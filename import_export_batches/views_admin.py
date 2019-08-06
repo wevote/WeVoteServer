@@ -1040,6 +1040,7 @@ def batch_action_list_create_or_update_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     batch_row_list_found = False
+    status = ""
 
     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
     batch_row_id = convert_to_int(request.GET.get('batch_row_id', 0))
@@ -1083,9 +1084,10 @@ def batch_action_list_create_or_update_process_view(request):
                                      ''.format(kind_of_batch=kind_of_batch,
                                                created=results['number_of_table_rows_created']))
             else:
+                status += results['status']
                 messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} create failed: {status}'
                                                               ''.format(kind_of_batch=kind_of_batch,
-                                                                        status=results['status']))
+                                                                        status=status))
         elif kind_of_action == IMPORT_ADD_TO_EXISTING:
             if results['success']:
                 messages.add_message(request, messages.INFO,
@@ -1093,13 +1095,16 @@ def batch_action_list_create_or_update_process_view(request):
                                      ''.format(kind_of_batch=kind_of_batch,
                                                updated=results['number_of_table_rows_updated']))
             else:
-                messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} update failed--'
-                                                              'UPDATE may not be supported yet.'
-                                                              ''.format(kind_of_batch=kind_of_batch))
+                status += results['status']
+                messages.add_message(request, messages.ERROR,
+                                     'Batch kind: {kind_of_batch} UPDATE_FAILED-UPDATE_MAY_NOT_BE_SUPPORTED_YET, '
+                                     'status: {status} '
+                                     ''.format(kind_of_batch=kind_of_batch, status=status))
         else:
+            status += results['status']
             messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} import status: {status}'
                                                           ''.format(kind_of_batch=kind_of_batch,
-                                                                    status=results['status']))
+                                                                    status=status))
             return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()))
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +

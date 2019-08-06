@@ -1771,6 +1771,43 @@ def retrieve_organizations_followed(voter_id, auto_followed_from_twitter_suggest
     return results
 
 
+def retrieve_organization_list_for_all_upcoming_elections(limit_to_this_state_code="",
+                                                          return_list_of_objects=False,
+                                                          super_light_organization_list=False,
+                                                          candidate_we_vote_id_to_include=""):
+
+    status = ""
+    success = True
+    organization_list_objects = []
+    organization_list_light = []
+    organization_list_found = False
+
+    organization_list_manager = OrganizationListManager()
+    results = organization_list_manager.retrieve_public_organizations_for_upcoming_elections(
+        limit_to_this_state_code=limit_to_this_state_code,
+        return_list_of_objects=return_list_of_objects,
+        super_light_organization_list=super_light_organization_list,
+        candidate_we_vote_id_to_include=candidate_we_vote_id_to_include,
+    )
+    if results['organization_list_found']:
+        organization_list_found = True
+        organization_list_light = results['organization_list_light']
+    else:
+        status += results['status']
+        success = results['success']
+
+    results = {
+        'success': success,
+        'status': status,
+        'organization_list_found':          organization_list_found,
+        'organization_list_objects':        organization_list_objects if return_list_of_objects else [],
+        'organization_list_light':          organization_list_light,
+        'return_list_of_objects':           return_list_of_objects,
+        'super_light_candidate_list':       super_light_organization_list,
+    }
+    return results
+
+
 def update_social_media_statistics_in_other_tables(organization):
     """
     Update other tables that use any of these social media statistics

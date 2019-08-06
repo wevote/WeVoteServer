@@ -43,6 +43,11 @@ ORGANIZATION_TYPE_CHOICES = (
     (UNKNOWN, 'Unknown Type'),
     (ORGANIZATION, 'Group - Organization'),  # Deprecated
 )
+ORGANIZATION_TYPE_CHOICES_IN_PUBLIC_SPHERE = [CORPORATION, GROUP, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4,
+                                              NEWS_ORGANIZATION, ORGANIZATION, POLITICAL_ACTION_COMMITTEE,
+                                              PUBLIC_FIGURE]
+
+ORGANIZATION_NAMES_TO_EXCLUDE_FROM_SCRAPER = ["DID", "Google", "Twitter", "Ro", "Uber"]
 
 ORGANIZATION_TYPE_MAP = {
     CORPORATION:                'Corporation',
@@ -1931,6 +1936,87 @@ class OrganizationListManager(models.Manager):
         }
         return results
 
+    def retrieve_public_organizations_for_upcoming_elections(
+            self, limit_to_this_state_code="", return_list_of_objects=False, super_light_organization_list=False,
+            candidate_we_vote_id_to_include=""):
+        """
+        This function is used for our endorsements scraper.
+        :param limit_to_this_state_code:
+        :param return_list_of_objects:
+        :param super_light_organization_list:
+        :param candidate_we_vote_id_to_include:
+        :return:
+        """
+        status = ""
+        organization_list_objects = []
+        organization_list_light = []
+        organization_list_found = False
+
+        try:
+            organization_queryset = Organization.objects.using('readonly').all()
+            organization_queryset = organization_queryset.filter(
+                organization_type__in=ORGANIZATION_TYPE_CHOICES_IN_PUBLIC_SPHERE)
+            organization_queryset = organization_queryset.exclude(
+                organization_name__in=ORGANIZATION_NAMES_TO_EXCLUDE_FROM_SCRAPER)
+            if positive_value_exists(limit_to_this_state_code):
+                organization_queryset = organization_queryset.filter(state_served_code__iexact=limit_to_this_state_code)
+            organization_list_objects = list(organization_queryset)
+
+            if len(organization_list_objects):
+                organization_list_found = True
+                status += 'PUBLIC_ORGANIZATIONS_RETRIEVED '
+                success = True
+            else:
+                status += 'NO_PUBLIC_ORGANIZATIONS_RETRIEVED '
+                success = True
+        except Organization.DoesNotExist:
+            # No candidates found. Not a problem.
+            status = 'NO_PUBLIC_ORGANIZATIONS_FOUND_DoesNotExist '
+            organization_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_public_organizations_for_upcoming_elections ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        if organization_list_found:
+            for organization in organization_list_objects:
+                if positive_value_exists(super_light_organization_list):
+                    one_organization = {
+                        'name':         organization.organization_name,
+                        'we_vote_id':   organization.we_vote_id,
+                    }
+                else:
+                    if organization.organization_name == 'The Club for Growth':
+                        found_it = True
+
+                    alternate_names = organization.display_alternate_names_list()
+                    one_organization = {
+                        'ballot_item_display_name':     '',
+                        'alternate_names':              alternate_names,
+                        'ballot_item_website':          '',
+                        'candidate_contact_form_url':   '',
+                        'candidate_we_vote_id':         candidate_we_vote_id_to_include,
+                        'google_civic_election_id':     '',
+                        'office_we_vote_id':            '',
+                        'measure_we_vote_id':           '',
+                        'more_info_url':                '',
+                        'organization_name':            organization.organization_name,
+                        'organization_website':         organization.organization_website,
+                        'organization_we_vote_id':      organization.we_vote_id,
+                    }
+                organization_list_light.append(one_organization)
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'organization_list_found':  organization_list_found,
+            'organization_list_objects': organization_list_objects if return_list_of_objects else [],
+            'organization_list_light':  organization_list_light,
+        }
+        return results
+
     def retrieve_organizations_from_non_unique_identifiers(self, twitter_handle):
         keep_looking_for_duplicates = True
         organization_list = []
@@ -2267,6 +2353,15 @@ class Organization(models.Model):
     def __unicode__(self):
         return str(self.organization_name)
 
+    def display_alternate_names_list(self):
+        alternate_names = []
+        if self.organization_name and self.organization_name.startswith('The '):
+            if len(self.organization_name) > 10:
+                # Do not remove "The " from organization names where the word after "The" is shorter than 6 characters
+                # because "The Hill" or "The Nation" without the "The" causes "Hill" and "Nation" to show up too often
+                alternate_names.append(self.organization_name[len('The '):])
+        return alternate_names
+
     def organization_photo_url(self):
         """
         For an organization, this heirarchy determines which image gets displayed
@@ -2389,15 +2484,15 @@ class Organization(models.Model):
 
     def is_private_citizen(self):
         # Return True if this person or organization is not in the public sphere
-        is_in_public_sphere = self.organization_type in (
-            CORPORATION,
-            NONPROFIT,
-            NONPROFIT_501C3,
-            NONPROFIT_501C4,
-            NEWS_ORGANIZATION,
-            ORGANIZATION,
-            POLITICAL_ACTION_COMMITTEE,
-            PUBLIC_FIGURE)
+        is_in_public_sphere = self.organization_type in ORGANIZATION_TYPE_CHOICES_IN_PUBLIC_SPHERE
+        # CORPORATION,
+        # NONPROFIT,
+        # NONPROFIT_501C3,
+        # NONPROFIT_501C4,
+        # NEWS_ORGANIZATION,
+        # ORGANIZATION,
+        # POLITICAL_ACTION_COMMITTEE,
+        # PUBLIC_FIGURE
 
         return not is_in_public_sphere
 

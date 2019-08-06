@@ -6385,6 +6385,53 @@ class PositionManager(models.Model):
         }
         return results
 
+    def update_position_row_entry(self, position_we_vote_id, update_values):
+        """
+        Update PositionEntered table entry with matching we_vote_id
+        :param position_we_vote_id:
+        :param update_values:
+        :return:
+        """
+
+        success = False
+        status = ""
+        position_updated = False
+        existing_position_entry = None
+
+        try:
+            existing_position_entry = PositionEntered.objects.get(we_vote_id__iexact=position_we_vote_id)
+            values_changed = False
+
+            if existing_position_entry:
+                for key, value in update_values.items():
+                    if hasattr(existing_position_entry, key):
+                        values_changed = True
+                        setattr(existing_position_entry, key, value)
+
+                # now go ahead and save this entry (update)
+                if values_changed:
+                    existing_position_entry.save()
+                    position_updated = True
+                    success = True
+                    status += "POSITION_UPDATED "
+                else:
+                    position_updated = False
+                    success = True
+                    status += "POSITION_NOT_UPDATED-NO_CHANGES "
+        except Exception as e:
+            success = False
+            position_updated = False
+            status += "POSITION_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+                'success':              success,
+                'status':               status,
+                'position_updated':    position_updated,
+                'updated_position':    existing_position_entry,
+            }
+        return results
+
     def update_position_speaker_data_from_organization(self, position_object, organization):
         """
         Update position_object with organization data.
@@ -6503,7 +6550,8 @@ class PositionManager(models.Model):
                     position_on_stage.organization_we_vote_id = organization_we_vote_id
                     # Lookup organization_id based on organization_we_vote_id and update
                     organization_manager = OrganizationManager()
-                    organization_results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+                    organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                        organization_we_vote_id)
                     if organization_results['organization_found']:
                         organization = organization_results['organization']
                         position_on_stage.organization_id = organization.id
