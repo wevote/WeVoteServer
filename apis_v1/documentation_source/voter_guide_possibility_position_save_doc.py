@@ -71,6 +71,11 @@ def voter_guide_possibility_position_save_doc_template_values(url_root):
             'description':  '',
         },
         {
+            'name':         'organization_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  '',
+        },
+        {
             'name':         'position_should_be_removed',
             'value':        'boolean',  # boolean, integer, long, string
             'description':  'Delete saved position from PositionEntered table.',
@@ -118,22 +123,27 @@ def voter_guide_possibility_position_save_doc_template_values(url_root):
                    '     "possibility_position_id": integer,\n' \
                    '     "possibility_position_number": integer,\n' \
                    '     "ballot_item_name": string,\n' \
-                   '     "position_stance": string,\n' \
-                   '     "statement_text": string,\n' \
-                   '     "more_info_url": string,\n' \
-                   '     "possibility_should_be_ignored": boolean,\n' \
-                   '     "google_civic_election_id": string,\n'\
+                   '     "candidate_twitter_handle": string,\n' \
                    '     "candidate_we_vote_id": string,\n' \
-                   '     "ballot_item_name": string,\n' \
-                   '     "office_we_vote_id": string,\n' \
-                   '     "office_name": string,\n' \
-                   '     "measure_we_vote_id": string,\n' \
-                   '     "position_we_vote_id": string,\n' \
                    '     "edit_position_url": string,\n' \
-                   '     "position_stance_stored": string,\n' \
-                   '     "statement_text_stored": string,\n' \
+                   '     "google_civic_election_id": string,\n'\
+                   '     "measure_we_vote_id": string,\n' \
+                   '     "more_info_url": string,\n' \
                    '     "more_info_url_stored": string,\n' \
+                   '     "office_we_vote_id": string,\n' \
+                   '     "organization_name": string,\n' \
+                   '     "organization_twitter_handle": string,\n' \
+                   '     "organization_we_vote_id": string,\n' \
+                   '     "office_name": string,\n' \
                    '     "position_should_be_removed": boolean,\n' \
+                   '     "position_stance": string,\n' \
+                   '     "position_stance_stored": string,\n' \
+                   '     "position_we_vote_id": string,\n' \
+                   '     "possibility_should_be_deleted": boolean,\n' \
+                   '     "possibility_should_be_ignored": boolean,\n' \
+                   '     "statement_text": string,\n' \
+                   '     "statement_text_stored": string,\n' \
+                   '     "state_code": string,\n' \
                    '   }' \
                    '   ],\n' \
                    '}'

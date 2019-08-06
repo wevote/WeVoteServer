@@ -45,14 +45,18 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
     voter_guide_possibility_id = request.GET.get('voter_guide_possibility_id', 0)
     voter_guide_possibility_position_id = request.GET.get('voter_guide_possibility_position_id', 0)
     ballot_item_name = request.GET.get('ballot_item_name', None)
-    position_stance = request.GET.get('position_stance', None)
-    statement_text = request.GET.get('statement_text', None)
-    more_info_url = request.GET.get('more_info_url', None)
-    possibility_should_be_deleted = request.GET.get('possibility_should_be_deleted', None)
-    possibility_should_be_ignored = request.GET.get('possibility_should_be_ignored', None)
+    candidate_twitter_handle = request.GET.get('candidate_twitter_handle', None)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', None)
     measure_we_vote_id = request.GET.get('measure_we_vote_id', None)
+    more_info_url = request.GET.get('more_info_url', None)
+    organization_name = request.GET.get('organization_name', None)
+    organization_twitter_handle = request.GET.get('organization_twitter_handle', None)
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', None)
     position_should_be_removed = request.GET.get('position_should_be_removed', None)
+    position_stance = request.GET.get('position_stance', None)
+    possibility_should_be_deleted = request.GET.get('possibility_should_be_deleted', None)
+    possibility_should_be_ignored = request.GET.get('possibility_should_be_ignored', None)
+    statement_text = request.GET.get('statement_text', None)
 
     google_civic_election_id_list = request.GET.getlist('google_civic_election_id_list[]')
     try:
@@ -74,8 +78,12 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
         more_info_url=more_info_url,
         possibility_should_be_deleted=possibility_should_be_deleted,
         possibility_should_be_ignored=possibility_should_be_ignored,
+        candidate_twitter_handle=candidate_twitter_handle,
         candidate_we_vote_id=candidate_we_vote_id,
         measure_we_vote_id=measure_we_vote_id,
+        organization_name=organization_name,
+        organization_twitter_handle=organization_twitter_handle,
+        organization_we_vote_id=organization_we_vote_id,
         position_should_be_removed=position_should_be_removed,
         google_civic_election_id_list=google_civic_election_id_list)
 
@@ -105,6 +113,7 @@ def voter_guide_possibility_save_view(request):  # voterGuidePossibilitySave
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_guide_possibility_id = request.GET.get('voter_guide_possibility_id', 0)
     voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
+    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', None)
     clear_organization_options = request.GET.get('clear_organization_options', None)
     contributor_comments = request.GET.get('contributor_comments', None)
     contributor_email = request.GET.get('contributor_email', None)
@@ -113,10 +122,13 @@ def voter_guide_possibility_save_view(request):  # voterGuidePossibilitySave
     hide_from_active_review = request.GET.get('hide_from_active_review', None)
     ignore_this_source = request.GET.get('ignore_this_source', None)
     internal_notes = request.GET.get('internal_notes', None)
+    limit_to_this_state_code = request.GET.get('limit_to_this_state_code', None)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', None)
+    possible_candidate_name = request.GET.get('possible_candidate_name', None)
+    possible_candidate_twitter_handle = request.GET.get('possible_candidate_twitter_handle', None)
     possible_organization_name = request.GET.get('possible_organization_name', None)
     possible_organization_twitter_handle = request.GET.get('possible_organization_twitter_handle', None)
-    limit_to_this_state_code = request.GET.get('limit_to_this_state_code', None)
+    voter_guide_possibility_type = request.GET.get('voter_guide_possibility_type', None)
     return voter_guide_possibility_save_for_api(
         voter_device_id=voter_device_id,
         voter_guide_possibility_id=voter_guide_possibility_id,
@@ -128,9 +140,13 @@ def voter_guide_possibility_save_view(request):  # voterGuidePossibilitySave
         hide_from_active_review=hide_from_active_review,
         ignore_this_source=ignore_this_source,
         internal_notes=internal_notes,
+        voter_guide_possibility_type=voter_guide_possibility_type,
         organization_we_vote_id=organization_we_vote_id,
         possible_organization_name=possible_organization_name,
         possible_organization_twitter_handle=possible_organization_twitter_handle,
+        candidate_we_vote_id=candidate_we_vote_id,
+        possible_candidate_name=possible_candidate_name,
+        possible_candidate_twitter_handle=possible_candidate_twitter_handle,
         limit_to_this_state_code=limit_to_this_state_code)
 
 

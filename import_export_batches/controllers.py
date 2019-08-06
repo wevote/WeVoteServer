@@ -3974,9 +3974,6 @@ def import_position_data_from_batch_row_actions(
         }
         return results
 
-    if update_entry_flag:
-        status += "POSITION_UPDATE_NOT_WORKING YET "
-
     position_manager = PositionManager()
     google_civic_election_id = 0
     unique_organization_we_vote_id_list = []
