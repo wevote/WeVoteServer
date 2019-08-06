@@ -314,7 +314,8 @@ def voter_guide_create_view(request):
                 voter_guide_possibility_url = voter_guide_possibility.voter_guide_possibility_url
                 voter_guide_possibility_type = voter_guide_possibility.voter_guide_possibility_type
                 # ORGANIZATION_ENDORSING_CANDIDATES, ENDORSEMENTS_FOR_CANDIDATE, UNKNOWN_TYPE
-                if voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES:
+                if voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
+                        or voter_guide_possibility_type == UNKNOWN_TYPE:
                     is_organization_endorsing_candidates = True
                     is_list_of_endorsements_for_candidate = False
                 elif voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
@@ -2118,8 +2119,16 @@ def voter_guide_possibility_list_process_view(request):
     select_for_marking_organization_ids = request.POST.getlist('select_for_marking_checks[]')
     which_marking = request.POST.get("which_marking")
 
-    print(f"voter_guide_possibility_list_process_view {which_marking}")
-    print(f"marked:{select_for_marking_organization_ids}")
+    # Make sure 'which_marking' is one of the allowed Filter fields
+    if which_marking not in("candidates_missing_from_we_vote", "cannot_find_endorsements", "capture_detailed_comments",
+                            "hide_from_active_review", "ignore_this_source"):
+        messages.add_message(request, messages.ERROR,
+                             'The filter you are trying to update is not recognized: {which_marking}'
+                             ''.format(which_marking=which_marking))
+        return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()))
+
+    # print(f"voter_guide_possibility_list_process_view {which_marking}")
+    # print(f"marked:{select_for_marking_organization_ids}")
 
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
 
@@ -2132,9 +2141,13 @@ def voter_guide_possibility_list_process_view(request):
                     None,
                     voter_guide_possibility_id=voter_guide_possibility_id,
                     updated_values={which_marking: True})
-                print(f"voter_guide_possibility_list_process_view {results}")
+                messages.add_message(request, messages.INFO,
+                                     'voter_guide_possibility_list_process_view {results}'
+                                     ''.format(results=results))
             except ValueError:
-                print(f"bad id for {voter_guide_possibility_id_string}")
+                messages.add_message(request, messages.ERROR,
+                                     'Bad id for: {voter_guide_possibility_id_string}'
+                                     ''.format(voter_guide_possibility_id_string=voter_guide_possibility_id_string))
 
     return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()))
 

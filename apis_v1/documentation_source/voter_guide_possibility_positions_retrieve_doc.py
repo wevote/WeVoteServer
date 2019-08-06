@@ -71,23 +71,27 @@ def voter_guide_possibility_positions_retrieve_doc_template_values(url_root):
                    '     "possibility_position_number": integer,\n' \
                    '     "ballot_item_name": string,\n' \
                    '     "ballot_item_image_url_https_medium": string,\n' \
-                   '     "position_stance": string,\n' \
-                   '     "statement_text": string,\n' \
-                   '     "more_info_url": string,\n' \
-                   '     "possibility_should_be_ignored": boolean,\n' \
-                   '     "google_civic_election_id": string,\n'\
+                   '     "candidate_twitter_handle": string,\n' \
                    '     "candidate_we_vote_id": string,\n' \
-                   '     "ballot_item_name": string,\n' \
-                   '     "office_we_vote_id": string,\n' \
-                   '     "office_name": string,\n' \
-                   '     "political_party": string,\n' \
-                   '     "measure_we_vote_id": string,\n' \
-                   '     "position_we_vote_id": string,\n' \
                    '     "edit_position_url": string,\n' \
-                   '     "position_stance_stored": string,\n' \
-                   '     "statement_text_stored": string,\n' \
+                   '     "google_civic_election_id": string,\n'\
+                   '     "measure_we_vote_id": string,\n' \
                    '     "more_info_url_stored": string,\n' \
+                   '     "more_info_url": string,\n' \
+                   '     "office_we_vote_id": string,\n' \
+                   '     "organization_name": string,\n' \
+                   '     "organization_twitter_handle": string,\n' \
+                   '     "organization_we_vote_id": string,\n' \
+                   '     "political_party": string,\n' \
                    '     "position_should_be_removed": boolean,\n' \
+                   '     "position_stance": string,\n' \
+                   '     "position_stance_stored": string,\n' \
+                   '     "position_we_vote_id": string,\n' \
+                   '     "possibility_should_be_deleted": boolean,\n' \
+                   '     "possibility_should_be_ignored": boolean,\n' \
+                   '     "statement_text": string,\n' \
+                   '     "statement_text_stored": string,\n' \
+                   '     "state_code": string,\n' \
                    '   }' \
                    '   ],\n' \
                    '}'

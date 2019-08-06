@@ -111,6 +111,17 @@ def voter_guide_possibility_save_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
+                   '  "candidate": dict\n' \
+                   '   {\n' \
+                   '     "candidate_we_vote_id": string,\n' \
+                   '     "candidate_name": string,\n' \
+                   '     "candidate_website": string,\n' \
+                   '     "candidate_twitter_handle": string,\n' \
+                   '     "candidate_email": string,\n' \
+                   '     "candidate_facebook": string,\n' \
+                   '     "we_vote_hosted_profile_image_url_medium": string,\n'\
+                   '     "we_vote_hosted_profile_image_url_tiny": string,\n' \
+                   '   },\n' \
                    '  "candidates_missing_from_we_vote": boolean,\n' \
                    '  "cannot_find_endorsements": boolean,\n' \
                    '  "capture_detailed_comments": boolean,\n' \
@@ -119,13 +130,6 @@ def voter_guide_possibility_save_doc_template_values(url_root):
                    '  "hide_from_active_review": boolean,\n' \
                    '  "ignore_this_source": boolean,\n' \
                    '  "internal_notes": string,\n' \
-                   '  "possible_organization_name": string,\n' \
-                   '  "possible_organization_twitter_handle": string,\n' \
-                   '  "limit_to_this_state_code": string,\n' \
-                   '  "url_to_scan": string,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '  "voter_guide_possibility_edit": string,\n' \
-                   '  "voter_guide_possibility_id": integer,\n' \
                    '  "organization": dict\n' \
                    '   {\n' \
                    '     "organization_we_vote_id": string,\n' \
@@ -137,6 +141,16 @@ def voter_guide_possibility_save_doc_template_values(url_root):
                    '     "we_vote_hosted_profile_image_url_medium": string,\n'\
                    '     "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '   },\n' \
+                   '  "possible_candidate_name": string,\n' \
+                   '  "possible_candidate_twitter_handle": string,\n' \
+                   '  "possible_organization_name": string,\n' \
+                   '  "possible_organization_twitter_handle": string,\n' \
+                   '  "limit_to_this_state_code": string,\n' \
+                   '  "url_to_scan": string,\n' \
+                   '  "voter_device_id": string (88 characters long),\n' \
+                   '  "voter_guide_possibility_edit": string,\n' \
+                   '  "voter_guide_possibility_id": integer,\n' \
+                   '  "voter_guide_possibility_type": string,\n' \
                    '}'
 
     template_values = {
