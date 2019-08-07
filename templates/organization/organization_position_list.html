@@ -107,20 +107,20 @@
     </tr>
 
     <tr>
-        {% if organization.twitter_description %}
+
         <th>Twitter Description:</th>
         <td>{{ organization.twitter_description|default_if_none:"" }}</td>
-        {% endif %}
+
         <th> LOGO URL:</th>
         <td>
             {{organization.chosen_logo_url_https|default_if_none:""}}
         </td>
     </tr>
     <tr>
-        {% if organization.twitter_location %}
+
         <th>Twitter Location:</th>
         <td>{{ organization.twitter_location|default_if_none:"" }}</td>
-         {% endif %}
+
 
         <th> Social share description:</th>
         <td>
@@ -143,12 +143,10 @@
 
     </tr>
     <tr>
-       {% if organization.organization_email %}
         <th>Contact Email: </th>
         <td>
             {{ organization.organization_email|default_if_none:"" }}
         </td>
-       {% endif %}
 
         <th> Sub domain string:</th>
         <td>
