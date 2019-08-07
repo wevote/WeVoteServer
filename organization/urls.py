@@ -9,6 +9,8 @@ from . import views, views_admin
 urlpatterns = [
     # views_admin
     url(r'^(?P<organization_id>[0-9]+)/edit/$', views_admin.organization_edit_view, name='organization_edit'),
+    url(r'^(?P<organization_id>[0-9]+)/edit_account/$',
+        views_admin.organization_edit_account_view, name='organization_edit_account'),
     url(r'^edit/(?P<organization_we_vote_id>wv[\w]{2}org[\w]+)$',
         views_admin.organization_edit_view, name='organization_edit_we_vote_id'),
     url(r'^delete_process/$', views_admin.organization_delete_process_view, name='organization_delete_process'),

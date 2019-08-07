@@ -236,6 +236,9 @@
         <th></th>
         <td><a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
                class="btn btn-primary">Edit {{ organization.organization_name }}</a></td>
+        <th></th>
+        <td><a href="{% url 'organization:organization_edit_account' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+               class="btn btn-primary">Edit Client-Configured Values</a></td>
     </tr>
     </table>
 <br />
