@@ -108,7 +108,10 @@
                 {% if polling_location.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ polling_location.we_vote_id }}{% endif %}
             </td>
             <td>{% if polling_location.latitude %}&nbsp;&nbsp;Lat/Long: yes{% endif %}</td>
-            <td>{% if polling_location.use_for_bulk_retrieve %}bulk{% endif %}</td>
+            <td>
+              {% if polling_location.use_for_bulk_retrieve %}bulk{% endif %}
+              {% if polling_location.polling_location_deleted %} <strong>DELETED</strong>{% endif %}
+            </td>
             <td><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em">(edit)</a></td>
         </tr>
     {% endfor %}

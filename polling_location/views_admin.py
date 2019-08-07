@@ -98,18 +98,19 @@ def polling_locations_sync_out_view(request):  # pollingLocationsSyncOut
     state = request.GET.get('state', '')
 
     try:
-        polling_location_list = PollingLocation.objects.using('readonly').all()
+        polling_location_query = PollingLocation.objects.using('readonly').all()
+        polling_location_query = polling_location_query.filter(polling_location_deleted=False)
         if positive_value_exists(state):
-            polling_location_list = polling_location_list.filter(state__iexact=state)
+            polling_location_query = polling_location_query.filter(state__iexact=state)
 
-        polling_location_list_dict = polling_location_list.values('we_vote_id', 'city', 'directions_text',
-                                                                  'latitude', 'longitude',
-                                                                  'line1', 'line2', 'location_name',
-                                                                  'polling_hours_text',
-                                                                  'polling_location_id', 'state',
-                                                                  'use_for_bulk_retrieve',
-                                                                  'polling_location_deleted',
-                                                                  'zip_long', 'id')
+        polling_location_list_dict = polling_location_query.values('we_vote_id', 'city', 'directions_text',
+                                                                   'latitude', 'longitude',
+                                                                   'line1', 'line2', 'location_name',
+                                                                   'polling_hours_text',
+                                                                   'polling_location_id', 'state',
+                                                                   'use_for_bulk_retrieve',
+                                                                   'polling_location_deleted',
+                                                                   'zip_long', 'id')
         if polling_location_list_dict:
             polling_location_list_json = list(polling_location_list_dict)
             return HttpResponse(json.dumps(polling_location_list_json), content_type='application/json')
@@ -436,7 +437,8 @@ def polling_location_list_view(request):
     polling_location_count_query = polling_location_count_query.filter(polling_location_deleted=False)
     polling_location_without_latitude_count = 0
     polling_location_query = PollingLocation.objects.all()
-    polling_location_query = polling_location_query.filter(polling_location_deleted=False)
+    if not positive_value_exists(polling_location_search):
+        polling_location_query = polling_location_query.filter(polling_location_deleted=False)
 
     if positive_value_exists(show_bulk_retrieve):
         polling_location_count_query = polling_location_count_query.filter(use_for_bulk_retrieve=True)

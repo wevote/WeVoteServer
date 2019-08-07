@@ -25,6 +25,7 @@
     latitude: {{ polling_location.latitude|default_if_none:"" }}<br />
     longitude: {{ polling_location.longitude|default_if_none:"" }}<br />
     {% if polling_location.use_for_bulk_retrieve %}Use this location for bulk retrieval of ballots.<br />{% endif %}
+    {% if polling_location.polling_location_deleted %}<strong>DELETED</strong><br />{% endif %}
     </p>
 
 <p><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}">edit</a></p>
