@@ -469,6 +469,80 @@ def organization_edit_view(request, organization_id=0, organization_we_vote_id="
 
 
 @login_required
+def organization_edit_account_view(request, organization_id=0, organization_we_vote_id=""):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    # A positive value in google_civic_election_id means we want to create a voter guide for this org for this election
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    organization_type = request.GET.get('organization_type', UNKNOWN)
+
+    messages_on_stage = get_messages(request)
+    organization_id = convert_to_int(organization_id)
+    organization_on_stage_found = False
+    organization_manager = OrganizationManager()
+    organization_on_stage = Organization()
+    state_served_code = ''
+    new_issue_list = []
+    results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+
+    if results['organization_found']:
+        organization_on_stage = results['organization']
+        state_served_code = organization_on_stage.state_served_code
+        organization_on_stage_found = True
+        issue_list_manager = IssueListManager()
+        issue_list_results = issue_list_manager.retrieve_issues(ALPHABETICAL_ASCENDING, show_hidden_issues=True)
+        if issue_list_results["issue_list_found"]:
+            issue_list = issue_list_results["issue_list"]
+            link_issue_list_manager = OrganizationLinkToIssueList()
+            organization_issue_we_vote_id_list = link_issue_list_manager. \
+                fetch_issue_we_vote_id_list_by_organization_we_vote_id(organization_on_stage.we_vote_id)
+
+            for issue in issue_list:
+                if issue.we_vote_id in organization_issue_we_vote_id_list:
+                    issue.followed_by_organization = True
+                else:
+                    issue.followed_by_organization = False
+                new_issue_list.append(issue)
+
+    election_manager = ElectionManager()
+    upcoming_election_list = []
+    results = election_manager.retrieve_upcoming_elections()
+    if results['success']:
+        upcoming_election_list = results['election_list']
+
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    organization_types_map = ORGANIZATION_TYPE_MAP
+    # Sort by organization_type value (instead of key)
+    organization_types_list = sorted(organization_types_map.items(), key=operator.itemgetter(1))
+
+    if organization_on_stage_found:
+        template_values = {
+            'messages_on_stage':        messages_on_stage,
+            'organization':             organization_on_stage,
+            'organization_types':       organization_types_list,
+            'upcoming_election_list':   upcoming_election_list,
+            'google_civic_election_id': google_civic_election_id,
+            'state_list':               sorted_state_list,
+            'state_served_code':        state_served_code,
+            'issue_list':               new_issue_list,
+        }
+    else:
+        template_values = {
+            'messages_on_stage':        messages_on_stage,
+            'upcoming_election_list':   upcoming_election_list,
+            'google_civic_election_id': google_civic_election_id,
+            'state_list':               sorted_state_list,
+            'issue_list':               new_issue_list,
+        }
+    return render(request, 'organization/organization_edit_account.html', template_values)
+
+
+@login_required
 def organization_delete_process_view(request):
     """
     Delete an organization
