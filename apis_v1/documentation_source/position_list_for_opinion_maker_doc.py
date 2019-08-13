@@ -142,6 +142,7 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '     "contest_office_id": integer,\n' \
                    '     "contest_office_we_vote_id": string,\n' \
                    '     "contest_office_name": string (The name of the office if kind_of_ballot_item is CANDIDATE),\n' \
+                   '     "race_office_level": string, ' \
                    '     "kind_of_ballot_item": string, ' \
                    '      (One of these: \'CANDIDATE\', \'MEASURE\', \'OFFICE\', \'UNKNOWN\')\n' \
                    '     "is_support": boolean,\n' \

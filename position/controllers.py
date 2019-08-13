@@ -3048,12 +3048,15 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 force_update = True
             else:
                 force_update = False
+            race_office_level_missing = not positive_value_exists(one_position.race_office_level) \
+                and positive_value_exists(one_position.candidate_campaign_we_vote_id)
             if force_update or not positive_value_exists(one_position.ballot_item_display_name) \
                     or not positive_value_exists(one_position.state_code) \
                     or not positive_value_exists(one_position.speaker_image_url_https) \
                     or one_position.speaker_type == UNKNOWN \
                     or missing_ballot_item_image \
-                    or missing_office_information:
+                    or missing_office_information \
+                    or race_office_level_missing:
                 results = position_manager.refresh_cached_position_info(
                     one_position, force_update,
                     offices_dict=offices_dict,
@@ -3088,6 +3091,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'contest_office_id':                    one_position.contest_office_id,
                 'contest_office_we_vote_id':            one_position.contest_office_we_vote_id,
                 'contest_office_name':                  one_position.contest_office_name,
+                'race_office_level':                    one_position.race_office_level,
                 'is_support':                           one_position.is_support(),
                 'is_positive_rating':                   one_position.is_positive_rating(),
                 'is_support_or_positive_rating':        one_position.is_support_or_positive_rating(),
@@ -3288,11 +3292,14 @@ def position_list_for_voter_for_api(voter_device_id,
 
         if one_position_success:
             # Make sure we have this data to display. If we don't, refresh PositionEntered table from other tables.
+            race_office_level_missing = not positive_value_exists(one_position.race_office_level) \
+                and positive_value_exists(one_position.candidate_campaign_we_vote_id)
             if not positive_value_exists(one_position.ballot_item_display_name) \
                     or not positive_value_exists(one_position.state_code) \
                     or not positive_value_exists(one_position.speaker_image_url_https) \
                     or missing_ballot_item_image \
-                    or missing_office_information:
+                    or missing_office_information \
+                    or race_office_level_missing:
                 results = position_manager.refresh_cached_position_info(
                     one_position,
                     offices_dict=offices_dict,
@@ -3326,6 +3333,7 @@ def position_list_for_voter_for_api(voter_device_id,
                 'contest_office_id':                    one_position.contest_office_id,
                 'contest_office_we_vote_id':            one_position.contest_office_we_vote_id,
                 'contest_office_name':                  one_position.contest_office_name,
+                'race_office_level':                    one_position.race_office_level,
                 'is_support':                           one_position.is_support(),
                 'is_positive_rating':                   one_position.is_positive_rating(),
                 'is_support_or_positive_rating':        one_position.is_support_or_positive_rating(),
@@ -3556,6 +3564,7 @@ def positions_import_from_structured_json(structured_json):
                 position_on_stage.contest_measure_we_vote_id = one_position["contest_measure_we_vote_id"]
                 position_on_stage.contest_office_id = contest_office_id
                 position_on_stage.contest_office_we_vote_id = one_position["contest_office_we_vote_id"]
+                position_on_stage.race_office_level = one_position["race_office_level"]
                 position_on_stage.date_entered = one_position["date_entered"]
                 position_on_stage.google_civic_candidate_name = google_civic_candidate_name
                 position_on_stage.google_civic_election_id = one_position["google_civic_election_id"]

@@ -181,6 +181,7 @@ class PositionEntered(models.Model):
         verbose_name="we vote permanent id for the contest_office",
         max_length=255, null=True, blank=True, unique=False, db_index=True)
     contest_office_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
+    race_office_level = models.CharField(verbose_name="race office level", max_length=255, null=True, blank=True)
 
     # This is the candidate/politician that the position refers to.
     #  Either candidate_campaign is filled, contest_office OR contest_measure, but not all three
@@ -568,6 +569,7 @@ class PositionForFriends(models.Model):
         verbose_name="we vote permanent id for the contest_office", max_length=255, null=True, blank=True,
         unique=False, db_index=True)
     contest_office_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
+    race_office_level = models.CharField(verbose_name="race office level", max_length=255, null=True, blank=True)
 
     # This is the candidate/politician that the position refers to.
     #  Either candidate_campaign is filled, contest_office OR contest_measure, but not all three
@@ -2521,18 +2523,28 @@ class PositionListManager(models.Model):
 
                     # We can filter by only one of these
                     if positive_value_exists(show_positions_current_voter_election):  # This is the default option
-                        if positive_value_exists(google_civic_election_id_local_scope):
+                        if positive_value_exists(google_civic_election_id):
+                            # Please note that this option doesn't catch Vote Smart ratings, which are not
+                            # linked by google_civic_election_id
+                            friends_positions_list = friends_positions_list.filter(
+                                google_civic_election_id=google_civic_election_id)
+                        elif positive_value_exists(google_civic_election_id_local_scope):
                             # Limit positions we can retrieve for an org to only the items in this election
                             friends_positions_list = friends_positions_list.filter(
                                 google_civic_election_id=google_civic_election_id_local_scope)
                         else:
                             # Leave the position_list as is for now. TODO: We really should have election_id
                             # # If no election is found for the voter, don't show any positions
-                            # friends_positions_list = []
-                            # friends_query_exists = False
+                            # public_positions_list = []
+                            # public_query_exists = False
                             pass
                     elif positive_value_exists(exclude_positions_current_voter_election):
-                        if positive_value_exists(google_civic_election_id_local_scope):
+                        if positive_value_exists(google_civic_election_id):
+                            # Please note that this option doesn't catch Vote Smart ratings, which are not
+                            # linked by google_civic_election_id
+                            friends_positions_list = friends_positions_list.filter(
+                                google_civic_election_id=google_civic_election_id)
+                        elif positive_value_exists(google_civic_election_id_local_scope):
                             # Limit positions we can retrieve for an org to only the items NOT in this election
                             friends_positions_list = friends_positions_list.exclude(
                                 google_civic_election_id=google_civic_election_id_local_scope)
@@ -3794,6 +3806,7 @@ class PositionManager(models.Model):
             # Create new
             ballot_item_display_name = ""
             speaker_display_name = ""
+            race_office_level = ""
 
             candidate_campaign_id = None
             if candidate_we_vote_id:
@@ -3805,6 +3818,7 @@ class PositionManager(models.Model):
                     google_civic_election_id = candidate_campaign.google_civic_election_id
                     state_code = candidate_campaign.state_code
                     ballot_item_display_name = candidate_campaign.candidate_name
+                    office_we_vote_id = candidate_campaign.contest_office_we_vote_id
 
             contest_measure_id = None
             if measure_we_vote_id:
@@ -3827,6 +3841,7 @@ class PositionManager(models.Model):
                     google_civic_election_id = contest_office.google_civic_election_id
                     state_code = contest_office.state_code
                     ballot_item_display_name = contest_office.office_name
+                    race_office_level = contest_office.ballotpedia_race_office_level
 
             # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
             # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
@@ -3860,6 +3875,7 @@ class PositionManager(models.Model):
                 contest_measure_we_vote_id=measure_we_vote_id,
                 contest_office_id=contest_office_id,
                 contest_office_we_vote_id=office_we_vote_id,
+                race_office_level=race_office_level,
                 google_civic_election_id=google_civic_election_id,
                 state_code=state_code,
                 organization_id=organization_id,
@@ -5000,6 +5016,7 @@ class PositionManager(models.Model):
                 ballot_item_twitter_handle=existing_position.ballot_item_twitter_handle,
                 contest_office_we_vote_id=existing_position.contest_office_we_vote_id,
                 contest_office_id=existing_position.contest_office_id,
+                race_office_level=existing_position.race_office_level,
                 candidate_campaign_we_vote_id=existing_position.candidate_campaign_we_vote_id,
                 candidate_campaign_id=existing_position.candidate_campaign_id,
                 politician_we_vote_id=existing_position.politician_we_vote_id,
@@ -5836,6 +5853,7 @@ class PositionManager(models.Model):
                             voter_position_on_stage.google_civic_election_id = contest_office.google_civic_election_id
                             if positive_value_exists(contest_office.state_code):
                                 voter_position_on_stage.state_code = contest_office.state_code
+                            voter_position_on_stage.race_office_level = contest_office.ballotpedia_race_office_level
 
                 if voter_position_on_stage.candidate_campaign_we_vote_id:
                     if not positive_value_exists(voter_position_on_stage.candidate_campaign_id):
@@ -6351,7 +6369,7 @@ class PositionManager(models.Model):
         """
         Update position_object with office data.
         :param position_object:
-        :param candidate_campaign:
+        :param contest_office:
         :return:
         """
         position_change = False
@@ -6366,6 +6384,9 @@ class PositionManager(models.Model):
         if positive_value_exists(contest_office.id) and \
                 position_object.contest_office_id != contest_office.id:
             position_object.contest_office_id = contest_office.id
+            position_change = True
+        if position_object.race_office_level != contest_office.ballotpedia_race_office_level:
+            position_object.race_office_level = contest_office.ballotpedia_race_office_level
             position_change = True
         if position_change:
             try:
@@ -7123,6 +7144,7 @@ class PositionManager(models.Model):
                     measure_we_vote_id = None
 
                 contest_office_id = None
+                race_office_level = None
                 if office_we_vote_id:
                     contest_office_manager = ContestOfficeManager()
                     results = contest_office_manager.retrieve_contest_office_from_we_vote_id(office_we_vote_id)
@@ -7132,6 +7154,7 @@ class PositionManager(models.Model):
                         google_civic_election_id = contest_office.google_civic_election_id
                         state_code = contest_office.state_code
                         ballot_item_display_name = contest_office.office_name
+                        race_office_level = contest_office.ballotpedia_race_office_level
                 else:
                     # We don't need to ever look up the office_we_vote_id from the contest_office_id
                     office_we_vote_id = None
@@ -7205,6 +7228,7 @@ class PositionManager(models.Model):
                     speaker_display_name=speaker_display_name,
                     contest_office_we_vote_id=office_we_vote_id,
                     contest_office_id=contest_office_id,
+                    race_office_level=race_office_level,
                     candidate_campaign_we_vote_id=candidate_we_vote_id,
                     candidate_campaign_id=candidate_campaign_id,
                     contest_measure_we_vote_id=measure_we_vote_id,
@@ -7585,6 +7609,7 @@ class PositionManager(models.Model):
             if not positive_value_exists(position_object.contest_office_id) \
                     or not positive_value_exists(position_object.contest_office_we_vote_id) \
                     or not positive_value_exists(position_object.contest_office_name) \
+                    or not positive_value_exists(position_object.race_office_level) \
                     or force_update:
                 if not positive_value_exists(position_object.contest_office_id) \
                         and not positive_value_exists(position_object.contest_office_we_vote_id):
@@ -7639,6 +7664,9 @@ class PositionManager(models.Model):
                         position_change = True
                     if not positive_value_exists(position_object.contest_office_name) or force_update:
                         position_object.contest_office_name = office.office_name
+                        position_change = True
+                    if not positive_value_exists(position_object.race_office_level) or force_update:
+                        position_object.race_office_level = office.ballotpedia_race_office_level
                         position_change = True
 
         if position_change:

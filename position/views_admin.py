@@ -75,7 +75,7 @@ def positions_sync_out_view(request):  # positionsSyncOut
             'date_last_changed', 'organization_we_vote_id', 'voter_we_vote_id',
             'public_figure_we_vote_id', 'google_civic_election_id', 'state_code',
             'vote_smart_rating_id', 'vote_smart_time_span', 'vote_smart_rating',
-            'vote_smart_rating_name', 'contest_office_we_vote_id',
+            'vote_smart_rating_name', 'contest_office_we_vote_id', 'race_office_level',
             'candidate_campaign_we_vote_id', 'google_civic_candidate_name',
             'politician_we_vote_id', 'contest_measure_we_vote_id', 'speaker_type', 'stance',
             'statement_text', 'statement_html', 'twitter_followers_count', 'more_info_url', 'from_scraper',

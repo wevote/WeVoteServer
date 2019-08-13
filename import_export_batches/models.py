@@ -163,6 +163,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
     'candidate_selection_id9': 'candidate_selection_id9 *',  # For matching only
     'candidate_selection_id10': 'candidate_selection_id10 *',  # For matching only
     'contest_office_name': 'contest_office_name',
+    'race_office_level': 'race_office_level',
     'contest_office_batch_id': 'contest_office_batch_id',
     'contest_office_ctcl_uuid': 'contest_office_ctcl_uuid',
     'contest_office_votes_allowed': 'contest_office_votes_allowed',
@@ -289,6 +290,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS = {
     'candidate_twitter_handle': 'candidate_twitter_handle',
     'candidate_we_vote_id': 'candidate_we_vote_id',
     'contest_office_name': 'contest_office_name',
+    'race_office_level': 'race_office_level',
     'contest_measure_title': 'contest_measure_title',
     'election_day': 'election_day',
     'grade_rating': 'grade_rating',
@@ -311,6 +313,7 @@ BATCH_HEADER_MAP_FOR_POSITIONS = {
     'candidate_twitter_handle': 'candidate_twitter_handle',
     'candidate_we_vote_id': 'candidate_we_vote_id',
     'contest_office_name': 'contest_office_name',
+    'race_office_level': 'race_office_level',
     'contest_measure_title': 'contest_measure_title',
     'election_day': 'election_day',
     'grade_rating': 'grade_rating',
@@ -5108,6 +5111,7 @@ class BatchRowActionPosition(models.Model):
     contest_office_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the contest_office", max_length=255, null=True, blank=True, unique=False)
     contest_office_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
+    race_office_level = models.CharField(verbose_name="race office level", max_length=255, null=True, blank=True)
 
     # This is the candidate/politician that the position refers to.
     #  Either candidate_campaign is filled, contest_office OR contest_measure, but not all three
