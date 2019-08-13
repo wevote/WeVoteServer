@@ -2,9 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from apis_v1.documentation_source import ballot_item_options_retrieve_doc, ballot_item_retrieve_doc, \
-    ballot_items_sync_out_doc, ballot_returned_sync_out_doc, \
-    candidate_retrieve_doc, \
+from apis_v1.documentation_source import all_ballot_items_retrieve_doc, ballot_item_options_retrieve_doc, \
+    ballot_item_retrieve_doc, \
+    ballot_items_sync_out_doc, ballot_returned_sync_out_doc, candidate_retrieve_doc, \
     candidates_retrieve_doc, candidate_list_for_upcoming_elections_retrieve_doc, \
     candidates_sync_out_doc, device_id_generate_doc, donation_with_stripe_doc, \
     elections_retrieve_doc, elections_sync_out_doc, facebook_disconnect_doc, facebook_friends_action_doc, \
@@ -85,6 +85,16 @@ def apis_index_doc_view(request):
         set_voter_api_device_id(request, response, voter_api_device_id)
 
     return response
+
+
+def all_ballot_items_retrieve_doc_view(request):
+    """
+    Show documentation about allBallotItemsRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = all_ballot_items_retrieve_doc.all_ballot_items_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
 def ballot_item_options_retrieve_doc_view(request):

@@ -28,6 +28,8 @@ from voter_guide.views_admin import voter_guides_sync_out_view
 
 urlpatterns = [
     # Actual API Calls
+    url(r'^allBallotItemsRetrieve/', views_ballot.all_ballot_items_retrieve_view,
+        name='allBallotItemsRetrieveView'),
     url(r'^ballotItemOptionsRetrieve/', views_ballot.ballot_item_options_retrieve_view,
         name='ballotItemOptionsRetrieveView'),
     url(r'^ballotItemRetrieve/', views_ballot.ballot_item_retrieve_view, name='ballotItemRetrieveView'),
@@ -238,6 +240,8 @@ urlpatterns = [
     ##########################
     # API Documentation Views
     url(r'^docs/$', views_docs.apis_index_doc_view, name='apisIndex'),
+    url(r'^docs/allBallotItemsRetrieve/$',
+        views_docs.all_ballot_items_retrieve_doc_view, name='allBallotItemsRetrieveDocs'),
     url(r'^docs/ballotItemOptionsRetrieve/$',
         views_docs.ballot_item_options_retrieve_doc_view, name='ballotItemOptionsRetrieveDocs'),
     url(r'^docs/ballotItemRetrieve/$', views_docs.ballot_item_retrieve_doc_view, name='ballotItemRetrieveDocs'),

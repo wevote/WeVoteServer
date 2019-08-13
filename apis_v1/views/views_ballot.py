@@ -1,7 +1,7 @@
 # apis_v1/views/views_ballot.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from ballot.controllers import ballot_item_options_retrieve_for_api
+from ballot.controllers import all_ballot_items_retrieve_for_api, ballot_item_options_retrieve_for_api
 from candidate.controllers import candidate_retrieve_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse
@@ -16,6 +16,25 @@ from voter.controllers import email_ballot_data_for_api
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+
+
+def all_ballot_items_retrieve_view(request):  # allBallotItemsRetrieve
+    """
+    Return all the ballot data requested for an election
+    :param request:
+    :return:
+    """
+    # If passed in, we want to look at
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+    use_test_election = positive_value_exists(request.GET.get('use_test_election', False))
+
+    if use_test_election:
+        google_civic_election_id = 2000  # The Google Civic test election
+
+    json_data = all_ballot_items_retrieve_for_api(google_civic_election_id, state_code)
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def ballot_item_options_retrieve_view(request):  # ballotItemOptionsRetrieve

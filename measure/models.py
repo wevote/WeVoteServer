@@ -895,18 +895,22 @@ class ContestMeasureList(models.Model):
         return results
 
     def retrieve_all_measures_for_upcoming_election(self, google_civic_election_id=0, state_code='',
-                                                    return_list_of_objects=False, limit=300):
+                                                    return_list_of_objects=False, limit=300, read_only=False):
         measure_list_objects = []
         measure_list_light = []
         measure_list_found = False
+        status = ""
 
         try:
-            measure_queryset = ContestMeasure.objects.all()
+            if positive_value_exists(read_only):
+                measure_queryset = ContestMeasure.objects.using('readonly').all()
+            else:
+                measure_queryset = ContestMeasure.objects.all()
             if positive_value_exists(google_civic_election_id):
                 measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
             else:
                 success = False
-                status = "RETRIEVE_ALL_MEASURES_FOR_UPCOMING_ELECTION-MISSING_ELECTION_ID "
+                status += "RETRIEVE_ALL_MEASURES_FOR_UPCOMING_ELECTION-MISSING_ELECTION_ID "
                 results = {
                     'success': success,
                     'status': status,
@@ -927,20 +931,20 @@ class ContestMeasureList(models.Model):
 
             if len(measure_list_objects):
                 measure_list_found = True
-                status = 'MEASURES_RETRIEVED'
+                status += 'MEASURES_RETRIEVED '
                 success = True
             else:
-                status = 'NO_MEASURES_RETRIEVED'
+                status += 'NO_MEASURES_RETRIEVED '
                 success = True
         except ContestMeasure.DoesNotExist:
             # No measures found. Not a problem.
-            status = 'NO_MEASURES_FOUND_DoesNotExist'
+            status += 'NO_MEASURES_FOUND_DoesNotExist '
             measure_list_objects = []
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_all_measures_for_upcoming_election ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED retrieve_all_measures_for_upcoming_election ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
             success = False
 
         if measure_list_found:

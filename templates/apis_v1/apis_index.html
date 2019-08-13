@@ -264,6 +264,15 @@
         </td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:allBallotItemsRetrieveDocs' %}">allBallotItemsRetrieve</a></td>
+        <td>c3</td>
+        <td>Retrieve a list of all ballot items in a current election. This API gives us all possible offices,
+          candidates and measures for an election so that people can build a complete list of endorsements,
+          from anywhere in the country. Since this data doesn't change minute-by-minute and contains a lot of data,
+          try to always retrieve it from the CDN.
+        </td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:voterBallotItemsRetrieveDocs' %}">voterBallotItemsRetrieve</a></td>
         <td>c3</td>
         <td>Retrieve a list of ballot items to display for the current voter from the We Vote database. These entries

@@ -296,7 +296,10 @@ def office_new_view(request):
 
     office_list_manager = ContestOfficeListManager()
     updated_office_list = []
-    results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, state_code, True)
+    return_list_of_objects = True
+    read_only = True
+    results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, state_code,
+                                                                             return_list_of_objects, read_only)
     if results['office_list_found']:
         office_list = results['office_list_objects']
         for office in office_list:
