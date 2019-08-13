@@ -93,11 +93,13 @@ class CandidateCampaignListManager(models.Model):
     def retrieve_all_candidates_for_office(self, office_id, office_we_vote_id, read_only=False):
         candidate_list = []
         candidate_list_found = False
+        status = ""
+        success = True
 
         if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
-            status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING '
+            status += 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING '
             results = {
-                'success':              True if candidate_list_found else False,
+                'success':              False,
                 'status':               status,
                 'office_id':            office_id,
                 'office_we_vote_id':    office_we_vote_id,
@@ -120,20 +122,21 @@ class CandidateCampaignListManager(models.Model):
 
             if len(candidate_list):
                 candidate_list_found = True
-                status = 'RETRIEVE_ALL_CANDIDATES_FOR_OFFICE-CANDIDATES_RETRIEVED '
+                status += 'RETRIEVE_ALL_CANDIDATES_FOR_OFFICE-CANDIDATES_RETRIEVED '
             else:
-                status = 'RETRIEVE_ALL_CANDIDATES_FOR_OFFICE-NO_CANDIDATES_RETRIEVED '
+                status += 'RETRIEVE_ALL_CANDIDATES_FOR_OFFICE-NO_CANDIDATES_RETRIEVED '
         except CandidateCampaign.DoesNotExist:
             # No candidates found. Not a problem.
-            status = 'RETRIEVE_ALL_CANDIDATES_FOR_OFFICE-NO_CANDIDATES_FOUND_DoesNotExist '
+            status += 'RETRIEVE_ALL_CANDIDATES_FOR_OFFICE-NO_CANDIDATES_FOUND_DoesNotExist '
             candidate_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_all_candidates_for_office ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            status += 'FAILED retrieve_all_candidates_for_office ' \
+                      '{error} [type: {error_type}] '.format(error=e.message, error_type=type(e))
+            success = False
 
         results = {
-            'success':              True if candidate_list_found else False,
+            'success':              success,
             'status':               status,
             'office_id':            office_id,
             'office_we_vote_id':    office_we_vote_id,
