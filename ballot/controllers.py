@@ -1005,7 +1005,7 @@ def voter_ballot_items_retrieve_for_api(
             'voter_device_id':              voter_device_id,
             'ballot_found':                 False,
             'ballot_item_list':             [],
-            'google_civic_election_id':     0,
+            'google_civic_election_id':     google_civic_election_id,
             'text_for_map_search':          voter_address.text_for_map_search,
             'substituted_address_nearby':   '',
             'substituted_address_city':     '',
