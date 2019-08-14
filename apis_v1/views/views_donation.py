@@ -5,6 +5,7 @@ from config.base import get_environment_variable
 from django.http import HttpResponse
 from donate.controllers import donation_with_stripe_for_api, donation_process_stripe_webhook_event, \
     donation_refund_for_api, donation_subscription_cancellation_for_api, donation_history_for_a_voter
+from donate.models import DonationManager
 import json
 from voter.models import fetch_voter_we_vote_id_from_voter_device_link
 import wevote_functions.admin
@@ -29,6 +30,11 @@ def donation_with_stripe_view(request):  # donationWithStripe
     email = request.GET.get('email', '')
     donation_amount = request.GET.get('donation_amount', 0)
     monthly_donation = positive_value_exists(request.GET.get('monthly_donation', False))
+    is_business_plan = request.GET.get('is_business_plan', False)
+    coupon_code = request.GET.get('coupon_code', '')
+    plan_type_enum = request.GET.get('plan_type_enum', '')
+
+# ok to here Steve, 9/14/19 5:00pm
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_we_vote_id = ''
@@ -85,13 +91,13 @@ def donation_refund_view(request):  # donationRefund
                 'donation_list': donation_history_for_a_voter(voter_we_vote_id),
                 'voter_we_vote_id': voter_we_vote_id,
             }
-        else :
+        else:
             logger.error('donation_refund_view voter_we_vote_id is missing')
             json_data = {
                 'status': "VOTER_WE_VOTE_ID_IS_MISSING",
                 'success': False,
             }
-    else :
+    else:
         logger.error('donation_refund_view stripe_charge_id is missing')
         json_data = {
             'status': "STRIPE_CHARGE_ID_IS_MISSING",
@@ -198,6 +204,23 @@ def donation_history_list_view(request):
             'donation_list': [],
             'status': "DONATION_HISTORY_LIST STRIPE_SUBSCRIPTION_ID_IS_MISSING",
             'success': False,
+        }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+def validate_coupon_for_api_view(request):
+    plan_type_enum = request.GET.get('plan_type_enum', '')
+    coupon_code = request.GET.get('coupon_code', '')
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    print("validate_coupon_for_api_view, plan_type_enum: " + plan_type_enum + ", coupon_code: " + coupon_code)
+
+    if positive_value_exists(voter_device_id):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+        json_data = DonationManager.validate_coupon(plan_type_enum, coupon_code)
+    else:
+        json_data = {
+            'success': False,
+            'status': "validate_coupon_for_api_view received bad voter_device_id",
         }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
