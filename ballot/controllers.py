@@ -962,9 +962,10 @@ def all_ballot_items_retrieve_for_api(google_civic_election_id, state_code=''): 
         'success':                      success,
         'ballot_found':                 ballot_found,
         'ballot_item_list':             ballot_item_list,
-        'google_civic_election_id':     google_civic_election_id,
         'election_name':                election_description_text,
         'election_day_text':            election_day_text,
+        'google_civic_election_id':     google_civic_election_id,
+        'state_code':                   state_code,
     }
     return json_data
 

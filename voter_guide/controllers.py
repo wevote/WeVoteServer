@@ -3738,6 +3738,7 @@ def voter_guides_retrieve_for_api(voter_device_id, organization_we_vote_id="", v
                 'owner_voter_id':               voter_guide.owner_voter_id,
                 'pledge_goal':                  voter_guide.pledge_goal,
                 'pledge_count':                 voter_guide.pledge_count,
+                'state_code':                   voter_guide.state_code,
                 'last_updated':                 last_updated,
             }
             voter_guides.append(one_voter_guide.copy())
