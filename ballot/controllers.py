@@ -1912,12 +1912,12 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
     return error_results
 
 
-def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id, state_code):
+def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id, state_code_to_find):
     """
     allBallotItemsRetrieve
     :param google_civic_election_id: This variable was passed in explicitly so we can
     get the ballot items related to that election.
-    :param state_code:
+    :param state_code_to_find:
     :return:
     """
     status = ""
@@ -1935,7 +1935,7 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
     read_only = True
     return_list_of_objects = True
     office_results = contest_office_list_manager.retrieve_all_offices_for_upcoming_election(
-        google_civic_election_id, state_code, return_list_of_objects, read_only)
+        google_civic_election_id, state_code_to_find, return_list_of_objects, read_only)
     office_success = office_results['success']
     status += office_results['status']
     if office_results['office_list_found']:
@@ -1944,6 +1944,7 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
     if not office_success:
         success = False
 
+    first_no_candidates_warning = True
     if office_success:
         status += "OFFICE_LIST_FOUND "
         kind_of_ballot_item = OFFICE
@@ -1953,6 +1954,11 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                 office_id = contest_office.id
                 office_we_vote_id = contest_office.we_vote_id
                 race_office_level = contest_office.ballotpedia_race_office_level
+                state_code = contest_office.state_code
+                if positive_value_exists(state_code):
+                    state_code_lower_case = state_code.lower()
+                else:
+                    state_code_lower_case = ""
                 try:
                     read_only = True
                     results = candidate_list_object.retrieve_all_candidates_for_office(
@@ -1962,44 +1968,50 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                         candidate_list = results['candidate_list']
                         for candidate_campaign in candidate_list:
                             # This should match values returned in candidates_retrieve_for_api (candidatesRetrieve)
+                            candidate_state_code = candidate_campaign.state_code
+                            if positive_value_exists(candidate_state_code):
+                                candidate_state_code_lower_case = candidate_state_code.lower()
+                            else:
+                                candidate_state_code_lower_case = ""
                             one_candidate = {
-                                'id':                           candidate_campaign.id,
+                                # 'id':                           candidate_campaign.id,
                                 'we_vote_id':                   candidate_campaign.we_vote_id,
                                 'ballot_item_display_name':     candidate_campaign.display_candidate_name(),
-                                'ballotpedia_candidate_id':     candidate_campaign.ballotpedia_candidate_id,
+                                # 'ballotpedia_candidate_id':     candidate_campaign.ballotpedia_candidate_id,
                                 'ballotpedia_candidate_summary': candidate_campaign.ballotpedia_candidate_summary,
                                 'ballotpedia_candidate_url':    candidate_campaign.ballotpedia_candidate_url,
-                                'ballotpedia_person_id':        candidate_campaign.ballotpedia_person_id,
-                                'candidate_email':              candidate_campaign.candidate_email,
-                                'candidate_phone':              candidate_campaign.candidate_phone,
-                                'candidate_photo_url_large':
-                                    candidate_campaign.we_vote_hosted_profile_image_url_large
-                                    if positive_value_exists(candidate_campaign.we_vote_hosted_profile_image_url_large)
-                                    else candidate_campaign.candidate_photo_url(),
+                                # 'ballotpedia_person_id':        candidate_campaign.ballotpedia_person_id,
+                                # 'candidate_email':              candidate_campaign.candidate_email,
+                                # 'candidate_phone':              candidate_campaign.candidate_phone,
+                                # 'candidate_photo_url_large':
+                                #     candidate_campaign.we_vote_hosted_profile_image_url_large
+                                #     if positive_value_exists(
+                                #     candidate_campaign.we_vote_hosted_profile_image_url_large)
+                                #     else candidate_campaign.candidate_photo_url(),
                                 'candidate_photo_url_medium':
                                     candidate_campaign.we_vote_hosted_profile_image_url_medium,
                                 'candidate_photo_url_tiny': candidate_campaign.we_vote_hosted_profile_image_url_tiny,
-                                'candidate_url':                candidate_campaign.candidate_url,
-                                'candidate_contact_form_url':   candidate_campaign.candidate_contact_form_url,
-                                'contest_office_id':            candidate_campaign.contest_office_id,
-                                'contest_office_name':          candidate_campaign.contest_office_name,
-                                'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
-                                'facebook_url':                 candidate_campaign.facebook_url,
-                                'google_civic_election_id':     candidate_campaign.google_civic_election_id,
-                                'google_plus_url':              candidate_campaign.google_plus_url,
+                                # 'candidate_url':                candidate_campaign.candidate_url,
+                                # 'candidate_contact_form_url':   candidate_campaign.candidate_contact_form_url,
+                                # 'contest_office_id':            candidate_campaign.contest_office_id,
+                                # 'contest_office_name':          candidate_campaign.contest_office_name,
+                                # 'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
+                                # 'facebook_url':                 candidate_campaign.facebook_url,
+                                # 'google_civic_election_id':     candidate_campaign.google_civic_election_id,
+                                # 'google_plus_url':              candidate_campaign.google_plus_url,
                                 'kind_of_ballot_item':          CANDIDATE,
-                                'maplight_id':                  candidate_campaign.maplight_id,
-                                'ocd_division_id':              candidate_campaign.ocd_division_id,
-                                'order_on_ballot':              candidate_campaign.order_on_ballot,
+                                # 'maplight_id':                  candidate_campaign.maplight_id,
+                                # 'ocd_division_id':              candidate_campaign.ocd_division_id,
+                                # 'order_on_ballot':              candidate_campaign.order_on_ballot,
                                 'party':                        candidate_campaign.political_party_display(),
-                                'politician_id':                candidate_campaign.politician_id,
-                                'politician_we_vote_id':        candidate_campaign.politician_we_vote_id,
-                                'state_code':                   candidate_campaign.state_code,
-                                'twitter_url':                  candidate_campaign.twitter_url,
+                                # 'politician_id':                candidate_campaign.politician_id,
+                                # 'politician_we_vote_id':        candidate_campaign.politician_we_vote_id,
+                                'state_code':                   candidate_state_code_lower_case,
+                                # 'twitter_url':                  candidate_campaign.twitter_url,
                                 'twitter_handle':               candidate_campaign.fetch_twitter_handle(),
                                 'twitter_description':          candidate_campaign.twitter_description,
                                 'twitter_followers_count':      candidate_campaign.twitter_followers_count,
-                                'youtube_url':                  candidate_campaign.youtube_url,
+                                # 'youtube_url':                  candidate_campaign.youtube_url,
                             }
                             candidates_to_display.append(one_candidate.copy())
                 except Exception as e:
@@ -2012,16 +2024,20 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                 if len(candidates_to_display):
                     one_ballot_item = {
                         'ballot_item_display_name':     ballot_item_display_name,
+                        'candidate_list':               candidates_to_display,
                         'google_civic_election_id':     google_civic_election_id,
-                        'id':                           office_id,
+                        # 'id':                           office_id,
                         'kind_of_ballot_item':          kind_of_ballot_item,
                         'race_office_level':            race_office_level,
+                        'state_code':                   state_code_lower_case,
                         'we_vote_id':                   office_we_vote_id,
-                        'candidate_list':               candidates_to_display,
                     }
                     ballot_items_to_display.append(one_ballot_item.copy())
                 else:
-                    status += "NO_CANDIDATES_FOR_OFFICE:" + str(office_we_vote_id) + " "
+                    if first_no_candidates_warning:
+                        status += "NO_CANDIDATES_FOR_OFFICE(S): "
+                        first_no_candidates_warning = False
+                    status += str(office_we_vote_id) + " "
 
     # Retrieve all measures in this election
     read_only = True
@@ -2029,7 +2045,7 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
     measure_limit = 0
     measure_list = []
     measure_results = contest_measure_list_manager.retrieve_all_measures_for_upcoming_election(
-        google_civic_election_id, state_code, return_list_of_objects, limit=measure_limit, read_only=read_only)
+        google_civic_election_id, state_code_to_find, return_list_of_objects, limit=measure_limit, read_only=read_only)
     measure_success = measure_results['success']
     status += measure_results['status']
     if measure_results['measure_list_found']:
@@ -2051,6 +2067,12 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
         for contest_measure in measure_list:
             measure_we_vote_id = contest_measure.we_vote_id
             if positive_value_exists(measure_we_vote_id):
+                state_code = contest_measure.state_code
+                if positive_value_exists(state_code):
+                    state_code_lower_case = state_code.lower()
+                else:
+                    state_code_lower_case = ""
+
                 one_ballot_item = {
                     'ballot_item_display_name':     contest_measure.measure_title,
                     'google_civic_election_id':     google_civic_election_id,
@@ -2061,11 +2083,12 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                     'measure_text':                 contest_measure.measure_text,
                     'measure_url':                  contest_measure.measure_url,
                     'no_vote_description':          strip_html_tags(contest_measure.ballotpedia_no_vote_description),
-                    'district_name':                "",  # TODO Add this
+                    # 'district_name':                "",  # TODO Add this
                     'election_display_name':        election_name,
-                    'regional_display_name':        "",  # TODO Add this
-                    'state_display_name':           "",  # TODO Add this
+                    # 'regional_display_name':        "",  # TODO Add this
+                    # 'state_display_name':           "",  # TODO Add this
                     'we_vote_id':                   measure_we_vote_id,
+                    'state_code':                   state_code_lower_case,
                     'yes_vote_description':         strip_html_tags(contest_measure.ballotpedia_yes_vote_description),
                 }
                 ballot_items_to_display.append(one_ballot_item.copy())
