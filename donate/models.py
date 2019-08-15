@@ -6,10 +6,11 @@ from django.db import models
 from datetime import datetime, timezone, timedelta
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import positive_value_exists, convert_date_to_date_as_integer
 import stripe
 import textwrap
 import time
+import django.utils.timezone as tm
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -22,6 +23,20 @@ CURRENCY_USD = 'usd'
 CURRENCY_CAD = 'cad'
 CURRENCY_CHOICES = ((CURRENCY_USD, 'usd'),
                     (CURRENCY_CAD, 'cad'))
+FREE = 'FREE'
+PROFESSIONAL_MONTHLY = 'PROFESSIONAL_MONTHLY'
+PROFESSIONAL_YEARLY = 'PROFESSIONAL_YEARLY'
+PROFESSIONAL_PAID_WITHOUT_STRIPE = 'PROFESSIONAL_YEARLY'
+ENTERPRISE_MONTHLY = 'ENTERPRISE_MONTHLY'
+ENTERPRISE_YEARLY = 'ENTERPRISE_YEARLY'
+ENTERPRISE_PAID_WITHOUT_STRIPE = 'ENTERPRISE_YEARLY'
+BUSINESS_PLAN_OPTIONS = ((FREE, 'FREE'),
+                         (PROFESSIONAL_MONTHLY, 'PROFESSIONAL_MONTHLY'),
+                         (PROFESSIONAL_YEARLY, 'PROFESSIONAL_YEARLY'),
+                         (PROFESSIONAL_PAID_WITHOUT_STRIPE, 'PROFESSIONAL_PAID_WITHOUT_STRIPE'),
+                         (ENTERPRISE_MONTHLY, 'ENTERPRISE_MONTHLY'),
+                         (ENTERPRISE_YEARLY, 'ENTERPRISE_YEARLY'),
+                         (ENTERPRISE_PAID_WITHOUT_STRIPE, 'ENTERPRISE_PAID_WITHOUT_STRIPE'))
 
 # Stripes currency support https://support.stripe.com/questions/which-currencies-does-stripe-support
 
@@ -45,9 +60,6 @@ class DonationPlanDefinition(models.Model):
     donation_plan_id = models.CharField(verbose_name="unique recurring donation plan id", default="", max_length=255,
                                         null=False, blank=False)
     plan_name = models.CharField(verbose_name="donation plan name", max_length=255, null=False, blank=False)
-    # Don't think this is necessary, based on how recurring donation options are setup in webapp
-    # plan_name_visible_to_voter = models.CharField(verbose_name="plan name visible to user", max_length=255,
-    #                                               null=False, blank=False)
     # Stripe uses integer pennies for amount (ex: 2000 = $20.00)
     base_cost = models.PositiveIntegerField(verbose_name="recurring donation amount", default=0, null=False)
     billing_interval = models.CharField(verbose_name="recurring donation frequency", max_length=255,
@@ -57,11 +69,30 @@ class DonationPlanDefinition(models.Model):
                                 null=False, blank=False)
     donation_plan_is_active = models.BooleanField(verbose_name="status of recurring donation plan", default=True,
                                                   null=False, blank=False)
-    is_business_plan = models.BooleanField(verbose_name="is this a business plan (and not a personal subscription)",
-                                           default=False, null=False, blank=False)
-    # A big int, is a 64bit signed integer, so 63 bits of boolean values are possible.
-    features_provided_bitmap = models.BigIntegerField(verbose_name="Business features provided bitmap", null=False,
-                                                      default=0)
+    is_business_plan = models.BooleanField(
+        verbose_name="is this a business plan (and not a personal donation subscription)",
+        default=False, null=False, blank=False)
+    organization_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id of the organization that owns this subscription",
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
+    voter_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id of the person who created this subscription",
+        max_length=255, default=None, null=True, blank=True, unique=True, db_index=True)
+    coupon_code = models.CharField(
+        verbose_name="text of coupon code used to create the plan (redundant data for debugging)",
+        max_length=255, default=None, null=True, blank=True, unique=True, db_index=True)
+    business_subscription_plan_id = models.PositiveIntegerField(
+        verbose_name="the id of the BusinessSubscriptionPlan used to create this plan, resulting from the use "
+                     "of a coupon code, or a default coupon code", default=0, null=False)
+    paid_without_stripe = models.BooleanField(
+        verbose_name="is this business subscription plan paid via the We Vote accounting dept by check, etf, etc",
+        default=False, null=False, blank=False)
+    paid_without_stripe_expiration_date = models.DateTimeField(
+        verbose_name="On this day, deactivate this plan, that is paid without stripe",
+        auto_now=False, auto_now_add=False, null=True)
+    paid_without_stripe_comment = models.CharField(verbose_name="accounting comment for accounts paid without stripe",
+                                                   max_length=255, null=False, blank=False, default="")
+
 
 class DonationJournal(models.Model):
     """
@@ -140,6 +171,49 @@ class DonationJournal(models.Model):
                                               null=True, blank=True, unique=False)
     last_charged = models.DateTimeField(verbose_name="stripe subscription most recent charge timestamp", auto_now=False,
                                         auto_now_add=False, null=True)
+
+class BusinessSubscriptionPlan(models.Model):
+    """
+    BusinessSubscriptionPlans also known as "Coupon Codes" are pricing and feature sets, if the end user enters a coupon
+    code on the signup form, they will get a specific pre-created BusinessSubscriptionPlan that may have a lower than
+    list price and potentially a different feature set.
+    BusinessSubscriptionPlan rows are immutable, the admin interface that creates them, never changes an existing row,
+    only creates a new one -- if you want to add a new feature for all existing instance of DonationPlanDefinitions with
+    the previous BusinessSubscriptionPlan.id value, you will have to bulk update them to the new id value.
+    Coupon Codes are collections of pricing, features, with an instance expiration date.
+    The "25" in "25OFF" is a numerical discount, not a percentage
+    A Coupon code is categorized by PlanType (professional, enterprise, etc.)
+    BusinessSubscriptionPlan.id can map to many DonationPlanDefinition.business_coupon_code_id
+    There will need to be a default-professional and default-enterprise BusinessSubscriptionPlan that are created on the
+    fly if one does not exist, these coupons would not display in the end user ui.  In the UI they display as blank
+    coupon codes.
+    """
+    coupon_code = models.CharField(verbose_name="business subscription coupon codes",
+                                         max_length=255, null=False, blank=False)
+    coupon_expires_date = models.DateTimeField(
+        verbose_name="after this date, this coupon (display_plan_name) can not be used for new plans", auto_now=False,
+        auto_now_add=False, null=True)
+    plan_type_enum = models.CharField(verbose_name="enum of plan type {FREE, PROFESSIONAL, ENTERPRISE, etc}",
+                                      max_length=32, choices=BUSINESS_PLAN_OPTIONS, null=True, blank=True)
+    plan_created_at = models.DateTimeField(verbose_name="plan creation timestamp, mostly for debugging",
+                                             default=tm.now)
+    hidden_plan_comment = models.CharField(verbose_name="business subscription hidden comment",
+                                           max_length=255, null=False, blank=False, default="")
+    coupon_applied_message = models.CharField(verbose_name="message to display on screen when coupon is applied",
+                                           max_length=255, null=False, blank=False)
+    list_price_monthly_credit = models.PositiveIntegerField(
+        verbose_name="list price of the plan paid monthly by credit card", default=0, null=False)
+    # list_price_annually_credit = models.PositiveIntegerField(
+    #     verbose_name="list price of the plan paid annually by credit card", default=0, null=False)
+    discounted_price_monthly_credit = models.PositiveIntegerField(
+        verbose_name="discounted price of the plan paid monthly by credit card", default=0, null=False)
+    # actual_price_annually_credit = models.PositiveIntegerField(
+    #     verbose_name="discounted price of the plan paid annually by credit card", default=0, null=False)
+    # A big int, is a 64bit signed integer, so 63 bits of boolean values are possible.
+    features_provided_bitmap = models.BigIntegerField(verbose_name="Business features provided bitmap", null=False,
+                                                      default=0)
+    redemptions = models.PositiveIntegerField(verbose_name="the number of times this plan has been redeemed", default=0,
+                                              null=False)
 
 
 class DonationInvoice(models.Model):
@@ -446,7 +520,7 @@ class DonationManager(models.Model):
         :return:
         """
         voter_card_error_message = 'Your card has been declined for an unknown reason. Contact your bank for more' \
-                                               ' information.'
+                                   ' information.'
 
         card_error_message = {
             'approve_with_id': 'The transaction cannot be authorized. Please try again or contact your bank.',
@@ -826,3 +900,70 @@ class DonationManager(models.Model):
             handle_exception(e, logger=logger,
                              exception_message="update_subscription_with_latest_charge_date: " + str(e))
         return
+
+
+    @staticmethod
+    def validate_coupon(plan_type_enum, coupon_code):
+
+        # If there is no 25OFF, create one -- for developers to have at least one coupon in the db
+        coup, coup_created = BusinessSubscriptionPlan.objects.get_or_create(
+            coupon_code='25OFF',
+            plan_type_enum='PROFESSIONAL_MONTHLY',
+            defaults={
+                'coupon_applied_message': 'Coupon applied.  Deducted $25 per month.',
+                'list_price_monthly_credit': 12500,
+                'discounted_price_monthly_credit': 10000,
+                'features_provided_bitmap': 1
+            }
+        )
+
+        # First find the subscription_id from the cached invoices
+        status = ""
+        coupon_queryset = BusinessSubscriptionPlan.objects.filter(
+            plan_type_enum=plan_type_enum, coupon_code=coupon_code).order_by('-plan_created_at')
+        if not coupon_queryset:
+            coupon = []
+            status = 'COUPON_MATCH_NOT_FOUND '
+        else:
+            coupon = coupon_queryset[0]
+        coupon_match_found = False
+        coupon_still_valid = False
+        coupon_still_valid = False
+        list_price = 0
+        discounted_price = 0
+        success = False
+
+        coupon_applied_message = ""
+
+        try:
+            if coupon:
+                coupon_match_found = True
+                status = 'COUPON_MATCH_FOUND '
+
+                expires = coupon.coupon_expires_date
+                if expires is None:
+                    coupon_still_valid = True
+                else:
+                    today_date_as_integer = convert_date_to_date_as_integer(datetime.now().date())
+                    expires_as_integer = convert_date_to_date_as_integer(expires)
+                    if today_date_as_integer < expires_as_integer:
+                        coupon_still_valid = True
+
+                list_price = coupon.list_price_monthly_credit if coupon_match_found else 0
+                discounted_price = coupon.discounted_price_monthly_credit if coupon_match_found else 0
+                coupon_applied_message = coupon.coupon_applied_message
+                success = True
+
+        except Exception as e:
+            logger.debug("validate_coupon threw: ", e)
+
+        results = {
+            'coupon_applied_message':           coupon_applied_message,
+            'coupon_match_found':               coupon_match_found,
+            'coupon_still_valid':               coupon_still_valid,
+            '43':  discounted_price,
+            'list_price_monthly_credit':        list_price,
+            'status':                           status,
+            'success':                          success,
+        }
+        return results

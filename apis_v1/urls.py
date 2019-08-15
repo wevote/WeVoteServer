@@ -150,6 +150,8 @@ urlpatterns = [
     url(r'^twitterSignInRetrieve/', views_twitter.twitter_sign_in_retrieve_view, name='twitterSignInRetrieveView'),
     url(r'^twitterRetrieveIdsIFollow/',
         views_twitter.twitter_retrieve_ids_i_follow_view, name='twitterRetrieveIdsIFollowView'),
+    url(r'^validateCoupon', views_donation.validate_coupon_for_api_view,
+        name='validateCoupon'),
     url(r'^voterAddressRetrieve/', views_voter.voter_address_retrieve_view, name='voterAddressRetrieveView'),
     url(r'^voterAddressSave/', views_voter.voter_address_save_view, name='voterAddressSaveView'),
     url(r'^voterAllPositionsRetrieve/', views_voter.voter_all_positions_retrieve_view,
