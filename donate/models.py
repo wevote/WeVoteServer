@@ -906,13 +906,15 @@ class DonationManager(models.Model):
     def validate_coupon(plan_type_enum, coupon_code):
 
         # If there is no 25OFF, create one -- for developers to have at least one coupon in the db
-        coupon = BusinessSubscriptionPlan.objects.get_or_create(
-            coupon_code__exact='25OFF',
-            plan_type_enum__exact='PROFESSIONAL_MONTHLY',
-            coupon_applied_message='Coupon applied.  Deducted $25 per month.',
-            list_price_monthly_credit=12500,
-            discounted_price_monthly_credit=10000,
-            features_provided_bitmap=1
+        coup, coup_created = BusinessSubscriptionPlan.objects.get_or_create(
+            coupon_code='25OFF',
+            plan_type_enum='PROFESSIONAL_MONTHLY',
+            defaults={
+                'coupon_applied_message': 'Coupon applied.  Deducted $25 per month.',
+                'list_price_monthly_credit': 12500,
+                'discounted_price_monthly_credit': 10000,
+                'features_provided_bitmap': 1
+            }
         )
 
         # First find the subscription_id from the cached invoices
