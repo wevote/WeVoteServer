@@ -10,6 +10,7 @@ from wevote_functions.functions import positive_value_exists, convert_date_to_da
 import stripe
 import textwrap
 import time
+import django.utils.timezone as tm
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -195,7 +196,7 @@ class BusinessSubscriptionPlan(models.Model):
     plan_type_enum = models.CharField(verbose_name="enum of plan type {FREE, PROFESSIONAL, ENTERPRISE, etc}",
                                       max_length=32, choices=BUSINESS_PLAN_OPTIONS, null=True, blank=True)
     plan_created_at = models.DateTimeField(verbose_name="plan creation timestamp, mostly for debugging",
-                                             auto_now=False, auto_now_add=False, null=True)
+                                             default=tm.now)
     hidden_plan_comment = models.CharField(verbose_name="business subscription hidden comment",
                                            max_length=255, null=False, blank=False, default="")
     coupon_applied_message = models.CharField(verbose_name="message to display on screen when coupon is applied",
@@ -904,6 +905,16 @@ class DonationManager(models.Model):
     @staticmethod
     def validate_coupon(plan_type_enum, coupon_code):
 
+        # If there is no 25OFF, create one -- for developers to have at least one coupon in the db
+        coupon = BusinessSubscriptionPlan.objects.get_or_create(
+            coupon_code__exact='25OFF',
+            plan_type_enum__exact='PROFESSIONAL_MONTHLY',
+            coupon_applied_message='Coupon applied.  Deducted $25 per month.',
+            list_price_monthly_credit=12500,
+            discounted_price_monthly_credit=10000,
+            features_provided_bitmap=1
+        )
+
         # First find the subscription_id from the cached invoices
         status = ""
         coupon_queryset = BusinessSubscriptionPlan.objects.filter(
@@ -954,4 +965,3 @@ class DonationManager(models.Model):
             'success':                          success,
         }
         return results
-
