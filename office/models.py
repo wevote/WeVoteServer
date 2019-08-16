@@ -955,10 +955,16 @@ class ContestOfficeListManager(models.Model):
         return "ContestOfficeListManager"
 
     def retrieve_all_offices_for_upcoming_election(self, google_civic_election_id=0, state_code="",
-                                                   return_list_of_objects=False, read_only=False):
+                                                   return_list_of_objects=False,
+                                                   read_only=False):
         office_list = []
+        include_national_offices = False
+        if positive_value_exists(state_code):
+            # If we pass in a state_code, we also want to retrieve the national offices not assigned to any state
+            include_national_offices = True
         return self.retrieve_offices(
-            google_civic_election_id, state_code, office_list, return_list_of_objects, read_only=read_only)
+            google_civic_election_id, state_code, office_list, return_list_of_objects,
+            include_national_offices=include_national_offices, read_only=read_only)
 
     def retrieve_offices_by_list(self, office_list, return_list_of_objects=False):
         google_civic_election_id = 0
@@ -1011,7 +1017,8 @@ class ContestOfficeListManager(models.Model):
         return 0
 
     def retrieve_offices(self, google_civic_election_id=0, state_code="", retrieve_from_this_office_we_vote_id_list=[],
-                         return_list_of_objects=False, ballotpedia_district_id=0, read_only=False):
+                         return_list_of_objects=False, ballotpedia_district_id=0, include_national_offices=False,
+                         read_only=False):
         office_list_objects = []
         office_list_light = []
         office_list_found = False
@@ -1038,7 +1045,14 @@ class ContestOfficeListManager(models.Model):
             if positive_value_exists(ballotpedia_district_id):
                 office_queryset = office_queryset.filter(ballotpedia_district_id=ballotpedia_district_id)
             if positive_value_exists(state_code):
-                office_queryset = office_queryset.filter(state_code__iexact=state_code)
+                if positive_value_exists(include_national_offices):
+                    # Find offices in the state, or without a state
+                    office_queryset = office_queryset.filter(Q(state_code__isnull=True) |
+                                                             Q(state_code='') |
+                                                             Q(state_code__iexact='na') |
+                                                             Q(state_code__iexact=state_code))
+                else:
+                    office_queryset = office_queryset.filter(state_code__iexact=state_code)
             if len(retrieve_from_this_office_we_vote_id_list):
                 office_queryset = office_queryset.filter(
                     we_vote_id__in=retrieve_from_this_office_we_vote_id_list)
