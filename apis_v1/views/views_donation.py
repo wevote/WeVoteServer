@@ -5,6 +5,7 @@ from config.base import get_environment_variable
 from django.http import HttpResponse
 from donate.controllers import donation_with_stripe_for_api, donation_process_stripe_webhook_event, \
     donation_refund_for_api, donation_subscription_cancellation_for_api, donation_history_for_a_voter
+from voter.models import VoterManager
 from donate.models import DonationManager
 import json
 from voter.models import fetch_voter_we_vote_id_from_voter_device_link
@@ -30,11 +31,9 @@ def donation_with_stripe_view(request):  # donationWithStripe
     email = request.GET.get('email', '')
     donation_amount = request.GET.get('donation_amount', 0)
     monthly_donation = positive_value_exists(request.GET.get('monthly_donation', False))
-    is_business_plan = request.GET.get('is_business_plan', False)
+    is_organization_plan = positive_value_exists(request.GET.get('is_organization_plan', False))
     coupon_code = request.GET.get('coupon_code', '')
     plan_type_enum = request.GET.get('plan_type_enum', '')
-
-# ok to here Steve, 9/14/19 5:00pm
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_we_vote_id = ''
@@ -44,10 +43,15 @@ def donation_with_stripe_view(request):  # donationWithStripe
     else:
         logger.error('donation_with_stripe_view voter_we_vote_id is missing')
 
+    linked_organization_we_vote_id = VoterManager().retrieve_linked_organization_by_voter_we_vote_id(voter_we_vote_id)
+
     if positive_value_exists(token):
         results = donation_with_stripe_for_api(request, token, email, donation_amount, monthly_donation,
-                                               voter_we_vote_id)
+                                               voter_we_vote_id, is_organization_plan, coupon_code, plan_type_enum,
+                                               linked_organization_we_vote_id)
 
+        org_subscription_already_exists = results['org_subscription_already_exists'] if \
+            'org_subscription_already_exists' in results else False
         json_data = {
             'status': results['status'],
             'success': results['success'],
@@ -58,7 +62,8 @@ def donation_with_stripe_view(request):  # donationWithStripe
             'monthly_donation': monthly_donation,
             'subscription': results['subscription'],
             'donation_list': donation_history_for_a_voter(voter_we_vote_id),
-            'error_message_for_voter': results['error_message_for_voter']
+            'error_message_for_voter': results['error_message_for_voter'],
+            'org_subscription_already_exists': org_subscription_already_exists
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 

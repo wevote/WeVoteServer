@@ -638,6 +638,12 @@ class VoterManager(BaseUserManager):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, read_only=read_only)
 
+    def retrieve_linked_organization_by_voter_we_vote_id(self, voter_we_vote_id, read_only=False):
+        voter_manager = VoterManager()
+        results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id, read_only=True)
+        voter = results['voter']
+        return voter.linked_organization_we_vote_id
+
     def retrieve_voter_by_twitter_request_token(self, twitter_request_token):
         voter_id = ''
         email = ''
