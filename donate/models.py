@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.db import models
+from django.db import models, IntegrityError
 from datetime import datetime, timezone, timedelta
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 import wevote_functions.admin
@@ -30,7 +30,7 @@ PROFESSIONAL_PAID_WITHOUT_STRIPE = 'PROFESSIONAL_YEARLY'
 ENTERPRISE_MONTHLY = 'ENTERPRISE_MONTHLY'
 ENTERPRISE_YEARLY = 'ENTERPRISE_YEARLY'
 ENTERPRISE_PAID_WITHOUT_STRIPE = 'ENTERPRISE_YEARLY'
-BUSINESS_PLAN_OPTIONS = ((FREE, 'FREE'),
+ORGANIZATION_PLAN_OPTIONS = ((FREE, 'FREE'),
                          (PROFESSIONAL_MONTHLY, 'PROFESSIONAL_MONTHLY'),
                          (PROFESSIONAL_YEARLY, 'PROFESSIONAL_YEARLY'),
                          (PROFESSIONAL_PAID_WITHOUT_STRIPE, 'PROFESSIONAL_PAID_WITHOUT_STRIPE'),
@@ -43,7 +43,8 @@ BUSINESS_PLAN_OPTIONS = ((FREE, 'FREE'),
 
 class DonateLinkToVoter(models.Model):
     """
-    This is a generated table with customer ID's created when a stripe donation is made for the first time
+    This table links voter_we_vote_ids with Stripe customer IDs. A row is created when a stripe donation is made for the
+    first time.
     """
     # The unique customer id from a stripe donation
     stripe_customer_id = models.CharField(verbose_name="stripe unique customer id", max_length=255,
@@ -55,7 +56,7 @@ class DonateLinkToVoter(models.Model):
 
 class DonationPlanDefinition(models.Model):
     """
-    This is a generated table with admin created donation plans that users can subscribe to (recurring donations)
+    This table tracks donation plans (recurring donations) and organization subscription plans (paid subscriptions)
     """
     donation_plan_id = models.CharField(verbose_name="unique recurring donation plan id", default="", max_length=255,
                                         null=False, blank=False)
@@ -69,34 +70,31 @@ class DonationPlanDefinition(models.Model):
                                 null=False, blank=False)
     donation_plan_is_active = models.BooleanField(verbose_name="status of recurring donation plan", default=True,
                                                   null=False, blank=False)
-    is_business_plan = models.BooleanField(
-        verbose_name="is this a business plan (and not a personal donation subscription)",
+    is_organization_plan = models.BooleanField(
+        verbose_name="is this a organization plan (and not a personal donation subscription)",
         default=False, null=False, blank=False)
-    organization_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id of the organization that owns this subscription",
-        max_length=255, null=True, blank=True, unique=False, db_index=True)
     voter_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the person who created this subscription",
         max_length=255, default=None, null=True, blank=True, unique=True, db_index=True)
-    coupon_code = models.CharField(
-        verbose_name="text of coupon code used to create the plan (redundant data for debugging)",
+    organization_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id of the organization who benefits from the organization subscription",
         max_length=255, default=None, null=True, blank=True, unique=True, db_index=True)
-    business_subscription_plan_id = models.PositiveIntegerField(
-        verbose_name="the id of the BusinessSubscriptionPlan used to create this plan, resulting from the use "
+    organization_subscription_plan_id = models.PositiveIntegerField(
+        verbose_name="the id of the OrganizationSubscriptionPlan used to create this plan, resulting from the use "
                      "of a coupon code, or a default coupon code", default=0, null=False)
     paid_without_stripe = models.BooleanField(
-        verbose_name="is this business subscription plan paid via the We Vote accounting dept by check, etf, etc",
+        verbose_name="is this organization subscription plan paid via the We Vote accounting dept by check, etf, etc",
         default=False, null=False, blank=False)
     paid_without_stripe_expiration_date = models.DateTimeField(
         verbose_name="On this day, deactivate this plan, that is paid without stripe",
         auto_now=False, auto_now_add=False, null=True)
     paid_without_stripe_comment = models.CharField(verbose_name="accounting comment for accounts paid without stripe",
-                                                   max_length=255, null=False, blank=False, default="")
+                                                   max_length=255, null=True, blank=True, default="")
 
 
 class DonationJournal(models.Model):
     """
-     This is a generated table that will tracks donation and refund activity
+     This table tracks donation and refund activity
      """
     record_enum = models.CharField(
         verbose_name="enum of record type {PAYMENT_FROM_UI, PAYMENT_AUTO_SUBSCRIPTION, SUBSCRIPTION_SETUP_AND_INITIAL}",
@@ -171,33 +169,42 @@ class DonationJournal(models.Model):
                                               null=True, blank=True, unique=False)
     last_charged = models.DateTimeField(verbose_name="stripe subscription most recent charge timestamp", auto_now=False,
                                         auto_now_add=False, null=True)
+    is_organization_plan = models.BooleanField(
+        verbose_name="is this a organization plan (and not a personal donation subscription)",
+        default=False, null=False, blank=False)
+    plan_type_enum = models.CharField(verbose_name="enum of plan type {FREE, PROFESSIONAL, ENTERPRISE, etc}",
+                                      max_length=32, choices=ORGANIZATION_PLAN_OPTIONS, null=True, blank=True,
+                                      default="")
+    coupon_code = models.CharField(verbose_name="organization subscription coupon codes",
+                                   max_length=255, null=False, blank=False, default="")
 
-class BusinessSubscriptionPlan(models.Model):
+
+class OrganizationSubscriptionPlan(models.Model):
     """
-    BusinessSubscriptionPlans also known as "Coupon Codes" are pricing and feature sets, if the end user enters a coupon
-    code on the signup form, they will get a specific pre-created BusinessSubscriptionPlan that may have a lower than
+    OrganizationSubscriptionPlans also known as "Coupon Codes" are pricing and feature sets, if the end user enters a coupon
+    code on the signup form, they will get a specific pre-created OrganizationSubscriptionPlan that may have a lower than
     list price and potentially a different feature set.
-    BusinessSubscriptionPlan rows are immutable, the admin interface that creates them, never changes an existing row,
+    OrganizationSubscriptionPlan rows are immutable, the admin interface that creates them, never changes an existing row,
     only creates a new one -- if you want to add a new feature for all existing instance of DonationPlanDefinitions with
-    the previous BusinessSubscriptionPlan.id value, you will have to bulk update them to the new id value.
+    the previous OrganizationSubscriptionPlan.id value, you will have to bulk update them to the new id value.
     Coupon Codes are collections of pricing, features, with an instance expiration date.
     The "25" in "25OFF" is a numerical discount, not a percentage
     A Coupon code is categorized by PlanType (professional, enterprise, etc.)
-    BusinessSubscriptionPlan.id can map to many DonationPlanDefinition.business_coupon_code_id
-    There will need to be a default-professional and default-enterprise BusinessSubscriptionPlan that are created on the
+    OrganizationSubscriptionPlan.id can map to many DonationPlanDefinition.organization_coupon_code_id
+    There will need to be a default-professional and default-enterprise OrganizationSubscriptionPlan that are created on the
     fly if one does not exist, these coupons would not display in the end user ui.  In the UI they display as blank
     coupon codes.
     """
-    coupon_code = models.CharField(verbose_name="business subscription coupon codes",
+    coupon_code = models.CharField(verbose_name="organization subscription coupon codes",
                                          max_length=255, null=False, blank=False)
     coupon_expires_date = models.DateTimeField(
         verbose_name="after this date, this coupon (display_plan_name) can not be used for new plans", auto_now=False,
         auto_now_add=False, null=True)
     plan_type_enum = models.CharField(verbose_name="enum of plan type {FREE, PROFESSIONAL, ENTERPRISE, etc}",
-                                      max_length=32, choices=BUSINESS_PLAN_OPTIONS, null=True, blank=True)
+                                      max_length=32, choices=ORGANIZATION_PLAN_OPTIONS, null=True, blank=True)
     plan_created_at = models.DateTimeField(verbose_name="plan creation timestamp, mostly for debugging",
                                              default=tm.now)
-    hidden_plan_comment = models.CharField(verbose_name="business subscription hidden comment",
+    hidden_plan_comment = models.CharField(verbose_name="organization subscription hidden comment",
                                            max_length=255, null=False, blank=False, default="")
     coupon_applied_message = models.CharField(verbose_name="message to display on screen when coupon is applied",
                                            max_length=255, null=False, blank=False)
@@ -210,7 +217,7 @@ class BusinessSubscriptionPlan(models.Model):
     # actual_price_annually_credit = models.PositiveIntegerField(
     #     verbose_name="discounted price of the plan paid annually by credit card", default=0, null=False)
     # A big int, is a 64bit signed integer, so 63 bits of boolean values are possible.
-    features_provided_bitmap = models.BigIntegerField(verbose_name="Business features provided bitmap", null=False,
+    features_provided_bitmap = models.BigIntegerField(verbose_name="organization features provided bitmap", null=False,
                                                       default=0)
     redemptions = models.PositiveIntegerField(verbose_name="the number of times this plan has been redeemed", default=0,
                                               null=False)
@@ -298,13 +305,22 @@ class DonationManager(models.Model):
         return results
 
     @staticmethod
-    def retrieve_or_create_recurring_donation_plan(voter_we_vote_id, donation_amount):
+    def retrieve_or_create_recurring_donation_plan(voter_we_vote_id, donation_plan_id, donation_amount,
+                                                   is_organization_plan, coupon_code, plan_type_enum,
+                                                   organization_we_vote_id):
         """
-        June 2017, we create these records, but never read them
+        June 2017, we create these records, but never read them for donations
+        August 2019, we read them for organization paid subscriptions
+        :param voter_we_vote_id:
+        :param donation_plan_id:
         :param donation_amount:
+        :param is_organization_plan:
+        :param coupon_code:
+        :param plan_type_enum:
+        :param organization_we_vote_id:
         :return:
         """
-        recurring_donation_plan_id = voter_we_vote_id + "-monthly-" + str(donation_amount)
+        # recurring_donation_plan_id = voter_we_vote_id + "-monthly-" + str(donation_amount)
         # plan_name = donation_plan_id + " Plan"
         billing_interval = "monthly"
         currency = "usd"
@@ -313,17 +329,28 @@ class DonationManager(models.Model):
         status = ''
         stripe_plan_id = ''
         success = False
+        org_subs_id = 0
+        subscription_already_exists = False
 
         try:
+            if is_organization_plan:
+                # Lookup the price from the latest version of the coupon
+                donation_amount, org_subs_id = DonationManager.get_coupon_price(plan_type_enum, coupon_code)
+
             # the donation plan needs to exist in two places: our stripe account and our database
             # plans can be created here or in our stripe account dashboard
             donation_plan_query, is_new = DonationPlanDefinition.objects.get_or_create(
-                donation_plan_id=recurring_donation_plan_id,
-                plan_name=recurring_donation_plan_id,
+                donation_plan_id=donation_plan_id,
+                plan_name=donation_plan_id,
                 base_cost=donation_amount,
                 billing_interval=billing_interval,
                 currency=currency,
-                donation_plan_is_active=donation_plan_is_active)
+                donation_plan_is_active=donation_plan_is_active,
+                is_organization_plan=is_organization_plan,
+                voter_we_vote_id=voter_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
+                organization_subscription_plan_id=org_subs_id
+            )
             if is_new:
                 # if a donation plan is not found, we've added it to our database
                 success = True
@@ -333,7 +360,7 @@ class DonationManager(models.Model):
                 success = True
                 status += 'DONATION_PLAN_ALREADY_EXISTS_IN_DATABASE '
 
-            plan_id_query = stripe.Plan.retrieve(recurring_donation_plan_id)
+            plan_id_query = stripe.Plan.retrieve(donation_plan_id)
             if positive_value_exists(plan_id_query.id):
                 stripe_plan_id = plan_id_query.id
                 logger.debug("Stripe, plan_id_query.id " + plan_id_query.id)
@@ -346,16 +373,25 @@ class DonationManager(models.Model):
         except stripe.error.StripeError:
             pass
 
-        if not positive_value_exists(stripe_plan_id):
+        except IntegrityError:
+            if not is_organization_plan:
+                pass
+            subscription_already_exists = True
+            status += 'ORGANIZATION_SUBSCRIPTION_ALREADY_EXISTS '
+
+        except Exception as e:
+            handle_exception(e, logger=logger)
+
+        if not positive_value_exists(stripe_plan_id) and not subscription_already_exists:
             # if plan doesn't exist in stripe, we need to create it (note it's already been created in database)
             plan = stripe.Plan.create(
                 amount=donation_amount,
                 interval="month",
                 currency="usd",
-                nickname=recurring_donation_plan_id,
-                id=recurring_donation_plan_id,
+                nickname=donation_plan_id,
+                id=donation_plan_id,
                 product={
-                    "name": recurring_donation_plan_id,
+                    "name": donation_plan_id,
                     "type": "service"
                 },
             )
@@ -368,8 +404,9 @@ class DonationManager(models.Model):
         results = {
             'success': success,
             'status': status,
+            'subscription_already_exists': subscription_already_exists,
             'MultipleObjectsReturned': exception_multiple_object_returned,
-            'recurring_donation_plan_id': recurring_donation_plan_id,
+            'recurring_donation_plan_id': donation_plan_id,
         }
         return results
 
@@ -380,7 +417,7 @@ class DonationManager(models.Model):
             reason, seller_message, stripe_type, paid, amount_refunded, refund_count, email, address_zip, brand,
             country, exp_month, exp_year, last4, id_card, stripe_object, stripe_status, status, subscription_id,
             subscription_plan_id, subscription_created_at, subscription_canceled_at, subscription_ended_at,
-            not_loggedin_voter_we_vote_id):
+            not_loggedin_voter_we_vote_id, is_organization_plan, coupon_code, plan_type_enum, organization_we_vote_id):
         """
 
         :param record_enum:
@@ -438,7 +475,9 @@ class DonationManager(models.Model):
                 stripe_status=stripe_status, status=status, subscription_id=subscription_id,
                 subscription_plan_id=subscription_plan_id, subscription_created_at=subscription_created_at,
                 subscription_canceled_at=subscription_canceled_at, subscription_ended_at=subscription_ended_at,
-                not_loggedin_voter_we_vote_id=not_loggedin_voter_we_vote_id)
+                not_loggedin_voter_we_vote_id=not_loggedin_voter_we_vote_id,
+                is_organization_plan=is_organization_plan, coupon_code=coupon_code, plan_type_enum=plan_type_enum,
+                organization_we_vote_id=organization_we_vote_id)
 
             success = True
             status = 'NEW_HISTORY_ENTRY_SAVED'
@@ -452,21 +491,28 @@ class DonationManager(models.Model):
         }
         return saved_results
 
-    def create_recurring_donation(self, stripe_customer_id, voter_we_vote_id, donation_amount, start_date_time, email):
+    def create_recurring_donation(self, stripe_customer_id, voter_we_vote_id, donation_amount, start_date_time, email,
+                                  is_organization_plan, coupon_code, plan_type_enum, organization_we_vote_id):
         """
 
-        # subscription_entry = object
         :param stripe_customer_id:
         :param voter_we_vote_id:
         :param donation_amount:
         :param start_date_time:
         :param email:
+        :param is_organization_plan:
+        :param coupon_code:
+        :param plan_type_enum:
+        :param organization_we_vote_id:
         :return:
         """
+        org_segment = "organization-" if is_organization_plan else ""
+        donation_plan_id = voter_we_vote_id + "-monthly-" + org_segment + str(donation_amount)
 
-        donation_plan_id = voter_we_vote_id + "-monthly-" + str(donation_amount)
-
-        donation_plan_id_query = self.retrieve_or_create_recurring_donation_plan(voter_we_vote_id, donation_amount)
+        donation_plan_id_query = self.retrieve_or_create_recurring_donation_plan(voter_we_vote_id, donation_plan_id,
+                                                                                 donation_amount, is_organization_plan,
+                                                                                 coupon_code, plan_type_enum,
+                                                                                 organization_we_vote_id)
         if donation_plan_id_query['success']:
             status = donation_plan_id_query['status']
 
@@ -901,25 +947,44 @@ class DonationManager(models.Model):
                              exception_message="update_subscription_with_latest_charge_date: " + str(e))
         return
 
-
     @staticmethod
     def validate_coupon(plan_type_enum, coupon_code):
 
         # If there is no 25OFF, create one -- for developers to have at least one coupon in the db
-        coup, coup_created = BusinessSubscriptionPlan.objects.get_or_create(
+        coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
             coupon_code='25OFF',
             plan_type_enum='PROFESSIONAL_MONTHLY',
             defaults={
                 'coupon_applied_message': 'Coupon applied.  Deducted $25 per month.',
-                'list_price_monthly_credit': 12500,
-                'discounted_price_monthly_credit': 10000,
+                'list_price_monthly_credit': 15000,
+                'discounted_price_monthly_credit': 12500,
+                'features_provided_bitmap': 1
+            }
+        )
+        coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
+            coupon_code='DEFAULT-PROFESSIONAL_MONTHLY',
+            plan_type_enum='PROFESSIONAL_MONTHLY',
+            defaults={
+                'coupon_applied_message': '',
+                'list_price_monthly_credit': 15000,
+                'discounted_price_monthly_credit': 15000,
+                'features_provided_bitmap': 1
+            }
+        )
+        coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
+            coupon_code='DEFAULT-ENTERPRISE_MONTHLY',
+            plan_type_enum='ENTERPRISE_MONTHLY',
+            defaults={
+                'coupon_applied_message': '',
+                'list_price_monthly_credit': 20000,
+                'discounted_price_monthly_credit': 200,
                 'features_provided_bitmap': 1
             }
         )
 
         # First find the subscription_id from the cached invoices
         status = ""
-        coupon_queryset = BusinessSubscriptionPlan.objects.filter(
+        coupon_queryset = OrganizationSubscriptionPlan.objects.filter(
             plan_type_enum=plan_type_enum, coupon_code=coupon_code).order_by('-plan_created_at')
         if not coupon_queryset:
             coupon = []
@@ -927,7 +992,6 @@ class DonationManager(models.Model):
         else:
             coupon = coupon_queryset[0]
         coupon_match_found = False
-        coupon_still_valid = False
         coupon_still_valid = False
         list_price = 0
         discounted_price = 0
@@ -967,3 +1031,26 @@ class DonationManager(models.Model):
             'success':                          success,
         }
         return results
+
+
+    @staticmethod
+    def get_coupon_price(plan_type_enum, coupon_code):
+        """
+        By the time we get here, the coupon has already been verified, so it will exist
+        Return the price from the latest version of the coupon
+        :param plan_type_enum:
+        :param coupon_code:
+        :return: price
+        """
+        price = -1
+        org_subs_id = -1
+        try:
+            coupon_queryset = OrganizationSubscriptionPlan.objects.filter(
+                plan_type_enum=plan_type_enum, coupon_code=coupon_code).order_by('-plan_created_at')
+            coupon = coupon_queryset[0]
+            price = coupon.discounted_price_monthly_credit
+            org_subs_id = coupon.id
+        except Exception as e:
+            logger.debug("get_coupon_price threw: ", e)
+
+        return price, org_subs_id
