@@ -119,7 +119,8 @@ class VoterGuideManager(models.Manager):
                                                                  we_vote_hosted_profile_image_url_large='',
                                                                  we_vote_hosted_profile_image_url_medium='',
                                                                  we_vote_hosted_profile_image_url_tiny='',
-                                                                 vote_smart_ratings_only=False
+                                                                 vote_smart_ratings_only=False,
+                                                                 elections_dict={}
                                                                  ):
         """
         This creates voter_guides, and also refreshes voter guides with updated organization data
@@ -144,6 +145,23 @@ class VoterGuideManager(models.Manager):
                 organization_found = True
                 organization = results['organization']
 
+            # Retrieve the election so we can bring over the state_code if needed
+            if positive_value_exists(state_code):
+                election_state_code = state_code
+            else:
+                election_state_code = ''
+                if google_civic_election_id in elections_dict:
+                    election_state_code = elections_dict[google_civic_election_id]
+                else:
+                    election_manager = ElectionManager()
+                    election_results = election_manager.retrieve_election(google_civic_election_id)
+                    if election_results['election_found']:
+                        election = election_results['election']
+                        election_state_code = election.state_code
+                        if not positive_value_exists(election_state_code):
+                            election_state_code = ''
+                        elections_dict[google_civic_election_id] = election_state_code
+
             # Now update voter_guide
             try:
                 if organization_found:
@@ -155,8 +173,8 @@ class VoterGuideManager(models.Manager):
                     else:
                         pledge_count = 0
 
-                    if positive_value_exists(state_code):
-                        state_code = state_code.lower()
+                    if positive_value_exists(election_state_code):
+                        election_state_code = election_state_code.lower()
                     updated_values = {
                         'google_civic_election_id': google_civic_election_id,
                         'organization_we_vote_id':  organization_we_vote_id,
@@ -167,7 +185,7 @@ class VoterGuideManager(models.Manager):
                         'display_name':             organization.organization_name,
                         'voter_guide_owner_type':   organization.organization_type,
                         'vote_smart_ratings_only':  vote_smart_ratings_only,
-                        'state_code':               state_code,
+                        'state_code':               election_state_code,
                         'we_vote_hosted_profile_image_url_large':  organization.we_vote_hosted_profile_image_url_large,
                         'we_vote_hosted_profile_image_url_medium': organization.we_vote_hosted_profile_image_url_medium,
                         'we_vote_hosted_profile_image_url_tiny':   organization.we_vote_hosted_profile_image_url_tiny,
@@ -218,6 +236,7 @@ class VoterGuideManager(models.Manager):
             'voter_guide_saved':        success,
             'voter_guide':              voter_guide_on_stage,
             'new_voter_guide_created':  new_voter_guide_created,
+            'elections_dict':           elections_dict,
         }
         return results
 
