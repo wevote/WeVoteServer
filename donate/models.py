@@ -951,8 +951,7 @@ class DonationManager(models.Model):
         return
 
     @staticmethod
-    def validate_coupon(plan_type_enum, coupon_code):
-
+    def create_initial_coupons():
         # If there is no 25OFF, create one -- for developers to have at least one coupon in the db
         coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
             coupon_code='25OFF',
@@ -980,10 +979,17 @@ class DonationManager(models.Model):
             defaults={
                 'coupon_applied_message': '',
                 'list_price_monthly_credit': 20000,
-                'discounted_price_monthly_credit': 200,
+                'discounted_price_monthly_credit': 20000,
                 'features_provided_bitmap': 1
             }
         )
+        return
+
+
+    @staticmethod
+    def validate_coupon(plan_type_enum, coupon_code):
+
+        DonationManager.create_initial_coupons()
 
         # First find the subscription_id from the cached invoices
         status = ""
@@ -1028,7 +1034,7 @@ class DonationManager(models.Model):
             'coupon_applied_message':           coupon_applied_message,
             'coupon_match_found':               coupon_match_found,
             'coupon_still_valid':               coupon_still_valid,
-            '43':  discounted_price,
+            'discounted_price_monthly_credit':  discounted_price,
             'list_price_monthly_credit':        list_price,
             'status':                           status,
             'success':                          success,

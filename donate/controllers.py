@@ -370,6 +370,8 @@ def donation_history_for_a_voter(voter_we_vote_id):
                 'subscription_ended_at': str(donation_row.subscription_ended_at),
                 'refund_days_limit': refund_days,
                 'last_charged': str(donation_row.last_charged),
+                'is_organization_plan': "True" if donation_row.is_organization_plan else "False",
+                'organization_we_vote_id': str(donation_row.organization_we_vote_id),
             }
             simple_donation_list.append(json_data)
 
