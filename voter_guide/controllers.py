@@ -4145,23 +4145,29 @@ def refresh_existing_voter_guides(google_civic_election_id, organization_we_vote
             voter_guide_list_found = True
             voter_guide_list = results['voter_guide_list']
 
+    elections_dict = {}
+    organization_we_vote_ids_refreshed = []
     if voter_guide_list_found:
         for voter_guide in voter_guide_list:
             if positive_value_exists(voter_guide.organization_we_vote_id):
-                results = refresh_organization_data_from_master_tables(voter_guide.organization_we_vote_id)
-                status += results['status']
-                # DALE 2017-11-06 This seems to be wasteful, doing the same data pushing multiple times. Refactor.
-                if results['success']:
-                    push_organization_data_to_other_table_caches(voter_guide.organization_we_vote_id)
+                if voter_guide.organization_we_vote_id not in organization_we_vote_ids_refreshed:
+                    results = refresh_organization_data_from_master_tables(voter_guide.organization_we_vote_id)
+                    status += results['status']
+                    # DALE 2017-11-06 This seems to be wasteful, doing the same data pushing multiple times. Refactor.
+                    if results['success']:
+                        push_organization_data_to_other_table_caches(voter_guide.organization_we_vote_id)
+                        organization_we_vote_ids_refreshed.append(voter_guide.organization_we_vote_id)
                 # DALE 2017-11-06 The update voter guides functions below I think are also done
                 #  in "push_organization_data_to_other_table_caches". Refactor.
                 if positive_value_exists(voter_guide.google_civic_election_id):
                     voter_guide_we_vote_id = ''
                     results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
                         voter_guide_we_vote_id,
-                        voter_guide.organization_we_vote_id, voter_guide.google_civic_election_id)
+                        voter_guide.organization_we_vote_id, voter_guide.google_civic_election_id,
+                        elections_dict=elections_dict)
                     if results['success']:
                         voter_guide_updated_count += 1
+                        elections_dict = results['elections_dict']
                 elif positive_value_exists(voter_guide.vote_smart_time_span):
                     voter_guide_we_vote_id = ''
                     results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
