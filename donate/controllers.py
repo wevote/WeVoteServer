@@ -83,7 +83,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     create_subscription_entry = False
     charge = None
     not_loggedin_voter_we_vote_id = None
-    org_subscription_already_exists = False
+    org_subs_already_exists = False
 
     ip_address = get_ip_from_headers(request)
 
@@ -100,7 +100,8 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
             'donation_entry_saved':     donation_entry_saved,
             'saved_stripe_donation':    saved_stripe_donation,
             'monthly_donation':         monthly_donation,
-            'subscription':             subscription_saved
+            'subscription':             subscription_saved,
+            'org_subs_already_exists': False,
         }
 
         return error_results
@@ -115,7 +116,8 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
             'donation_entry_saved':     donation_entry_saved,
             'saved_stripe_donation':    saved_stripe_donation,
             'monthly_donation':         monthly_donation,
-            'subscription':             subscription_saved
+            'subscription':             subscription_saved,
+            'org_subs_already_exists': False,
         }
 
         return error_results
@@ -141,15 +143,15 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                                                                                 email, is_organization_plan,
                                                                                 coupon_code, plan_type_enum,
                                                                                 organization_we_vote_id)
-                org_subscription_already_exists = True if 'subscription_already_exists' in recurring_donation else False
 
-                if org_subscription_already_exists:
+                org_subs_already_exists = recurring_donation['org_subs_already_exists']
+                if org_subs_already_exists:
                     charge_id = 0
                 else:
                     subscription_saved = recurring_donation['voter_subscription_saved']
                     status = textwrap.shorten(recurring_donation['status'] + " " + status, width=255, placeholder="...")
                     success = recurring_donation['success']
-                    create_subscription_entry = True if 'subscription_already_exists' else False
+                    create_subscription_entry = True
                     subscription_id = recurring_donation['subscription_id']
                     subscription_plan_id = recurring_donation['subscription_plan_id']
                     subscription_created_at = None
@@ -240,7 +242,8 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
             "No more than 25 active subscriptions are allowed, please delete a subscription before adding another."
         logger.debug("donation_with_stripe_for_api: " + error_message)
 
-    # action_result should be CANCEL_REQUEST_FAILED, CANCEL_REQUEST_SUCCEEDED or DONATION_PROCESSED_SUCCESSFULLY
+    # action_result should be CANCEL_REQUEST_FAILED, CANCEL_REQUEST_SUCCEEDED, DONATION_PROCESSED_SUCCESSFULLY,
+    #    STRIPE_DONATION_NOT_COMPLETED
     action_result = donation_status
 
     logged_in = is_voter_logged_in(request)
@@ -294,7 +297,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
         'monthly_donation': monthly_donation,
         'subscription': subscription_saved,
         'error_message_for_voter': error_message,
-        'org_subscription_already_exists': org_subscription_already_exists
+        'org_subs_already_exists': org_subs_already_exists
     }
 
     return results
@@ -367,6 +370,8 @@ def donation_history_for_a_voter(voter_we_vote_id):
                 'subscription_ended_at': str(donation_row.subscription_ended_at),
                 'refund_days_limit': refund_days,
                 'last_charged': str(donation_row.last_charged),
+                'is_organization_plan': "True" if donation_row.is_organization_plan else "False",
+                'organization_we_vote_id': str(donation_row.organization_we_vote_id),
             }
             simple_donation_list.append(json_data)
 
@@ -450,7 +455,7 @@ def donation_process_charge(event):           # 'charge.succeeded'
         except Exception:
             voter_we_vote_id = DonationManager.find_we_vote_voter_id_for_stripe_customer(customer)
 
-        organization_we_vote_id = VoterManager().retrieve_linked_organization_by_voter_we_vote_id
+        organization_we_vote_id = VoterManager().retrieve_linked_organization_by_voter_we_vote_id(voter_we_vote_id)
 
         if results['success'] and not results['exists']:
             # Create the Journal entry for a payment initiated by an automatic subscription payment.
@@ -459,7 +464,7 @@ def donation_process_charge(event):           # 'charge.succeeded'
             coupon_code = metadata['coupon_code'] if 'coupon_code' in metadata else ''
             plan_type_enum = metadata['plan_type_enum'] if 'plan_type_enum' in metadata else ''
             organization_we_vote_id = metadata['organization_we_vote_id'] if 'organization_we_vote_id' in metadata \
-                else ''
+                else organization_we_vote_id
 
             DonationManager.create_donation_journal_entry("PAYMENT_AUTO_SUBSCRIPTION", "0.0.0.0",
                                                           customer,

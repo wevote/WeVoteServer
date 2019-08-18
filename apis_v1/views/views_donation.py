@@ -50,8 +50,8 @@ def donation_with_stripe_view(request):  # donationWithStripe
                                                voter_we_vote_id, is_organization_plan, coupon_code, plan_type_enum,
                                                linked_organization_we_vote_id)
 
-        org_subscription_already_exists = results['org_subscription_already_exists'] if \
-            'org_subscription_already_exists' in results else False
+        org_subs_already_exists = results['org_subs_already_exists'] if \
+            'org_subs_already_exists' in results else False
         json_data = {
             'status': results['status'],
             'success': results['success'],
@@ -63,7 +63,7 @@ def donation_with_stripe_view(request):  # donationWithStripe
             'subscription': results['subscription'],
             'donation_list': donation_history_for_a_voter(voter_we_vote_id),
             'error_message_for_voter': results['error_message_for_voter'],
-            'org_subscription_already_exists': org_subscription_already_exists
+            'org_subs_already_exists': org_subs_already_exists
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 

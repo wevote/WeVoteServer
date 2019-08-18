@@ -177,6 +177,8 @@ class DonationJournal(models.Model):
                                       default="")
     coupon_code = models.CharField(verbose_name="organization subscription coupon codes",
                                    max_length=255, null=False, blank=False, default="")
+    organization_we_vote_id = models.CharField(verbose_name="unique organization we vote user id", max_length=32,
+                                               unique=False, null=True, blank=True)
 
 
 class OrganizationSubscriptionPlan(models.Model):
@@ -330,7 +332,7 @@ class DonationManager(models.Model):
         stripe_plan_id = ''
         success = False
         org_subs_id = 0
-        subscription_already_exists = False
+        org_subs_already_exists = False
 
         try:
             if is_organization_plan:
@@ -374,15 +376,14 @@ class DonationManager(models.Model):
             pass
 
         except IntegrityError:
-            if not is_organization_plan:
-                pass
-            subscription_already_exists = True
-            status += 'ORGANIZATION_SUBSCRIPTION_ALREADY_EXISTS '
+            if is_organization_plan:
+                org_subs_already_exists = True
+                status += 'ORGANIZATION_SUBSCRIPTION_ALREADY_EXISTS '
 
         except Exception as e:
             handle_exception(e, logger=logger)
 
-        if not positive_value_exists(stripe_plan_id) and not subscription_already_exists:
+        if not positive_value_exists(stripe_plan_id) and not org_subs_already_exists:
             # if plan doesn't exist in stripe, we need to create it (note it's already been created in database)
             plan = stripe.Plan.create(
                 amount=donation_amount,
@@ -404,7 +405,7 @@ class DonationManager(models.Model):
         results = {
             'success': success,
             'status': status,
-            'subscription_already_exists': subscription_already_exists,
+            'org_subs_already_exists': org_subs_already_exists,
             'MultipleObjectsReturned': exception_multiple_object_returned,
             'recurring_donation_plan_id': donation_plan_id,
         }
@@ -513,7 +514,7 @@ class DonationManager(models.Model):
                                                                                  donation_amount, is_organization_plan,
                                                                                  coupon_code, plan_type_enum,
                                                                                  organization_we_vote_id)
-        if donation_plan_id_query['success']:
+        if not donation_plan_id_query['org_subs_already_exists'] and donation_plan_id_query['success']:
             status = donation_plan_id_query['status']
 
             try:
@@ -535,7 +536,8 @@ class DonationManager(models.Model):
                     'voter_subscription_saved': status,
                     'subscription_plan_id': donation_plan_id,
                     'subscription_created_at': subscription['created'],
-                    'subscription_id': subscription_id
+                    'subscription_id': subscription_id,
+                    'org_subs_already_exists': False,
                 }
 
             except stripe.error.StripeError as e:
@@ -549,6 +551,7 @@ class DonationManager(models.Model):
                     'success': False,
                     'status': status,
                     'voter_subscription_saved': False,
+                    'org_subs_already_exists': False,
                     'subscription_plan_id': "",
                     'subscription_created_at': "",
                     'subscription_id': ""
@@ -948,8 +951,7 @@ class DonationManager(models.Model):
         return
 
     @staticmethod
-    def validate_coupon(plan_type_enum, coupon_code):
-
+    def create_initial_coupons():
         # If there is no 25OFF, create one -- for developers to have at least one coupon in the db
         coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
             coupon_code='25OFF',
@@ -977,10 +979,17 @@ class DonationManager(models.Model):
             defaults={
                 'coupon_applied_message': '',
                 'list_price_monthly_credit': 20000,
-                'discounted_price_monthly_credit': 200,
+                'discounted_price_monthly_credit': 20000,
                 'features_provided_bitmap': 1
             }
         )
+        return
+
+
+    @staticmethod
+    def validate_coupon(plan_type_enum, coupon_code):
+
+        DonationManager.create_initial_coupons()
 
         # First find the subscription_id from the cached invoices
         status = ""
@@ -1025,7 +1034,7 @@ class DonationManager(models.Model):
             'coupon_applied_message':           coupon_applied_message,
             'coupon_match_found':               coupon_match_found,
             'coupon_still_valid':               coupon_still_valid,
-            '43':  discounted_price,
+            'discounted_price_monthly_credit':  discounted_price,
             'list_price_monthly_credit':        list_price,
             'status':                           status,
             'success':                          success,
