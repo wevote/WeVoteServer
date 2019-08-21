@@ -40,14 +40,14 @@
     <table id="pl" class="plan-table">
       <thead style="border-bottom: 2pt solid black;">
         <tr>
-          <th>id</th>
+          <th style="text-align: center; padding-right: 12px">id</th>
           <th>Coupon Code</th>
           <th>Plan Type</th>
           <th>Plan Comment</th>
           <th>Coupon Applied Message</th>
-          <th>List Price</th>
-          <th>Discount Price</th>
-          <th>Redemptions</th>
+          <th style="text-align: right">List Price</th>
+          <th style="text-align: right">Discount Price</th>
+          <th style="padding-left: 10px">Redeemed</th>
           <th>Features</th>
           <th>Created</th>
           <th>Expires</th>
@@ -57,13 +57,13 @@
         <tr>
           <td style="width: 50px"><input id="edit-plan" type="button" value={{ plan.id }} onclick="activePlan = {{plan}}" /></td>
           <td style="width: 275px">{{ plan.coupon_code }}</td>
-          <td style="width: 190px">{{ plan.plan_type_enum }}</td>
+          <td style="width: 200px">{{ plan.plan_type_enum }}</td>
           <td style="width: 200px">{{ plan.hidden_plan_comment }}</td>
           <td style="width: 200px">{{ plan.coupon_applied_message }}</td>
-          <td style="width: 75px">{{ plan.list_price_monthly_credit }}</td>
-          <td style="width: 110px">{{ plan.discounted_price_monthly_credit }}</td>
-          <td style="width: 95px">{{ plan.redemptions }}</td>
-          <td style="width: 65px">{{ plan.features_provided_bitmap }}</td>
+          <td style="width: 75px; text-align: right">{{ plan.list_price_monthly_credit }}</td>
+          <td style="width: 110px; text-align: right">{{ plan.discounted_price_monthly_credit }}</td>
+          <td style="width: 105px; text-align: center">{{ plan.redemptions }}</td>
+          <td style="width: 65px; text-align: center">{{ plan.features_provided_bitmap }}</td>
           <td style="width: 120px">{{ plan.plan_created_at }}</td>
           <td style="width: 85px" class="base-expire">{{ plan.coupon_expires_date }}</td>
         </tr>
