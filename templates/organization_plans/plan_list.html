@@ -4,14 +4,7 @@
 
 {% block js %}
   <script src="{% static "js/PlanDialog.js" %}" type="text/javascript"></script>
-  $('.matchCountdown').each(function() {
-    this = $(this);
-    var start_date = this.attr('start');
-    var matchDate = new Date(start_date).getTime();
-    this.countdown({until: matchDate});
-});
 {% endblock %}
-
 {% block title %}Coupons{% endblock %}
 
 {%  block content %}
@@ -28,15 +21,11 @@
   <input id="create-coupon" type="button" value="Create a Coupon" />
 </span>
 <br><br>
+&nbsp;&nbsp;&nbsp;<input type="checkbox" id="rollupOlderVersions"> Display only the latest version of each Coupon<br>
+<br><br>
 
 {% if plans %}
-  <style>
-    table#pl tr:nth-child(even) {
-      background-color:#F2F2F2;
-      border-bottom: 1pt solid lightgrey;
-      border-top: 1pt solid lightgrey;
-    }
-  </style>
+
     <table id="pl" class="plan-table">
       <thead style="border-bottom: 2pt solid black;">
         <tr>
@@ -54,7 +43,7 @@
         </tr>
       </thead>
       {% for plan in plans %}
-        <tr>
+        <tr style="border-bottom: 1pt solid lightgrey">
           <td style="width: 50px"><input id="edit-plan" type="button" value={{ plan.id }} onclick="activePlan = {{plan}}" /></td>
           <td style="width: 275px">{{ plan.coupon_code }}</td>
           <td style="width: 200px">{{ plan.plan_type_enum }}</td>

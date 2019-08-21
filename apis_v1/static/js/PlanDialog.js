@@ -254,6 +254,39 @@ $(function () {
     dialog.dialog('open');
   });
 
+  $('#rollupOlderVersions').change(() => {
+    let checked = document.getElementById('rollupOlderVersions').checked;
+    console.log("clicked on rollupOlderVersions: " + checked);
+
+    let table = document.getElementById('pl');
+    let rowLength = table.rows.length;
+
+    let hashmap = {};
+    // This assumes that the rows arrive in order of most recently created
+
+    for(let i=1; i<rowLength; i+=1) {
+      var row = table.rows[i];
+      let coupon = row.cells[1].innerText;
+      let type = row.cells[2].innerText;
+      let key = coupon + "~" + type;
+      if (checked) {
+        if (key in hashmap) {
+          $(row).css("display", "none");
+          console.log("Row hide: " + key);
+        } else {
+          console.log("Row in hashmap for hide: " + key);
+          hashmap[key] = true;
+        }
+        console.log("Row dump: " + coupon + "~" + type);
+      } else {
+        $(row).css("display", "");
+        console.log("Row unhide: " + key);
+      }
+    }
+   });
+
+  $('#rollupOlderVersions').click();
+
   $('#update').button().on('click', () => {
     const limit = spinner.val();
     let newUrl = window.location.href;
