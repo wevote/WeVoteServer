@@ -19,22 +19,16 @@ span.nobr { white-space: nowrap; }
     <input type="hidden" name="organization_id" value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
 
 <div class="form-group">
-    <label for="organization_name_id" class="col-sm-3 control-label">Logo</label>
+    <label for="chosen_logo_displayed" class="col-sm-3 control-label">Logo</label>
     <div class="col-sm-8">
         <input type="text" name="organization_name" id="organization_name_id" class="form-control"
-               value="{% if organization %}{{ organization.organization_name }}{% else %}{{ organization_name }}{% endif %}" />
-        {% if organization %}
-            {{ organization.chosen_logo_displayed }}
-            &nbsp;&nbsp;&nbsp;&nbsp;Vote Smart Id: <a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.chosen_logo_displayed }}</a>
-            &nbsp;&nbsp;&nbsp;&nbsp;Internal Id: {{ organization.id }}
-        {% endif %}
-    </div>
+               value="{% if organization %}{{ organization.chosen_logo_displayed }}{% else %}{{ chosen_logo_displayed }}{% endif %}" />
 </div>
 
 
 
 <div class="form-group">
-    <label for="organization_website_id" class="col-sm-3 control-label">Domain string
+    <label for="chosen_domain_string" class="col-sm-3 control-label">Domain string
     {% if organization.chosen_domain_string %}
     <a href="{{ organization.chosen_domain_string }}"
                target="_blank"
@@ -43,101 +37,85 @@ span.nobr { white-space: nowrap; }
     </label>
     <div class="col-sm-8">
         <input type="text" name="organization_website" id="organization_website_id" class="form-control"
-               value="{% if organization %}{{ organization.chosen_domain_string }}{% else %}{{ organization_website }}{% endif %}" />
+               value="{% if organization %}{{ organization.chosen_domain_string }}{% else %}{{ chosen_domain_string }}{% endif %}" />
     </div>
 </div>
 
 <div class="form-group">
-    <label for="organization_twitter_handle_id" class="col-sm-3 control-label">
+    <label for="chosen_favicon_url_https" class="col-sm-3 control-label">
         Favicon URL
-        {% if organization.organization_twitter_handle %}
-        <a href="https://twitter.com/{{ organization.organization_twitter_handle }}"
+        {% if organization.chosen_favicon_url_https %}
+        <a href="{{ organization.chosen_favicon_url_https }}"
                    target="_blank"
                    class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
     <div class="col-sm-8">
-        <input type="text" name="organization_twitter_handle" id="organization_twitter_handle_id" class="form-control"
-               value="{% if organization %}{{ organization.organization_twitter_handle }}{% else %}{{ organization_twitter_handle }}{% endif %}" />
+        <input type="text" name="chosen_favicon_url_https" id="chosen_favicon_url_https" class="form-control"
+               value="{% if organization %}{{ organization.chosen_favicon_url_https }}{% else %}{{ chosen_favicon_url_https }}{% endif %}" />
     </div>
 </div>
 
 <div class="form-group">
-    <label for="organization_facebook_id" class="col-sm-3 control-label">Google Analytics account number</label>
+    <label for="chosen_google_analytics_account_number" class="col-sm-3 control-label">Google Analytics account number</label>
     <div class="col-sm-8">
-    <input type="text" name="organization_facebook" id="organization_facebook_id" class="form-control"
-           value="{% if organization %}{{ organization.organization_facebook|default_if_none:"" }}{% else %}{{ organization_facebook }}{% endif %}" />
+    <input type="text" name="chosen_google_analytics_account_number" id="chosen_google_analytics_account_number" class="form-control"
+           value="{% if organization %}{{ organization.chosen_google_analytics_account_number|default_if_none:"" }}{% else %}{{ chosen_google_analytics_account_number }}{% endif %}" />
     </div>
 </div>
 
 <div class="form-group">
-    <label for="organization_email_id" class="col-sm-3 control-label">HTML verification string</label>
+    <label for="chosen_html_verification_string" class="col-sm-3 control-label">HTML verification string</label>
     <div class="col-sm-8">
-    <input type="text" name="organization_email" id="organization_email_id" class="form-control"
-           value="{% if organization %}{{ organization.organization_email|default_if_none:"" }}{% else %}{{ organization_email }}{% endif %}" />
+    <input type="text" name="chosen_html_verification_string" id="chosen_html_verification_string" class="form-control"
+           value="{% if organization %}{{ organization.chosen_html_verification_string|default_if_none:"" }}{% else %}{{ chosen_html_verification_string }}{% endif %}" />
     </div>
 </div>
 
-{% if organization %}
+
 <div class="form-group">
-    <label for="wikipedia_page_title_id" class="col-sm-3 control-label">LOGO URL</label>
+    <label for="chosen_logo_url_https" class="col-sm-3 control-label">LOGO URL</label>
     <div class="col-sm-8">
-        <input type="text" name="wikipedia_page_title" id="wikipedia_page_title_id" class="form-control"
-               placeholder="The Wikipedia Full URL, or Wikipedia Page Identifier"
-               value="{% if organization %}{{ organization.wikipedia_page_title|default_if_none:"" }}{% else %}{{ wikipedia_page_title }}{% endif %}" />
+        <input type="text" name="chosen_logo_url_https" id="chosen_logo_url_https" class="form-control
+               value="{% if organization %}{{ organization.chosen_logo_url_https|default_if_none:"" }}{% else %}{{ chosen_logo_url_https }}{% endif %}" />
     </div>
 </div>
 
 <div class="form-group">
-    <label for="wikipedia_photo_url_id" class="col-sm-3 control-label">Social share description</label>
+    <label for="chosen_social_share_description" class="col-sm-3 control-label">Social share description</label>
     <div class="col-sm-8">
-        <input type="text" name="wikipedia_photo_url" id="wikipedia_photo_url_id" class="form-control"
-               value="{% if organization %}{{ organization.wikipedia_photo_url|default_if_none:"" }}{% else %}{{ wikipedia_photo_url }}{% endif %}" />
+        <input type="text" name="chosen_social_share_description" id="chosen_social_share_description" class="form-control"
+               value="{% if organization %}{{ organization.chosen_social_share_description|default_if_none:"" }}{% else %}{{ chosen_social_share_description }}{% endif %}" />
     </div>
 </div>
 
 <div class="form-group">
-    <label for="organization_endorsements_api_url" class="col-sm-3 control-label">Social share image</label>
+    <label for="chosen_social_share_image_256x256_url_https" class="col-sm-3 control-label">Social share image</label>
     <div class="col-sm-8">
-        <input type="text" name="organization_endorsements_api_url" id="organization_endorsements_api_url" class="form-control"
-               value="{% if organization %}{{ organization.organization_endorsements_api_url|default_if_none:"" }}{% else %}{{ organization_endorsements_api_url }}{% endif %}" />
-            (<a href="https://docs.google.com/document/d/1D90CslIjOPSxyB6XIBPSV07vDlVp5oMNyQPlOrq1Qj4/edit" target="_blank">see importer specification</a>)
+        <input type="text" name="chosen_social_share_image_256x256_url_https" id="chosen_social_share_image_256x256_url_https" class="form-control"
+               value="{% if organization %}{{ organization.chosen_social_share_image_256x256_url_https }}{% else %}{{ chosen_social_share_image_256x256_url_https }}{% endif %}" />
     </div>
 </div>
 
 
 <div class="form-group">
-    <label class="col-sm-3 control-label">Sub domain string</label>
-    <div class="col-sm-8 ">
-    <ul class="list-inline">
-    {% for issue in issue_list %}
-      {% if not issue.hide_issue or issue.followed_by_organization %}
-        <li class="list-inline-item">
-        <input type="checkbox" name="selected_issues" id="selected_issues_id_{{ issue.we_vote_id }}" value={{ issue.we_vote_id }}
-                {% if issue.followed_by_organization %}checked{% endif %} />
-        <label for="selected_issues_id_{{ issue.we_vote_id }}" style="font-weight: normal !important;">
-          {% if issue.hide_issue %}
-          <span style="text-decoration: line-through">{{ issue.issue_name }}</span>
-          {% else %}
-          {{ issue.issue_name }}
-          {% endif %}
-        </label>
-        </li>
-      {% endif %}
-    {% endfor %}
-    </ul>
+    <label for="chosen_sub_domain_string" class="col-sm-3 control-label">Sub domain string</label>
+    <div class="col-sm-8">
+        <input type="text" name="chosen_sub_domain_string" id="chosen_sub_domain_string" class="form-control"
+               value="{% if organization %}{{ organization.chosen_sub_domain_string }}{% else %}{{ chosen_sub_domain_string }}{% endif %}" />
     </div>
 </div>
 
 
 <div class="form-group">
-    <label class="col-sm-3 control-label">Subscription plan</label>
-    <div class="col-sm-8 ">
-
+    <label for="chosen_subscription_plan" class="col-sm-3 control-label">Subscription plan</label>
+    <div class="col-sm-8">
+        <input type="text" name="chosen_subscription_plan" id="chosen_subscription_plan" class="form-control"
+               value="{% if organization %}{{ organization.chosen_subscription_plan }}{% else %}{{ chosen_subscription_plan }}{% endif %}" />
     </div>
 </div>
 
-{% endif %}
+
 
 
 
