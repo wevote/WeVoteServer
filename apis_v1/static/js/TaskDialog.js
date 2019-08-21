@@ -225,8 +225,7 @@ $(function () {
   // onClick Handlers
 
   $('#tasktable').on('click', (event) => {
-    // var button = $(event.target).closest('#edit-task', 'input');
-    // console.log("You clicked on:", button);
+    console.log("You clicked on a numbered id button: ", activeTask.id);
     $('label[for=idfld]').show();
     idfld.show();
     $('button:contains("Save as")').show();

@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from donate.controllers import donation_with_stripe_for_api, donation_process_stripe_webhook_event, \
     donation_refund_for_api, donation_subscription_cancellation_for_api, donation_history_for_a_voter
 from voter.models import VoterManager
-from donate.models import DonationManager
+from donate.models import DonationManager, OrganizationSubscriptionPlan
 import json
 from voter.models import fetch_voter_we_vote_id_from_voter_device_link
 import wevote_functions.admin
@@ -226,6 +226,68 @@ def validate_coupon_for_api_view(request):
         json_data = {
             'success': False,
             'status': "validate_coupon_for_api_view received bad voter_device_id",
+        }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+def create_new_plan_for_api_view(request):
+    coupon_code = request.GET.get('couponCode')
+    plan_type_enum = request.GET.get('planTypeEnum')
+    hidden_plan_comment = request.GET.get('hiddenPlanComment')
+    coupon_applied_message = request.GET.get('couponAppliedMessage')
+    list_price_monthly_credit = request.GET.get('listPriceMonthlyCredit')
+    discounted_price_monthly_credit = request.GET.get('discountedPriceMonthlyCredit')
+    features_provided_bitmap = request.GET.get('featuresProvidedBitmap')
+    coupon_expires_date = request.GET.get('couponExpiresDate', None)
+    if len(coupon_expires_date) is 0:
+        coupon_expires_date = None
+    print("create_new_plan_for_api_view, plan_type_enum: " + plan_type_enum + ", coupon_code: " + coupon_code)
+    plan_on_stage = 0
+
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    if positive_value_exists(voter_device_id):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+        plan_on_stage = OrganizationSubscriptionPlan.objects.create(
+            coupon_code=coupon_code,
+            plan_type_enum=plan_type_enum,
+            hidden_plan_comment=hidden_plan_comment,
+            coupon_applied_message=coupon_applied_message,
+            list_price_monthly_credit=list_price_monthly_credit,
+            discounted_price_monthly_credit=discounted_price_monthly_credit,
+            features_provided_bitmap=features_provided_bitmap,
+            coupon_expires_date=coupon_expires_date)
+        status = "create_new_plan_for_api_view succeeded"
+    else:
+        status = "create_new_plan_for_api_view received bad voter_device_id",
+
+    json_data = {
+        'success': positive_value_exists(plan_on_stage.id),
+        'status': status,
+        'id': plan_on_stage.id if positive_value_exists(plan_on_stage.id) else 0.
+        }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+def delete_plan_for_api_view(request):
+    id = request.GET.get('id')
+    print("delete_coupon_for_api_view, sql id: " + id)
+
+    try:
+        if positive_value_exists(id):
+            OrganizationSubscriptionPlan.objects.filter(id=id).delete()
+            status = "DELETE_PLAN_SUCCESSFUL"
+            success = True
+        else:
+            status = "DELETE_PLAN-MISSING_ID"
+            success = False
+    except Exception as e:
+        status = "DELETE_PLAN-DATABASE_DELETE_EXCEPTION"
+        success = False
+
+    json_data = {
+        'success': success,
+        'status': status,
+        'id': id,
         }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')

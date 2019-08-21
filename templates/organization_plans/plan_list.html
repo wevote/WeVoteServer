@@ -1,0 +1,124 @@
+{# templates/organization_plans/plan_list.html #}
+{% extends "template_base.html" %}
+{% load staticfiles %}
+
+{% block js %}
+  <script src="{% static "js/PlanDialog.js" %}" type="text/javascript"></script>
+  $('.matchCountdown').each(function() {
+    this = $(this);
+    var start_date = this.attr('start');
+    var matchDate = new Date(start_date).getTime();
+    this.countdown({until: matchDate});
+});
+{% endblock %}
+
+{% block title %}Coupons{% endblock %}
+
+{%  block content %}
+
+<p>
+  <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a>
+</p>
+
+
+<h1>Coupons/Paid Subscription Plans for an Organization</h1>
+
+<br>
+<span>
+  <input id="create-coupon" type="button" value="Create a Coupon" />
+</span>
+<br><br>
+
+{% if plans %}
+  <style>
+    table#pl tr:nth-child(even) {
+      background-color:#F2F2F2;
+      border-bottom: 1pt solid lightgrey;
+      border-top: 1pt solid lightgrey;
+    }
+  </style>
+    <table id="pl" class="plan-table">
+      <thead style="border-bottom: 2pt solid black;">
+        <tr>
+          <th style="text-align: center; padding-right: 12px">id</th>
+          <th>Coupon Code</th>
+          <th>Plan Type</th>
+          <th>Plan Comment</th>
+          <th>Coupon Applied Message</th>
+          <th style="text-align: right">List Price</th>
+          <th style="text-align: right">Discount Price</th>
+          <th style="padding-left: 10px">Redeemed</th>
+          <th>Features</th>
+          <th>Created</th>
+          <th>Expires</th>
+        </tr>
+      </thead>
+      {% for plan in plans %}
+        <tr>
+          <td style="width: 50px"><input id="edit-plan" type="button" value={{ plan.id }} onclick="activePlan = {{plan}}" /></td>
+          <td style="width: 275px">{{ plan.coupon_code }}</td>
+          <td style="width: 200px">{{ plan.plan_type_enum }}</td>
+          <td style="width: 200px">{{ plan.hidden_plan_comment }}</td>
+          <td style="width: 200px">{{ plan.coupon_applied_message }}</td>
+          <td style="width: 75px; text-align: right">{{ plan.list_price_monthly_credit }}</td>
+          <td style="width: 110px; text-align: right">{{ plan.discounted_price_monthly_credit }}</td>
+          <td style="width: 105px; text-align: center">{{ plan.redemptions }}</td>
+          <td style="width: 65px; text-align: center">{{ plan.features_provided_bitmap }}</td>
+          <td style="width: 120px">{{ plan.plan_created_at }}</td>
+          <td style="width: 85px" class="base-expire">{{ plan.coupon_expires_date }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    You must have deleted all the plans, including the defaults.
+  {% endif %}
+
+  <div id="dialog-form" title="Coupon Details">
+  <form>
+    <fieldset>
+      <label for="id">id</label><br>
+      <input type="text" name="id" id="id" value="000" disabled class="text ui-widget-content ui-corner-all"><br>
+      <div style="height: 7px;"></div>
+      <label for="coupon_code">Coupon Code</label><br>
+      <input type="text" name="coupon_code" id="coupon_code" value="" class="text ui-widget-content ui-corner-all"><br>
+      <div style="height: 7px;"></div>
+      <label for="plan_type_enum">Plan Type</label><br>
+      <select name="plan_type_enum" id="plan_type_enum" class="text ui-widget-content ui-corner-all"><br>
+        <option>FREE</option>
+        <option selected="selected">PROFESSIONAL_MONTHLY</option>
+        <option>ENTERPRISE_MONTHLY</option>
+      </select><br>
+      <div style="height: 7px;"></div>
+      <label for="hidden_plan_comment">Hidden Plan Comment</label><br>
+      <input type="text" name="hidden_plan_comment" id="hidden_plan_comment" value="" class="text ui-widget-content ui-corner-all"><br>
+      <div style="height: 7px;"></div>
+      <label for="run_at">Coupon Applied Message</label><br>
+      <input type="text" name="coupon_applied_message" id="coupon_applied_message" value="" class="text ui-widget-content ui-corner-all"><br>
+      <div style="height: 7px;"></div>
+      <label for="list_price_monthly_credit">List Price Monthly, Credit Card</label><br>
+      <input type="number" name="list_price_monthly_credit" id="list_price_monthly_credit" min="0.00" max="10000.00" step="0.01" class="text ui-widget-content ui-corner-all"><br>
+      <div style="height: 7px;"></div>
+      <label for="discounted_price_monthly_credit">Discounted Price Monthly, Credit Card</label><br>
+      <input type="number" name="discounted_price_monthly_credit" id="discounted_price_monthly_credit" min="0.00" max="10000.00" step="0.01" class="text ui-widget-content ui-corner-all"><br>
+      <div style="height: 7px;"></div>
+      <label for="redemptions">Redemptions</label><br>
+      <input type="text" name="redemptions" id="redemptions" value="" disabled class="text ui-widget-content ui-corner-all"><br>
+      <div style="height: 7px;"></div>
+      <label for="features_provided_bitmap">Features Provided Bitmap</label><br>
+      <input type="text" name="features_provided_bitmap" id="features_provided_bitmap" value="" class="text ui-widget-content ui-corner-all"><br>
+      <div style="height: 7px;"></div>
+      <label for="plan_created_at">Plan Created Date</label><br>
+      <input type="text" name="plan_created_at" id="plan_created_at" value="" disabled class="text ui-widget-content ui-corner-all"><br>
+      <div style="height: 7px;"></div>
+      <label for="coupon_expires_date">Expiration Date of Coupon</label><br>
+      <input type="text" name="coupon_expires_date" id="coupon_expires_date" value="" class="text ui-widget-content ui-corner-all"><br>
+      <div style="height: 7px;"></div>
+
+      <!-- Allow form submission with keyboard without duplicating the dialog button -->
+      <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+    </fieldset>
+  </form>
+</div>
+
+
+{% endblock %}

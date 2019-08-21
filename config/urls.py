@@ -59,6 +59,7 @@ urlpatterns = [
     url(r'^m/', include(('measure.urls', 'measure'), namespace="measure")),
     url(r'^off/', include(('office.urls', 'office'), namespace="office")),
     url(r'^org/', include(('organization.urls', 'organization'), namespace="organization")),
+    url(r'^organization_plans/', include(('donate.urls', 'organization_plans'), namespace="organization_plans")),
     url(r'^pl/', include(('polling_location.urls', 'polling_location'), namespace="polling_location")),
     url(r'^party/', include(('party.urls', 'party'), namespace="party")),
     url(r'^politician_list/', include(('politician.urls', 'politician_list'), namespace="politician_list")),
