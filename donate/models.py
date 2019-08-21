@@ -26,17 +26,18 @@ CURRENCY_CHOICES = ((CURRENCY_USD, 'usd'),
 FREE = 'FREE'
 PROFESSIONAL_MONTHLY = 'PROFESSIONAL_MONTHLY'
 PROFESSIONAL_YEARLY = 'PROFESSIONAL_YEARLY'
-PROFESSIONAL_PAID_WITHOUT_STRIPE = 'PROFESSIONAL_YEARLY'
+PROFESSIONAL_PAID_WITHOUT_STRIPE = 'PROFESSIONAL_PAID_WITHOUT_STRIPE'
 ENTERPRISE_MONTHLY = 'ENTERPRISE_MONTHLY'
 ENTERPRISE_YEARLY = 'ENTERPRISE_YEARLY'
 ENTERPRISE_PAID_WITHOUT_STRIPE = 'ENTERPRISE_YEARLY'
-ORGANIZATION_PLAN_OPTIONS = ((FREE, 'FREE'),
-                         (PROFESSIONAL_MONTHLY, 'PROFESSIONAL_MONTHLY'),
-                         (PROFESSIONAL_YEARLY, 'PROFESSIONAL_YEARLY'),
-                         (PROFESSIONAL_PAID_WITHOUT_STRIPE, 'PROFESSIONAL_PAID_WITHOUT_STRIPE'),
-                         (ENTERPRISE_MONTHLY, 'ENTERPRISE_MONTHLY'),
-                         (ENTERPRISE_YEARLY, 'ENTERPRISE_YEARLY'),
-                         (ENTERPRISE_PAID_WITHOUT_STRIPE, 'ENTERPRISE_PAID_WITHOUT_STRIPE'))
+ORGANIZATION_PLAN_OPTIONS = (
+    (FREE, 'FREE'),
+    (PROFESSIONAL_MONTHLY, 'PROFESSIONAL_MONTHLY'),
+    (PROFESSIONAL_YEARLY, 'PROFESSIONAL_YEARLY'),
+    (PROFESSIONAL_PAID_WITHOUT_STRIPE, 'PROFESSIONAL_PAID_WITHOUT_STRIPE'),
+    (ENTERPRISE_MONTHLY, 'ENTERPRISE_MONTHLY'),
+    (ENTERPRISE_YEARLY, 'ENTERPRISE_YEARLY'),
+    (ENTERPRISE_PAID_WITHOUT_STRIPE, 'ENTERPRISE_PAID_WITHOUT_STRIPE'))
 
 # Stripes currency support https://support.stripe.com/questions/which-currencies-does-stripe-support
 
@@ -677,6 +678,42 @@ class DonationManager(models.Model):
         results = {
             'exists': exists,
             'success': success,
+        }
+
+        return results
+
+    @staticmethod
+    def retrieve_subscription_plan_list():
+        """
+        Retrieve coupons
+        :return:
+        """
+        subscription_plan_list = []
+        status = ''
+
+        try:
+            #plan_queryset = OrganizationSubscriptionPlan.objects.order_by('coupon_code', '-plan_created_at')
+            plan_queryset = OrganizationSubscriptionPlan.objects.order_by('-plan_created_at')
+            subscription_plan_list = plan_queryset
+
+            if len(plan_queryset):
+                success = True
+                status += ' ORGANIZATIONAL_SUBSCRIPTION_PLANS_LIST_RETRIEVED '
+            else:
+                subscription_plan_list = []
+                success = False
+                status += " NO_ORGANIZATIONAL_SUBSCRIPTION_PLAN_EXISTS "
+
+
+        except Exception as e:
+            status += " FAILED_TO_RETRIEVE_ORGANIZATIONAL_SUBSCRIPTION_PLANS_LIST "
+            success = False
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+            'success': success,
+            'status': status,
+            'subscription_plan_list': subscription_plan_list
         }
 
         return results
