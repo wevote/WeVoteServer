@@ -1,11 +1,12 @@
 # apis_v1/views/views_donaton.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from donate.controllers import donation_with_stripe_for_api, donation_process_stripe_webhook_event, \
     donation_refund_for_api, donation_subscription_cancellation_for_api, donation_history_for_a_voter
-from voter.models import VoterManager
+from voter.models import VoterManager, voter_has_authority
 from donate.models import DonationManager, OrganizationSubscriptionPlan
 import json
 from voter.models import fetch_voter_we_vote_id_from_voter_device_link
@@ -231,6 +232,10 @@ def validate_coupon_for_api_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 def create_new_plan_for_api_view(request):
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     coupon_code = request.GET.get('couponCode')
     plan_type_enum = request.GET.get('planTypeEnum')
     hidden_plan_comment = request.GET.get('hiddenPlanComment')
@@ -269,6 +274,10 @@ def create_new_plan_for_api_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 def delete_plan_for_api_view(request):
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     id = request.GET.get('id')
     print("delete_coupon_for_api_view, sql id: " + id)
 
