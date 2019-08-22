@@ -69,11 +69,10 @@ class DonationPlanDefinition(models.Model):
                                         null=True, blank=True)
     currency = models.CharField(verbose_name="currency", max_length=255, choices=CURRENCY_CHOICES, default=CURRENCY_USD,
                                 null=False, blank=False)
-    donation_plan_is_active = models.BooleanField(verbose_name="status of recurring donation plan", default=True,
-                                                  null=False, blank=False)
+    donation_plan_is_active = models.BooleanField(verbose_name="status of recurring donation plan", default=True,)
     is_organization_plan = models.BooleanField(
         verbose_name="is this a organization plan (and not a personal donation subscription)",
-        default=False, null=False, blank=False)
+        default=False)
     voter_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the person who created this subscription",
         max_length=255, default=None, null=True, blank=True, unique=True, db_index=True)
@@ -171,8 +170,7 @@ class DonationJournal(models.Model):
     last_charged = models.DateTimeField(verbose_name="stripe subscription most recent charge timestamp", auto_now=False,
                                         auto_now_add=False, null=True)
     is_organization_plan = models.BooleanField(
-        verbose_name="is this a organization plan (and not a personal donation subscription)",
-        default=False, null=False, blank=False)
+        verbose_name="is this a organization plan (and not a personal donation subscription)", default=False)
     plan_type_enum = models.CharField(verbose_name="enum of plan type {FREE, PROFESSIONAL, ENTERPRISE, etc}",
                                       max_length=32, choices=ORGANIZATION_PLAN_OPTIONS, null=True, blank=True,
                                       default="")
@@ -989,37 +987,49 @@ class DonationManager(models.Model):
 
     @staticmethod
     def create_initial_coupons():
-        # If there is no 25OFF, create one -- for developers to have at least one coupon in the db
-        coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
-            coupon_code='25OFF',
-            plan_type_enum='PROFESSIONAL_MONTHLY',
-            defaults={
-                'coupon_applied_message': 'Coupon applied.  Deducted $25 per month.',
-                'list_price_monthly_credit': 15000,
-                'discounted_price_monthly_credit': 12500,
-                'features_provided_bitmap': 1
-            }
-        )
-        coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
-            coupon_code='DEFAULT-PROFESSIONAL_MONTHLY',
-            plan_type_enum='PROFESSIONAL_MONTHLY',
-            defaults={
-                'coupon_applied_message': '',
-                'list_price_monthly_credit': 15000,
-                'discounted_price_monthly_credit': 15000,
-                'features_provided_bitmap': 1
-            }
-        )
-        coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
-            coupon_code='DEFAULT-ENTERPRISE_MONTHLY',
-            plan_type_enum='ENTERPRISE_MONTHLY',
-            defaults={
-                'coupon_applied_message': '',
-                'list_price_monthly_credit': 20000,
-                'discounted_price_monthly_credit': 20000,
-                'features_provided_bitmap': 1
-            }
-        )
+        # If there is no 25OFF, create one -- so that developers have at least one coupon, and the defaults, in the db
+
+        coupon_queryset = OrganizationSubscriptionPlan.objects.filter(
+            plan_type_enum='PROFESSIONAL_MONTHLY', coupon_code='25OFF')
+        if not coupon_queryset:
+            coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
+                coupon_code='25OFF',
+                plan_type_enum='PROFESSIONAL_MONTHLY',
+                defaults={
+                    'coupon_applied_message': 'Coupon applied.  Deducted $25 per month.',
+                    'list_price_monthly_credit': 15000,
+                    'discounted_price_monthly_credit': 12500,
+                    'features_provided_bitmap': 1
+                }
+            )
+
+        coupon_queryset = OrganizationSubscriptionPlan.objects.filter(
+            plan_type_enum='PROFESSIONAL_MONTHLY', coupon_code='DEFAULT-PROFESSIONAL_MONTHLY')
+        if not coupon_queryset:
+            coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
+                coupon_code='DEFAULT-PROFESSIONAL_MONTHLY',
+                plan_type_enum='PROFESSIONAL_MONTHLY',
+                defaults={
+                    'coupon_applied_message': '',
+                    'list_price_monthly_credit': 15000,
+                    'discounted_price_monthly_credit': 15000,
+                    'features_provided_bitmap': 1
+                }
+            )
+
+        coupon_queryset = OrganizationSubscriptionPlan.objects.filter(
+            plan_type_enum='PROFESSIONAL_MONTHLY', coupon_code='DEFAULT-PROFESSIONAL_MONTHLY')
+        if not coupon_queryset:
+            coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
+                coupon_code='DEFAULT-ENTERPRISE_MONTHLY',
+                plan_type_enum='ENTERPRISE_MONTHLY',
+                defaults={
+                    'coupon_applied_message': '',
+                    'list_price_monthly_credit': 20000,
+                    'discounted_price_monthly_credit': 20000,
+                    'features_provided_bitmap': 1
+                }
+            )
         return
 
 
