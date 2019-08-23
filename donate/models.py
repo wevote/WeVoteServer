@@ -80,7 +80,7 @@ class DonationPlanDefinition(models.Model):
         verbose_name="we vote permanent id of the organization who benefits from the organization subscription",
         max_length=255, default=None, null=True, blank=True, unique=True, db_index=True)
     organization_subscription_plan_id = models.PositiveIntegerField(
-        verbose_name="the id of the OrganizationSubscriptionPlan used to create this plan, resulting from the use "
+        verbose_name="the id of the OrganizationSubscriptionPlans used to create this plan, resulting from the use "
                      "of a coupon code, or a default coupon code", default=0, null=False)
     paid_without_stripe = models.BooleanField(
         verbose_name="is this organization subscription plan paid via the We Vote accounting dept by check, etf, etc",
@@ -179,25 +179,24 @@ class DonationJournal(models.Model):
     organization_we_vote_id = models.CharField(verbose_name="unique organization we vote user id", max_length=32,
                                                unique=False, null=True, blank=True)
 
-
-class OrganizationSubscriptionPlan(models.Model):
+class OrganizationSubscriptionPlans(models.Model):
     """
-    OrganizationSubscriptionPlans also known as "Coupon Codes" are pricing and feature sets, if the end user enters a coupon
-    code on the signup form, they will get a specific pre-created OrganizationSubscriptionPlan that may have a lower than
-    list price and potentially a different feature set.
-    OrganizationSubscriptionPlan rows are immutable, the admin interface that creates them, never changes an existing row,
-    only creates a new one -- if you want to add a new feature for all existing instance of DonationPlanDefinitions with
-    the previous OrganizationSubscriptionPlan.id value, you will have to bulk update them to the new id value.
+    OrganizationSubscriptionPlans also known as "Coupon Codes" are pricing and feature sets, if the end user enters a
+    coupon code on the signup form, they will get a specific pre-created OrganizationSubscriptionPlans that may have a
+    lower than list price and potentially a different feature set.
+    OrganizationSubscriptionPlans rows are immutable, the admin interface that creates them, never changes an existing
+    row, only creates a new one -- if you want to add a new feature for all existing instance of DonationPlanDefinitions
+    with the previous OrganizationSubscriptionPlans.id value, you will have to bulk update them to the new id value.
     Coupon Codes are collections of pricing, features, with an instance expiration date.
-    The "25" in "25OFF" is a numerical discount, not a percentage
+    The "25" in "25OFF" simply associates a coupon with a price, it could be numerical discount or a percentage
     A Coupon code is categorized by PlanType (professional, enterprise, etc.)
-    OrganizationSubscriptionPlan.id can map to many DonationPlanDefinition.organization_coupon_code_id
-    There will need to be a default-professional and default-enterprise OrganizationSubscriptionPlan that are created on the
-    fly if one does not exist, these coupons would not display in the end user ui.  In the UI they display as blank
+    OrganizationSubscriptionPlans.id can map to many DonationPlanDefinition.organization_coupon_code_id
+    There will need to be a default-professional and default-enterprise OrganizationSubscriptionPlans that are created on
+    the fly if one does not exist, these coupons would not display in the end user ui.  In the UI they display as blank
     coupon codes.
     """
     coupon_code = models.CharField(verbose_name="organization subscription coupon codes",
-                                         max_length=255, null=False, blank=False)
+                                   max_length=255, null=False, blank=False)
     coupon_expires_date = models.DateTimeField(
         verbose_name="after this date, this coupon (display_plan_name) can not be used for new plans", auto_now=False,
         auto_now_add=False, null=True)
@@ -209,15 +208,10 @@ class OrganizationSubscriptionPlan(models.Model):
                                            max_length=255, null=False, blank=False, default="")
     coupon_applied_message = models.CharField(verbose_name="message to display on screen when coupon is applied",
                                            max_length=255, null=False, blank=False)
-    list_price_monthly_credit = models.PositiveIntegerField(
-        verbose_name="list price of the plan paid monthly by credit card", default=0, null=False)
-    # list_price_annually_credit = models.PositiveIntegerField(
-    #     verbose_name="list price of the plan paid annually by credit card", default=0, null=False)
-    discounted_price_monthly_credit = models.PositiveIntegerField(
-        verbose_name="discounted price of the plan paid monthly by credit card", default=0, null=False)
-    # actual_price_annually_credit = models.PositiveIntegerField(
-    #     verbose_name="discounted price of the plan paid annually by credit card", default=0, null=False)
-    # A big int, is a 64bit signed integer, so 63 bits of boolean values are possible.
+    monthly_price_stripe = models.PositiveIntegerField(
+        verbose_name="The monthly price of this monthly plan, the amount we charge with stripe", default=0, null=False)
+    annual_price_stripe = models.PositiveIntegerField(
+        verbose_name="The annual price of this annual plan, the amount we charge with stripe", default=0, null=False)
     features_provided_bitmap = models.BigIntegerField(verbose_name="organization features provided bitmap", null=False,
                                                       default=0)
     redemptions = models.PositiveIntegerField(verbose_name="the number of times this plan has been redeemed", default=0,
@@ -689,9 +683,11 @@ class DonationManager(models.Model):
         subscription_plan_list = []
         status = ''
 
+        DonationManager.create_initial_coupons()
+
         try:
-            #plan_queryset = OrganizationSubscriptionPlan.objects.order_by('coupon_code', '-plan_created_at')
-            plan_queryset = OrganizationSubscriptionPlan.objects.order_by('-plan_created_at')
+            #plan_queryset = OrganizationSubscriptionPlans.objects.order_by('coupon_code', '-plan_created_at')
+            plan_queryset = OrganizationSubscriptionPlans.objects.order_by('-plan_created_at')
             subscription_plan_list = plan_queryset
 
             if len(plan_queryset):
@@ -989,44 +985,44 @@ class DonationManager(models.Model):
     def create_initial_coupons():
         # If there is no 25OFF, create one -- so that developers have at least one coupon, and the defaults, in the db
 
-        coupon_queryset = OrganizationSubscriptionPlan.objects.filter(
+        coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
+            plan_type_enum='PROFESSIONAL_MONTHLY', coupon_code='DEFAULT-ENTERPRISE_MONTHLY')
+        if not coupon_queryset:
+            coup, coup_created = OrganizationSubscriptionPlans.objects.get_or_create(
+                coupon_code='DEFAULT-ENTERPRISE_MONTHLY',
+                plan_type_enum='ENTERPRISE_MONTHLY',
+                defaults={
+                    'coupon_applied_message': 'not visible on screen, since this is a default',
+                    'monthly_price_stripe': 1667,
+                    'annual_price_stripe': 0,
+                    'features_provided_bitmap': 1
+                }
+            )
+
+        coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
+            plan_type_enum='PROFESSIONAL_MONTHLY', coupon_code='DEFAULT-PROFESSIONAL_MONTHLY')
+        if not coupon_queryset:
+            coup, coup_created = OrganizationSubscriptionPlans.objects.get_or_create(
+                coupon_code='DEFAULT-PROFESSIONAL_MONTHLY',
+                plan_type_enum='PROFESSIONAL_MONTHLY',
+                defaults={
+                    'coupon_applied_message': 'not visible on screen, since this is a default',
+                    'monthly_price_stripe': 1250,
+                    'annual_price_stripe': 0,
+                    'features_provided_bitmap': 1
+                }
+            )
+
+        coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
             plan_type_enum='PROFESSIONAL_MONTHLY', coupon_code='25OFF')
         if not coupon_queryset:
-            coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
+            coup, coup_created = OrganizationSubscriptionPlans.objects.get_or_create(
                 coupon_code='25OFF',
                 plan_type_enum='PROFESSIONAL_MONTHLY',
                 defaults={
                     'coupon_applied_message': 'Coupon applied.  Deducted $25 per month.',
-                    'list_price_monthly_credit': 15000,
-                    'discounted_price_monthly_credit': 12500,
-                    'features_provided_bitmap': 1
-                }
-            )
-
-        coupon_queryset = OrganizationSubscriptionPlan.objects.filter(
-            plan_type_enum='PROFESSIONAL_MONTHLY', coupon_code='DEFAULT-PROFESSIONAL_MONTHLY')
-        if not coupon_queryset:
-            coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
-                coupon_code='DEFAULT-PROFESSIONAL_MONTHLY',
-                plan_type_enum='PROFESSIONAL_MONTHLY',
-                defaults={
-                    'coupon_applied_message': '',
-                    'list_price_monthly_credit': 15000,
-                    'discounted_price_monthly_credit': 15000,
-                    'features_provided_bitmap': 1
-                }
-            )
-
-        coupon_queryset = OrganizationSubscriptionPlan.objects.filter(
-            plan_type_enum='PROFESSIONAL_MONTHLY', coupon_code='DEFAULT-PROFESSIONAL_MONTHLY')
-        if not coupon_queryset:
-            coup, coup_created = OrganizationSubscriptionPlan.objects.get_or_create(
-                coupon_code='DEFAULT-ENTERPRISE_MONTHLY',
-                plan_type_enum='ENTERPRISE_MONTHLY',
-                defaults={
-                    'coupon_applied_message': '',
-                    'list_price_monthly_credit': 20000,
-                    'discounted_price_monthly_credit': 20000,
+                    'monthly_price_stripe': 1250,
+                    'annual_price_stripe': 0,
                     'features_provided_bitmap': 1
                 }
             )
@@ -1035,12 +1031,9 @@ class DonationManager(models.Model):
 
     @staticmethod
     def validate_coupon(plan_type_enum, coupon_code):
-
-        DonationManager.create_initial_coupons()
-
         # First find the subscription_id from the cached invoices
         status = ""
-        coupon_queryset = OrganizationSubscriptionPlan.objects.filter(
+        coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
             plan_type_enum=plan_type_enum, coupon_code=coupon_code).order_by('-plan_created_at')
         if not coupon_queryset:
             coupon = []
@@ -1049,8 +1042,8 @@ class DonationManager(models.Model):
             coupon = coupon_queryset[0]
         coupon_match_found = False
         coupon_still_valid = False
-        list_price = 0
-        discounted_price = 0
+        monthly_price_stripe = 0
+        annual_price_stripe = 0
         success = False
 
         coupon_applied_message = ""
@@ -1069,8 +1062,11 @@ class DonationManager(models.Model):
                     if today_date_as_integer < expires_as_integer:
                         coupon_still_valid = True
 
-                list_price = coupon.list_price_monthly_credit if coupon_match_found else 0
-                discounted_price = coupon.discounted_price_monthly_credit if coupon_match_found else 0
+                if 'MONTHLY' in plan_type_enum:
+                    monthly_price_stripe = coupon.monthly_price_stripe if coupon_match_found else 0
+                else:
+                    annual_price_stripe = coupon.annual_price_stripe if coupon_match_found else 0
+
                 coupon_applied_message = coupon.coupon_applied_message
                 success = True
 
@@ -1081,8 +1077,8 @@ class DonationManager(models.Model):
             'coupon_applied_message':           coupon_applied_message,
             'coupon_match_found':               coupon_match_found,
             'coupon_still_valid':               coupon_still_valid,
-            'discounted_price_monthly_credit':  discounted_price,
-            'list_price_monthly_credit':        list_price,
+            'monthly_price_stripe':             monthly_price_stripe,
+            'annual_price_stripe':              annual_price_stripe,
             'status':                           status,
             'success':                          success,
         }
@@ -1101,10 +1097,14 @@ class DonationManager(models.Model):
         price = -1
         org_subs_id = -1
         try:
-            coupon_queryset = OrganizationSubscriptionPlan.objects.filter(
+            coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
                 plan_type_enum=plan_type_enum, coupon_code=coupon_code).order_by('-plan_created_at')
             coupon = coupon_queryset[0]
-            price = coupon.discounted_price_monthly_credit
+            if 'MONTHLY' in plan_type_enum:
+                price = monthly_price_stripe = coupon.monthly_price_stripe
+            else:
+                price = annual_price_stripe = coupon.annual_price_stripe
+
             org_subs_id = coupon.id
         except Exception as e:
             logger.debug("get_coupon_price threw: ", e)
