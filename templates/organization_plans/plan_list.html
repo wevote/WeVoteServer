@@ -34,8 +34,8 @@
           <th>Plan Type</th>
           <th>Plan Comment</th>
           <th>Coupon Applied Message</th>
-          <th style="text-align: right">List Price</th>
-          <th style="text-align: right">Discount Price</th>
+          <th style="text-align: right">Monthly Price</th>
+          <th style="text-align: right">Annual Price</th>
           <th style="padding-left: 10px">Redeemed</th>
           <th>Features</th>
           <th>Created</th>
@@ -49,8 +49,8 @@
           <td style="width: 200px">{{ plan.plan_type_enum }}</td>
           <td style="width: 200px">{{ plan.hidden_plan_comment }}</td>
           <td style="width: 200px">{{ plan.coupon_applied_message }}</td>
-          <td style="width: 75px; text-align: right">{{ plan.list_price_monthly_credit }}</td>
-          <td style="width: 110px; text-align: right">{{ plan.discounted_price_monthly_credit }}</td>
+          <td style="width: 75px; text-align: right">{{ plan.monthly_price_stripe }}</td>
+          <td style="width: 75px; text-align: right">{{ plan.annual_price_stripe }}</td>
           <td style="width: 105px; text-align: center">{{ plan.redemptions }}</td>
           <td style="width: 65px; text-align: center">{{ plan.features_provided_bitmap }}</td>
           <td style="width: 120px">{{ plan.plan_created_at }}</td>
@@ -71,11 +71,15 @@
       <label for="coupon_code">Coupon Code</label><br>
       <input type="text" name="coupon_code" id="coupon_code" value="" class="text ui-widget-content ui-corner-all"><br>
       <div style="height: 7px;"></div>
-      <label for="plan_type_enum">Plan Type</label><br>
+      <label for="plan_type_enum">Plan Type (Yearly and "paid without stripe" plans do not work yet)</label><br>
       <select name="plan_type_enum" id="plan_type_enum" class="text ui-widget-content ui-corner-all"><br>
         <option>FREE</option>
         <option selected="selected">PROFESSIONAL_MONTHLY</option>
         <option>ENTERPRISE_MONTHLY</option>
+        <option>PROFESSIONAL_YEARLY</option>
+        <option>ENTERPRISE_YEARLY</option>
+        <option>PROFESSIONAL_PAID_WITHOUT_STRIPE</option>
+        <option>ENTERPRISE_PAID_WITHOUT_STRIPE</option>
       </select><br>
       <div style="height: 7px;"></div>
       <label for="hidden_plan_comment">Hidden Plan Comment</label><br>
@@ -84,11 +88,14 @@
       <label for="run_at">Coupon Applied Message</label><br>
       <input type="text" name="coupon_applied_message" id="coupon_applied_message" value="" class="text ui-widget-content ui-corner-all"><br>
       <div style="height: 7px;"></div>
-      <label for="list_price_monthly_credit">List Price Monthly, Credit Card</label><br>
-      <input type="number" name="list_price_monthly_credit" id="list_price_monthly_credit" min="0.00" max="10000.00" step="0.01" class="text ui-widget-content ui-corner-all"><br>
+      <label for="monthly_price_stripe">Monthly Price (annualized)</label><br>
+      <span id="monthly">
+        <input type="number" name="monthly_price_stripe" id="monthly_price_stripe" class="text ui-widget-content ui-corner-all">
+        <input type="number" name="annualized_monthly" id="annualized_monthly" value="" class="text ui-widget-content ui-corner-all" disabled><br>
+      </span>
       <div style="height: 7px;"></div>
-      <label for="discounted_price_monthly_credit">Discounted Price Monthly, Credit Card</label><br>
-      <input type="number" name="discounted_price_monthly_credit" id="discounted_price_monthly_credit" min="0.00" max="10000.00" step="0.01" class="text ui-widget-content ui-corner-all"><br>
+      <label for="annual_price_stripe">Annual Price</label><br>
+      <input type="number" name="annual_price_stripe" id="annual_price_stripe" min="0.00" max="10000.00" step="1.00" class="text ui-widget-content ui-corner-all"><br>
       <div style="height: 7px;"></div>
       <label for="redemptions">Redemptions</label><br>
       <input type="text" name="redemptions" id="redemptions" value="" disabled class="text ui-widget-content ui-corner-all"><br>

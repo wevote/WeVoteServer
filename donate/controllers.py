@@ -33,7 +33,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     :param monthly_donation:
     :param voter_we_vote_id:
     :param is_organization_plan:  True for a organization plan, False for a donation (one time or donation subscription)
-    :param coupon_code: Our coupon codes for pricing and features that are looked up in the OrganizationSubscriptionPlan
+    :param coupon_code: Our coupon codes for pricing and features that are looked up in the OrganizationSubscriptionPlans
     :param plan_type_enum: Type of organization plan, or undefined for donations
     :param organization_we_vote_id: The organization that benefits from this paid plan (subscription)
     :return:

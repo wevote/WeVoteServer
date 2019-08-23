@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from donate.controllers import donation_with_stripe_for_api, donation_process_stripe_webhook_event, \
     donation_refund_for_api, donation_subscription_cancellation_for_api, donation_history_for_a_voter
 from voter.models import VoterManager, voter_has_authority
-from donate.models import DonationManager, OrganizationSubscriptionPlan
+from donate.models import DonationManager, OrganizationSubscriptionPlans
 import json
 from voter.models import fetch_voter_we_vote_id_from_voter_device_link
 import wevote_functions.admin
@@ -240,8 +240,10 @@ def create_new_plan_for_api_view(request):
     plan_type_enum = request.GET.get('planTypeEnum')
     hidden_plan_comment = request.GET.get('hiddenPlanComment')
     coupon_applied_message = request.GET.get('couponAppliedMessage')
-    list_price_monthly_credit = request.GET.get('listPriceMonthlyCredit')
-    discounted_price_monthly_credit = request.GET.get('discountedPriceMonthlyCredit')
+    monthly_price_stripe = request.GET.get('monthlyPriceStripe')
+    monthly_price_stripe = monthly_price_stripe if monthly_price_stripe != '' else 0
+    annual_price_stripe = request.GET.get('annualPriceStripe')
+    annual_price_stripe = annual_price_stripe if annual_price_stripe != '' else 0
     features_provided_bitmap = request.GET.get('featuresProvidedBitmap')
     coupon_expires_date = request.GET.get('couponExpiresDate', None)
     if len(coupon_expires_date) is 0:
@@ -252,13 +254,13 @@ def create_new_plan_for_api_view(request):
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     if positive_value_exists(voter_device_id):
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
-        plan_on_stage = OrganizationSubscriptionPlan.objects.create(
+        plan_on_stage = OrganizationSubscriptionPlans.objects.create(
             coupon_code=coupon_code,
             plan_type_enum=plan_type_enum,
             hidden_plan_comment=hidden_plan_comment,
             coupon_applied_message=coupon_applied_message,
-            list_price_monthly_credit=list_price_monthly_credit,
-            discounted_price_monthly_credit=discounted_price_monthly_credit,
+            monthly_price_stripe=monthly_price_stripe,
+            annual_price_stripe=annual_price_stripe,
             features_provided_bitmap=features_provided_bitmap,
             coupon_expires_date=coupon_expires_date)
         status = "create_new_plan_for_api_view succeeded"
@@ -283,7 +285,7 @@ def delete_plan_for_api_view(request):
 
     try:
         if positive_value_exists(id):
-            OrganizationSubscriptionPlan.objects.filter(id=id).delete()
+            OrganizationSubscriptionPlans.objects.filter(id=id).delete()
             status = "DELETE_PLAN_SUCCESSFUL"
             success = True
         else:

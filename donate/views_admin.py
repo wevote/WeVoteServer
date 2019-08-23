@@ -34,8 +34,8 @@ def organization_subscription_list_view(request):
             else:
                 expires_dt = plan.coupon_expires_date.astimezone(pytz.timezone("US/Pacific"))  # Display PST/PDST
                 nice_expires_dt = expires_dt.strftime("%m/%d/%Y %H:%M")
-            monthly_list = "{:0.2f}".format(plan.list_price_monthly_credit / 100.0)
-            monthly_discounted = "{:0.2f}".format(plan.discounted_price_monthly_credit / 100.0)
+            monthly_price_stripe = "{:0.2f}".format(plan.monthly_price_stripe / 100.0)
+            annual_price_stripe = "{:0.2f}".format(plan.annual_price_stripe / 100.0)
         except Exception as e:
             print(e)
             nice_created_at = "format error"
@@ -47,8 +47,8 @@ def organization_subscription_list_view(request):
             'plan_type_enum': plan.plan_type_enum,
             'coupon_applied_message': plan.coupon_applied_message,
             'hidden_plan_comment': plan.hidden_plan_comment,
-            'list_price_monthly_credit': monthly_list,
-            'discounted_price_monthly_credit': monthly_discounted,
+            'monthly_price_stripe': monthly_price_stripe,
+            'annual_price_stripe': annual_price_stripe,
             'redemptions': plan.redemptions,
             'features_provided_bitmap': plan.features_provided_bitmap,
             'plan_created_at': nice_created_at,

@@ -1,19 +1,21 @@
 $(function () {
   let dialog;
   let form;
+  let isMonthly = true;
   const idfld = $('#id');
   const couponCode = $('#coupon_code');
   const planTypeEnum = $('#plan_type_enum');
   const hiddenPlanComment = $('#hidden_plan_comment');
   const couponAppliedMessage = $('#coupon_applied_message');
-  const listPriceMonthlyCredit = $('#list_price_monthly_credit');
-  const discountedPriceMonthlyCredit = $('#discounted_price_monthly_credit');
+  const monthlyPriceStripe = $('#monthly_price_stripe');
+  const annualizedMonthly = $('#annualized_monthly');  // Do not validate this
+  const annualPriceStripe = $('#annual_price_stripe');
   const redemptions = $('#redemptions');
   const featuresProvidedBitmap = $('#features_provided_bitmap');
   const planCreatedAt = $('#plan_created_at');
   const couponExpiresDate = $('#coupon_expires_date');
-  const allFields = $([]).add(idfld).add(couponCode).add(planTypeEnum).add(hiddenPlanComment).add(couponAppliedMessage).add(listPriceMonthlyCredit)
-    .add(discountedPriceMonthlyCredit).add(redemptions).add(featuresProvidedBitmap).add(planCreatedAt).add(couponExpiresDate);
+  const allFields = $([]).add(idfld).add(couponCode).add(planTypeEnum).add(hiddenPlanComment).add(couponAppliedMessage)
+    .add(monthlyPriceStripe).add(annualPriceStripe).add(redemptions).add(featuresProvidedBitmap).add(planCreatedAt).add(couponExpiresDate);
   const tips = $('.validateTips');
   const spinner = $('#html5Spinner');
 
@@ -59,9 +61,16 @@ $(function () {
     hiddenPlanComment.css('width', '100%');
     couponAppliedMessage.css('width', '100%');
     couponExpiresDate.datepicker();
-    listPriceMonthlyCredit.css('width', '100').css('text-align', 'right');
-    discountedPriceMonthlyCredit.css('width', '100').css('text-align', 'right');
-    planCreatedAt.css('background', 'ghostwhite');;
+    isMonthly = true;
+    monthlyPriceStripe.css({'width': '100', 'text-align': 'right', 'background': 'white'}).attr('disabled', false);
+    annualPriceStripe.css({'width': '100', 'text-align': 'right', 'background': 'ghostwhite'}).attr('disabled', true);
+    annualizedMonthly.css({
+      'width': '100',
+      'text-align': 'right',
+      'background': 'ghostwhite',
+      'margin-left': '22px'
+      }).attr('disabled', true);
+    planCreatedAt.css('background', 'ghostwhite');
     redemptions.css('background', 'ghostwhite');
   }
 
@@ -86,6 +95,16 @@ $(function () {
 
   function checkNumber (o, n) {
     if (Number.isNaN(o.val())) {
+      o.addClass('ui-state-error');
+      updateTips(`${n} must be a number.`);
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  function checkNumberNonZero (o, n) {
+    if (Number.isNaN(o.val()) || o.val() < 1) {
       o.addClass('ui-state-error');
       updateTips(`${n} must be a number.`);
       return false;
@@ -132,8 +151,12 @@ $(function () {
     expires = "";
 
     valid = valid && checkLength(couponCode, 'Coupon Code', 3, 128);
-    valid = valid && checkNumber(listPriceMonthlyCredit, 'List Price Monthly');
-    valid = valid && checkNumber(discountedPriceMonthlyCredit, 'Discounted Price Monthly');
+    if (isMonthly) {
+      valid = valid && checkNumberNonZero(monthlyPriceStripe, 'Monthly Price');
+    } else {
+      valid = valid && checkNumberNonZero(annualPriceStripe, 'Annual Price');
+    }
+
     if (couponExpiresDate.val().length) {
       valid = valid && checkRegexp(couponExpiresDate, /^([0-9]{2}\/[0-9]{2}\/[0-9]{4})+$/, 'Expiration date must use this format: 12/25/2022');
       if (valid) {
@@ -148,8 +171,8 @@ $(function () {
         planTypeEnum: planTypeEnum.val(),
         couponAppliedMessage: couponAppliedMessage.val(),
         hiddenPlanComment: hiddenPlanComment.val(),
-        listPriceMonthlyCredit: dollarsToCents(listPriceMonthlyCredit.val()),
-        discountedPriceMonthlyCredit: dollarsToCents(discountedPriceMonthlyCredit.val()),
+        monthlyPriceStripe: dollarsToCents(monthlyPriceStripe.val()),
+        annualPriceStripe: dollarsToCents(annualPriceStripe.val()),
         featuresProvidedBitmap: featuresProvidedBitmap.val(),
         couponExpiresDate: expires,
       }
@@ -168,12 +191,14 @@ $(function () {
   function setInitialValues () {
     idfld.val(activePlan.id);
     couponCode.val(activePlan.coupon_code);
-    console.log('activePlan.plan_type_enum:\'' + activePlan.plan_type_enum + '\'');
     planTypeEnum.val(activePlan.plan_type_enum).change();
     hiddenPlanComment.val(activePlan.hidden_plan_comment);
     couponAppliedMessage.val(activePlan.coupon_applied_message);
-    listPriceMonthlyCredit.val(activePlan.list_price_monthly_credit);
-    discountedPriceMonthlyCredit.val(activePlan.discounted_price_monthly_credit);
+    if (isMonthly) {
+      monthlyPriceStripe.val(activePlan.monthly_price_stripe);
+    } else {
+      annualPriceStripe.val(activePlan.annual_price_stripe);
+    }
     redemptions.val(activePlan.redemptions);
     featuresProvidedBitmap.val(activePlan.features_provided_bitmap);
     planCreatedAt.val(activePlan.plan_created_at);
@@ -272,15 +297,12 @@ $(function () {
       if (checked) {
         if (key in hashmap) {
           $(row).css("display", "none");
-          console.log("Row hide: " + key);
         } else {
-          console.log("Row in hashmap for hide: " + key);
           hashmap[key] = true;
         }
         console.log("Row dump: " + coupon + "~" + type);
       } else {
         $(row).css("display", "");
-        console.log("Row unhide: " + key);
       }
     }
    });
@@ -288,6 +310,7 @@ $(function () {
   $('#rollupOlderVersions').click();
 
   $('#update').button().on('click', () => {
+    event.preventDefault();
     const limit = spinner.val();
     let newUrl = window.location.href;
     if (getLimitFromUrl()) {
@@ -297,4 +320,27 @@ $(function () {
     }
     window.location.href = newUrl;
   });
+
+  $('#plan_type_enum').on('change', function (e) {
+    event.preventDefault();
+    const optionSelected = $("option:selected", this);
+    const valueSelected = this.value;
+    if (valueSelected.includes('_MONTHLY')) {
+      isMonthly = true;
+      monthlyPriceStripe.css('background', 'white').attr('disabled', false);
+      annualPriceStripe.css('background', 'ghostwhite').attr('disabled', true).val('');
+    } else {
+      isMonthly = false;
+      monthlyPriceStripe.css('background', 'ghostwhite').attr('disabled', true).val('');
+      annualPriceStripe.css('background', 'white').attr('disabled', false);
+      annualizedMonthly.val('');
+    }
+  });
+
+  monthlyPriceStripe.on("change paste keyup", () => {
+    const value = monthlyPriceStripe.val();
+    const annualized = Number(value.replace(/[^0-9\.]+/g,"")) * 12;
+    annualizedMonthly.val(annualized);
+  });
+
 });
