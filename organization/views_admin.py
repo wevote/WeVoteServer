@@ -670,29 +670,29 @@ def organization_edit_process_view(request):
                     current_organization_with_new_twitter_handle = True
 
             if issue_analysis_admin_notes is not False:
-                organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes
+                organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes.strip()
             if issue_analysis_done is not False:
                 organization_on_stage.issue_analysis_done = issue_analysis_done
             if organization_name is not False:
-                organization_on_stage.organization_name = organization_name
+                organization_on_stage.organization_name = organization_name.strip()
             if organization_twitter_handle is not False:
-                organization_on_stage.organization_twitter_handle = organization_twitter_handle
+                organization_on_stage.organization_twitter_handle = organization_twitter_handle.strip()
             if organization_email is not False:
-                organization_on_stage.organization_email = organization_email
+                organization_on_stage.organization_email = organization_email.strip()
             if organization_facebook is not False:
-                organization_on_stage.organization_facebook = organization_facebook
+                organization_on_stage.organization_facebook = organization_facebook.strip()
             if organization_website is not False:
-                organization_on_stage.organization_website = organization_website
+                organization_on_stage.organization_website = organization_website.strip()
             if wikipedia_page_title is not False:
-                organization_on_stage.wikipedia_page_title = wikipedia_page_title
+                organization_on_stage.wikipedia_page_title = wikipedia_page_title.strip()
             if wikipedia_photo_url is not False:
-                organization_on_stage.wikipedia_photo_url = wikipedia_photo_url
+                organization_on_stage.wikipedia_photo_url = wikipedia_photo_url.strip()
             if organization_endorsements_api_url is not False:
-                organization_on_stage.organization_endorsements_api_url = organization_endorsements_api_url
+                organization_on_stage.organization_endorsements_api_url = organization_endorsements_api_url.strip()
             if state_served_code is not False:
-                organization_on_stage.state_served_code = state_served_code
+                organization_on_stage.state_served_code = state_served_code.strip()
             if organization_type is not False:
-                organization_on_stage.organization_type = organization_type
+                organization_on_stage.organization_type = organization_type.strip()
             organization_on_stage.save()
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id

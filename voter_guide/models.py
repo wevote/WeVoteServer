@@ -2235,11 +2235,13 @@ class VoterGuidePossibilityManager(models.Manager):
                                               cannot_find_endorsements=False,
                                               candidates_missing_from_we_vote=False,
                                               capture_detailed_comments=False,
+                                              from_prior_election=False,
                                               ignore_this_source=False):
         hide_from_active_review = positive_value_exists(hide_from_active_review)
         candidates_missing_from_we_vote = positive_value_exists(candidates_missing_from_we_vote)
         cannot_find_endorsements = positive_value_exists(cannot_find_endorsements)
         capture_detailed_comments = positive_value_exists(capture_detailed_comments)
+        from_prior_election = positive_value_exists(from_prior_election)
         ignore_this_source = positive_value_exists(ignore_this_source)
 
         status = ""
@@ -2254,7 +2256,10 @@ class VoterGuidePossibilityManager(models.Manager):
                     # generally skip these unless we specifically ask for it?
                     voter_guide_query = voter_guide_query.exclude(ignore_this_source=True)
                 voter_guide_query = voter_guide_query.filter(hide_from_active_review=hide_from_active_review)
-                if positive_value_exists(cannot_find_endorsements):
+                if positive_value_exists(from_prior_election):
+                    # Cannot find endorsements
+                    voter_guide_query = voter_guide_query.filter(from_prior_election=True)
+                elif positive_value_exists(cannot_find_endorsements):
                     # Cannot find endorsements
                     voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=True)
                 elif positive_value_exists(candidates_missing_from_we_vote):
@@ -2271,6 +2276,7 @@ class VoterGuidePossibilityManager(models.Manager):
                     voter_guide_query = voter_guide_query.filter(candidates_missing_from_we_vote=False)
                     voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=False)
                     voter_guide_query = voter_guide_query.filter(capture_detailed_comments=False)
+                    voter_guide_query = voter_guide_query.filter(from_prior_election=False)
 
             # Allow searching for voter guide possibilities that are being ignored
             if positive_value_exists(search_string):
@@ -2775,6 +2781,9 @@ class VoterGuidePossibility(models.Model):
 
     # Data manager will need to put more work into this in order to capture all of the details
     capture_detailed_comments = models.BooleanField(default=False)
+
+    # Data manager will need to put more work into this in order to capture all of the details
+    from_prior_election = models.BooleanField(default=False)
 
     # While processing and reviewing this organization's endorsements, leave out positions already stored
     ignore_stored_positions = models.BooleanField(default=False)

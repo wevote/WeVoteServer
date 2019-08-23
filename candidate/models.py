@@ -338,6 +338,51 @@ class CandidateCampaignListManager(models.Model):
         }
         return results
 
+    def retrieve_candidate_count_for_election_and_state(self, google_civic_election_id=0, state_code=''):
+        status = ''
+        if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
+            status += 'VALID_ELECTION_ID_AND_STATE_CODE_MISSING '
+            results = {
+                'success':                  False,
+                'status':                   status,
+                'google_civic_election_id': google_civic_election_id,
+                'state_code':               state_code,
+                'candidate_count':          0,
+            }
+            return results
+
+        try:
+            candidate_queryset = CandidateCampaign.objects.using('readonly').all()
+            if positive_value_exists(google_civic_election_id):
+                candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                candidate_queryset = candidate_queryset.filter(state_code__iexact=state_code)
+            candidate_list = candidate_queryset
+
+            candidate_count = candidate_list.count()
+            success = True
+            status += "CANDIDATE_COUNT_FOUND "
+        except CandidateCampaign.DoesNotExist:
+            # No candidates found. Not a problem.
+            status += 'NO_CANDIDATES_FOUND_DoesNotExist '
+            candidate_count = 0
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED RETRIEVE_CANDIDATE_COUNT ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+            candidate_count = 0
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'state_code':               state_code,
+            'candidate_count':          candidate_count,
+        }
+        return results
+
     def is_automatic_merge_ok(self, candidate_option1, candidate_option2):
         automatic_merge_ok = True
         status = ""
@@ -1462,6 +1507,12 @@ class CandidateCampaign(models.Model):
 def fetch_candidate_count_for_office(office_id=0, office_we_vote_id=''):
     candidate_campaign_list = CandidateCampaignListManager()
     results = candidate_campaign_list.retrieve_candidate_count_for_office(office_id, office_we_vote_id)
+    return results['candidate_count']
+
+
+def fetch_candidate_count_for_election_and_state(google_civic_election_id, state_code):
+    candidate_campaign_list = CandidateCampaignListManager()
+    results = candidate_campaign_list.retrieve_candidate_count_for_office(google_civic_election_id, state_code)
     return results['candidate_count']
 
 

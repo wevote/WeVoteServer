@@ -71,9 +71,17 @@
 Filters:&nbsp;
 
 {# Return to see voter guides to review #}
-<span{% if not show_cannot_find_endorsements and not show_candidates_missing_from_we_vote and not show_capture_detailed_comments and not show_only_hide_from_active_review and not show_ignore_this_source %} style="font-weight: bold;"{% endif %}>
+<span{% if not show_cannot_find_endorsements and not show_candidates_missing_from_we_vote and not show_capture_detailed_comments and not show_only_hide_from_active_review and not show_ignore_this_source and not from_prior_election %} style="font-weight: bold;"{% endif %}>
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}">
       To Review
+    </a>
+</span>
+
+&nbsp;&nbsp;&nbsp;
+{# Show voter guides suggested from prior elections #}
+<span{% if from_prior_election %} style="font-weight: bold;"{% endif %}>
+    <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&from_prior_election=1">
+        From Prior Elections
     </a>
 </span>
 
@@ -131,6 +139,7 @@ Filters:&nbsp;
                 <select id="which_marking_id" name="which_marking">
                     {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
                     <option value="hide_from_active_review">Stop Reviewing</option>
+                    <option value="add_to_active_review">To Review</option>
                     <option value="capture_detailed_comments">Capture Detailed Comments</option>
                     <option value="candidates_missing_from_we_vote">Candidates/Measures Missing</option>
                     <option value="cannot_find_endorsements">Endorsements Not Available Yet</option>
