@@ -1101,9 +1101,9 @@ class DonationManager(models.Model):
                 plan_type_enum=plan_type_enum, coupon_code=coupon_code).order_by('-plan_created_at')
             coupon = coupon_queryset[0]
             if 'MONTHLY' in plan_type_enum:
-                price = monthly_price_stripe = coupon.monthly_price_stripe
+                price = coupon.monthly_price_stripe
             else:
-                price = annual_price_stripe = coupon.annual_price_stripe
+                price = coupon.annual_price_stripe
 
             org_subs_id = coupon.id
         except Exception as e:
