@@ -179,6 +179,7 @@ class DonationJournal(models.Model):
     organization_we_vote_id = models.CharField(verbose_name="unique organization we vote user id", max_length=32,
                                                unique=False, null=True, blank=True)
 
+
 class OrganizationSubscriptionPlans(models.Model):
     """
     OrganizationSubscriptionPlans also known as "Coupon Codes" are pricing and feature sets, if the end user enters a
@@ -216,6 +217,7 @@ class OrganizationSubscriptionPlans(models.Model):
                                                       default=0)
     redemptions = models.PositiveIntegerField(verbose_name="the number of times this plan has been redeemed", default=0,
                                               null=False)
+    is_archived = models.BooleanField(verbose_name="stop offering this plan for new clients", default=False,)
 
 
 class DonationInvoice(models.Model):
@@ -686,7 +688,6 @@ class DonationManager(models.Model):
         DonationManager.create_initial_coupons()
 
         try:
-            #plan_queryset = OrganizationSubscriptionPlans.objects.order_by('coupon_code', '-plan_created_at')
             plan_queryset = OrganizationSubscriptionPlans.objects.order_by('-plan_created_at')
             subscription_plan_list = plan_queryset
 
@@ -985,49 +986,311 @@ class DonationManager(models.Model):
     def create_initial_coupons():
         # If there is no 25OFF, create one -- so that developers have at least one coupon, and the defaults, in the db
 
+        # We do not want default pricing for Enterprise, so we set these up with "is_archived" set
         coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
-            plan_type_enum='PROFESSIONAL_MONTHLY', coupon_code='DEFAULT-ENTERPRISE_MONTHLY')
+            plan_type_enum=ENTERPRISE_MONTHLY, coupon_code='DEFAULT-ENTERPRISE_MONTHLY')
         if not coupon_queryset:
-            coup, coup_created = OrganizationSubscriptionPlans.objects.get_or_create(
+            coupon, coupon_created = OrganizationSubscriptionPlans.objects.get_or_create(
                 coupon_code='DEFAULT-ENTERPRISE_MONTHLY',
-                plan_type_enum='ENTERPRISE_MONTHLY',
+                plan_type_enum=ENTERPRISE_MONTHLY,
                 defaults={
-                    'coupon_applied_message': 'not visible on screen, since this is a default',
-                    'monthly_price_stripe': 1667,
+                    'coupon_applied_message': 'Not visible on screen, since this is a default.',
+                    'monthly_price_stripe': 0,
                     'annual_price_stripe': 0,
-                    'features_provided_bitmap': 1
+                    'features_provided_bitmap': 1,
+                    'hidden_plan_comment': 'We do not share default Enterprise pricing.',
+                    'is_archived': True,
                 }
             )
 
         coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
-            plan_type_enum='PROFESSIONAL_MONTHLY', coupon_code='DEFAULT-PROFESSIONAL_MONTHLY')
+            plan_type_enum=ENTERPRISE_YEARLY, coupon_code='DEFAULT-ENTERPRISE_YEARLY')
         if not coupon_queryset:
-            coup, coup_created = OrganizationSubscriptionPlans.objects.get_or_create(
+            coupon, coupon_created = OrganizationSubscriptionPlans.objects.get_or_create(
+                coupon_code='DEFAULT-ENTERPRISE_YEARLY',
+                plan_type_enum=ENTERPRISE_YEARLY,
+                defaults={
+                    'coupon_applied_message': 'Not visible on screen, since this is a default',
+                    'monthly_price_stripe': 0,
+                    'annual_price_stripe': 0,
+                    'features_provided_bitmap': 1,
+                    'hidden_plan_comment': 'We do not share default Enterprise pricing.',
+                    'is_archived': True,
+                }
+            )
+
+        coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
+            plan_type_enum=PROFESSIONAL_MONTHLY, coupon_code='DEFAULT-PROFESSIONAL_MONTHLY')
+        if not coupon_queryset:
+            coupon, coupon_created = OrganizationSubscriptionPlans.objects.get_or_create(
                 coupon_code='DEFAULT-PROFESSIONAL_MONTHLY',
-                plan_type_enum='PROFESSIONAL_MONTHLY',
+                plan_type_enum=PROFESSIONAL_MONTHLY,
                 defaults={
-                    'coupon_applied_message': 'not visible on screen, since this is a default',
-                    'monthly_price_stripe': 1250,
+                    'coupon_applied_message': 'Not visible on screen, since this is a default',
+                    'monthly_price_stripe': 15000,
                     'annual_price_stripe': 0,
-                    'features_provided_bitmap': 1
+                    'features_provided_bitmap': 1,
+                    'hidden_plan_comment': '',
                 }
             )
 
         coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
-            plan_type_enum='PROFESSIONAL_MONTHLY', coupon_code='25OFF')
+            plan_type_enum=PROFESSIONAL_YEARLY, coupon_code='DEFAULT-PROFESSIONAL_YEARLY')
         if not coupon_queryset:
-            coup, coup_created = OrganizationSubscriptionPlans.objects.get_or_create(
-                coupon_code='25OFF',
-                plan_type_enum='PROFESSIONAL_MONTHLY',
+            coupon, coupon_created = OrganizationSubscriptionPlans.objects.get_or_create(
+                coupon_code='DEFAULT-PROFESSIONAL_YEARLY',
+                plan_type_enum=PROFESSIONAL_YEARLY,
                 defaults={
-                    'coupon_applied_message': 'Coupon applied.  Deducted $25 per month.',
-                    'monthly_price_stripe': 1250,
+                    'coupon_applied_message': 'Not visible on screen, since this is a default',
+                    'monthly_price_stripe': 0,
+                    'annual_price_stripe': 150000,
+                    'features_provided_bitmap': 1,
+                    'hidden_plan_comment': '',
+                }
+            )
+
+        coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
+            plan_type_enum=PROFESSIONAL_MONTHLY, coupon_code='25OFF')
+        if not coupon_queryset:
+            coupon, coupon_created = OrganizationSubscriptionPlans.objects.get_or_create(
+                coupon_code='25OFF',
+                plan_type_enum=PROFESSIONAL_MONTHLY,
+                defaults={
+                    'coupon_applied_message': 'You save $25 per month.',
+                    'monthly_price_stripe': 12500,
                     'annual_price_stripe': 0,
-                    'features_provided_bitmap': 1
+                    'features_provided_bitmap': 1,
+                    'hidden_plan_comment': '',
+                }
+            )
+
+        coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
+            plan_type_enum=PROFESSIONAL_YEARLY, coupon_code='25OFF')
+        if not coupon_queryset:
+            coupon, coupon_created = OrganizationSubscriptionPlans.objects.get_or_create(
+                coupon_code='25OFF',
+                plan_type_enum=PROFESSIONAL_YEARLY,
+                defaults={
+                    'coupon_applied_message': 'You save $300 per year.',
+                    'monthly_price_stripe': 0,
+                    'annual_price_stripe': 120000,
+                    'features_provided_bitmap': 1,
+                    'hidden_plan_comment': '',
+                }
+            )
+
+        coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
+            plan_type_enum=ENTERPRISE_MONTHLY, coupon_code='VOTE9X3')
+        if not coupon_queryset:
+            coupon, coupon_created = OrganizationSubscriptionPlans.objects.get_or_create(
+                coupon_code='VOTE9X3',
+                plan_type_enum=ENTERPRISE_MONTHLY,
+                defaults={
+                    'coupon_applied_message': '',
+                    'monthly_price_stripe': 22500,
+                    'annual_price_stripe': 0,
+                    'features_provided_bitmap': 1,
+                    'hidden_plan_comment': 'Nonprofit, annual revenues < $1M',
+                }
+            )
+
+        coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
+            plan_type_enum=ENTERPRISE_YEARLY, coupon_code='VOTE9X3')
+        if not coupon_queryset:
+            coupon, coupon_created = OrganizationSubscriptionPlans.objects.get_or_create(
+                coupon_code='VOTE9X3',
+                plan_type_enum=ENTERPRISE_YEARLY,
+                defaults={
+                    'coupon_applied_message': '',
+                    'monthly_price_stripe': 0,
+                    'annual_price_stripe': 225000,
+                    'features_provided_bitmap': 1,
+                    'hidden_plan_comment': 'Nonprofit, annual revenues < $1M',
                 }
             )
         return
 
+    @staticmethod
+    def retrieve_coupon_summary(coupon_code):  # couponSummaryRetrieve
+        status = ""
+        success = True
+        coupon_applied_message = ""
+        coupon_match_found = False
+        coupon_plan_list = []
+        coupon_still_valid = False
+        enterprise_plan_coupon_price_per_month_pay_monthly = 0
+        enterprise_plan_coupon_price_per_month_pay_monthly_found = False
+        enterprise_plan_coupon_price_per_month_pay_yearly = 0
+        enterprise_plan_coupon_price_per_month_pay_yearly_found = False
+        pro_plan_coupon_price_per_month_pay_monthly = 0
+        pro_plan_coupon_price_per_month_pay_monthly_found = False
+        pro_plan_coupon_price_per_month_pay_yearly = 0
+        pro_plan_coupon_price_per_month_pay_yearly_found = False
+        valid_for_enterprise_plan = False
+        valid_for_professional_plan = False
+
+        if not positive_value_exists(coupon_code):
+            success = False
+            status += "VALIDATE_COUPON_CODE_MISSING "
+            results = {
+                'coupon_applied_message':           '',
+                'coupon_code_string':               coupon_code,
+                'coupon_match_found':               False,
+                'coupon_still_valid':               False,
+                'enterprise_plan_coupon_price_per_month_pay_yearly': enterprise_plan_coupon_price_per_month_pay_yearly,
+                'enterprise_plan_coupon_price_per_month_pay_monthly':
+                    enterprise_plan_coupon_price_per_month_pay_monthly,
+                'pro_plan_coupon_price_per_month_pay_yearly':        pro_plan_coupon_price_per_month_pay_yearly,
+                'pro_plan_coupon_price_per_month_pay_monthly':       pro_plan_coupon_price_per_month_pay_monthly,
+                'valid_for_enterprise_plan':        valid_for_enterprise_plan,
+                'valid_for_professional_plan':      valid_for_professional_plan,
+                'status':                           status,
+                'success':                          success,
+            }
+            return results
+
+        DonationManager.create_initial_coupons()
+
+        try:
+            # First find the subscription_id from the cached invoices
+            coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
+                coupon_code__iexact=coupon_code).order_by('-plan_created_at')
+            coupon_queryset = coupon_queryset.exclude(is_archived=True)
+
+            coupon_plan_list = list(coupon_queryset)
+        except Exception as e:
+            logger.debug("validate_coupon threw: ", e)
+
+        valid_for_enterprise_plan = False
+        valid_for_professional_plan = False
+        date_now_as_integer = convert_date_to_date_as_integer(datetime.now().date())
+        for coupon in coupon_plan_list:
+            if coupon.coupon_expires_date:
+                expires_as_integer = convert_date_to_date_as_integer(coupon.coupon_expires_date)
+                if date_now_as_integer > expires_as_integer:
+                    # Skip this part of the coupon
+                    continue
+
+            if coupon.plan_type_enum == ENTERPRISE_MONTHLY:
+                # Only proceed if a newer coupon hasn't already been found
+                if not enterprise_plan_coupon_price_per_month_pay_monthly_found:
+                    coupon_match_found = True
+                    coupon_still_valid = True
+                    enterprise_plan_coupon_price_per_month_pay_monthly_found = True
+                    enterprise_plan_coupon_price_per_month_pay_monthly = coupon.monthly_price_stripe
+                    valid_for_enterprise_plan = True
+            elif coupon.plan_type_enum == ENTERPRISE_YEARLY:
+                # Only proceed if a newer coupon hasn't already been found
+                if not enterprise_plan_coupon_price_per_month_pay_yearly_found:
+                    coupon_match_found = True
+                    coupon_still_valid = True
+                    enterprise_plan_coupon_price_per_month_pay_yearly_found = True
+                    enterprise_plan_coupon_price_per_month_pay_yearly = coupon.annual_price_stripe / 12
+                    valid_for_enterprise_plan = True
+            elif coupon.plan_type_enum == PROFESSIONAL_MONTHLY:
+                # Only proceed if a newer coupon hasn't already been found
+                if not pro_plan_coupon_price_per_month_pay_monthly_found:
+                    coupon_match_found = True
+                    coupon_still_valid = True
+                    pro_plan_coupon_price_per_month_pay_monthly_found = True
+                    pro_plan_coupon_price_per_month_pay_monthly = coupon.monthly_price_stripe
+                    valid_for_professional_plan = True
+            elif coupon.plan_type_enum == PROFESSIONAL_YEARLY:
+                # Only proceed if a newer coupon hasn't already been found
+                if not pro_plan_coupon_price_per_month_pay_yearly_found:
+                    coupon_match_found = True
+                    coupon_still_valid = True
+                    pro_plan_coupon_price_per_month_pay_yearly_found = True
+                    pro_plan_coupon_price_per_month_pay_yearly = coupon.annual_price_stripe / 12
+                    valid_for_professional_plan = True
+
+        results = {
+            'coupon_applied_message':           coupon_applied_message,
+            'coupon_code_string':               coupon_code,
+            'coupon_match_found':               coupon_match_found,
+            'coupon_still_valid':               coupon_still_valid,
+            'enterprise_plan_coupon_price_per_month_pay_yearly':    enterprise_plan_coupon_price_per_month_pay_yearly,
+            'enterprise_plan_coupon_price_per_month_pay_monthly':   enterprise_plan_coupon_price_per_month_pay_monthly,
+            'pro_plan_coupon_price_per_month_pay_yearly':           pro_plan_coupon_price_per_month_pay_yearly,
+            'pro_plan_coupon_price_per_month_pay_monthly':          pro_plan_coupon_price_per_month_pay_monthly,
+            'valid_for_enterprise_plan':        valid_for_enterprise_plan,
+            'valid_for_professional_plan':      valid_for_professional_plan,
+            'status':                           status,
+            'success':                          success,
+        }
+        return results
+
+    @staticmethod
+    def retrieve_default_pricing():  # defaultPricing
+        status = ""
+        success = True
+        default_pricing_list = []
+        enterprise_plan_full_price_per_month_pay_monthly = 0
+        enterprise_plan_full_price_per_month_pay_monthly_found = False
+        enterprise_plan_full_price_per_month_pay_yearly = 0
+        enterprise_plan_full_price_per_month_pay_yearly_found = False
+        pro_plan_full_price_per_month_pay_monthly = 0
+        pro_plan_full_price_per_month_pay_monthly_found = False
+        pro_plan_full_price_per_month_pay_yearly = 0
+        pro_plan_full_price_per_month_pay_yearly_found = False
+
+        try:
+            default_pricing_queryset = OrganizationSubscriptionPlans.objects.filter(
+                coupon_code__in=['DEFAULT-ENTERPRISE_MONTHLY', 'DEFAULT-ENTERPRISE_YEARLY',
+                                 'DEFAULT-PROFESSIONAL_MONTHLY', 'DEFAULT-PROFESSIONAL_YEARLY']
+            ).order_by('-plan_created_at')
+            default_pricing_queryset = default_pricing_queryset.exclude(is_archived=True)
+
+            default_pricing_list = list(default_pricing_queryset)
+        except Exception as e:
+            logger.debug("retrieve_default_pricing threw: ", e)
+
+        valid_for_enterprise_plan = False
+        valid_for_professional_plan = False
+        date_now_as_integer = convert_date_to_date_as_integer(datetime.now().date())
+        for coupon in default_pricing_list:
+            if coupon.coupon_expires_date:
+                expires_as_integer = convert_date_to_date_as_integer(coupon.coupon_expires_date)
+                if date_now_as_integer > expires_as_integer:
+                    # Skip this part of the coupon
+                    continue
+
+            if coupon.plan_type_enum == ENTERPRISE_MONTHLY:
+                # Only proceed if a newer coupon hasn't already been found
+                if not enterprise_plan_full_price_per_month_pay_monthly_found:
+                    enterprise_plan_full_price_per_month_pay_monthly_found = True
+                    enterprise_plan_full_price_per_month_pay_monthly = coupon.monthly_price_stripe
+                    valid_for_enterprise_plan = True
+            elif coupon.plan_type_enum == ENTERPRISE_YEARLY:
+                # Only proceed if a newer coupon hasn't already been found
+                if not enterprise_plan_full_price_per_month_pay_yearly_found:
+                    enterprise_plan_full_price_per_month_pay_yearly_found = True
+                    enterprise_plan_full_price_per_month_pay_yearly = coupon.annual_price_stripe / 12
+                    valid_for_enterprise_plan = True
+            elif coupon.plan_type_enum == PROFESSIONAL_MONTHLY:
+                # Only proceed if a newer coupon hasn't already been found
+                if not pro_plan_full_price_per_month_pay_monthly_found:
+                    pro_plan_full_price_per_month_pay_monthly_found = True
+                    pro_plan_full_price_per_month_pay_monthly = coupon.monthly_price_stripe
+                    valid_for_professional_plan = True
+            elif coupon.plan_type_enum == PROFESSIONAL_YEARLY:
+                # Only proceed if a newer coupon hasn't already been found
+                if not pro_plan_full_price_per_month_pay_yearly_found:
+                    pro_plan_full_price_per_month_pay_yearly_found = True
+                    pro_plan_full_price_per_month_pay_yearly = coupon.annual_price_stripe / 12
+                    valid_for_professional_plan = True
+
+        results = {
+            'enterprise_plan_full_price_per_month_pay_monthly': enterprise_plan_full_price_per_month_pay_monthly,
+            'enterprise_plan_full_price_per_month_pay_yearly':  enterprise_plan_full_price_per_month_pay_yearly,
+            'pro_plan_full_price_per_month_pay_monthly':        pro_plan_full_price_per_month_pay_monthly,
+            'pro_plan_full_price_per_month_pay_yearly':         pro_plan_full_price_per_month_pay_yearly,
+            'valid_for_enterprise_plan':        valid_for_enterprise_plan,
+            'valid_for_professional_plan':      valid_for_professional_plan,
+            'status':                           status,
+            'success':                          success,
+        }
+        return results
 
     @staticmethod
     def validate_coupon(plan_type_enum, coupon_code):
@@ -1035,6 +1298,7 @@ class DonationManager(models.Model):
         status = ""
         coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
             plan_type_enum=plan_type_enum, coupon_code=coupon_code).order_by('-plan_created_at')
+        coupon_queryset = coupon_queryset.exclude(is_archived=True)
         if not coupon_queryset:
             coupon = []
             status = 'COUPON_MATCH_NOT_FOUND '
@@ -1084,7 +1348,6 @@ class DonationManager(models.Model):
         }
         return results
 
-
     @staticmethod
     def get_coupon_price(plan_type_enum, coupon_code):
         """
@@ -1099,6 +1362,7 @@ class DonationManager(models.Model):
         try:
             coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
                 plan_type_enum=plan_type_enum, coupon_code=coupon_code).order_by('-plan_created_at')
+            coupon_queryset = coupon_queryset.exclude(is_archived=True)
             coupon = coupon_queryset[0]
             if 'MONTHLY' in plan_type_enum:
                 price = coupon.monthly_price_stripe

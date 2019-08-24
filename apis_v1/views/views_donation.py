@@ -214,7 +214,30 @@ def donation_history_list_view(request):
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-def validate_coupon_for_api_view(request):
+
+def coupon_summary_retrieve_for_api_view(request):  # couponSummaryRetrieve
+    coupon_code = request.GET.get('coupon_code', '')
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    if positive_value_exists(voter_device_id):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+        json_data = DonationManager.retrieve_coupon_summary(coupon_code)
+    else:
+        json_data = {
+            'success': False,
+            'status': "coupon_summary_retrieve_for_api_view received bad voter_device_id",
+        }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def default_pricing_for_api_view(request):  # defaultPricing
+    json_data = DonationManager.retrieve_default_pricing()
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def validate_coupon_for_api_view(request):  # validateCoupon
     plan_type_enum = request.GET.get('plan_type_enum', '')
     coupon_code = request.GET.get('coupon_code', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
@@ -230,6 +253,7 @@ def validate_coupon_for_api_view(request):
         }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
 
 def create_new_plan_for_api_view(request):
     authority_required = {'admin'}
@@ -274,6 +298,7 @@ def create_new_plan_for_api_view(request):
         }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
 
 def delete_plan_for_api_view(request):
     authority_required = {'admin'}
