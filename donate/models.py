@@ -986,36 +986,38 @@ class DonationManager(models.Model):
     def create_initial_coupons():
         # If there is no 25OFF, create one -- so that developers have at least one coupon, and the defaults, in the db
 
-        # We do not want default pricing for Enterprise
-        # coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
-        #     plan_type_enum=ENTERPRISE_MONTHLY, coupon_code='DEFAULT-ENTERPRISE_MONTHLY')
-        # if not coupon_queryset:
-        #     coupon, coupon_created = OrganizationSubscriptionPlans.objects.get_or_create(
-        #         coupon_code='DEFAULT-ENTERPRISE_MONTHLY',
-        #         plan_type_enum=ENTERPRISE_MONTHLY,
-        #         defaults={
-        #             'coupon_applied_message': 'Not visible on screen, since this is a default.',
-        #             'monthly_price_stripe': 0,
-        #             'annual_price_stripe': 0,
-        #             'features_provided_bitmap': 1,
-        #             'hidden_plan_comment': 'We do not share default Enterprise pricing.',
-        #         }
-        #     )
-        #
-        # coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
-        #     plan_type_enum=ENTERPRISE_YEARLY, coupon_code='DEFAULT-ENTERPRISE_YEARLY')
-        # if not coupon_queryset:
-        #     coupon, coupon_created = OrganizationSubscriptionPlans.objects.get_or_create(
-        #         coupon_code='DEFAULT-ENTERPRISE_YEARLY',
-        #         plan_type_enum=ENTERPRISE_YEARLY,
-        #         defaults={
-        #             'coupon_applied_message': 'Not visible on screen, since this is a default',
-        #             'monthly_price_stripe': 0,
-        #             'annual_price_stripe': 0,
-        #             'features_provided_bitmap': 1,
-        #             'hidden_plan_comment': 'We do not share default Enterprise pricing.',
-        #         }
-        #     )
+        # We do not want default pricing for Enterprise, so we set these up with "is_archived" set
+        coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
+            plan_type_enum=ENTERPRISE_MONTHLY, coupon_code='DEFAULT-ENTERPRISE_MONTHLY')
+        if not coupon_queryset:
+            coupon, coupon_created = OrganizationSubscriptionPlans.objects.get_or_create(
+                coupon_code='DEFAULT-ENTERPRISE_MONTHLY',
+                plan_type_enum=ENTERPRISE_MONTHLY,
+                defaults={
+                    'coupon_applied_message': 'Not visible on screen, since this is a default.',
+                    'monthly_price_stripe': 0,
+                    'annual_price_stripe': 0,
+                    'features_provided_bitmap': 1,
+                    'hidden_plan_comment': 'We do not share default Enterprise pricing.',
+                    'is_archived': True,
+                }
+            )
+
+        coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
+            plan_type_enum=ENTERPRISE_YEARLY, coupon_code='DEFAULT-ENTERPRISE_YEARLY')
+        if not coupon_queryset:
+            coupon, coupon_created = OrganizationSubscriptionPlans.objects.get_or_create(
+                coupon_code='DEFAULT-ENTERPRISE_YEARLY',
+                plan_type_enum=ENTERPRISE_YEARLY,
+                defaults={
+                    'coupon_applied_message': 'Not visible on screen, since this is a default',
+                    'monthly_price_stripe': 0,
+                    'annual_price_stripe': 0,
+                    'features_provided_bitmap': 1,
+                    'hidden_plan_comment': 'We do not share default Enterprise pricing.',
+                    'is_archived': True,
+                }
+            )
 
         coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
             plan_type_enum=PROFESSIONAL_MONTHLY, coupon_code='DEFAULT-PROFESSIONAL_MONTHLY')
