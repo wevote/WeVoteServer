@@ -41,6 +41,9 @@ urlpatterns = [
         name='candidateListForUpcomingElectionsRetrieveView'),
     url(r'^candidatesRetrieve/', views_candidate.candidates_retrieve_view, name='candidatesRetrieveView'),
     url(r'^candidatesSyncOut/', candidates_sync_out_view, name='candidatesSyncOutView'),
+    url(r'^couponSummaryRetrieve',
+        views_donation.coupon_summary_retrieve_for_api_view, name='couponSummaryRetrieve'),  # No doc yet
+    url(r'^defaultPricing', views_donation.default_pricing_for_api_view, name='defaultPricing'),  # No doc yet
     url(r'^deviceIdGenerate/$', views_misc.device_id_generate_view, name='deviceIdGenerateView'),
     url(r'^donationCancelSubscription',
         views_donation.donation_cancel_subscription_view, name='donationCancelSubscription'),
