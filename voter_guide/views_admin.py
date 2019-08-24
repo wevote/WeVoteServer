@@ -63,7 +63,14 @@ def create_possible_voter_guides_from_prior_elections_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_api_device_id
-    voter_who_submitted_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+    voter_manager = VoterManager()
+    voter_who_submitted_name = ''
+    voter_who_submitted_we_vote_id = ''
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_who_submitted_name = voter.get_full_name()
+        voter_who_submitted_we_vote_id = voter.we_vote_id
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     target_google_civic_election_id = 0
@@ -173,10 +180,11 @@ def create_possible_voter_guides_from_prior_elections_view(request):
                 if voter_guide_possibility_url in urls_already_stored:
                     continue
                 updated_values = {
+                    'from_prior_election':  True,  # Mark as a possible entry, but don't show on "To Review" page yet
                     # 'organization_name': organization_name,
                     # 'organization_twitter_handle': organization_twitter_handle,
                     'organization_we_vote_id': voter_guide.organization_we_vote_id,
-                    # 'voter_who_submitted_name': voter_who_submitted_name,
+                    'voter_who_submitted_name': voter_who_submitted_name,
                     # 'voter_who_submitted_we_vote_id': voter_who_submitted_we_vote_id,
                 }
                 results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
@@ -207,7 +215,8 @@ def create_possible_voter_guides_from_prior_elections_view(request):
                              status=status,
                          ))
     return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()) +
-                                "?google_civic_election_id=" + str(google_civic_election_id))
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&from_prior_elections=1")
 
 
 # We do not require login for this page
@@ -370,7 +379,7 @@ def voter_guide_create_view(request):
 
                         # Match possible_endorsement_list with organizations in database
                         results = match_endorsement_list_with_organizations_in_database(
-                            possible_endorsement_list, state_code)
+                            possible_endorsement_list)
                         if results['possible_endorsement_list_found']:
                             possible_endorsement_list = results['possible_endorsement_list']
 
@@ -870,7 +879,8 @@ def voter_guide_create_process_view(request):
                     convert_candidate_endorsement_list_light_to_possible_endorsement_list(
                         endorsement_list_light_updated)
                 if possible_endorsement_list_results['possible_endorsement_list_found']:
-                    possible_endorsement_list_from_url_scan = possible_endorsement_list_results['possible_endorsement_list']
+                    possible_endorsement_list_from_url_scan = \
+                        possible_endorsement_list_results['possible_endorsement_list']
                     possible_endorsement_list_found = True
 
         possible_endorsement_list = possible_endorsement_list + possible_endorsement_list_from_url_scan
@@ -879,18 +889,19 @@ def voter_guide_create_process_view(request):
             possible_endorsement_list = results['possible_endorsement_list']
 
         # If we don't already have a list of possible endorsements, check the raw text entry field
+        # For subsequent passes, we use ballot_items_additional
         possible_endorsement_list_from_ballot_items_raw = []
         if not possible_endorsement_list_found and positive_value_exists(ballot_items_raw):
-            results = break_up_text_into_possible_endorsement_list(ballot_items_raw)
+            results = break_up_text_into_possible_endorsement_list(
+                ballot_items_raw, organization_we_vote_id_to_include=organization_we_vote_id)
             if results['possible_endorsement_list_found']:
                 possible_endorsement_list_from_ballot_items_raw = results['possible_endorsement_list']
                 # possible_endorsement_list_found = True
                 changes_made = True
-
-        possible_endorsement_list = possible_endorsement_list + possible_endorsement_list_from_ballot_items_raw
-        results = fix_sequence_of_possible_endorsement_list(possible_endorsement_list)
-        if results['possible_endorsement_list_found']:
-            possible_endorsement_list = results['possible_endorsement_list']
+            possible_endorsement_list = possible_endorsement_list + possible_endorsement_list_from_ballot_items_raw
+            results = fix_sequence_of_possible_endorsement_list(possible_endorsement_list)
+            if results['possible_endorsement_list_found']:
+                possible_endorsement_list = results['possible_endorsement_list']
 
         remove_possibility_position_id = request.POST.get('remove_possibility_position_id', 0)
 
@@ -906,13 +917,14 @@ def voter_guide_create_process_view(request):
             if positive_value_exists(results['success']):
                 possible_endorsement_list = results['possible_endorsement_list']
 
-        # Check for additional items to add
+        # Check for additional items to add (For the first pass, we use ballot_items_raw)
         if positive_value_exists(ballot_items_additional):
             number_of_current_possible_endorsements = len(possible_endorsement_list)
             try:
                 starting_possibility_number = number_of_current_possible_endorsements + 1
                 results = break_up_text_into_possible_endorsement_list(
-                    ballot_items_additional, starting_possibility_number)
+                    ballot_items_additional, starting_possibility_number,
+                    organization_we_vote_id_to_include=organization_we_vote_id)
                 if results['possible_endorsement_list_found']:
                     additional_possible_endorsement_list = results['possible_endorsement_list']
                     possible_endorsement_list = possible_endorsement_list + additional_possible_endorsement_list
@@ -1060,18 +1072,21 @@ def voter_guide_create_process_view(request):
             possible_endorsement_list = results['possible_endorsement_list']
 
         # If we don't already have a list of possible endorsements, check the raw text entry field
+        # For subsequent passes, we use ballot_items_additional
         possible_endorsement_list_from_ballot_items_raw = []
         if not possible_endorsement_list_found and positive_value_exists(ballot_items_raw):
-            results = break_up_text_into_possible_endorsement_list(ballot_items_raw)
+            results = break_up_text_into_possible_endorsement_list(
+                ballot_items_raw,
+                incoming_text_organization_names=True,
+                candidate_we_vote_id_to_include=candidate_we_vote_id)
             if results['possible_endorsement_list_found']:
                 possible_endorsement_list_from_ballot_items_raw = results['possible_endorsement_list']
                 # possible_endorsement_list_found = True
                 changes_made = True
-
-        possible_endorsement_list = possible_endorsement_list + possible_endorsement_list_from_ballot_items_raw
-        results = fix_sequence_of_possible_endorsement_list(possible_endorsement_list)
-        if results['possible_endorsement_list_found']:
-            possible_endorsement_list = results['possible_endorsement_list']
+            possible_endorsement_list = possible_endorsement_list + possible_endorsement_list_from_ballot_items_raw
+            results = fix_sequence_of_possible_endorsement_list(possible_endorsement_list)
+            if results['possible_endorsement_list_found']:
+                possible_endorsement_list = results['possible_endorsement_list']
 
         remove_possibility_position_id = request.POST.get('remove_possibility_position_id', 0)
 
@@ -1087,13 +1102,15 @@ def voter_guide_create_process_view(request):
             if positive_value_exists(results['success']):
                 possible_endorsement_list = results['possible_endorsement_list']
 
-        # Check for additional items to add
+        # Check for additional items to add (For the first pass, we use ballot_items_raw)
         if positive_value_exists(ballot_items_additional):
             number_of_current_possible_endorsements = len(possible_endorsement_list)
             try:
                 starting_possibility_number = number_of_current_possible_endorsements + 1
                 results = break_up_text_into_possible_endorsement_list(
-                    ballot_items_additional, starting_possibility_number)
+                    ballot_items_additional, starting_possibility_number,
+                    incoming_text_organization_names=True,
+                    candidate_we_vote_id_to_include=candidate_we_vote_id)
                 if results['possible_endorsement_list_found']:
                     additional_possible_endorsement_list = results['possible_endorsement_list']
                     possible_endorsement_list = possible_endorsement_list + additional_possible_endorsement_list
@@ -1229,9 +1246,12 @@ def voter_guide_create_process_view(request):
                     'google_civic_election_id': convert_to_int(one_possible_endorsement['google_civic_election_id']),
                     'measure_we_vote_id':               one_possible_endorsement['measure_we_vote_id'],
                     'more_info_url':                    one_possible_endorsement['more_info_url'],
-                    'organization_name':                one_possible_endorsement['organization_name'],
-                    'organization_twitter_handle':      one_possible_endorsement['organization_twitter_handle'],
-                    'organization_we_vote_id':          one_possible_endorsement['organization_we_vote_id'],
+                    'organization_name':                one_possible_endorsement['organization_name']
+                    if 'organization_name' in one_possible_endorsement else '',
+                    'organization_twitter_handle':      one_possible_endorsement['organization_twitter_handle']
+                    if 'organization_twitter_handle' in one_possible_endorsement else '',
+                    'organization_we_vote_id':          one_possible_endorsement['organization_we_vote_id']
+                    if 'organization_we_vote_id' in one_possible_endorsement else '',
                     'position_stance':                  one_possible_endorsement['position_stance'],
                     'possibility_position_number':      convert_to_int(
                         one_possible_endorsement['possibility_position_number']),
@@ -1276,7 +1296,10 @@ def voter_guide_create_process_view(request):
                                 "&clear_organization_options=" + str(clear_organization_options))
 
 
-def break_up_text_into_possible_endorsement_list(ballot_items, starting_endorsement_number=1):
+def break_up_text_into_possible_endorsement_list(ballot_items, starting_endorsement_number=1,
+                                                 incoming_text_organization_names=False,
+                                                 candidate_we_vote_id_to_include='',
+                                                 organization_we_vote_id_to_include=''):
     names_list = []
     # First break up multiple lines
     ballot_items_list1 = ballot_items.splitlines()
@@ -1289,7 +1312,11 @@ def break_up_text_into_possible_endorsement_list(ballot_items, starting_endorsem
                 names_list.append(one_item_stripped)
 
     possible_endorsement_list_results = \
-        convert_list_of_names_to_possible_endorsement_list(names_list, starting_endorsement_number)
+        convert_list_of_names_to_possible_endorsement_list(
+            names_list, starting_endorsement_number, incoming_text_organization_names,
+            candidate_we_vote_id_to_include=candidate_we_vote_id_to_include,
+            organization_we_vote_id_to_include=organization_we_vote_id_to_include,
+        )
 
     results = {
         'status': possible_endorsement_list_results['status'],
@@ -1984,6 +2011,7 @@ def voter_guide_possibility_list_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     show_all_elections = request.GET.get('show_all_elections', False)
+    from_prior_election = request.GET.get('from_prior_election', False)
     show_candidates_missing_from_we_vote = request.GET.get('show_candidates_missing_from_we_vote', False)
     show_cannot_find_endorsements = request.GET.get('show_cannot_find_endorsements', False)
     show_capture_detailed_comments = request.GET.get('show_capture_detailed_comments', False)
@@ -2000,7 +2028,16 @@ def voter_guide_possibility_list_view(request):
     limit_number = 75
 
     # Possibilities to review
-    if positive_value_exists(show_cannot_find_endorsements):
+    if positive_value_exists(from_prior_election):
+        filtered_by_title = "From Prior Elections"
+        from_prior_election = True
+        order_by = "-id"
+        results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
+            from_prior_election=from_prior_election)
+        if results['success']:
+            voter_guide_possibility_list = results['voter_guide_possibility_list']
+    elif positive_value_exists(show_cannot_find_endorsements):
         filtered_by_title = "Endorsements Not Available Yet"
         cannot_find_endorsements = True
         order_by = "-id"
@@ -2096,6 +2133,7 @@ def voter_guide_possibility_list_view(request):
         'filtered_by_title':                    filtered_by_title,
         'google_civic_election_id':             google_civic_election_id,
         'show_all_elections':                   show_all_elections,
+        'from_prior_election':                  from_prior_election,
         'show_candidates_missing_from_we_vote': show_candidates_missing_from_we_vote,
         'show_cannot_find_endorsements':        show_cannot_find_endorsements,
         'show_capture_detailed_comments':       show_capture_detailed_comments,
@@ -2120,7 +2158,8 @@ def voter_guide_possibility_list_process_view(request):
     which_marking = request.POST.get("which_marking")
 
     # Make sure 'which_marking' is one of the allowed Filter fields
-    if which_marking not in("candidates_missing_from_we_vote", "cannot_find_endorsements", "capture_detailed_comments",
+    if which_marking not in("add_to_active_review", "candidates_missing_from_we_vote",
+                            "cannot_find_endorsements", "capture_detailed_comments",
                             "hide_from_active_review", "ignore_this_source"):
         messages.add_message(request, messages.ERROR,
                              'The filter you are trying to update is not recognized: {which_marking}'
@@ -2136,11 +2175,21 @@ def voter_guide_possibility_list_process_view(request):
         for voter_guide_possibility_id_string in select_for_marking_organization_ids:
             try:
                 voter_guide_possibility_id = int(voter_guide_possibility_id_string)
-                results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
-                    None,
-                    None,
-                    voter_guide_possibility_id=voter_guide_possibility_id,
-                    updated_values={which_marking: True})
+                if which_marking == "add_to_active_review":
+                    results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
+                        None,
+                        None,
+                        voter_guide_possibility_id=voter_guide_possibility_id,
+                        updated_values={
+                            'from_prior_election': False,
+                            'hide_from_active_review': False,
+                        })
+                else:
+                    results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
+                        None,
+                        None,
+                        voter_guide_possibility_id=voter_guide_possibility_id,
+                        updated_values={which_marking: True})
                 messages.add_message(request, messages.INFO,
                                      'voter_guide_possibility_list_process_view {results}'
                                      ''.format(results=results))

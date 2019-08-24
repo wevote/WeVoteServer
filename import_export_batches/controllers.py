@@ -323,8 +323,8 @@ def create_batch_row_action_organization(batch_description, batch_header_map, on
 
     if positive_value_exists(keep_looking_for_duplicates):
         organization_list_manager = OrganizationListManager()
-        matching_results = organization_list_manager.retrieve_organizations_from_non_unique_identifiers(
-            organization_twitter_handle)
+        matching_results = organization_list_manager.retrieve_organizations_from_twitter_handle(
+            twitter_handle=organization_twitter_handle)
 
         if matching_results['organization_found']:
             organization = matching_results['organization']
@@ -1971,8 +1971,8 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
 
     if not organization_found and positive_value_exists(organization_twitter_handle):
         organization_list_manager = OrganizationListManager()
-        matching_results = organization_list_manager.retrieve_organizations_from_non_unique_identifiers(
-            organization_twitter_handle)
+        matching_results = organization_list_manager.retrieve_organizations_from_twitter_handle(
+            twitter_handle=organization_twitter_handle)
 
         if matching_results['organization_found']:
             organization_found = True

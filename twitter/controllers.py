@@ -334,8 +334,8 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
 
     if not positive_value_exists(owner_found):
         organization_list_manager = OrganizationListManager()
-        organization_results = organization_list_manager.retrieve_organizations_from_non_unique_identifiers(
-            twitter_handle)
+        organization_results = organization_list_manager.retrieve_organizations_from_twitter_handle(
+            twitter_handle=twitter_handle)
         if organization_results['organization_list_found']:
             organization_list = organization_results['organization_list']
             one_organization = organization_list[0]
