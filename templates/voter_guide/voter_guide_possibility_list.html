@@ -37,19 +37,19 @@
 {% endif %}
 
 <form name="voter_guide_choose_election" method="get" action="{% url 'voter_guide:voter_guide_possibility_list' %}">
-{% csrf_token %}
-{% if election_list %}
-    <select id="google_civic_election_id" name="google_civic_election_id">
-    <option value="0">-- Filter by Election --</option>
-    {% for one_election in election_list %}
-    <option value="{{ one_election.google_civic_election_id }}"
-            {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-        {{ one_election.election_name }} - {{ one_election.google_civic_election_id }} - {{ one_election.election_day_text }}</option>
-    {% endfor %}
-    </select>
-{% else %}
-    (no elections found)
-{% endif %}
+    {% csrf_token %}
+    {% if election_list %}
+        <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0">-- Filter by Election --</option>
+        {% for one_election in election_list %}
+        <option value="{{ one_election.google_civic_election_id }}"
+                {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {{ one_election.election_name }} - {{ one_election.google_civic_election_id }} - {{ one_election.election_day_text }}</option>
+        {% endfor %}
+        </select>
+    {% else %}
+        (no elections found)
+    {% endif %}
 
     {# Default to showing only upcoming elections #}
     <label for="show_all_elections_id">
@@ -64,7 +64,17 @@
         <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}">
              clear search</a>&nbsp;
     {% endif %}
-    </form>
+    {# Pass along the url_variables this page is using, so we can return to the same page state #}
+    <input type="hidden" name="show_all_elections" value="{{ show_all_elections }}">
+    <input type="hidden" name="from_prior_election" value="{{ from_prior_election }}">
+    <input type="hidden" name="show_candidates_missing_from_we_vote" value="{{ show_candidates_missing_from_we_vote }}">
+    <input type="hidden" name="show_cannot_find_endorsements" value="{{ show_cannot_find_endorsements }}">
+    <input type="hidden" name="show_capture_detailed_comments" value="{{ show_capture_detailed_comments }}">
+    <input type="hidden" name="show_only_hide_from_active_review" value="{{ show_only_hide_from_active_review }}">
+    <input type="hidden" name="show_ignore_this_source" value="{{ show_ignore_this_source }}">
+    <input type="hidden" name="state_code" value="{{ state_code }}">
+    <input type="hidden" name="voter_guide_possibility_search" value="{{ voter_guide_possibility_search }}">
+</form>
 
 <p></p>
 
@@ -151,6 +161,17 @@ Filters:&nbsp;
             </div>
         </div>
         {% include "voter_guide/voter_guide_possibility_table.html" with voter_guide_possibility_list=voter_guide_possibility_list google_civic_election_id=google_civic_election_id %}
+        {# Pass along the url_variables this page is using, so we can return to the same page state #}
+        <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+        <input type="hidden" name="show_all_elections" value="{{ show_all_elections }}">
+        <input type="hidden" name="from_prior_election" value="{{ from_prior_election }}">
+        <input type="hidden" name="show_candidates_missing_from_we_vote" value="{{ show_candidates_missing_from_we_vote }}">
+        <input type="hidden" name="show_cannot_find_endorsements" value="{{ show_cannot_find_endorsements }}">
+        <input type="hidden" name="show_capture_detailed_comments" value="{{ show_capture_detailed_comments }}">
+        <input type="hidden" name="show_only_hide_from_active_review" value="{{ show_only_hide_from_active_review }}">
+        <input type="hidden" name="show_ignore_this_source" value="{{ show_ignore_this_source }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+        <input type="hidden" name="voter_guide_possibility_search" value="{{ voter_guide_possibility_search }}">
     </form>
 {% else %}
     <p>(no voter guide possibilities found)</p>

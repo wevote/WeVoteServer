@@ -216,7 +216,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
                          ))
     return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
-                                "&from_prior_elections=1")
+                                "&from_prior_election=1")
 
 
 # We do not require login for this page
@@ -2010,13 +2010,15 @@ def voter_guide_possibility_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    show_all_elections = request.GET.get('show_all_elections', False)
-    from_prior_election = request.GET.get('from_prior_election', False)
-    show_candidates_missing_from_we_vote = request.GET.get('show_candidates_missing_from_we_vote', False)
-    show_cannot_find_endorsements = request.GET.get('show_cannot_find_endorsements', False)
-    show_capture_detailed_comments = request.GET.get('show_capture_detailed_comments', False)
-    show_only_hide_from_active_review = request.GET.get('show_only_hide_from_active_review', False)
-    show_ignore_this_source = request.GET.get('show_ignore_this_source', False)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
+    from_prior_election = positive_value_exists(request.GET.get('from_prior_election', False))
+    show_candidates_missing_from_we_vote = \
+        positive_value_exists(request.GET.get('show_candidates_missing_from_we_vote', False))
+    show_cannot_find_endorsements = positive_value_exists(request.GET.get('show_cannot_find_endorsements', False))
+    show_capture_detailed_comments = positive_value_exists(request.GET.get('show_capture_detailed_comments', False))
+    show_only_hide_from_active_review = \
+        positive_value_exists(request.GET.get('show_only_hide_from_active_review', False))
+    show_ignore_this_source = positive_value_exists(request.GET.get('show_ignore_this_source', False))
     state_code = request.GET.get('state_code', '')
     voter_guide_possibility_search = request.GET.get('voter_guide_possibility_search', '')
 
@@ -2154,6 +2156,18 @@ def voter_guide_possibility_list_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    # Capture the current filter view of the page and other settings, so we can pass along url_variables at the end
+    google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+    show_all_elections = request.POST.get('show_all_elections', False)
+    from_prior_election = request.POST.get('from_prior_election', False)
+    show_candidates_missing_from_we_vote = request.POST.get('show_candidates_missing_from_we_vote', False)
+    show_cannot_find_endorsements = request.POST.get('show_cannot_find_endorsements', False)
+    show_capture_detailed_comments = request.POST.get('show_capture_detailed_comments', False)
+    show_only_hide_from_active_review = request.POST.get('show_only_hide_from_active_review', False)
+    show_ignore_this_source = request.POST.get('show_ignore_this_source', False)
+    state_code = request.POST.get('state_code', '')
+    voter_guide_possibility_search = request.POST.get('voter_guide_possibility_search', '')
+
     select_for_marking_organization_ids = request.POST.getlist('select_for_marking_checks[]')
     which_marking = request.POST.get("which_marking")
 
@@ -2172,6 +2186,7 @@ def voter_guide_possibility_list_process_view(request):
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
 
     if which_marking and select_for_marking_organization_ids:
+        items_processed_successfully = 0
         for voter_guide_possibility_id_string in select_for_marking_organization_ids:
             try:
                 voter_guide_possibility_id = int(voter_guide_possibility_id_string)
@@ -2190,15 +2205,43 @@ def voter_guide_possibility_list_process_view(request):
                         None,
                         voter_guide_possibility_id=voter_guide_possibility_id,
                         updated_values={which_marking: True})
-                messages.add_message(request, messages.INFO,
-                                     'voter_guide_possibility_list_process_view {results}'
-                                     ''.format(results=results))
+                if results['success']:
+                    items_processed_successfully += 1
+                else:
+                    messages.add_message(request, messages.ERROR,
+                                         'voter_guide_possibility_list_process_view {results}'
+                                         ''.format(results=results))
             except ValueError:
                 messages.add_message(request, messages.ERROR,
                                      'Bad id for: {voter_guide_possibility_id_string}'
                                      ''.format(voter_guide_possibility_id_string=voter_guide_possibility_id_string))
 
-    return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()))
+        messages.add_message(request, messages.INFO,
+                             'Voter guides processed successfully: {items_processed_successfully}'
+                             ''.format(items_processed_successfully=items_processed_successfully))
+
+    url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
+    if positive_value_exists(show_all_elections):
+        url_variables += "&show_all_elections=" + str(show_all_elections)
+    if positive_value_exists(from_prior_election):
+        url_variables += "&from_prior_election=" + str(from_prior_election)
+    if positive_value_exists(show_candidates_missing_from_we_vote):
+        url_variables += "&show_candidates_missing_from_we_vote=" + str(show_candidates_missing_from_we_vote)
+    if positive_value_exists(show_cannot_find_endorsements):
+        url_variables += "&show_cannot_find_endorsements=" + str(show_cannot_find_endorsements)
+    if positive_value_exists(show_capture_detailed_comments):
+        url_variables += "&show_capture_detailed_comments=" + str(show_capture_detailed_comments)
+    if positive_value_exists(show_only_hide_from_active_review):
+        url_variables += "&show_only_hide_from_active_review=" + str(show_only_hide_from_active_review)
+    if positive_value_exists(show_ignore_this_source):
+        url_variables += "&show_ignore_this_source=" + str(show_ignore_this_source)
+    if positive_value_exists(state_code):
+        url_variables += "&state_code=" + str(state_code)
+    if positive_value_exists(voter_guide_possibility_search):
+        url_variables += "&voter_guide_possibility_search=" + str(voter_guide_possibility_search)
+
+    return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()) +
+                                url_variables)
 
 
 @login_required
