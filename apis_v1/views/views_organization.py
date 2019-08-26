@@ -13,8 +13,10 @@ from django.http import HttpResponse
 from django_user_agents.utils import get_user_agent
 from follow.controllers import organization_suggestion_tasks_for_api
 import json
-from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
-    organization_search_for_api, organizations_followed_retrieve_for_api
+from organization.controllers import full_domain_string_available, organization_retrieve_for_api, \
+    organization_save_for_api, organization_search_for_api, organizations_followed_retrieve_for_api, \
+    sub_domain_string_available
+from organization.models import OrganizationManager
 from voter.models import voter_has_authority, VoterManager
 from voter_guide.controllers_possibility import organizations_found_on_url
 import wevote_functions.admin
@@ -157,12 +159,33 @@ def organization_save_view(request):  # organizationSave
     facebook_email = request.GET.get('facebook_email', False)
     facebook_profile_image_url_https = request.GET.get('facebook_profile_image_url_https', False)
 
+    organization_manager = OrganizationManager()
     chosen_domain_string = request.GET.get('chosen_domain_string', False)
+    chosen_sub_domain_string = request.GET.get('chosen_sub_domain_string', False)
+    if positive_value_exists(chosen_domain_string) or positive_value_exists(chosen_sub_domain_string):
+        if not positive_value_exists(organization_id) and positive_value_exists(organization_we_vote_id):
+            results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+            if results['success']:
+                organization_id = results['organization_id']
+    full_domain_string_already_taken = False
+    if positive_value_exists(chosen_domain_string):
+        domain_results = full_domain_string_available(chosen_domain_string, organization_id)
+        if not domain_results['full_domain_string_available']:
+            full_domain_string_already_taken = True
+            # Clear it out
+            chosen_domain_string = ''
+    sub_domain_string_already_taken = False
+    if positive_value_exists(chosen_sub_domain_string):
+        domain_results = sub_domain_string_available(chosen_sub_domain_string, organization_id)
+        if not domain_results['sub_domain_string_available']:
+            sub_domain_string_already_taken = True
+            # Clear it out
+            chosen_sub_domain_string = ''
+
     chosen_google_analytics_account_number = request.GET.get('chosen_google_analytics_account_number', False)
     chosen_html_verification_string = request.GET.get('chosen_html_verification_string', False)
     chosen_logo_displayed = request.GET.get('chosen_logo_displayed', None)
     chosen_social_share_description = request.GET.get('chosen_social_share_description', False)
-    chosen_sub_domain_string = request.GET.get('chosen_sub_domain_string', False)
     chosen_subscription_plan = request.GET.get('chosen_subscription_plan', False)
 
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
@@ -205,6 +228,7 @@ def organization_save_view(request):  # organizationSave
                 'status': "VOTER_LACKS_AUTHORITY_TO_SAVE_ORGANIZATION",
                 'success': False,
                 'chosen_domain_string': '',
+                'full_domain_string_already_taken': full_domain_string_already_taken,
                 'chosen_favicon_url_https': '',
                 'chosen_google_analytics_account_number': '',
                 'chosen_html_verification_string': '',
@@ -213,6 +237,7 @@ def organization_save_view(request):  # organizationSave
                 'chosen_social_share_description': '',
                 'chosen_social_share_image_256x256_url_https': '',
                 'chosen_sub_domain_string': '',
+                'sub_domain_string_already_taken': sub_domain_string_already_taken,
                 'chosen_subscription_plan': '',
                 'facebook_id': facebook_id,
                 'facebook_email': facebook_email,
@@ -252,6 +277,8 @@ def organization_save_view(request):  # organizationSave
         chosen_social_share_description=chosen_social_share_description,
         chosen_sub_domain_string=chosen_sub_domain_string, chosen_subscription_plan=chosen_subscription_plan,
     )
+    results['full_domain_string_already_taken'] = full_domain_string_already_taken
+    results['sub_domain_string_already_taken'] = sub_domain_string_already_taken
 
     return HttpResponse(json.dumps(results), content_type='application/json')
 

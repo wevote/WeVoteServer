@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import Organization, OrganizationListManager, OrganizationManager, \
+    OrganizationReservedDomain, \
     CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
     POLITICAL_ACTION_COMMITTEE, ORGANIZATION, PUBLIC_FIGURE, UNKNOWN, VOTER, ORGANIZATION_TYPE_CHOICES
 from analytics.models import ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, \
@@ -40,6 +41,148 @@ TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
+
+
+def full_domain_string_available(full_domain_string, organization_id):
+    """
+    Make sure this full domain name (website address) isn't already taken
+    :param full_domain_string:
+    :param organization_id:
+    :return:
+    """
+    status = ""
+    if not positive_value_exists(full_domain_string):
+        status += "MISSING_FULL_DOMAIN_STRING "
+        results = {
+            'full_domain_string_available': False,
+            'status':                       status,
+            'success':                      False,
+        }
+        return results
+    try:
+        organization_list_query = Organization.objects.using('readonly').all()
+        organization_list_query = organization_list_query.exclude(id=organization_id)
+        organization_list_query = organization_list_query.filter(chosen_domain_string__iexact=full_domain_string)
+        organization_domain_match_count = organization_list_query.count()
+        if positive_value_exists(organization_domain_match_count):
+            status += "FULL_DOMAIN_STRING_FOUND-OWNED_BY_ORGANIZATION "
+            results = {
+                'full_domain_string_available': False,
+                'status': status,
+                'success': True,
+            }
+            return results
+    except Exception as e:
+        status += 'PROBLEM_QUERYING_ORGANIZATION_TABLE {error} [type: {error_type}] ' \
+                  ''.format(error=e, error_type=type(e))
+        results = {
+            'full_domain_string_available': False,
+            'status':                       status,
+            'success':                      False,
+        }
+        return results
+
+    # Double-check that we don't have a reserved entry already in the OrganizationReservedDomain table
+    try:
+        reserved_domain_list_query = OrganizationReservedDomain.objects.using('readonly').all()
+        reserved_domain_list_query = reserved_domain_list_query.filter(full_domain_string__iexact=full_domain_string)
+        reserved_domain_match_count = reserved_domain_list_query.count()
+        if positive_value_exists(reserved_domain_match_count):
+            status += "FULL_DOMAIN_STRING_FOUND-RESERVED "
+            results = {
+                'full_domain_string_available': False,
+                'status': status,
+                'success': True,
+            }
+            return results
+    except Exception as e:
+        status += 'PROBLEM_QUERYING_ORGANIZATION_RESERVED_DOMAIN_TABLE {error} [type: {error_type}] ' \
+                  ''.format(error=e, error_type=type(e))
+        results = {
+            'full_domain_string_available': False,
+            'status':                       status,
+            'success':                      False,
+        }
+        return results
+
+    status += "FULL_DOMAIN_STRING_AVAILABLE "
+    results = {
+        'full_domain_string_available': True,
+        'status': status,
+        'success': True,
+    }
+    return results
+
+
+def sub_domain_string_available(sub_domain_string, organization_id):
+    """
+    Make sure this sub domain name (website address) isn't already taken
+    :param sub_domain_string:
+    :param organization_id:
+    :return:
+    """
+    status = ""
+    if not positive_value_exists(sub_domain_string):
+        status += "MISSING_SUB_DOMAIN_STRING "
+        results = {
+            'sub_domain_string_available': False,
+            'status':                       status,
+            'success':                      False,
+        }
+        return results
+    try:
+        organization_list_query = Organization.objects.using('readonly').all()
+        organization_list_query = organization_list_query.exclude(id=organization_id)
+        organization_list_query = organization_list_query.filter(chosen_sub_domain_string__iexact=sub_domain_string)
+        organization_domain_match_count = organization_list_query.count()
+        if positive_value_exists(organization_domain_match_count):
+            status += "SUB_DOMAIN_STRING_FOUND-OWNED_BY_ORGANIZATION "
+            results = {
+                'sub_domain_string_available':  False,
+                'status':                       status,
+                'success':                      True,
+            }
+            return results
+    except Exception as e:
+        status += 'PROBLEM_QUERYING_ORGANIZATION_TABLE {error} [type: {error_type}] ' \
+                  ''.format(error=e, error_type=type(e))
+        results = {
+            'sub_domain_string_available':  False,
+            'status':                       status,
+            'success':                      False,
+        }
+        return results
+
+    # Double-check that we don't have a reserved entry already in the OrganizationReservedDomain table
+    try:
+        reserved_domain_list_query = OrganizationReservedDomain.objects.using('readonly').all()
+        reserved_domain_list_query = reserved_domain_list_query.filter(sub_domain_string__iexact=sub_domain_string)
+        reserved_domain_match_count = reserved_domain_list_query.count()
+        if positive_value_exists(reserved_domain_match_count):
+            status += "SUB_DOMAIN_STRING_FOUND-RESERVED "
+            results = {
+                'sub_domain_string_available':  False,
+                'status':                       status,
+                'success':                      True,
+            }
+            return results
+    except Exception as e:
+        status += 'PROBLEM_QUERYING_ORGANIZATION_RESERVED_DOMAIN_TABLE {error} [type: {error_type}] ' \
+                  ''.format(error=e, error_type=type(e))
+        results = {
+            'sub_domain_string_available':  False,
+            'status':                       status,
+            'success':                      False,
+        }
+        return results
+
+    status += "SUB_DOMAIN_STRING_AVAILABLE "
+    results = {
+        'sub_domain_string_available': True,
+        'status': status,
+        'success': True,
+    }
+    return results
 
 
 def organization_retrieve_tweets_from_twitter(organization_we_vote_id):

@@ -15,6 +15,8 @@ urlpatterns = [
         views_admin.organization_edit_view, name='organization_edit_we_vote_id'),
     url(r'^delete_process/$', views_admin.organization_delete_process_view, name='organization_delete_process'),
     url(r'^edit_process/$', views_admin.organization_edit_process_view, name='organization_edit_process'),
+    url(r'^edit_account_process/$',
+        views_admin.organization_edit_account_process_view, name='organization_edit_account_process'),
     url(r'^$', views_admin.organization_list_view, name='organization_list',),
     url(r'^import/$',
         views_admin.organizations_import_from_master_server_view, name='organizations_import_from_master_server'),
@@ -39,6 +41,12 @@ urlpatterns = [
         views_admin.organization_position_edit_view, name='organization_we_vote_id_position_edit', ),
     url(r'^pos/edit_process/$',
         views_admin.organization_position_edit_process_view, name='organization_position_edit_process'),
+    url(r'^reserved_domain_list/$',
+        views_admin.reserved_domain_list_view, name='reserved_domain_list'),
+    url(r'^reserved_domain_edit/$',
+        views_admin.reserved_domain_edit_view, name='reserved_domain_edit'),
+    url(r'^reserved_domain_edit_process/$',
+        views_admin.reserved_domain_edit_process_view, name='reserved_domain_edit_process'),
 
     # views
     # This is used for a voter to follow an organization

@@ -1,7 +1,7 @@
 {# templates/organization/organization_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if organization %}{{ organization.organization_name  }}{% else %}New Organization{% endif %}{% endblock %}
+{% block title %}{% if organization %}{{ organization.organization_name }}{% endif %}: Account Settings{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
@@ -9,152 +9,139 @@
 span.nobr { white-space: nowrap; }
 </style>
 
-<h1>{% if organization %}{{ organization.organization_name }}: Account{% else %}New Organization{% endif %}</h1>
+{% if not organization or not organization.we_vote_id %}
+  This page requires a valid organization.
+{% else %}
+<h1>{{ organization.organization_name }}: Account Settings</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 
 
-<form action="{% url "organization:organization_edit_process" %}" method="post" class="form-horizontal">
+<form action="{% url "organization:organization_edit_account_process" %}" method="post" class="form-horizontal">
 {% csrf_token %}
-    <input type="hidden" name="organization_id" value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
+    <input type="hidden" name="organization_id" value="{{ organization.id }}">
 
 <div class="form-group">
-    <label for="chosen_logo_displayed" class="col-sm-3 control-label">Logo</label>
+    <label for="chosen_logo_displayed_id" class="col-sm-3 control-label">Hide We Vote Logo?</label>
     <div class="col-sm-8">
-        <input type="text" name="organization_name" id="organization_name_id" class="form-control"
-               value="{% if organization %}{{ organization.chosen_logo_displayed }}{% else %}{{ chosen_logo_displayed }}{% endif %}" />
-</div>
-
-
-
-<div class="form-group">
-    <label for="chosen_domain_string" class="col-sm-3 control-label">Domain string
-    {% if organization.chosen_domain_string %}
-    <a href="{{ organization.chosen_domain_string }}"
-               target="_blank"
-               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-    {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_website" id="organization_website_id" class="form-control"
-               value="{% if organization %}{{ organization.chosen_domain_string }}{% else %}{{ chosen_domain_string }}{% endif %}" />
+        <label for="show_we_vote_logo_id">
+            <input type="radio" name="chosen_logo_displayed" value="0"{% if organization.chosen_logo_displayed %}{% else %} checked{% endif %} id="show_we_vote_logo_id" >
+            Show We Vote Logo
+        </label>
+        <label for="hide_we_vote_logo_id">
+            <input type="radio" name="chosen_logo_displayed" value="1"{% if organization.chosen_logo_displayed %} checked{% endif %} id="hide_we_vote_logo_id" >
+            Hide We Vote Logo & Show Custom Logo
+        </label>
     </div>
 </div>
 
 <div class="form-group">
-    <label for="chosen_favicon_url_https" class="col-sm-3 control-label">
-        Favicon URL
-        {% if organization.chosen_favicon_url_https %}
-        <a href="{{ organization.chosen_favicon_url_https }}"
-                   target="_blank"
-                   class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+    <label for="chosen_domain_string_id" class="col-sm-3 control-label">
+        Full Domain String
+        {% if organization.chosen_domain_string %}
+            <a href="https://{{ organization.chosen_domain_string }}"
+               target="_blank"
+               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
     <div class="col-sm-8">
-        <input type="text" name="chosen_favicon_url_https" id="chosen_favicon_url_https" class="form-control"
-               value="{% if organization %}{{ organization.chosen_favicon_url_https }}{% else %}{{ chosen_favicon_url_https }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="chosen_google_analytics_account_number" class="col-sm-3 control-label">Google Analytics account number</label>
-    <div class="col-sm-8">
-    <input type="text" name="chosen_google_analytics_account_number" id="chosen_google_analytics_account_number" class="form-control"
-           value="{% if organization %}{{ organization.chosen_google_analytics_account_number|default_if_none:"" }}{% else %}{{ chosen_google_analytics_account_number }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="chosen_html_verification_string" class="col-sm-3 control-label">HTML verification string</label>
-    <div class="col-sm-8">
-    <input type="text" name="chosen_html_verification_string" id="chosen_html_verification_string" class="form-control"
-           value="{% if organization %}{{ organization.chosen_html_verification_string|default_if_none:"" }}{% else %}{{ chosen_html_verification_string }}{% endif %}" />
+        <input type="text" name="chosen_domain_string" id="chosen_domain_string_id" class="form-control"
+               value="{{ organization.chosen_domain_string|default_if_none:"" }}" />
     </div>
 </div>
 
 
 <div class="form-group">
-    <label for="chosen_logo_url_https" class="col-sm-3 control-label">LOGO URL</label>
+    <label for="chosen_sub_domain_string_id" class="col-sm-3 control-label">We Vote Sub Domain String</label>
     <div class="col-sm-8">
-        <input type="text" name="chosen_logo_url_https" id="chosen_logo_url_https" class="form-control
-               value="{% if organization %}{{ organization.chosen_logo_url_https|default_if_none:"" }}{% else %}{{ chosen_logo_url_https }}{% endif %}" />
+        <input type="text" name="chosen_sub_domain_string" id="chosen_sub_domain_string_id" class="form-control"
+               value="{{ organization.chosen_sub_domain_string|default_if_none:"" }}" />
+        .WeVote.US
     </div>
 </div>
 
 <div class="form-group">
-    <label for="chosen_social_share_description" class="col-sm-3 control-label">Social share description</label>
+    <label for="chosen_favicon_url_https_id" class="col-sm-3 control-label">
+        Favicon URL
+        {% if organization.chosen_favicon_url_https %}
+            <a href="{{ organization.chosen_favicon_url_https }}"
+               target="_blank"
+               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+    </label>
     <div class="col-sm-8">
-        <input type="text" name="chosen_social_share_description" id="chosen_social_share_description" class="form-control"
-               value="{% if organization %}{{ organization.chosen_social_share_description|default_if_none:"" }}{% else %}{{ chosen_social_share_description }}{% endif %}" />
+        <input type="text" name="chosen_favicon_url_https" id="chosen_favicon_url_https_id" class="form-control"
+               value="{{ organization.chosen_favicon_url_https|default_if_none:"" }}"
+               disabled
+        />
     </div>
 </div>
 
 <div class="form-group">
-    <label for="chosen_social_share_image_256x256_url_https" class="col-sm-3 control-label">Social share image</label>
+    <label for="chosen_google_analytics_account_number_id" class="col-sm-3 control-label">Google Analytics Account Number</label>
     <div class="col-sm-8">
-        <input type="text" name="chosen_social_share_image_256x256_url_https" id="chosen_social_share_image_256x256_url_https" class="form-control"
-               value="{% if organization %}{{ organization.chosen_social_share_image_256x256_url_https }}{% else %}{{ chosen_social_share_image_256x256_url_https }}{% endif %}" />
+    <input type="text" name="chosen_google_analytics_account_number" id="chosen_google_analytics_account_number_id" class="form-control"
+           value="{{ organization.chosen_google_analytics_account_number|default_if_none:"" }}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="chosen_html_verification_string_id" class="col-sm-3 control-label">HTML Verification String</label>
+    <div class="col-sm-8">
+    <input type="text" name="chosen_html_verification_string" id="chosen_html_verification_string_id" class="form-control"
+           value="{{ organization.chosen_html_verification_string|default_if_none:"" }}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="chosen_logo_url_https_id" class="col-sm-3 control-label">Custom Logo URL</label>
+    <div class="col-sm-8">
+        <input type="text" name="chosen_logo_url_https" id="chosen_logo_url_https_id" class="form-control"
+               value="{{ organization.chosen_logo_url_https|default_if_none:"" }}"
+               disabled
+        />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="chosen_social_share_description_id" class="col-sm-3 control-label">Social Share Description</label>
+    <div class="col-sm-8">
+        <input type="text" name="chosen_social_share_description" id="chosen_social_share_description_id" class="form-control"
+               value="{{ organization.chosen_social_share_description|default_if_none:"" }}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="chosen_social_share_image_256x256_url_https_id" class="col-sm-3 control-label">Social Share Image</label>
+    <div class="col-sm-8">
+        <input type="text" name="chosen_social_share_image_256x256_url_https" id="chosen_social_share_image_256x256_url_https_id" class="form-control"
+               value="{{ organization.chosen_social_share_image_256x256_url_https|default_if_none:"" }}"
+               disabled
+        />
     </div>
 </div>
 
 
 <div class="form-group">
-    <label for="chosen_sub_domain_string" class="col-sm-3 control-label">Sub domain string</label>
+    <label for="chosen_subscription_plan_id" class="col-sm-3 control-label">Subscription Plan</label>
     <div class="col-sm-8">
-        <input type="text" name="chosen_sub_domain_string" id="chosen_sub_domain_string" class="form-control"
-               value="{% if organization %}{{ organization.chosen_sub_domain_string }}{% else %}{{ chosen_sub_domain_string }}{% endif %}" />
+        <input type="text" name="chosen_subscription_plan" id="chosen_subscription_plan_id" class="form-control"
+               value="{{ organization.chosen_subscription_plan|default_if_none:"" }}" />
     </div>
 </div>
 
 
 <div class="form-group">
-    <label for="chosen_subscription_plan" class="col-sm-3 control-label">Subscription plan</label>
+    <label class="col-sm-3 control-label">
+      <a href="{% url 'organization:organization_position_list' organization.id %}">cancel</a>
+    </label>
     <div class="col-sm-8">
-        <input type="text" name="chosen_subscription_plan" id="chosen_subscription_plan" class="form-control"
-               value="{% if organization %}{{ organization.chosen_subscription_plan }}{% else %}{{ chosen_subscription_plan }}{% endif %}" />
+        <button type="submit" class="btn btn-default">Update account</button>
     </div>
 </div>
 
-
-
-
-
-<p>
-{% if organization %}
-    <a href="{% url 'organization:organization_position_list' organization.id %}">cancel</a>
-{% else %}
-    <a href="{% url 'organization:organization_list' %}">cancel</a>
-{% endif %}
-    <button type="submit" class="btn btn-default">{% if organization %}Update account{% else %}Save New Organization{% endif %}</button>
-</p>
 </form>
-
-
-{% if organization %}
-  <br />
-  <br />
-<form action="{% url "organization:organization_delete_process" %}" method="post" class="form-horizontal">
-{% csrf_token %}
-  <input type="hidden" name="organization_id" value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
-  <button type="submit" class="btn btn-danger">Delete Organization</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <label for="confirm_delete_id">
-    <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> Check to confirm that you want to permanently delete this organization
-  </label>
-</form>
 {% endif %}
   <br />
   <br />
-
-
-{% if organization %}
-    {% if organization.wikipedia_thumbnail_url %}
-        <img src="{{ organization.wikipedia_thumbnail_url }}"><br />
-        Thumbnail<br />
-    {% endif %}
-
-    {% if organization.wikipedia_photo_url %}
-        <img src="{{ organization.wikipedia_photo_url }}"><br />
-        Full size<br />
-    {% endif %}
-{% endif %}
 {% endblock %}

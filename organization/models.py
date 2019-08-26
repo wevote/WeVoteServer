@@ -2576,3 +2576,19 @@ class Organization(models.Model):
             return "https://en.wikipedia.org/wiki/{page_title}".format(page_title=encoded_page_title)
         else:
             return ''
+
+
+class OrganizationReservedDomain(models.Model):
+    def __unicode__(self):
+        return "OrganizationReservedDomain"
+
+    # If there is a value, this is the owner
+    organization_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+
+    # One one of the following is expected to be used for each database row
+    # Ex/ bestdomain.org
+    full_domain_string = models.CharField(
+        verbose_name="full domain", max_length=255, null=True, blank=True, unique=True)
+    # Ex/ zoom (referring to zoom.wevote.us)
+    sub_domain_string = models.CharField(
+        verbose_name="we vote sub domain", max_length=255, null=True, blank=True, unique=True)
