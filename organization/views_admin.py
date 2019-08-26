@@ -2,8 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import organizations_import_from_master_server, push_organization_data_to_other_table_caches
-from .models import GROUP, INDIVIDUAL, Organization
+from .controllers import full_domain_string_available, organizations_import_from_master_server, \
+    push_organization_data_to_other_table_caches, sub_domain_string_available
+from .models import GROUP, INDIVIDUAL, Organization, OrganizationReservedDomain
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from config.base import get_environment_variable
@@ -871,6 +872,96 @@ def organization_edit_process_view(request):
 
 
 @login_required
+def organization_edit_account_process_view(request):
+    """
+    Process the edit organization account forms
+    :param request:
+    :return:
+    """
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    organization_id = convert_to_int(request.POST.get('organization_id', 0))
+    chosen_domain_string = request.POST.get('chosen_domain_string', None)
+    chosen_favicon_url_https = request.POST.get('chosen_favicon_url_https', None)
+    chosen_google_analytics_account_number = request.POST.get('chosen_google_analytics_account_number', None)
+    chosen_html_verification_string = request.POST.get('chosen_html_verification_string', None)
+    chosen_logo_displayed = request.POST.get('chosen_logo_displayed', None)
+    chosen_logo_url_https = request.POST.get('chosen_logo_url_https', None)
+    chosen_social_share_description = request.POST.get('chosen_social_share_description', None)
+    chosen_social_share_image_256x256_url_https = request.POST.get('chosen_social_share_image_256x256_url_https', None)
+    chosen_sub_domain_string = request.POST.get('chosen_sub_domain_string', None)
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    state_code = request.POST.get('state_code', None)
+
+    # Check to see if this organization is already being used anywhere
+    organization_on_stage = None
+    organization_on_stage_found = False
+    status = ""
+    try:
+        organization_on_stage = Organization.objects.get(id=organization_id)
+        organization_on_stage_found = True
+    except Exception as e:
+        messages.add_message(request, messages.ERROR, 'Account settings can only be edited on existing organization.')
+        status += "ORGANIZATION_NOT_FOUND "
+
+    try:
+        if organization_on_stage_found:
+            # Update
+            if chosen_domain_string is not None:
+                domain_results = full_domain_string_available(chosen_domain_string, organization_id)
+                if domain_results['full_domain_string_available']:
+                    organization_on_stage.chosen_domain_string = chosen_domain_string.strip()
+                else:
+                    message = 'Cannot save full domain: \'' + chosen_domain_string + '\', status: ' + \
+                              domain_results['status']
+                    messages.add_message(request, messages.ERROR, message)
+                    status += domain_results['status']
+            # if chosen_favicon_url_https is not None:
+            #     organization_on_stage.chosen_favicon_url_https = chosen_favicon_url_https
+            if chosen_google_analytics_account_number is not None:
+                organization_on_stage.chosen_google_analytics_account_number = \
+                    chosen_google_analytics_account_number.strip()
+            if chosen_html_verification_string is not None:
+                organization_on_stage.chosen_html_verification_string = chosen_html_verification_string.strip()
+            if chosen_logo_displayed is not None:
+                organization_on_stage.chosen_logo_displayed = positive_value_exists(chosen_logo_displayed)
+            # if chosen_logo_url_https is not None:
+            #     organization_on_stage.chosen_logo_url_https = chosen_logo_url_https.strip()
+            if chosen_social_share_description is not None:
+                organization_on_stage.chosen_social_share_description = chosen_social_share_description.strip()
+            # if chosen_social_share_image_256x256_url_https is not None:
+            #     organization_on_stage.chosen_social_share_image_256x256_url_https = \
+            #         chosen_social_share_image_256x256_url_https.strip()
+            if chosen_sub_domain_string is not None:
+                domain_results = sub_domain_string_available(chosen_sub_domain_string, organization_id)
+                if domain_results['sub_domain_string_available']:
+                    organization_on_stage.chosen_sub_domain_string = chosen_sub_domain_string.strip()
+                else:
+                    message = 'Cannot save sub domain: \'' + chosen_sub_domain_string + '\', status: ' + \
+                              domain_results['status']
+                    messages.add_message(request, messages.ERROR, message)
+                    status += domain_results['status']
+            organization_on_stage.save()
+            organization_id = organization_on_stage.id
+
+            messages.add_message(request, messages.INFO, 'Organization account information updated.')
+        else:
+            # We do not create organizations in this view
+            pass
+    except Exception as e:
+        messages.add_message(request, messages.ERROR, 'Could not save organization.'
+                                                      ' {error} [type: {error_type}]'.format(error=e,
+                                                                                             error_type=type(e)))
+
+    return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + str(state_code))
+
+
+@login_required
 def organization_position_list_view(request, organization_id=0, organization_we_vote_id="", incorrect_integer=0):
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'partner_organization', 'political_data_manager', 'political_data_viewer',
@@ -1506,3 +1597,337 @@ def organization_position_edit_process_view(request):
     else:
         return HttpResponseRedirect(
             reverse('organization:organization_position_list', args=(organization_on_stage.id,)))
+
+
+@login_required
+def reserved_domain_edit_view(request):
+    """
+    In edit, you can only change your stance and comments, not who or what the position is about
+    :param request:
+    :return:
+    """
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+    reserved_domain_id = request.GET.get('reserved_domain_id', 0)
+    reserved_domain_id = convert_to_int(reserved_domain_id)
+    state_code = request.GET.get('state_code', '')
+
+    messages_on_stage = get_messages(request)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+    full_domain_string = ''
+    sub_domain_string = ''
+    reserved_domain_found = False
+    try:
+        if positive_value_exists(reserved_domain_id):
+            reserved_domain = OrganizationReservedDomain.objects.get(id=reserved_domain_id)
+            full_domain_string = reserved_domain.full_domain_string
+            sub_domain_string = reserved_domain.sub_domain_string
+            reserved_domain_found = True
+    except OrganizationReservedDomain.MultipleObjectsReturned as e:
+        messages.add_message(request, messages.INFO,
+                             'Could not find reserved domain when trying to edit.')
+    except OrganizationReservedDomain.DoesNotExist:
+        # This is fine, create new
+        pass
+
+    template_values = {
+        'google_civic_election_id': google_civic_election_id,
+        'messages_on_stage':        messages_on_stage,
+        'full_domain_string':       full_domain_string,
+        'reserved_domain_id':       reserved_domain_id,
+        'reserved_domain_found':    reserved_domain_found,
+        'state_code':               state_code,
+        'sub_domain_string':        sub_domain_string,
+    }
+
+    return render(request, 'organization/reserved_domain_edit.html', template_values)
+
+
+@login_required
+def reserved_domain_edit_process_view(request):
+    """
+    Process the new or edit reserved domain form
+    :param request:
+    :return:
+    """
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    reserved_domain = None
+
+    full_domain_string = request.POST.get('full_domain_string', '')
+    reserved_domain_id = convert_to_int(request.POST.get('reserved_domain_id', 0))
+    sub_domain_string = request.POST.get('sub_domain_string', '')
+
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    state_code = request.POST.get('state_code', False)
+
+    if not positive_value_exists(full_domain_string) and not positive_value_exists(sub_domain_string):
+        messages.add_message(request, messages.INFO, 'Please enter either a full domain, or a sub domain.')
+        messages_on_stage = get_messages(request)
+        template_values = {
+            'full_domain_string':       full_domain_string,
+            'google_civic_election_id': google_civic_election_id,
+            'messages_on_stage':        messages_on_stage,
+            'reserved_domain_id':       reserved_domain_id,
+            'state_code':               state_code,
+            'sub_domain_string':        sub_domain_string,
+        }
+
+        return render(request, 'organization/reserved_domain_edit.html', template_values)
+
+    # Check to see if this organization is already being used anywhere
+    reserved_domain_found = False
+    new_organization_created = False
+    status = ""
+    if positive_value_exists(reserved_domain_id):
+        try:
+            reserved_domain = OrganizationReservedDomain.objects.get(id=reserved_domain_id)
+            reserved_domain_found = True
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, 'Could not find existing reserved domain.'
+                                                          ' {error} [type: {error_type}]'
+                                                          ''.format(error=e, error_type=type(e)))
+
+    organization_domain_list = []
+    reserved_domain_list = []
+    if positive_value_exists(full_domain_string) or positive_value_exists(sub_domain_string):
+        # Double-check that we don't have a reserved entry already in the Organization table
+        try:
+            organization_list_query = Organization.objects.using('readonly').all()
+            if positive_value_exists(full_domain_string):
+                organization_list_query = organization_list_query.filter(chosen_domain_string__iexact=full_domain_string)
+            else:
+                organization_list_query = organization_list_query.\
+                    filter(chosen_sub_domain_string__iexact=sub_domain_string)
+            organization_domain_list = list(organization_list_query)
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, 'Could not find existing organization domain.'
+                                                          ' {error} [type: {error_type}]'
+                                                          ''.format(error=e, error_type=type(e)))
+
+        # Double-check that we don't have a reserved entry already in the OrganizationReservedDomain table
+        try:
+            reserved_domain_list_query = OrganizationReservedDomain.objects.using('readonly').all()
+            if positive_value_exists(reserved_domain_id):
+                # Don't include this reserved_domain in the query
+                reserved_domain_list_query = reserved_domain_list_query.exclude(id=reserved_domain_id)
+            if positive_value_exists(full_domain_string):
+                reserved_domain_list_query = reserved_domain_list_query.\
+                    filter(full_domain_string__iexact=full_domain_string)
+            else:
+                reserved_domain_list_query = reserved_domain_list_query.filter(sub_domain_string__iexact=sub_domain_string)
+            reserved_domain_list = list(reserved_domain_list_query)
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, 'Could not find existing reserved domain.'
+                                                          ' {error} [type: {error_type}]'
+                                                          ''.format(error=e, error_type=type(e)))
+
+    if len(reserved_domain_list) or len(organization_domain_list):
+        # Cannot save this entry
+        messages.add_message(request, messages.INFO, 'Reserved domain already taken.')
+        messages_on_stage = get_messages(request)
+        template_values = {
+            'full_domain_string':       full_domain_string,
+            'google_civic_election_id': google_civic_election_id,
+            'messages_on_stage':        messages_on_stage,
+            'organization_domain_list': organization_domain_list,
+            'reserved_domain_list':     reserved_domain_list,
+            'reserved_domain_id':       reserved_domain_id,
+            'state_code':               state_code,
+            'sub_domain_string':        sub_domain_string,
+        }
+
+        return render(request, 'organization/reserved_domain_edit.html', template_values)
+
+    if reserved_domain_found:
+        # Update
+        try:
+            string_updated = ''
+            if positive_value_exists(full_domain_string):
+                reserved_domain.full_domain_string = full_domain_string.strip()
+                string_updated = full_domain_string.strip()
+            else:
+                reserved_domain.full_domain_string = None
+            if positive_value_exists(sub_domain_string):
+                reserved_domain.sub_domain_string = sub_domain_string.strip()
+                string_updated = sub_domain_string.strip()
+            else:
+                reserved_domain.sub_domain_string = None
+            reserved_domain.save()
+            reserved_domain_id = reserved_domain.id
+
+            messages.add_message(request, messages.INFO,
+                                 'Reserved domain \'{string_updated}\' updated.'
+                                 ''.format(string_updated=string_updated))
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, 'Could not update reserved domain.'
+                                                          ' {error} [type: {error_type}]'.format(error=e,
+                                                                                                 error_type=type(e)))
+    else:
+        # Create new
+        try:
+            if positive_value_exists(full_domain_string):
+                reserved_domain = OrganizationReservedDomain.objects.create(
+                    full_domain_string=full_domain_string,
+                )
+                messages.add_message(request, messages.INFO, 'New reserved full domain saved.')
+            elif positive_value_exists(sub_domain_string):
+                reserved_domain = OrganizationReservedDomain.objects.create(
+                    sub_domain_string=sub_domain_string,
+                )
+                messages.add_message(request, messages.INFO, 'New reserved sub domain saved.')
+            else:
+                messages.add_message(request, messages.ERROR, 'Reserved full or sub domain not saved.')
+
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, 'Could not save new reserved domain.'
+                                                          ' {error} [type: {error_type}]'.format(error=e,
+                                                                                                 error_type=type(e)))
+    return HttpResponseRedirect(reverse('organization:reserved_domain_list', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" +
+                                str(state_code))
+
+
+@login_required
+def reserved_domain_list_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    domain_search = request.GET.get('domain_search', '')
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
+    show_all = request.GET.get('show_all', False)
+    show_full_domains = request.GET.get('show_full_domains', False)
+    show_more = request.GET.get('show_more', False)
+    show_sub_domains = request.GET.get('show_sub_domains', False)
+    state_code = request.GET.get('state_code', '')
+
+    messages_on_stage = get_messages(request)
+
+    # ##########################################
+    # Pull from OrganizationReservedDomain table
+    reserved_domain_list_query = OrganizationReservedDomain.objects.using('readonly').all()
+    if positive_value_exists(show_full_domains) and not positive_value_exists(show_sub_domains):
+        reserved_domain_list_query = reserved_domain_list_query.exclude(full_domain_string__isnull=True). \
+            exclude(full_domain_string__exact='')
+        reserved_domain_list_query = reserved_domain_list_query.order_by('full_domain_string')
+    elif positive_value_exists(show_sub_domains) and not positive_value_exists(show_full_domains):
+        reserved_domain_list_query = reserved_domain_list_query.exclude(sub_domain_string__isnull=True). \
+            exclude(sub_domain_string__exact='')
+        reserved_domain_list_query = reserved_domain_list_query.order_by('sub_domain_string')
+    else:
+        reserved_domain_list_query = reserved_domain_list_query.order_by('sub_domain_string').\
+            order_by('full_domain_string')
+
+    if positive_value_exists(domain_search):
+        search_words = domain_search.split()
+        for one_word in search_words:
+            filters = []
+            new_filter = Q(full_domain_string__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(sub_domain_string__icontains=one_word)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                reserved_domain_list_query = reserved_domain_list_query.filter(final_filters)
+
+    reserved_domain_count = reserved_domain_list_query.count()
+
+    # Limit to only showing 200 on screen
+    if positive_value_exists(show_more):
+        reserved_domain_list = reserved_domain_list_query[:1000]
+    elif positive_value_exists(show_all):
+        reserved_domain_list = reserved_domain_list_query
+    else:
+        reserved_domain_list = reserved_domain_list_query[:200]
+
+    # ##########################################
+    # Pull from Organization table
+    organization_domain_list_query = Organization.objects.using('readonly').all()
+    # organization_domain_list_query = organization_domain_list_query. \
+    #     exclude(chosen_domain_string__isnull=True). \
+    #     exclude(chosen_domain_string__exact=''). \
+    #     exclude(chosen_sub_domain_string__isnull=True). \
+    #     exclude(chosen_sub_domain_string__exact='')
+    if positive_value_exists(show_full_domains) and not positive_value_exists(show_sub_domains):
+        organization_domain_list_query = organization_domain_list_query.filter(chosen_domain_string__isnull=False)
+        organization_domain_list_query = organization_domain_list_query.order_by('chosen_domain_string')
+    elif positive_value_exists(show_sub_domains) and not positive_value_exists(show_full_domains):
+        organization_domain_list_query = organization_domain_list_query.filter(chosen_sub_domain_string__isnull=False)
+        organization_domain_list_query = organization_domain_list_query.order_by('chosen_sub_domain_string')
+    else:
+        organization_domain_list_query = organization_domain_list_query.filter(
+            Q(chosen_domain_string__isnull=False) |
+            Q(chosen_sub_domain_string__isnull=False)
+        )
+        organization_domain_list_query = organization_domain_list_query.order_by('chosen_sub_domain_string').\
+            order_by('chosen_domain_string')
+
+    if positive_value_exists(domain_search):
+        search_words = domain_search.split()
+        for one_word in search_words:
+            filters = []
+            new_filter = Q(chosen_domain_string__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(chosen_sub_domain_string__icontains=one_word)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                organization_domain_list_query = organization_domain_list_query.filter(final_filters)
+
+    organization_domain_count = organization_domain_list_query.count()
+
+    # Limit to only showing 200 on screen
+    if positive_value_exists(show_more):
+        organization_domain_list = organization_domain_list_query[:1000]
+    elif positive_value_exists(show_all):
+        organization_domain_list = organization_domain_list_query
+    else:
+        organization_domain_list = organization_domain_list_query[:200]
+
+    if positive_value_exists(organization_domain_count) or positive_value_exists(reserved_domain_count):
+        messages.add_message(request, messages.INFO,
+                             '{reserved_domain_count:,} reserved domains found. '
+                             '{organization_domain_count:,} organization domains found. '
+                             ''.format(organization_domain_count=organization_domain_count,
+                                       reserved_domain_count=reserved_domain_count))
+
+    template_values = {
+        'domain_search':            domain_search,
+        'google_civic_election_id': google_civic_election_id,
+        'messages_on_stage':        messages_on_stage,
+        'organization_domain_list': organization_domain_list,
+        'reserved_domain_list':     reserved_domain_list,
+        # 'show_all':                 show_all,
+        # 'show_more':                show_more,
+        'show_full_domains':        show_full_domains,
+        'show_sub_domains':         show_sub_domains,
+        # 'sort_by':                  sort_by,
+        'state_code':               state_code,
+    }
+    return render(request, 'organization/reserved_domain_list.html', template_values)
