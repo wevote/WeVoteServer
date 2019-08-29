@@ -122,6 +122,20 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
 
         return error_results
 
+    # Use a default coupon_code if none is specified
+    if len(coupon_code) < 2:
+        coupon_code = 'DEFAULT-' + plan_type_enum
+
+    # If is_organization_plan, set the price from the coupon, not whatever was passed in.
+    if is_organization_plan:
+        increment_redemption_cnt = False
+        coupon_price, org_subs_id = DonationManager.get_coupon_price(plan_type_enum, coupon_code,
+                                                                     increment_redemption_cnt)
+        if int(donation_amount) > 0:
+            print("Warning for developers, the donation_amount that is passed in for organization plans is ignored,"
+                  " the value is read from the coupon")
+        donation_amount = coupon_price
+
     try:
         results = donation_manager.retrieve_stripe_customer_id(voter_we_vote_id)
         if results['success']:
@@ -138,6 +152,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
 
         if positive_value_exists(stripe_customer_id):
             if positive_value_exists(monthly_donation):
+                donation_status = 'DONATION_SUBSCRIPTION_SETUP'
                 recurring_donation = donation_manager.create_recurring_donation(stripe_customer_id, voter_we_vote_id,
                                                                                 donation_amount, donation_date_time,
                                                                                 email, is_organization_plan,
@@ -251,37 +266,37 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     if not logged_in:
         not_loggedin_voter_we_vote_id = voter_we_vote_id
 
+    # These methods have long lists of parameters, the line breaks in the parameters may look messy, but are purposeful
     if create_donation_entry:
         # Create the Journal entry for a payment initiated by the UI.  (Automatic payments from the subscription will be
         donation_journal_entry = \
-            donation_manager.create_donation_journal_entry("PAYMENT_FROM_UI", ip_address, stripe_customer_id,
-                                                           voter_we_vote_id, charge_id, amount, currency, funding,
-                                                           livemode, action_taken, action_result, created, failure_code,
-                                                           failure_message, network_status, reason, seller_message,
-                                                           stripe_type, paid, amount_refunded, refund_count, email,
-                                                           address_zip, brand, country, exp_month, exp_year, last4,
-                                                           id_card, stripe_object, stripe_status, status, None, None,
-                                                           None, None, None, not_loggedin_voter_we_vote_id,
-                                                           is_organization_plan, coupon_code, plan_type_enum,
-                                                           organization_we_vote_id)
+            donation_manager.create_donation_journal_entry(
+                "PAYMENT_FROM_UI", ip_address, stripe_customer_id,
+                voter_we_vote_id, charge_id, amount, currency, funding,
+                livemode, action_taken, action_result, created,
+                failure_code, failure_message, network_status, reason, seller_message,
+                stripe_type, paid, amount_refunded, refund_count,
+                email, address_zip, brand, country,
+                exp_month, exp_year, last4, id_card, stripe_object,
+                stripe_status, status,
+                None, None, None, None, None, not_loggedin_voter_we_vote_id,
+                is_organization_plan, coupon_code, plan_type_enum, organization_we_vote_id)
         status = textwrap.shorten(donation_journal_entry['status'] + " " + status, width=255, placeholder="...")
 
     if create_subscription_entry:
         # Create the Journal entry for a new subscription, with some fields from the intial payment on that subscription
-        donation_journal_entry = \
-            donation_manager.create_donation_journal_entry("SUBSCRIPTION_SETUP_AND_INITIAL", ip_address,
-                                                           stripe_customer_id, voter_we_vote_id, charge_id, amount,
-                                                           currency, funding, livemode, action_taken, action_result,
-                                                           created, failure_code, failure_message, network_status,
-                                                           reason, seller_message,
-                                                           stripe_type, paid, amount_refunded, refund_count, email,
-                                                           address_zip, brand, country, exp_month, exp_year, last4,
-                                                           id_card, stripe_object, stripe_status, status,
-                                                           subscription_id, subscription_plan_id,
-                                                           subscription_created_at, subscription_canceled_at,
-                                                           subscription_ended_at, not_loggedin_voter_we_vote_id,
-                                                           is_organization_plan, coupon_code, plan_type_enum,
-                                                           organization_we_vote_id)
+        donation_journal_entry = donation_manager.create_donation_journal_entry(
+            "SUBSCRIPTION_SETUP_AND_INITIAL", ip_address, stripe_customer_id,
+            voter_we_vote_id, charge_id, amount, currency, funding,
+            livemode, action_taken, action_result, created,
+            failure_code, failure_message, network_status, reason, seller_message,
+            stripe_type, paid, amount_refunded, refund_count,
+            email, address_zip, brand, country,
+            exp_month, exp_year, last4, id_card, stripe_object,
+            stripe_status, status,
+            subscription_id, subscription_plan_id, subscription_created_at, subscription_canceled_at,
+            subscription_ended_at, not_loggedin_voter_we_vote_id,
+            is_organization_plan, coupon_code, plan_type_enum, organization_we_vote_id)
         donation_entry_saved = donation_journal_entry['success']
         status = textwrap.shorten(donation_journal_entry['status'] + " " + status, width=255, placeholder="...")
         logger.debug("Stripe subscription created successfully: " + subscription_id + ", amount: " + str(amount) +
@@ -425,7 +440,7 @@ def donation_process_charge(event):           # 'charge.succeeded'
         results = DonationManager.does_donation_journal_charge_exist(charge['id'])
 
         # Handle stripe test urls with no customer
-        if outcome == None:
+        if outcome is None:
             outcome = []
 
         if 'network_status' in outcome:
@@ -437,7 +452,7 @@ def donation_process_charge(event):           # 'charge.succeeded'
         else:
             customer = str(charge['customer'])
         if 'reason' in outcome:
-            reason = str('reason')
+            reason = outcome['reason']
         else:
             reason = 'none'
         if 'seller_message' in outcome:
@@ -451,7 +466,7 @@ def donation_process_charge(event):           # 'charge.succeeded'
             if voter_we_vote_id:
                 # Has our metadata?  Then we have already made a journal entry at the time of the donation
                 logger.info("Stripe 'charge.succeeded' received for a PAYMENT_FROM_UI -- ignored, charge = " + charge)
-                return None
+                return
         except Exception:
             voter_we_vote_id = DonationManager.find_we_vote_voter_id_for_stripe_customer(customer)
 
@@ -466,21 +481,28 @@ def donation_process_charge(event):           # 'charge.succeeded'
             organization_we_vote_id = metadata['organization_we_vote_id'] if 'organization_we_vote_id' in metadata \
                 else organization_we_vote_id
 
-            DonationManager.create_donation_journal_entry("PAYMENT_AUTO_SUBSCRIPTION", "0.0.0.0",
-                                                          customer,
-                                                          voter_we_vote_id, charge['id'],
-                                                          charge['amount'], charge['currency'], source['funding'],
-                                                          charge['livemode'], "",  "",
-                                                          datetime.fromtimestamp(charge['created'], timezone.utc),
-                                                          str(charge['failure_code']), str(charge['failure_message']),
-                                                          network_status, reason, seller_message, event['type'], charge['paid'],
-                                                          0, charge['refunds']['total_count'], source['name'],
-                                                          source['address_zip'], source['brand'], source['country'],
-                                                          source['exp_month'], source['exp_year'],
-                                                          int(source['last4']), charge['source']['id'], event['id'],
-                                                          charge['status'], "", 'no', None, None, None, None, None,
-                                                          is_organization_plan, coupon_code, plan_type_enum,
-                                                          organization_we_vote_id)
+            journal = DonationManager.get_missing_charge_info(voter_we_vote_id, organization_we_vote_id,
+                                                              charge['amount'])
+            success = journal['success']
+            status = ''
+            subscription_id = journal['subscription_id'] if success else 'no'
+            subscription_plan_id = journal['subscription_plan_id'] if success else ''
+            is_organization_plan = journal['is_organization_plan'] if success else is_organization_plan
+            plan_type_enum = journal['plan_type_enum'] if success else plan_type_enum
+            coupon_code = journal['coupon_code'] if success else coupon_code
+
+            # This is a long list of parameters, the line breaks in the parameters may look messy, but are purposeful
+            DonationManager.create_donation_journal_entry(
+                "PAYMENT_AUTO_SUBSCRIPTION", "0.0.0.0", customer,
+                voter_we_vote_id, charge['id'], charge['amount'], charge['currency'], source['funding'],
+                charge['livemode'], "",  "", datetime.fromtimestamp(charge['created'], timezone.utc),
+                str(charge['failure_code']), str(charge['failure_message']), network_status, reason, seller_message,
+                event['type'], charge['paid'], 0, charge['refunds']['total_count'],
+                source['name'], source['address_zip'], source['brand'], source['country'],
+                source['exp_month'], source['exp_year'], int(source['last4']), charge['source']['id'], event['id'],
+                charge['status'], status, subscription_id, subscription_plan_id,
+                None, None, None, None,
+                is_organization_plan, coupon_code, plan_type_enum, organization_we_vote_id)
             logger.debug("Stripe subscription payment from webhook: " + str(charge['customer']) + ", amount: " +
                          str(charge['amount']) + ", last4:" + str(source['last4']))
             DonationManager.update_subscription_with_latest_charge_date(charge['invoice'], charge['created'])
@@ -493,7 +515,7 @@ def donation_process_charge(event):           # 'charge.succeeded'
     except Exception as err:
         logger.error("donation_process_charge, general: " + str(err))
 
-    return None
+    return
 
 
 def donation_process_subscription_deleted(event):
@@ -636,6 +658,7 @@ def donation_process_invoice_created(event):
         logger.error("donation_process_invoice_created threw " + str(e))
 
     return
+
 
 def donation_refund_for_api(request, charge, voter_we_vote_id):
     # The WebApp has requested a refund
