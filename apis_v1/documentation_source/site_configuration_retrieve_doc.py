@@ -37,19 +37,13 @@ def site_configuration_retrieve_doc_template_values(url_root):
         'hostname': 'localhost',
     }
 
-    # Changes made here should also be made in organizations_followed_retrieved
     api_response = '{\n' \
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \
-                   '  "organization_description": string,\n' \
-                   '  "organization_email": string,\n' \
-                   '  "organization_facebook": string,\n' \
-                   '  "organization_id": integer (the id of the organization found),\n' \
-                   '  "organization_name": string (value from Google),\n' \
-                   '  "organization_photo_url_large": string,\n' \
-                   '  "organization_photo_url_medium": string,\n' \
-                   '  "organization_photo_url_tiny": string,\n' \
-                   '  "organization_twitter_handle": string (twitter address),\n' \
+                   '  "chosen_hide_we_vote_logo": boolean,\n' \
+                   '  "chosen_logo_url_https": string,\n' \
+                   '  "features_provided_bitmap": integer,\n' \
+                   '  "hostname": string,\n' \
                    '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
                    '}'
 
