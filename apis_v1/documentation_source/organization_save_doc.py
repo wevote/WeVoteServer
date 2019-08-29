@@ -55,9 +55,9 @@ def organization_save_doc_template_values(url_root):
                             'It is changed by a client in Settings section.',
         },
         {
-            'name':         'chosen_logo_displayed',
+            'name':         'chosen_hide_we_vote_logo',
             'value':        'boolean',  # boolean, integer, long, string
-            'description':  'The client wants to show their own logo instead of the default. '
+            'description':  'The client wants to hide the default logo. '
                             'It is changed by a client in Settings section.',
         },
         {

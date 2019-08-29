@@ -5,6 +5,9 @@
 from django.db import models, IntegrityError
 from datetime import datetime, timezone, timedelta
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
+from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOWED, CHOSEN_GOOGLE_ANALYTICS_ALLOWED, \
+    CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED, CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED, CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED
+
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists, convert_date_to_date_as_integer
 import stripe
@@ -213,11 +216,30 @@ class OrganizationSubscriptionPlans(models.Model):
         verbose_name="The monthly price of this monthly plan, the amount we charge with stripe", default=0, null=False)
     annual_price_stripe = models.PositiveIntegerField(
         verbose_name="The annual price of this annual plan, the amount we charge with stripe", default=0, null=False)
+    # 2019-08-26 To discuss: Deprecate features_provided_bitmap in this table in favor of looking up the features
+    # that this plan provides in MasterFeaturePackage per the constant stored here in master_feature_package.
     features_provided_bitmap = models.BigIntegerField(verbose_name="organization features provided bitmap", null=False,
                                                       default=0)
+    master_feature_package = models.CharField(
+        verbose_name="plan type {PROFESSIONAL, ENTERPRISE} that has the features_provided_bitmap definition",
+        max_length=255, null=True, blank=True)
     redemptions = models.PositiveIntegerField(verbose_name="the number of times this plan has been redeemed", default=0,
                                               null=False)
     is_archived = models.BooleanField(verbose_name="stop offering this plan for new clients", default=False,)
+
+
+class MasterFeaturePackage(models.Model):
+    """
+    The master definition of which features are provide with each plan type. For example, changing the features provided
+    for "PROFESSIONAL" affects everyone with that plan. If we want to give new clients a different set of features,
+    (or Beta features) can be set up on a new plan. We did not set up master_feature_package as an enum so we can add
+    new feature bundles under new subscription_plan_type like PROFESSIONAL_2019_AUG
+    """
+    master_feature_package = models.CharField(
+        verbose_name="plan type {FREE, PROFESSIONAL, ENTERPRISE} that is referred to in OrganizationSubscriptionPlans",
+        max_length=255, null=True, blank=True)
+    features_provided_bitmap = models.BigIntegerField(
+        verbose_name="organization features provided bitmap", null=False, default=0)
 
 
 class DonationInvoice(models.Model):
@@ -686,7 +708,7 @@ class DonationManager(models.Model):
         status = ''
 
         DonationManager.create_initial_coupons()
-
+        DonationManager.create_initial_master_feature_packages()
         try:
             plan_queryset = OrganizationSubscriptionPlans.objects.order_by('-plan_created_at')
             subscription_plan_list = plan_queryset
@@ -698,7 +720,6 @@ class DonationManager(models.Model):
                 subscription_plan_list = []
                 success = False
                 status += " NO_ORGANIZATIONAL_SUBSCRIPTION_PLAN_EXISTS "
-
 
         except Exception as e:
             status += " FAILED_TO_RETRIEVE_ORGANIZATIONAL_SUBSCRIPTION_PLANS_LIST "
@@ -985,6 +1006,17 @@ class DonationManager(models.Model):
     @staticmethod
     def create_initial_coupons():
         # If there is no 25OFF, create one -- so that developers have at least one coupon, and the defaults, in the db
+        pro_features_provided_bitmap = 0
+        pro_features_provided_bitmap += CHOSEN_FULL_DOMAIN_ALLOWED
+        pro_features_provided_bitmap += CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED
+
+        enterprise_features_provided_bitmap = 0
+        enterprise_features_provided_bitmap += CHOSEN_FAVICON_ALLOWED
+        enterprise_features_provided_bitmap += CHOSEN_FULL_DOMAIN_ALLOWED
+        enterprise_features_provided_bitmap += CHOSEN_GOOGLE_ANALYTICS_ALLOWED
+        enterprise_features_provided_bitmap += CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED
+        enterprise_features_provided_bitmap += CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED
+        enterprise_features_provided_bitmap += CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED
 
         # We do not want default pricing for Enterprise, so we set these up with "is_archived" set
         coupon_queryset = OrganizationSubscriptionPlans.objects.filter(
@@ -997,7 +1029,8 @@ class DonationManager(models.Model):
                     'coupon_applied_message': 'Not visible on screen, since this is a default.',
                     'monthly_price_stripe': 0,
                     'annual_price_stripe': 0,
-                    'features_provided_bitmap': 1,
+                    'master_feature_package': 'ENTERPRISE',
+                    'features_provided_bitmap': enterprise_features_provided_bitmap,
                     'hidden_plan_comment': 'We do not share default Enterprise pricing.',
                     'is_archived': True,
                 }
@@ -1013,7 +1046,8 @@ class DonationManager(models.Model):
                     'coupon_applied_message': 'Not visible on screen, since this is a default',
                     'monthly_price_stripe': 0,
                     'annual_price_stripe': 0,
-                    'features_provided_bitmap': 1,
+                    'master_feature_package': 'ENTERPRISE',
+                    'features_provided_bitmap': enterprise_features_provided_bitmap,
                     'hidden_plan_comment': 'We do not share default Enterprise pricing.',
                     'is_archived': True,
                 }
@@ -1029,7 +1063,8 @@ class DonationManager(models.Model):
                     'coupon_applied_message': 'Not visible on screen, since this is a default',
                     'monthly_price_stripe': 15000,
                     'annual_price_stripe': 0,
-                    'features_provided_bitmap': 1,
+                    'master_feature_package': 'PROFESSIONAL',
+                    'features_provided_bitmap': pro_features_provided_bitmap,
                     'hidden_plan_comment': '',
                 }
             )
@@ -1044,7 +1079,8 @@ class DonationManager(models.Model):
                     'coupon_applied_message': 'Not visible on screen, since this is a default',
                     'monthly_price_stripe': 0,
                     'annual_price_stripe': 150000,
-                    'features_provided_bitmap': 1,
+                    'master_feature_package': 'PROFESSIONAL',
+                    'features_provided_bitmap': pro_features_provided_bitmap,
                     'hidden_plan_comment': '',
                 }
             )
@@ -1059,7 +1095,8 @@ class DonationManager(models.Model):
                     'coupon_applied_message': 'You save $25 per month.',
                     'monthly_price_stripe': 12500,
                     'annual_price_stripe': 0,
-                    'features_provided_bitmap': 1,
+                    'master_feature_package': 'PROFESSIONAL',
+                    'features_provided_bitmap': pro_features_provided_bitmap,
                     'hidden_plan_comment': '',
                 }
             )
@@ -1074,7 +1111,8 @@ class DonationManager(models.Model):
                     'coupon_applied_message': 'You save $300 per year.',
                     'monthly_price_stripe': 0,
                     'annual_price_stripe': 120000,
-                    'features_provided_bitmap': 1,
+                    'master_feature_package': 'PROFESSIONAL',
+                    'features_provided_bitmap': pro_features_provided_bitmap,
                     'hidden_plan_comment': '',
                 }
             )
@@ -1089,7 +1127,8 @@ class DonationManager(models.Model):
                     'coupon_applied_message': '',
                     'monthly_price_stripe': 22500,
                     'annual_price_stripe': 0,
-                    'features_provided_bitmap': 1,
+                    'master_feature_package': 'ENTERPRISE',
+                    'features_provided_bitmap': enterprise_features_provided_bitmap,
                     'hidden_plan_comment': 'Nonprofit, annual revenues < $1M',
                 }
             )
@@ -1104,11 +1143,50 @@ class DonationManager(models.Model):
                     'coupon_applied_message': '',
                     'monthly_price_stripe': 0,
                     'annual_price_stripe': 225000,
-                    'features_provided_bitmap': 1,
+                    'master_feature_package': 'ENTERPRISE',
+                    'features_provided_bitmap': enterprise_features_provided_bitmap,
                     'hidden_plan_comment': 'Nonprofit, annual revenues < $1M',
                 }
             )
         return
+
+    @staticmethod
+    def create_initial_master_feature_packages():
+        """
+        The master feature packages we want to keep updated
+        :return:
+        """
+        master_feature_package, package_created = MasterFeaturePackage.objects.update_or_create(
+            master_feature_package='FREE',
+            defaults={
+                'master_feature_package': 'FREE',
+                'features_provided_bitmap': 0,
+            }
+        )
+        pro_features_provided_bitmap = 0
+        pro_features_provided_bitmap += CHOSEN_FULL_DOMAIN_ALLOWED
+        pro_features_provided_bitmap += CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED
+        master_feature_package, package_created = MasterFeaturePackage.objects.update_or_create(
+            master_feature_package='PROFESSIONAL',
+            defaults={
+                'master_feature_package': 'PROFESSIONAL',
+                'features_provided_bitmap': pro_features_provided_bitmap,
+            }
+        )
+        enterprise_features_provided_bitmap = 0
+        enterprise_features_provided_bitmap += CHOSEN_FAVICON_ALLOWED
+        enterprise_features_provided_bitmap += CHOSEN_FULL_DOMAIN_ALLOWED
+        enterprise_features_provided_bitmap += CHOSEN_GOOGLE_ANALYTICS_ALLOWED
+        enterprise_features_provided_bitmap += CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED
+        enterprise_features_provided_bitmap += CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED
+        enterprise_features_provided_bitmap += CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED
+        master_feature_package, package_created = MasterFeaturePackage.objects.update_or_create(
+            master_feature_package='ENTERPRISE',
+            defaults={
+                'master_feature_package': 'ENTERPRISE',
+                'features_provided_bitmap': enterprise_features_provided_bitmap,
+            }
+        )
 
     @staticmethod
     def retrieve_coupon_summary(coupon_code):  # couponSummaryRetrieve

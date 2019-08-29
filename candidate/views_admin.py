@@ -233,18 +233,22 @@ def candidate_list_view(request):
     state_code = request.GET.get('state_code', '')
     state_list = STATE_CODE_MAP
     state_list_modified = {}
-    if positive_value_exists(google_civic_election_id):
-        candidate_campaign_list_manager = CandidateCampaignListManager()
-        for one_state_code, one_state_name in state_list.items():
-            count_result = candidate_campaign_list_manager.retrieve_candidate_count_for_election_and_state(
-                google_civic_election_id, one_state_code)
-            state_name_modified = one_state_name
-            if positive_value_exists(count_result['candidate_count']):
-                state_name_modified += " - " + str(count_result['candidate_count'])
+    candidate_campaign_list_manager = CandidateCampaignListManager()
+    for one_state_code, one_state_name in state_list.items():
+        count_result = candidate_campaign_list_manager.retrieve_candidate_count_for_election_and_state(
+            google_civic_election_id, one_state_code)
+        state_name_modified = one_state_name
+        if positive_value_exists(count_result['candidate_count']):
+            state_name_modified += " - " + str(count_result['candidate_count'])
             state_list_modified[one_state_code] = state_name_modified
-        sorted_state_list = sorted(state_list_modified.items())
-    else:
-        sorted_state_list = sorted(state_list.items())
+        else:
+            # Do not include state in drop-down if there aren't any candidates in that state
+            pass
+    sorted_state_list = sorted(state_list_modified.items())
+    # if positive_value_exists(google_civic_election_id):
+    #     pass
+    # else:
+    #     sorted_state_list = sorted(state_list.items())
 
     show_all = request.GET.get('show_all', False)
     show_all_elections = request.GET.get('show_all_elections', False)

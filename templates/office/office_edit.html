@@ -131,6 +131,22 @@
 </div>
 
 <div class="form-group">
+    <label for="ballotpedia_is_marquee_id" class="col-sm-3 control-label">Is Marquee</label>
+    <div class="col-sm-8">
+        <input type="checkbox" name="ballotpedia_is_marquee" id="ballotpedia_is_marquee_id" value="1"
+             {% if office.ballotpedia_is_marquee %}checked{% endif %} />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="is_battleground_race_id" class="col-sm-3 control-label">Is Battleground Race</label>
+    <div class="col-sm-8">
+        <input type="checkbox" name="is_battleground_race" id="is_battleground_race_id" value="1"
+             {% if office.is_battleground_race %}checked{% endif %} />
+    </div>
+</div>
+
+<div class="form-group">
     <label for="ballotpedia_race_office_level_id" class="col-sm-3 control-label">Ballotpedia Race Office Level</label>
     <div class="col-sm-8">
         <input type="radio" name="ballotpedia_race_office_level" value="Federal"{% if office.ballotpedia_race_office_level == "Federal" %} checked{% endif %} > Federal&nbsp;&nbsp;

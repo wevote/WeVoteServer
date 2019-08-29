@@ -145,6 +145,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
     'ballotpedia_candidate_id': 'ballotpedia_candidate_id *',  # For matching only
     'ballotpedia_district_id': 'ballotpedia_district_id',
     'ballotpedia_election_id': 'ballotpedia_election_id',
+    'ballotpedia_is_marquee': 'ballotpedia_is_marquee',
     'ballotpedia_office_id': 'ballotpedia_office_id',
     'ballotpedia_office_name': 'ballotpedia_office_name',
     'ballotpedia_office_url': 'ballotpedia_office_url',
@@ -185,6 +186,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
 BATCH_HEADER_MAP_CONTEST_OFFICES_TO_BALLOTPEDIA_RACES = {
     'ballotpedia_district_id': 'ballotpedia_district_id',
     'ballotpedia_election_id': 'ballotpedia_election_id',
+    'ballotpedia_is_marquee': 'ballotpedia_is_marquee',
     'ballotpedia_office_id': 'ballotpedia_office_id',
     'ballotpedia_office_name': 'office_name',
     'ballotpedia_race_id': 'ballotpedia_race_id',
@@ -4543,6 +4545,7 @@ class BatchRowActionContestOffice(models.Model):
     ballotpedia_district_id = models.PositiveIntegerField(
         verbose_name="ballotpedia district id", null=True, blank=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
+    ballotpedia_is_marquee = models.NullBooleanField(default=None, null=True)
     is_ballotpedia_general_election = models.BooleanField(default=False)
     is_ballotpedia_general_runoff_election = models.BooleanField(default=False)
     is_ballotpedia_primary_election = models.BooleanField(default=False)

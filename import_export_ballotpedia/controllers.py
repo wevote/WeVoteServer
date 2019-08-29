@@ -1225,6 +1225,7 @@ def groom_ballotpedia_data_for_processing(structured_json, google_civic_election
                             # Add our own key/value pairs
                             # root level
                             one_office_json['ballotpedia_race_id'] = one_office_json['id']
+                            one_office_json['ballotpedia_is_marquee'] = one_office_json['is_marquee']
                             # office
                             one_office_json['ballotpedia_district_id'] = inner_office_json['district']
                             one_office_json['ballotpedia_office_id'] = inner_office_json['id']

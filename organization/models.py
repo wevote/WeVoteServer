@@ -62,6 +62,17 @@ ORGANIZATION_TYPE_MAP = {
     UNKNOWN:                    'Unknown Type',
 }
 
+# These are values used in features_provided_bitmap
+# Mirrored in WebApp/src/js/constants/VoterConstants.js
+# Related to MasterFeaturePackage in donate/models.py, features_provided_bitmap
+# Related to Organization, features_provided_bitmap
+CHOSEN_FAVICON_ALLOWED = 1  # Able to upload/display custom favicon in browser
+CHOSEN_FULL_DOMAIN_ALLOWED = 2  # Able to specify full domain for white label version of WeVote.US
+CHOSEN_GOOGLE_ANALYTICS_ALLOWED = 4  # Able to specify and have rendered org's Google Analytics Javascript
+CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED = 8  # Able to specify sharing images for white label version of WeVote.US
+CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED = 16  # Able to specify sharing description for white label version of WeVote.US
+CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED = 32  # Able to promote endorsements from specific organizations
+
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric characters are allowed.')
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -295,6 +306,9 @@ class OrganizationManager(models.Manager):
     def retrieve_organization_from_vote_smart_id(self, vote_smart_id, read_only=False):
         return self.retrieve_organization(0, '', vote_smart_id, read_only=read_only)
 
+    def retrieve_organization_from_incoming_hostname(self, incoming_hostname, read_only=False):
+        return self.retrieve_organization(incoming_hostname=incoming_hostname, read_only=read_only)
+
     def retrieve_organization_from_twitter_handle(self, twitter_handle, read_only=False):
         organization_id = 0
         organization_we_vote_id = ""
@@ -365,14 +379,15 @@ class OrganizationManager(models.Manager):
         }
         return results
 
-    def retrieve_organization(self, organization_id, we_vote_id=None, vote_smart_id=None, twitter_user_id=None,
-                              read_only=False):
+    def retrieve_organization(self, organization_id=None, we_vote_id=None, vote_smart_id=None, twitter_user_id=None,
+                              incoming_hostname=None, read_only=False):
         """
         Get an organization, based the passed in parameters
         :param organization_id:
         :param we_vote_id:
         :param vote_smart_id:
         :param twitter_user_id:
+        :param incoming_hostname:
         :param read_only:
         :return: the matching organization object
         """
@@ -414,7 +429,21 @@ class OrganizationManager(models.Manager):
                 else:
                     organization_on_stage = Organization.objects.get(twitter_user_id=twitter_user_id)
                 organization_on_stage_id = organization_on_stage.id
-                status = "ORGANIZATION_FOUND_WITH_TWITTER_ID"
+                status = "ORGANIZATION_FOUND_WITH_TWITTER_ID "
+            elif positive_value_exists(incoming_hostname):
+                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_INCOMING_HOSTNAME "
+                incoming_hostname = incoming_hostname.strip().lower()
+                incoming_sub_domain = incoming_hostname.replace('.wevote.us', '')
+                if read_only:
+                    organization_on_stage = Organization.objects.using('readonly')\
+                        .get(Q(chosen_domain_string__iexact=incoming_hostname) |
+                             Q(chosen_sub_domain_string__iexact=incoming_sub_domain))
+                else:
+                    organization_on_stage = Organization.objects\
+                        .get(Q(chosen_domain_string__iexact=incoming_hostname) |
+                             Q(chosen_sub_domain_string__iexact=incoming_sub_domain))
+                organization_on_stage_id = organization_on_stage.id
+                status = "ORGANIZATION_FOUND_WITH_INCOMING_HOSTNAME "
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger)
             error_result = True
@@ -741,7 +770,8 @@ class OrganizationManager(models.Manager):
             facebook_profile_image_url_https=False,
             facebook_background_image_url_https=False,
             chosen_domain_string=False, chosen_google_analytics_account_number=False,
-            chosen_html_verification_string=False, chosen_logo_displayed=None, chosen_social_share_description=False,
+            chosen_html_verification_string=False, chosen_hide_we_vote_logo=None,
+            chosen_social_share_description=False,
             chosen_sub_domain_string=False, chosen_subscription_plan=False,
     ):
         """
@@ -767,7 +797,7 @@ class OrganizationManager(models.Manager):
         :param chosen_domain_string:
         :param chosen_google_analytics_account_number:
         :param chosen_html_verification_string:
-        :param chosen_logo_displayed:
+        :param chosen_hide_we_vote_logo:
         :param chosen_social_share_description:
         :param chosen_sub_domain_string:
         :param chosen_subscription_plan:
@@ -906,9 +936,9 @@ class OrganizationManager(models.Manager):
                 if chosen_html_verification_string is not False:
                     value_changed = True
                     organization_on_stage.chosen_html_verification_string = chosen_html_verification_string
-                if chosen_logo_displayed is not None:
+                if chosen_hide_we_vote_logo is not None:
                     value_changed = True
-                    organization_on_stage.chosen_logo_displayed = chosen_logo_displayed
+                    organization_on_stage.chosen_hide_we_vote_logo = positive_value_exists(chosen_hide_we_vote_logo)
                 if chosen_social_share_description is not False:
                     value_changed = True
                     organization_on_stage.chosen_social_share_description = chosen_social_share_description
@@ -962,8 +992,8 @@ class OrganizationManager(models.Manager):
                         success = True
                         status += "SAVED_WITH_ORG_ID_OR_WE_VOTE_ID "
                     except Exception as e:
-                        status += "organization_on_stage.save() failed to save #1 "
-                        logger.error("organization_on_stage.save() failed to save #1")
+                        status += 'organization_on_stage.save() failed to save #1 ' \
+                                  '{error} [type: {error_type}] '.format(error=e.message, error_type=type(e))
                 else:
                     success = True
                     status += "NO_CHANGES_SAVED_WITH_ORG_ID_OR_WE_VOTE_ID "
@@ -1118,9 +1148,9 @@ class OrganizationManager(models.Manager):
                     if chosen_html_verification_string is not False:
                         value_changed = True
                         organization_on_stage.chosen_html_verification_string = chosen_html_verification_string
-                    if chosen_logo_displayed is not None:
+                    if chosen_hide_we_vote_logo is not None:
                         value_changed = True
-                        organization_on_stage.chosen_logo_displayed = chosen_logo_displayed
+                        organization_on_stage.chosen_hide_we_vote_logo = chosen_hide_we_vote_logo
                     if chosen_social_share_description is not False:
                         value_changed = True
                         organization_on_stage.chosen_social_share_description = chosen_social_share_description
@@ -1266,9 +1296,9 @@ class OrganizationManager(models.Manager):
                     if chosen_html_verification_string is not False:
                         value_changed = True
                         organization_on_stage.chosen_html_verification_string = chosen_html_verification_string
-                    if chosen_logo_displayed is not None:
+                    if chosen_hide_we_vote_logo is not None:
                         value_changed = True
-                        organization_on_stage.chosen_logo_displayed = chosen_logo_displayed
+                        organization_on_stage.chosen_hide_we_vote_logo = chosen_hide_we_vote_logo
                     if chosen_social_share_description is not False:
                         value_changed = True
                         organization_on_stage.chosen_social_share_description = chosen_social_share_description
@@ -2395,7 +2425,7 @@ class Organization(models.Model):
     chosen_google_analytics_account_number = models.CharField(max_length=255, null=True, blank=True)
     chosen_html_verification_string = models.CharField(max_length=255, null=True, blank=True)
     # Set to True to hide We Vote logo
-    chosen_logo_displayed = models.BooleanField(default=False)
+    chosen_hide_we_vote_logo = models.BooleanField(default=False)
     chosen_logo_url_https = models.URLField(verbose_name='url of client logo', blank=True, null=True)
     # Client configured text that will show in index.html
     chosen_social_share_description = models.TextField(null=True, blank=True)
@@ -2408,7 +2438,15 @@ class Organization(models.Model):
     # Last date the subscription is paid through ex/ 20200415
     subscription_plan_end_day_text = models.CharField(
         verbose_name="paid through day", max_length=8, null=True, blank=True)
+    # subscription_plan_features_active should be replaced by features_provided_bitmap
     subscription_plan_features_active = models.PositiveIntegerField(verbose_name="features that are active", default=0)
+    # The cached value of chosen_feature_package in this Organization table will be slave
+    # to the chosen_subscription_plan
+    chosen_feature_package = models.CharField(
+        verbose_name="plan type {FREE, PROFESSIONAL, ENTERPRISE} that is referred to in MasterFeaturePackage",
+        max_length=255, null=True, blank=True)
+    # These get copied from features_provided_bitmap in MasterFeaturePackage table
+    features_provided_bitmap = models.PositiveIntegerField(verbose_name="features that are active", default=0)
 
     organization_endorsements_api_url = models.URLField(verbose_name='endorsements importer url', blank=True, null=True)
 
