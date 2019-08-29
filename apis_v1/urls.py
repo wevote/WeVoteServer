@@ -133,6 +133,8 @@ urlpatterns = [
         views_position.position_support_count_for_ballot_item_view, name='positionSupportCountForBallotItemView'),
     url(r'^quickInfoRetrieve/', views_misc.quick_info_retrieve_view, name='quickInfoRetrieveView'),
     url(r'^retrieveIssuesToFollow/', retrieve_issues_to_follow_view, name='retrieveIssuesToFollowView'),
+    url(r'^siteConfigurationRetrieve/',
+        views_organization.site_configuration_retrieve_view, name='siteConfigurationRetrieveView'),
     url(r'^saveAnalyticsAction/', views_analytics.save_analytics_action_view, name='saveAnalyticsActionView'),
     url(r'^searchAll/', views_misc.search_all_view, name='searchAllView'),
 
@@ -353,6 +355,8 @@ urlpatterns = [
         name='retrieveIssuesToFollowDocs'),
     url(r'^docs/saveAnalyticsAction/$',
         views_docs.save_analytics_action_doc_view, name='saveAnalyticsActionDocs'),
+    url(r'^docs/siteConfigurationRetrieve/$',
+        views_docs.site_configuration_retrieve_doc_view, name='siteConfigurationRetrieveDocs'),
     url(r'^docs/searchAll/$',
         views_docs.search_all_doc_view, name='searchAllDocs'),
     url(r'^docs/twitterIdentityRetrieve/$',

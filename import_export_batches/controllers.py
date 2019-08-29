@@ -937,6 +937,8 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                                                                           one_batch_row)
     ballotpedia_election_id = batch_manager.retrieve_value_from_batch_row("ballotpedia_election_id", batch_header_map,
                                                                           one_batch_row)
+    ballotpedia_is_marquee = batch_manager.retrieve_value_from_batch_row("ballotpedia_is_marquee", batch_header_map,
+                                                                         one_batch_row)
     ballotpedia_office_id = batch_manager.retrieve_value_from_batch_row("ballotpedia_office_id", batch_header_map,
                                                                         one_batch_row)
     ballotpedia_office_name = batch_manager.retrieve_value_from_batch_row("ballotpedia_office_name", batch_header_map,
@@ -1130,6 +1132,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         batch_row_action_contest_office.batch_set_id = batch_description.batch_set_id
         batch_row_action_contest_office.ballotpedia_district_id = convert_to_int(ballotpedia_district_id)
         batch_row_action_contest_office.ballotpedia_election_id = convert_to_int(ballotpedia_election_id)
+        batch_row_action_contest_office.ballotpedia_is_marquee = positive_value_exists(ballotpedia_is_marquee)
         batch_row_action_contest_office.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
         batch_row_action_contest_office.ballotpedia_office_name = ballotpedia_office_name
         batch_row_action_contest_office.ballotpedia_office_url = ballotpedia_office_url
@@ -3027,6 +3030,7 @@ def import_contest_office_data_from_batch_row_actions(
             'district_scope':                   one_batch_row_action.district_scope,
             'ballotpedia_district_id':          one_batch_row_action.ballotpedia_district_id,
             'ballotpedia_election_id':          one_batch_row_action.ballotpedia_election_id,
+            'ballotpedia_is_marquee':           one_batch_row_action.ballotpedia_is_marquee,
             'ballotpedia_office_id':            one_batch_row_action.ballotpedia_office_id,
             'ballotpedia_office_name':          one_batch_row_action.ballotpedia_office_name,
             'ballotpedia_office_url':           one_batch_row_action.ballotpedia_office_url,

@@ -89,6 +89,8 @@ class ContestOffice(models.Model):
     ballotpedia_id = models.CharField(
         verbose_name="ballotpedia unique identifier", max_length=255, null=True, blank=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
+    ballotpedia_is_marquee = models.NullBooleanField(default=None, null=True)
+    is_battleground_race = models.NullBooleanField(default=None, null=True)
 
     # Which kind of ballotpedia election "state" is this office in. Ex/ You can have an office in a primary be labeled
     #  general election if it is to decide on the final outcome, like for a mayor
@@ -782,6 +784,9 @@ class ContestOfficeManager(models.Model):
                     new_contest_office.ballotpedia_district_id = convert_to_int(defaults['ballotpedia_district_id'])
                 if 'ballotpedia_election_id' in defaults:
                     new_contest_office.ballotpedia_election_id = convert_to_int(defaults['ballotpedia_election_id'])
+                if 'ballotpedia_is_marquee' in defaults:
+                    new_contest_office.ballotpedia_is_marquee = \
+                        positive_value_exists(defaults['ballotpedia_is_marquee'])
                 if 'ballotpedia_office_id' in defaults:
                     new_contest_office.ballotpedia_office_id = convert_to_int(defaults['ballotpedia_office_id'])
                 if 'ballotpedia_office_name' in defaults:
@@ -872,6 +877,9 @@ class ContestOfficeManager(models.Model):
                     existing_office_entry.ballotpedia_district_id = convert_to_int(defaults['ballotpedia_district_id'])
                 if 'ballotpedia_election_id' in defaults:
                     existing_office_entry.ballotpedia_election_id = convert_to_int(defaults['ballotpedia_election_id'])
+                if 'ballotpedia_is_marquee' in defaults:
+                    existing_office_entry.ballotpedia_is_marquee = \
+                        positive_value_exists(defaults['ballotpedia_is_marquee'])
                 if 'ballotpedia_office_id' in defaults:
                     existing_office_entry.ballotpedia_office_id = convert_to_int(defaults['ballotpedia_office_id'])
                 if 'ballotpedia_office_name' in defaults:

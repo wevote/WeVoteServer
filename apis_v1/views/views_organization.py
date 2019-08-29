@@ -15,7 +15,7 @@ from follow.controllers import organization_suggestion_tasks_for_api
 import json
 from organization.controllers import full_domain_string_available, organization_retrieve_for_api, \
     organization_save_for_api, organization_search_for_api, organizations_followed_retrieve_for_api, \
-    sub_domain_string_available
+    site_configuration_retrieve_for_api, sub_domain_string_available
 from organization.models import OrganizationManager
 from voter.models import voter_has_authority, VoterManager
 from voter_guide.controllers_possibility import organizations_found_on_url
@@ -110,7 +110,7 @@ def organizations_found_on_url_api_view(request):  # organizationsFoundOnUrl
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def organization_retrieve_view(request):
+def organization_retrieve_view(request):  # organizationRetrieve
     """
     Retrieve a single organization based on unique identifier
     :param request:
@@ -162,6 +162,8 @@ def organization_save_view(request):  # organizationSave
     organization_manager = OrganizationManager()
     chosen_domain_string = request.GET.get('chosen_domain_string', False)
     chosen_sub_domain_string = request.GET.get('chosen_sub_domain_string', False)
+
+    # Check to make sure it is ok to assign this full_domain or sub_domain to this organization
     if positive_value_exists(chosen_domain_string) or positive_value_exists(chosen_sub_domain_string):
         if not positive_value_exists(organization_id) and positive_value_exists(organization_we_vote_id):
             results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
@@ -172,19 +174,19 @@ def organization_save_view(request):  # organizationSave
         domain_results = full_domain_string_available(chosen_domain_string, organization_id)
         if not domain_results['full_domain_string_available']:
             full_domain_string_already_taken = True
-            # Clear it out
-            chosen_domain_string = ''
+            # Do not save it
+            chosen_domain_string = False
     sub_domain_string_already_taken = False
     if positive_value_exists(chosen_sub_domain_string):
         domain_results = sub_domain_string_available(chosen_sub_domain_string, organization_id)
         if not domain_results['sub_domain_string_available']:
             sub_domain_string_already_taken = True
-            # Clear it out
-            chosen_sub_domain_string = ''
+            # Do not save it
+            chosen_sub_domain_string = False
 
     chosen_google_analytics_account_number = request.GET.get('chosen_google_analytics_account_number', False)
     chosen_html_verification_string = request.GET.get('chosen_html_verification_string', False)
-    chosen_logo_displayed = request.GET.get('chosen_logo_displayed', None)
+    chosen_hide_we_vote_logo = request.GET.get('chosen_hide_we_vote_logo', None)
     chosen_social_share_description = request.GET.get('chosen_social_share_description', False)
     chosen_subscription_plan = request.GET.get('chosen_subscription_plan', False)
 
@@ -232,7 +234,7 @@ def organization_save_view(request):  # organizationSave
                 'chosen_favicon_url_https': '',
                 'chosen_google_analytics_account_number': '',
                 'chosen_html_verification_string': '',
-                'chosen_logo_displayed': '',
+                'chosen_hide_we_vote_logo': '',
                 'chosen_logo_url_https': '',
                 'chosen_social_share_description': '',
                 'chosen_social_share_image_256x256_url_https': '',
@@ -261,21 +263,29 @@ def organization_save_view(request):  # organizationSave
             return HttpResponse(json.dumps(results), content_type='application/json')
 
     results = organization_save_for_api(
-        voter_device_id=voter_device_id, organization_id=organization_id,
+        voter_device_id=voter_device_id,
+        organization_id=organization_id,
         organization_we_vote_id=organization_we_vote_id,
-        organization_name=organization_name, organization_description=organization_description,
+        organization_name=organization_name,
+        organization_description=organization_description,
         organization_email=organization_email,
-        organization_website=organization_website, organization_twitter_handle=organization_twitter_handle,
-        organization_facebook=organization_facebook, organization_instagram_handle=organization_instagram_handle,
+        organization_website=organization_website,
+        organization_twitter_handle=organization_twitter_handle,
+        organization_facebook=organization_facebook,
+        organization_instagram_handle=organization_instagram_handle,
         organization_image=organization_image,
-        organization_type=organization_type, refresh_from_twitter=refresh_from_twitter,
-        facebook_id=facebook_id, facebook_email=facebook_email,
+        organization_type=organization_type,
+        refresh_from_twitter=refresh_from_twitter,
+        facebook_id=facebook_id,
+        facebook_email=facebook_email,
         facebook_profile_image_url_https=facebook_profile_image_url_https,
         chosen_domain_string=chosen_domain_string,
         chosen_google_analytics_account_number=chosen_google_analytics_account_number,
-        chosen_html_verification_string=chosen_html_verification_string, chosen_logo_displayed=chosen_logo_displayed,
+        chosen_html_verification_string=chosen_html_verification_string,
+        chosen_hide_we_vote_logo=chosen_hide_we_vote_logo,
         chosen_social_share_description=chosen_social_share_description,
-        chosen_sub_domain_string=chosen_sub_domain_string, chosen_subscription_plan=chosen_subscription_plan,
+        chosen_sub_domain_string=chosen_sub_domain_string,
+        chosen_subscription_plan=chosen_subscription_plan,
     )
     results['full_domain_string_already_taken'] = full_domain_string_already_taken
     results['sub_domain_string_already_taken'] = sub_domain_string_already_taken
@@ -348,3 +358,13 @@ def organizations_followed_retrieve_api_view(request):  # organizationsFollowedR
                                                    maximum_number_to_retrieve=maximum_number_to_retrieve,
                                                    auto_followed_from_twitter_suggestion=
                                                    auto_followed_from_twitter_suggestion)
+
+
+def site_configuration_retrieve_view(request):  # siteConfigurationRetrieve
+    """
+    Retrieve the configuration settings for a private-labeled site set up by one organization
+    :param request:
+    :return:
+    """
+    hostname = request.GET.get('hostname', '')
+    return site_configuration_retrieve_for_api(hostname)

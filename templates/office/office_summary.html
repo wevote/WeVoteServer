@@ -81,6 +81,10 @@
       <td><strong>{{ office.ballotpedia_district_id|default_if_none:"" }}</strong></td>
     </tr>
     <tr>
+      <td>Is Marquee? :: Is Battleground?</td>
+      <td><strong>{{ office.ballotpedia_is_marquee|default_if_none:"No" }} :: {{ office.is_battleground_race|default_if_none:"No" }}</strong></td>
+    </tr>
+    <tr>
       <td>Ballotpedia Office URL:</td>
       <td><strong>{{ office.ballotpedia_office_url }}</strong></td>
     </tr>
@@ -91,7 +95,7 @@
     </tr>
     {% endif %}
     <tr>
-      <td>Google ballotPlacement:</td>
+      <td>Google Ballot Placement:</td>
       <td><strong>{{ office.google_ballot_placement|default_if_none:"" }}</strong></td>
     </tr>
     <tr>

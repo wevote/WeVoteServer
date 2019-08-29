@@ -29,7 +29,7 @@ from apis_v1.documentation_source import all_ballot_items_retrieve_doc, ballot_i
     position_public_support_count_for_ballot_item_doc, position_support_count_for_ballot_item_doc, \
     positions_count_for_all_ballot_items_doc, positions_count_for_one_ballot_item_doc, \
     quick_info_retrieve_doc, retrieve_issues_to_follow_doc, \
-    save_analytics_action_doc, search_all_doc, twitter_identity_retrieve_doc, \
+    save_analytics_action_doc, search_all_doc, site_configuration_retrieve_doc, twitter_identity_retrieve_doc, \
     twitter_sign_in_request_access_token_doc, twitter_sign_in_request_voter_info_doc, twitter_sign_in_retrieve_doc, \
     twitter_sign_in_start_doc, twitter_retrieve_ids_i_follow_doc, voter_address_retrieve_doc, voter_address_save_doc, \
     voter_all_positions_retrieve_doc, voter_all_bookmarks_status_retrieve_doc, \
@@ -728,6 +728,16 @@ def search_all_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = search_all_doc.\
         search_all_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def site_configuration_retrieve_doc_view(request):
+    """
+    Show documentation about siteConfigurationRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = site_configuration_retrieve_doc.site_configuration_retrieve_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

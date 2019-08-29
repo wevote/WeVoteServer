@@ -15,6 +15,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
+from donate.models import MasterFeaturePackage
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception
 from election.models import Election, ElectionManager
@@ -517,28 +518,33 @@ def organization_edit_account_view(request, organization_id=0, organization_we_v
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
+    master_feature_package_query = MasterFeaturePackage.objects.all()
+    master_feature_package_list = list(master_feature_package_query)
+
     organization_types_map = ORGANIZATION_TYPE_MAP
     # Sort by organization_type value (instead of key)
     organization_types_list = sorted(organization_types_map.items(), key=operator.itemgetter(1))
 
     if organization_on_stage_found:
         template_values = {
+            'google_civic_election_id': google_civic_election_id,
+            'issue_list':               new_issue_list,
+            'master_feature_package_list': master_feature_package_list,
             'messages_on_stage':        messages_on_stage,
             'organization':             organization_on_stage,
             'organization_types':       organization_types_list,
-            'upcoming_election_list':   upcoming_election_list,
-            'google_civic_election_id': google_civic_election_id,
             'state_list':               sorted_state_list,
             'state_served_code':        state_served_code,
-            'issue_list':               new_issue_list,
+            'upcoming_election_list':   upcoming_election_list,
         }
     else:
         template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'upcoming_election_list':   upcoming_election_list,
             'google_civic_election_id': google_civic_election_id,
-            'state_list':               sorted_state_list,
             'issue_list':               new_issue_list,
+            'master_feature_package_list': master_feature_package_list,
+            'messages_on_stage':        messages_on_stage,
+            'state_list':               sorted_state_list,
+            'upcoming_election_list':   upcoming_election_list,
         }
     return render(request, 'organization/organization_edit_account.html', template_values)
 
@@ -888,11 +894,12 @@ def organization_edit_account_process_view(request):
     chosen_favicon_url_https = request.POST.get('chosen_favicon_url_https', None)
     chosen_google_analytics_account_number = request.POST.get('chosen_google_analytics_account_number', None)
     chosen_html_verification_string = request.POST.get('chosen_html_verification_string', None)
-    chosen_logo_displayed = request.POST.get('chosen_logo_displayed', None)
+    chosen_hide_we_vote_logo = request.POST.get('chosen_hide_we_vote_logo', None)
     chosen_logo_url_https = request.POST.get('chosen_logo_url_https', None)
     chosen_social_share_description = request.POST.get('chosen_social_share_description', None)
     chosen_social_share_image_256x256_url_https = request.POST.get('chosen_social_share_image_256x256_url_https', None)
     chosen_sub_domain_string = request.POST.get('chosen_sub_domain_string', None)
+    chosen_feature_package = request.POST.get('chosen_feature_package', None)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     state_code = request.POST.get('state_code', None)
 
@@ -926,8 +933,8 @@ def organization_edit_account_process_view(request):
                     chosen_google_analytics_account_number.strip()
             if chosen_html_verification_string is not None:
                 organization_on_stage.chosen_html_verification_string = chosen_html_verification_string.strip()
-            if chosen_logo_displayed is not None:
-                organization_on_stage.chosen_logo_displayed = positive_value_exists(chosen_logo_displayed)
+            if chosen_hide_we_vote_logo is not None:
+                organization_on_stage.chosen_hide_we_vote_logo = positive_value_exists(chosen_hide_we_vote_logo)
             # if chosen_logo_url_https is not None:
             #     organization_on_stage.chosen_logo_url_https = chosen_logo_url_https.strip()
             if chosen_social_share_description is not None:
@@ -944,6 +951,13 @@ def organization_edit_account_process_view(request):
                               domain_results['status']
                     messages.add_message(request, messages.ERROR, message)
                     status += domain_results['status']
+            if chosen_feature_package is not None:
+                master_feature_package_query = MasterFeaturePackage.objects.all()
+                master_feature_package_list = list(master_feature_package_query)
+                for feature_package in master_feature_package_list:
+                    if feature_package.master_feature_package == chosen_feature_package:
+                        organization_on_stage.chosen_feature_package = chosen_feature_package
+
             organization_on_stage.save()
             organization_id = organization_on_stage.id
 

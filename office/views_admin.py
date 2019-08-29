@@ -166,6 +166,7 @@ def office_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     show_all_elections = request.GET.get('show_all_elections', False)
+    show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
     office_search = request.GET.get('office_search', '')
 
     office_list_found = False
@@ -181,6 +182,8 @@ def office_list_view(request):
             pass
         if positive_value_exists(state_code):
             office_queryset = office_queryset.filter(state_code__iexact=state_code)
+        if positive_value_exists(show_marquee_or_battleground):
+            office_queryset = office_queryset.filter(Q(ballotpedia_is_marquee=True) | Q(is_battleground_race=True))
         office_queryset = office_queryset.order_by("office_name")
 
         if positive_value_exists(office_search):
@@ -262,7 +265,18 @@ def office_list_view(request):
                 election_list.append(election)
 
     state_list = STATE_CODE_MAP
-    sorted_state_list = sorted(state_list.items())
+    state_list_modified = {}
+    office_list_manager = ContestOfficeListManager()
+    for one_state_code, one_state_name in state_list.items():
+        office_count = office_list_manager.fetch_office_count(google_civic_election_id, one_state_code)
+        state_name_modified = one_state_name
+        if positive_value_exists(office_count):
+            state_name_modified += " - " + str(office_count)
+            state_list_modified[one_state_code] = state_name_modified
+        else:
+            # Do not include state in drop-down if there aren't any offices in that state
+            pass
+    sorted_state_list = sorted(state_list_modified.items())
 
     status_print_list = ""
     status_print_list += "office_list_count: " + \
@@ -279,6 +293,7 @@ def office_list_view(request):
         'election_list':            election_list,
         'state_code':               state_code,
         'show_all_elections':       show_all_elections,
+        'show_marquee_or_battleground': show_marquee_or_battleground,
         'state_list':               sorted_state_list,
         'google_civic_election_id': google_civic_election_id,
     }
@@ -381,6 +396,8 @@ def office_edit_process_view(request):
     ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)  # Related to contest_office
     ballotpedia_race_office_level = request.POST.get('ballotpedia_race_office_level', False)
     ballotpedia_office_name = request.POST.get('ballotpedia_office_name', False)
+    ballotpedia_is_marquee = request.POST.get('ballotpedia_is_marquee', None)
+    is_battleground_race = request.POST.get('is_battleground_race', None)
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     redirect_to_contest_office_list = convert_to_int(request.POST.get('redirect_to_contest_office_list', 0))
 
@@ -426,6 +443,10 @@ def office_edit_process_view(request):
                 office_on_stage.primary_party = primary_party
             if positive_value_exists(election_state):
                 office_on_stage.state_code = election_state
+            if ballotpedia_is_marquee is not None:
+                office_on_stage.ballotpedia_is_marquee = positive_value_exists(ballotpedia_is_marquee)
+            if is_battleground_race is not None:
+                office_on_stage.is_battleground_race = positive_value_exists(is_battleground_race)
             if ballotpedia_office_id is not False:
                 office_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
             if ballotpedia_office_name is not False:
@@ -462,6 +483,8 @@ def office_edit_process_view(request):
                 office_on_stage.ballotpedia_office_name = ballotpedia_office_name
             if ballotpedia_race_id is not False:
                 office_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
+            if is_battleground_race is not None:
+                office_on_stage.is_battleground_race = positive_value_exists(is_battleground_race)
             office_on_stage.save()
             messages.add_message(request, messages.INFO, 'New office saved.')
 

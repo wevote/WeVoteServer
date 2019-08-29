@@ -268,6 +268,7 @@ def create_new_plan_for_api_view(request):
     monthly_price_stripe = monthly_price_stripe if monthly_price_stripe != '' else 0
     annual_price_stripe = request.GET.get('annualPriceStripe')
     annual_price_stripe = annual_price_stripe if annual_price_stripe != '' else 0
+    master_feature_package = request.GET.get('masterFeatureType')
     features_provided_bitmap = request.GET.get('featuresProvidedBitmap')
     coupon_expires_date = request.GET.get('couponExpiresDate', None)
     if len(coupon_expires_date) is 0:
@@ -285,6 +286,7 @@ def create_new_plan_for_api_view(request):
             coupon_applied_message=coupon_applied_message,
             monthly_price_stripe=monthly_price_stripe,
             annual_price_stripe=annual_price_stripe,
+            master_feature_package=master_feature_package,
             features_provided_bitmap=features_provided_bitmap,
             coupon_expires_date=coupon_expires_date)
         status = "create_new_plan_for_api_view succeeded"

@@ -1,4 +1,4 @@
-# scheduled_tasks/views_admin.py
+# donate/views_admin.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
@@ -50,6 +50,7 @@ def organization_subscription_list_view(request):
             'monthly_price_stripe': monthly_price_stripe,
             'annual_price_stripe': annual_price_stripe,
             'redemptions': plan.redemptions,
+            'master_feature_package': plan.master_feature_package,
             'features_provided_bitmap': plan.features_provided_bitmap,
             'plan_created_at': nice_created_at,
             'coupon_expires_date': nice_expires_dt
