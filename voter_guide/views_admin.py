@@ -2168,6 +2168,27 @@ def voter_guide_possibility_list_process_view(request):
     state_code = request.POST.get('state_code', '')
     voter_guide_possibility_search = request.POST.get('voter_guide_possibility_search', '')
 
+    # On redirect, we want to maintain the "state" of the page
+    url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
+    if positive_value_exists(show_all_elections):
+        url_variables += "&show_all_elections=" + str(show_all_elections)
+    if positive_value_exists(from_prior_election):
+        url_variables += "&from_prior_election=" + str(from_prior_election)
+    if positive_value_exists(show_candidates_missing_from_we_vote):
+        url_variables += "&show_candidates_missing_from_we_vote=" + str(show_candidates_missing_from_we_vote)
+    if positive_value_exists(show_cannot_find_endorsements):
+        url_variables += "&show_cannot_find_endorsements=" + str(show_cannot_find_endorsements)
+    if positive_value_exists(show_capture_detailed_comments):
+        url_variables += "&show_capture_detailed_comments=" + str(show_capture_detailed_comments)
+    if positive_value_exists(show_only_hide_from_active_review):
+        url_variables += "&show_only_hide_from_active_review=" + str(show_only_hide_from_active_review)
+    if positive_value_exists(show_ignore_this_source):
+        url_variables += "&show_ignore_this_source=" + str(show_ignore_this_source)
+    if positive_value_exists(state_code):
+        url_variables += "&state_code=" + str(state_code)
+    if positive_value_exists(voter_guide_possibility_search):
+        url_variables += "&voter_guide_possibility_search=" + str(voter_guide_possibility_search)
+
     select_for_marking_organization_ids = request.POST.getlist('select_for_marking_checks[]')
     which_marking = request.POST.get("which_marking")
 
@@ -2178,7 +2199,8 @@ def voter_guide_possibility_list_process_view(request):
         messages.add_message(request, messages.ERROR,
                              'The filter you are trying to update is not recognized: {which_marking}'
                              ''.format(which_marking=which_marking))
-        return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()))
+        return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()) +
+                                    url_variables)
 
     # print(f"voter_guide_possibility_list_process_view {which_marking}")
     # print(f"marked:{select_for_marking_organization_ids}")
@@ -2219,26 +2241,6 @@ def voter_guide_possibility_list_process_view(request):
         messages.add_message(request, messages.INFO,
                              'Voter guides processed successfully: {items_processed_successfully}'
                              ''.format(items_processed_successfully=items_processed_successfully))
-
-    url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
-    if positive_value_exists(show_all_elections):
-        url_variables += "&show_all_elections=" + str(show_all_elections)
-    if positive_value_exists(from_prior_election):
-        url_variables += "&from_prior_election=" + str(from_prior_election)
-    if positive_value_exists(show_candidates_missing_from_we_vote):
-        url_variables += "&show_candidates_missing_from_we_vote=" + str(show_candidates_missing_from_we_vote)
-    if positive_value_exists(show_cannot_find_endorsements):
-        url_variables += "&show_cannot_find_endorsements=" + str(show_cannot_find_endorsements)
-    if positive_value_exists(show_capture_detailed_comments):
-        url_variables += "&show_capture_detailed_comments=" + str(show_capture_detailed_comments)
-    if positive_value_exists(show_only_hide_from_active_review):
-        url_variables += "&show_only_hide_from_active_review=" + str(show_only_hide_from_active_review)
-    if positive_value_exists(show_ignore_this_source):
-        url_variables += "&show_ignore_this_source=" + str(show_ignore_this_source)
-    if positive_value_exists(state_code):
-        url_variables += "&state_code=" + str(state_code)
-    if positive_value_exists(voter_guide_possibility_search):
-        url_variables += "&voter_guide_possibility_search=" + str(voter_guide_possibility_search)
 
     return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()) +
                                 url_variables)

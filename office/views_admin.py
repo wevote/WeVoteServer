@@ -96,13 +96,14 @@ def offices_sync_out_view(request):  # officesSyncOut
         contest_office_list_dict = contest_office_list.values('we_vote_id', 'office_name', 'google_civic_election_id',
                                                               'ocd_division_id', 'maplight_id',
                                                               'ballotpedia_id', 'ballotpedia_district_id',
-                                                              'ballotpedia_office_id',
+                                                              'ballotpedia_is_marquee', 'ballotpedia_office_id',
                                                               'ballotpedia_office_name', 'ballotpedia_office_url',
                                                               'ballotpedia_race_id', 'ballotpedia_race_office_level',
                                                               'google_ballot_placement',
                                                               'google_civic_office_name', 'google_civic_office_name2',
                                                               'google_civic_office_name3', 'google_civic_office_name4',
                                                               'google_civic_office_name5',
+                                                              'is_battleground_race',
                                                               'wikipedia_id', 'number_voting_for', 'number_elected',
                                                               'state_code', 'primary_party', 'district_name',
                                                               'district_scope', 'district_id', 'contest_level0',
@@ -298,6 +299,80 @@ def office_list_view(request):
         'google_civic_election_id': google_civic_election_id,
     }
     return render(request, 'office/office_list.html', template_values)
+
+    # select_for_marking_organization_ids = request.POST.getlist('select_for_marking_checks[]')
+    # which_marking = request.POST.get("which_marking")
+
+
+@login_required
+def office_list_process_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer', 'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    status = ""
+    google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+    state_code = request.POST.get('state_code', '')
+    show_all_elections = request.POST.get('show_all_elections', False)
+    show_marquee_or_battleground = request.POST.get('show_marquee_or_battleground', False)
+    office_search = request.POST.get('office_search', '')
+
+    # On redirect, we want to maintain the "state" of the page
+    url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
+    if positive_value_exists(state_code):
+        url_variables += "&state_code=" + str(state_code)
+    if positive_value_exists(show_all_elections):
+        url_variables += "&show_all_elections=" + str(show_all_elections)
+    if positive_value_exists(show_marquee_or_battleground):
+        url_variables += "&show_marquee_or_battleground=" + str(show_marquee_or_battleground)
+    if positive_value_exists(office_search):
+        url_variables += "&office_search=" + str(office_search)
+
+    select_for_marking_office_we_vote_ids = request.POST.getlist('select_for_marking_checks[]')
+    which_marking = request.POST.get("which_marking")
+
+    # Make sure 'which_marking' is one of the allowed Filter fields
+    if which_marking not in "is_battleground_race":
+        messages.add_message(request, messages.ERROR,
+                             'The filter you are trying to update is not recognized: {which_marking}'
+                             ''.format(which_marking=which_marking))
+        return HttpResponseRedirect(reverse('office:office_list', args=()))
+
+    print(f"office_list_process_view {which_marking}")
+    print(f"marked:{select_for_marking_office_we_vote_ids}")
+
+    error_count = 0
+    items_processed_successfully = 0
+    if which_marking and select_for_marking_office_we_vote_ids:
+        for organization_we_vote_id in select_for_marking_office_we_vote_ids:
+            try:
+                contest_office_on_stage = ContestOffice.objects.get(
+                    we_vote_id__iexact=organization_we_vote_id)
+                if which_marking == "is_battleground_race":
+                    contest_office_on_stage.is_battleground_race = True
+                contest_office_on_stage.save()
+                items_processed_successfully += 1
+                status += 'CONTEST_OFFICE_UPDATED '
+            except ContestOffice.MultipleObjectsReturned as e:
+                status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND '
+                error_count += 1
+            except ContestOffice.DoesNotExist:
+                status += "RETRIEVE_OFFICE_NOT_FOUND "
+                error_count += 1
+            except Exception as e:
+                status += 'GENERAL_ERROR ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                error_count += 1
+
+        messages.add_message(request, messages.INFO,
+                             'Organizations processed successfully: {items_processed_successfully}, '
+                             'errors: {error_count}'
+                             ''.format(error_count=error_count,
+                                       items_processed_successfully=items_processed_successfully))
+
+    return HttpResponseRedirect(reverse('office:office_list', args=()) +
+                                url_variables)
 
 
 @login_required

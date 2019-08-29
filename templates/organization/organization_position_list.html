@@ -176,6 +176,10 @@
                     <td>{{organization.chosen_hide_we_vote_logo|default_if_none:""}}</td>
                 </tr>
                 <tr>
+                    <th>Sub domain string:</th>
+                    <td>{{organization.chosen_sub_domain_string|default_if_none:""}}{% if organization.chosen_subdomain_string %}.WeVote.US{% endif %}</td>
+                </tr>
+                <tr>
                     <th>Domain string:</th>
                     <td>{{organization.chosen_domain_string|default_if_none:""}}</td>
                 </tr>
@@ -203,10 +207,6 @@
                 <tr>
                     <th>Social share image:</th>
                     <td>{{organization.chosen_social_share_image_256x256_url_https|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <th>Sub domain string:</th>
-                    <td>{{organization.chosen_sub_domain_string|default_if_none:""}}</td>
                 </tr>
                 <tr>
                     <th>Subscription plan:</th>

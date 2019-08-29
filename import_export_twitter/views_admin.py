@@ -235,6 +235,7 @@ def refresh_twitter_data_for_organizations_view(request):
     organization_state_code = request.GET.get('organization_state', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     first_retrieve_only = request.GET.get('first_retrieve_only', True)
+    return_to_voter_guide_list = request.GET.get('return_to_voter_guide_list', False)
 
     results = refresh_twitter_data_for_organizations(state_code=organization_state_code,
                                                      google_civic_election_id=google_civic_election_id,
@@ -251,8 +252,12 @@ def refresh_twitter_data_for_organizations_view(request):
                                  number_of_twitter_accounts_queried=number_of_twitter_accounts_queried,
                                  number_of_organizations_updated=number_of_organizations_updated))
 
-    return HttpResponseRedirect(reverse('organization:organization_list', args=()) +
-                                '?organization_state=' + organization_state_code)
+    if positive_value_exists(return_to_voter_guide_list):
+        return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()) +
+                                    '?google_civic_election_id=' + google_civic_election_id)
+    else:
+        return HttpResponseRedirect(reverse('organization:organization_list', args=()) +
+                                    '?organization_state=' + organization_state_code)
 
 
 @login_required

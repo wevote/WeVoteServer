@@ -918,14 +918,17 @@ def organization_edit_account_process_view(request):
         if organization_on_stage_found:
             # Update
             if chosen_domain_string is not None:
-                domain_results = full_domain_string_available(chosen_domain_string, organization_id)
-                if domain_results['full_domain_string_available']:
-                    organization_on_stage.chosen_domain_string = chosen_domain_string.strip()
+                if positive_value_exists(chosen_domain_string):
+                    domain_results = full_domain_string_available(chosen_domain_string, organization_id)
+                    if domain_results['full_domain_string_available']:
+                        organization_on_stage.chosen_domain_string = chosen_domain_string.strip()
+                    else:
+                        message = 'Cannot save full domain: \'' + chosen_domain_string + '\', status: ' + \
+                                  domain_results['status']
+                        messages.add_message(request, messages.ERROR, message)
+                        status += domain_results['status']
                 else:
-                    message = 'Cannot save full domain: \'' + chosen_domain_string + '\', status: ' + \
-                              domain_results['status']
-                    messages.add_message(request, messages.ERROR, message)
-                    status += domain_results['status']
+                    organization_on_stage.chosen_domain_string = None
             # if chosen_favicon_url_https is not None:
             #     organization_on_stage.chosen_favicon_url_https = chosen_favicon_url_https
             if chosen_google_analytics_account_number is not None:
@@ -943,14 +946,17 @@ def organization_edit_account_process_view(request):
             #     organization_on_stage.chosen_social_share_image_256x256_url_https = \
             #         chosen_social_share_image_256x256_url_https.strip()
             if chosen_sub_domain_string is not None:
-                domain_results = sub_domain_string_available(chosen_sub_domain_string, organization_id)
-                if domain_results['sub_domain_string_available']:
-                    organization_on_stage.chosen_sub_domain_string = chosen_sub_domain_string.strip()
+                if positive_value_exists(chosen_sub_domain_string):
+                    domain_results = sub_domain_string_available(chosen_sub_domain_string, organization_id)
+                    if domain_results['sub_domain_string_available']:
+                        organization_on_stage.chosen_sub_domain_string = chosen_sub_domain_string.strip()
+                    else:
+                        message = 'Cannot save sub domain: \'' + chosen_sub_domain_string + '\', status: ' + \
+                                  domain_results['status']
+                        messages.add_message(request, messages.ERROR, message)
+                        status += domain_results['status']
                 else:
-                    message = 'Cannot save sub domain: \'' + chosen_sub_domain_string + '\', status: ' + \
-                              domain_results['status']
-                    messages.add_message(request, messages.ERROR, message)
-                    status += domain_results['status']
+                    organization_on_stage.chosen_sub_domain_string = None
             if chosen_feature_package is not None:
                 master_feature_package_query = MasterFeaturePackage.objects.all()
                 master_feature_package_list = list(master_feature_package_query)
@@ -1122,6 +1128,7 @@ def organization_position_new_view(request, organization_id):
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', False)
     measure_we_vote_id = request.GET.get('measure_we_vote_id', False)
     state_code = request.GET.get('state_code', '')
+    show_all_elections = request.GET.get('show_all_elections', False)
 
     # Take in some incoming values
     candidate_and_measure_not_found = request.GET.get('candidate_and_measure_not_found', False)
@@ -1198,7 +1205,14 @@ def organization_position_new_view(request, organization_id):
         organization_position_list = []
 
     if all_is_well:
-        election_list = Election.objects.order_by('-election_day_text')
+        election_manager = ElectionManager()
+        if positive_value_exists(show_all_elections):
+            results = election_manager.retrieve_elections()
+            election_list = results['election_list']
+        else:
+            results = election_manager.retrieve_upcoming_elections()
+            election_list = results['election_list']
+
         template_values = {
             'candidate_campaigns_for_this_election_list':   candidate_campaigns_for_this_election_list,
             'candidate_campaign_id':                        candidate_campaign_id,
@@ -1208,6 +1222,7 @@ def organization_position_new_view(request, organization_id):
             'organization':                                 organization_on_stage,
             'organization_position_candidate_campaign_id':  0,
             'possible_stances_list':                        ORGANIZATION_STANCE_CHOICES,
+            'show_all_elections':                           show_all_elections,
             'stance_selected':                              stance,
             'election_list':                                election_list,
             'google_civic_election_id':                     google_civic_election_id,
@@ -1284,6 +1299,7 @@ def organization_position_edit_view(request, organization_id=0, organization_we_
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    show_all_elections = request.GET.get('show_all_elections', False)
 
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
@@ -1321,7 +1337,13 @@ def organization_position_edit_view(request, organization_id=0, organization_we_
 
     # Note: We have access to the candidate campaign through organization_position_on_stage.candidate_campaign
 
-    election_list = Election.objects.all()
+    election_manager = ElectionManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
 
     if organization_position_on_stage_found:
         template_values = {
@@ -1330,6 +1352,7 @@ def organization_position_edit_view(request, organization_id=0, organization_we_
             'organization':                                 organization_on_stage,
             'organization_position':                        organization_position_on_stage,
             'possible_stances_list':                        ORGANIZATION_STANCE_CHOICES,
+            'show_all_elections':                           show_all_elections,
             'stance_selected':                              organization_position_on_stage.stance,
             'election_list':                                election_list,
             'google_civic_election_id':                     google_civic_election_id,
@@ -1358,6 +1381,7 @@ def organization_position_edit_process_view(request):
     stance = request.POST.get('stance', SUPPORT)  # Set a default if stance comes in empty
     statement_text = request.POST.get('statement_text', '')  # Set a default if stance comes in empty
     more_info_url = request.POST.get('more_info_url', '')
+    show_all_elections = request.POST.get('show_all_elections', False)
 
     go_back_to_add_new = False
     candidate_campaign_we_vote_id = ""
@@ -1411,24 +1435,31 @@ def organization_position_edit_process_view(request):
                 request, messages.ERROR,
                 "Could not find Candidate's campaign when trying to create or edit a new position.")
             if positive_value_exists(position_we_vote_id):
+                url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
+                url_variables += "&state_code=" + str(state_code)
+                if positive_value_exists(show_all_elections):
+                    url_variables += "&show_all_elections=1"
+                url_variables += "&stance=" + str(stance)
+                url_variables += "&statement_text=" + str(statement_text)
+                url_variables += "&more_info_url=" + str(more_info_url)
+                url_variables += "&candidate_and_measure_not_found=1"
+
                 return HttpResponseRedirect(
-                    reverse('organization:organization_position_edit', args=([organization_id], [position_we_vote_id])) +
-                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                    "&state_code=" + str(state_code) +
-                    "&stance=" + stance +
-                    "&statement_text=" + statement_text +
-                    "&more_info_url=" + more_info_url +
-                    "&candidate_and_measure_not_found=1"
+                    reverse('organization:organization_position_edit',
+                            args=([organization_id], [position_we_vote_id])) + url_variables
                 )
             else:
+                url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
+                url_variables += "&state_code=" + str(state_code)
+                if positive_value_exists(show_all_elections):
+                    url_variables += "&show_all_elections=1"
+                url_variables += "&stance=" + str(stance)
+                url_variables += "&statement_text=" + str(statement_text)
+                url_variables += "&more_info_url=" + str(more_info_url)
+                url_variables += "&candidate_and_measure_not_found=1"
+
                 return HttpResponseRedirect(
-                    reverse('organization:organization_position_new', args=([organization_id])) +
-                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                    "&state_code=" + str(state_code) +
-                    "&stance=" + stance +
-                    "&statement_text=" + statement_text +
-                    "&more_info_url=" + more_info_url +
-                    "&candidate_and_measure_not_found=1"
+                    reverse('organization:organization_position_new', args=([organization_id])) + url_variables
                 )
         contest_measure_id = 0
     elif contest_measure_id:
@@ -1448,38 +1479,49 @@ def organization_position_edit_process_view(request):
                 request, messages.ERROR,
                 "Could not find measure when trying to create or edit a new position.")
             if positive_value_exists(position_we_vote_id):
+                url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
+                url_variables += "&state_code=" + str(state_code)
+                if positive_value_exists(show_all_elections):
+                    url_variables += "&show_all_elections=1"
+                url_variables += "&stance=" + str(stance)
+                url_variables += "&statement_text=" + str(statement_text)
+                url_variables += "&more_info_url=" + str(more_info_url)
+                url_variables += "&candidate_and_measure_not_found=1"
+
                 return HttpResponseRedirect(
-                    reverse('organization:organization_position_edit', args=([organization_id], [position_we_vote_id])) +
-                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                    "&state_code=" + str(state_code) +
-                    "&stance=" + stance +
-                    "&statement_text=" + statement_text +
-                    "&more_info_url=" + more_info_url +
-                    "&candidate_and_measure_not_found=1"
+                    reverse('organization:organization_position_edit',
+                            args=([organization_id], [position_we_vote_id])) + url_variables
                 )
             else:
+                url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
+                url_variables += "&state_code=" + str(state_code)
+                if positive_value_exists(show_all_elections):
+                    url_variables += "&show_all_elections=1"
+                url_variables += "&stance=" + str(stance)
+                url_variables += "&statement_text=" + str(statement_text)
+                url_variables += "&more_info_url=" + str(more_info_url)
+                url_variables += "&candidate_and_measure_not_found=1"
+
                 return HttpResponseRedirect(
-                    reverse('organization:organization_position_new', args=([organization_id])) +
-                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                    "&state_code=" + str(state_code) +
-                    "&stance=" + stance +
-                    "&statement_text=" + statement_text +
-                    "&more_info_url=" + more_info_url +
-                    "&candidate_and_measure_not_found=1"
+                    reverse('organization:organization_position_new', args=([organization_id])) + url_variables
                 )
         candidate_campaign_id = 0
     else:
         messages.add_message(
             request, messages.ERROR,
             "Unable to find either Candidate or Measure.")
+        url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
+        url_variables += "&state_code=" + str(state_code)
+        if positive_value_exists(show_all_elections):
+            url_variables += "&show_all_elections=1"
+        url_variables += "&stance=" + str(stance)
+        url_variables += "&statement_text=" + str(statement_text)
+        url_variables += "&more_info_url=" + str(more_info_url)
+        url_variables += "&candidate_and_measure_not_found=1"
+
         return HttpResponseRedirect(
             reverse('organization:organization_position_new', args=([organization_id])) +
-            "?google_civic_election_id=" + str(google_civic_election_id) +
-            "&state_code=" + str(state_code) +
-            "&stance=" + stance +
-            "&statement_text=" + statement_text +
-            "&more_info_url=" + more_info_url +
-            "&candidate_and_measure_not_found=1"
+            url_variables
         )
 
     organization_position_on_stage_found = False
@@ -1605,9 +1647,14 @@ def organization_position_edit_process_view(request):
         # if results['success']:
 
     if go_back_to_add_new:
+        url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
+        url_variables += "&state_code=" + str(state_code)
+        if positive_value_exists(show_all_elections):
+            url_variables += "&show_all_elections=1"
+
         return HttpResponseRedirect(
             reverse('organization:organization_position_new', args=(organization_on_stage.id,)) +
-            "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" + str(state_code))
+            url_variables)
     else:
         return HttpResponseRedirect(
             reverse('organization:organization_position_list', args=(organization_on_stage.id,)))
