@@ -545,6 +545,8 @@ def offices_import_from_structured_json(structured_json):
             ballotpedia_id = one_office['ballotpedia_id'] if 'ballotpedia_id' in one_office else ''
             ballotpedia_district_id = one_office['ballotpedia_district_id'] \
                 if 'ballotpedia_district_id' in one_office else ''
+            ballotpedia_is_marquee = one_office['ballotpedia_is_marquee'] \
+                if 'ballotpedia_is_marquee' in one_office else ''
             # Equivalent to elected_office
             ballotpedia_office_id = one_office['ballotpedia_office_id'] if 'ballotpedia_office_id' in one_office else ''
             ballotpedia_office_name = one_office['ballotpedia_office_name'] \
@@ -555,6 +557,7 @@ def offices_import_from_structured_json(structured_json):
             ballotpedia_race_id = one_office['ballotpedia_race_id'] if 'ballotpedia_race_id' in one_office else ''
             ballotpedia_race_office_level = one_office['ballotpedia_race_office_level'] \
                 if 'ballotpedia_race_office_level' in one_office else ''
+            is_battleground_race = one_office['is_battleground_race'] if 'is_battleground_race' in one_office else ''
             wikipedia_id = one_office['wikipedia_id'] if 'wikipedia_id' in one_office else ''
             updated_contest_office_values = {
                 'we_vote_id': we_vote_id,
@@ -569,6 +572,7 @@ def offices_import_from_structured_json(structured_json):
                 'google_civic_office_name3': google_civic_office_name3,
                 'google_civic_office_name4': google_civic_office_name4,
                 'google_civic_office_name5': google_civic_office_name5,
+                'is_battleground_race': is_battleground_race,
                 'ocd_division_id': ocd_division_id,
                 'number_voting_for': number_voting_for,
                 'number_elected': number_elected,
@@ -582,6 +586,7 @@ def offices_import_from_structured_json(structured_json):
                 'maplight_id': maplight_id,
                 'ballotpedia_id': ballotpedia_id,
                 'ballotpedia_district_id': ballotpedia_district_id,
+                'ballotpedia_is_marquee': ballotpedia_is_marquee,
                 'ballotpedia_office_id': ballotpedia_office_id,
                 'ballotpedia_office_name': ballotpedia_office_name,
                 'ballotpedia_office_url': ballotpedia_office_url,

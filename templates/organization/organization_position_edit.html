@@ -49,6 +49,12 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
                 {{ organization_position.election.google_civic_election_id }} -
                 {{ organization_position.election.election_day_text }}
             {% endif %}
+
+        {# Default to showing only upcoming elections #}
+        <label for="show_all_elections_id">
+          <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
+                 {% if show_all_elections %}checked{% endif %} /> Include Past Elections
+        </label>
         </div>
     </div>
 
@@ -59,13 +65,19 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 <div class="form-group">
     <label for="google_civic_election_id" class="col-sm-2 control-label">Election</label>
     <div class="col-sm-9">
-    <select id="google_civic_election_id" name="google_civic_election_id" class="form-control">
-    {% for election in election_list %}
-    <option value="{{ election.google_civic_election_id }}"
-            {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-        {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
-    {% endfor %}
-    </select>
+        <select id="google_civic_election_id" name="google_civic_election_id" class="form-control">
+        {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+        {% endfor %}
+        </select>
+
+        {# Default to showing only upcoming elections #}
+        <label for="show_all_elections_id">
+          <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
+                 {% if show_all_elections %}checked{% endif %} /> Include Past Elections
+        </label>
     </div>
 </div>
     {% endif %}
@@ -233,6 +245,11 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 <script>
     $(function() {
         $('#google_civic_election_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_all_elections_id').change(function() {
             this.form.submit();
         });
     });
