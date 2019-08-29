@@ -105,7 +105,8 @@ def ballot_returned_import_from_master_server(request, google_civic_election_id,
     """
 
     import_results, structured_json = process_request_from_master(
-        request, "Loading Ballot Returned entries (saved ballots, specific to one location) from WeVote Master servers",
+        request, "Requesting BallotReturned entries (saved ballots, specific to one location) "
+                 "from WeVote Master servers",
         BALLOT_RETURNED_SYNC_URL,
         {
             "key": WE_VOTE_API_KEY,  # This comes from an environment variable
@@ -114,7 +115,7 @@ def ballot_returned_import_from_master_server(request, google_civic_election_id,
         }
     )
 
-    print("... the master server returned " + str(len(structured_json)) + " polling locations for election " +
+    print("... the master server returned " + str(len(structured_json)) + " BallotReturned entries for election " +
           str(google_civic_election_id) + " in state " + str(state_code))
 
     if import_results['success']:

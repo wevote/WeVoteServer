@@ -1900,7 +1900,7 @@ class BallotReturnedManager(models.Model):
         # If we got through the elections without finding any ballot_returned entries, there is no prior elections
         return 0
 
-    def fetch_next_upcoming_election_in_this_state(self, state_code):
+    def fetch_next_upcoming_election_in_this_state(self, state_code, skip_these_elections=[]):
         """
         Find the soonest upcoming election in the future with at least one ballot at a polling location
         :param state_code:
@@ -1919,6 +1919,10 @@ class BallotReturnedManager(models.Model):
             # These elections are sorted by today, then tomorrow, etc
             election_list = election_results['election_list']
             for election in election_list:
+                # Filter out elections we want to skip
+                if len(skip_these_elections):
+                    if election.google_civic_election_id in skip_these_elections:
+                        continue
                 # Filter out elections earlier than today
                 if not positive_value_exists(election.election_day_text):
                     continue
@@ -1942,6 +1946,9 @@ class BallotReturnedManager(models.Model):
         # Start with list of elections (before today) in this state,
         #  including national but without elections in other states
         for election in filtered_election_list:
+            if len(skip_these_elections):
+                if election.google_civic_election_id in skip_these_elections:
+                    continue
             try:
                 # Loop backwards in time until we find an election with at least one ballot_returned entry
                 ballot_returned_query = BallotReturned.objects.filter(
@@ -2071,31 +2078,51 @@ class BallotReturnedManager(models.Model):
                 # This search for normalized_state is NOT redundant because some elections are in many states
                 ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
 
+            # TODO: Update to a more modern approach? I think this will be deprecated in > Django 1.9
+            ballot_returned_query = ballot_returned_query.annotate(
+                distance=(F('latitude') - location.latitude) ** 2 +
+                         (F('longitude') - location.longitude) ** 2)
+            ballot_returned_query = ballot_returned_query.order_by('distance')
+
             if positive_value_exists(google_civic_election_id):
                 ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
+                ballot = ballot_returned_query.first()
             else:
                 # If we have an active election coming up, including today
                 # fetch_next_upcoming_election_in_this_state returns next election with ballot items
                 upcoming_google_civic_election_id = self.fetch_next_upcoming_election_in_this_state(state_code)
                 if positive_value_exists(upcoming_google_civic_election_id):
+                    ballot_returned_query_without_election_id = ballot_returned_query
                     ballot_returned_query = ballot_returned_query.filter(
                         google_civic_election_id=upcoming_google_civic_election_id)
+                    ballot = ballot_returned_query.first()
+                    # What if this is a National election, but there aren't any races in the state the voter is in?
+                    # We want to find the *next* upcoming election
+                    if ballot is None:
+                        ballot_not_found = True
+                        more_elections_exist = True
+                        skip_these_elections = []
+                        while ballot_not_found and more_elections_exist:
+                            # Reset ballot_returned_query
+                            ballot_returned_query = ballot_returned_query_without_election_id
+                            skip_these_elections.append(upcoming_google_civic_election_id)
+                            upcoming_google_civic_election_id = self.fetch_next_upcoming_election_in_this_state(
+                                state_code, skip_these_elections)
+                            if positive_value_exists(upcoming_google_civic_election_id):
+                                ballot_returned_query = ballot_returned_query.filter(
+                                    google_civic_election_id=upcoming_google_civic_election_id)
+                                ballot = ballot_returned_query.first()
+                                if ballot is not None:
+                                    ballot_not_found = False
+                            else:
+                                more_elections_exist = False
                 else:
                     past_google_civic_election_id = self.fetch_last_election_in_this_state(state_code)
                     if positive_value_exists(past_google_civic_election_id):
                         # Limit the search to the most recent election with ballot items
                         ballot_returned_query = ballot_returned_query.filter(
                             google_civic_election_id=past_google_civic_election_id)
-
-            # TODO: This should be updated to a more modern approach. I think this will be deprecated in > Django 1.9
-            ballot_returned_query = ballot_returned_query.annotate(distance=(F('latitude') - location.latitude) ** 2 +
-                                                                            (F('longitude') - location.longitude) ** 2)
-            ballot_returned_query = ballot_returned_query.order_by('distance')
-
-            ballot = ballot_returned_query.first()
-            # ballot_returned_list = list(ballot_returned_query)
-            # if positive_value_exists(len(ballot_returned_list)):
-            #     ballot = ballot_returned_list[0]
+                    ballot = ballot_returned_query.first()
 
         if ballot is not None:
             ballot_returned = ballot
@@ -2103,6 +2130,8 @@ class BallotReturnedManager(models.Model):
             status += 'BALLOT_RETURNED_FOUND '
         else:
             status += 'NO_STORED_BALLOT_MATCHES_STATE {}. '.format(state_code)
+
+        status += 'END_OF_FIND_CLOSEST_BALLOT_RETURNED '
 
         return {
             'status':                   status,
