@@ -2102,7 +2102,9 @@ class BallotReturnedManager(models.Model):
                         ballot_not_found = True
                         more_elections_exist = True
                         skip_these_elections = []
-                        while ballot_not_found and more_elections_exist:
+                        safety_valve_count = 0
+                        while ballot_not_found and more_elections_exist and safety_valve_count < 20:
+                            safety_valve_count += 1
                             # Reset ballot_returned_query
                             ballot_returned_query = ballot_returned_query_without_election_id
                             skip_these_elections.append(upcoming_google_civic_election_id)
