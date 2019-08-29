@@ -341,7 +341,7 @@ class DonationManager(models.Model):
         """
         # recurring_donation_plan_id = voter_we_vote_id + "-monthly-" + str(donation_amount)
         # plan_name = donation_plan_id + " Plan"
-        billing_interval = "monthly"
+        billing_interval = "monthly"  # This would be a good place to start for annual payment paid subscriptions
         currency = "usd"
         donation_plan_is_active = True
         exception_multiple_object_returned = False
@@ -352,10 +352,6 @@ class DonationManager(models.Model):
         org_subs_already_exists = False
 
         try:
-            if is_organization_plan:
-                # Lookup the price from the latest version of the coupon
-                donation_amount, org_subs_id = DonationManager.get_coupon_price(plan_type_enum, coupon_code)
-
             # the donation plan needs to exist in two places: our stripe account and our database
             # plans can be created here or in our stripe account dashboard
             donation_plan_query, is_new = DonationPlanDefinition.objects.get_or_create(
@@ -392,10 +388,12 @@ class DonationManager(models.Model):
         except stripe.error.StripeError:
             pass
 
-        except IntegrityError:
-            if is_organization_plan:
-                org_subs_already_exists = True
-                status += 'ORGANIZATION_SUBSCRIPTION_ALREADY_EXISTS '
+        # except IntegrityError:
+        #     # This trips for donation subscriptions too, but we allow multiple subscriptions for donations (not for
+        #     # organization paid plans/coupons)
+        #     if is_organization_plan:
+        #         org_subs_already_exists = True
+        #         status += 'ORGANIZATION_SUBSCRIPTION_ALREADY_EXISTS '
 
         except Exception as e:
             handle_exception(e, logger=logger)
@@ -430,69 +428,39 @@ class DonationManager(models.Model):
 
     @staticmethod
     def create_donation_journal_entry(
-            record_enum, ip_address, stripe_customer_id, voter_we_vote_id, charge_id, amount, currency,
-            funding, livemode, action_taken, action_result, created, failure_code, failure_message, network_status,
-            reason, seller_message, stripe_type, paid, amount_refunded, refund_count, email, address_zip, brand,
-            country, exp_month, exp_year, last4, id_card, stripe_object, stripe_status, status, subscription_id,
-            subscription_plan_id, subscription_created_at, subscription_canceled_at, subscription_ended_at,
-            not_loggedin_voter_we_vote_id, is_organization_plan, coupon_code, plan_type_enum, organization_we_vote_id):
+            record_enum, ip_address, stripe_customer_id,
+            voter_we_vote_id, charge_id, amount, currency, funding,
+            livemode, action_taken, action_result, created,
+            failure_code, failure_message, network_status, reason, seller_message,
+            stripe_type, paid, amount_refunded, refund_count,
+            email, address_zip, brand, country,
+            exp_month, exp_year, last4, id_card, stripe_object,
+            stripe_status, status,
+            subscription_id, subscription_plan_id, subscription_created_at, subscription_canceled_at,
+            subscription_ended_at, not_loggedin_voter_we_vote_id,
+            is_organization_plan, coupon_code, plan_type_enum, organization_we_vote_id):
+        """
+        This function receives a long list of parameters, the line breaks in the parameters may look messy,
+        but are purposeful
         """
 
-        :param record_enum:
-        :param ip_address:
-        :param stripe_customer_id:
-        :param voter_we_vote_id:
-        :param charge_id:
-        :param amount:
-        :param currency:
-        :param funding:
-        :param livemode:
-        :param action_taken:
-        :param action_result:
-        :param created:
-        :param failure_code:
-        :param failure_message:
-        :param network_status:
-        :param reason:
-        :param seller_message:
-        :param stripe_type:
-        :param paid:
-        :param amount_refunded:
-        :param refund_count:
-        :param email:
-        :param address_zip:
-        :param brand:
-        :param country:
-        :param exp_month:
-        :param exp_year:
-        :param last4:
-        :param id_card:
-        :param stripe_object:
-        :param stripe_status:
-        :param status:
-        :param subscription_id:
-        :param subscription_plan_id:
-        :param subscription_created_at:
-        :param subscription_canceled_at:
-        :param subscription_ended_at:
-        :param not_loggedin_voter_we_vote_id:
-        :return:
-        """
         new_history_entry = 0
-
         try:
+            # This is a long list of parameters, the line breaks in the parameters may look messy, but are purposeful
             new_history_entry = DonationJournal.objects.create(
                 record_enum=record_enum, ip_address=ip_address, stripe_customer_id=stripe_customer_id,
                 voter_we_vote_id=voter_we_vote_id, charge_id=charge_id, amount=amount, currency=currency,
-                funding=funding, livemode=livemode, action_taken=action_taken,
-                action_result=action_result, created=created, failure_code=failure_code,
-                failure_message=failure_message, network_status=network_status, reason=reason,
-                seller_message=seller_message, stripe_type=stripe_type, paid=paid, amount_refunded=amount_refunded,
-                refund_count=refund_count, email=email, address_zip=address_zip, brand=brand, country=country,
+                funding=funding,
+                livemode=livemode, action_taken=action_taken, action_result=action_result, created=created,
+                failure_code=failure_code, failure_message=failure_message, network_status=network_status,
+                reason=reason, seller_message=seller_message,
+                stripe_type=stripe_type, paid=paid, amount_refunded=amount_refunded, refund_count=refund_count,
+                email=email, address_zip=address_zip, brand=brand, country=country,
                 exp_month=exp_month, exp_year=exp_year, last4=last4, id_card=id_card, stripe_object=stripe_object,
-                stripe_status=stripe_status, status=status, subscription_id=subscription_id,
-                subscription_plan_id=subscription_plan_id, subscription_created_at=subscription_created_at,
-                subscription_canceled_at=subscription_canceled_at, subscription_ended_at=subscription_ended_at,
+                stripe_status=stripe_status, status=status,
+                subscription_id=subscription_id, subscription_plan_id=subscription_plan_id,
+                subscription_created_at=subscription_created_at, subscription_canceled_at=subscription_canceled_at,
+                subscription_ended_at=subscription_ended_at,
                 not_loggedin_voter_we_vote_id=not_loggedin_voter_we_vote_id,
                 is_organization_plan=is_organization_plan, coupon_code=coupon_code, plan_type_enum=plan_type_enum,
                 organization_we_vote_id=organization_we_vote_id)
@@ -524,14 +492,45 @@ class DonationManager(models.Model):
         :param organization_we_vote_id:
         :return:
         """
+        plan_error = False
+        status = ""
         org_segment = "organization-" if is_organization_plan else ""
-        donation_plan_id = voter_we_vote_id + "-monthly-" + org_segment + str(donation_amount)
+        periodicity ="-monthly-"
+        if "_YEARLY" in plan_type_enum:
+            periodicity = "-yearly-"
+        donation_plan_id = voter_we_vote_id + periodicity + org_segment + str(donation_amount)
 
-        donation_plan_id_query = self.retrieve_or_create_recurring_donation_plan(voter_we_vote_id, donation_plan_id,
-                                                                                 donation_amount, is_organization_plan,
-                                                                                 coupon_code, plan_type_enum,
-                                                                                 organization_we_vote_id)
-        if not donation_plan_id_query['org_subs_already_exists'] and donation_plan_id_query['success']:
+        # If is_organization_plan, set the price from the coupon, not whatever was passed in.
+        if is_organization_plan:
+            increment_redemption_cnt = True
+            coupon_price, org_subs_id = DonationManager.get_coupon_price(plan_type_enum, coupon_code,
+                                                                         increment_redemption_cnt)
+            if donation_amount:
+                print("Warning for developers, the donation_amount that is passed in for organization plans is ignored,"
+                      " the value is read from the coupon")
+            donation_amount = coupon_price
+            if "MONTHLY" not in plan_type_enum:
+                logger.error("Only MONTHLY plan_type_enum values are allowed in organization plan coupons at this time")
+                status += "ONLY_MONTHLY_ORGANIZATION_PLANS_ALLOWED_AT_THIS_TIME "
+                plan_error = True
+
+                results = {
+                    'success': False,
+                    'status': status,
+                    'voter_subscription_saved': False,
+                    'org_subs_already_exists': False,
+                    'subscription_plan_id': "",
+                    'subscription_created_at': "",
+                    'subscription_id': ""
+                }
+
+        if not plan_error:
+            donation_plan_id_query = self.retrieve_or_create_recurring_donation_plan(
+                voter_we_vote_id, donation_plan_id, donation_amount, is_organization_plan, coupon_code, plan_type_enum,
+                organization_we_vote_id)
+
+        if not plan_error and not donation_plan_id_query['org_subs_already_exists'] and \
+                donation_plan_id_query['success']:
             status = donation_plan_id_query['status']
 
             try:
@@ -574,7 +573,8 @@ class DonationManager(models.Model):
                     'subscription_id': ""
                 }
         else:
-            results = donation_plan_id_query
+            if not plan_error:
+                results = donation_plan_id_query
 
         return results
 
@@ -747,7 +747,8 @@ class DonationManager(models.Model):
         """
         try:
             subscription_row = DonationJournal.objects.get(subscription_id=subscription_id,
-                                                           stripe_customer_id=customer_id)
+                                                           stripe_customer_id=customer_id,
+                                                           record_enum='SUBSCRIPTION_SETUP_AND_INITIAL')
             subscription_row.subscription_ended_at = datetime.fromtimestamp(subscription_ended_at, timezone.utc)
             subscription_row.subscription_canceled_at = datetime.fromtimestamp(subscription_canceled_at, timezone.utc)
             subscription_row.save()
@@ -916,14 +917,19 @@ class DonationManager(models.Model):
     def update_journal_entry_for_refund_completed(charge):
         logger.debug("update_journal_entry_for_refund_completed: " + charge)
         try:
-            row = DonationJournal.objects.get(charge_id=charge)
-            row.status = textwrap.shorten(row.status + "CHARGE_REFUNDED_" + str(datetime.utcnow()) + " ", width=255,
-                                          placeholder="...")
-            row.stripe_status = "refunded"
-            row.save()
-            logger.debug("update_journal_entry_for_refund_completed for charge " + charge + ", with status: " +
-                         row.status)
-            return "True"
+            queryset = DonationJournal.objects.all().order_by('-id')
+            rows = queryset.filter(charge_id=charge)
+            # There should only be one match, but super rarely, if the process gets interrupted, you can get multiples,
+            #   We need to get the most recent one.
+            if len(rows):
+                row = rows[0]
+                row.status = textwrap.shorten(row.status + "CHARGE_REFUNDED_" + str(datetime.utcnow()) + " ", width=255,
+                                              placeholder="...")
+                row.stripe_status = "refunded"
+                row.save()
+                logger.debug("update_journal_entry_for_refund_completed for charge " + charge + ", with status: " +
+                             row.status)
+                return "True"
 
         except DonationJournal.DoesNotExist:
             logger.error("update_journal_entry_for_refund_completed row does not exist for charge " + charge)
@@ -1002,6 +1008,54 @@ class DonationManager(models.Model):
             handle_exception(e, logger=logger,
                              exception_message="update_subscription_with_latest_charge_date: " + str(e))
         return
+
+    @staticmethod
+    def get_missing_charge_info(voter_we_vote_id, organization_we_vote_id, amount):
+        try:
+            # Then find the SUBSCRIPTION_SETUP_AND_INITIAL in the DonationJournal row that matches this charge.succeeded
+            queryset = DonationJournal.objects.all().order_by('-id')
+            journal_rows = queryset.filter(voter_we_vote_id__iexact=voter_we_vote_id,
+                                   organization_we_vote_id__iexact=organization_we_vote_id,
+                                   amount=amount,
+                                   record_enum__iexact="SUBSCRIPTION_SETUP_AND_INITIAL")
+
+            if len(journal_rows):
+                row = journal_rows[0]
+                journal = {
+                    'subscription_plan_id': row.subscription_plan_id,
+                    'subscription_id': row.subscription_id,
+                    'is_organization_plan': row.is_organization_plan,
+                    'plan_type_enum': row.plan_type_enum,
+                    'coupon_code': row.coupon_code,
+                    'success': True,
+                    'status:': "Row found",
+                }
+
+        except DonationJournal.DoesNotExist:
+            logger.error("Donation Journal table does not exist")
+            journal = {
+                'subscription_plan_id': '',
+                'subscription_id': '',
+                'is_organization_plan': '',
+                'plan_type_enum': '',
+                'coupon_code': '',
+                'success': False,
+                'status:': "Donation Journal table does not exist",
+            }
+
+        except Exception as e:
+            logger.error("subscription info row does not exist for voter ", e)
+            journal = {
+                'subscription_plan_id': '',
+                'subscription_id': '',
+                'is_organization_plan': '',
+                'plan_type_enum': '',
+                'coupon_code': '',
+                'success': False,
+                'status:': "Donation Journal table does not exist",
+            }
+
+        return journal
 
     @staticmethod
     def create_initial_coupons():
@@ -1427,7 +1481,7 @@ class DonationManager(models.Model):
         return results
 
     @staticmethod
-    def get_coupon_price(plan_type_enum, coupon_code):
+    def get_coupon_price(plan_type_enum, coupon_code, increment_redemption_cnt):
         """
         By the time we get here, the coupon has already been verified, so it will exist
         Return the price from the latest version of the coupon
@@ -1447,8 +1501,13 @@ class DonationManager(models.Model):
             else:
                 price = coupon.annual_price_stripe
 
+            if increment_redemption_cnt:
+                coupon.redemptions += 1
+                coupon.save()
+
             org_subs_id = coupon.id
         except Exception as e:
             logger.debug("get_coupon_price threw: ", e)
 
         return price, org_subs_id
+
