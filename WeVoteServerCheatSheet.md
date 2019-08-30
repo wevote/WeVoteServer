@@ -14,7 +14,10 @@ or
 waiting for server to start.... done
 server started
 (WeVoteServerPy3.7) Steves-MacBook-Pro-32GB-Oct-2018:WeVoteServer stevepodell$ 
-
+```
+####Setting up ngrok to send stripe webhooks to your local python server
+```
+(WeVoteServerPy3.7) Steves-MacBook-Pro-32GB-Oct-2018:PycharmProjects stevepodell$ ~/PythonProjects/ngrok http 8000 -host-header="localhost:8000"
 
 ```
 
