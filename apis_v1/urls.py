@@ -161,6 +161,8 @@ urlpatterns = [
         name='createNewCoupon'),
     url(r'^deletePlan', views_donation.delete_plan_for_api_view,
         name='deletePlan'),
+    url(r'^doesOrgHavePaidPlan', views_donation.does_paid_subscription_exist_for_api,
+        name='doesOrgHavePaidPlan'),
     url(r'^voterAddressRetrieve/', views_voter.voter_address_retrieve_view, name='voterAddressRetrieveView'),
     url(r'^voterAddressSave/', views_voter.voter_address_save_view, name='voterAddressSaveView'),
     url(r'^voterAllPositionsRetrieve/', views_voter.voter_all_positions_retrieve_view,

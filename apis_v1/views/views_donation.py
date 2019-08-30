@@ -329,3 +329,23 @@ def delete_plan_for_api_view(request):
         }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def does_paid_subscription_exist_for_api(request):
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    voter_we_vote_id = ''
+
+    if positive_value_exists(voter_device_id):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+    else:
+        logger.error('donation_with_stripe_view voter_we_vote_id is missing')
+    organization_we_vote_id = VoterManager().retrieve_linked_organization_by_voter_we_vote_id(voter_we_vote_id)
+    found_live_paid_subscription_for_the_org = DonationManager.does_paid_subscription_exist(organization_we_vote_id)
+
+    json_data = {
+        'org_has_active_paid_plan': found_live_paid_subscription_for_the_org,
+        'success': True,
+    }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+

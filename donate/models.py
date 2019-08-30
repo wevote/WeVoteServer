@@ -9,6 +9,7 @@ from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOW
     CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED, CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED, CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED
 
 import wevote_functions.admin
+from voter.models import VoterManager
 from wevote_functions.functions import positive_value_exists, convert_date_to_date_as_integer
 import stripe
 import textwrap
@@ -78,10 +79,10 @@ class DonationPlanDefinition(models.Model):
         default=False)
     voter_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the person who created this subscription",
-        max_length=255, default=None, null=True, blank=True, unique=True, db_index=True)
+        max_length=255, default=None, null=True, blank=True, unique=False, db_index=True)
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the organization who benefits from the organization subscription",
-        max_length=255, default=None, null=True, blank=True, unique=True, db_index=True)
+        max_length=255, default=None, null=True, blank=True, unique=False, db_index=True)
     organization_subscription_plan_id = models.PositiveIntegerField(
         verbose_name="the id of the OrganizationSubscriptionPlans used to create this plan, resulting from the use "
                      "of a coupon code, or a default coupon code", default=0, null=False)
@@ -388,13 +389,6 @@ class DonationManager(models.Model):
         except stripe.error.StripeError:
             pass
 
-        # except IntegrityError:
-        #     # This trips for donation subscriptions too, but we allow multiple subscriptions for donations (not for
-        #     # organization paid plans/coupons)
-        #     if is_organization_plan:
-        #         org_subs_already_exists = True
-        #         status += 'ORGANIZATION_SUBSCRIPTION_ALREADY_EXISTS '
-
         except Exception as e:
             handle_exception(e, logger=logger)
 
@@ -699,6 +693,31 @@ class DonationManager(models.Model):
         return results
 
     @staticmethod
+    def does_paid_subscription_exist(organization_we_vote_id):
+        found_live_paid_subscription_for_the_org = False
+        try:
+            donation_queryset = DonationJournal.objects.all()
+            donation_queryset = donation_queryset.filter(record_enum='SUBSCRIPTION_SETUP_AND_INITIAL',
+                                                         is_organization_plan=True)
+
+            if len(donation_queryset) == 0:
+                found_live_paid_subscription_for_the_org = False
+            else:
+                journal_list_objects = list(donation_queryset)
+                for journal in journal_list_objects:
+                 if not positive_value_exists(journal.subscription_canceled_at):
+                     print('does_paid_subscription_exist FOUND LIVE SUBSCRIPTION AT id: ' + str(journal.id))
+                     found_live_paid_subscription_for_the_org = True
+
+        except Exception as e:
+            found_live_paid_subscription_for_the_org = False
+            handle_exception(e, logger=logger, exception_message="Exception in does_paid_subscription_exist")
+
+
+        return found_live_paid_subscription_for_the_org
+
+
+    @staticmethod
     def retrieve_subscription_plan_list():
         """
         Retrieve coupons
@@ -763,6 +782,32 @@ class DonationManager(models.Model):
             return False
 
         return True
+
+    @staticmethod
+    def mark_organization_subscription_canceled(voter_we_vote_id):
+        #There can only be one active organization paid plan at one time, so mark the first active one as inactive
+        try:
+            org_we_vote_id = VoterManager().retrieve_linked_organization_by_voter_we_vote_id(voter_we_vote_id)
+
+            rows = DonationPlanDefinition.objects.get(organization_we_vote_id__iexact=org_we_vote_id,
+                                                      is_organiztion_plan=True,
+                                                      donation_plan_is_active=True)
+            if len(rows):
+                row = rows[0]
+                row.donation_plan_is_active = False
+                print('DonationPlanDefinition for ' + org_we_vote_id + ' is now marked as inactive')
+                row.save()
+            else:
+                print('DonationPlanDefinition for ' + org_we_vote_id + ' not found')
+                logger.error('DonationPlanDefinition for ' + org_we_vote_id +
+                             ' not found in mark_organization_subscription_canceled')
+
+
+            #TODO: STEVE STEVE STEVE seperately make sure that we only find  the active ones
+        except Exception as e:
+            logger.error('DonationPlanDefinition for ' + org_we_vote_id +
+                         ' threw exception: ' + e)
+        return
 
     @staticmethod
     def move_donations_between_donors(from_voter, to_voter):
