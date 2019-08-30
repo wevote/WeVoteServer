@@ -389,13 +389,6 @@ class DonationManager(models.Model):
         except stripe.error.StripeError:
             pass
 
-        # except IntegrityError:
-        #     # This trips for donation subscriptions too, but we allow multiple subscriptions for donations (not for
-        #     # organization paid plans/coupons)
-        #     if is_organization_plan:
-        #         org_subs_already_exists = True
-        #         status += 'ORGANIZATION_SUBSCRIPTION_ALREADY_EXISTS '
-
         except Exception as e:
             handle_exception(e, logger=logger)
 
