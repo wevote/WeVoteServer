@@ -2160,7 +2160,7 @@ class VoterGuidePossibilityManager(models.Manager):
                 status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_URL "  # Set this in case the get fails
                 voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
                     voter_guide_possibility_url=voter_guide_possibility_url)
-                voter_guide_possibility_on_stage = voter_guide_possibility_query.first()
+                voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
                 if voter_guide_possibility_on_stage is not None:
                     voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
                     status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_URL "
