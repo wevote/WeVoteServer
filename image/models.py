@@ -16,6 +16,9 @@ import wevote_functions.admin
 from .functions import analyze_remote_url
 
 # naming convention stored at aws
+CHOSEN_FAVICON_NAME = "favicon_image"
+CHOSEN_LOGO_NAME = "logo_image"
+CHOSEN_SOCIAL_SHARE_IMAGE_NAME = "social_share_image"
 FACEBOOK_PROFILE_IMAGE_NAME = "facebook_profile_image"
 FACEBOOK_BACKGROUND_IMAGE_NAME = "facebook_background_image"
 TWITTER_PROFILE_IMAGE_NAME = "twitter_profile_image"
@@ -79,6 +82,10 @@ class WeVoteImage(models.Model):
     issue_image_url_https = models.URLField(verbose_name='url of issue image', blank=True, null=True)
     ballotpedia_profile_image_url = models.URLField(verbose_name='profile image from ballotpedia',
                                                     blank=True, null=True)
+    chosen_favicon_image_url_https = models.URLField(verbose_name='org favicon image', blank=True, null=True)
+    chosen_logo_image_url_https = models.URLField(verbose_name='org logo image', blank=True, null=True)
+    chosen_social_share_master_image_url_https = models.URLField(
+        verbose_name='org master share image', blank=True, null=True)
     linkedin_profile_image_url = models.URLField(verbose_name='profile image from linkedin', blank=True, null=True)
     wikipedia_profile_image_url = models.URLField(verbose_name='profile image from wikipedia', blank=True, null=True)
     other_source = models.CharField(verbose_name="other source of image", max_length=255, null=True, blank=True)
@@ -93,24 +100,35 @@ class WeVoteImage(models.Model):
     date_image_saved = models.DateTimeField(verbose_name="date when image saved on wevote", auto_now_add=True)
     same_day_image_version = models.BigIntegerField(verbose_name="image version on same day", null=True, blank=True)
     is_active_version = models.BooleanField(verbose_name="True if image is newest", default=False)
+
+    kind_of_image_ballotpedia_profile = models.BooleanField(verbose_name="image is ballotpedia", default=False)
+    kind_of_image_chosen_favicon = models.BooleanField(verbose_name="image is for favicon", default=False)
+    kind_of_image_chosen_logo = models.BooleanField(verbose_name="image is for header", default=False)
+    kind_of_image_chosen_social_share_master = models.BooleanField(verbose_name="image is for sharing", default=False)
+    kind_of_image_facebook_profile = models.BooleanField(verbose_name="image is facebook profile", default=False)
+    kind_of_image_facebook_background = models.BooleanField(verbose_name="image is facebook background", default=False)
+    kind_of_image_issue = models.BooleanField(verbose_name="image is for issue", default=False)
+    kind_of_image_linkedin_profile = models.BooleanField(verbose_name="image is linkedin", default=False)
     kind_of_image_maplight = models.BooleanField(verbose_name="image is maplight", default=False)
-    kind_of_image_vote_smart = models.BooleanField(verbose_name="image is vote smart", default=False)
-    kind_of_image_issue = models.BooleanField (verbose_name="image is for issue", default=False)
     kind_of_image_twitter_background = models.BooleanField(verbose_name="image is twitter background", default=False)
     kind_of_image_twitter_banner = models.BooleanField(verbose_name="image is twitter banner", default=False)
     kind_of_image_twitter_profile = models.BooleanField(verbose_name="image is twitter profile", default=False)
-    kind_of_image_original = models.BooleanField(verbose_name="is image size original", default=False)
-    kind_of_image_facebook_profile = models.BooleanField(verbose_name="image is facebook profile", default=False)
-    kind_of_image_facebook_background = models.BooleanField(verbose_name="image is facebook background", default=False)
-    kind_of_image_ballotpedia_profile = models.BooleanField(verbose_name="image is ballotpedia", default=False)
-    kind_of_image_linkedin_profile = models.BooleanField(verbose_name="image is linkedin", default=False)
+    kind_of_image_vote_smart = models.BooleanField(verbose_name="image is vote smart", default=False)
     kind_of_image_wikipedia_profile = models.BooleanField(verbose_name="image is wikipedia", default=False)
     kind_of_image_other_source = models.BooleanField(verbose_name="image is from other sources", default=False)
+
+    kind_of_image_original = models.BooleanField(verbose_name="is image size original", default=False)
     kind_of_image_large = models.BooleanField(verbose_name="is image size large", default=False)
     kind_of_image_medium = models.BooleanField(verbose_name="is image size medium", default=False)
     kind_of_image_tiny = models.BooleanField(verbose_name="is image size tiny", default=False)
 
     def display_kind_of_image(self):
+        if self.kind_of_image_chosen_favicon:
+            return "chosen_favicon"
+        if self.kind_of_image_chosen_logo:
+            return "chosen_logo"
+        if self.kind_of_image_chosen_social_share_master:
+            return "chosen_social_share_master"
         if self.kind_of_image_twitter_profile:
             return "twitter_profile"
         elif self.kind_of_image_twitter_background:
@@ -142,16 +160,18 @@ class WeVoteImageManager(models.Model):
     def __unicode__(self):
         return "WeVoteImageManager"
 
-    def create_we_vote_image(self, google_civic_election_id, voter_we_vote_id=None, candidate_we_vote_id=None,
+    def create_we_vote_image(self, google_civic_election_id=0, voter_we_vote_id=None, candidate_we_vote_id=None,
                              organization_we_vote_id=None, issue_we_vote_id=None, kind_of_image_twitter_profile=False,
                              kind_of_image_twitter_background=False, kind_of_image_twitter_banner=False,
                              kind_of_image_facebook_profile=False, kind_of_image_facebook_background=False,
-                             kind_of_image_maplight=False, kind_of_image_vote_smart=False, kind_of_image_issue=None,
+                             kind_of_image_maplight=False, kind_of_image_vote_smart=False, kind_of_image_issue=False,
                              kind_of_image_ballotpedia_profile=False, kind_of_image_linkedin_profile=False,
                              kind_of_image_wikipedia_profile=False, kind_of_image_other_source=False,
                              kind_of_image_original=False, kind_of_image_large=False,
                              kind_of_image_medium=False, kind_of_image_tiny=False,
-                             facebook_background_image_offset_x=False, facebook_background_image_offset_y=False):
+                             facebook_background_image_offset_x=False, facebook_background_image_offset_y=False,
+                             kind_of_image_chosen_favicon=False, kind_of_image_chosen_logo=False,
+                             kind_of_image_chosen_social_share_master=False):
         """
         Creates a we_vote_image object, which contains all the metadata, but not the image or a link to the image
         :param google_civic_election_id:
@@ -177,9 +197,13 @@ class WeVoteImageManager(models.Model):
         :param kind_of_image_tiny:
         :param facebook_background_image_offset_x:
         :param facebook_background_image_offset_y:
+        :param kind_of_image_chosen_favicon:
+        :param kind_of_image_chosen_logo:
+        :param kind_of_image_chosen_social_share_master:
         :return:
         """
         we_vote_image = WeVoteImage()
+        status = ""
         try:
             we_vote_image = WeVoteImage.objects.create(
                 voter_we_vote_id=voter_we_vote_id,
@@ -187,6 +211,9 @@ class WeVoteImageManager(models.Model):
                 organization_we_vote_id=organization_we_vote_id,
                 issue_we_vote_id=issue_we_vote_id,
                 google_civic_election_id=google_civic_election_id,
+                kind_of_image_chosen_favicon=kind_of_image_chosen_favicon,
+                kind_of_image_chosen_logo=kind_of_image_chosen_logo,
+                kind_of_image_chosen_social_share_master=kind_of_image_chosen_social_share_master,
                 kind_of_image_twitter_profile=kind_of_image_twitter_profile,
                 kind_of_image_twitter_background=kind_of_image_twitter_background,
                 kind_of_image_twitter_banner=kind_of_image_twitter_banner,
@@ -208,11 +235,11 @@ class WeVoteImageManager(models.Model):
             )
             we_vote_image_saved = True
             success = True
-            status = "WE_VOTE_IMAGE_CREATED"
+            status += "WE_VOTE_IMAGE_CREATED "
         except Exception as e:
             we_vote_image_saved = False
             success = False
-            status = "WE_VOTE_IMAGE_NOT_CREATED"
+            status += "WE_VOTE_IMAGE_NOT_CREATED "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
@@ -367,6 +394,51 @@ class WeVoteImageManager(models.Model):
             status = "SAVED_WE_VOTE_IMAGE_MAPLIGHT_INFO"
         except Exception as e:
             status = "UNABLE_TO_SAVE_WE_VOTE_IMAGE_MAPLIGHT_INFO"
+            success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        results = {
+            'status':           status,
+            'success':          success,
+            'we_vote_image':    we_vote_image,
+        }
+        return results
+
+    def save_we_vote_image_organization_share_info(
+            self, we_vote_image, image_width, image_height,
+            image_url_https, same_day_image_version, image_url_valid=False,
+            kind_of_image_chosen_favicon=False, kind_of_image_chosen_logo=False,
+            kind_of_image_chosen_social_share_master=False):
+        """
+
+        :param we_vote_image:
+        :param image_width:
+        :param image_height:
+        :param image_url_https:
+        :param same_day_image_version:
+        :param image_url_valid:
+        :param kind_of_image_chosen_favicon:
+        :param kind_of_image_chosen_logo:
+        :param kind_of_image_chosen_social_share_master:
+        :return:
+        """
+        status = ""
+        try:
+            we_vote_image.image_width = image_width
+            we_vote_image.image_height = image_height
+            if kind_of_image_chosen_favicon:
+                we_vote_image.chosen_favicon_image_url_https = image_url_https
+            elif kind_of_image_chosen_logo:
+                we_vote_image.chosen_logo_image_url_https = image_url_https
+            elif kind_of_image_chosen_social_share_master:
+                we_vote_image.chosen_social_share_master_image_url_https = image_url_https
+            we_vote_image.source_image_still_valid = image_url_valid
+            we_vote_image.same_day_image_version = same_day_image_version
+            we_vote_image.save()
+            success = True
+            status += "SAVED_WE_VOTE_IMAGE_ORGANIZATION_SHARE_INFO "
+        except Exception as e:
+            status += "UNABLE_TO_SAVE_WE_VOTE_IMAGE_ORGANIZATION_SHARE_INFO "
             success = False
             handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
@@ -650,7 +722,10 @@ class WeVoteImageManager(models.Model):
                                                   kind_of_image_ballotpedia_profile=False,
                                                   kind_of_image_linkedin_profile=False,
                                                   kind_of_image_wikipedia_profile=False,
-                                                  kind_of_image_other_source=False):
+                                                  kind_of_image_other_source=False,
+                                                  kind_of_image_chosen_favicon=False,
+                                                  kind_of_image_chosen_logo=False,
+                                                  kind_of_image_chosen_social_share_master=False):
         """
         Set active version false for all other images except for current latest image of a candidate/organization
         :param voter_we_vote_id:
@@ -670,27 +745,45 @@ class WeVoteImageManager(models.Model):
         :param kind_of_image_linkedin_profile:
         :param kind_of_image_wikipedia_profile:
         :param kind_of_image_other_source:
+        :param kind_of_image_chosen_favicon:
+        :param kind_of_image_chosen_logo:
+        :param kind_of_image_chosen_social_share_master:
         :return:
         """
+        status = ""
         try:
             we_vote_image_list = WeVoteImage.objects.all()
             we_vote_image_list = we_vote_image_list.filter(
                 voter_we_vote_id=voter_we_vote_id,
-                candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
+                candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
                 issue_we_vote_id=issue_we_vote_id,
-                is_active_version=True, kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+                is_active_version=True,
+                kind_of_image_chosen_favicon=kind_of_image_chosen_favicon,
+                kind_of_image_chosen_logo=kind_of_image_chosen_logo,
+                kind_of_image_chosen_social_share_master=kind_of_image_chosen_social_share_master,
+                kind_of_image_twitter_profile=kind_of_image_twitter_profile,
                 kind_of_image_twitter_background=kind_of_image_twitter_background,
                 kind_of_image_twitter_banner=kind_of_image_twitter_banner,
                 kind_of_image_facebook_profile=kind_of_image_facebook_profile,
                 kind_of_image_facebook_background=kind_of_image_facebook_background,
-                kind_of_image_maplight=kind_of_image_maplight, kind_of_image_vote_smart=kind_of_image_vote_smart,
+                kind_of_image_maplight=kind_of_image_maplight,
+                kind_of_image_vote_smart=kind_of_image_vote_smart,
                 kind_of_image_issue=kind_of_image_issue,
                 kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
                 kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
                 kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-                kind_of_image_other_source=kind_of_image_other_source
+                kind_of_image_other_source=kind_of_image_other_source,
+
             )
 
+            if kind_of_image_chosen_favicon:
+                we_vote_image_list = we_vote_image_list.exclude(chosen_favicon_image_url_https=image_url_https)
+            if kind_of_image_chosen_logo:
+                we_vote_image_list = we_vote_image_list.exclude(chosen_logo_image_url_https=image_url_https)
+            if kind_of_image_chosen_social_share_master:
+                we_vote_image_list = we_vote_image_list.exclude(
+                    chosen_social_share_master_image_url_https=image_url_https)
             if kind_of_image_twitter_profile:
                 we_vote_image_list = we_vote_image_list.exclude(twitter_profile_image_url_https=image_url_https)
             if kind_of_image_twitter_background:
@@ -720,10 +813,10 @@ class WeVoteImageManager(models.Model):
             for we_vote_image in we_vote_image_list:
                 we_vote_image.is_active_version = False
                 we_vote_image.save()
-            status = "SET_ACTIVE_VERSION_FALSE_FOR_OTHER_IMAGES"
+            status += "SET_ACTIVE_VERSION_FALSE_FOR_OTHER_IMAGES-SUCCESS "
             success = True
         except Exception as e:
-            status = "UNABLE_TO_SET_ACTIVE_VERSION_FALSE_FOR_OTHER_IMAGES"
+            status += "UNABLE_TO_SET_ACTIVE_VERSION_FALSE_FOR_OTHER_IMAGES "
             success = False
             handle_exception(e, logger=logger, exception_message=status)
 
@@ -1234,7 +1327,10 @@ class WeVoteImageManager(models.Model):
                                                   kind_of_image_wikipedia_profile=False,
                                                   kind_of_image_other_source=False,
                                                   kind_of_image_original=False, kind_of_image_large=False,
-                                                  kind_of_image_medium=False, kind_of_image_tiny=False):
+                                                  kind_of_image_medium=False, kind_of_image_tiny=False,
+                                                  kind_of_image_chosen_favicon=False,
+                                                  kind_of_image_chosen_logo=False,
+                                                  kind_of_image_chosen_social_share_master=False):
         """
         Retrieve today's cached images according to the kind of image
         :param voter_we_vote_id:
@@ -1257,6 +1353,9 @@ class WeVoteImageManager(models.Model):
         :param kind_of_image_large:
         :param kind_of_image_medium:
         :param kind_of_image_tiny:
+        :param kind_of_image_chosen_favicon:
+        :param kind_of_image_chosen_logo:
+        :param kind_of_image_chosen_social_share_master:
         :return:
         """
         we_vote_image_list = []
@@ -1270,6 +1369,9 @@ class WeVoteImageManager(models.Model):
                 organization_we_vote_id__iexact=organization_we_vote_id,
                 issue_we_vote_id__iexact=issue_we_vote_id,
                 date_image_saved__contains=today_date,
+                kind_of_image_chosen_favicon=kind_of_image_chosen_favicon,
+                kind_of_image_chosen_logo=kind_of_image_chosen_logo,
+                kind_of_image_chosen_social_share_master=kind_of_image_chosen_social_share_master,
                 kind_of_image_twitter_profile=kind_of_image_twitter_profile,
                 kind_of_image_twitter_background=kind_of_image_twitter_background,
                 kind_of_image_twitter_banner=kind_of_image_twitter_banner,
@@ -1360,6 +1462,28 @@ class WeVoteImageManager(models.Model):
         try:
             image_local_path = "/tmp/" + image_local_path
             urlretrieve(image_url_https, image_local_path)
+            image_stored = True
+        except HTTPError as error:  # something wrong with url
+            image_stored = False
+            exception_message = "store_image_locally failed because of http error"
+            handle_exception(error, logger=logger, exception_message=exception_message)
+        except Exception as e:
+            image_stored = False
+            exception_message = "store_image_locally failed"
+            handle_exception(e, logger=logger, exception_message=exception_message)
+
+        return image_stored
+
+    def store_python_image_locally(self, python_image_library_image, image_local_path):
+        """
+        Save image locally at /tmp/ folder
+        :param python_image_library_image:
+        :param image_local_path:
+        :return:
+        """
+        try:
+            image_local_path = "/tmp/" + image_local_path
+            python_image_library_image.save(image_local_path, format=python_image_library_image.format)
             image_stored = True
         except HTTPError as error:  # something wrong with url
             image_stored = False
