@@ -18,7 +18,7 @@ from apis_v1.documentation_source import all_ballot_items_retrieve_doc, ballot_i
     organization_count_doc, organizations_followed_retrieve_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organizations_found_on_url_doc, \
     organization_link_to_issue_sync_out_doc, organization_link_to_issue_doc, organization_stop_following_doc, \
-    organization_stop_ignoring_doc, \
+    organization_stop_ignoring_doc, organization_photos_save_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, organizations_sync_out_doc, \
     organization_suggestion_tasks_doc, \
     pledge_to_vote_with_voter_guide_doc, politicians_sync_out_doc, polling_locations_sync_out_doc, \
@@ -511,6 +511,16 @@ def organization_stop_ignoring_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = organization_stop_ignoring_doc.organization_stop_ignoring_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def organization_photos_save_doc_view(request):
+    """
+    Show documentation about organizationPhotosSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = organization_photos_save_doc.organization_photos_save_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

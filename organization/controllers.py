@@ -8,15 +8,18 @@ from .models import Organization, OrganizationListManager, OrganizationManager, 
     POLITICAL_ACTION_COMMITTEE, ORGANIZATION, PUBLIC_FIGURE, UNKNOWN, VOTER, ORGANIZATION_TYPE_CHOICES
 from analytics.models import ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, \
     ACTION_ORGANIZATION_STOP_FOLLOWING, ACTION_ORGANIZATION_STOP_IGNORING, AnalyticsManager
+import base64
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from exception.models import handle_record_not_found_exception
 from follow.controllers import move_organization_followers_to_another_organization
 from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, \
     STOP_FOLLOWING, STOP_IGNORING
-from image.controllers import retrieve_all_images_for_one_organization
+from image.controllers import cache_organization_sharing_image, retrieve_all_images_for_one_organization
 from import_export_facebook.models import FacebookManager
 import json
+from io import BytesIO, StringIO
+from PIL import Image
 from position.controllers import add_position_network_count_entries_for_one_organization, \
     move_positions_to_another_organization, \
     update_position_entered_details_from_organization
@@ -41,6 +44,12 @@ TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
+CHOSEN_FAVICON_MAX_WIDTH = 32
+CHOSEN_FAVICON_MAX_HEIGHT = 32
+CHOSEN_LOGO_MAX_WIDTH = 125
+CHOSEN_LOGO_MAX_HEIGHT = 30
+CHOSEN_SOCIAL_SHARE_MASTER_MAX_WIDTH = 1600
+CHOSEN_SOCIAL_SHARE_MASTER_MAX_HEIGHT = 900
 
 
 def full_domain_string_available(full_domain_string, organization_id):
@@ -1158,20 +1167,202 @@ def organizations_import_from_structured_json(structured_json):
     return organizations_results
 
 
-def organization_retrieve_for_api(organization_id, organization_we_vote_id, voter_device_id):  # organizationRetrieve
+def organization_photos_save_for_api(  # organizationPhotosSave
+        organization_id=0, organization_we_vote_id='',
+        chosen_favicon_from_file_reader='',
+        chosen_logo_from_file_reader='',
+        chosen_social_share_master_image_from_file_reader='',
+        delete_chosen_favicon=False,
+        delete_chosen_logo=False,
+        delete_chosen_social_share_master_image=False):
+    status = ''
+    success = True
+
+    organization_id = convert_to_int(organization_id)
+    organization_we_vote_id = organization_we_vote_id.strip().lower()
+
+    organization_manager = OrganizationManager()
+    unique_identifier_found = positive_value_exists(organization_id) \
+        or positive_value_exists(organization_we_vote_id)
+    if not unique_identifier_found:
+        status += "ORGANIZATION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING "
+        results = {
+            'status':                       status,
+            'success':                      False,
+            'chosen_favicon_url_https':     '',
+            'chosen_logo_url_https':        '',
+            'chosen_social_share_master_url_https': '',
+            'organization_id':              organization_id,
+            'organization_we_vote_id':      organization_we_vote_id,
+            'organization_updated':         False,
+        }
+        return results
+
+    kind_of_image_chosen_favicon = positive_value_exists(chosen_favicon_from_file_reader)
+    kind_of_image_chosen_logo = positive_value_exists(chosen_logo_from_file_reader)
+    kind_of_image_chosen_social_share_master = positive_value_exists(chosen_social_share_master_image_from_file_reader)
+
+    # Now convert the file_reader data (from Javascript) into a URL stored in our AWS bucket
+    chosen_favicon_url_https = False
+    chosen_logo_url_https = False
+    chosen_social_share_master_url_https = False
+
+    if kind_of_image_chosen_favicon:
+        image_data_found = False
+        python_image_library_image = None
+        img_dict = re.match("data:(?P<type>.*?);(?P<encoding>.*?),(?P<data>.*)",
+                            chosen_favicon_from_file_reader).groupdict()
+        if img_dict['encoding'] == 'base64':
+            try:
+                base64_data = img_dict['data']
+                byte_data = base64.b64decode(base64_data)
+                image_data = BytesIO(byte_data)
+                python_image_library_image = Image.open(image_data)
+                format_to_cache = python_image_library_image.format
+                python_image_library_image = \
+                    python_image_library_image.resize(
+                        (CHOSEN_FAVICON_MAX_WIDTH, CHOSEN_FAVICON_MAX_HEIGHT), Image.ANTIALIAS)
+                python_image_library_image.format = format_to_cache
+                image_data_found = True
+            except Exception as e:
+                status += 'PROBLEM_DECODING_CHOSEN_FAVICON: {error} [type: {error_type}] ' \
+                          ''.format(error=e, error_type=type(e))
+        else:
+            status += "INCOMING_CHOSEN_FAVICON-BASE64_NOT_FOUND "
+
+        if image_data_found:
+            cache_issue_image_results = cache_organization_sharing_image(
+                python_image_library_image=python_image_library_image,
+                organization_we_vote_id=organization_we_vote_id,
+                kind_of_image_chosen_favicon=True,
+                kind_of_image_original=True)
+            if cache_issue_image_results['success']:
+                cached_master_we_vote_image = cache_issue_image_results['we_vote_image']
+                chosen_favicon_url_https = cached_master_we_vote_image.we_vote_image_url
+    elif delete_chosen_favicon:
+        pass
+
+    if kind_of_image_chosen_logo:
+        image_data_found = False
+        python_image_library_image = None
+        img_dict = re.match("data:(?P<type>.*?);(?P<encoding>.*?),(?P<data>.*)",
+                            chosen_logo_from_file_reader).groupdict()
+        if img_dict['encoding'] == 'base64':
+            try:
+                base64_data = img_dict['data']
+                byte_data = base64.b64decode(base64_data)
+                image_data = BytesIO(byte_data)
+                python_image_library_image = Image.open(image_data)
+                format_to_cache = python_image_library_image.format
+                python_image_library_image = \
+                    python_image_library_image.resize((CHOSEN_LOGO_MAX_WIDTH, CHOSEN_LOGO_MAX_HEIGHT), Image.ANTIALIAS)
+                python_image_library_image.format = format_to_cache
+                image_data_found = True
+            except Exception as e:
+                status += 'PROBLEM_DECODING_CHOSEN_LOGO: {error} [type: {error_type}] ' \
+                          ''.format(error=e, error_type=type(e))
+        else:
+            status += "INCOMING_CHOSEN_LOGO-BASE64_NOT_FOUND "
+
+        if image_data_found:
+            cache_issue_image_results = cache_organization_sharing_image(
+                python_image_library_image=python_image_library_image,
+                organization_we_vote_id=organization_we_vote_id,
+                kind_of_image_chosen_logo=True,
+                kind_of_image_original=True)
+            if cache_issue_image_results['success']:
+                cached_master_we_vote_image = cache_issue_image_results['we_vote_image']
+                chosen_logo_url_https = cached_master_we_vote_image.we_vote_image_url
+    elif delete_chosen_logo:
+        # For now we aren't actually deleting these images here -- we just remove them from the organization
+        pass
+
+    if kind_of_image_chosen_social_share_master:
+        image_data_found = False
+        python_image_library_image = None
+        img_dict = re.match("data:(?P<type>.*?);(?P<encoding>.*?),(?P<data>.*)",
+                            chosen_social_share_master_image_from_file_reader).groupdict()
+        if img_dict['encoding'] == 'base64':
+            try:
+                base64_data = img_dict['data']
+                byte_data = base64.b64decode(base64_data)
+                image_data = BytesIO(byte_data)
+                python_image_library_image = Image.open(image_data)
+                format_to_cache = python_image_library_image.format
+                python_image_library_image = \
+                    python_image_library_image.resize((CHOSEN_SOCIAL_SHARE_MASTER_MAX_WIDTH,
+                                                       CHOSEN_SOCIAL_SHARE_MASTER_MAX_HEIGHT), Image.ANTIALIAS)
+                python_image_library_image.format = format_to_cache
+                image_data_found = True
+            except Exception as e:
+                status += 'PROBLEM_DECODING_CHOSEN_SOCIAL_SHARE_MASTER: {error} [type: {error_type}] ' \
+                          ''.format(error=e, error_type=type(e))
+        else:
+            status += "INCOMING_CHOSEN_SOCIAL_SHARE_MASTER-BASE64_NOT_FOUND "
+
+        if image_data_found:
+            cache_issue_image_results = cache_organization_sharing_image(
+                python_image_library_image=python_image_library_image,
+                organization_we_vote_id=organization_we_vote_id,
+                kind_of_image_chosen_social_share_master=True,
+                kind_of_image_original=True)
+            if cache_issue_image_results['success']:
+                cached_master_we_vote_image = cache_issue_image_results['we_vote_image']
+                chosen_social_share_master_url_https = cached_master_we_vote_image.we_vote_image_url
+    elif delete_chosen_social_share_master_image:
+        # For now we aren't actually deleting these images here -- we just remove them from the organization
+        pass
+
+    # And finally, save the locally stored URLs in the organization object
+    save_results = organization_manager.update_organization_photos(
+        organization_id=organization_id, organization_we_vote_id=organization_we_vote_id,
+        chosen_favicon_url_https=chosen_favicon_url_https,
+        chosen_logo_url_https=chosen_logo_url_https,
+        chosen_social_share_master_url_https=chosen_social_share_master_url_https,
+        delete_chosen_favicon=delete_chosen_favicon,
+        delete_chosen_logo=delete_chosen_logo,
+        delete_chosen_social_share_master_image=delete_chosen_social_share_master_image)
+
+    success = save_results['success']
+    status = save_results['status']
+    organization_updated = save_results['organization_updated']
+
+    results = {
+        'success':                              success,
+        'status':                               status,
+        'chosen_favicon_url_https':             chosen_favicon_url_https if chosen_favicon_url_https else '',
+        'chosen_logo_url_https':                chosen_logo_url_https if chosen_logo_url_https else '',
+        'chosen_social_share_master_url_https': chosen_social_share_master_url_https
+        if chosen_social_share_master_url_https else '',
+        'delete_chosen_favicon':                delete_chosen_favicon,
+        'delete_chosen_logo':                   delete_chosen_logo,
+        'delete_chosen_social_share_master_image':  delete_chosen_social_share_master_image,
+        'organization_id':                      organization_id,
+        'organization_we_vote_id':              organization_we_vote_id,
+        'organization_updated':                 organization_updated,
+    }
+    return results
+
+
+def organization_retrieve_for_api(
+        organization_id, organization_we_vote_id, voter_device_id, prior_status=''):  # organizationRetrieve
     """
     Called from organizationRetrieve api
     :param organization_id:
     :param organization_we_vote_id:
     :param voter_device_id:
+    :param prior_status:
     :return:
     """
+    status = ''
+    status += prior_status
     organization_id = convert_to_int(organization_id)
 
     organization_we_vote_id = organization_we_vote_id.strip().lower()
     if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
+        status += "ORGANIZATION_RETRIEVE_BOTH_IDS_MISSING "
         json_data = {
-            'status':                           "ORGANIZATION_RETRIEVE_BOTH_IDS_MISSING",
+            'status':                           status,
             'success':                          False,
             'chosen_domain_string':             '',
             'chosen_favicon_url_https':         '',
@@ -1182,6 +1373,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
             'chosen_logo_url_https':            '',
             'chosen_social_share_description':  '',
             'chosen_social_share_image_256x256_url_https': '',
+            'chosen_social_share_master_url_https': '',
             'chosen_sub_domain_string':         '',
             'chosen_subscription_plan':         '',
             'subscription_plan_end_day_text':   '',
@@ -1209,6 +1401,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
 
     organization_manager = OrganizationManager()
     results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+    status += results['status']
 
     if results['organization_found']:
         organization = results['organization']
@@ -1240,17 +1433,18 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
 
         json_data = {
             'success': True,
-            'status': results['status'],
+            'status': status,
             'chosen_domain_string':             organization.chosen_domain_string,
             'chosen_favicon_url_https':         organization.chosen_favicon_url_https,
             'chosen_feature_package':           organization.chosen_feature_package,
             'chosen_google_analytics_account_number': organization.chosen_google_analytics_account_number,
             'chosen_html_verification_string':  organization.chosen_html_verification_string,
-            'chosen_hide_we_vote_logo':            organization.chosen_hide_we_vote_logo,
+            'chosen_hide_we_vote_logo':         organization.chosen_hide_we_vote_logo,
             'chosen_logo_url_https':            organization.chosen_logo_url_https,
             'chosen_social_share_description':  organization.chosen_social_share_description,
-            'chosen_social_share_image_256x256_url_https': organization.chosen_social_share_image_256x256_url_https,
-            'chosen_sub_domain_string':          organization.chosen_sub_domain_string,
+            'chosen_social_share_master_url_https':         organization.chosen_social_share_master_url_https,
+            'chosen_social_share_image_256x256_url_https':  organization.chosen_social_share_image_256x256_url_https,
+            'chosen_sub_domain_string':         organization.chosen_sub_domain_string,
             'chosen_subscription_plan':         organization.chosen_subscription_plan,
             'subscription_plan_end_day_text':   organization.subscription_plan_end_day_text,
             'subscription_plan_features_active': organization.subscription_plan_features_active,  # Replace
@@ -1292,7 +1486,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
         json_data = {
-            'status':                           results['status'],
+            'status':                           status,
             'success':                          False,
             'chosen_domain_string':             '',
             'chosen_favicon_url_https':         '',
@@ -1302,11 +1496,12 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
             'chosen_logo_url_https':            '',
             'chosen_social_share_description':  '',
             'chosen_social_share_image_256x256_url_https': '',
-            'chosen_sub_domain_string':          '',
+            'chosen_social_share_master_url_https': '',
+            'chosen_sub_domain_string':         '',
             'chosen_subscription_plan':         '',
             'subscription_plan_end_day_text':   '',
             'subscription_plan_features_active': '',  # Replace with features_provided_bitmap
-            'chosen_feature_package':              '',
+            'chosen_feature_package':           '',
             'features_provided_bitmap':         '',
             'facebook_id':                      0,
             'organization_banner_url':          '',

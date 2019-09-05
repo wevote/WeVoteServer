@@ -1339,6 +1339,93 @@ class OrganizationManager(models.Manager):
         }
         return results
 
+    def update_organization_photos(
+            self, organization_id=False, organization_we_vote_id=False,
+            chosen_favicon_url_https=False,
+            chosen_logo_url_https=False,
+            chosen_social_share_master_url_https=False,
+            delete_chosen_favicon=False,
+            delete_chosen_logo=False,
+            delete_chosen_social_share_master_image=False):
+        organization = None
+        organization_updated = False
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        success = False
+        status = "ENTERING_UPDATE_ORGANIZATION_PHOTOS "
+        values_changed = False
+        chosen_favicon_url_https = chosen_favicon_url_https.strip() if chosen_favicon_url_https else False
+        chosen_logo_url_https = chosen_logo_url_https.strip() if chosen_logo_url_https else False
+        chosen_social_share_master_url_https = chosen_social_share_master_url_https.strip() \
+            if chosen_social_share_master_url_https else False
+
+        if not positive_value_exists(chosen_favicon_url_https) \
+                and not positive_value_exists(chosen_logo_url_https) \
+                and not positive_value_exists(chosen_social_share_master_url_https) \
+                and not positive_value_exists(delete_chosen_favicon) \
+                and not positive_value_exists(delete_chosen_logo) \
+                and not positive_value_exists(delete_chosen_social_share_master_image):
+            status += "NO_VALUES_TO_SAVE_OR_DELETE "
+            results = {
+                'success':                  success,
+                'status':                   status,
+                'DoesNotExist':             exception_does_not_exist,
+                'MultipleObjectsReturned':  exception_multiple_object_returned,
+                'organization':             None,
+                'organization_updated':     organization_updated,
+            }
+            return results
+
+        organization_found = False
+        if positive_value_exists(organization_id):
+            results = self.retrieve_organization_from_id(organization_id)
+            if results['organization_found']:
+                organization_found = True
+                organization = results['organization']
+        elif positive_value_exists(organization_we_vote_id):
+            results = self.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+            if results['organization_found']:
+                organization_found = True
+                organization = results['organization']
+
+        if organization_found:
+            if chosen_favicon_url_https:
+                organization.chosen_favicon_url_https = str(chosen_favicon_url_https)
+                values_changed = True
+            elif delete_chosen_favicon:
+                organization.chosen_favicon_url_https = None
+                values_changed = True
+            if chosen_logo_url_https:
+                organization.chosen_logo_url_https = str(chosen_logo_url_https)
+                values_changed = True
+            elif delete_chosen_logo:
+                organization.chosen_logo_url_https = None
+                values_changed = True
+            if chosen_social_share_master_url_https:
+                organization.chosen_social_share_master_url_https = str(chosen_social_share_master_url_https)
+                values_changed = True
+            elif delete_chosen_social_share_master_image:
+                organization.chosen_social_share_master_url_https = None
+                values_changed = True
+            if values_changed:
+                organization.save()
+                organization_updated = True
+                success = True
+                status += "SAVED_ORG_PHOTOS "
+            else:
+                success = True
+                status += "NO_CHANGES_SAVED_TO_ORG_PHOTOS "
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'DoesNotExist':             exception_does_not_exist,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'organization':             organization,
+            'organization_updated':     organization_updated,
+        }
+        return results
+
     def update_organization_social_media(self, organization, organization_twitter_handle=False,
                                          organization_facebook=False):
         """
@@ -2429,6 +2516,8 @@ class Organization(models.Model):
     chosen_logo_url_https = models.URLField(verbose_name='url of client logo', blank=True, null=True)
     # Client configured text that will show in index.html
     chosen_social_share_description = models.TextField(null=True, blank=True)
+    chosen_social_share_master_url_https = models.URLField(
+        verbose_name='url of client social share master image', blank=True, null=True)
     chosen_social_share_image_256x256_url_https = models.URLField(
         verbose_name='url of client social share image', blank=True, null=True)
     # This is the subdomain the client has configured for yyy.WeVote.US

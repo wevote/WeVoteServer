@@ -4,8 +4,10 @@
 
 import requests
 import wevote_functions.admin
-from .functions import analyze_remote_url, analyze_image_file
-from .models import WeVoteImageManager, WeVoteImage, FACEBOOK_PROFILE_IMAGE_NAME, FACEBOOK_BACKGROUND_IMAGE_NAME, \
+from .functions import analyze_remote_url, analyze_image_file, analyze_image_in_memory
+from .models import WeVoteImageManager, WeVoteImage, \
+    CHOSEN_FAVICON_NAME, CHOSEN_LOGO_NAME, CHOSEN_SOCIAL_SHARE_IMAGE_NAME, \
+    FACEBOOK_PROFILE_IMAGE_NAME, FACEBOOK_BACKGROUND_IMAGE_NAME, \
     TWITTER_PROFILE_IMAGE_NAME, TWITTER_BACKGROUND_IMAGE_NAME, TWITTER_BANNER_IMAGE_NAME, MAPLIGHT_IMAGE_NAME, \
     VOTE_SMART_IMAGE_NAME, MASTER_IMAGE, ISSUE_IMAGE_NAME, BALLOTPEDIA_IMAGE_NAME, LINKEDIN_IMAGE_NAME, \
     WIKIPEDIA_IMAGE_NAME
@@ -719,7 +721,7 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
         if not image_stored_locally:
             error_results = {
                 'success':                      success,
-                'status':                       status + " IMAGE_NOT_STORED_LOCALLY",
+                'status':                       status + " IMAGE_NOT_STORED_LOCALLY ",
                 'we_vote_image_created':        we_vote_image_created,
                 'image_url_valid':              image_url_valid,
                 'image_stored_from_source':     image_stored_from_source,
@@ -729,14 +731,14 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
             delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
             return error_results
 
-        status += " IMAGE_STORED_LOCALLY"
+        status += " IMAGE_STORED_LOCALLY "
         image_stored_to_aws = we_vote_image_manager.store_image_to_aws(
             we_vote_image_file_name, we_vote_image_file_location,
             analyze_source_images_results['analyze_image_url_results']['image_format'])
         if not image_stored_to_aws:
             error_results = {
                 'success':                      success,
-                'status':                       status + " IMAGE_NOT_STORED_TO_AWS",
+                'status':                       status + " IMAGE_NOT_STORED_TO_AWS ",
                 'we_vote_image_created':        we_vote_image_created,
                 'image_url_valid':              image_url_valid,
                 'image_stored_from_source':     image_stored_from_source,
@@ -2602,7 +2604,8 @@ def cache_master_images(twitter_id=None, twitter_screen_name=None,
 def cache_issue_image_master(google_civic_election_id, issue_image_file, issue_we_vote_id=None,
                              kind_of_image_issue=False, kind_of_image_original=False):
     """
-    Cache master issue image to AWS
+    Cache master issue image to AWS. This function is a more focused version of cache_image_locally (which deals with
+    all of the standard photos like Facebook, or Twitter).
     :param google_civic_election_id:
     :param issue_image_file:
     :param issue_we_vote_id:
@@ -2750,6 +2753,219 @@ def cache_issue_image_master(google_civic_election_id, issue_image_file, issue_w
     set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
         issue_we_vote_id=issue_we_vote_id, image_url_https=we_vote_image.we_vote_image_url,
         kind_of_image_issue=True)
+
+    results = {
+        'success':                      success,
+        'status':                       status,
+        'we_vote_image_created':        we_vote_image_created,
+        'image_url_valid':              image_url_valid,
+        'image_stored_from_source':     image_stored_from_source,
+        'image_stored_to_aws':          image_stored_to_aws,
+        'we_vote_image':                we_vote_image
+    }
+    return results
+
+
+def cache_organization_sharing_image(
+        python_image_library_image=None,
+        organization_we_vote_id=None,
+        kind_of_image_original=False,
+        kind_of_image_chosen_favicon=False,
+        kind_of_image_chosen_logo=False,
+        kind_of_image_chosen_social_share_master=False):
+    """
+    Cache master "chosen" images to AWS. This function is a more focused version of cache_image_locally
+    (which deals with all of the standard profile photos like Facebook, or Twitter).
+    :param python_image_library_image:
+    :param organization_we_vote_id:
+    :param kind_of_image_original:
+    :param kind_of_image_chosen_favicon:
+    :param kind_of_image_chosen_logo:
+    :param kind_of_image_chosen_social_share_master:
+    :return:
+    """
+    we_vote_parent_image_id = None
+    success = False
+    status = ''
+    is_active_version = True
+    we_vote_image_created = False
+    image_url_valid = False
+    image_stored_from_source = False
+    image_stored_to_aws = False
+    image_versions = []
+
+    we_vote_image_manager = WeVoteImageManager()
+
+    create_we_vote_image_results = we_vote_image_manager.create_we_vote_image(
+        organization_we_vote_id=organization_we_vote_id,
+        kind_of_image_chosen_favicon=kind_of_image_chosen_favicon,
+        kind_of_image_chosen_logo=kind_of_image_chosen_logo,
+        kind_of_image_chosen_social_share_master=kind_of_image_chosen_social_share_master,
+        kind_of_image_original=kind_of_image_original)
+    status += create_we_vote_image_results['status']
+    if not create_we_vote_image_results['we_vote_image_saved']:
+        error_results = {
+            'success':                      success,
+            'status':                       status,
+            'we_vote_image_created':        we_vote_image_created,
+            'image_url_valid':              image_url_valid,
+            'image_stored_from_source':     image_stored_from_source,
+            'image_stored_to_aws':          image_stored_to_aws,
+            'we_vote_image':                None
+        }
+        return error_results
+
+    we_vote_image_created = True
+    we_vote_image = create_we_vote_image_results['we_vote_image']
+
+    # image file validation and get source image properties
+    analyze_source_images_results = analyze_image_in_memory(python_image_library_image)
+
+    if not analyze_source_images_results['image_url_valid']:
+        error_results = {
+            'success':                      success,
+            'status':                       status + " IMAGE_URL_NOT_VALID ",
+            'we_vote_image_created':        True,
+            'image_url_valid':              False,
+            'image_stored_from_source':     image_stored_from_source,
+            'image_stored_to_aws':          image_stored_to_aws,
+            'we_vote_image':                None
+        }
+        delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        return error_results
+
+    image_url_valid = True
+    status += " IMAGE_URL_VALID "
+    image_width = analyze_source_images_results['image_width']
+    image_height = analyze_source_images_results['image_height']
+    image_format = analyze_source_images_results['image_format']
+
+    # Get today's cached images and their versions so that image version can be calculated
+    cached_todays_we_vote_image_list_results = we_vote_image_manager.retrieve_todays_cached_we_vote_image_list(
+        organization_we_vote_id=organization_we_vote_id,
+        kind_of_image_chosen_favicon=kind_of_image_chosen_favicon,
+        kind_of_image_chosen_logo=kind_of_image_chosen_logo,
+        kind_of_image_chosen_social_share_master=kind_of_image_chosen_social_share_master,
+        kind_of_image_original=kind_of_image_original)
+
+    for cached_we_vote_image in cached_todays_we_vote_image_list_results['we_vote_image_list']:
+        if cached_we_vote_image.same_day_image_version:
+            image_versions.append(cached_we_vote_image.same_day_image_version)
+
+    if image_versions:
+        same_day_image_version = max(image_versions) + 1
+    else:
+        same_day_image_version = 1
+
+    image_stored_from_source = True
+    date_image_saved = "{year}{:02d}{:02d}".format(we_vote_image.date_image_saved.month,
+                                                   we_vote_image.date_image_saved.day,
+                                                   year=we_vote_image.date_image_saved.year)
+    if kind_of_image_chosen_favicon:
+        image_type = CHOSEN_FAVICON_NAME
+    elif kind_of_image_chosen_logo:
+        image_type = CHOSEN_LOGO_NAME
+    elif kind_of_image_chosen_social_share_master:
+        image_type = CHOSEN_SOCIAL_SHARE_IMAGE_NAME
+    else:
+        image_type = 'organization_sharing'
+
+    if kind_of_image_original:
+        master_image = MASTER_IMAGE
+    else:
+        master_image = 'calculated'
+
+    # ex issue_image_master-2017210_1_48x48.png
+    we_vote_image_file_name = "{image_type}_{master_image}-{date_image_saved}_{counter}_" \
+                              "{image_width}x{image_height}.{image_format}" \
+                              "".format(image_type=image_type,
+                                        master_image=master_image,
+                                        date_image_saved=date_image_saved,
+                                        counter=str(same_day_image_version),
+                                        image_width=str(image_width),
+                                        image_height=str(image_height),
+                                        image_format=str(image_format))
+
+    we_vote_image_file_location = organization_we_vote_id + "/" + we_vote_image_file_name
+
+    image_stored_locally = we_vote_image_manager.store_python_image_locally(
+        python_image_library_image, we_vote_image_file_name)
+
+    if not image_stored_locally:
+        error_results = {
+            'success': success,
+            'status': status + " IMAGE_NOT_STORED_LOCALLY",
+            'we_vote_image_created': we_vote_image_created,
+            'image_url_valid': image_url_valid,
+            'image_stored_from_source': image_stored_from_source,
+            'image_stored_locally': False,
+            'image_stored_to_aws': image_stored_to_aws,
+        }
+        delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        return error_results
+
+    image_stored_to_aws = we_vote_image_manager.store_image_to_aws(
+        we_vote_image_file_name, we_vote_image_file_location, image_format)
+    if not image_stored_to_aws:
+        error_results = {
+            'success':                      success,
+            'status':                       status + " IMAGE_NOT_STORED_TO_AWS ",
+            'we_vote_image_created':        we_vote_image_created,
+            'image_url_valid':              image_url_valid,
+            'image_stored_from_source':     image_stored_from_source,
+            'image_stored_to_aws':          False,
+            'we_vote_image':                None
+        }
+        delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        return error_results
+
+    we_vote_image_url = "https://{bucket_name}.s3.amazonaws.com/{we_vote_image_file_location}" \
+                        "".format(bucket_name=AWS_STORAGE_BUCKET_NAME,
+                                  we_vote_image_file_location=we_vote_image_file_location)
+    save_aws_info = we_vote_image_manager.save_we_vote_image_aws_info(we_vote_image, we_vote_image_url,
+                                                                      we_vote_image_file_location,
+                                                                      we_vote_parent_image_id, is_active_version)
+    status += " IMAGE_STORED_TO_AWS " + save_aws_info['status']
+    success = save_aws_info['success']
+    if not success:
+        error_results = {
+            'success':                  success,
+            'status':                   status,
+            'we_vote_image_created':    we_vote_image_created,
+            'image_url_valid':          image_url_valid,
+            'image_stored_from_source': image_stored_from_source,
+            'image_stored_to_aws':      image_stored_to_aws,
+            'we_vote_image':            None
+        }
+        delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        return error_results
+
+    save_source_info_results = we_vote_image_manager.save_we_vote_image_organization_share_info(
+        we_vote_image, analyze_source_images_results['image_width'],
+        analyze_source_images_results['image_height'], we_vote_image.we_vote_image_url,
+        same_day_image_version, image_url_valid,
+        kind_of_image_chosen_favicon=kind_of_image_chosen_favicon, kind_of_image_chosen_logo=kind_of_image_chosen_logo,
+        kind_of_image_chosen_social_share_master=kind_of_image_chosen_social_share_master)
+    status += " " + save_source_info_results['status']
+    if not save_source_info_results['success']:
+        error_results = {
+            'success':                  success,
+            'status':                   status,
+            'we_vote_image_created':    we_vote_image_created,
+            'image_url_valid':          image_url_valid,
+            'image_stored_from_source': False,
+            'image_stored_to_aws':      image_stored_to_aws,
+            'we_vote_image':            None
+        }
+        delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        return error_results
+
+    # set active version False for other master images for same candidate/organization
+    set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
+        organization_we_vote_id=organization_we_vote_id, image_url_https=we_vote_image.we_vote_image_url,
+        kind_of_image_chosen_favicon=kind_of_image_chosen_favicon, kind_of_image_chosen_logo=kind_of_image_chosen_logo,
+        kind_of_image_chosen_social_share_master=kind_of_image_chosen_social_share_master)
+    status += set_active_version_false_results['status']
 
     results = {
         'success':                      success,
