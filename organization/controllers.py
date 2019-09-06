@@ -1174,9 +1174,10 @@ def organization_photos_save_for_api(  # organizationPhotosSave
         chosen_social_share_master_image_from_file_reader='',
         delete_chosen_favicon=False,
         delete_chosen_logo=False,
-        delete_chosen_social_share_master_image=False):
+        delete_chosen_social_share_master_image=False,
+        prior_status=''):
     status = ''
-    success = True
+    status += prior_status
 
     organization_id = convert_to_int(organization_id)
     organization_we_vote_id = organization_we_vote_id.strip().lower()
@@ -1231,13 +1232,14 @@ def organization_photos_save_for_api(  # organizationPhotosSave
             status += "INCOMING_CHOSEN_FAVICON-BASE64_NOT_FOUND "
 
         if image_data_found:
-            cache_issue_image_results = cache_organization_sharing_image(
+            cache_results = cache_organization_sharing_image(
                 python_image_library_image=python_image_library_image,
                 organization_we_vote_id=organization_we_vote_id,
                 kind_of_image_chosen_favicon=True,
                 kind_of_image_original=True)
-            if cache_issue_image_results['success']:
-                cached_master_we_vote_image = cache_issue_image_results['we_vote_image']
+            status += cache_results['status']
+            if cache_results['success']:
+                cached_master_we_vote_image = cache_results['we_vote_image']
                 chosen_favicon_url_https = cached_master_we_vote_image.we_vote_image_url
     elif delete_chosen_favicon:
         pass
@@ -1265,13 +1267,14 @@ def organization_photos_save_for_api(  # organizationPhotosSave
             status += "INCOMING_CHOSEN_LOGO-BASE64_NOT_FOUND "
 
         if image_data_found:
-            cache_issue_image_results = cache_organization_sharing_image(
+            cache_results = cache_organization_sharing_image(
                 python_image_library_image=python_image_library_image,
                 organization_we_vote_id=organization_we_vote_id,
                 kind_of_image_chosen_logo=True,
                 kind_of_image_original=True)
-            if cache_issue_image_results['success']:
-                cached_master_we_vote_image = cache_issue_image_results['we_vote_image']
+            status += cache_results['status']
+            if cache_results['success']:
+                cached_master_we_vote_image = cache_results['we_vote_image']
                 chosen_logo_url_https = cached_master_we_vote_image.we_vote_image_url
     elif delete_chosen_logo:
         # For now we aren't actually deleting these images here -- we just remove them from the organization
@@ -1301,13 +1304,14 @@ def organization_photos_save_for_api(  # organizationPhotosSave
             status += "INCOMING_CHOSEN_SOCIAL_SHARE_MASTER-BASE64_NOT_FOUND "
 
         if image_data_found:
-            cache_issue_image_results = cache_organization_sharing_image(
+            cache_results = cache_organization_sharing_image(
                 python_image_library_image=python_image_library_image,
                 organization_we_vote_id=organization_we_vote_id,
                 kind_of_image_chosen_social_share_master=True,
                 kind_of_image_original=True)
-            if cache_issue_image_results['success']:
-                cached_master_we_vote_image = cache_issue_image_results['we_vote_image']
+            status += cache_results['status']
+            if cache_results['success']:
+                cached_master_we_vote_image = cache_results['we_vote_image']
                 chosen_social_share_master_url_https = cached_master_we_vote_image.we_vote_image_url
     elif delete_chosen_social_share_master_image:
         # For now we aren't actually deleting these images here -- we just remove them from the organization
@@ -1324,7 +1328,7 @@ def organization_photos_save_for_api(  # organizationPhotosSave
         delete_chosen_social_share_master_image=delete_chosen_social_share_master_image)
 
     success = save_results['success']
-    status = save_results['status']
+    status += save_results['status']
     organization_updated = save_results['organization_updated']
 
     results = {
