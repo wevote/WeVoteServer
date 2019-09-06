@@ -11,6 +11,7 @@ from apis_v1.controllers import organization_count, organization_follow, organiz
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from django_user_agents.utils import get_user_agent
+from django.views.decorators.csrf import csrf_exempt
 from follow.controllers import organization_suggestion_tasks_for_api
 import json
 from organization.controllers import full_domain_string_available, organization_retrieve_for_api, \
@@ -111,6 +112,7 @@ def organizations_found_on_url_api_view(request):  # organizationsFoundOnUrl
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+@csrf_exempt
 def organization_photos_save_view(request):  # organizationPhotosSave
     """
     Save 'external' photos for an organization. These are currently photos which are manually uploaded by an org.
@@ -118,19 +120,19 @@ def organization_photos_save_view(request):  # organizationPhotosSave
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    organization_id = request.GET.get('organization_id', 0)
-    organization_twitter_handle = request.GET.get('organization_twitter_handle', False)
-    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    organization_id = request.POST.get('organization_id', 0)
+    organization_twitter_handle = request.POST.get('organization_twitter_handle', False)
+    organization_we_vote_id = request.POST.get('organization_we_vote_id', '')
 
     status = ''
-    chosen_favicon_from_file_reader = request.GET.get('chosen_favicon_from_file_reader', False)
-    chosen_logo_from_file_reader = request.GET.get('chosen_logo_from_file_reader', False)
+    chosen_favicon_from_file_reader = request.POST.get('chosen_favicon_from_file_reader', False)
+    chosen_logo_from_file_reader = request.POST.get('chosen_logo_from_file_reader', False)
     chosen_social_share_master_image_from_file_reader = \
-        request.GET.get('chosen_social_share_master_image_from_file_reader', False)
-    delete_chosen_favicon = positive_value_exists(request.GET.get('delete_chosen_favicon', False))
-    delete_chosen_logo = positive_value_exists(request.GET.get('delete_chosen_logo', False))
+        request.POST.get('chosen_social_share_master_image_from_file_reader', False)
+    delete_chosen_favicon = positive_value_exists(request.POST.get('delete_chosen_favicon', False))
+    delete_chosen_logo = positive_value_exists(request.POST.get('delete_chosen_logo', False))
     delete_chosen_social_share_master_image = \
-        positive_value_exists(request.GET.get('delete_chosen_social_share_master_image', False))
+        positive_value_exists(request.POST.get('delete_chosen_social_share_master_image', False))
 
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin', 'political_data_manager'}
@@ -173,7 +175,7 @@ def organization_photos_save_view(request):  # organizationPhotosSave
         return HttpResponse(json.dumps(results), content_type='application/json')
 
     # By the time we are here, we know that this voter has the authority to update the organization's photos
-    results = organization_photos_save_for_api(
+    json_data = organization_photos_save_for_api(
         organization_id=organization_id,
         organization_we_vote_id=organization_we_vote_id,
         chosen_favicon_from_file_reader=chosen_favicon_from_file_reader,
@@ -181,11 +183,10 @@ def organization_photos_save_view(request):  # organizationPhotosSave
         chosen_social_share_master_image_from_file_reader=chosen_social_share_master_image_from_file_reader,
         delete_chosen_favicon=delete_chosen_favicon,
         delete_chosen_logo=delete_chosen_logo,
-        delete_chosen_social_share_master_image=delete_chosen_social_share_master_image)
-    status += results['status']
+        delete_chosen_social_share_master_image=delete_chosen_social_share_master_image,
+        prior_status=status)
 
-    return organization_retrieve_for_api(organization_id, organization_we_vote_id, voter_device_id,
-                                         prior_status=status)
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def organization_retrieve_view(request):  # organizationRetrieve
@@ -321,6 +322,8 @@ def organization_save_view(request):  # organizationSave
             }
             return HttpResponse(json.dumps(results), content_type='application/json')
 
+    full_domain_string_already_taken = None
+    sub_domain_string_already_taken = None
     if voter_is_signed_in and organization_linked_to_this_voter:
         # Check to make sure it is ok to assign this full_domain or sub_domain to this organization
         # Voter must be signed in to save this

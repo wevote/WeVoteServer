@@ -104,7 +104,7 @@ def organization_photos_save_doc_template_values(url_root):
         'try_now_link': 'apis_v1:organizationPhotosSaveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
-        'get_or_post': 'GET',
+        'get_or_post': 'POST',
         'required_query_parameter_list': required_query_parameter_list,
         'optional_query_parameter_list': optional_query_parameter_list,
         'api_response': api_response,

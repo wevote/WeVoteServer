@@ -299,6 +299,18 @@ CSRF_TRUSTED_ORIGINS = ['api.wevoteusa.org']
 #     'google.com',
 #     'hostname.example.com'
 # )
+# CORS_ALLOW_HEADERS = (
+#     'access-control-allow-headers',
+#     'access-control-allow-methods',
+#     'access-control-allow-origin',
+#     'x-requested-with',
+#     'content-type',
+#     'accept',
+#     'origin',
+#     'authorization',
+#     'x-csrftoken',
+#     'x-api-key'
+# )
 
 SOCIAL_AUTH_FACEBOOK_KEY = get_environment_variable("SOCIAL_AUTH_FACEBOOK_KEY")
 SOCIAL_AUTH_FACEBOOK_SECRET = get_environment_variable("SOCIAL_AUTH_FACEBOOK_SECRET")
