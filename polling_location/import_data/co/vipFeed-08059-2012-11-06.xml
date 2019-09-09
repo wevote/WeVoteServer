@@ -1,0 +1,3364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>8</vip_id>
+  <datetime>2012-10-26T06:33:00</datetime>
+  <description>VIP collects polling information from official government sources</description>
+</source>
+<state id="8">
+  <name>Colorado</name>
+</state>
+<election id="4000">
+  <date>2012-11-06</date>
+  <election_type>State</election_type>
+  <state_id>8</state_id>
+  <statewide>Yes</statewide>
+</election>
+<locality id="11059">
+  <name>Jefferson</name>
+  <state_id>8</state_id>
+  <type>County</type>
+</locality>
+<precinct id="22197">
+  <name>2162530070</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590041</polling_location_id>
+</precinct>
+<precinct id="22146">
+  <name>1222230032</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590019</polling_location_id>
+</precinct>
+<precinct id="22103">
+  <name>7202430198</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590130</polling_location_id>
+</precinct>
+<precinct id="2223">
+  <name>7192930151</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590173</polling_location_id>
+</precinct>
+<precinct id="22236">
+  <name>7192930136</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590089</polling_location_id>
+</precinct>
+<precinct id="22149">
+  <name>7192730112</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590071</polling_location_id>
+</precinct>
+<precinct id="2240">
+  <name>7192430103</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590063</polling_location_id>
+</precinct>
+<precinct id="22234">
+  <name>1222230023</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590017</polling_location_id>
+</precinct>
+<precinct id="22173">
+  <name>7202430191</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590123</polling_location_id>
+</precinct>
+<precinct id="22211">
+  <name>7192930145</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590093</polling_location_id>
+</precinct>
+<precinct id="22159">
+  <name>7162430092</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590056</polling_location_id>
+</precinct>
+<precinct id="22135">
+  <name>7192930160</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590101</polling_location_id>
+</precinct>
+<precinct id="22245">
+  <name>2162530044</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590026</polling_location_id>
+</precinct>
+<precinct id="22133">
+  <name>7192930147</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590094</polling_location_id>
+</precinct>
+<precinct id="22209">
+  <name>2162530047</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590028</polling_location_id>
+</precinct>
+<precinct id="22107">
+  <name>2162530038</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590022</polling_location_id>
+</precinct>
+<precinct id="2280">
+  <name>7192730125</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590080</polling_location_id>
+</precinct>
+<precinct id="2236">
+  <name>1162230002</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590001</polling_location_id>
+</precinct>
+<precinct id="2286">
+  <name>1222230024</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590012</polling_location_id>
+</precinct>
+<precinct id="22203">
+  <name>7162430096</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590059</polling_location_id>
+</precinct>
+<precinct id="22250">
+  <name>7162430097</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590060</polling_location_id>
+</precinct>
+<precinct id="22243">
+  <name>7192930148</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590093</polling_location_id>
+</precinct>
+<precinct id="2224">
+  <name>2162530046</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590023</polling_location_id>
+</precinct>
+<precinct id="2230">
+  <name>1222230029</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590016</polling_location_id>
+</precinct>
+<precinct id="22127">
+  <name>7202330177</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590118</polling_location_id>
+</precinct>
+<precinct id="22182">
+  <name>1222230022</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590020</polling_location_id>
+</precinct>
+<precinct id="22248">
+  <name>7202530208</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590044</polling_location_id>
+</precinct>
+<precinct id="226">
+  <name>7222830238</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590157</polling_location_id>
+</precinct>
+<precinct id="22180">
+  <name>7202830220</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590142</polling_location_id>
+</precinct>
+<precinct id="2259">
+  <name>7222330232</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590152</polling_location_id>
+</precinct>
+<precinct id="22253">
+  <name>2162530052</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590031</polling_location_id>
+</precinct>
+<precinct id="22101">
+  <name>1222230035</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590170</polling_location_id>
+</precinct>
+<precinct id="22165">
+  <name>2162530036</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590021</polling_location_id>
+</precinct>
+<precinct id="2297">
+  <name>7202430206</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590127</polling_location_id>
+</precinct>
+<precinct id="2260">
+  <name>7222330229</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590149</polling_location_id>
+</precinct>
+<precinct id="2246">
+  <name>1162230005</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590003</polling_location_id>
+</precinct>
+<precinct id="22141">
+  <name>7192930144</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590171</polling_location_id>
+</precinct>
+<precinct id="22219">
+  <name>7202330172</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590110</polling_location_id>
+</precinct>
+<precinct id="22217">
+  <name>1222230034</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590020</polling_location_id>
+</precinct>
+<precinct id="22223">
+  <name>7202730209</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590137</polling_location_id>
+</precinct>
+<precinct id="22166">
+  <name>7202730213</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590139</polling_location_id>
+</precinct>
+<precinct id="22154">
+  <name>7202330162</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590175</polling_location_id>
+</precinct>
+<precinct id="2269">
+  <name>7222830240</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590159</polling_location_id>
+</precinct>
+<precinct id="22184">
+  <name>1222230026</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590014</polling_location_id>
+</precinct>
+<precinct id="22204">
+  <name>7192730109</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590069</polling_location_id>
+</precinct>
+<precinct id="2264">
+  <name>7222830246</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590155</polling_location_id>
+</precinct>
+<precinct id="22218">
+  <name>2202530076</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590046</polling_location_id>
+</precinct>
+<precinct id="22105">
+  <name>7202330165</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590104</polling_location_id>
+</precinct>
+<precinct id="22225">
+  <name>2162530037</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590022</polling_location_id>
+</precinct>
+<precinct id="22112">
+  <name>7202330185</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590119</polling_location_id>
+</precinct>
+<precinct id="2237">
+  <name>2202530081</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590049</polling_location_id>
+</precinct>
+<precinct id="22174">
+  <name>7202330179</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590115</polling_location_id>
+</precinct>
+<precinct id="22114">
+  <name>7162430087</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590056</polling_location_id>
+</precinct>
+<precinct id="2228">
+  <name>7222830242</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590154</polling_location_id>
+</precinct>
+<precinct id="2285">
+  <name>7192730129</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590083</polling_location_id>
+</precinct>
+<precinct id="22213">
+  <name>7202430190</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590122</polling_location_id>
+</precinct>
+<precinct id="22106">
+  <name>7192930158</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590174</polling_location_id>
+</precinct>
+<precinct id="2235">
+  <name>7192730106</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590066</polling_location_id>
+</precinct>
+<precinct id="22257">
+  <name>7162530101</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590135</polling_location_id>
+</precinct>
+<precinct id="22183">
+  <name>7192730121</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590077</polling_location_id>
+</precinct>
+<precinct id="22255">
+  <name>2162530058</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590033</polling_location_id>
+</precinct>
+<precinct id="22131">
+  <name>7222830243</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590160</polling_location_id>
+</precinct>
+<precinct id="22145">
+  <name>7202330174</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590111</polling_location_id>
+</precinct>
+<precinct id="22251">
+  <name>7202730212</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590138</polling_location_id>
+</precinct>
+<precinct id="2255">
+  <name>7202430203</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590126</polling_location_id>
+</precinct>
+<precinct id="22122">
+  <name>2162530064</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590038</polling_location_id>
+</precinct>
+<precinct id="2262">
+  <name>7222830245</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590161</polling_location_id>
+</precinct>
+<precinct id="2265">
+  <name>7202330169</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590107</polling_location_id>
+</precinct>
+<precinct id="22188">
+  <name>1222230017</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590010</polling_location_id>
+</precinct>
+<precinct id="22201">
+  <name>7222830258</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590168</polling_location_id>
+</precinct>
+<precinct id="22190">
+  <name>7192730118</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590075</polling_location_id>
+</precinct>
+<precinct id="22102">
+  <name>1162230011</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590007</polling_location_id>
+</precinct>
+<precinct id="224">
+  <name>7202330163</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590102</polling_location_id>
+</precinct>
+<precinct id="22148">
+  <name>7192730111</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590070</polling_location_id>
+</precinct>
+<precinct id="2211">
+  <name>7222830239</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590158</polling_location_id>
+</precinct>
+<precinct id="2274">
+  <name>7222830254</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590165</polling_location_id>
+</precinct>
+<precinct id="2267">
+  <name>7222430234</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590150</polling_location_id>
+</precinct>
+<precinct id="22130">
+  <name>7192930161</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590101</polling_location_id>
+</precinct>
+<precinct id="22222">
+  <name>7192730104</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590064</polling_location_id>
+</precinct>
+<precinct id="2257">
+  <name>7192930152</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590096</polling_location_id>
+</precinct>
+<precinct id="22242">
+  <name>1222230016</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590051</polling_location_id>
+</precinct>
+<precinct id="2227">
+  <name>7202430192</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590124</polling_location_id>
+</precinct>
+<precinct id="22158">
+  <name>2162530039</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590023</polling_location_id>
+</precinct>
+<precinct id="22256">
+  <name>1222230019</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590015</polling_location_id>
+</precinct>
+<precinct id="22119">
+  <name>7202430202</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590124</polling_location_id>
+</precinct>
+<precinct id="2252">
+  <name>7202430188</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590175</polling_location_id>
+</precinct>
+<precinct id="2287">
+  <name>7192930134</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590085</polling_location_id>
+</precinct>
+<precinct id="2229">
+  <name>7192930154</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590097</polling_location_id>
+</precinct>
+<precinct id="22181">
+  <name>2202230072</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590043</polling_location_id>
+</precinct>
+<precinct id="223">
+  <name>7202430194</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590126</polling_location_id>
+</precinct>
+<precinct id="2277">
+  <name>7192730107</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590067</polling_location_id>
+</precinct>
+<precinct id="2222">
+  <name>7222830252</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590166</polling_location_id>
+</precinct>
+<precinct id="2283">
+  <name>7222830255</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590164</polling_location_id>
+</precinct>
+<precinct id="22260">
+  <name>1202230015</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590011</polling_location_id>
+</precinct>
+<precinct id="22191">
+  <name>2162530067</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590034</polling_location_id>
+</precinct>
+<precinct id="2263">
+  <name>2162530069</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590040</polling_location_id>
+</precinct>
+<precinct id="22199">
+  <name>2202530074</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590045</polling_location_id>
+</precinct>
+<precinct id="2216">
+  <name>7192930150</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590095</polling_location_id>
+</precinct>
+<precinct id="2288">
+  <name>2202530077</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590047</polling_location_id>
+</precinct>
+<precinct id="22240">
+  <name>2202530082</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590052</polling_location_id>
+</precinct>
+<precinct id="2281">
+  <name>7202430195</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590127</polling_location_id>
+</precinct>
+<precinct id="22164">
+  <name>7192730105</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590065</polling_location_id>
+</precinct>
+<precinct id="22143">
+  <name>7202830215</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590140</polling_location_id>
+</precinct>
+<precinct id="22220">
+  <name>7192930137</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590087</polling_location_id>
+</precinct>
+<precinct id="2214">
+  <name>7192730113</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590072</polling_location_id>
+</precinct>
+<precinct id="22123">
+  <name>2162530061</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590036</polling_location_id>
+</precinct>
+<precinct id="2251">
+  <name>7162430088</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590053</polling_location_id>
+</precinct>
+<precinct id="2217">
+  <name>7222830253</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590166</polling_location_id>
+</precinct>
+<precinct id="22136">
+  <name>2222230085</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590051</polling_location_id>
+</precinct>
+<precinct id="2225">
+  <name>7202730211</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590137</polling_location_id>
+</precinct>
+<precinct id="2279">
+  <name>7202330181</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590119</polling_location_id>
+</precinct>
+<precinct id="2294">
+  <name>2202530083</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590049</polling_location_id>
+</precinct>
+<precinct id="22111">
+  <name>7202430200</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590132</polling_location_id>
+</precinct>
+<precinct id="22124">
+  <name>2202530075</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590045</polling_location_id>
+</precinct>
+<precinct id="22169">
+  <name>7192930133</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590088</polling_location_id>
+</precinct>
+<precinct id="22157">
+  <name>1162230010</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590007</polling_location_id>
+</precinct>
+<precinct id="222">
+  <name>7222830260</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590143</polling_location_id>
+</precinct>
+<precinct id="22117">
+  <name>7162430098</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590061</polling_location_id>
+</precinct>
+<precinct id="2238">
+  <name>7222830237</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590156</polling_location_id>
+</precinct>
+<precinct id="2293">
+  <name>1162230012</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590008</polling_location_id>
+</precinct>
+<precinct id="2239">
+  <name>7222330233</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590153</polling_location_id>
+</precinct>
+<precinct id="22195">
+  <name>2162530054</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590026</polling_location_id>
+</precinct>
+<precinct id="22231">
+  <name>2162530056</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590033</polling_location_id>
+</precinct>
+<precinct id="22210">
+  <name>2162530065</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590036</polling_location_id>
+</precinct>
+<precinct id="22151">
+  <name>7202330171</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590109</polling_location_id>
+</precinct>
+<precinct id="22155">
+  <name>2202530080</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590039</polling_location_id>
+</precinct>
+<precinct id="22194">
+  <name>2162530060</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590035</polling_location_id>
+</precinct>
+<precinct id="22139">
+  <name>2162530057</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590028</polling_location_id>
+</precinct>
+<precinct id="2295">
+  <name>1162230009</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590006</polling_location_id>
+</precinct>
+<precinct id="22227">
+  <name>1162230014</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590009</polling_location_id>
+</precinct>
+<precinct id="2256">
+  <name>7192730117</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590074</polling_location_id>
+</precinct>
+<precinct id="22177">
+  <name>1162230007</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590002</polling_location_id>
+</precinct>
+<precinct id="22144">
+  <name>7192730130</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590083</polling_location_id>
+</precinct>
+<precinct id="2234">
+  <name>7202430186</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590062</polling_location_id>
+</precinct>
+<precinct id="22162">
+  <name>7192730120</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590068</polling_location_id>
+</precinct>
+<precinct id="22132">
+  <name>7202330168</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590106</polling_location_id>
+</precinct>
+<precinct id="2245">
+  <name>7202330182</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590117</polling_location_id>
+</precinct>
+<precinct id="2232">
+  <name>7222830257</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590167</polling_location_id>
+</precinct>
+<precinct id="22262">
+  <name>1160130001</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590001</polling_location_id>
+</precinct>
+<precinct id="22137">
+  <name>2162530068</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590042</polling_location_id>
+</precinct>
+<precinct id="22202">
+  <name>2202530079</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590177</polling_location_id>
+</precinct>
+<precinct id="22118">
+  <name>2202530078</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590048</polling_location_id>
+</precinct>
+<precinct id="2231">
+  <name>7192930149</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590172</polling_location_id>
+</precinct>
+<precinct id="2226">
+  <name>7202430196</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590128</polling_location_id>
+</precinct>
+<precinct id="2273">
+  <name>2162530066</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590039</polling_location_id>
+</precinct>
+<precinct id="22207">
+  <name>2162530048</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590027</polling_location_id>
+</precinct>
+<precinct id="2261">
+  <name>7202330167</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590176</polling_location_id>
+</precinct>
+<precinct id="2298">
+  <name>7202330166</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590105</polling_location_id>
+</precinct>
+<precinct id="22187">
+  <name>7202330183</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590117</polling_location_id>
+</precinct>
+<precinct id="22212">
+  <name>7192730126</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590084</polling_location_id>
+</precinct>
+<precinct id="2244">
+  <name>1222230020</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590011</polling_location_id>
+</precinct>
+<precinct id="22156">
+  <name>1162230004</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590002</polling_location_id>
+</precinct>
+<precinct id="22110">
+  <name>7192730116</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590076</polling_location_id>
+</precinct>
+<precinct id="22186">
+  <name>7192730123</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590078</polling_location_id>
+</precinct>
+<precinct id="2248">
+  <name>7222230221</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590143</polling_location_id>
+</precinct>
+<precinct id="2249">
+  <name>7222830244</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590161</polling_location_id>
+</precinct>
+<precinct id="22175">
+  <name>7202330176</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590113</polling_location_id>
+</precinct>
+<precinct id="2215">
+  <name>1222230031</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590018</polling_location_id>
+</precinct>
+<precinct id="22198">
+  <name>2222530086</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590052</polling_location_id>
+</precinct>
+<precinct id="22172">
+  <name>7202530207</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590136</polling_location_id>
+</precinct>
+<precinct id="22214">
+  <name>2162530042</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590025</polling_location_id>
+</precinct>
+<precinct id="22215">
+  <name>2162530040</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590024</polling_location_id>
+</precinct>
+<precinct id="2276">
+  <name>7202430197</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590129</polling_location_id>
+</precinct>
+<precinct id="2250">
+  <name>7202330170</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590108</polling_location_id>
+</precinct>
+<precinct id="22140">
+  <name>7192930141</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590091</polling_location_id>
+</precinct>
+<precinct id="22235">
+  <name>1222230025</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590013</polling_location_id>
+</precinct>
+<precinct id="2218">
+  <name>7222830259</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590169</polling_location_id>
+</precinct>
+<precinct id="2258">
+  <name>7202430205</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590134</polling_location_id>
+</precinct>
+<precinct id="22193">
+  <name>1222230018</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590016</polling_location_id>
+</precinct>
+<precinct id="22100">
+  <name>7202830219</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590142</polling_location_id>
+</precinct>
+<precinct id="2210">
+  <name>7192730119</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590076</polling_location_id>
+</precinct>
+<precinct id="2292">
+  <name>7192930140</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590090</polling_location_id>
+</precinct>
+<precinct id="22168">
+  <name>7162430093</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590057</polling_location_id>
+</precinct>
+<precinct id="2272">
+  <name>7222830249</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590164</polling_location_id>
+</precinct>
+<precinct id="22167">
+  <name>2162530062</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590037</polling_location_id>
+</precinct>
+<precinct id="22142">
+  <name>1222230033</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590018</polling_location_id>
+</precinct>
+<precinct id="22138">
+  <name>7192730115</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590075</polling_location_id>
+</precinct>
+<precinct id="2268">
+  <name>7202830216</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590140</polling_location_id>
+</precinct>
+<precinct id="22161">
+  <name>2222230084</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590050</polling_location_id>
+</precinct>
+<precinct id="2275">
+  <name>7222330223</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590144</polling_location_id>
+</precinct>
+<precinct id="2291">
+  <name>7202330178</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590114</polling_location_id>
+</precinct>
+<precinct id="22128">
+  <name>7222230222</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590050</polling_location_id>
+</precinct>
+<precinct id="22254">
+  <name>2162530041</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590025</polling_location_id>
+</precinct>
+<precinct id="2296">
+  <name>7192730110</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590072</polling_location_id>
+</precinct>
+<precinct id="2289">
+  <name>7202330175</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590112</polling_location_id>
+</precinct>
+<precinct id="22170">
+  <name>7222830256</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590167</polling_location_id>
+</precinct>
+<precinct id="2220">
+  <name>1162230008</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590005</polling_location_id>
+</precinct>
+<precinct id="22192">
+  <name>7162430089</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590053</polling_location_id>
+</precinct>
+<precinct id="22252">
+  <name>7202330173</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590111</polling_location_id>
+</precinct>
+<precinct id="22205">
+  <name>7192930139</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590089</polling_location_id>
+</precinct>
+<precinct id="2221">
+  <name>7202430187</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590120</polling_location_id>
+</precinct>
+<precinct id="22121">
+  <name>2162530071</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590042</polling_location_id>
+</precinct>
+<precinct id="2282">
+  <name>7202830218</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590141</polling_location_id>
+</precinct>
+<precinct id="22200">
+  <name>7222330231</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590151</polling_location_id>
+</precinct>
+<precinct id="22108">
+  <name>7192930138</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590088</polling_location_id>
+</precinct>
+<precinct id="22134">
+  <name>7202730210</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590138</polling_location_id>
+</precinct>
+<precinct id="22232">
+  <name>2162530055</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590032</polling_location_id>
+</precinct>
+<precinct id="22216">
+  <name>7202430204</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590063</polling_location_id>
+</precinct>
+<precinct id="2213">
+  <name>7222830250</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590165</polling_location_id>
+</precinct>
+<precinct id="2270">
+  <name>7222330228</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590149</polling_location_id>
+</precinct>
+<precinct id="2299">
+  <name>7192930159</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590100</polling_location_id>
+</precinct>
+<precinct id="22221">
+  <name>1162230013</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590009</polling_location_id>
+</precinct>
+<precinct id="22129">
+  <name>1162230006</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590004</polling_location_id>
+</precinct>
+<precinct id="22208">
+  <name>1222230030</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590017</polling_location_id>
+</precinct>
+<precinct id="22239">
+  <name>7162430091</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590055</polling_location_id>
+</precinct>
+<precinct id="229">
+  <name>7222830235</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590154</polling_location_id>
+</precinct>
+<precinct id="22152">
+  <name>7192930132</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590086</polling_location_id>
+</precinct>
+<precinct id="2242">
+  <name>7192930142</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590092</polling_location_id>
+</precinct>
+<precinct id="228">
+  <name>7202330164</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590103</polling_location_id>
+</precinct>
+<precinct id="22147">
+  <name>7202430201</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590133</polling_location_id>
+</precinct>
+<precinct id="22224">
+  <name>2162530043</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590026</polling_location_id>
+</precinct>
+<precinct id="22226">
+  <name>2162530049</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590029</polling_location_id>
+</precinct>
+<precinct id="22229">
+  <name>7222330226</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590147</polling_location_id>
+</precinct>
+<precinct id="22241">
+  <name>2162530045</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590027</polling_location_id>
+</precinct>
+<precinct id="22176">
+  <name>7162430090</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590054</polling_location_id>
+</precinct>
+<precinct id="22160">
+  <name>7192930153</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590096</polling_location_id>
+</precinct>
+<precinct id="2233">
+  <name>7202430199</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590131</polling_location_id>
+</precinct>
+<precinct id="22206">
+  <name>7192730108</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590068</polling_location_id>
+</precinct>
+<precinct id="22246">
+  <name>1162230003</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590003</polling_location_id>
+</precinct>
+<precinct id="22233">
+  <name>7162430099</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590060</polling_location_id>
+</precinct>
+<precinct id="2219">
+  <name>7222830251</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590163</polling_location_id>
+</precinct>
+<precinct id="221">
+  <name>7222330230</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590150</polling_location_id>
+</precinct>
+<precinct id="22247">
+  <name>1222230027</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590015</polling_location_id>
+</precinct>
+<precinct id="22126">
+  <name>2162530059</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590034</polling_location_id>
+</precinct>
+<precinct id="22259">
+  <name>2162530063</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590038</polling_location_id>
+</precinct>
+<precinct id="22115">
+  <name>7162430095</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590059</polling_location_id>
+</precinct>
+<precinct id="22196">
+  <name>7202830217</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590141</polling_location_id>
+</precinct>
+<precinct id="2290">
+  <name>7192730127</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590081</polling_location_id>
+</precinct>
+<precinct id="22244">
+  <name>7192730114</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590073</polling_location_id>
+</precinct>
+<precinct id="2266">
+  <name>7192730124</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590079</polling_location_id>
+</precinct>
+<precinct id="22109">
+  <name>7222830247</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590162</polling_location_id>
+</precinct>
+<precinct id="2271">
+  <name>7222330227</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590148</polling_location_id>
+</precinct>
+<precinct id="22116">
+  <name>7192930146</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590090</polling_location_id>
+</precinct>
+<precinct id="2241">
+  <name>7192730131</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590084</polling_location_id>
+</precinct>
+<precinct id="22171">
+  <name>1222230021</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590043</polling_location_id>
+</precinct>
+<precinct id="22179">
+  <name>7192930155</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590098</polling_location_id>
+</precinct>
+<precinct id="22163">
+  <name>2162530053</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590031</polling_location_id>
+</precinct>
+<precinct id="22228">
+  <name>7192730128</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590082</polling_location_id>
+</precinct>
+<precinct id="2247">
+  <name>7222830236</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590155</polling_location_id>
+</precinct>
+<precinct id="22261">
+  <name>7162430094</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590058</polling_location_id>
+</precinct>
+<precinct id="225">
+  <name>7202430193</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590125</polling_location_id>
+</precinct>
+<precinct id="2212">
+  <name>7222330225</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590146</polling_location_id>
+</precinct>
+<precinct id="2278">
+  <name>7162530102</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590062</polling_location_id>
+</precinct>
+<precinct id="22185">
+  <name>7202330180</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590116</polling_location_id>
+</precinct>
+<precinct id="22104">
+  <name>7202430189</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590121</polling_location_id>
+</precinct>
+<precinct id="22189">
+  <name>7192730122</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590077</polling_location_id>
+</precinct>
+<precinct id="2284">
+  <name>7202330184</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590118</polling_location_id>
+</precinct>
+<precinct id="22238">
+  <name>7202730214</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590139</polling_location_id>
+</precinct>
+<precinct id="2254">
+  <name>7222330224</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590145</polling_location_id>
+</precinct>
+<precinct id="22153">
+  <name>7192930143</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590091</polling_location_id>
+</precinct>
+<precinct id="2243">
+  <name>7222830241</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590159</polling_location_id>
+</precinct>
+<precinct id="22113">
+  <name>7192930157</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590099</polling_location_id>
+</precinct>
+<precinct id="227">
+  <name>7222830248</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590163</polling_location_id>
+</precinct>
+<precinct id="22249">
+  <name>7192930135</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590086</polling_location_id>
+</precinct>
+<precinct id="2253">
+  <name>7192930156</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590097</polling_location_id>
+</precinct>
+<precinct id="22178">
+  <name>7162430100</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590054</polling_location_id>
+</precinct>
+<precinct id="22150">
+  <name>2162530051</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590030</polling_location_id>
+</precinct>
+<precinct id="22120">
+  <name>1222230028</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590170</polling_location_id>
+</precinct>
+<precinct id="22230">
+  <name>2202530073</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590044</polling_location_id>
+</precinct>
+<precinct id="22125">
+  <name>2162530050</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590029</polling_location_id>
+</precinct>
+<precinct id="22258">
+  <name>1222530261</name>
+  <locality_id>11059</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440590047</polling_location_id>
+</precinct>
+<precinct id="22237">
+  <name>7202430262</name>
+  <locality_id>11059</locality_id>
+  <mail_only>YES</mail_only>
+</precinct>
+<polling_location id="440590001">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>5987 W Dorado Dr</line1>
+    <state>CO</state>
+    <location_name>Blue Heron Elementary School</location_name>
+    <zip>80123</zip>
+  </address>
+</polling_location>
+<polling_location id="440590002">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>7304 W Roxbury Pl</line1>
+    <state>CO</state>
+    <location_name>Dutch Creek Elementary School</location_name>
+    <zip>80128</zip>
+  </address>
+</polling_location>
+<polling_location id="440590003">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>6509 W Ken Caryl Ave</line1>
+    <state>CO</state>
+    <location_name>Ken Caryl Middle School</location_name>
+    <zip>80128</zip>
+  </address>
+</polling_location>
+<polling_location id="440590004">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>6750 S Kendall Blvd</line1>
+    <state>CO</state>
+    <location_name>Normandy Elementary School</location_name>
+    <zip>80128</zip>
+  </address>
+</polling_location>
+<polling_location id="440590005">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>8131 S. Pierce St</line1>
+    <state>CO</state>
+    <location_name>Deer Creek Church</location_name>
+    <zip>80128</zip>
+  </address>
+</polling_location>
+<polling_location id="440590006">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>7706 W Bowles Ave</line1>
+    <state>CO</state>
+    <location_name>Columbine Library</location_name>
+    <zip>80123</zip>
+  </address>
+</polling_location>
+<polling_location id="440590007">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>7531 S Kendall Blvd</line1>
+    <state>CO</state>
+    <location_name>St Philip Lutheran Church</location_name>
+    <zip>80128</zip>
+  </address>
+</polling_location>
+<polling_location id="440590008">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>6155 W Leawood Dr</line1>
+    <state>CO</state>
+    <location_name>Leawood Elementary School</location_name>
+    <zip>80123</zip>
+  </address>
+</polling_location>
+<polling_location id="440590009">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>6005 W Canyon Ave</line1>
+    <state>CO</state>
+    <location_name>Columbine Hills Elementary School</location_name>
+    <zip>80128</zip>
+  </address>
+</polling_location>
+<polling_location id="440590010">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>9990 W Alamo Pl</line1>
+    <state>CO</state>
+    <location_name>West Metro F.S. #12</location_name>
+    <zip>80123</zip>
+  </address>
+</polling_location>
+<polling_location id="440590011">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>11809 W Coal Mine Ave</line1>
+    <state>CO</state>
+    <location_name>Summit Ridge Middle School</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="440590012">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>7961 Sangre De Cristo Rd</line1>
+    <state>CO</state>
+    <location_name>Shaffer Elementary School</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="440590013">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>7203 S Everett St</line1>
+    <state>CO</state>
+    <location_name>Stony Creek Elementary School</location_name>
+    <zip>80128</zip>
+  </address>
+</polling_location>
+<polling_location id="440590014">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>9052 W Ken Caryl Ave</line1>
+    <state>CO</state>
+    <location_name>Calvary Chapel</location_name>
+    <zip>80128</zip>
+  </address>
+</polling_location>
+<polling_location id="440590015">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>11050 W Meadows Dr</line1>
+    <state>CO</state>
+    <location_name>Ute Meadows Elementary School</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="440590016">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>8449 S Garrison St</line1>
+    <state>CO</state>
+    <location_name>Falcon Bluffs Middle School</location_name>
+    <zip>80128</zip>
+  </address>
+</polling_location>
+<polling_location id="440590017">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>7676 S. Continental Divide Rd</line1>
+    <state>CO</state>
+    <location_name>The Ranch House</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="440590018">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>6317 S Estes St</line1>
+    <state>CO</state>
+    <location_name>Colorow Elementary School</location_name>
+    <zip>80123</zip>
+  </address>
+</polling_location>
+<polling_location id="440590019">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>8006 S Iris Way</line1>
+    <state>CO</state>
+    <location_name>Mortensen Elementary School</location_name>
+    <zip>80128</zip>
+  </address>
+</polling_location>
+<polling_location id="440590020">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>7922 S Carr St</line1>
+    <state>CO</state>
+    <location_name>Coronado Elementary School</location_name>
+    <zip>80128</zip>
+  </address>
+</polling_location>
+<polling_location id="440590021">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>21401 Golden Gate Canyon Rd</line1>
+    <state>CO</state>
+    <location_name>Jeffco Public Works Bldg</location_name>
+    <zip>80403</zip>
+  </address>
+</polling_location>
+<polling_location id="440590022">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>25856 Columbine Glen Rd</line1>
+    <state>CO</state>
+    <location_name>Ralston Elementary School</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590023">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Evergreen</city>
+    <line1>32003 Ellingwood Trl</line1>
+    <state>CO</state>
+    <location_name>Buchanan Park And Rec Center</location_name>
+    <zip>80439</zip>
+  </address>
+</polling_location>
+<polling_location id="440590024">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Evergreen</city>
+    <line1>1422 Sugarbush Dr</line1>
+    <state>CO</state>
+    <location_name>Bergen Valley Elementary School</location_name>
+    <zip>80439</zip>
+  </address>
+</polling_location>
+<polling_location id="440590025">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>23455 Currant Drive</line1>
+    <state>CO</state>
+    <location_name>Genesee Fire Station #1</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590026">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Indian Hills</city>
+    <line1>4460 Parmalee Gulch Rd</line1>
+    <state>CO</state>
+    <location_name>Parmalee Elementary School</location_name>
+    <zip>80454</zip>
+  </address>
+</polling_location>
+<polling_location id="440590027">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Evergreen</city>
+    <line1>3757 Ponderosa Dr</line1>
+    <state>CO</state>
+    <location_name>United Methodist Church Evergreen</location_name>
+    <zip>80439</zip>
+  </address>
+</polling_location>
+<polling_location id="440590028">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Evergreen</city>
+    <line1>1892 Bergen Pkwy</line1>
+    <state>CO</state>
+    <location_name>Bergen Meadow Elementary School</location_name>
+    <zip>80439</zip>
+  </address>
+</polling_location>
+<polling_location id="440590029">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Evergreen</city>
+    <line1>5124 S Hatch Dr</line1>
+    <state>CO</state>
+    <location_name>Wilmot Elementary School</location_name>
+    <zip>80439</zip>
+  </address>
+</polling_location>
+<polling_location id="440590030">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Evergreen</city>
+    <line1>26663 North Turkey Creek Rd</line1>
+    <state>CO</state>
+    <location_name>Marshdale Elementary School</location_name>
+    <zip>80439</zip>
+  </address>
+</polling_location>
+<polling_location id="440590031">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Evergreen</city>
+    <line1>5980 County Hwy 73</line1>
+    <state>CO</state>
+    <location_name>Evergreen Lutheran Church</location_name>
+    <zip>80439</zip>
+  </address>
+</polling_location>
+<polling_location id="440590032">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>17 S Mt Vernon Cntry Club Rd</line1>
+    <state>CO</state>
+    <location_name>Rockland Community Church</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590033">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Morrison</city>
+    <line1>17199 State Hwy 74</line1>
+    <state>CO</state>
+    <location_name>Red Rocks Elementary School</location_name>
+    <zip>80465</zip>
+  </address>
+</polling_location>
+<polling_location id="440590034">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Pine</city>
+    <line1>13304 S Us Hwy 285</line1>
+    <state>CO</state>
+    <location_name>Elk Creek Elementary School</location_name>
+    <zip>80470</zip>
+  </address>
+</polling_location>
+<polling_location id="440590035">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Morrison</city>
+    <line1>8445 S. U.S. 285</line1>
+    <state>CO</state>
+    <location_name>Inter-Canyon F.S. #3</location_name>
+    <zip>80465</zip>
+  </address>
+</polling_location>
+<polling_location id="440590036">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Conifer</city>
+    <line1>26501 Barkley Rd</line1>
+    <state>CO</state>
+    <location_name>West Jefferson Elementary School</location_name>
+    <zip>80433</zip>
+  </address>
+</polling_location>
+<polling_location id="440590037">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Buffalo Creek</city>
+    <line1>19384 County Rd 126</line1>
+    <state>CO</state>
+    <location_name>North Fork Fire Station # 1</location_name>
+    <zip>80425</zip>
+  </address>
+</polling_location>
+<polling_location id="440590038">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Conifer</city>
+    <line1>9449 Barnes Ave</line1>
+    <state>CO</state>
+    <location_name>West Jefferson Middle School</location_name>
+    <zip>80433</zip>
+  </address>
+</polling_location>
+<polling_location id="440590039">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Morrison</city>
+    <line1>15629 W Belleview Ave</line1>
+    <state>CO</state>
+    <location_name>West Metro F.S. #11</location_name>
+    <zip>80465</zip>
+  </address>
+</polling_location>
+<polling_location id="440590040">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Conifer</city>
+    <line1>9998 Havekost Rd</line1>
+    <state>CO</state>
+    <location_name>Conifer Community Church</location_name>
+    <zip>80433</zip>
+  </address>
+</polling_location>
+<polling_location id="440590041">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>13877 Grizzly Dr</line1>
+    <state>CO</state>
+    <location_name>Inter-Caynon F.S. #4</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="440590042">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Morrison</city>
+    <line1>8444 S Us Hwy 285</line1>
+    <state>CO</state>
+    <location_name>Mtn High Christian Center</location_name>
+    <zip>80465</zip>
+  </address>
+</polling_location>
+<polling_location id="440590043">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>12109 W Coal Mine Ave</line1>
+    <state>CO</state>
+    <location_name>Powderhorn Elementary School</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="440590044">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Morrison</city>
+    <line1>13658 W Marlowe Ave</line1>
+    <state>CO</state>
+    <location_name>Kendallvue Elementary School</location_name>
+    <zip>80465</zip>
+  </address>
+</polling_location>
+<polling_location id="440590045">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>11455 W Belleview Ave</line1>
+    <state>CO</state>
+    <location_name>Dakota Ridge Assem Church</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="440590046">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>12472 W Belleview Ave</line1>
+    <state>CO</state>
+    <location_name>Belleview Community Church</location_name>
+    <zip>80226</zip>
+  </address>
+</polling_location>
+<polling_location id="440590047">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>5890 S. Alkire St</line1>
+    <state>CO</state>
+    <location_name>Waterstone Community Church</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="440590048">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>6612 S Ward St</line1>
+    <state>CO</state>
+    <location_name>The Peak Wellness Center</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="440590049">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>2 Woodruff</line1>
+    <state>CO</state>
+    <location_name>Bradford Intermediate</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="440590050">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>4997 S Miller Way</line1>
+    <state>CO</state>
+    <location_name>Peiffer Elementary School</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="440590051">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>10785 W Alamo Pl</line1>
+    <state>CO</state>
+    <location_name>Westridge Elementary School</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="440590052">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>1 White Oak Dr</line1>
+    <state>CO</state>
+    <location_name>Bradford Primary</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="440590053">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>420 Crawford St</line1>
+    <state>CO</state>
+    <location_name>Shelton Elementary School</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590054">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>201 Rubey Dr</line1>
+    <state>CO</state>
+    <location_name>Mitchell Elementary School</location_name>
+    <zip>80403</zip>
+  </address>
+</polling_location>
+<polling_location id="440590055">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>15920 W 10Th Ave</line1>
+    <state>CO</state>
+    <location_name>Pleasant View Elementary School</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590056">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>1001 Ulysses St</line1>
+    <state>CO</state>
+    <location_name>Bell Middle School</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590057">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>100 Jefferson County Pkwy</line1>
+    <state>CO</state>
+    <location_name>Jeffco Administrative Building</location_name>
+    <zip>80419</zip>
+  </address>
+</polling_location>
+<polling_location id="440590058">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>1805 Washington Ave</line1>
+    <state>CO</state>
+    <location_name>1St Bapt Church Of Golden</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590059">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>13200 W 32Nd Ave</line1>
+    <state>CO</state>
+    <location_name>Manning School</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590060">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>1470 10Th St</line1>
+    <state>CO</state>
+    <location_name>Golden Community Center</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590061">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>1500 Ford St</line1>
+    <state>CO</state>
+    <location_name>1St United Methodist Of Golden</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590062">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>15975 W 50Th Ave</line1>
+    <state>CO</state>
+    <location_name>Fairmount Elementary School</location_name>
+    <zip>80403</zip>
+  </address>
+</polling_location>
+<polling_location id="440590063">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>12550 W 52Nd Ave</line1>
+    <state>CO</state>
+    <location_name>Drake Middle School</location_name>
+    <zip>80002</zip>
+  </address>
+</polling_location>
+<polling_location id="440590064">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>13405 W 83Rd Pl</line1>
+    <state>CO</state>
+    <location_name>Al Meiklejohn Elementary School</location_name>
+    <zip>80005</zip>
+  </address>
+</polling_location>
+<polling_location id="440590065">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>5875 Routt Ct</line1>
+    <state>CO</state>
+    <location_name>Vanderhoof Elementary School</location_name>
+    <zip>80004</zip>
+  </address>
+</polling_location>
+<polling_location id="440590066">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>7840 Carr Dr</line1>
+    <state>CO</state>
+    <location_name>Warder Elementary School</location_name>
+    <zip>80005</zip>
+  </address>
+</polling_location>
+<polling_location id="440590067">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>6490 Carr St</line1>
+    <state>CO</state>
+    <location_name>Church Of Christ The King</location_name>
+    <zip>80004</zip>
+  </address>
+</polling_location>
+<polling_location id="440590068">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>7751 Oak St</line1>
+    <state>CO</state>
+    <location_name>Sierra Elementary School</location_name>
+    <zip>80005</zip>
+  </address>
+</polling_location>
+<polling_location id="440590069">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>6500 Oak St</line1>
+    <state>CO</state>
+    <location_name>Campbell Elementary School</location_name>
+    <zip>80004</zip>
+  </address>
+</polling_location>
+<polling_location id="440590070">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>6600 Yank Way</line1>
+    <state>CO</state>
+    <location_name>Stott Elementary School</location_name>
+    <zip>80004</zip>
+  </address>
+</polling_location>
+<polling_location id="440590071">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>13150 W 72Nd Ave</line1>
+    <state>CO</state>
+    <location_name>Apex Center</location_name>
+    <zip>80005</zip>
+  </address>
+</polling_location>
+<polling_location id="440590072">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>6420 Urban St</line1>
+    <state>CO</state>
+    <location_name>Fremont Elementary School</location_name>
+    <zip>80004</zip>
+  </address>
+</polling_location>
+<polling_location id="440590073">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>6757 Simms St</line1>
+    <state>CO</state>
+    <location_name>Arvada Church Of Christ</location_name>
+    <zip>80004</zip>
+  </address>
+</polling_location>
+<polling_location id="440590074">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>6250 Independence St</line1>
+    <state>CO</state>
+    <location_name>Fitzmorris Elementary School</location_name>
+    <zip>80004</zip>
+  </address>
+</polling_location>
+<polling_location id="440590075">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>7300 Quail St</line1>
+    <state>CO</state>
+    <location_name>Oberon Middle School</location_name>
+    <zip>80005</zip>
+  </address>
+</polling_location>
+<polling_location id="440590076">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>6750 Carr St</line1>
+    <state>CO</state>
+    <location_name>Arvada United Methodist</location_name>
+    <zip>80004</zip>
+  </address>
+</polling_location>
+<polling_location id="440590077">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>8725 W 81St Pl</line1>
+    <state>CO</state>
+    <location_name>Weber Elementary School</location_name>
+    <zip>80005</zip>
+  </address>
+</polling_location>
+<polling_location id="440590078">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>8350 Pomona Dr</line1>
+    <state>CO</state>
+    <location_name>Arvada Bapt Church</location_name>
+    <zip>80005</zip>
+  </address>
+</polling_location>
+<polling_location id="440590079">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Wheat Ridge</city>
+    <line1>9725 W 50Th Ave</line1>
+    <state>CO</state>
+    <location_name>Crossroads Church Of Denver</location_name>
+    <zip>80033</zip>
+  </address>
+</polling_location>
+<polling_location id="440590080">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>5611 Zephyr St</line1>
+    <state>CO</state>
+    <location_name>Lawrence Elementary School</location_name>
+    <zip>80002</zip>
+  </address>
+</polling_location>
+<polling_location id="440590081">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>10001 W 58Th Ave</line1>
+    <state>CO</state>
+    <location_name>King Of Glory Lutheran Church</location_name>
+    <zip>80002</zip>
+  </address>
+</polling_location>
+<polling_location id="440590082">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>11325 Allendale Dr</line1>
+    <state>CO</state>
+    <location_name>Arvada West H.S.</location_name>
+    <zip>80004</zip>
+  </address>
+</polling_location>
+<polling_location id="440590083">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>8101 Ralston Rd</line1>
+    <state>CO</state>
+    <location_name>Arvada City Hall</location_name>
+    <zip>80002</zip>
+  </address>
+</polling_location>
+<polling_location id="440590084">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>5592 Independence St</line1>
+    <state>CO</state>
+    <location_name>Arvada Presbyterian Church</location_name>
+    <zip>80002</zip>
+  </address>
+</polling_location>
+<polling_location id="440590085">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Westminster</city>
+    <line1>10747 W 108Th Ave</line1>
+    <state>CO</state>
+    <location_name>West View Rec Center</location_name>
+    <zip>80021</zip>
+  </address>
+</polling_location>
+<polling_location id="440590086">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Westminster</city>
+    <line1>9300 W 104Th Ave</line1>
+    <state>CO</state>
+    <location_name>Standley Lake High School</location_name>
+    <zip>80021</zip>
+  </address>
+</polling_location>
+<polling_location id="440590087">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Westminster</city>
+    <line1>9650 W 97Th Ave</line1>
+    <state>CO</state>
+    <location_name>Lukas Elementary School</location_name>
+    <zip>80021</zip>
+  </address>
+</polling_location>
+<polling_location id="440590088">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Westminster</city>
+    <line1>7575 W 96Th Ave</line1>
+    <state>CO</state>
+    <location_name>Semper Elementary School</location_name>
+    <zip>80021</zip>
+  </address>
+</polling_location>
+<polling_location id="440590089">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Westminster</city>
+    <line1>10255 W 104Th Dr</line1>
+    <state>CO</state>
+    <location_name>Witt Elementary School</location_name>
+    <zip>80021</zip>
+  </address>
+</polling_location>
+<polling_location id="440590090">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>8455 W 88Th Ave</line1>
+    <state>CO</state>
+    <location_name>Moore Middle School</location_name>
+    <zip>80005</zip>
+  </address>
+</polling_location>
+<polling_location id="440590091">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Westminster</city>
+    <line1>8300 W 94Th Ave</line1>
+    <state>CO</state>
+    <location_name>Woodrow Willson Academy</location_name>
+    <zip>80021</zip>
+  </address>
+</polling_location>
+<polling_location id="440590092">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Broomfield</city>
+    <line1>10951 Harlan St</line1>
+    <state>CO</state>
+    <location_name>Sheridan Green Elementary School</location_name>
+    <zip>80020</zip>
+  </address>
+</polling_location>
+<polling_location id="440590093">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Westminster</city>
+    <line1>5851 W 115Th Ave</line1>
+    <state>CO</state>
+    <location_name>Ryan Elementary School</location_name>
+    <zip>80020</zip>
+  </address>
+</polling_location>
+<polling_location id="440590094">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Westminster</city>
+    <line1>10455 Sheridan Blvd</line1>
+    <state>CO</state>
+    <location_name>Westminster Rec Center</location_name>
+    <zip>80031</zip>
+  </address>
+</polling_location>
+<polling_location id="440590095">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>7750 Harlan St</line1>
+    <state>CO</state>
+    <location_name>Thomson Elementary School</location_name>
+    <zip>80003</zip>
+  </address>
+</polling_location>
+<polling_location id="440590096">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>6875 W 64Th Ave</line1>
+    <state>CO</state>
+    <location_name>Secrest Elementary School</location_name>
+    <zip>80003</zip>
+  </address>
+</polling_location>
+<polling_location id="440590097">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>6055 W 68Th Ave</line1>
+    <state>CO</state>
+    <location_name>Swanson Elementary School</location_name>
+    <zip>80003</zip>
+  </address>
+</polling_location>
+<polling_location id="440590098">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>7135 W 68Th Ave</line1>
+    <state>CO</state>
+    <location_name>Arvada Church Of God</location_name>
+    <zip>80003</zip>
+  </address>
+</polling_location>
+<polling_location id="440590099">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>8485 Kipling St</line1>
+    <state>CO</state>
+    <location_name>Standley Lake Library</location_name>
+    <zip>80005</zip>
+  </address>
+</polling_location>
+<polling_location id="440590100">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>7300 W 76Th Ave</line1>
+    <state>CO</state>
+    <location_name>Hackberry Hill Elementary School</location_name>
+    <zip>80003</zip>
+  </address>
+</polling_location>
+<polling_location id="440590101">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>5800 W 84Th Ave</line1>
+    <state>CO</state>
+    <location_name>Parr Elementary School</location_name>
+    <zip>80003</zip>
+  </address>
+</polling_location>
+<polling_location id="440590102">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>1580 Yarrow St</line1>
+    <state>CO</state>
+    <location_name>Clements Community Center</location_name>
+    <zip>80214</zip>
+  </address>
+</polling_location>
+<polling_location id="440590103">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>920 Kipling St</line1>
+    <state>CO</state>
+    <location_name>Holy Shepherd Lutheran Church</location_name>
+    <zip>80215</zip>
+  </address>
+</polling_location>
+<polling_location id="440590104">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>11177 W 8Th Ave</line1>
+    <state>CO</state>
+    <location_name>Dvlpmntl Disabilities Resource Center</location_name>
+    <zip>80215</zip>
+  </address>
+</polling_location>
+<polling_location id="440590105">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>1545 Robb St</line1>
+    <state>CO</state>
+    <location_name>West Metro F.S. #2</location_name>
+    <zip>80215</zip>
+  </address>
+</polling_location>
+<polling_location id="440590106">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>2300 Urban St</line1>
+    <state>CO</state>
+    <location_name>Stober Elementary School</location_name>
+    <zip>80215</zip>
+  </address>
+</polling_location>
+<polling_location id="440590107">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>10200 W 20Th Ave</line1>
+    <state>CO</state>
+    <location_name>Lakewood Library</location_name>
+    <zip>80215</zip>
+  </address>
+</polling_location>
+<polling_location id="440590108">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>8605 W 23Rd Ave</line1>
+    <state>CO</state>
+    <location_name>Slater Elementary School</location_name>
+    <zip>80215</zip>
+  </address>
+</polling_location>
+<polling_location id="440590109">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>13300 W 6Th Ave Frontage Rd</line1>
+    <state>CO</state>
+    <location_name>Red Rocks Campus</location_name>
+    <zip>80228</zip>
+  </address>
+</polling_location>
+<polling_location id="440590110">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>2200 S Kipling St</line1>
+    <state>CO</state>
+    <location_name>Carmody Rec Center</location_name>
+    <zip>80227</zip>
+  </address>
+</polling_location>
+<polling_location id="440590111">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>11202 W Jewell Ave</line1>
+    <state>CO</state>
+    <location_name>St Joseph Epis Church</location_name>
+    <zip>80232</zip>
+  </address>
+</polling_location>
+<polling_location id="440590112">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>12900 W Utah Ave</line1>
+    <state>CO</state>
+    <location_name>Hutchinson Elementary School</location_name>
+    <zip>80228</zip>
+  </address>
+</polling_location>
+<polling_location id="440590113">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>13198 W Green Mtn Dr</line1>
+    <state>CO</state>
+    <location_name>Green Mtn Rec Center</location_name>
+    <zip>80228</zip>
+  </address>
+</polling_location>
+<polling_location id="440590114">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>11025 Glennon Dr</line1>
+    <state>CO</state>
+    <location_name>Glennon Heights Elementary School</location_name>
+    <zip>80226</zip>
+  </address>
+</polling_location>
+<polling_location id="440590115">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>10700 W Exposition Dr</line1>
+    <state>CO</state>
+    <location_name>Green Mtn Christian Church</location_name>
+    <zip>80226</zip>
+  </address>
+</polling_location>
+<polling_location id="440590116">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>1855 S Wright St</line1>
+    <state>CO</state>
+    <location_name>Dunstan Middle School</location_name>
+    <zip>80228</zip>
+  </address>
+</polling_location>
+<polling_location id="440590117">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>13165 W Ohio Ave</line1>
+    <state>CO</state>
+    <location_name>Foothills Elementary School</location_name>
+    <zip>80228</zip>
+  </address>
+</polling_location>
+<polling_location id="440590118">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>13300 W 2Nd Pl</line1>
+    <state>CO</state>
+    <location_name>Warren Tech Center</location_name>
+    <zip>80228</zip>
+  </address>
+</polling_location>
+<polling_location id="440590119">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>12250 W Kentucky Dr</line1>
+    <state>CO</state>
+    <location_name>Green Mtn Elementary School</location_name>
+    <zip>80228</zip>
+  </address>
+</polling_location>
+<polling_location id="440590120">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>6350 Eldridge St</line1>
+    <state>CO</state>
+    <location_name>Susan M. Duncan Ymca</location_name>
+    <zip>80004</zip>
+  </address>
+</polling_location>
+<polling_location id="440590121">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>13119 W 20Th Ave</line1>
+    <state>CO</state>
+    <location_name>St Luke'S Lutheran Church</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590122">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>205 Flora Way</line1>
+    <state>CO</state>
+    <location_name>Kyffin Elementary School</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590123">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>15200 W 6Th Ave Frontage Rd</line1>
+    <state>CO</state>
+    <location_name>Jeffco Fairgrounds</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590124">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Wheat Ridge</city>
+    <line1>7101 W 38Th Ave</line1>
+    <state>CO</state>
+    <location_name>Wheat Ridge Middle School</location_name>
+    <zip>80033</zip>
+  </address>
+</polling_location>
+<polling_location id="440590125">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Wheat Ridge</city>
+    <line1>7975 W 41St Ave</line1>
+    <state>CO</state>
+    <location_name>Wilmore Davis Elementary School</location_name>
+    <zip>80033</zip>
+  </address>
+</polling_location>
+<polling_location id="440590126">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Wheat Ridge</city>
+    <line1>10555 W 44Th Ave</line1>
+    <state>CO</state>
+    <location_name>Clear Creek Church</location_name>
+    <zip>80033</zip>
+  </address>
+</polling_location>
+<polling_location id="440590127">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Wheat Ridge</city>
+    <line1>12225 W 38Th Ave</line1>
+    <state>CO</state>
+    <location_name>Kullerstrand Elementary School</location_name>
+    <zip>80033</zip>
+  </address>
+</polling_location>
+<polling_location id="440590128">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Wheat Ridge</city>
+    <line1>6363 W 35Th Ave</line1>
+    <state>CO</state>
+    <location_name>Wheat Ridge Active Adult Center</location_name>
+    <zip>80033</zip>
+  </address>
+</polling_location>
+<polling_location id="440590129">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Wheat Ridge</city>
+    <line1>9180 W 38Th Ave</line1>
+    <state>CO</state>
+    <location_name>Wheat Ridge Presbyterian Church</location_name>
+    <zip>80033</zip>
+  </address>
+</polling_location>
+<polling_location id="440590130">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Wheat Ridge</city>
+    <line1>3400 Pierson St</line1>
+    <state>CO</state>
+    <location_name>Prospect Valley Elementary School</location_name>
+    <zip>80033</zip>
+  </address>
+</polling_location>
+<polling_location id="440590131">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Wheat Ridge</city>
+    <line1>5925 W 32Nd Ave</line1>
+    <state>CO</state>
+    <location_name>Son'S Of Italy Lodge</location_name>
+    <zip>80033</zip>
+  </address>
+</polling_location>
+<polling_location id="440590132">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Wheat Ridge</city>
+    <line1>4645 Independence St</line1>
+    <state>CO</state>
+    <location_name>Pennington Elementary School</location_name>
+    <zip>80033</zip>
+  </address>
+</polling_location>
+<polling_location id="440590133">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Wheat Ridge</city>
+    <line1>7500 W 29Th Ave</line1>
+    <state>CO</state>
+    <location_name>Wheat Ridge City Hall</location_name>
+    <zip>80033</zip>
+  </address>
+</polling_location>
+<polling_location id="440590134">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Wheat Ridge</city>
+    <line1>4500 Wadsworth Blvd</line1>
+    <state>CO</state>
+    <location_name>Holy Cross Lutheran Church</location_name>
+    <zip>80033</zip>
+  </address>
+</polling_location>
+<polling_location id="440590135">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>3500 Illinois St</line1>
+    <state>CO</state>
+    <location_name>Mail-In Precinct</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590136">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>18208 W 58Th Dr</line1>
+    <state>CO</state>
+    <location_name>Fairmount Fire Station #2</location_name>
+    <zip>80403</zip>
+  </address>
+</polling_location>
+<polling_location id="440590137">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>16735 W. 63Rd Pl</line1>
+    <state>CO</state>
+    <location_name>Table Mtn Bapt Church</location_name>
+    <zip>80403</zip>
+  </address>
+</polling_location>
+<polling_location id="440590138">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>16650 W 72Nd Ave</line1>
+    <state>CO</state>
+    <location_name>West Woods Elementary School</location_name>
+    <zip>80007</zip>
+  </address>
+</polling_location>
+<polling_location id="440590139">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>7535 Alkire St</line1>
+    <state>CO</state>
+    <location_name>Van Arsdale Elementary School</location_name>
+    <zip>80005</zip>
+  </address>
+</polling_location>
+<polling_location id="440590140">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>2200 S Coors St</line1>
+    <state>CO</state>
+    <location_name>Rooney Ranch Elementary School</location_name>
+    <zip>80228</zip>
+  </address>
+</polling_location>
+<polling_location id="440590141">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Morrison</city>
+    <line1>14711 W Morrison Rd</line1>
+    <state>CO</state>
+    <location_name>Red Rocks Bapt Church</location_name>
+    <zip>80465</zip>
+  </address>
+</polling_location>
+<polling_location id="440590142">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>3101 S Kipling St</line1>
+    <state>CO</state>
+    <location_name>Bear Creek Presbyterian Church</location_name>
+    <zip>80227</zip>
+  </address>
+</polling_location>
+<polling_location id="440590143">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>5354 S Field St</line1>
+    <state>CO</state>
+    <location_name>Governors Ranch Elementary School</location_name>
+    <zip>80123</zip>
+  </address>
+</polling_location>
+<polling_location id="440590144">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Edgewater</city>
+    <line1>2305 Pierce St</line1>
+    <state>CO</state>
+    <location_name>Jefferson High School</location_name>
+    <zip>80214</zip>
+  </address>
+</polling_location>
+<polling_location id="440590145">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>1975 S Garrison St</line1>
+    <state>CO</state>
+    <location_name>Our Saviour'S Reformed Church</location_name>
+    <zip>80227</zip>
+  </address>
+</polling_location>
+<polling_location id="440590146">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>1385 Independence St</line1>
+    <state>CO</state>
+    <location_name>Eiber Elementary School</location_name>
+    <zip>80215</zip>
+  </address>
+</polling_location>
+<polling_location id="440590147">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>8210 W 10Th Ave</line1>
+    <state>CO</state>
+    <location_name>1St Presbyterian Church Of Lakewood</location_name>
+    <zip>80214</zip>
+  </address>
+</polling_location>
+<polling_location id="440590148">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>1390 Brentwood St</line1>
+    <state>CO</state>
+    <location_name>Lakewood United Methodist Church</location_name>
+    <zip>80214</zip>
+  </address>
+</polling_location>
+<polling_location id="440590149">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>6000 W 9Th Ave</line1>
+    <state>CO</state>
+    <location_name>Molholm Elementary School</location_name>
+    <zip>80214</zip>
+  </address>
+</polling_location>
+<polling_location id="440590150">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Edgewater</city>
+    <line1>6705 W 22Nd Ave</line1>
+    <state>CO</state>
+    <location_name>Lumberg Elementary School</location_name>
+    <zip>80214</zip>
+  </address>
+</polling_location>
+<polling_location id="440590151">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>1350 S Hoyt St</line1>
+    <state>CO</state>
+    <location_name>Kendrick Lakes Elementary School</location_name>
+    <zip>80232</zip>
+  </address>
+</polling_location>
+<polling_location id="440590152">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>885 S Garrison St</line1>
+    <state>CO</state>
+    <location_name>Belmar Elementary School</location_name>
+    <zip>80226</zip>
+  </address>
+</polling_location>
+<polling_location id="440590153">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>10001 W Jewell Ave</line1>
+    <state>CO</state>
+    <location_name>Bear Valley Church</location_name>
+    <zip>80232</zip>
+  </address>
+</polling_location>
+<polling_location id="440590154">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>6800 W Hampden Ave</line1>
+    <state>CO</state>
+    <location_name>Jubilee Fellowship Church</location_name>
+    <zip>80227</zip>
+  </address>
+</polling_location>
+<polling_location id="440590155">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>1401 S Kendall St</line1>
+    <state>CO</state>
+    <location_name>Lasley Elementary School</location_name>
+    <zip>80232</zip>
+  </address>
+</polling_location>
+<polling_location id="440590156">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>6281 W Yale Ave</line1>
+    <state>CO</state>
+    <location_name>Atonement Lutheran Church</location_name>
+    <zip>80227</zip>
+  </address>
+</polling_location>
+<polling_location id="440590157">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>8701 W Woodard Dr</line1>
+    <state>CO</state>
+    <location_name>Green Gables Elementary School</location_name>
+    <zip>80227</zip>
+  </address>
+</polling_location>
+<polling_location id="440590158">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>8550 W Vassar Dr</line1>
+    <state>CO</state>
+    <location_name>Westgate Elementary School</location_name>
+    <zip>80227</zip>
+  </address>
+</polling_location>
+<polling_location id="440590159">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>9601 W Dartmouth Pl</line1>
+    <state>CO</state>
+    <location_name>Bear Creek Elementary School</location_name>
+    <zip>80227</zip>
+  </address>
+</polling_location>
+<polling_location id="440590160">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>9800 W. Dartmouth Pl.</line1>
+    <state>CO</state>
+    <location_name>Bear Creek High School</location_name>
+    <zip>80227</zip>
+  </address>
+</polling_location>
+<polling_location id="440590161">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>80 S Teller St</line1>
+    <state>CO</state>
+    <location_name>Stein Elementary School</location_name>
+    <zip>80226</zip>
+  </address>
+</polling_location>
+<polling_location id="440590162">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>1450 S Pierce St</line1>
+    <state>CO</state>
+    <location_name>Phillips United Methodist Church</location_name>
+    <zip>80232</zip>
+  </address>
+</polling_location>
+<polling_location id="440590163">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>1275 S Teller St</line1>
+    <state>CO</state>
+    <location_name>O'Connell Middle School</location_name>
+    <zip>80232</zip>
+  </address>
+</polling_location>
+<polling_location id="440590164">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>1255 S Wadsworth Blvd</line1>
+    <state>CO</state>
+    <location_name>Alameda High School</location_name>
+    <zip>80232</zip>
+  </address>
+</polling_location>
+<polling_location id="440590165">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>580 S Harlan St</line1>
+    <state>CO</state>
+    <location_name>Deane Elementary School</location_name>
+    <zip>80226</zip>
+  </address>
+</polling_location>
+<polling_location id="440590166">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>480 S Allison Pkwy</line1>
+    <state>CO</state>
+    <location_name>Lakewood Municipal Center</location_name>
+    <zip>80226</zip>
+  </address>
+</polling_location>
+<polling_location id="440590167">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>8425 W 1St Ave</line1>
+    <state>CO</state>
+    <location_name>S Lakewood Elementary School</location_name>
+    <zip>80226</zip>
+  </address>
+</polling_location>
+<polling_location id="440590168">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>25 S Newland St</line1>
+    <state>CO</state>
+    <location_name>Lakewood Christian Fellowship</location_name>
+    <zip>80226</zip>
+  </address>
+</polling_location>
+<polling_location id="440590169">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>1263 S Dudley St</line1>
+    <state>CO</state>
+    <location_name>Patterson Elementary School</location_name>
+    <zip>80232</zip>
+  </address>
+</polling_location>
+<polling_location id="440590170">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>9201 W Columbine Dr</line1>
+    <state>CO</state>
+    <location_name>Deer Creek Middle School</location_name>
+    <zip>80128</zip>
+  </address>
+</polling_location>
+<polling_location id="440590171">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Westminster</city>
+    <line1>9651 Pierce St</line1>
+    <state>CO</state>
+    <location_name>Mandalay Middle School</location_name>
+    <zip>80021</zip>
+  </address>
+</polling_location>
+<polling_location id="440590172">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>7285 Pierce St</line1>
+    <state>CO</state>
+    <location_name>N. Arvada Middle School</location_name>
+    <zip>80003</zip>
+  </address>
+</polling_location>
+<polling_location id="440590173">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>5300 Saulsbury Ct</line1>
+    <state>CO</state>
+    <location_name>Foster Elementary School</location_name>
+    <zip>80002</zip>
+  </address>
+</polling_location>
+<polling_location id="440590174">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Arvada</city>
+    <line1>8448 Otis Dr</line1>
+    <state>CO</state>
+    <location_name>Little Elementary School</location_name>
+    <zip>80003</zip>
+  </address>
+</polling_location>
+<polling_location id="440590175">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Golden</city>
+    <line1>13000 W 10Th Ave</line1>
+    <state>CO</state>
+    <location_name>Welchester Elementary School</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="440590176">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Lakewood</city>
+    <line1>2025 Kipling St</line1>
+    <state>CO</state>
+    <location_name>Lakewood Christian Church</location_name>
+    <zip>80215</zip>
+  </address>
+</polling_location>
+<polling_location id="440590177">
+  <polling_hours>7:00AM - 7:00PM</polling_hours>
+  <address>
+    <city>Littleton</city>
+    <line1>12472 W Belleview Ave</line1>
+    <state>CO</state>
+    <location_name>Celleview Cmty. Ch</location_name>
+    <zip>80226</zip>
+  </address>
+</polling_location>
+</vip_object>

@@ -1,0 +1,1837 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>29</vip_id>
+  <datetime>2012-10-19T10:00:00</datetime>
+  <description>VIP aggregates this data from official state sources</description>
+</source>
+<state id="29">
+  <name>Missouri</name>
+</state>
+<election id="4000">
+  <date>2012-11-06</date>
+  <election_type>State</election_type>
+  <state_id>29</state_id>
+  <statewide>Yes</statewide>
+</election>
+<locality id="11019">
+  <name>Boone</name>
+  <state_id>29</state_id>
+  <type>County</type>
+</locality>
+<precinct id="2293">
+  <name>2L</name>
+  <number>2L</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190024</polling_location_id>
+</precinct>
+<precinct id="2226">
+  <name>2A</name>
+  <number>2A</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190014</polling_location_id>
+</precinct>
+<precinct id="2271">
+  <name>33</name>
+  <number>33</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190102</polling_location_id>
+</precinct>
+<precinct id="2258">
+  <name>2J</name>
+  <number>2J</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190022</polling_location_id>
+</precinct>
+<precinct id="227">
+  <name>3D</name>
+  <number>3D</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190028</polling_location_id>
+</precinct>
+<precinct id="22114">
+  <name>5P</name>
+  <number>5P</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190063</polling_location_id>
+</precinct>
+<precinct id="2225">
+  <name>4I</name>
+  <number>4I</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190045</polling_location_id>
+</precinct>
+<precinct id="222">
+  <name>6L</name>
+  <number>6L</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190075</polling_location_id>
+</precinct>
+<precinct id="2265">
+  <name>12</name>
+  <number>12</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190082</polling_location_id>
+</precinct>
+<precinct id="22100">
+  <name>30</name>
+  <number>30</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190099</polling_location_id>
+</precinct>
+<precinct id="2236">
+  <name>17</name>
+  <number>17</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190086</polling_location_id>
+</precinct>
+<precinct id="2298">
+  <name>6D</name>
+  <number>6D</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190067</polling_location_id>
+</precinct>
+<precinct id="2269">
+  <name>11</name>
+  <number>11</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190081</polling_location_id>
+</precinct>
+<precinct id="2267">
+  <name>23</name>
+  <number>23</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190092</polling_location_id>
+</precinct>
+<precinct id="2268">
+  <name>7</name>
+  <number>7</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190077</polling_location_id>
+</precinct>
+<precinct id="2275">
+  <name>28</name>
+  <number>28</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190097</polling_location_id>
+</precinct>
+<precinct id="2264">
+  <name>5H</name>
+  <number>5H</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190057</polling_location_id>
+</precinct>
+<precinct id="2248">
+  <name>10</name>
+  <number>10</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190080</polling_location_id>
+</precinct>
+<precinct id="2288">
+  <name>2I</name>
+  <number>2I</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190021</polling_location_id>
+</precinct>
+<precinct id="2274">
+  <name>1D</name>
+  <number>1D</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190006</polling_location_id>
+</precinct>
+<precinct id="2212">
+  <name>1C</name>
+  <number>1C</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190005</polling_location_id>
+</precinct>
+<precinct id="2238">
+  <name>22</name>
+  <number>22</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190091</polling_location_id>
+</precinct>
+<precinct id="2230">
+  <name>21</name>
+  <number>21</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190090</polling_location_id>
+</precinct>
+<precinct id="2222">
+  <name>5F</name>
+  <number>5F</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190055</polling_location_id>
+</precinct>
+<precinct id="22107">
+  <name>6J</name>
+  <number>6J</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190073</polling_location_id>
+</precinct>
+<precinct id="2227">
+  <name>2C</name>
+  <number>2C</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190016</polling_location_id>
+</precinct>
+<precinct id="2213">
+  <name>5A</name>
+  <number>5A</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190051</polling_location_id>
+</precinct>
+<precinct id="2291">
+  <name>40</name>
+  <number>40</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190109</polling_location_id>
+</precinct>
+<precinct id="2273">
+  <name>36</name>
+  <number>36</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190105</polling_location_id>
+</precinct>
+<precinct id="2243">
+  <name>1B</name>
+  <number>1B</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190004</polling_location_id>
+</precinct>
+<precinct id="2285">
+  <name>5K</name>
+  <number>5K</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190060</polling_location_id>
+</precinct>
+<precinct id="2270">
+  <name>38</name>
+  <number>38</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190107</polling_location_id>
+</precinct>
+<precinct id="2290">
+  <name>20</name>
+  <number>20</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190089</polling_location_id>
+</precinct>
+<precinct id="223">
+  <name>4M</name>
+  <number>4M</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190049</polling_location_id>
+</precinct>
+<precinct id="2295">
+  <name>27</name>
+  <number>27</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190096</polling_location_id>
+</precinct>
+<precinct id="2233">
+  <name>3A</name>
+  <number>3A</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190025</polling_location_id>
+</precinct>
+<precinct id="22103">
+  <name>39</name>
+  <number>39</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190108</polling_location_id>
+</precinct>
+<precinct id="2241">
+  <name>1G</name>
+  <number>1G</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190009</polling_location_id>
+</precinct>
+<precinct id="2282">
+  <name>19</name>
+  <number>19</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190088</polling_location_id>
+</precinct>
+<precinct id="2253">
+  <name>5C</name>
+  <number>5C</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190052</polling_location_id>
+</precinct>
+<precinct id="2272">
+  <name>29</name>
+  <number>29</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190098</polling_location_id>
+</precinct>
+<precinct id="22102">
+  <name>1E</name>
+  <number>1E</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190007</polling_location_id>
+</precinct>
+<precinct id="2259">
+  <name>4N</name>
+  <number>4N</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190050</polling_location_id>
+</precinct>
+<precinct id="2224">
+  <name>6B</name>
+  <number>6B</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190065</polling_location_id>
+</precinct>
+<precinct id="2284">
+  <name>3M</name>
+  <number>3M</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190036</polling_location_id>
+</precinct>
+<precinct id="2223">
+  <name>4E</name>
+  <number>4E</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190041</polling_location_id>
+</precinct>
+<precinct id="2232">
+  <name>1I</name>
+  <number>1I</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190010</polling_location_id>
+</precinct>
+<precinct id="2266">
+  <name>4G</name>
+  <number>4G</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190043</polling_location_id>
+</precinct>
+<precinct id="2292">
+  <name>6K</name>
+  <number>6K</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190074</polling_location_id>
+</precinct>
+<precinct id="2242">
+  <name>6M</name>
+  <number>6M</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190076</polling_location_id>
+</precinct>
+<precinct id="22113">
+  <name>32</name>
+  <number>32</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190101</polling_location_id>
+</precinct>
+<precinct id="2214">
+  <name>1J</name>
+  <number>1J</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190011</polling_location_id>
+</precinct>
+<precinct id="2240">
+  <name>37</name>
+  <number>37</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190106</polling_location_id>
+</precinct>
+<precinct id="2235">
+  <name>3F</name>
+  <number>3F</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190030</polling_location_id>
+</precinct>
+<precinct id="2256">
+  <name>3C</name>
+  <number>3C</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190027</polling_location_id>
+</precinct>
+<precinct id="2263">
+  <name>3J</name>
+  <number>3J</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190034</polling_location_id>
+</precinct>
+<precinct id="22111">
+  <name>3I</name>
+  <number>3I</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190033</polling_location_id>
+</precinct>
+<precinct id="2280">
+  <name>5I</name>
+  <number>5I</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190058</polling_location_id>
+</precinct>
+<precinct id="2228">
+  <name>4H</name>
+  <number>4H</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190044</polling_location_id>
+</precinct>
+<precinct id="2211">
+  <name>25</name>
+  <number>25</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190094</polling_location_id>
+</precinct>
+<precinct id="2249">
+  <name>9</name>
+  <number>9</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190079</polling_location_id>
+</precinct>
+<precinct id="2221">
+  <name>4C</name>
+  <number>4C</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190039</polling_location_id>
+</precinct>
+<precinct id="2299">
+  <name>2F</name>
+  <number>2F</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190018</polling_location_id>
+</precinct>
+<precinct id="2239">
+  <name>1A</name>
+  <number>1A</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190003</polling_location_id>
+</precinct>
+<precinct id="2283">
+  <name>8</name>
+  <number>8</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190078</polling_location_id>
+</precinct>
+<precinct id="2276">
+  <name>4L</name>
+  <number>4L</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190048</polling_location_id>
+</precinct>
+<precinct id="2229">
+  <name>34</name>
+  <number>34</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190103</polling_location_id>
+</precinct>
+<precinct id="2219">
+  <name>2H</name>
+  <number>2H</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190020</polling_location_id>
+</precinct>
+<precinct id="2220">
+  <name>5G</name>
+  <number>5G</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190056</polling_location_id>
+</precinct>
+<precinct id="2251">
+  <name>44</name>
+  <number>44</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190113</polling_location_id>
+</precinct>
+<precinct id="2286">
+  <name>16</name>
+  <number>16</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190085</polling_location_id>
+</precinct>
+<precinct id="2255">
+  <name>4B</name>
+  <number>4B</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190038</polling_location_id>
+</precinct>
+<precinct id="2250">
+  <name>4J</name>
+  <number>4J</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190046</polling_location_id>
+</precinct>
+<precinct id="22105">
+  <name>31</name>
+  <number>31</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190100</polling_location_id>
+</precinct>
+<precinct id="2244">
+  <name>2G</name>
+  <number>2G</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190019</polling_location_id>
+</precinct>
+<precinct id="2278">
+  <name>1K</name>
+  <number>1K</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190012</polling_location_id>
+</precinct>
+<precinct id="226">
+  <name>6A</name>
+  <number>6A</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190064</polling_location_id>
+</precinct>
+<precinct id="2252">
+  <name>6H</name>
+  <number>6H</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190071</polling_location_id>
+</precinct>
+<precinct id="22108">
+  <name>3L</name>
+  <number>3L</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190035</polling_location_id>
+</precinct>
+<precinct id="2254">
+  <name>2B</name>
+  <number>2B</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190015</polling_location_id>
+</precinct>
+<precinct id="2297">
+  <name>5M</name>
+  <number>5M</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190061</polling_location_id>
+</precinct>
+<precinct id="2216">
+  <name>6G</name>
+  <number>6G</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190070</polling_location_id>
+</precinct>
+<precinct id="22110">
+  <name>3G</name>
+  <number>3G</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190031</polling_location_id>
+</precinct>
+<precinct id="224">
+  <name>5E</name>
+  <number>5E</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190054</polling_location_id>
+</precinct>
+<precinct id="22104">
+  <name>42</name>
+  <number>42</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190111</polling_location_id>
+</precinct>
+<precinct id="2231">
+  <name>15</name>
+  <number>15</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190084</polling_location_id>
+</precinct>
+<precinct id="2279">
+  <name>26</name>
+  <number>26</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190095</polling_location_id>
+</precinct>
+<precinct id="2217">
+  <name>2D</name>
+  <number>2D</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190017</polling_location_id>
+</precinct>
+<precinct id="2287">
+  <name>2K</name>
+  <number>2K</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190023</polling_location_id>
+</precinct>
+<precinct id="2289">
+  <name>5N</name>
+  <number>5N</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190062</polling_location_id>
+</precinct>
+<precinct id="2281">
+  <name>45</name>
+  <number>45</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190114</polling_location_id>
+</precinct>
+<precinct id="2277">
+  <name>4K</name>
+  <number>4K</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190047</polling_location_id>
+</precinct>
+<precinct id="2294">
+  <name>43</name>
+  <number>43</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190112</polling_location_id>
+</precinct>
+<precinct id="2257">
+  <name>24</name>
+  <number>24</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190093</polling_location_id>
+</precinct>
+<precinct id="2215">
+  <name>1L</name>
+  <number>1L</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190013</polling_location_id>
+</precinct>
+<precinct id="225">
+  <name>4F</name>
+  <number>4F</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190042</polling_location_id>
+</precinct>
+<precinct id="2246">
+  <name>18</name>
+  <number>18</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190087</polling_location_id>
+</precinct>
+<precinct id="22106">
+  <name>1F</name>
+  <number>1F</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190008</polling_location_id>
+</precinct>
+<precinct id="2260">
+  <name>3B</name>
+  <number>3B</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190026</polling_location_id>
+</precinct>
+<precinct id="2210">
+  <name>3H</name>
+  <number>3H</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190032</polling_location_id>
+</precinct>
+<precinct id="2245">
+  <name>6I</name>
+  <number>6I</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190072</polling_location_id>
+</precinct>
+<precinct id="2296">
+  <name>14</name>
+  <number>14</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190083</polling_location_id>
+</precinct>
+<precinct id="2261">
+  <name>5D</name>
+  <number>5D</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190053</polling_location_id>
+</precinct>
+<precinct id="228">
+  <name>6C</name>
+  <number>6C</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190066</polling_location_id>
+</precinct>
+<precinct id="2247">
+  <name>4D</name>
+  <number>4D</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190040</polling_location_id>
+</precinct>
+<precinct id="2237">
+  <name>4A</name>
+  <number>4A</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190037</polling_location_id>
+</precinct>
+<precinct id="22101">
+  <name>35</name>
+  <number>35</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190104</polling_location_id>
+</precinct>
+<precinct id="2218">
+  <name>6F</name>
+  <number>6F</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190069</polling_location_id>
+</precinct>
+<precinct id="2262">
+  <name>3E</name>
+  <number>3E</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190029</polling_location_id>
+</precinct>
+<precinct id="229">
+  <name>6E</name>
+  <number>6E</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190068</polling_location_id>
+</precinct>
+<precinct id="2234">
+  <name>41</name>
+  <number>41</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190110</polling_location_id>
+</precinct>
+<precinct id="221">
+  <name>5J</name>
+  <number>5J</number>
+  <locality_id>11019</locality_id>
+  <polling_location_id>440190059</polling_location_id>
+</precinct>
+<polling_location id="440190001">
+  <directions>CORNER OF 9TH AND ASH</directions>
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>801 E Walnut Street</line1>
+    <state>MO</state>
+    <location_name>BOONE COUNTY GOVERNMENT CENTER</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190002">
+  <directions>CORNER OF HITT AND ROLLINS</directions>
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>901 ROLLINS ST.</line1>
+    <state>MO</state>
+    <location_name>UMC STUDENT CENTER</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190003">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>701 E ASH ST</line1>
+    <state>MO</state>
+    <location_name>DOWNTOWN PARKS &amp; REC ARMORY</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190004">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1201 PAQUIN ST</line1>
+    <state>MO</state>
+    <location_name>PAQUIN TOWERS</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190005">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1005 W WORLEY ST</line1>
+    <state>MO</state>
+    <location_name>HEALTH DEPT COL BOONE COUNTY</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190006">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>700 N GARTH Avw</line1>
+    <state>MO</state>
+    <location_name>OAK TOWERS</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190007">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>518 HITT ST</line1>
+    <state>MO</state>
+    <location_name>MEMORIAL UNION</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190008">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1701 W ASH ST</line1>
+    <state>MO</state>
+    <location_name>ARC COLUMBIA RECREATION CENTER</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190009">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1005 W WORLEY ST</line1>
+    <state>MO</state>
+    <location_name>HEALTH DEPT COL BOONE COUNTY</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190010">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>700 CONLEY AVE</line1>
+    <state>MO</state>
+    <location_name>REYNOLDS ALUMNI CENTER</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190011">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1701 W ASH ST</line1>
+    <state>MO</state>
+    <location_name>ARC COLUMBIA RECREATION CENTER</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190012">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3600 W WORLEY ST</line1>
+    <state>MO</state>
+    <location_name>SMITHTON MIDDLE SCHOOL</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190013">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2601 W BROADWAY</line1>
+    <state>MO</state>
+    <location_name>BROADWAY CHRISTIAN CHURCH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190014">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>111 PARKADE BLVD</line1>
+    <state>MO</state>
+    <location_name>PARKADE SCHOOL</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190015">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3405 OAKLAND PL</line1>
+    <state>MO</state>
+    <location_name>OAKLAND JUNIOR HIGH SCHOOL</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190016">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2201 SMILEY LN</line1>
+    <state>MO</state>
+    <location_name>LANGE MIDDLE SCHOOL</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190017">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2525 N STADIUM BLVD</line1>
+    <state>MO</state>
+    <location_name>KNIGHTS OF COLUMBUS HALL</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190018">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2102 N GARTH AVE</line1>
+    <state>MO</state>
+    <location_name>PARKADE BAPTIST CHURCH</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190019">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2102 N GARTH AVE</line1>
+    <state>MO</state>
+    <location_name>PARKADE BAPTIST CHURCH</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190020">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1707 SMILEY LN</line1>
+    <state>MO</state>
+    <location_name>FRIENDSHIP BAPTIST CHURCH</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190021">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>601 BLUE RIDGE RD</line1>
+    <state>MO</state>
+    <location_name>GRACE BIBLE CHURCH</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190022">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3405 OAKLAND PL</line1>
+    <state>MO</state>
+    <location_name>OAKLAND JUNIOR HIGH SCHOOL</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190023">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3600 W WORLEY ST</line1>
+    <state>MO</state>
+    <location_name>SMITHTON MIDDLE SCHOOL</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190024">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2201 I-70 DR NW</line1>
+    <state>MO</state>
+    <location_name>BOONE COUNTY FIRE DISTRICT HQ</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190025">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2601 BLUE RIDGE RD</line1>
+    <state>MO</state>
+    <location_name>FIRST CHURCH OF THE NAZARENE</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190026">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3601 AMRON CT</line1>
+    <state>MO</state>
+    <location_name>MO UNITED METHODIST CONF CTR</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190027">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1601 HANOVER BLVD</line1>
+    <state>MO</state>
+    <location_name>HANOVER VILLAGE COMM BLDG</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190028">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1634 PARIS RD</line1>
+    <state>MO</state>
+    <location_name>MEMORIAL BAPTIST CHURCH</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190029">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3669 LEGION LN</line1>
+    <state>MO</state>
+    <location_name>AMERICAN LEGION POST #202</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190030">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2519 N LAKE OF THE WOODS RD</line1>
+    <state>MO</state>
+    <location_name>OPEN HEART BAPTIST CHURCH</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190031">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2201 SMILEY LN</line1>
+    <state>MO</state>
+    <location_name>LANGE MIDDLE SCHOOL</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190032">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3100 I-70 DR</line1>
+    <state>MO</state>
+    <location_name>HOWARD JOHNSON INN COLUMBIA</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190033">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3601 AMRON CT</line1>
+    <state>MO</state>
+    <location_name>MO UNITED METHODIST CONF CTR</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190034">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3601 AMRON CT</line1>
+    <state>MO</state>
+    <location_name>MO UNITED METHODIST CONF CTR</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190035">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2601 BLUE RIDGE RD</line1>
+    <state>MO</state>
+    <location_name>FIRST CHURCH OF THE NAZARENE</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190036">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3100 I-70 DR</line1>
+    <state>MO</state>
+    <location_name>HOWARD JOHNSON INN COLUMBIA</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190037">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>201 S FAIRVIEW RD</line1>
+    <state>MO</state>
+    <location_name>FAIRVIEW RD CHURCH OF CHRIST</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190038">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3301 W BROADWAY</line1>
+    <state>MO</state>
+    <location_name>COMMUNITY METHODIST CHURCH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190039">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1600 W ROLLINS RD</line1>
+    <state>MO</state>
+    <location_name>TRINITY PRESBYTERIAN CHURCH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190040">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1600 W ROLLINS RD</line1>
+    <state>MO</state>
+    <location_name>TRINITY PRESBYTERIAN CHURCH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190041">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>914 WEST BLVD S</line1>
+    <state>MO</state>
+    <location_name>ST ANDREWS LUTHERAN CHURCH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190042">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>100 W BROADWAY</line1>
+    <state>MO</state>
+    <location_name>COLUMBIA PUBLIC LIBRARY</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190043">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1111 S FAIRVIEW RD</line1>
+    <state>MO</state>
+    <location_name>FAIRVIEW RD COMM OF CHRIST</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190044">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1900 CHAPEL HILL RD</line1>
+    <state>MO</state>
+    <location_name>REJOICE FREE WILL BAPTIST CH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190045">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>100 W BROADWAY</line1>
+    <state>MO</state>
+    <location_name>COLUMBIA PUBLIC LIBRARY</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190046">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>201 S FAIRVIEW RD</line1>
+    <state>MO</state>
+    <location_name>FAIRVIEW RD CHURCH OF CHRIST</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190047">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2011 CORONA RD</line1>
+    <state>MO</state>
+    <location_name>CHERRY HILL EVENT CENTER</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190048">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2601 W BROADWAY</line1>
+    <state>MO</state>
+    <location_name>BROADWAY CHRISTIAN CHURCH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190049">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3200 CHAPEL HILL RD</line1>
+    <state>MO</state>
+    <location_name>FAIRVIEW METHODIST CHURCH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190050">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1900 CHAPEL HILL RD</line1>
+    <state>MO</state>
+    <location_name>REJOICE FREE WILL BAPTIST CH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190051">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>100 W BROADWAY</line1>
+    <state>MO</state>
+    <location_name>COLUMBIA PUBLIC LIBRARY</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190052">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>20 E GREEN MEADOWS RD</line1>
+    <state>MO</state>
+    <location_name>CORNERSTONE BAPTIST CHURCH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190053">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>120 E NIFONG BLVD</line1>
+    <state>MO</state>
+    <location_name>PEACHTREE BANQUET CENTER</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190054">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2201 W NIFONG BLVD</line1>
+    <state>MO</state>
+    <location_name>WOODCREST CHAPEL</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190055">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>4303 S PROVIDENCE RD</line1>
+    <state>MO</state>
+    <location_name>ROCK BRIDGE HIGH SCHOOL</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190056">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3900 FORUM BLVD</line1>
+    <state>MO</state>
+    <location_name>FORUM BLVD CHRISTIAN CHURCH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190057">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>301 W GREEN MEADOWS RD</line1>
+    <state>MO</state>
+    <location_name>ROCK BRIDGE CHRISTIAN CHURCH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190058">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3900 FORUM BLVD</line1>
+    <state>MO</state>
+    <location_name>FORUM BLVD CHRISTIAN CHURCH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190059">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>4200 BETHEL ST</line1>
+    <state>MO</state>
+    <location_name>GENTRY MIDDLE SCHOOL</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190060">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>4300 THORNBROOK TERRACE</line1>
+    <state>MO</state>
+    <location_name>THORNBROOK CLUBHOUSE</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190061">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3900 FORUM BLVD</line1>
+    <state>MO</state>
+    <location_name>FORUM BLVD CHRISTIAN CHURCH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190062">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2200 W NIFONG BLVD</line1>
+    <state>MO</state>
+    <location_name>MILL CREEK SCHOOL</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190063">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2200 W NIFONG BLVD</line1>
+    <state>MO</state>
+    <location_name>MILL CREEK SCHOOL</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190064">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>304 S COLLEGE AVE</line1>
+    <state>MO</state>
+    <location_name>CAMPUS LUTHERAN CHURCH</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190065">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>304 S COLLEGE AVE</line1>
+    <state>MO</state>
+    <location_name>CAMPUS LUTHERAN CHURCH</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190066">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2616 SHEPARD BLVD</line1>
+    <state>MO</state>
+    <location_name>SHEPARD BLVD SCHOOL</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190067">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1 HOURIGAN DR</line1>
+    <state>MO</state>
+    <location_name>LENOIR COMMUNITY CENTER</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190068">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1225 FELLOWS PL</line1>
+    <state>MO</state>
+    <location_name>HAMPTON INN &amp; SUITES COLUMBIA</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190069">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1225 FELLOWS PL</line1>
+    <state>MO</state>
+    <location_name>HAMPTON INN &amp; SUITES COLUMBIA</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190070">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3300 S PROVIDENCE RD</line1>
+    <state>MO</state>
+    <location_name>CHRISTIAN CHAPEL</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190071">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2616 SHEPARD BLVD</line1>
+    <state>MO</state>
+    <location_name>SHEPARD BLVD SCHOOL</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190072">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1225 FELLOWS PL</line1>
+    <state>MO</state>
+    <location_name>HAMPTON INN &amp; SUITES COLUMBIA</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190073">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>3669 LEGION LN</line1>
+    <state>MO</state>
+    <location_name>AMERICAN LEGION POST #202</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190074">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2306 BLUFF CREEK DR</line1>
+    <state>MO</state>
+    <location_name>MO CATTLEMENS FOUNDATION</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190075">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1225 FELLOWS PL</line1>
+    <state>MO</state>
+    <location_name>HAMPTON INN &amp; SUITES COLUMBIA</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190076">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2306 BLUFF CREEK DR</line1>
+    <state>MO</state>
+    <location_name>MO CATTLEMENS FOUNDATION</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190077">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>HARRISBURG</city>
+    <line1>120 SEXTON ST</line1>
+    <state>MO</state>
+    <location_name>HARRISBURG LIONS CLUB</location_name>
+    <zip>65256</zip>
+  </address>
+</polling_location>
+<polling_location id="440190078">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>STURGEON</city>
+    <line1>403 W MCDOWELL ST</line1>
+    <state>MO</state>
+    <location_name>STURGEON RECREATION CENTER</location_name>
+    <zip>65284</zip>
+  </address>
+</polling_location>
+<polling_location id="440190079">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>CENTRALIA</city>
+    <line1>715 ORCHARD</line1>
+    <state>MO</state>
+    <location_name>UNITED METHODIST CHURCH</location_name>
+    <zip>65240</zip>
+  </address>
+</polling_location>
+<polling_location id="440190080">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>CENTRALIA</city>
+    <line1>229 S ROLLINS</line1>
+    <state>MO</state>
+    <location_name>FIRST CHRISTIAN CHURCH</location_name>
+    <zip>65240</zip>
+  </address>
+</polling_location>
+<polling_location id="440190081">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>CENTRALIA</city>
+    <line1>715 ORCHARD</line1>
+    <state>MO</state>
+    <location_name>UNITED METHODIST CHURCH</location_name>
+    <zip>65240</zip>
+  </address>
+</polling_location>
+<polling_location id="440190082">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>CENTRALIA</city>
+    <line1>229 S ROLLINS</line1>
+    <state>MO</state>
+    <location_name>FIRST CHRISTIAN CHURCH</location_name>
+    <zip>65240</zip>
+  </address>
+</polling_location>
+<polling_location id="440190083">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2701 W DRIPPING SPRINGS RD</line1>
+    <state>MO</state>
+    <location_name>DRIPPING SPRINGS CHURCH</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190084">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>5212 N OAKLAND GRAVEL RD</line1>
+    <state>MO</state>
+    <location_name>BOONE COUNTY FAIRGROUNDS</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190085">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>HALLSVILLE</city>
+    <line1>324 E HWY OO</line1>
+    <state>MO</state>
+    <location_name>HALLSVILLE COMMUNITY CENTER</location_name>
+    <zip>65255</zip>
+  </address>
+</polling_location>
+<polling_location id="440190086">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>7461 N BROWN STATION RD</line1>
+    <state>MO</state>
+    <location_name>LIBERTY BAPTIST CHURCH</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190087">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>8130 W HWY 40</line1>
+    <state>MO</state>
+    <location_name>MIDWAY HEIGHTS SCHOOL</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190088">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>8130 W HWY 40</line1>
+    <state>MO</state>
+    <location_name>MIDWAY HEIGHTS SCHOOL</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190089">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2201 I-70 DR NW</line1>
+    <state>MO</state>
+    <location_name>BOONE COUNTY FIRE DISTRICT HQ</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190090">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>4600 CHRISTian FELLOWSHIP RD</line1>
+    <state>MO</state>
+    <location_name>CHRISTIAN FELLOWSHIP</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190091">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>4000 DERBY RIDGE DR</line1>
+    <state>MO</state>
+    <location_name>DERBY RIDGE ELEM SCHOOL</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190092">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>915 PORT WAY</line1>
+    <state>MO</state>
+    <location_name>HOLIDAY INN EAST</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190093">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>860 N EAST PARK LN</line1>
+    <state>MO</state>
+    <location_name>PRAIRIE GROVE BAPTIST CHURCH</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190094">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>4747 E ELK PARK DR</line1>
+    <state>MO</state>
+    <location_name>ELKS LODGE</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190095">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>5151 S HWY 163</line1>
+    <state>MO</state>
+    <location_name>ROCK BRIDGE ELEMENTARY SCHOOL</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190096">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>201 E OLD PLANK RD</line1>
+    <state>MO</state>
+    <location_name>BETHEL BAPTIST CHURCH</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190097">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1 HOURIGAN DR</line1>
+    <state>MO</state>
+    <location_name>LENOIR COMMUNITY CENTER</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190098">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>4838 E MEADOW LARK LN</line1>
+    <state>MO</state>
+    <location_name>OPEN DOOR BAPTIST CHURCH</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190099">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ASHLAND</city>
+    <line1>203 E BROADWAY</line1>
+    <state>MO</state>
+    <location_name>ASHLAND BAPTIST CHURCH</location_name>
+    <zip>65010</zip>
+  </address>
+</polling_location>
+<polling_location id="440190100">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ASHLAND</city>
+    <line1>511 OPTIMIST DR</line1>
+    <state>MO</state>
+    <location_name>ASHLAND OPTIMIST CLUB</location_name>
+    <zip>65010</zip>
+  </address>
+</polling_location>
+<polling_location id="440190101">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ASHLAND</city>
+    <line1>406 DOUGLAS</line1>
+    <state>MO</state>
+    <location_name>ASHLAND SENIOR CENTER</location_name>
+    <zip>65010</zip>
+  </address>
+</polling_location>
+<polling_location id="440190102">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>860 N EAST PARK LN</line1>
+    <state>MO</state>
+    <location_name>PRAIRIE GROVE BAPTIST CHURCH</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190103">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>4747 E ELK PARK DR</line1>
+    <state>MO</state>
+    <location_name>ELKS LODGE</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190104">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ASHLAND</city>
+    <line1>406 DOUGLAS</line1>
+    <state>MO</state>
+    <location_name>ASHLAND SENIOR CENTER</location_name>
+    <zip>65010</zip>
+  </address>
+</polling_location>
+<polling_location id="440190105">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2200 W NIFONG BLVD</line1>
+    <state>MO</state>
+    <location_name>MILL CREEK SCHOOL</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190106">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2011 CORONA RD</line1>
+    <state>MO</state>
+    <location_name>CHERRY HILL EVENT CENTER</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190107">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1012 N HWY UU</line1>
+    <state>MO</state>
+    <location_name>UMC EXTENSION OFFICE</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190108">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>HALLSVILLE</city>
+    <line1>14355 N RTE U</line1>
+    <state>MO</state>
+    <location_name>RED TOP CHRISTIAN CHURCH</location_name>
+    <zip>65255</zip>
+  </address>
+</polling_location>
+<polling_location id="440190109">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>5212 N OAKLAND GRAVEL RD</line1>
+    <state>MO</state>
+    <location_name>BOONE COUNTY FAIRGROUNDS</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+<polling_location id="440190110">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>101 GRACE LN</line1>
+    <state>MO</state>
+    <location_name>REDEEMER PRESBYTERIAN CHURCH</location_name>
+    <zip>65201</zip>
+  </address>
+</polling_location>
+<polling_location id="440190111">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ASHLAND</city>
+    <line1>406 DOUGLAS</line1>
+    <state>MO</state>
+    <location_name>ASHLAND SENIOR CENTER</location_name>
+    <zip>65010</zip>
+  </address>
+</polling_location>
+<polling_location id="440190112">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ASHLAND</city>
+    <line1>203 E BROADWAY</line1>
+    <state>MO</state>
+    <location_name>ASHLAND BAPTIST CHURCH</location_name>
+    <zip>65010</zip>
+  </address>
+</polling_location>
+<polling_location id="440190113">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2201 W NIFONG BLVD</line1>
+    <state>MO</state>
+    <location_name>WOODCREST CHAPEL</location_name>
+    <zip>65203</zip>
+  </address>
+</polling_location>
+<polling_location id="440190114">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>2201 SMILEY LN</line1>
+    <state>MO</state>
+    <location_name>LANGE MIDDLE SCHOOL</location_name>
+    <zip>65202</zip>
+  </address>
+</polling_location>
+</vip_object>

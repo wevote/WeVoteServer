@@ -1,0 +1,3897 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>29</vip_id>
+  <datetime>2012-10-29T10:00:00</datetime>
+  <description>VIP aggregates this data from official state sources</description>
+</source>
+<state id="29">
+  <name>Missouri</name>
+</state>
+<election id="4000">
+  <date>2012-11-06</date>
+  <election_type>State</election_type>
+  <state_id>29</state_id>
+  <statewide>Yes</statewide>
+</election>
+<locality id="1138000">
+  <name>Kansas City</name>
+  <state_id>29</state_id>
+  <type>City</type>
+</locality>
+<precinct id="22322">
+  <name>2-16</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380090010</polling_location_id>
+</precinct>
+<precinct id="22304">
+  <name>12-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380670068</polling_location_id>
+</precinct>
+<precinct id="22221">
+  <name>11-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380590060</polling_location_id>
+</precinct>
+<precinct id="22321">
+  <name>26-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381530154</polling_location_id>
+</precinct>
+<precinct id="2225">
+  <name>3-18</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380160017</polling_location_id>
+</precinct>
+<precinct id="22116">
+  <name>11-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380610062</polling_location_id>
+</precinct>
+<precinct id="22272">
+  <name>9-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380470048</polling_location_id>
+</precinct>
+<precinct id="22204">
+  <name>3-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380150016</polling_location_id>
+</precinct>
+<precinct id="2224">
+  <name>8-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380390040</polling_location_id>
+</precinct>
+<precinct id="22115">
+  <name>7-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380330034</polling_location_id>
+</precinct>
+<precinct id="22286">
+  <name>15-21</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380870088</polling_location_id>
+</precinct>
+<precinct id="2233">
+  <name>2-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380050006</polling_location_id>
+</precinct>
+<precinct id="2227">
+  <name>6-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380290030</polling_location_id>
+</precinct>
+<precinct id="22299">
+  <name>15-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380800081</polling_location_id>
+</precinct>
+<precinct id="22157">
+  <name>14-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380770078</polling_location_id>
+</precinct>
+<precinct id="22132">
+  <name>2-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380080009</polling_location_id>
+</precinct>
+<precinct id="22335">
+  <name>14-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380760077</polling_location_id>
+</precinct>
+<precinct id="22315">
+  <name>24-31</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381370138</polling_location_id>
+</precinct>
+<precinct id="22107">
+  <name>17-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380940095</polling_location_id>
+</precinct>
+<precinct id="22339">
+  <name>11-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380630064</polling_location_id>
+</precinct>
+<precinct id="2232">
+  <name>19-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381080109</polling_location_id>
+</precinct>
+<precinct id="22356">
+  <name>15-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380810082</polling_location_id>
+</precinct>
+<precinct id="22108">
+  <name>7-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380360037</polling_location_id>
+</precinct>
+<precinct id="22189">
+  <name>19-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381090110</polling_location_id>
+</precinct>
+<precinct id="2248">
+  <name>7-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380340035</polling_location_id>
+</precinct>
+<precinct id="22213">
+  <name>20-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381120113</polling_location_id>
+</precinct>
+<precinct id="22242">
+  <name>13-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380720073</polling_location_id>
+</precinct>
+<precinct id="22227">
+  <name>13-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380710072</polling_location_id>
+</precinct>
+<precinct id="22220">
+  <name>3-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380150016</polling_location_id>
+</precinct>
+<precinct id="22215">
+  <name>26-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381530154</polling_location_id>
+</precinct>
+<precinct id="22276">
+  <name>5-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380260027</polling_location_id>
+</precinct>
+<precinct id="22196">
+  <name>2-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380060007</polling_location_id>
+</precinct>
+<precinct id="22357">
+  <name>15-15</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380850086</polling_location_id>
+</precinct>
+<precinct id="22167">
+  <name>15-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380790080</polling_location_id>
+</precinct>
+<precinct id="22109">
+  <name>18-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381020103</polling_location_id>
+</precinct>
+<precinct id="22172">
+  <name>18-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381040105</polling_location_id>
+</precinct>
+<precinct id="2211">
+  <name>9-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380450046</polling_location_id>
+</precinct>
+<precinct id="22110">
+  <name>16-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380900091</polling_location_id>
+</precinct>
+<precinct id="22131">
+  <name>16-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380910092</polling_location_id>
+</precinct>
+<precinct id="2254">
+  <name>8-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380390040</polling_location_id>
+</precinct>
+<precinct id="22161">
+  <name>5-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380250026</polling_location_id>
+</precinct>
+<precinct id="22251">
+  <name>15-19</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380860087</polling_location_id>
+</precinct>
+<precinct id="22195">
+  <name>20-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381160117</polling_location_id>
+</precinct>
+<precinct id="22253">
+  <name>15-22</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380830084</polling_location_id>
+</precinct>
+<precinct id="22150">
+  <name>19-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381100111</polling_location_id>
+</precinct>
+<precinct id="2273">
+  <name>4-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380180019</polling_location_id>
+</precinct>
+<precinct id="2285">
+  <name>26-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381490150</polling_location_id>
+</precinct>
+<precinct id="22316">
+  <name>24-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381340135</polling_location_id>
+</precinct>
+<precinct id="22100">
+  <name>24-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381320133</polling_location_id>
+</precinct>
+<precinct id="22342">
+  <name>11-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380630064</polling_location_id>
+</precinct>
+<precinct id="2239">
+  <name>15-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380810082</polling_location_id>
+</precinct>
+<precinct id="22198">
+  <name>4-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380190020</polling_location_id>
+</precinct>
+<precinct id="22271">
+  <name>16-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380920093</polling_location_id>
+</precinct>
+<precinct id="22121">
+  <name>17-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380980099</polling_location_id>
+</precinct>
+<precinct id="22201">
+  <name>24-22</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381390140</polling_location_id>
+</precinct>
+<precinct id="22212">
+  <name>23-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381270128</polling_location_id>
+</precinct>
+<precinct id="22206">
+  <name>12-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380640065</polling_location_id>
+</precinct>
+<precinct id="22241">
+  <name>19-19</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381110112</polling_location_id>
+</precinct>
+<precinct id="22306">
+  <name>3-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380140015</polling_location_id>
+</precinct>
+<precinct id="2253">
+  <name>5-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380210022</polling_location_id>
+</precinct>
+<precinct id="2272">
+  <name>1-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380020003</polling_location_id>
+</precinct>
+<precinct id="2263">
+  <name>9-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380460047</polling_location_id>
+</precinct>
+<precinct id="22106">
+  <name>25-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381440145</polling_location_id>
+</precinct>
+<precinct id="2219">
+  <name>5-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380250026</polling_location_id>
+</precinct>
+<precinct id="22182">
+  <name>17-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380940095</polling_location_id>
+</precinct>
+<precinct id="22153">
+  <name>14-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380760077</polling_location_id>
+</precinct>
+<precinct id="2282">
+  <name>7-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380360037</polling_location_id>
+</precinct>
+<precinct id="2231">
+  <name>5-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380220023</polling_location_id>
+</precinct>
+<precinct id="222">
+  <name>11-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380620063</polling_location_id>
+</precinct>
+<precinct id="2290">
+  <name>18-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381030104</polling_location_id>
+</precinct>
+<precinct id="22147">
+  <name>9-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380490050</polling_location_id>
+</precinct>
+<precinct id="22239">
+  <name>14-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380760077</polling_location_id>
+</precinct>
+<precinct id="22249">
+  <name>11-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380600061</polling_location_id>
+</precinct>
+<precinct id="22319">
+  <name>2-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380070008</polling_location_id>
+</precinct>
+<precinct id="22158">
+  <name>6-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380320033</polling_location_id>
+</precinct>
+<precinct id="22258">
+  <name>12-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380650066</polling_location_id>
+</precinct>
+<precinct id="22146">
+  <name>8-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380420043</polling_location_id>
+</precinct>
+<precinct id="22176">
+  <name>4-4</name>
+  <locality_id>1138000</locality_id>
+  <polling_location_id>44380180019</polling_location_id>
+</precinct>
+<precinct id="22184">
+  <name>7-15</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380380039</polling_location_id>
+</precinct>
+<precinct id="22275">
+  <name>11-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380600061</polling_location_id>
+</precinct>
+<precinct id="2216">
+  <name>10-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380570058</polling_location_id>
+</precinct>
+<precinct id="22287">
+  <name>3-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380120013</polling_location_id>
+</precinct>
+<precinct id="2292">
+  <name>15-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380830084</polling_location_id>
+</precinct>
+<precinct id="2288">
+  <name>17-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380960097</polling_location_id>
+</precinct>
+<precinct id="22199">
+  <name>10-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380550056</polling_location_id>
+</precinct>
+<precinct id="22138">
+  <name>7-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380370038</polling_location_id>
+</precinct>
+<precinct id="22136">
+  <name>11-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380600061</polling_location_id>
+</precinct>
+<precinct id="22290">
+  <name>13-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380690070</polling_location_id>
+</precinct>
+<precinct id="22347">
+  <name>15-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380800081</polling_location_id>
+</precinct>
+<precinct id="22208">
+  <name>10-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380530054</polling_location_id>
+</precinct>
+<precinct id="22235">
+  <name>13-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380720073</polling_location_id>
+</precinct>
+<precinct id="2242">
+  <name>2-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380080009</polling_location_id>
+</precinct>
+<precinct id="22259">
+  <name>25-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381410142</polling_location_id>
+</precinct>
+<precinct id="22263">
+  <name>7-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380360037</polling_location_id>
+</precinct>
+<precinct id="22246">
+  <name>25-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381450146</polling_location_id>
+</precinct>
+<precinct id="22101">
+  <name>24-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381350136</polling_location_id>
+</precinct>
+<precinct id="22288">
+  <name>16-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380890090</polling_location_id>
+</precinct>
+<precinct id="22125">
+  <name>24-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381360137</polling_location_id>
+</precinct>
+<precinct id="2236">
+  <name>19-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381070108</polling_location_id>
+</precinct>
+<precinct id="22269">
+  <name>12-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380660067</polling_location_id>
+</precinct>
+<precinct id="22296">
+  <name>18-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381040105</polling_location_id>
+</precinct>
+<precinct id="22105">
+  <name>20-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381140115</polling_location_id>
+</precinct>
+<precinct id="22240">
+  <name>14-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380750076</polling_location_id>
+</precinct>
+<precinct id="22194">
+  <name>24-24</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381350136</polling_location_id>
+</precinct>
+<precinct id="22313">
+  <name>23-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381270128</polling_location_id>
+</precinct>
+<precinct id="2289">
+  <name>6-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380290030</polling_location_id>
+</precinct>
+<precinct id="22245">
+  <name>3-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380120013</polling_location_id>
+</precinct>
+<precinct id="2234">
+  <name>6-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380320033</polling_location_id>
+</precinct>
+<precinct id="22228">
+  <name>22-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381220123</polling_location_id>
+</precinct>
+<precinct id="22205">
+  <name>26-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381510152</polling_location_id>
+</precinct>
+<precinct id="22233">
+  <name>5-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380230024</polling_location_id>
+</precinct>
+<precinct id="2243">
+  <name>4-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380180019</polling_location_id>
+</precinct>
+<precinct id="22203">
+  <name>25-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381430144</polling_location_id>
+</precinct>
+<precinct id="22181">
+  <name>7-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380360037</polling_location_id>
+</precinct>
+<precinct id="22341">
+  <name>7-18</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380350036</polling_location_id>
+</precinct>
+<precinct id="22126">
+  <name>9-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380480049</polling_location_id>
+</precinct>
+<precinct id="22160">
+  <name>26-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381500151</polling_location_id>
+</precinct>
+<precinct id="2297">
+  <name>3-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380130014</polling_location_id>
+</precinct>
+<precinct id="22151">
+  <name>23-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381300131</polling_location_id>
+</precinct>
+<precinct id="22340">
+  <name>17-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380940095</polling_location_id>
+</precinct>
+<precinct id="2210">
+  <name>6-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380300031</polling_location_id>
+</precinct>
+<precinct id="22291">
+  <name>13-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380690070</polling_location_id>
+</precinct>
+<precinct id="22293">
+  <name>23-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381370138</polling_location_id>
+</precinct>
+<precinct id="22312">
+  <name>15-24</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380860087</polling_location_id>
+</precinct>
+<precinct id="2235">
+  <name>19-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381060107</polling_location_id>
+</precinct>
+<precinct id="22329">
+  <name>2-17</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380050006</polling_location_id>
+</precinct>
+<precinct id="22270">
+  <name>22-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381250126</polling_location_id>
+</precinct>
+<precinct id="22223">
+  <name>24-20</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381370138</polling_location_id>
+</precinct>
+<precinct id="22170">
+  <name>5-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380240025</polling_location_id>
+</precinct>
+<precinct id="22222">
+  <name>14-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380750076</polling_location_id>
+</precinct>
+<precinct id="22355">
+  <name>24-16</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381370138</polling_location_id>
+</precinct>
+<precinct id="2229">
+  <name>5-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380230024</polling_location_id>
+</precinct>
+<precinct id="22139">
+  <name>9-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380480049</polling_location_id>
+</precinct>
+<precinct id="22163">
+  <name>1-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380040005</polling_location_id>
+</precinct>
+<precinct id="22173">
+  <name>23-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381280129</polling_location_id>
+</precinct>
+<precinct id="22175">
+  <name>9-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380480049</polling_location_id>
+</precinct>
+<precinct id="22298">
+  <name>2-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380070008</polling_location_id>
+</precinct>
+<precinct id="22135">
+  <name>1-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380030004</polling_location_id>
+</precinct>
+<precinct id="2259">
+  <name>18-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381040105</polling_location_id>
+</precinct>
+<precinct id="22248">
+  <name>8-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380420043</polling_location_id>
+</precinct>
+<precinct id="22118">
+  <name>24-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381330134</polling_location_id>
+</precinct>
+<precinct id="22141">
+  <name>22-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381180119</polling_location_id>
+</precinct>
+<precinct id="22148">
+  <name>26-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381500151</polling_location_id>
+</precinct>
+<precinct id="22180">
+  <name>15-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380780079</polling_location_id>
+</precinct>
+<precinct id="22266">
+  <name>13-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380680069</polling_location_id>
+</precinct>
+<precinct id="2215">
+  <name>9-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380460047</polling_location_id>
+</precinct>
+<precinct id="2258">
+  <name>23-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381310132</polling_location_id>
+</precinct>
+<precinct id="2280">
+  <name>24-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381330134</polling_location_id>
+</precinct>
+<precinct id="22273">
+  <name>26-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381470148</polling_location_id>
+</precinct>
+<precinct id="22325">
+  <name>16-15</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380930094</polling_location_id>
+</precinct>
+<precinct id="2217">
+  <name>4-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380200021</polling_location_id>
+</precinct>
+<precinct id="2281">
+  <name>23-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381270128</polling_location_id>
+</precinct>
+<precinct id="22140">
+  <name>8-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380440045</polling_location_id>
+</precinct>
+<precinct id="22159">
+  <name>17-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380970098</polling_location_id>
+</precinct>
+<precinct id="22265">
+  <name>7-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380330034</polling_location_id>
+</precinct>
+<precinct id="2238">
+  <name>17-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380980099</polling_location_id>
+</precinct>
+<precinct id="22216">
+  <name>14-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380760077</polling_location_id>
+</precinct>
+<precinct id="22178">
+  <name>25-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381440145</polling_location_id>
+</precinct>
+<precinct id="2275">
+  <name>6-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380310032</polling_location_id>
+</precinct>
+<precinct id="22274">
+  <name>15-20</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380870088</polling_location_id>
+</precinct>
+<precinct id="22162">
+  <name>20-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381140115</polling_location_id>
+</precinct>
+<precinct id="2286">
+  <name>9-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380450046</polling_location_id>
+</precinct>
+<precinct id="22353">
+  <name>15-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380840085</polling_location_id>
+</precinct>
+<precinct id="2267">
+  <name>3-17</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380160017</polling_location_id>
+</precinct>
+<precinct id="22128">
+  <name>18-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381020103</polling_location_id>
+</precinct>
+<precinct id="22250">
+  <name>14-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380730074</polling_location_id>
+</precinct>
+<precinct id="22301">
+  <name>18-15</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381050106</polling_location_id>
+</precinct>
+<precinct id="2262">
+  <name>4-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380200021</polling_location_id>
+</precinct>
+<precinct id="22280">
+  <name>11-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380600061</polling_location_id>
+</precinct>
+<precinct id="22283">
+  <name>24-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381370138</polling_location_id>
+</precinct>
+<precinct id="22317">
+  <name>26-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381460147</polling_location_id>
+</precinct>
+<precinct id="22349">
+  <name>25-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381450146</polling_location_id>
+</precinct>
+<precinct id="221">
+  <name>8-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380430044</polling_location_id>
+</precinct>
+<precinct id="2260">
+  <name>4-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380200021</polling_location_id>
+</precinct>
+<precinct id="22197">
+  <name>12-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380640065</polling_location_id>
+</precinct>
+<precinct id="22164">
+  <name>4-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380170018</polling_location_id>
+</precinct>
+<precinct id="22210">
+  <name>2-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380070008</polling_location_id>
+</precinct>
+<precinct id="22318">
+  <name>1-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380010002</polling_location_id>
+</precinct>
+<precinct id="22254">
+  <name>11-5</name>
+  <locality_id>1138000</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380600061</polling_location_id>
+</precinct>
+<precinct id="22143">
+  <name>9-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380460047</polling_location_id>
+</precinct>
+<precinct id="2271">
+  <name>19-16</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381110112</polling_location_id>
+</precinct>
+<precinct id="22155">
+  <name>18-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381030104</polling_location_id>
+</precinct>
+<precinct id="22348">
+  <name>24-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381360137</polling_location_id>
+</precinct>
+<precinct id="2237">
+  <name>20-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381130114</polling_location_id>
+</precinct>
+<precinct id="22133">
+  <name>24-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381360137</polling_location_id>
+</precinct>
+<precinct id="22168">
+  <name>6-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380320033</polling_location_id>
+</precinct>
+<precinct id="22260">
+  <name>14-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380740075</polling_location_id>
+</precinct>
+<precinct id="22277">
+  <name>13-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380720073</polling_location_id>
+</precinct>
+<precinct id="22217">
+  <name>12-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380670068</polling_location_id>
+</precinct>
+<precinct id="2276">
+  <name>8-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380420043</polling_location_id>
+</precinct>
+<precinct id="2221">
+  <name>6-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380280029</polling_location_id>
+</precinct>
+<precinct id="227">
+  <name>2-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380050006</polling_location_id>
+</precinct>
+<precinct id="224">
+  <name>8-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380390040</polling_location_id>
+</precinct>
+<precinct id="22292">
+  <name>3-15</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380130014</polling_location_id>
+</precinct>
+<precinct id="22209">
+  <name>7-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380350036</polling_location_id>
+</precinct>
+<precinct id="2287">
+  <name>20-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381170118</polling_location_id>
+</precinct>
+<precinct id="2214">
+  <name>3-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380150016</polling_location_id>
+</precinct>
+<precinct id="2245">
+  <name>10-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380520053</polling_location_id>
+</precinct>
+<precinct id="22332">
+  <name>11-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380600061</polling_location_id>
+</precinct>
+<precinct id="22358">
+  <name>19-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381070108</polling_location_id>
+</precinct>
+<precinct id="22154">
+  <name>14-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380750076</polling_location_id>
+</precinct>
+<precinct id="22279">
+  <name>24-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381340135</polling_location_id>
+</precinct>
+<precinct id="22278">
+  <name>23-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381280129</polling_location_id>
+</precinct>
+<precinct id="22337">
+  <name>16-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380920093</polling_location_id>
+</precinct>
+<precinct id="22284">
+  <name>15-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380800081</polling_location_id>
+</precinct>
+<precinct id="22120">
+  <name>10-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380540055</polling_location_id>
+</precinct>
+<precinct id="22305">
+  <name>3-16</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380100011</polling_location_id>
+</precinct>
+<precinct id="22119">
+  <name>12-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380640065</polling_location_id>
+</precinct>
+<precinct id="2294">
+  <name>10-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380550056</polling_location_id>
+</precinct>
+<precinct id="2257">
+  <name>20-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381150116</polling_location_id>
+</precinct>
+<precinct id="22207">
+  <name>14-4</name>
+  <locality_id>1138000</locality_id>
+  <polling_location_id>44380730074</polling_location_id>
+</precinct>
+<precinct id="2228">
+  <name>8-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380410042</polling_location_id>
+</precinct>
+<precinct id="22186">
+  <name>7-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380370038</polling_location_id>
+</precinct>
+<precinct id="22123">
+  <name>5-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380220023</polling_location_id>
+</precinct>
+<precinct id="22264">
+  <name>23-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381280129</polling_location_id>
+</precinct>
+<precinct id="22314">
+  <name>15-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380800081</polling_location_id>
+</precinct>
+<precinct id="2223">
+  <name>9-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380500051</polling_location_id>
+</precinct>
+<precinct id="22230">
+  <name>2-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380050006</polling_location_id>
+</precinct>
+<precinct id="22165">
+  <name>3-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380130014</polling_location_id>
+</precinct>
+<precinct id="2244">
+  <name>5-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380250026</polling_location_id>
+</precinct>
+<precinct id="22344">
+  <name>24-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381360137</polling_location_id>
+</precinct>
+<precinct id="22156">
+  <name>8-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380410042</polling_location_id>
+</precinct>
+<precinct id="22127">
+  <name>18-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381050106</polling_location_id>
+</precinct>
+<precinct id="22295">
+  <name>16-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380910092</polling_location_id>
+</precinct>
+<precinct id="22311">
+  <name>14-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380760077</polling_location_id>
+</precinct>
+<precinct id="22334">
+  <name>7-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380340035</polling_location_id>
+</precinct>
+<precinct id="22234">
+  <name>16-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380920093</polling_location_id>
+</precinct>
+<precinct id="22190">
+  <name>2-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380060007</polling_location_id>
+</precinct>
+<precinct id="2230">
+  <name>25-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381400141</polling_location_id>
+</precinct>
+<precinct id="22124">
+  <name>16-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380890090</polling_location_id>
+</precinct>
+<precinct id="22193">
+  <name>7-17</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380360037</polling_location_id>
+</precinct>
+<precinct id="22113">
+  <name>15-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380840085</polling_location_id>
+</precinct>
+<precinct id="22103">
+  <name>22-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381210122</polling_location_id>
+</precinct>
+<precinct id="2269">
+  <name>25-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381420143</polling_location_id>
+</precinct>
+<precinct id="2268">
+  <name>7-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380350036</polling_location_id>
+</precinct>
+<precinct id="2266">
+  <name>8-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380400041</polling_location_id>
+</precinct>
+<precinct id="22350">
+  <name>19-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381070108</polling_location_id>
+</precinct>
+<precinct id="22142">
+  <name>10-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380540055</polling_location_id>
+</precinct>
+<precinct id="22255">
+  <name>15-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380790080</polling_location_id>
+</precinct>
+<precinct id="2212">
+  <name>2-18</name>
+  <locality_id>1138000</locality_id>
+  <polling_location_id>44380050006</polling_location_id>
+</precinct>
+<precinct id="22137">
+  <name>10-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380520053</polling_location_id>
+</precinct>
+<precinct id="2264">
+  <name>22-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381200121</polling_location_id>
+</precinct>
+<precinct id="22289">
+  <name>12-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380670068</polling_location_id>
+</precinct>
+<precinct id="2252">
+  <name>5-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380240025</polling_location_id>
+</precinct>
+<precinct id="226">
+  <name>6-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380290030</polling_location_id>
+</precinct>
+<precinct id="22211">
+  <name>8-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380420043</polling_location_id>
+</precinct>
+<precinct id="22300">
+  <name>8-15</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380400041</polling_location_id>
+</precinct>
+<precinct id="2265">
+  <name>4-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380170018</polling_location_id>
+</precinct>
+<precinct id="22324">
+  <name>22-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381190120</polling_location_id>
+</precinct>
+<precinct id="2218">
+  <name>15-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380820083</polling_location_id>
+</precinct>
+<precinct id="22174">
+  <name>12-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380660067</polling_location_id>
+</precinct>
+<precinct id="22346">
+  <name>19-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381070108</polling_location_id>
+</precinct>
+<precinct id="2278">
+  <name>6-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380320033</polling_location_id>
+</precinct>
+<precinct id="22130">
+  <name>25-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381420143</polling_location_id>
+</precinct>
+<precinct id="22282">
+  <name>13-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380720073</polling_location_id>
+</precinct>
+<precinct id="22179">
+  <name>16-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380900091</polling_location_id>
+</precinct>
+<precinct id="22243">
+  <name>7-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380330034</polling_location_id>
+</precinct>
+<precinct id="22327">
+  <name>9-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380470048</polling_location_id>
+</precinct>
+<precinct id="22328">
+  <name>11-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380600061</polling_location_id>
+</precinct>
+<precinct id="22112">
+  <name>3-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380100011</polling_location_id>
+</precinct>
+<precinct id="22267">
+  <name>18-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381010102</polling_location_id>
+</precinct>
+<precinct id="22188">
+  <name>2-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380080009</polling_location_id>
+</precinct>
+<precinct id="22252">
+  <name>24-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381330134</polling_location_id>
+</precinct>
+<precinct id="22191">
+  <name>22-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381240125</polling_location_id>
+</precinct>
+<precinct id="22202">
+  <name>11-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380580059</polling_location_id>
+</precinct>
+<precinct id="2261">
+  <name>16-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380880089</polling_location_id>
+</precinct>
+<precinct id="22231">
+  <name>26-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381460147</polling_location_id>
+</precinct>
+<precinct id="229">
+  <name>10-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380560057</polling_location_id>
+</precinct>
+<precinct id="22236">
+  <name>2-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380080009</polling_location_id>
+</precinct>
+<precinct id="2255">
+  <name>26-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381460147</polling_location_id>
+</precinct>
+<precinct id="2274">
+  <name>26-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381500151</polling_location_id>
+</precinct>
+<precinct id="22256">
+  <name>25-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381410142</polling_location_id>
+</precinct>
+<precinct id="22218">
+  <name>3-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380100011</polling_location_id>
+</precinct>
+<precinct id="22354">
+  <name>25-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381410142</polling_location_id>
+</precinct>
+<precinct id="22326">
+  <name>18-16</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381050106</polling_location_id>
+</precinct>
+<precinct id="22309">
+  <name>23-15</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381280129</polling_location_id>
+</precinct>
+<precinct id="2296">
+  <name>22-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381200121</polling_location_id>
+</precinct>
+<precinct id="22343">
+  <name>24-17</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381370138</polling_location_id>
+</precinct>
+<precinct id="22149">
+  <name>22-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381210122</polling_location_id>
+</precinct>
+<precinct id="22166">
+  <name>2-15</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380080009</polling_location_id>
+</precinct>
+<precinct id="22320">
+  <name>16-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380930094</polling_location_id>
+</precinct>
+<precinct id="22351">
+  <name>24-19</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381370138</polling_location_id>
+</precinct>
+<precinct id="22333">
+  <name>13-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380720073</polling_location_id>
+</precinct>
+<precinct id="22145">
+  <name>16-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380880089</polling_location_id>
+</precinct>
+<precinct id="22171">
+  <name>4-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380180019</polling_location_id>
+</precinct>
+<precinct id="2283">
+  <name>17-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380980099</polling_location_id>
+</precinct>
+<precinct id="2250">
+  <name>6-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380310032</polling_location_id>
+</precinct>
+<precinct id="22225">
+  <name>6-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380310032</polling_location_id>
+</precinct>
+<precinct id="22122">
+  <name>19-20</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381100111</polling_location_id>
+</precinct>
+<precinct id="22257">
+  <name>10-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380540055</polling_location_id>
+</precinct>
+<precinct id="2213">
+  <name>1-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380000001</polling_location_id>
+</precinct>
+<precinct id="2298">
+  <name>17-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380970098</polling_location_id>
+</precinct>
+<precinct id="22229">
+  <name>18-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381010102</polling_location_id>
+</precinct>
+<precinct id="22224">
+  <name>8-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380440045</polling_location_id>
+</precinct>
+<precinct id="2251">
+  <name>6-15</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380310032</polling_location_id>
+</precinct>
+<precinct id="2291">
+  <name>24-18</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381380139</polling_location_id>
+</precinct>
+<precinct id="2256">
+  <name>19-22</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381090110</polling_location_id>
+</precinct>
+<precinct id="22285">
+  <name>23-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381260127</polling_location_id>
+</precinct>
+<precinct id="22294">
+  <name>16-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380920093</polling_location_id>
+</precinct>
+<precinct id="22345">
+  <name>24-23</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381350136</polling_location_id>
+</precinct>
+<precinct id="2222">
+  <name>19-18</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381100111</polling_location_id>
+</precinct>
+<precinct id="22338">
+  <name>3-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380100011</polling_location_id>
+</precinct>
+<precinct id="22144">
+  <name>17-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380950096</polling_location_id>
+</precinct>
+<precinct id="22232">
+  <name>13-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380680069</polling_location_id>
+</precinct>
+<precinct id="22104">
+  <name>12-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380670068</polling_location_id>
+</precinct>
+<precinct id="22247">
+  <name>15-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380780079</polling_location_id>
+</precinct>
+<precinct id="22330">
+  <name>2-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380080009</polling_location_id>
+</precinct>
+<precinct id="2270">
+  <name>23-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381270128</polling_location_id>
+</precinct>
+<precinct id="225">
+  <name>22-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381190120</polling_location_id>
+</precinct>
+<precinct id="22281">
+  <name>7-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380360037</polling_location_id>
+</precinct>
+<precinct id="22307">
+  <name>22-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381190120</polling_location_id>
+</precinct>
+<precinct id="22129">
+  <name>22-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381230124</polling_location_id>
+</precinct>
+<precinct id="22214">
+  <name>3-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380100011</polling_location_id>
+</precinct>
+<precinct id="22297">
+  <name>7-16</name>
+  <locality_id>1138000</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380380039</polling_location_id>
+</precinct>
+<precinct id="22244">
+  <name>15-18</name>
+  <locality_id>1138000</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380860087</polling_location_id>
+</precinct>
+<precinct id="2220">
+  <name>5-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380260027</polling_location_id>
+</precinct>
+<precinct id="2284">
+  <name>16-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380880089</polling_location_id>
+</precinct>
+<precinct id="22262">
+  <name>13-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380680069</polling_location_id>
+</precinct>
+<precinct id="22102">
+  <name>24-15</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381370138</polling_location_id>
+</precinct>
+<precinct id="22200">
+  <name>25-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381430144</polling_location_id>
+</precinct>
+<precinct id="22219">
+  <name>18-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380990100</polling_location_id>
+</precinct>
+<precinct id="22336">
+  <name>18-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381000101</polling_location_id>
+</precinct>
+<precinct id="223">
+  <name>9-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380490050</polling_location_id>
+</precinct>
+<precinct id="22238">
+  <name>14-15</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380770078</polling_location_id>
+</precinct>
+<precinct id="22302">
+  <name>13-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380690070</polling_location_id>
+</precinct>
+<precinct id="22308">
+  <name>19-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381070108</polling_location_id>
+</precinct>
+<precinct id="2247">
+  <name>20-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381140115</polling_location_id>
+</precinct>
+<precinct id="22185">
+  <name>3-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380100011</polling_location_id>
+</precinct>
+<precinct id="2295">
+  <name>1-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380000001</polling_location_id>
+</precinct>
+<precinct id="228">
+  <name>8-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380410042</polling_location_id>
+</precinct>
+<precinct id="22261">
+  <name>20-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381140115</polling_location_id>
+</precinct>
+<precinct id="22111">
+  <name>19-23</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381080109</polling_location_id>
+</precinct>
+<precinct id="22268">
+  <name>19-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381070108</polling_location_id>
+</precinct>
+<precinct id="2226">
+  <name>6-4</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380290030</polling_location_id>
+</precinct>
+<precinct id="22134">
+  <name>1-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380040005</polling_location_id>
+</precinct>
+<precinct id="22303">
+  <name>3-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380110012</polling_location_id>
+</precinct>
+<precinct id="2249">
+  <name>17-14</name>
+  <locality_id>1138000</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380980099</polling_location_id>
+</precinct>
+<precinct id="22183">
+  <name>17-12</name>
+  <locality_id>1138000</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380950096</polling_location_id>
+</precinct>
+<precinct id="2293">
+  <name>22-13</name>
+  <locality_id>1138000</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381230124</polling_location_id>
+</precinct>
+<precinct id="2241">
+  <name>14-7</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380740075</polling_location_id>
+</precinct>
+<precinct id="22310">
+  <name>10-10</name>
+  <locality_id>1138000</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380540055</polling_location_id>
+</precinct>
+<precinct id="2299">
+  <name>19-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381090110</polling_location_id>
+</precinct>
+<precinct id="22152">
+  <name>24-21</name>
+  <locality_id>1138000</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381380139</polling_location_id>
+</precinct>
+<precinct id="2240">
+  <name>6-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380270028</polling_location_id>
+</precinct>
+<precinct id="22187">
+  <name>14-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380740075</polling_location_id>
+</precinct>
+<precinct id="22177">
+  <name>5-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380220023</polling_location_id>
+</precinct>
+<precinct id="22237">
+  <name>23-11</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381300131</polling_location_id>
+</precinct>
+<precinct id="22323">
+  <name>23-8</name>
+  <locality_id>1138000</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381290130</polling_location_id>
+</precinct>
+<precinct id="2246">
+  <name>17-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380970098</polling_location_id>
+</precinct>
+<precinct id="22226">
+  <name>13-3</name>
+  <locality_id>1138000</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380700071</polling_location_id>
+</precinct>
+<precinct id="22114">
+  <name>25-2</name>
+  <locality_id>1138000</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381440145</polling_location_id>
+</precinct>
+<precinct id="22192">
+  <name>26-3</name>
+  <locality_id>1138000</locality_id>
+  <polling_location_id>44381480149</polling_location_id>
+</precinct>
+<precinct id="2279">
+  <name>4-6</name>
+  <locality_id>1138000</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380190020</polling_location_id>
+</precinct>
+<precinct id="22331">
+  <name>12-5</name>
+  <locality_id>1138000</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380660067</polling_location_id>
+</precinct>
+<precinct id="22117">
+  <name>10-1</name>
+  <locality_id>1138000</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44380510052</polling_location_id>
+</precinct>
+<precinct id="2277">
+  <name>26-9</name>
+  <locality_id>1138000</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>44381520153</polling_location_id>
+</precinct>
+<precinct id="22169">
+  <name>11-3</name>
+  <locality_id>1138000</locality_id>
+  <polling_location_id>44380590060</polling_location_id>
+</precinct>
+<polling_location id="44380000001">
+  <address>
+    <city>Kansas City</city>
+    <line1>444 West 12th Street</line1>
+    <state>MO</state>
+    <location_name>Cathedral Square Towers</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380010002">
+  <address>
+    <city>Kansas City</city>
+    <line1>814 West 26th Street</line1>
+    <state>MO</state>
+    <location_name>Scared Heart Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380020003">
+  <address>
+    <city>Kansas City</city>
+    <line1>770 Admiral Blvd</line1>
+    <state>MO</state>
+    <location_name>Comfort Inn</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380030004">
+  <address>
+    <city>Kansas City</city>
+    <line1>1735 Summit Street</line1>
+    <state>MO</state>
+    <location_name>Posada Del Sol</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380040005">
+  <address>
+    <city>Kansas City</city>
+    <line1>400 West Pershing Avenue</line1>
+    <state>MO</state>
+    <location_name>National Archives (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380050006">
+  <address>
+    <city>Kansas City</city>
+    <line1>1101 Euclid Avenue</line1>
+    <state>MO</state>
+    <location_name>Saint Mark Union Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380060007">
+  <address>
+    <city>Kansas City</city>
+    <line1>400 West. Pershing Ave.</line1>
+    <state>MO</state>
+    <location_name>National Archiles (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380070008">
+  <address>
+    <city>Kansas City</city>
+    <line1>2920 East 17th Street</line1>
+    <state>MO</state>
+    <location_name>Sycamore Groves Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380080009">
+  <address>
+    <city>Kansas City</city>
+    <line1>2200 Olive Street</line1>
+    <state>MO</state>
+    <location_name>Mount Pleasant Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380090010">
+  <address>
+    <city>Kansas City</city>
+    <line1>1101 Euclid Ave.</line1>
+    <state>MO</state>
+    <location_name>Saint Mark Union Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380100011">
+  <directions>Multi-Purpose Center</directions>
+  <address>
+    <city>Kansas City</city>
+    <line1>3211 Flora Ave.</line1>
+    <state>MO</state>
+    <location_name>Robert J. Mohart</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380110012">
+  <address>
+    <city>Kansas City</city>
+    <line1>3915 Prospect Ave.</line1>
+    <state>MO</state>
+    <location_name>Mount Vernon Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380120013">
+  <address>
+    <city>Kansas City</city>
+    <line1>324 Brooklyn Ave.</line1>
+    <state>MO</state>
+    <location_name>Mt. Sinai Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380130014">
+  <address>
+    <city>Kansas City</city>
+    <line1>1812 East 37th Street</line1>
+    <state>MO</state>
+    <location_name>Gregg Tabernacle A.M.E. Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380140015">
+  <address>
+    <city>Kansas City</city>
+    <line1>3620 East 39th Street</line1>
+    <state>MO</state>
+    <location_name>Second Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380150016">
+  <address>
+    <city>Kansas City</city>
+    <line1>3619 East 35th Street</line1>
+    <state>MO</state>
+    <location_name>Palestine Missionary Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380160017">
+  <address>
+    <city>Kansas City</city>
+    <line1>1700 East Linwood Blvd</line1>
+    <state>MO</state>
+    <location_name>Macedonia Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380170018">
+  <address>
+    <city>Kansas City</city>
+    <line1>620 East Armour Blvd</line1>
+    <state>MO</state>
+    <location_name>Trinity U.M. Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380180019">
+  <address>
+    <city>Kansas City</city>
+    <line1>3801 Wyandotte Street</line1>
+    <state>MO</state>
+    <location_name>Spirit of Hope Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380190020">
+  <address>
+    <city>Kansas City</city>
+    <line1>3501 Campbell Street</line1>
+    <state>MO</state>
+    <location_name>Central Presbyterian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380200021">
+  <address>
+    <city>Kansas City</city>
+    <line1>11 East 40th Street</line1>
+    <state>MO</state>
+    <location_name>St. Paul's Episcopal Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380210022">
+  <address>
+    <city>Kansas City</city>
+    <line1>4501 Walnut Street</line1>
+    <state>MO</state>
+    <location_name>All Souls Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380220023">
+  <address>
+    <city>Kansas City</city>
+    <line1>4501 Walnut Street</line1>
+    <state>MO</state>
+    <location_name>All Souls Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380230024">
+  <address>
+    <city>Kansas City</city>
+    <line1>3601 Roanoke Road</line1>
+    <state>MO</state>
+    <location_name>Roanoke Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380240025">
+  <address>
+    <city>Kansas City</city>
+    <line1>1700 Westport Road</line1>
+    <state>MO</state>
+    <location_name>Immanuel Lutheran Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380250026">
+  <address>
+    <city>Kansas City</city>
+    <line1>4301 Madison Ave.</line1>
+    <state>MO</state>
+    <location_name>Bishop Spencer Place</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380260027">
+  <address>
+    <city>Kansas City</city>
+    <line1>1700 Westport Road</line1>
+    <state>MO</state>
+    <location_name>Immanuel Lutheran Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380270028">
+  <address>
+    <city>Kansas City</city>
+    <line1>318 East 55th Street</line1>
+    <state>MO</state>
+    <location_name>Second Presbyterian Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380280029">
+  <address>
+    <city>Kansas City</city>
+    <line1>318 East 55th Street</line1>
+    <state>MO</state>
+    <location_name>Second Presbyterian Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380290030">
+  <address>
+    <city>Kansas City</city>
+    <line1>5144 Oak Street</line1>
+    <state>MO</state>
+    <location_name>Central Methodist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380300031">
+  <address>
+    <city>Kansas City</city>
+    <line1>400 West 57th Street</line1>
+    <state>MO</state>
+    <location_name>Country Club United Methodist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380310032">
+  <address>
+    <city>Kansas City</city>
+    <line1>5600 Main Street</line1>
+    <state>MO</state>
+    <location_name>St. Teresa's Academy</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380320033">
+  <address>
+    <city>Kansas City</city>
+    <line1>915 59th Street</line1>
+    <state>MO</state>
+    <location_name>Olive Branch Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380330034">
+  <address>
+    <city>Kansas City</city>
+    <line1>4200 Tracy Ave.</line1>
+    <state>MO</state>
+    <location_name>Immanuel Manor</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380340035">
+  <address>
+    <city>Kansas City</city>
+    <line1>4526 Paseo Blvd</line1>
+    <state>MO</state>
+    <location_name>SEIU Local 1 Missouri Division</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380350036">
+  <address>
+    <city>Kansas City</city>
+    <line1>3831 East 43rd Street</line1>
+    <state>MO</state>
+    <location_name>Boys and Girls Club</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380360037">
+  <address>
+    <city>Kansas City</city>
+    <line1>5401 Troost Ave.</line1>
+    <state>MO</state>
+    <location_name>Rockhurt Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380370038">
+  <address>
+    <city>Kansas City</city>
+    <line1>3801 Cleaver II Blvd.</line1>
+    <state>MO</state>
+    <location_name>Brush Creek Community Center (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380380039">
+  <address>
+    <city>Kansas City</city>
+    <line1>56th and Paseo</line1>
+    <state>MO</state>
+    <location_name>St. James Paseo United Methodist Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380390040">
+  <address>
+    <city>Kansas City</city>
+    <line1>6101 Ward Parkway</line1>
+    <state>MO</state>
+    <location_name>County Club Christian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380400041">
+  <address>
+    <city>Kansas City</city>
+    <line1>815 East Meyer Blvd</line1>
+    <state>MO</state>
+    <location_name>St. Peter's Legacy Center (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380410042">
+  <address>
+    <city>Kansas City</city>
+    <line1>400 West Meyer Blvd</line1>
+    <state>MO</state>
+    <location_name>Wornall Road Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380420043">
+  <address>
+    <city>Kansas City</city>
+    <line1>205 West 65th Street</line1>
+    <state>MO</state>
+    <location_name>Country Club Congregational Church of Christ</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380430044">
+  <address>
+    <city>Kansas City</city>
+    <line1>6801 Homes Road</line1>
+    <state>MO</state>
+    <location_name>University Academy (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380440045">
+  <address>
+    <city>Kansas City</city>
+    <line1>815 East Meyer Blvd</line1>
+    <state>MO</state>
+    <location_name>St. Peter's Legacy Center (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380450046">
+  <address>
+    <city>Kansas City</city>
+    <line1>406 West 74th Street</line1>
+    <state>MO</state>
+    <location_name>Broadway United Methodist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380460047">
+  <address>
+    <city>Kansas City</city>
+    <line1>201 East 75th Street</line1>
+    <state>MO</state>
+    <location_name>Waldo Branch Library (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380470048">
+  <address>
+    <city>Kansas City</city>
+    <line1>201 East 75th Street</line1>
+    <state>MO</state>
+    <location_name>Waldo Branch Library (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380480049">
+  <address>
+    <city>Kansas City</city>
+    <line1>8030 Ward Parkway Plaza</line1>
+    <state>MO</state>
+    <location_name>Calvary Lutheran School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380490050">
+  <address>
+    <city>Kansas City</city>
+    <line1>7850 Holmes Road</line1>
+    <state>MO</state>
+    <location_name>South Broadland Presbyterian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380500051">
+  <address>
+    <city>Kansas City</city>
+    <line1>6801 Homes Road</line1>
+    <state>MO</state>
+    <location_name>University Academy (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380510052">
+  <address>
+    <city>Kansas City</city>
+    <line1>8800 Summit Street</line1>
+    <state>MO</state>
+    <location_name>Southside Christian Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380520053">
+  <address>
+    <city>Kansas City</city>
+    <line1>9201 Wornall Road</line1>
+    <state>MO</state>
+    <location_name>All Saints Episcopal Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380530054">
+  <address>
+    <city>Kansas City</city>
+    <line1>9901 Homes Road</line1>
+    <state>MO</state>
+    <location_name>Trailside Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380540055">
+  <address>
+    <city>Kansas City</city>
+    <line1>801 West 97th Street</line1>
+    <state>MO</state>
+    <location_name>Summit View Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380550056">
+  <address>
+    <city>Kansas City</city>
+    <line1>515 East 99th Street</line1>
+    <state>MO</state>
+    <location_name>Elks Lodge #26</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380560057">
+  <address>
+    <city>Kansas City</city>
+    <line1>501 West 107th Street</line1>
+    <state>MO</state>
+    <location_name>The Grand Court</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380570058">
+  <address>
+    <city>Kansas City</city>
+    <line1>8817 Wornall Road</line1>
+    <state>MO</state>
+    <location_name>Boone Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380580059">
+  <address>
+    <city>Kansas City</city>
+    <line1>580 Campbell Street</line1>
+    <state>MO</state>
+    <location_name>Don Bosco Center (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380590060">
+  <address>
+    <city>Kansas City</city>
+    <line1>2415 Independence Ave.</line1>
+    <state>MO</state>
+    <location_name>Sons of Columbus Meeting Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380600061">
+  <address>
+    <city>Kansas City</city>
+    <line1>3208 Lexington Ave.</line1>
+    <state>MO</state>
+    <location_name>St. Anthony Catholic Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380610062">
+  <address>
+    <city>Kansas City</city>
+    <line1>436 Prospect Ave.</line1>
+    <state>MO</state>
+    <location_name>Garfield Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380620063">
+  <address>
+    <city>Kansas City</city>
+    <line1>580 Campbell Street</line1>
+    <state>MO</state>
+    <location_name>Don Bosco Center (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380630064">
+  <address>
+    <city>Kansas City</city>
+    <line1>3208 Lexington Ave.</line1>
+    <state>MO</state>
+    <location_name>St. Anthony Catholic Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380640065">
+  <address>
+    <city>Kansas City</city>
+    <line1>5108 St. John Ave.</line1>
+    <state>MO</state>
+    <location_name>Holy Cross Gym (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380650066">
+  <address>
+    <city>Kansas City</city>
+    <line1>5108 St. John Ave.</line1>
+    <state>MO</state>
+    <location_name>Holy Cross Gym (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380660067">
+  <address>
+    <city>Kansas City</city>
+    <line1>6000 Wilson Road</line1>
+    <state>MO</state>
+    <location_name>Northeast Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380670068">
+  <address>
+    <city>Kansas City</city>
+    <line1>5001 Independence Blvd.</line1>
+    <state>MO</state>
+    <location_name>Children's Memorial Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380680069">
+  <address>
+    <city>Kansas City</city>
+    <line1>1400 Topping Ave</line1>
+    <state>MO</state>
+    <location_name>Lawndale Heights (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380690070">
+  <address>
+    <city>Kansas City</city>
+    <line1>1400 Topping Ave.</line1>
+    <state>MO</state>
+    <location_name>Lawndale Heights (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380700071">
+  <address>
+    <city>Kansas City</city>
+    <line1>1903 Hardesty Ave.</line1>
+    <state>MO</state>
+    <location_name>Wesley Heights UMC (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380710072">
+  <address>
+    <city>Kansas City</city>
+    <line1>1903 Hardesty Ave.</line1>
+    <state>MO</state>
+    <location_name>Wesley Heights UMC (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380720073">
+  <address>
+    <city>Kansas City</city>
+    <line1>6515 Independence Ave.</line1>
+    <state>MO</state>
+    <location_name>Baha'I Faith Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380730074">
+  <address>
+    <city>Kansas City</city>
+    <line1>4300 East 18th Street</line1>
+    <state>MO</state>
+    <location_name>Bethel Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380740075">
+  <address>
+    <city>Kansas City</city>
+    <state>MO</state>
+    <location_name>Phyllis Wheatley Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380750076">
+  <address>
+    <city>Kansas City</city>
+    <line1>3050 Prospect Ave.</line1>
+    <state>MO</state>
+    <location_name>Bluford Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380760077">
+  <address>
+    <city>Kansas City</city>
+    <line1>2853 Cleveland Ave.</line1>
+    <state>MO</state>
+    <location_name>Cleveland Avenue Baptist Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380770078">
+  <address>
+    <city>Kansas City</city>
+    <line1>2853 Cleveland Ave.</line1>
+    <state>MO</state>
+    <location_name>Cleveland Avenue Baptist Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380780079">
+  <address>
+    <city>Kansas City</city>
+    <line1>5445 East 29th Street</line1>
+    <state>MO</state>
+    <location_name>United Believers Community Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380790080">
+  <address>
+    <city>Kansas City</city>
+    <line1>5445 East 29th Street</line1>
+    <state>MO</state>
+    <location_name>United Believers Community Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380800081">
+  <address>
+    <city>Kansas City</city>
+    <line1>3530 Chelsea Ave.</line1>
+    <state>MO</state>
+    <location_name>Friendship Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380810082">
+  <address>
+    <city>Kansas City</city>
+    <line1>3999A Topping Ave.</line1>
+    <state>MO</state>
+    <location_name>River Park Town Homes</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380820083">
+  <address>
+    <city>Kansas City</city>
+    <line1>4301 East 43rd Street</line1>
+    <state>MO</state>
+    <location_name>Vineyard Neighborhood Association</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380830084">
+  <address>
+    <city>Kansas City</city>
+    <line1>6841 Sni-A-Bar Road</line1>
+    <state>MO</state>
+    <location_name>Corinthian Baptist Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380840085">
+  <address>
+    <city>Kansas City</city>
+    <line1>3801 Cleaver II Blvd.</line1>
+    <state>MO</state>
+    <location_name>Brush Creek Community Center (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380850086">
+  <address>
+    <city>Kansas City</city>
+    <line1>6841 Sni-A-Bar Road</line1>
+    <state>MO</state>
+    <location_name>Corinthian Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380860087">
+  <address>
+    <city>Kansas City</city>
+    <line1>2902 Blue Ridge Blvd.</line1>
+    <state>MO</state>
+    <location_name>Sheet Metal Local #2</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380870088">
+  <address>
+    <city>Kansas City</city>
+    <line1>11200 East 47th Street</line1>
+    <state>MO</state>
+    <location_name>Sterling Acres Baptist Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380880089">
+  <address>
+    <city>Kansas City</city>
+    <line1>1600 East 58th Street</line1>
+    <state>MO</state>
+    <location_name>Paradise Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380890090">
+  <address>
+    <city>Kansas City</city>
+    <line1>5931 Swope Parkway</line1>
+    <state>MO</state>
+    <location_name>Covenant Presbyterian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380900091">
+  <address>
+    <city>Kansas City</city>
+    <line1>56th and Paseo</line1>
+    <state>MO</state>
+    <location_name>St. James Paseo United Methodist Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380910092">
+  <address>
+    <city>Kansas City</city>
+    <line1>5620 Swope Parkway</line1>
+    <state>MO</state>
+    <location_name>Swope Parkway Church of Christ</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380920093">
+  <address>
+    <city>Kansas City</city>
+    <line1>5610 Jackson Ave.</line1>
+    <state>MO</state>
+    <location_name>Faith Fellowship Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380930094">
+  <address>
+    <city>Kansas City</city>
+    <line1>6841 Sni-A-Bar Road</line1>
+    <state>MO</state>
+    <location_name>Corinthian Baptist Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380940095">
+  <address>
+    <city>Kansas City</city>
+    <line1>1700 E Meyer Blvd</line1>
+    <state>MO</state>
+    <location_name>Nazarene Theological Seminary</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380950096">
+  <address>
+    <city>Kansas City</city>
+    <line1>7203 Paseo Blvd</line1>
+    <state>MO</state>
+    <location_name>Grace Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380960097">
+  <address>
+    <city>Kansas City</city>
+    <line1>4201 E 63rd Street</line1>
+    <state>MO</state>
+    <location_name>Southeast Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380970098">
+  <address>
+    <city>Kansas City</city>
+    <line1>7020 James A Reed Road</line1>
+    <state>MO</state>
+    <location_name>Gregory Hills Church of God</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380980099">
+  <address>
+    <city>Kansas City</city>
+    <line1>7304 Cleveland Ave</line1>
+    <state>MO</state>
+    <location_name>Southside Christian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44380990100">
+  <address>
+    <city>Kansas City</city>
+    <line1>8107 Holmes Road</line1>
+    <state>MO</state>
+    <location_name>St. James Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381000101">
+  <address>
+    <city>Kansas City</city>
+    <line1>7820 Prospect Ave</line1>
+    <state>MO</state>
+    <location_name>Laborers Union Local #663 (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381010102">
+  <address>
+    <city>Kansas City</city>
+    <line1>7900 Blue Ridge Blvd</line1>
+    <state>MO</state>
+    <location_name>One Spirit United Methodist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381020103">
+  <address>
+    <city>Kansas City</city>
+    <line1>7405 Paseo Blvd</line1>
+    <state>MO</state>
+    <location_name>Christian Tabernacle Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381030104">
+  <address>
+    <city>Kansas City</city>
+    <line1>7020 James A. Reed</line1>
+    <state>MO</state>
+    <location_name>Gregory Hills Church of God (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381040105">
+  <address>
+    <city>Kansas City</city>
+    <line1>8200 Paseo Blvd</line1>
+    <state>MO</state>
+    <location_name>Marlborough Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381050106">
+  <address>
+    <city>Kansas City</city>
+    <line1>7820 Prospect Ave</line1>
+    <state>MO</state>
+    <location_name>Laborers Union Local #663 (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381060107">
+  <address>
+    <city>Kansas City</city>
+    <line1>10508 Hillcrest Road</line1>
+    <state>MO</state>
+    <location_name>Crosspoint Community Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381070108">
+  <address>
+    <city>Kansas City</city>
+    <line1>8787 Old Santa Fe Road</line1>
+    <state>MO</state>
+    <location_name>Disabled American Veterans (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381080109">
+  <address>
+    <city>Kansas City</city>
+    <line1>1414 E 103rd Street</line1>
+    <state>MO</state>
+    <location_name>Evangel Temple</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381090110">
+  <address>
+    <city>Kansas City</city>
+    <line1>8715 Holmes Road</line1>
+    <state>MO</state>
+    <location_name>Center High school</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381100111">
+  <address>
+    <city>Kansas City</city>
+    <line1>9404 Grandview Road</line1>
+    <state>MO</state>
+    <location_name>IAM &amp; AW Lodge #778</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381110112">
+  <address>
+    <city>Kansas City</city>
+    <line1>10526 Grandview Road</line1>
+    <state>MO</state>
+    <location_name>Our Lady of Peace</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381120113">
+  <address>
+    <city>Kansas City</city>
+    <line1>11600 Blue Ridge Blvd</line1>
+    <state>MO</state>
+    <location_name>Hickman Mills Memorial Post #598</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381130114">
+  <address>
+    <city>Kansas City</city>
+    <line1>10842 McGee St</line1>
+    <state>MO</state>
+    <location_name>Red Bridge Christian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381140115">
+  <address>
+    <city>Kansas City</city>
+    <line1>10415 Chestnut Drive</line1>
+    <state>MO</state>
+    <location_name>Grace Point Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381150116">
+  <address>
+    <city>Kansas City</city>
+    <line1>301 E. 103rd Ter</line1>
+    <state>MO</state>
+    <location_name>I.B.E.W. Local union #124</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381160117">
+  <address>
+    <city>Kansas City</city>
+    <line1>117th and Holmes Road</line1>
+    <state>MO</state>
+    <location_name>Red Bridge United Methoidst Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381170118">
+  <address>
+    <city>Kansas City</city>
+    <line1>11330 Colorado Ave</line1>
+    <state>MO</state>
+    <location_name>Kings Quarters Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381180119">
+  <address>
+    <city>Kansas City</city>
+    <line1>12100 Wornall Road</line1>
+    <state>MO</state>
+    <location_name>Villa Ventura Retirement Center (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381190120">
+  <address>
+    <city>Kansas City</city>
+    <line1>12411 Wornall Road</line1>
+    <state>MO</state>
+    <location_name>Lutheran High School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381200121">
+  <address>
+    <city>Kansas City</city>
+    <line1>11430 Wornall Road</line1>
+    <state>MO</state>
+    <location_name>John Knox Kirk</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381210122">
+  <address>
+    <city>Kansas City</city>
+    <line1>11811 State Line Road</line1>
+    <state>MO</state>
+    <location_name>First Church of the Nazarene</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381220123">
+  <address>
+    <city>Kansas City</city>
+    <line1>12100 Wornall Road</line1>
+    <state>MO</state>
+    <location_name>Villa Ventura Retirement Center (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381230124">
+  <address>
+    <city>Kansas City</city>
+    <line1>117th and Holmes Road</line1>
+    <state>MO</state>
+    <location_name>Red Bridge United Methodist Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381240125">
+  <address>
+    <city>Kansas City</city>
+    <line1>520 E 132nd Ter.</line1>
+    <state>MO</state>
+    <location_name>Martin City Baptist Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381250126">
+  <address>
+    <city>Kansas City</city>
+    <line1>520 E 132nd Ter.</line1>
+    <state>MO</state>
+    <location_name>Martin City Baptist Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381260127">
+  <address>
+    <city>Kansas City</city>
+    <line1>8640 Sni-A-Bar Road</line1>
+    <state>MO</state>
+    <location_name>Ebenezer Baptist Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381270128">
+  <address>
+    <city>Kansas City</city>
+    <line1>11200 E. 47th St</line1>
+    <state>MO</state>
+    <location_name>Sterling Acres Baptist Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381280129">
+  <address>
+    <city>Kansas City</city>
+    <line1>4900 Pittman Road</line1>
+    <state>MO</state>
+    <location_name>Raytown Middle School (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381290130">
+  <address>
+    <city>Kansas City</city>
+    <line1>4900 Pittman Road</line1>
+    <state>MO</state>
+    <location_name>Raytown Middle School (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381300131">
+  <address>
+    <city>Kansas City</city>
+    <line1>8640 Sni-A-Bar Road</line1>
+    <state>MO</state>
+    <location_name>Ebenezer Baptist Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381310132">
+  <address>
+    <city>Kansas City</city>
+    <line1>5055 Blue Ridge Blvd</line1>
+    <state>MO</state>
+    <location_name>Blue Ridge Blvd United Methodist Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381320133">
+  <address>
+    <city>Kansas City</city>
+    <line1>5055 Blue Ridge Blvd</line1>
+    <state>MO</state>
+    <location_name>Blue Ridge Blvd United Methodist Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381330134">
+  <address>
+    <city>Kansas City</city>
+    <line1>13800 E. 51st St</line1>
+    <state>MO</state>
+    <location_name>Pebble Creek Assembly of God</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381340135">
+  <address>
+    <city>Kansas City</city>
+    <line1>7600 Lee's Summit Road</line1>
+    <state>MO</state>
+    <location_name>Oakwood Baptist Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381350136">
+  <address>
+    <city>Kansas City</city>
+    <line1>7600 Lee's Summit Road</line1>
+    <state>MO</state>
+    <location_name>Oakwood Baptist Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381360137">
+  <address>
+    <city>Kansas City</city>
+    <line1>7119 Noland Road</line1>
+    <state>MO</state>
+    <location_name>Little Blue Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381370138">
+  <address>
+    <city>Kansas City</city>
+    <line1>8307 Westridge Road</line1>
+    <state>MO</state>
+    <location_name>Yellow Rock Barn</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381380139">
+  <address>
+    <city>Kansas City</city>
+    <line1>9003 E 87th St</line1>
+    <state>MO</state>
+    <location_name>Lane Avenue Baptist Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381390140">
+  <address>
+    <city>Kansas City</city>
+    <line1>9003 E 87th St</line1>
+    <state>MO</state>
+    <location_name>Lane Avenue Baptist Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381400141">
+  <address>
+    <city>Kansas City</city>
+    <line1>10530 Greenwood Road</line1>
+    <state>MO</state>
+    <location_name>Ervin Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381410142">
+  <address>
+    <city>Kansas City</city>
+    <line1>11050 W Longview Pkwy</line1>
+    <state>MO</state>
+    <location_name>Concort Fortress of Hope Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381420143">
+  <address>
+    <city>Kansas City</city>
+    <line1>10900 Marsh Ave</line1>
+    <state>MO</state>
+    <location_name>Johnson Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381430144">
+  <address>
+    <city>Kansas City</city>
+    <line1>10801 Ruskin Way</line1>
+    <state>MO</state>
+    <location_name>Ruskin heights Lutheran Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381440145">
+  <address>
+    <city>Kansas City</city>
+    <line1>7205 Longview Road</line1>
+    <state>MO</state>
+    <location_name>Renaissance United Methodist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381450146">
+  <address>
+    <city>Kansas City</city>
+    <line1>14651 Peterson Road</line1>
+    <state>MO</state>
+    <location_name>Seventh Day Adventist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381460147">
+  <address>
+    <city>Kansas City</city>
+    <line1>9420 James A Reed Road</line1>
+    <state>MO</state>
+    <location_name>St. Luke's United Methodist Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381470148">
+  <address>
+    <city>Kansas City</city>
+    <line1>10200 James A Reed Road</line1>
+    <state>MO</state>
+    <location_name>South Kansas City Baptist Church (A)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381480149">
+  <address>
+    <city>Kansas City</city>
+    <line1>10200 James A Reed Road</line1>
+    <state>MO</state>
+    <location_name>South Kansas City Baptist Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381490150">
+  <address>
+    <city>Kansas City</city>
+    <line1>8787 Old Santa Fe Road</line1>
+    <state>MO</state>
+    <location_name>Disabled American Veterans (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381500151">
+  <address>
+    <city>Kansas City</city>
+    <line1>9101 Blue Ridge Blvd</line1>
+    <state>MO</state>
+    <location_name>New Vision Christian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381510152">
+  <address>
+    <city>Kansas City</city>
+    <line1>9420 James A Reed Road</line1>
+    <state>MO</state>
+    <location_name>St. Luke's United Methodist Church (B)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381520153">
+  <address>
+    <city>Kansas City</city>
+    <line1>9603 Blue Ridge Blvd</line1>
+    <state>MO</state>
+    <location_name>Blue Ridge Church of Christ</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44381530154">
+  <address>
+    <city>Kansas City</city>
+    <line1>10401 Hillcrest Road</line1>
+    <state>MO</state>
+    <location_name>Hillcrest Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+</vip_object>

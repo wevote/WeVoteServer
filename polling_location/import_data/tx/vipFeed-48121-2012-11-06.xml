@@ -1,0 +1,2379 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>48</vip_id>
+  <datetime>2012-10-25T10:00:00</datetime>
+  <description>VIP aggregates this data from official state sources</description>
+</source>
+<state id="48">
+  <name>Texas</name>
+</state>
+<election id="4000">
+  <date>2012-11-06</date>
+  <election_type>State</election_type>
+  <state_id>48</state_id>
+  <statewide>Yes</statewide>
+</election>
+<locality id="11121">
+  <name>Denton</name>
+  <state_id>48</state_id>
+  <type>County</type>
+</locality>
+<precinct id="22117">
+  <name>1005</name>
+  <number>1005</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210006</polling_location_id>
+</precinct>
+<precinct id="22114">
+  <name>1008</name>
+  <number>1008</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210009</polling_location_id>
+</precinct>
+<precinct id="2281">
+  <name>1032</name>
+  <number>1032</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210033</polling_location_id>
+</precinct>
+<precinct id="2267">
+  <name>1030</name>
+  <number>1030</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210031</polling_location_id>
+</precinct>
+<precinct id="2274">
+  <name>1013</name>
+  <number>1013</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210014</polling_location_id>
+</precinct>
+<precinct id="22128">
+  <name>1010</name>
+  <number>1010</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210011</polling_location_id>
+</precinct>
+<precinct id="2286">
+  <name>2022</name>
+  <number>2022</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210060</polling_location_id>
+</precinct>
+<precinct id="2260">
+  <name>2005</name>
+  <number>2005</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210043</polling_location_id>
+</precinct>
+<precinct id="227">
+  <name>2016</name>
+  <number>2016</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210054</polling_location_id>
+</precinct>
+<precinct id="2218">
+  <name>4007</name>
+  <number>4007</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210110</polling_location_id>
+</precinct>
+<precinct id="2268">
+  <name>2012</name>
+  <number>2012</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210050</polling_location_id>
+</precinct>
+<precinct id="2298">
+  <name>1026</name>
+  <number>1026</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210027</polling_location_id>
+</precinct>
+<precinct id="2275">
+  <name>1003</name>
+  <number>1003</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210004</polling_location_id>
+</precinct>
+<precinct id="22104">
+  <name>3002</name>
+  <number>3002</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210073</polling_location_id>
+</precinct>
+<precinct id="2266">
+  <name>4008</name>
+  <number>4008</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210111</polling_location_id>
+</precinct>
+<precinct id="2283">
+  <name>1017</name>
+  <number>1017</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210018</polling_location_id>
+</precinct>
+<precinct id="22102">
+  <name>1004</name>
+  <number>1004</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210005</polling_location_id>
+</precinct>
+<precinct id="2273">
+  <name>4014</name>
+  <number>4014</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210117</polling_location_id>
+</precinct>
+<precinct id="22138">
+  <name>1027</name>
+  <number>1027</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210028</polling_location_id>
+</precinct>
+<precinct id="22127">
+  <name>1020</name>
+  <number>1020</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210021</polling_location_id>
+</precinct>
+<precinct id="2248">
+  <name>4028</name>
+  <number>4028</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210131</polling_location_id>
+</precinct>
+<precinct id="2231">
+  <name>2011</name>
+  <number>2011</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210049</polling_location_id>
+</precinct>
+<precinct id="22118">
+  <name>1031</name>
+  <number>1031</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210032</polling_location_id>
+</precinct>
+<precinct id="2296">
+  <name>3023</name>
+  <number>3023</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210094</polling_location_id>
+</precinct>
+<precinct id="22130">
+  <name>1033</name>
+  <number>1033</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210034</polling_location_id>
+</precinct>
+<precinct id="2291">
+  <name>2028</name>
+  <number>2028</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210066</polling_location_id>
+</precinct>
+<precinct id="22109">
+  <name>3001</name>
+  <number>3001</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210072</polling_location_id>
+</precinct>
+<precinct id="2220">
+  <name>4032</name>
+  <number>4032</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210135</polling_location_id>
+</precinct>
+<precinct id="2271">
+  <name>2031</name>
+  <number>2031</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210069</polling_location_id>
+</precinct>
+<precinct id="22108">
+  <name>2021</name>
+  <number>2021</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210059</polling_location_id>
+</precinct>
+<precinct id="2259">
+  <name>3029</name>
+  <number>3029</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210100</polling_location_id>
+</precinct>
+<precinct id="2282">
+  <name>4024</name>
+  <number>4024</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210127</polling_location_id>
+</precinct>
+<precinct id="223">
+  <name>3027</name>
+  <number>3027</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210098</polling_location_id>
+</precinct>
+<precinct id="2232">
+  <name>4009</name>
+  <number>4009</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210112</polling_location_id>
+</precinct>
+<precinct id="22100">
+  <name>4012</name>
+  <number>4012</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210115</polling_location_id>
+</precinct>
+<precinct id="2262">
+  <name>1006</name>
+  <number>1006</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210007</polling_location_id>
+</precinct>
+<precinct id="2257">
+  <name>2000</name>
+  <number>2000</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210038</polling_location_id>
+</precinct>
+<precinct id="22126">
+  <name>1012</name>
+  <number>1012</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210013</polling_location_id>
+</precinct>
+<precinct id="22131">
+  <name>4025</name>
+  <number>4025</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210128</polling_location_id>
+</precinct>
+<precinct id="229">
+  <name>2017</name>
+  <number>2017</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210055</polling_location_id>
+</precinct>
+<precinct id="2297">
+  <name>1001</name>
+  <number>1001</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210002</polling_location_id>
+</precinct>
+<precinct id="2255">
+  <name>4020</name>
+  <number>4020</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210123</polling_location_id>
+</precinct>
+<precinct id="224">
+  <name>2010</name>
+  <number>2010</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210048</polling_location_id>
+</precinct>
+<precinct id="2211">
+  <name>2009</name>
+  <number>2009</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210047</polling_location_id>
+</precinct>
+<precinct id="2285">
+  <name>4026</name>
+  <number>4026</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210129</polling_location_id>
+</precinct>
+<precinct id="22132">
+  <name>4001</name>
+  <number>4001</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210104</polling_location_id>
+</precinct>
+<precinct id="2230">
+  <name>3021</name>
+  <number>3021</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210092</polling_location_id>
+</precinct>
+<precinct id="2227">
+  <name>2008</name>
+  <number>2008</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210046</polling_location_id>
+</precinct>
+<precinct id="22113">
+  <name>1023</name>
+  <number>1023</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210024</polling_location_id>
+</precinct>
+<precinct id="2289">
+  <name>3030</name>
+  <number>3030</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210101</polling_location_id>
+</precinct>
+<precinct id="2280">
+  <name>3005</name>
+  <number>3005</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210076</polling_location_id>
+</precinct>
+<precinct id="2212">
+  <name>3007</name>
+  <number>3007</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210078</polling_location_id>
+</precinct>
+<precinct id="22129">
+  <name>4030</name>
+  <number>4030</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210133</polling_location_id>
+</precinct>
+<precinct id="2263">
+  <name>2013</name>
+  <number>2013</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210051</polling_location_id>
+</precinct>
+<precinct id="2226">
+  <name>3016</name>
+  <number>3016</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210087</polling_location_id>
+</precinct>
+<precinct id="222">
+  <name>4027</name>
+  <number>4027</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210130</polling_location_id>
+</precinct>
+<precinct id="2216">
+  <name>1034</name>
+  <number>1034</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210035</polling_location_id>
+</precinct>
+<precinct id="2213">
+  <name>4005</name>
+  <number>4005</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210108</polling_location_id>
+</precinct>
+<precinct id="2293">
+  <name>2025</name>
+  <number>2025</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210063</polling_location_id>
+</precinct>
+<precinct id="2258">
+  <name>1024</name>
+  <number>1024</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210025</polling_location_id>
+</precinct>
+<precinct id="22112">
+  <name>1028</name>
+  <number>1028</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210029</polling_location_id>
+</precinct>
+<precinct id="22105">
+  <name>2003</name>
+  <number>2003</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210041</polling_location_id>
+</precinct>
+<precinct id="22121">
+  <name>3020</name>
+  <number>3020</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210091</polling_location_id>
+</precinct>
+<precinct id="2215">
+  <name>2004</name>
+  <number>2004</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210042</polling_location_id>
+</precinct>
+<precinct id="2249">
+  <name>3000</name>
+  <number>3000</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210071</polling_location_id>
+</precinct>
+<precinct id="2219">
+  <name>3015</name>
+  <number>3015</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210086</polling_location_id>
+</precinct>
+<precinct id="2243">
+  <name>3014</name>
+  <number>3014</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210085</polling_location_id>
+</precinct>
+<precinct id="2217">
+  <name>3019</name>
+  <number>3019</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210090</polling_location_id>
+</precinct>
+<precinct id="2272">
+  <name>1022</name>
+  <number>1022</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210023</polling_location_id>
+</precinct>
+<precinct id="2242">
+  <name>4013</name>
+  <number>4013</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210116</polling_location_id>
+</precinct>
+<precinct id="22134">
+  <name>4019</name>
+  <number>4019</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210122</polling_location_id>
+</precinct>
+<precinct id="22115">
+  <name>3018</name>
+  <number>3018</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210089</polling_location_id>
+</precinct>
+<precinct id="22136">
+  <name>4029</name>
+  <number>4029</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210132</polling_location_id>
+</precinct>
+<precinct id="2290">
+  <name>4000</name>
+  <number>4000</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210103</polling_location_id>
+</precinct>
+<precinct id="22110">
+  <name>2015</name>
+  <number>2015</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210053</polling_location_id>
+</precinct>
+<precinct id="2256">
+  <name>4006</name>
+  <number>4006</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210109</polling_location_id>
+</precinct>
+<precinct id="22111">
+  <name>3012</name>
+  <number>3012</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210083</polling_location_id>
+</precinct>
+<precinct id="2225">
+  <name>1009</name>
+  <number>1009</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210010</polling_location_id>
+</precinct>
+<precinct id="225">
+  <name>3010</name>
+  <number>3010</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210081</polling_location_id>
+</precinct>
+<precinct id="2210">
+  <name>2020</name>
+  <number>2020</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210058</polling_location_id>
+</precinct>
+<precinct id="2233">
+  <name>3011</name>
+  <number>3011</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210082</polling_location_id>
+</precinct>
+<precinct id="22122">
+  <name>4017</name>
+  <number>4017</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210120</polling_location_id>
+</precinct>
+<precinct id="2247">
+  <name>1025</name>
+  <number>1025</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210026</polling_location_id>
+</precinct>
+<precinct id="2284">
+  <name>1014</name>
+  <number>1014</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210015</polling_location_id>
+</precinct>
+<precinct id="2241">
+  <name>3008</name>
+  <number>3008</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210079</polling_location_id>
+</precinct>
+<precinct id="2299">
+  <name>3026</name>
+  <number>3026</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210097</polling_location_id>
+</precinct>
+<precinct id="2294">
+  <name>2026</name>
+  <number>2026</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210064</polling_location_id>
+</precinct>
+<precinct id="2252">
+  <name>4034</name>
+  <number>4034</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210137</polling_location_id>
+</precinct>
+<precinct id="2269">
+  <name>4010</name>
+  <number>4010</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210113</polling_location_id>
+</precinct>
+<precinct id="2221">
+  <name>4031</name>
+  <number>4031</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210134</polling_location_id>
+</precinct>
+<precinct id="2287">
+  <name>2032</name>
+  <number>2032</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210070</polling_location_id>
+</precinct>
+<precinct id="2253">
+  <name>1002</name>
+  <number>1002</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210003</polling_location_id>
+</precinct>
+<precinct id="221">
+  <name>4022</name>
+  <number>4022</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210125</polling_location_id>
+</precinct>
+<precinct id="2244">
+  <name>1016</name>
+  <number>1016</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210017</polling_location_id>
+</precinct>
+<precinct id="2229">
+  <name>3009</name>
+  <number>3009</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210080</polling_location_id>
+</precinct>
+<precinct id="22133">
+  <name>4015</name>
+  <number>4015</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210118</polling_location_id>
+</precinct>
+<precinct id="22101">
+  <name>1015</name>
+  <number>1015</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210016</polling_location_id>
+</precinct>
+<precinct id="22137">
+  <name>4016</name>
+  <number>4016</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210119</polling_location_id>
+</precinct>
+<precinct id="226">
+  <name>2030</name>
+  <number>2030</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210068</polling_location_id>
+</precinct>
+<precinct id="22120">
+  <name>4002</name>
+  <number>4002</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210105</polling_location_id>
+</precinct>
+<precinct id="22106">
+  <name>4021</name>
+  <number>4021</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210124</polling_location_id>
+</precinct>
+<precinct id="22123">
+  <name>2014</name>
+  <number>2014</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210052</polling_location_id>
+</precinct>
+<precinct id="22116">
+  <name>1007</name>
+  <number>1007</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210008</polling_location_id>
+</precinct>
+<precinct id="2277">
+  <name>3013</name>
+  <number>3013</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210084</polling_location_id>
+</precinct>
+<precinct id="2270">
+  <name>4035</name>
+  <number>4035</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210138</polling_location_id>
+</precinct>
+<precinct id="2237">
+  <name>4004</name>
+  <number>4004</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210107</polling_location_id>
+</precinct>
+<precinct id="2250">
+  <name>3028</name>
+  <number>3028</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210099</polling_location_id>
+</precinct>
+<precinct id="2288">
+  <name>3024</name>
+  <number>3024</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210095</polling_location_id>
+</precinct>
+<precinct id="228">
+  <name>3017</name>
+  <number>3017</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210088</polling_location_id>
+</precinct>
+<precinct id="2222">
+  <name>2002</name>
+  <number>2002</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210040</polling_location_id>
+</precinct>
+<precinct id="22103">
+  <name>2024</name>
+  <number>2024</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210062</polling_location_id>
+</precinct>
+<precinct id="2239">
+  <name>4011</name>
+  <number>4011</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210114</polling_location_id>
+</precinct>
+<precinct id="2246">
+  <name>2018</name>
+  <number>2018</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210056</polling_location_id>
+</precinct>
+<precinct id="2245">
+  <name>2001</name>
+  <number>2001</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210039</polling_location_id>
+</precinct>
+<precinct id="2228">
+  <name>4003</name>
+  <number>4003</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210106</polling_location_id>
+</precinct>
+<precinct id="22119">
+  <name>1019</name>
+  <number>1019</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210020</polling_location_id>
+</precinct>
+<precinct id="2254">
+  <name>2027</name>
+  <number>2027</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210065</polling_location_id>
+</precinct>
+<precinct id="2292">
+  <name>1011</name>
+  <number>1011</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210012</polling_location_id>
+</precinct>
+<precinct id="2214">
+  <name>1035</name>
+  <number>1035</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210036</polling_location_id>
+</precinct>
+<precinct id="2265">
+  <name>4023</name>
+  <number>4023</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210126</polling_location_id>
+</precinct>
+<precinct id="2235">
+  <name>1036</name>
+  <number>1036</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210037</polling_location_id>
+</precinct>
+<precinct id="2251">
+  <name>1018</name>
+  <number>1018</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210019</polling_location_id>
+</precinct>
+<precinct id="22107">
+  <name>3031</name>
+  <number>3031</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210102</polling_location_id>
+</precinct>
+<precinct id="2236">
+  <name>2007</name>
+  <number>2007</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210045</polling_location_id>
+</precinct>
+<precinct id="22125">
+  <name>2029</name>
+  <number>2029</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210067</polling_location_id>
+</precinct>
+<precinct id="2234">
+  <name>4036</name>
+  <number>4036</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210139</polling_location_id>
+</precinct>
+<precinct id="2264">
+  <name>1029</name>
+  <number>1029</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210030</polling_location_id>
+</precinct>
+<precinct id="2238">
+  <name>3025</name>
+  <number>3025</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210096</polling_location_id>
+</precinct>
+<precinct id="2295">
+  <name>1000</name>
+  <number>1000</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210001</polling_location_id>
+</precinct>
+<precinct id="2278">
+  <name>4033</name>
+  <number>4033</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210136</polling_location_id>
+</precinct>
+<precinct id="2261">
+  <name>2006</name>
+  <number>2006</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210044</polling_location_id>
+</precinct>
+<precinct id="2223">
+  <name>1021</name>
+  <number>1021</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210022</polling_location_id>
+</precinct>
+<precinct id="22124">
+  <name>3003</name>
+  <number>3003</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210074</polling_location_id>
+</precinct>
+<precinct id="2240">
+  <name>3004</name>
+  <number>3004</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210075</polling_location_id>
+</precinct>
+<precinct id="22135">
+  <name>3022</name>
+  <number>3022</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210093</polling_location_id>
+</precinct>
+<precinct id="2224">
+  <name>4018</name>
+  <number>4018</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210121</polling_location_id>
+</precinct>
+<precinct id="2276">
+  <name>2023</name>
+  <number>2023</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210061</polling_location_id>
+</precinct>
+<precinct id="2279">
+  <name>3006</name>
+  <number>3006</number>
+  <locality_id>11121</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441210077</polling_location_id>
+</precinct>
+<polling_location id="441210001">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Sanger</city>
+    <line1>6690 FM 455 W</line1>
+    <state>TX</state>
+    <location_name>Bolivar Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210002">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Sanger</city>
+    <line1>708 S 5th St.</line1>
+    <state>TX</state>
+    <location_name>First Baptist Church of Sanger</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210003">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Sanger</city>
+    <line1>708 S 5th St.</line1>
+    <state>TX</state>
+    <location_name>First Baptist Church of Sanger</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210004">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Pilot Point</city>
+    <line1>310 S Washington</line1>
+    <state>TX</state>
+    <location_name>Pilot Point Senior Citizen Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210005">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Aubrey</city>
+    <line1>701 Savannah Blvd.</line1>
+    <state>TX</state>
+    <location_name>Savannah Ballroom</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210006">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Aubrey</city>
+    <line1>107 S Main St.</line1>
+    <state>TX</state>
+    <location_name>Aubrey City Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210007">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Providence Village</city>
+    <line1>9400 Waterman Dr.</line1>
+    <state>TX</state>
+    <location_name>Providence Village Community Clubhouse</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210008">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Krugerville</city>
+    <line1>5097 Hwy 377 S.</line1>
+    <state>TX</state>
+    <location_name>Krugerville City Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210009">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Aubrey</city>
+    <line1>9901 FM 428</line1>
+    <state>TX</state>
+    <location_name>Green Valley Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210010">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>3130 N Elm St.</line1>
+    <state>TX</state>
+    <location_name>Denton Christian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210011">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>4582 Fishtrap Ed.</line1>
+    <state>TX</state>
+    <location_name>Cooper Creek Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210012">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>526 Hercules</line1>
+    <state>TX</state>
+    <location_name>Towne North Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210013">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>2110 E. Sherman Dr.</line1>
+    <state>TX</state>
+    <location_name>Denton Fire Station #4</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210014">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>101 Cardinal Dr.</line1>
+    <state>TX</state>
+    <location_name>Singing Oaks Church of Christ</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210015">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>1900 Jason</line1>
+    <state>TX</state>
+    <location_name>McMath Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210016">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>1900 Jason</line1>
+    <state>TX</state>
+    <location_name>McMath Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210017">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>2801 Pennsylvania Dr.</line1>
+    <state>TX</state>
+    <location_name>Southmont Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210018">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>2801 Pennsylvania Dr.</line1>
+    <state>TX</state>
+    <location_name>Southmont Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210019">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>3210 Teasley Ln.</line1>
+    <state>TX</state>
+    <location_name>DATCU South Denton Branch</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210020">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>7501 Teasley Ln.</line1>
+    <state>TX</state>
+    <location_name>Guyer High School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210021">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Corinth</city>
+    <line1>1901 Oakmont Dr.</line1>
+    <state>TX</state>
+    <location_name>Oakmont Country Club</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210022">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Corinth</city>
+    <line1>1901 Oakmont Dr.</line1>
+    <state>TX</state>
+    <location_name>Oakmont Country Club</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210023">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Corinth</city>
+    <line1>3300 Corinth Pkwy.</line1>
+    <state>TX</state>
+    <location_name>Corinth City Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210024">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Corinth</city>
+    <line1>3300 Corinth Pkwy.</line1>
+    <state>TX</state>
+    <location_name>Corinth City Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210025">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Shady Shores</city>
+    <line1>101 Shady Shores Rd.</line1>
+    <state>TX</state>
+    <location_name>Shady Shores Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210026">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Little Elm</city>
+    <line1>2315 FM 720 W.</line1>
+    <state>TX</state>
+    <location_name>Living Word Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210027">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Little Elm</city>
+    <line1>1501 Bluebird Dr.</line1>
+    <state>TX</state>
+    <location_name>Paloma Creek South Clubhouse</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210028">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Little Elm</city>
+    <line1>1501 Bluebird Dr.</line1>
+    <state>TX</state>
+    <location_name>Paloma Creek South Clubhouse</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210029">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Frisco</city>
+    <line1>2288 Little River Rd.</line1>
+    <state>TX</state>
+    <location_name>Stafford Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210030">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Frisco</city>
+    <line1>2288 Little River Rd.</line1>
+    <state>TX</state>
+    <location_name>Stafford Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210031">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Frisco</city>
+    <line1>3535 Eldorado Pkwy.</line1>
+    <state>TX</state>
+    <location_name>Frisco Fire Station #6</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210032">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Frisco</city>
+    <line1>3535 Eldorado Pkwy.</line1>
+    <state>TX</state>
+    <location_name>Frisco Fire Station #6</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210033">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Frisco</city>
+    <line1>4485 Cotton Gin Rd.</line1>
+    <state>TX</state>
+    <location_name>Frisco Fire Station #4</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210034">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Frisco</city>
+    <line1>4485 Cotton Gin Rd.</line1>
+    <state>TX</state>
+    <location_name>Frisco Fire Station #4</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210035">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Frisco</city>
+    <line1>3651 Compass Dr.</line1>
+    <state>TX</state>
+    <location_name>Tom Hicks Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210036">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Frisco</city>
+    <line1>3651 Compass Dr.</line1>
+    <state>TX</state>
+    <location_name>Tom Hicks Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210037">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Frisco</city>
+    <line1>330 W Stonebrook Pkwy.</line1>
+    <state>TX</state>
+    <location_name>Frisco Fire Station #7</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210038">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Dallas</city>
+    <line1>18110 Marsh Ln.</line1>
+    <state>TX</state>
+    <location_name>Frankford Town Homes</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210039">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Dallas</city>
+    <line1>3810 Timberglen Rd.</line1>
+    <state>TX</state>
+    <location_name>Timberglen Recreation Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210040">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>2525 Frankford Rd.</line1>
+    <state>TX</state>
+    <location_name>Dan F Long Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210041">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>2525 Frankford Rd.</line1>
+    <state>TX</state>
+    <location_name>Dan F Long Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210042">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>1518 E Frankford Rd.</line1>
+    <state>TX</state>
+    <location_name>Redeemer Evangelican Covenant Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210043">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>1800 W Rosemeade Pkwy.</line1>
+    <state>TX</state>
+    <location_name>Kent Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210044">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>1133 W Hebron Pkwy.</line1>
+    <state>TX</state>
+    <location_name>Victory Assembly</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210045">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>1689 Bandera Dr.</line1>
+    <state>TX</state>
+    <location_name>Indian Creek Home Owners Association</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210046">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>1330 E Rosemeade Pkwy.</line1>
+    <state>TX</state>
+    <location_name>Rosemeade Recreation Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210047">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>1330 E Rosemeade Pkwy.</line1>
+    <state>TX</state>
+    <location_name>Rosemeade Recreation Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210048">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>2115 E Frankford Rd.</line1>
+    <state>TX</state>
+    <location_name>Marie Huie Special Education Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210049">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>2115 E Frankford Rd.</line1>
+    <state>TX</state>
+    <location_name>Marie Huie Special Education Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210050">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>3000 E Hebron Pkwy.</line1>
+    <state>TX</state>
+    <location_name>Hebron Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210051">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>1830 E Branch Hollow Dr.</line1>
+    <state>TX</state>
+    <location_name>Homestead Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210052">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>1830 E Branch Hollow Dr.</line1>
+    <state>TX</state>
+    <location_name>Homestead Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210053">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>2109 Arbor Creek Dr</line1>
+    <state>TX</state>
+    <location_name>Arbor Creek Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210054">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>2050 Arbor Creek Dr.</line1>
+    <state>TX</state>
+    <location_name>Indian Creek Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210055">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>2501 Queen Margaret Dr.</line1>
+    <state>TX</state>
+    <location_name>Castle Hills Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210056">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>2109 Arbor Creek Dr.</line1>
+    <state>TX</state>
+    <location_name>Arbor Creek Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210057">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Carrollton</city>
+    <line1>2109 Arbor Creek Dr.</line1>
+    <state>TX</state>
+    <location_name>Arbor Creek Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210058">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Plano</city>
+    <line1>6801 W Park Blvd.</line1>
+    <state>TX</state>
+    <location_name>Prestonwood Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210059">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>The Colony</city>
+    <line1>4301 Blair Oaks</line1>
+    <state>TX</state>
+    <location_name>The Colony High School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210060">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>The Colony</city>
+    <line1>5220 Blair Oaks</line1>
+    <state>TX</state>
+    <location_name>Calvary Christian Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210061">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>The Colony</city>
+    <line1>4301 Blair Oaks</line1>
+    <state>TX</state>
+    <location_name>The Colony High School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210062">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>The Colony</city>
+    <line1>5640 Squires Dr.</line1>
+    <state>TX</state>
+    <location_name>Owen Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210063">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>The Colony</city>
+    <line1>5101 N Colony Blvd.</line1>
+    <state>TX</state>
+    <location_name>Griffin Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210064">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>The Colony</city>
+    <line1>6301 Main St.</line1>
+    <state>TX</state>
+    <location_name>The Colony Government Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210065">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>The Colony</city>
+    <line1>6301 Main St.</line1>
+    <state>TX</state>
+    <location_name>The Colony Government Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210066">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Little Elm</city>
+    <line1>303 Main St.</line1>
+    <state>TX</state>
+    <location_name>Little Elm Recreation Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210067">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Little Elm</city>
+    <line1>303 Main St.</line1>
+    <state>TX</state>
+    <location_name>Little Elm Recreation Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210068">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Little Elm</city>
+    <line1>1900 Walker Ln.</line1>
+    <state>TX</state>
+    <location_name>Little Elm ISD Admin. Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210069">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Little Elm</city>
+    <line1>1900 Walker Ln.</line1>
+    <state>TX</state>
+    <location_name>Little Elm ISD Admin. Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210070">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Little Elm</city>
+    <line1>1900 Walker Ln.</line1>
+    <state>TX</state>
+    <location_name>Little Elm ISD Admin. Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210071">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lake Dallas</city>
+    <line1>212 Main St.</line1>
+    <state>TX</state>
+    <location_name>Lake Dallas City Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210072">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Hickory Creek</city>
+    <line1>1075 Ronald Reagan Ave.</line1>
+    <state>TX</state>
+    <location_name>Hickory Creek Town Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210073">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Highland Village</city>
+    <line1>2100 Briarhill Blvd.</line1>
+    <state>TX</state>
+    <location_name>Briarhill Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210074">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Highland Village</city>
+    <line1>100 Barnett Blvd.</line1>
+    <state>TX</state>
+    <location_name>Heritage Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210075">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Highland Village</city>
+    <line1>2100 Briarhill Blvd.</line1>
+    <state>TX</state>
+    <location_name>Briarhill Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210076">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Highland Village</city>
+    <line1>1000 Highland Village Rd.</line1>
+    <state>TX</state>
+    <location_name>Highland Village Municipal Complex</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210077">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>1604 N Garden Ridge Blvd.</line1>
+    <state>TX</state>
+    <location_name>Valley Ridge Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210078">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>1197 W Main St.</line1>
+    <state>TX</state>
+    <location_name>Lewisville Municipal Annex</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210079">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>102 N. Garden Ridge Blvd.</line1>
+    <state>TX</state>
+    <location_name>Garden Ridge Church of Christ</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210080">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>1197 W Main St.</line1>
+    <state>TX</state>
+    <location_name>Lewisville Municipal Annex</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210081">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>1526 Bellaire Blvd.</line1>
+    <state>TX</state>
+    <location_name>Hedrick Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210082">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>1002 Fox Ave.</line1>
+    <state>TX</state>
+    <location_name>First Presbyterian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210083">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>2200 Garden Ridge Rd.</line1>
+    <state>TX</state>
+    <location_name>Garden Ridge Elementary</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210084">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>1950-B S Valley Pkwy.</line1>
+    <state>TX</state>
+    <location_name>Memorial Park Recreation Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210085">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>901 Valley View Dr.</line1>
+    <state>TX</state>
+    <location_name>Creekside Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210086">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>1727 Edmunds Ln.</line1>
+    <state>TX</state>
+    <location_name>Vista Ridge Church of Christ</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210087">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>901 Valley View Dr.</line1>
+    <state>TX</state>
+    <location_name>Creekside Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210088">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>1727 Edmunds Ln.</line1>
+    <state>TX</state>
+    <location_name>Vista Ridge Church of Christ</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210089">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>400 High School Dr.</line1>
+    <state>TX</state>
+    <location_name>Central Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210090">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>2901 Denton Tap Rd.</line1>
+    <state>TX</state>
+    <location_name>Vista Ridge Methodist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210091">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>2501 Queen Margaret Dr.</line1>
+    <state>TX</state>
+    <location_name>Castlehills Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210092">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>151 W Church St.</line1>
+    <state>TX</state>
+    <location_name>Lewisville City Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210093">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>2901 Denton Tap Rd.</line1>
+    <state>TX</state>
+    <location_name>Vista Ridge Methodist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210094">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lewisville</city>
+    <line1>2901 Denton Tap Rd.</line1>
+    <state>TX</state>
+    <location_name>Vista Ridge Methodist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210095">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>2050 Aberdeen Dr.</line1>
+    <state>TX</state>
+    <location_name>Shadow Ridge Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210096">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>2050 Aberdeen Dr.</line1>
+    <state>TX</state>
+    <location_name>Shadow Ridge Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210097">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>2220 Garden Ridge Rd.</line1>
+    <state>TX</state>
+    <location_name>Garden Ridge Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210098">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>2660 Forest Vista Dr.</line1>
+    <state>TX</state>
+    <location_name>Creekwood Christian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210099">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>4150 Kirkpatrick</line1>
+    <state>TX</state>
+    <location_name>Flower Mound Police &amp; Municipal Court  Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210100">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>1800 Timber Creek Rd.</line1>
+    <state>TX</state>
+    <location_name>Lewisville ISD Admin. Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210101">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>4000 Timber Creek Rd.</line1>
+    <state>TX</state>
+    <location_name>Lamar Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210102">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>5707 Morriss Rd.</line1>
+    <state>TX</state>
+    <location_name>Marcus High School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210103">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Krum</city>
+    <line1>12 Gregg Rd.</line1>
+    <state>TX</state>
+    <location_name>First Baptist Church of Krum</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210104">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Krum</city>
+    <line1>12 Gregg Rd.</line1>
+    <state>TX</state>
+    <location_name>First Baptist Church of Krum</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210105">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Ponder</city>
+    <line1>405 Shaffner</line1>
+    <state>TX</state>
+    <location_name>Vivian Cockburn Municipal Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210106">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>9428 Ed Robson Cr.</line1>
+    <state>TX</state>
+    <location_name>Robson Ranch</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210107">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>1001 Parvin St.</line1>
+    <state>TX</state>
+    <location_name>Denia Recreation Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210108">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>2001 Windsor Dr.</line1>
+    <state>TX</state>
+    <location_name>North Lakes Recreation Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210109">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>2200 N Bell Ave.</line1>
+    <state>TX</state>
+    <location_name>Trinity Presbyterian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210110">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>1100 Malone St.</line1>
+    <state>TX</state>
+    <location_name>First Baptist Church of Denton</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210111">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>1357 Bernard St.</line1>
+    <state>TX</state>
+    <location_name>Carriage House Assisted Living</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210112">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>321 E McKinney</line1>
+    <state>TX</state>
+    <location_name>Denton Civic Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210113">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>321 E McKinney</line1>
+    <state>TX</state>
+    <location_name>Denton Civic Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210114">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>1300 Wilson</line1>
+    <state>TX</state>
+    <location_name>Martin Luther King Jr. Recreation Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210115">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>4400 Lakeview Blvd.</line1>
+    <state>TX</state>
+    <location_name>Pecan Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210116">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>1357 Bernard St.</line1>
+    <state>TX</state>
+    <location_name>Carriage House</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210117">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>1900 Jason</line1>
+    <state>TX</state>
+    <location_name>McMath Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210118">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>1900 Jason</line1>
+    <state>TX</state>
+    <location_name>McMath Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210119">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Denton</city>
+    <line1>7501 Teasley Ln.</line1>
+    <state>TX</state>
+    <location_name>Guyer High School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210120">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Argyle</city>
+    <line1>800 Eagle Dr.</line1>
+    <state>TX</state>
+    <location_name>Argyle School Administration Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210121">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Argyle</city>
+    <line1>377 Rayzor Rd.</line1>
+    <state>TX</state>
+    <location_name>E.P. Rayzor Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210122">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Copper Canyon</city>
+    <line1>400 Woodland Dr.</line1>
+    <state>TX</state>
+    <location_name>Copper Canyon Town Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210123">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Copper Canyon</city>
+    <line1>400 Woodland Dr.</line1>
+    <state>TX</state>
+    <location_name>Copper Canyon Town Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210124">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Bartonville</city>
+    <line1>1941 E Jeter</line1>
+    <state>TX</state>
+    <location_name>Bartonville Town Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210125">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Double Oak</city>
+    <line1>320 Waketon</line1>
+    <state>TX</state>
+    <location_name>Double Oak Town Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210126">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>4901 Remington Park</line1>
+    <state>TX</state>
+    <location_name>Bridlewood Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210127">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>4101 Churchill</line1>
+    <state>TX</state>
+    <location_name>Flower Mound Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210128">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>3030 Broadmoor</line1>
+    <state>TX</state>
+    <location_name>Flower Mound Public Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210129">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>2525 Old Settlers Dr.</line1>
+    <state>TX</state>
+    <location_name>Old Settlers Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210130">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>4600 Quail Run Rd.</line1>
+    <state>TX</state>
+    <location_name>Liberty Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210131">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>4401 Shiloh Rd.</line1>
+    <state>TX</state>
+    <location_name>Flower Mound Fire Station #2</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210132">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Flower Mound</city>
+    <line1>4401 Shiloh Rd.</line1>
+    <state>TX</state>
+    <location_name>Flower Mound Fire Station #2</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210133">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Trophy Club</city>
+    <line1>100 Municipal Dr.</line1>
+    <state>TX</state>
+    <location_name>Svore Municipal Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210134">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Trophy Club</city>
+    <line1>100 Municipal Dr.</line1>
+    <state>TX</state>
+    <location_name>Svore Municipal Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210135">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Trophy Club</city>
+    <line1>100 Municipal Dr.</line1>
+    <state>TX</state>
+    <location_name>Svore Municipal Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210136">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Roanoke</city>
+    <line1>209 N Pine St.</line1>
+    <state>TX</state>
+    <location_name>First Baptist Church of Roanoke</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210137">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Justin</city>
+    <line1>402 W 8th St.</line1>
+    <state>TX</state>
+    <location_name>First Baptist Church of Justin</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210138">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Justin</city>
+    <line1>402 W 8th St.</line1>
+    <state>TX</state>
+    <location_name>First Baptist Church of Justin</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441210139">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Justin</city>
+    <line1>402 W 8th St.</line1>
+    <state>TX</state>
+    <location_name>First Baptist Church of Justin</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+</vip_object>

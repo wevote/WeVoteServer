@@ -1,0 +1,4139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>29</vip_id>
+  <datetime>2012-10-19T10:00:00</datetime>
+  <description>VIP aggregates this data from official state sources</description>
+</source>
+<state id="29">
+  <name>Missouri</name>
+</state>
+<election id="4000">
+  <date>2012-11-06</date>
+  <election_type>State</election_type>
+  <state_id>29</state_id>
+  <statewide>Yes</statewide>
+</election>
+<locality id="11510">
+  <name>St. Louis</name>
+  <state_id>29</state_id>
+  <type>city</type>
+</locality>
+<precinct id="22107">
+  <name>Julia Davis Library</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>21</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100167</polling_location_id>
+</precinct>
+<precinct id="2231">
+  <name>Mann School</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100123</polling_location_id>
+</precinct>
+<precinct id="22206">
+  <name>Grand View Tower Apartments</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100153</polling_location_id>
+</precinct>
+<precinct id="22152">
+  <name>Adams School</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100136</polling_location_id>
+</precinct>
+<precinct id="22194">
+  <name>Lexington School</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100002</polling_location_id>
+</precinct>
+<precinct id="22167">
+  <name>Kingshighway Branch Library</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100059</polling_location_id>
+</precinct>
+<precinct id="22200">
+  <name>Booth Manor</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100073</polling_location_id>
+</precinct>
+<precinct id="2264">
+  <name>St Raphael Church</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100128</polling_location_id>
+</precinct>
+<precinct id="22134">
+  <name>Nottingham School</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100131</polling_location_id>
+</precinct>
+<precinct id="22222">
+  <name>Mt Zion Apartments</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100152</polling_location_id>
+</precinct>
+<precinct id="22178">
+  <name>Walnut Park Library</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>27</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100216</polling_location_id>
+</precinct>
+<precinct id="228">
+  <name>Sherman School</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100062</polling_location_id>
+</precinct>
+<precinct id="2218">
+  <name>Yeatman School</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>21</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100169</polling_location_id>
+</precinct>
+<precinct id="2212">
+  <name>St. Marks Episcopal Church</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100134</polling_location_id>
+</precinct>
+<precinct id="2263">
+  <name>Monroe School</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100164</polling_location_id>
+</precinct>
+<precinct id="22141">
+  <name>Yeatman School</name>
+  <number>9</number>
+  <locality_id>11510</locality_id>
+  <ward>21</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100175</polling_location_id>
+</precinct>
+<precinct id="22197">
+  <name>Bryan Hill School</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100020</polling_location_id>
+</precinct>
+<precinct id="22105">
+  <name>Unity Christ Church</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>28</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100229</polling_location_id>
+</precinct>
+<precinct id="22122">
+  <name>Kappa House</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100157</polling_location_id>
+</precinct>
+<precinct id="2224">
+  <name>Buder School</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100132</polling_location_id>
+</precinct>
+<precinct id="22131">
+  <name>Yeatman School</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>21</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100170</polling_location_id>
+</precinct>
+<precinct id="22183">
+  <name>Jesus Is All Family Worship Center</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100008</polling_location_id>
+</precinct>
+<precinct id="2233">
+  <name>Euclid Plaza High Rise</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100004</polling_location_id>
+</precinct>
+<precinct id="2269">
+  <name>St. Agnes Apartments</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100071</polling_location_id>
+</precinct>
+<precinct id="2273">
+  <name>Wilkinson/Roe School</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100200</polling_location_id>
+</precinct>
+<precinct id="2242">
+  <name>Tower Grove Baptist Church (Hallway)</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100061</polling_location_id>
+</precinct>
+<precinct id="2245">
+  <name>Dewey School</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100199</polling_location_id>
+</precinct>
+<precinct id="22210">
+  <name>Laclede School</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100182</polling_location_id>
+</precinct>
+<precinct id="22149">
+  <name>Fanning School</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100124</polling_location_id>
+</precinct>
+<precinct id="22220">
+  <name>Missouri School For The Blind</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100063</polling_location_id>
+</precinct>
+<precinct id="22223">
+  <name>St John's Lutheran Church</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100127</polling_location_id>
+</precinct>
+<precinct id="22154">
+  <name>Aboussie Pavilion Apartments</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100114</polling_location_id>
+</precinct>
+<precinct id="22118">
+  <name>Newstead Baptist Church</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100025</polling_location_id>
+</precinct>
+<precinct id="22100">
+  <name>Froebel School</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100166</polling_location_id>
+</precinct>
+<precinct id="2222">
+  <name>UCM Church Of Jesus Christ</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>21</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100172</polling_location_id>
+</precinct>
+<precinct id="2256">
+  <name>Buder School</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100130</polling_location_id>
+</precinct>
+<precinct id="2274">
+  <name>Prince Hall</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>21</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100171</polling_location_id>
+</precinct>
+<precinct id="22208">
+  <name>Nance School</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100014</polling_location_id>
+</precinct>
+<precinct id="2266">
+  <name>Mann School</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100122</polling_location_id>
+</precinct>
+<precinct id="22168">
+  <name>St. Louis Activity Center</name>
+  <number>10</number>
+  <locality_id>11510</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100077</polling_location_id>
+</precinct>
+<precinct id="2253">
+  <name>Mason School</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100197</polling_location_id>
+</precinct>
+<precinct id="2275">
+  <name>Park Place Apartments (Activity Room)</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100137</polling_location_id>
+</precinct>
+<precinct id="22129">
+  <name>Greater Faith Church (multiplex)</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>21</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100168</polling_location_id>
+</precinct>
+<precinct id="2265">
+  <name>Carr Square Community Center</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100041</polling_location_id>
+</precinct>
+<precinct id="22163">
+  <name>Hopewell Baptist Church</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100148</polling_location_id>
+</precinct>
+<precinct id="22137">
+  <name>Carr Square Community Center</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100042</polling_location_id>
+</precinct>
+<precinct id="22162">
+  <name>Booth Manor</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100067</polling_location_id>
+</precinct>
+<precinct id="22185">
+  <name>Blewett School</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100016</polling_location_id>
+</precinct>
+<precinct id="2230">
+  <name>Oak Hill School</name>
+  <number>9</number>
+  <locality_id>11510</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100120</polling_location_id>
+</precinct>
+<precinct id="2259">
+  <name>Stanley &amp; Clayton Rice Center</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100027</polling_location_id>
+</precinct>
+<precinct id="229">
+  <name>Schlafly Library</name>
+  <number>11</number>
+  <locality_id>11510</locality_id>
+  <ward>28</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100226</polling_location_id>
+</precinct>
+<precinct id="227">
+  <name>St Agnes Apartments</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100069</polling_location_id>
+</precinct>
+<precinct id="2290">
+  <name>Berean SDA Church</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100209</polling_location_id>
+</precinct>
+<precinct id="2247">
+  <name>St. Vincent's Church (hall)</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100056</polling_location_id>
+</precinct>
+<precinct id="22155">
+  <name>Kennard School</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100086</polling_location_id>
+</precinct>
+<precinct id="22182">
+  <name>Metro Academy</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100145</polling_location_id>
+</precinct>
+<precinct id="22151">
+  <name>Hodgen School</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100048</polling_location_id>
+</precinct>
+<precinct id="22209">
+  <name>James House</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100033</polling_location_id>
+</precinct>
+<precinct id="22124">
+  <name>Alpha Terrace Apartments</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100181</polling_location_id>
+</precinct>
+<precinct id="2287">
+  <name>Union United Methodist Church</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100185</polling_location_id>
+</precinct>
+<precinct id="22176">
+  <name>Herzog School</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>27</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100221</polling_location_id>
+</precinct>
+<precinct id="2299">
+  <name>Carr Square Community Center</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100039</polling_location_id>
+</precinct>
+<precinct id="2278">
+  <name>Sigel School</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100052</polling_location_id>
+</precinct>
+<precinct id="22140">
+  <name>St James The Greater School</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100193</polling_location_id>
+</precinct>
+<precinct id="2279">
+  <name>Wilkinson/Roe School</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100198</polling_location_id>
+</precinct>
+<precinct id="22146">
+  <name>B K Z American Legion Post 422</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100074</polling_location_id>
+</precinct>
+<precinct id="2235">
+  <name>Berean SDA Church</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100210</polling_location_id>
+</precinct>
+<precinct id="22121">
+  <name>Mt Zion Apartments</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100154</polling_location_id>
+</precinct>
+<precinct id="22207">
+  <name>Wilkinson/Roe School</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100195</polling_location_id>
+</precinct>
+<precinct id="2246">
+  <name>2nd Presbyterian Church</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>28</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100232</polling_location_id>
+</precinct>
+<precinct id="22193">
+  <name>Langston School</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100180</polling_location_id>
+</precinct>
+<precinct id="2214">
+  <name>Carpenter's Hall</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100194</polling_location_id>
+</precinct>
+<precinct id="22160">
+  <name>Immaculate Heart Of Mary Church</name>
+  <number>9</number>
+  <locality_id>11510</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100103</polling_location_id>
+</precinct>
+<precinct id="2260">
+  <name>Williams Temple</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100006</polling_location_id>
+</precinct>
+<precinct id="22104">
+  <name>Alexian Court Apartments</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100163</polling_location_id>
+</precinct>
+<precinct id="22192">
+  <name>Macler Sheppard JVL Housing</name>
+  <number>9</number>
+  <locality_id>11510</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100159</polling_location_id>
+</precinct>
+<precinct id="22127">
+  <name>Union United Methodist Church</name>
+  <number>9</number>
+  <locality_id>11510</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100192</polling_location_id>
+</precinct>
+<precinct id="22177">
+  <name>Ames School</name>
+  <number>9</number>
+  <locality_id>11510</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100024</polling_location_id>
+</precinct>
+<precinct id="2215">
+  <name>St. Joan of Arc School</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100187</polling_location_id>
+</precinct>
+<precinct id="22130">
+  <name>Clay Community Center</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100022</polling_location_id>
+</precinct>
+<precinct id="22159">
+  <name>Grbic Hall</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100204</polling_location_id>
+</precinct>
+<precinct id="2228">
+  <name>Kennard School</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100083</polling_location_id>
+</precinct>
+<precinct id="22164">
+  <name>Grbic Hall</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100206</polling_location_id>
+</precinct>
+<precinct id="22219">
+  <name>Adams School</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100138</polling_location_id>
+</precinct>
+<precinct id="22132">
+  <name>Laclede School</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100177</polling_location_id>
+</precinct>
+<precinct id="2284">
+  <name>Oak Hill School</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100116</polling_location_id>
+</precinct>
+<precinct id="22156">
+  <name>St. Agnes Apartments</name>
+  <number>9</number>
+  <locality_id>11510</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100075</polling_location_id>
+</precinct>
+<precinct id="2267">
+  <name>Shaw School</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100082</polling_location_id>
+</precinct>
+<precinct id="22216">
+  <name>St. Louis Activity Center</name>
+  <number>9</number>
+  <locality_id>11510</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100088</polling_location_id>
+</precinct>
+<precinct id="2289">
+  <name>Lindenwood Baptist Church</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100135</polling_location_id>
+</precinct>
+<precinct id="22116">
+  <name>Carondelet Library</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100092</polling_location_id>
+</precinct>
+<precinct id="2286">
+  <name>Peabody School</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100050</polling_location_id>
+</precinct>
+<precinct id="2236">
+  <name>Walbridge Community Building</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>27</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100217</polling_location_id>
+</precinct>
+<precinct id="2272">
+  <name>St. Louis Connect Care</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100214</polling_location_id>
+</precinct>
+<precinct id="2239">
+  <name>Newstead Baptist Church</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100028</polling_location_id>
+</precinct>
+<precinct id="2223">
+  <name>Langston School</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100176</polling_location_id>
+</precinct>
+<precinct id="2221">
+  <name>Baden Branch Library</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100010</polling_location_id>
+</precinct>
+<precinct id="22196">
+  <name>St. Cecilia School</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100110</polling_location_id>
+</precinct>
+<precinct id="225">
+  <name>Hamilton School</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100211</polling_location_id>
+</precinct>
+<precinct id="22126">
+  <name>Herzog School</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>27</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100220</polling_location_id>
+</precinct>
+<precinct id="2227">
+  <name>New City School</name>
+  <number>10</number>
+  <locality_id>11510</locality_id>
+  <ward>28</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100225</polling_location_id>
+</precinct>
+<precinct id="22189">
+  <name>Greater Fellowship Church</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>27</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100215</polling_location_id>
+</precinct>
+<precinct id="22119">
+  <name>Union United Methodist church</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100191</polling_location_id>
+</precinct>
+<precinct id="22169">
+  <name>Carondelet Library</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100091</polling_location_id>
+</precinct>
+<precinct id="2255">
+  <name>Woerner School</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100104</polling_location_id>
+</precinct>
+<precinct id="22145">
+  <name>Meramec School</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100161</polling_location_id>
+</precinct>
+<precinct id="2254">
+  <name>St John's Lutheran Church</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100126</polling_location_id>
+</precinct>
+<precinct id="2268">
+  <name>B K Z American Legion Post 422</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100070</polling_location_id>
+</precinct>
+<precinct id="2249">
+  <name>St. Louis Activity Center</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100076</polling_location_id>
+</precinct>
+<precinct id="2282">
+  <name>Sigel School</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100054</polling_location_id>
+</precinct>
+<precinct id="2252">
+  <name>St. Stephen School</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100105</polling_location_id>
+</precinct>
+<precinct id="22221">
+  <name>Grbic Hall</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100207</polling_location_id>
+</precinct>
+<precinct id="22202">
+  <name>Jesus Is All Family Worship Center</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100013</polling_location_id>
+</precinct>
+<precinct id="22211">
+  <name>Shaw School</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100085</polling_location_id>
+</precinct>
+<precinct id="2250">
+  <name>2nd Presbyterian Church</name>
+  <number>9</number>
+  <locality_id>11510</locality_id>
+  <ward>28</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100234</polling_location_id>
+</precinct>
+<precinct id="22205">
+  <name>James House</name>
+  <number>9</number>
+  <locality_id>11510</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100034</polling_location_id>
+</precinct>
+<precinct id="222">
+  <name>Fanning School</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100121</polling_location_id>
+</precinct>
+<precinct id="22199">
+  <name>Langston School</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100183</polling_location_id>
+</precinct>
+<precinct id="22147">
+  <name>St. Lucas Evangelical Church</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100097</polling_location_id>
+</precinct>
+<precinct id="2213">
+  <name>Grbic Hall</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100203</polling_location_id>
+</precinct>
+<precinct id="2271">
+  <name>Stanley &amp; Clayton Rice Center</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100030</polling_location_id>
+</precinct>
+<precinct id="2296">
+  <name>Unity Christ Church</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>28</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100227</polling_location_id>
+</precinct>
+<precinct id="22148">
+  <name>Clay Community Center</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100019</polling_location_id>
+</precinct>
+<precinct id="22106">
+  <name>Shenandoah School</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100049</polling_location_id>
+</precinct>
+<precinct id="22195">
+  <name>Fifth Missionary Baptist Church</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100021</polling_location_id>
+</precinct>
+<precinct id="2261">
+  <name>W 08 P 01A</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100058</polling_location_id>
+</precinct>
+<precinct id="22174">
+  <name>Adams School</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100142</polling_location_id>
+</precinct>
+<precinct id="22114">
+  <name>Immaculate Heart Of Mary Church</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100096</polling_location_id>
+</precinct>
+<precinct id="22158">
+  <name>Columbia School</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100036</polling_location_id>
+</precinct>
+<precinct id="22171">
+  <name>North City Church of Christ</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100003</polling_location_id>
+</precinct>
+<precinct id="22117">
+  <name>Kingshighway Baptist Church</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100111</polling_location_id>
+</precinct>
+<precinct id="22111">
+  <name>Redeemer Evangelical Church</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100099</polling_location_id>
+</precinct>
+<precinct id="22173">
+  <name>Columbia School</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100035</polling_location_id>
+</precinct>
+<precinct id="2220">
+  <name>St. Roch's Church</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>28</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100230</polling_location_id>
+</precinct>
+<precinct id="22213">
+  <name>Shenandoah School</name>
+  <number>9</number>
+  <locality_id>11510</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100051</polling_location_id>
+</precinct>
+<precinct id="22201">
+  <name>Meramec School</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100165</polling_location_id>
+</precinct>
+<precinct id="2229">
+  <name>Aboussie Pavilion Apartments</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100113</polling_location_id>
+</precinct>
+<precinct id="2262">
+  <name>Carr Square Community Center</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100037</polling_location_id>
+</precinct>
+<precinct id="22166">
+  <name>Hodgen School</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100046</polling_location_id>
+</precinct>
+<precinct id="22144">
+  <name>Kappa House</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100158</polling_location_id>
+</precinct>
+<precinct id="2293">
+  <name>St. Cecilia School</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100106</polling_location_id>
+</precinct>
+<precinct id="22186">
+  <name>Hickey School</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100029</polling_location_id>
+</precinct>
+<precinct id="22136">
+  <name>Berea Temple Assembly of God</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100045</polling_location_id>
+</precinct>
+<precinct id="223">
+  <name>New City School</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>28</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100233</polling_location_id>
+</precinct>
+<precinct id="2281">
+  <name>Redeemer Evangelical Church</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100100</polling_location_id>
+</precinct>
+<precinct id="22157">
+  <name>Central Baptist Church</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100156</polling_location_id>
+</precinct>
+<precinct id="2211">
+  <name>Park Place Apartments (Activity Room)</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100143</polling_location_id>
+</precinct>
+<precinct id="22150">
+  <name>Timothy Lutheran Church</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100186</polling_location_id>
+</precinct>
+<precinct id="221">
+  <name>West Pine Apartments</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100140</polling_location_id>
+</precinct>
+<precinct id="22179">
+  <name>Newstead Baptist Church</name>
+  <number>10</number>
+  <locality_id>11510</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100026</polling_location_id>
+</precinct>
+<precinct id="22191">
+  <name>New Jerusalem Church #2</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100009</polling_location_id>
+</precinct>
+<precinct id="224">
+  <name>MCC of Greater St Louis</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100057</polling_location_id>
+</precinct>
+<precinct id="22101">
+  <name>St. Mary Magdalen School</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100115</polling_location_id>
+</precinct>
+<precinct id="22215">
+  <name>St. John The Baptist School</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100119</polling_location_id>
+</precinct>
+<precinct id="2219">
+  <name>Schlafly Library</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>28</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100224</polling_location_id>
+</precinct>
+<precinct id="22138">
+  <name>St. John The Baptist School</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100117</polling_location_id>
+</precinct>
+<precinct id="22103">
+  <name>Sherman School</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100060</polling_location_id>
+</precinct>
+<precinct id="22143">
+  <name>Barr Branch Library</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100043</polling_location_id>
+</precinct>
+<precinct id="2294">
+  <name>Immaculate Heart Of Mary Church</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100098</polling_location_id>
+</precinct>
+<precinct id="2238">
+  <name>Henry School</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100040</polling_location_id>
+</precinct>
+<precinct id="2298">
+  <name>Mt. Tabor United Church Of Christ</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100184</polling_location_id>
+</precinct>
+<precinct id="2270">
+  <name>Kennard School</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100084</polling_location_id>
+</precinct>
+<precinct id="22172">
+  <name>Nance School</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100012</polling_location_id>
+</precinct>
+<precinct id="22125">
+  <name>Lexington School</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100005</polling_location_id>
+</precinct>
+<precinct id="22135">
+  <name>Missouri School For The Blind</name>
+  <number>9</number>
+  <locality_id>11510</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100066</polling_location_id>
+</precinct>
+<precinct id="22188">
+  <name>Sigel School</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100053</polling_location_id>
+</precinct>
+<precinct id="22165">
+  <name>Woodward Elementary School</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100093</polling_location_id>
+</precinct>
+<precinct id="22110">
+  <name>St Louis Connect Care</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100212</polling_location_id>
+</precinct>
+<precinct id="22123">
+  <name>Fifth Missionary Baptist Church</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100017</polling_location_id>
+</precinct>
+<precinct id="2277">
+  <name>Shaw School</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100081</polling_location_id>
+</precinct>
+<precinct id="22153">
+  <name>Mt Zion Apartments</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100150</polling_location_id>
+</precinct>
+<precinct id="2295">
+  <name>Booth Manor</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100072</polling_location_id>
+</precinct>
+<precinct id="2234">
+  <name>Hickey School</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100032</polling_location_id>
+</precinct>
+<precinct id="2248">
+  <name>Washington Montessori School</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100149</polling_location_id>
+</precinct>
+<precinct id="22218">
+  <name>St. John The Baptist School</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100118</polling_location_id>
+</precinct>
+<precinct id="22204">
+  <name>James House</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100031</polling_location_id>
+</precinct>
+<precinct id="2291">
+  <name>Woodward Elementary School</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100094</polling_location_id>
+</precinct>
+<precinct id="2237">
+  <name>St. Peters A M E Church</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>21</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100173</polling_location_id>
+</precinct>
+<precinct id="22203">
+  <name>Lexington School</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100007</polling_location_id>
+</precinct>
+<precinct id="22180">
+  <name>New Jerusalem Church #2</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100011</polling_location_id>
+</precinct>
+<precinct id="22139">
+  <name>Mallincrodt School</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100189</polling_location_id>
+</precinct>
+<precinct id="2292">
+  <name>Woodward Elementary School</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100090</polling_location_id>
+</precinct>
+<precinct id="2276">
+  <name>New Cote Brilliante Church</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>28</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100231</polling_location_id>
+</precinct>
+<precinct id="22190">
+  <name>Nance School</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100015</polling_location_id>
+</precinct>
+<precinct id="22108">
+  <name>Touch Point Autism Services</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100089</polling_location_id>
+</precinct>
+<precinct id="2280">
+  <name>Friendly Temple Missionary Church (Fellowship Hall)</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100179</polling_location_id>
+</precinct>
+<precinct id="22102">
+  <name>Missouri School For The Blind</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100064</polling_location_id>
+</precinct>
+<precinct id="2283">
+  <name>Omega Center</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>22</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100178</polling_location_id>
+</precinct>
+<precinct id="2257">
+  <name>Adams School</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100141</polling_location_id>
+</precinct>
+<precinct id="2225">
+  <name>St Luke's Lutheran Church</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100202</polling_location_id>
+</precinct>
+<precinct id="2226">
+  <name>Busch Academy</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100129</polling_location_id>
+</precinct>
+<precinct id="22109">
+  <name>Mathews Dickey Boys &amp; Girls Club</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100001</polling_location_id>
+</precinct>
+<precinct id="22161">
+  <name>IL Monastero</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100047</polling_location_id>
+</precinct>
+<precinct id="22187">
+  <name>Jack McKeon JVL Elderly Housing</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100018</polling_location_id>
+</precinct>
+<precinct id="22175">
+  <name>Christ South Missionary Baptist</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>26</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100213</polling_location_id>
+</precinct>
+<precinct id="22112">
+  <name>Holy Center Church Of God In Christ</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>27</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100222</polling_location_id>
+</precinct>
+<precinct id="22170">
+  <name>Bread Of Life Church</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100038</polling_location_id>
+</precinct>
+<precinct id="22181">
+  <name>St. Peters A M E Church</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>21</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100174</polling_location_id>
+</precinct>
+<precinct id="2297">
+  <name>Nottingham Middle School</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100133</polling_location_id>
+</precinct>
+<precinct id="22120">
+  <name>St Luke's Lutheran Church</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>25</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100205</polling_location_id>
+</precinct>
+<precinct id="2216">
+  <name>Missouri School For The Blind</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100065</polling_location_id>
+</precinct>
+<precinct id="22217">
+  <name>Immaculate Heart Of Mary Church</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100102</polling_location_id>
+</precinct>
+<precinct id="2288">
+  <name>Mason School</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>24</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100196</polling_location_id>
+</precinct>
+<precinct id="2251">
+  <name>St. Joan of Arc School</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100188</polling_location_id>
+</precinct>
+<precinct id="2240">
+  <name>Froebel School</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100162</polling_location_id>
+</precinct>
+<precinct id="22142">
+  <name>Walbridge Community Building</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>27</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100219</polling_location_id>
+</precinct>
+<precinct id="2232">
+  <name>Metro Academy</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100144</polling_location_id>
+</precinct>
+<precinct id="2210">
+  <name>St John's Lutheran Church</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100125</polling_location_id>
+</precinct>
+<precinct id="22115">
+  <name>Mallincrodt School</name>
+  <number>7</number>
+  <locality_id>11510</locality_id>
+  <ward>23</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100190</polling_location_id>
+</precinct>
+<precinct id="2243">
+  <name>Northwest Middle School</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>27</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100218</polling_location_id>
+</precinct>
+<precinct id="2217">
+  <name>Maryville Gardens Apartments</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100068</polling_location_id>
+</precinct>
+<precinct id="226">
+  <name>St. Stephen School</name>
+  <number>6</number>
+  <locality_id>11510</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100109</polling_location_id>
+</precinct>
+<precinct id="2244">
+  <name>Central Baptist Church</name>
+  <number>5</number>
+  <locality_id>11510</locality_id>
+  <ward>19</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100155</polling_location_id>
+</precinct>
+<precinct id="22113">
+  <name>The Thaxton</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100055</polling_location_id>
+</precinct>
+<precinct id="22128">
+  <name>Froebel School</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>20</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100160</polling_location_id>
+</precinct>
+<precinct id="22212">
+  <name>St. Lucas Evangelical Church</name>
+  <number>1</number>
+  <locality_id>11510</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100095</polling_location_id>
+</precinct>
+<precinct id="2285">
+  <name>Park Place Apts. (activity room)</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100139</polling_location_id>
+</precinct>
+<precinct id="2258">
+  <name>Woerner School</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100107</polling_location_id>
+</precinct>
+<precinct id="22198">
+  <name>Berea Temple Assembly of God</name>
+  <number>2</number>
+  <locality_id>11510</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100044</polling_location_id>
+</precinct>
+<precinct id="2241">
+  <name>Washington Montessori School</name>
+  <number>4</number>
+  <locality_id>11510</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100147</polling_location_id>
+</precinct>
+<precinct id="22133">
+  <name>Metro Academy</name>
+  <number>3</number>
+  <locality_id>11510</locality_id>
+  <ward>18</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100146</polling_location_id>
+</precinct>
+<precinct id="22184">
+  <name>Bryan Hill School</name>
+  <number>8</number>
+  <locality_id>11510</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>445100023</polling_location_id>
+</precinct>
+<polling_location id="445100001">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4245 N. Kingshighway Blvd</line1>
+    <state>MO</state>
+    <location_name>Mathews Dickey Boys &amp; Girls Club</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100002">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5030 Lexington Ave.</line1>
+    <state>MO</state>
+    <location_name>Lexington School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100003">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5036 Thekla Ave.</line1>
+    <state>MO</state>
+    <location_name>North City Church of Christ</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100004">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5310 N. Euclid Ave.</line1>
+    <state>MO</state>
+    <location_name>Euclid Plaza High Rise</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100005">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5030 Lexington Ave.</line1>
+    <state>MO</state>
+    <location_name>Lexington School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100006">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1500 N Union Blvd</line1>
+    <state>MO</state>
+    <location_name>Williams Temple</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100007">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5030 Lexington Ave</line1>
+    <state>MO</state>
+    <location_name>Lexington School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100008">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1524 East Grand Ave</line1>
+    <state>MO</state>
+    <location_name>Jesus Is All Family Worship Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100009">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>8629 Halls Ferry Rd</line1>
+    <state>MO</state>
+    <location_name>New Jerusalem Church #2</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100010">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>8448 Church Rd</line1>
+    <state>MO</state>
+    <location_name>Baden Branch Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100011">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>8629 Halls ferry Rd.</line1>
+    <state>MO</state>
+    <location_name>New Jerusalem Church #2</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100012">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>8959 Riverview Blvd.</line1>
+    <state>MO</state>
+    <location_name>Nance School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100013">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1524 East Grand Ave</line1>
+    <state>MO</state>
+    <location_name>Jesus Is All Family Worship Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100014">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>8959 Riverview Blvd</line1>
+    <state>MO</state>
+    <location_name>Nance School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100015">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>8959 Riverview Blvd</line1>
+    <state>MO</state>
+    <location_name>Nance School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100016">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1927 Cass Ave.</line1>
+    <state>MO</state>
+    <location_name>Blewett School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100017">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3736 Natural Bridge Rd.</line1>
+    <state>MO</state>
+    <location_name>Fifth Missionary Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100018">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2829 Howard St.</line1>
+    <state>MO</state>
+    <location_name>Jack McKeon JVL Elderly Housing</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100019">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3820 14th St.</line1>
+    <state>MO</state>
+    <location_name>Clay Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100020">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2128 Gano Ave.</line1>
+    <state>MO</state>
+    <location_name>Bryan Hill School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100021">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3736 Natural Bridge Rd.</line1>
+    <state>MO</state>
+    <location_name>Fifth Missionary Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100022">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3820 14th St.</line1>
+    <state>MO</state>
+    <location_name>Clay Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100023">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2128 Gano Ave.</line1>
+    <state>MO</state>
+    <location_name>Bryan Hill School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100024">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2900 Hadley St.</line1>
+    <state>MO</state>
+    <location_name>Ames School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100025">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4370 North Market St.</line1>
+    <state>MO</state>
+    <location_name>Newstead Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100026">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4370 North Market St</line1>
+    <state>MO</state>
+    <location_name>Newstead Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100027">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4145 W. Kennerly Ave.</line1>
+    <state>MO</state>
+    <location_name>Stanley &amp; Clayton Rice Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100028">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4370 North Market St.</line1>
+    <state>MO</state>
+    <location_name>Newstead Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100029">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3111 Cora Ave.</line1>
+    <state>MO</state>
+    <location_name>Hickey School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100030">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4145 W. Kennerly Ave.</line1>
+    <state>MO</state>
+    <location_name>Stanley &amp; Clayton Rice Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100031">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4310 St. Ferdinand</line1>
+    <state>MO</state>
+    <location_name>James House</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100032">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3111 Cora Ave.</line1>
+    <state>MO</state>
+    <location_name>Hickey School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100033">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4310 St Ferdinand St.</line1>
+    <state>MO</state>
+    <location_name>James House</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100034">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4310 St Ferdinand St.</line1>
+    <state>MO</state>
+    <location_name>James House</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100035">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3120 St Louis Ave.</line1>
+    <state>MO</state>
+    <location_name>Columbia School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100036">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3120 St Louis Ave.</line1>
+    <state>MO</state>
+    <location_name>Columbia School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100037">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1629 Biddle St.</line1>
+    <state>MO</state>
+    <location_name>Carr Square Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100038">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2429 N 14th St.</line1>
+    <state>MO</state>
+    <location_name>Bread Of Life Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100039">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1629 Biddle St.</line1>
+    <state>MO</state>
+    <location_name>Carr Square Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100040">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1220 N. 10th St.</line1>
+    <state>MO</state>
+    <location_name>Henry School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100041">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1629 Biddle St.</line1>
+    <state>MO</state>
+    <location_name>Carr Square Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100042">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1629 Biddle St.</line1>
+    <state>MO</state>
+    <location_name>Carr Square Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100043">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1701 S. Jefferson Ave.</line1>
+    <state>MO</state>
+    <location_name>Barr Branch Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100044">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3224 Russell Blvd</line1>
+    <state>MO</state>
+    <location_name>Berea Temple Assembly of God</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100045">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3224 Russell Blvd</line1>
+    <state>MO</state>
+    <location_name>Berea Temple Assembly of God</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100046">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1616 California Ave.</line1>
+    <state>MO</state>
+    <location_name>Hodgen School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100047">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3050 Olive St.</line1>
+    <state>MO</state>
+    <location_name>IL Monastero</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100048">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1616 California Ave.</line1>
+    <state>MO</state>
+    <location_name>Hodgen School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100049">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3412 Shenandoah Ave.</line1>
+    <state>MO</state>
+    <location_name>Shenandoah School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100050">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1224 S. 14th St.</line1>
+    <state>MO</state>
+    <location_name>Peabody School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100051">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3412 Shenandoah Ave</line1>
+    <state>MO</state>
+    <location_name>Shenandoah School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100052">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2039 Russell Blvd.</line1>
+    <state>MO</state>
+    <location_name>Sigel School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100053">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2039 Russell Blvd.</line1>
+    <state>MO</state>
+    <location_name>Sigel School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100054">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2039 Russell Blvd.</line1>
+    <state>MO</state>
+    <location_name>Sigel School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100055">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1009 Olive St.</line1>
+    <state>MO</state>
+    <location_name>The Thaxton</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100056">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1408 S. 10th St.</line1>
+    <state>MO</state>
+    <location_name>St. Vincent's Church (hall)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100057">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1919 S. Broadway</line1>
+    <state>MO</state>
+    <location_name>MCC of Greater St Louis</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100058">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2260 S. Vandeventer Ave.</line1>
+    <state>MO</state>
+    <location_name>Kingshighway Branch Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100059">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2260 S. Vandeventer Ave.</line1>
+    <state>MO</state>
+    <location_name>Kingshighway Branch Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100060">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3942 Flad Ave</line1>
+    <state>MO</state>
+    <location_name>Sherman School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100061">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4257 Magnolia Ave.</line1>
+    <state>MO</state>
+    <location_name>Tower Grove Baptist Church (Hallway)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100062">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3942 Flad Ave.</line1>
+    <state>MO</state>
+    <location_name>Sherman School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100063">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3867 Magnolia Ave.</line1>
+    <state>MO</state>
+    <location_name>Missouri School For The Blind</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100064">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3867 Magnolia Ave.</line1>
+    <state>MO</state>
+    <location_name>Missouri School For The Blind</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100065">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3867 Magnolia Ave.</line1>
+    <state>MO</state>
+    <location_name>Missouri School For The Blind</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100066">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3867 Magnolia Ave.</line1>
+    <state>MO</state>
+    <location_name>Missouri School For The Blind</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100067">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3131 Iowa Ave.</line1>
+    <state>MO</state>
+    <location_name>Booth Manor</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100068">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4333 Nebraska Ave.</line1>
+    <state>MO</state>
+    <location_name>Maryville Gardens Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100069">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2840 Wisconsin Ave.</line1>
+    <state>MO</state>
+    <location_name>St Agnes Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100070">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2601 S. 11th St.</line1>
+    <state>MO</state>
+    <location_name>B K Z American Legion Post 422</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100071">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2840 Wisconsin Ave.</line1>
+    <state>MO</state>
+    <location_name>St. Agnes Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100072">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3131 Iowa Ave.</line1>
+    <state>MO</state>
+    <location_name>Booth Manor</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100073">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3131 Iowa Ave.</line1>
+    <state>MO</state>
+    <location_name>Booth Manor</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100074">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2601 S. 11th St.</line1>
+    <state>MO</state>
+    <location_name>B K Z American Legion Post 422</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100075">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2840 Wisconsin Ave</line1>
+    <state>MO</state>
+    <location_name>St. Agnes Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100076">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5602 Arsenal St.</line1>
+    <state>MO</state>
+    <location_name>St. Louis Activity Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100077">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5602 Arsenal St.</line1>
+    <state>MO</state>
+    <location_name>St. Louis Activity Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100078">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>NO VOTERS</line1>
+    <state>MO</state>
+    <location_name>NO VOTERS</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100079">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>NO VOTERS</line1>
+    <state>MO</state>
+    <location_name>NO VOTERS</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100080">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>NO VOTERS</line1>
+    <state>MO</state>
+    <location_name>NO VOTERS</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100081">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5329 Columbia Ave.</line1>
+    <state>MO</state>
+    <location_name>Shaw School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100082">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5329 Columbia Ave.</line1>
+    <state>MO</state>
+    <location_name>Shaw School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100083">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5031 Potomac St.</line1>
+    <state>MO</state>
+    <location_name>Kennard School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100084">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5031 Potomac St.</line1>
+    <state>MO</state>
+    <location_name>Kennard School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100085">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5329 Columbia Ave.</line1>
+    <state>MO</state>
+    <location_name>Shaw School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100086">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5031 Potomac St.</line1>
+    <state>MO</state>
+    <location_name>Kennard School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100087">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>NO VOTERS</line1>
+    <state>MO</state>
+    <location_name>NO VOTERS</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100088">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5602 Arsenal St.</line1>
+    <state>MO</state>
+    <location_name>St. Louis Activity Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100089">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3601 Weber Rd</line1>
+    <state>MO</state>
+    <location_name>Touch Point Autism Services</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100090">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>725 Bellerive Blvd.</line1>
+    <state>MO</state>
+    <location_name>Woodward Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100091">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6800 Michigan Ave.</line1>
+    <state>MO</state>
+    <location_name>Carondelet Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100092">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6800 Michigan Ave.</line1>
+    <state>MO</state>
+    <location_name>Carondelet Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100093">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>725 Bellerive Blvd.</line1>
+    <state>MO</state>
+    <location_name>Woodward Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100094">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>725 Bellerive Blvd.</line1>
+    <state>MO</state>
+    <location_name>Woodward Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100095">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>7100 Morganford Rd.</line1>
+    <state>MO</state>
+    <location_name>St. Lucas Evangelical Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100096">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4092 Blow St.</line1>
+    <state>MO</state>
+    <location_name>Immaculate Heart Of Mary Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100097">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>7100 Morganford Rd.</line1>
+    <state>MO</state>
+    <location_name>St. Lucas Evangelical Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100098">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4092 Blow St.</line1>
+    <state>MO</state>
+    <location_name>Immaculate Heart Of Mary Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100099">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6450 S. Kingshighway Blvd.</line1>
+    <state>MO</state>
+    <location_name>Redeemer Evangelical Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100100">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6450 S. Kingshighway Blvd.</line1>
+    <state>MO</state>
+    <location_name>Redeemer Evangelical Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100101">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>NO VOTERS</line1>
+    <state>MO</state>
+    <location_name>NO VOTERS</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100102">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4092 Blow St.</line1>
+    <state>MO</state>
+    <location_name>Immaculate Heart Of Mary Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100103">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4092 Blow St.</line1>
+    <state>MO</state>
+    <location_name>Immaculate Heart Of Mary Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100104">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6131 Leona St.</line1>
+    <state>MO</state>
+    <location_name>Woerner School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100105">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3949 Wilmington Ave.</line1>
+    <state>MO</state>
+    <location_name>St. Stephen School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100106">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>906 Eichelberger St.</line1>
+    <state>MO</state>
+    <location_name>St. Cecilia School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100107">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6131 Leona St.</line1>
+    <state>MO</state>
+    <location_name>Woerner School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100108">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>NO VOTERS</line1>
+    <state>MO</state>
+    <location_name>NO VOTERS</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100109">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3949 Wilmington Ave.</line1>
+    <state>MO</state>
+    <location_name>St. Stephen School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100110">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>906 Eichelberger St.</line1>
+    <state>MO</state>
+    <location_name>St. Cecilia School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100111">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5401 S. Kingshighway</line1>
+    <state>MO</state>
+    <location_name>Kingshighway Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100112">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>NO VOTERS</line1>
+    <state>MO</state>
+    <location_name>NO VOTERS</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100113">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4635 Ridgewood Ave.</line1>
+    <state>MO</state>
+    <location_name>Aboussie Pavilion Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100114">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4635 Ridgewood Ave.</line1>
+    <state>MO</state>
+    <location_name>Aboussie Pavilion Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100115">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4924 Bancroft</line1>
+    <state>MO</state>
+    <location_name>St. Mary Magdalen School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100116">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4300 Morganford Rd.</line1>
+    <state>MO</state>
+    <location_name>Oak Hill School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100117">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4170 Delor</line1>
+    <state>MO</state>
+    <location_name>St. John The Baptist School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100118">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4170 Delor</line1>
+    <state>MO</state>
+    <location_name>St. John The Baptist School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100119">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4170 Delor</line1>
+    <state>MO</state>
+    <location_name>St. John The Baptist School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100120">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4300 Morganford Rd.</line1>
+    <state>MO</state>
+    <location_name>Oak Hill School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100121">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3417 Grace Ave.</line1>
+    <state>MO</state>
+    <location_name>Fanning School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100122">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4047 Juniata St.</line1>
+    <state>MO</state>
+    <location_name>Mann School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100123">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4047 Juniata St.</line1>
+    <state>MO</state>
+    <location_name>Mann School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100124">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3417 Grace Ave.</line1>
+    <state>MO</state>
+    <location_name>Fanning School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100125">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3716 Morganford Rd.</line1>
+    <state>MO</state>
+    <location_name>St John's Lutheran Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100126">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3716 Morganford Rd.</line1>
+    <state>MO</state>
+    <location_name>St John's Lutheran Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100127">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3716 Morganford Rd.</line1>
+    <state>MO</state>
+    <location_name>St John's Lutheran Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100128">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6000 Jamieson Ave.</line1>
+    <state>MO</state>
+    <location_name>St Raphael Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100129">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5910 Clifton Ave.</line1>
+    <state>MO</state>
+    <location_name>Busch Academy</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100130">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5319 Lansdowne Ave.</line1>
+    <state>MO</state>
+    <location_name>Buder School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100131">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4915 Donovan Ave.</line1>
+    <state>MO</state>
+    <location_name>Nottingham School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100132">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5319 Lansdowne Ave.</line1>
+    <state>MO</state>
+    <location_name>Buder School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100133">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4915 Donovan Ave.</line1>
+    <state>MO</state>
+    <location_name>Nottingham Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100134">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4714 Clifton Ave.</line1>
+    <state>MO</state>
+    <location_name>St. Marks Episcopal Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100135">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6932 Lansdowne Ave.</line1>
+    <state>MO</state>
+    <location_name>Lindenwood Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100136">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1311 Tower Grove Ave.</line1>
+    <state>MO</state>
+    <location_name>Adams School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100137">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4399 Forest Park Blvd</line1>
+    <state>MO</state>
+    <location_name>Park Place Apartments (Activity Room)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100138">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1311 Tower Grove Ave.</line1>
+    <state>MO</state>
+    <location_name>Adams School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100139">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4399 Forest Park Blvd.</line1>
+    <state>MO</state>
+    <location_name>Park Place Apts. (activity room)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100140">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4490 West Pine Blvd.</line1>
+    <state>MO</state>
+    <location_name>West Pine Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100141">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1311 Tower Grove Ave.</line1>
+    <state>MO</state>
+    <location_name>Adams School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100142">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1311 Tower Grove Ave.</line1>
+    <state>MO</state>
+    <location_name>Adams School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100143">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4399 Forest Park Blvd</line1>
+    <state>MO</state>
+    <location_name>Park Place Apartments (Activity Room)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100144">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4015 Mc Pherson Ave.</line1>
+    <state>MO</state>
+    <location_name>Metro Academy</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100145">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4015 Mc Pherson Ave.</line1>
+    <state>MO</state>
+    <location_name>Metro Academy</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100146">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4015 Mc Pherson Ave.</line1>
+    <state>MO</state>
+    <location_name>Metro Academy</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100147">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1130 N. Euclid Ave.</line1>
+    <state>MO</state>
+    <location_name>Washington Montessori School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100148">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>915 N. Taylor Ave.</line1>
+    <state>MO</state>
+    <location_name>Hopewell Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100149">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1130 N. Euclid Ave.</line1>
+    <state>MO</state>
+    <location_name>Washington Montessori School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100150">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3300 Park Ave</line1>
+    <state>MO</state>
+    <location_name>Mt Zion Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100151">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>NO VOTERS</line1>
+    <state>MO</state>
+    <location_name>NO VOTERS</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100152">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3300 Park Ave</line1>
+    <state>MO</state>
+    <location_name>Mt Zion Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100153">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>300 S. Grand Blvd.</line1>
+    <state>MO</state>
+    <location_name>Grand View Tower Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100154">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3300 Park Ave</line1>
+    <state>MO</state>
+    <location_name>Mt Zion Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100155">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2845 Washington Ave.</line1>
+    <state>MO</state>
+    <location_name>Central Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100156">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2845 Washington Ave.</line1>
+    <state>MO</state>
+    <location_name>Central Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100157">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>500 N. Vandeventer Ave.</line1>
+    <state>MO</state>
+    <location_name>Kappa House</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100158">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>500 N. Vandeventer Ave.</line1>
+    <state>MO</state>
+    <location_name>Kappa House</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100159">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2801 Dr. Martin Luther King Dr.</line1>
+    <state>MO</state>
+    <location_name>Macler Sheppard JVL Housing</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100160">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3709 Nebraska Ave.</line1>
+    <state>MO</state>
+    <location_name>Froebel School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100161">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2745 Meramec St.</line1>
+    <state>MO</state>
+    <location_name>Meramec School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100162">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3709 Nebraska Ave.</line1>
+    <state>MO</state>
+    <location_name>Froebel School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100163">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2636 Chippewa St.</line1>
+    <state>MO</state>
+    <location_name>Alexian Court Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100164">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3641 Missouri Ave.</line1>
+    <state>MO</state>
+    <location_name>Monroe School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100165">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>2745 Meramec St.</line1>
+    <state>MO</state>
+    <location_name>Meramec School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100166">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3709 Nebraska Ave.</line1>
+    <state>MO</state>
+    <location_name>Froebel School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100167">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4415 Natural Bridge Rd.</line1>
+    <state>MO</state>
+    <location_name>Julia Davis Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100168">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4125 Natural Bridge Rd.</line1>
+    <state>MO</state>
+    <location_name>Greater Faith Church (multiplex)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100169">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4265 Athlone Ave.</line1>
+    <state>MO</state>
+    <location_name>Yeatman School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100170">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4265 Athlone Ave.</line1>
+    <state>MO</state>
+    <location_name>Yeatman School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100171">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4411 N. Newstead Ave.</line1>
+    <state>MO</state>
+    <location_name>Prince Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100172">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4492 Bircher Blvd.</line1>
+    <state>MO</state>
+    <location_name>UCM Church Of Jesus Christ</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100173">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4730 Margaretta Ave.</line1>
+    <state>MO</state>
+    <location_name>St. Peters A M E Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100174">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4730 Margaretta Ave.</line1>
+    <state>MO</state>
+    <location_name>St. Peters A M E Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100175">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4265 Athlone Ave.</line1>
+    <state>MO</state>
+    <location_name>Yeatman School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100176">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5511 Wabada Ave.</line1>
+    <state>MO</state>
+    <location_name>Langston School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100177">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5821 Kennerly Ave.</line1>
+    <state>MO</state>
+    <location_name>Laclede School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100178">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3900 Goodfellow Blvd.</line1>
+    <state>MO</state>
+    <location_name>Omega Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100179">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5544 M L King Dr.</line1>
+    <state>MO</state>
+    <location_name>Friendly Temple Missionary Church (Fellowship Hall)</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100180">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5511 Wabada Ave.</line1>
+    <state>MO</state>
+    <location_name>Langston School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100181">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6105 Etzel Ave.</line1>
+    <state>MO</state>
+    <location_name>Alpha Terrace Apartments</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100182">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5821 Kennerly Ave.</line1>
+    <state>MO</state>
+    <location_name>Laclede School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100183">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5511 Wabada Ave.</line1>
+    <state>MO</state>
+    <location_name>Langston School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100184">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6520 Arsenal St.</line1>
+    <state>MO</state>
+    <location_name>Mt. Tabor United Church Of Christ</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100185">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3543 Watson Rd.</line1>
+    <state>MO</state>
+    <location_name>Union United Methodist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100186">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6740 Fyler Ave.</line1>
+    <state>MO</state>
+    <location_name>Timothy Lutheran Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100187">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5821 Pernod Ave.</line1>
+    <state>MO</state>
+    <location_name>St. Joan of Arc School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100188">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5821 Pernod Ave.</line1>
+    <state>MO</state>
+    <location_name>St. Joan of Arc School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100189">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6020 Pernod Ave.</line1>
+    <state>MO</state>
+    <location_name>Mallincrodt School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100190">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6020 Pernod Ave.</line1>
+    <state>MO</state>
+    <location_name>Mallincrodt School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100191">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3543 Watson Rd.</line1>
+    <state>MO</state>
+    <location_name>Union United Methodist church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100192">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3543 Watson Rd.</line1>
+    <state>MO</state>
+    <location_name>Union United Methodist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100193">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1360 Tamm Ave.</line1>
+    <state>MO</state>
+    <location_name>St James The Greater School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100194">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1401 Hampton Ave.</line1>
+    <state>MO</state>
+    <location_name>Carpenter's Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100195">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1921 Prather Ave.</line1>
+    <state>MO</state>
+    <location_name>Wilkinson/Roe School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100196">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6031 Southwest Ave.</line1>
+    <state>MO</state>
+    <location_name>Mason School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100197">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6031 Southwest Ave.</line1>
+    <state>MO</state>
+    <location_name>Mason School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100198">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1921 Prather Ave.</line1>
+    <state>MO</state>
+    <location_name>Wilkinson/Roe School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100199">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6746 Clayton Ave.</line1>
+    <state>MO</state>
+    <location_name>Dewey School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100200">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1921 Prather Ave.</line1>
+    <state>MO</state>
+    <location_name>Wilkinson/Roe School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100201">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>NO VOTERS</line1>
+    <state>MO</state>
+    <location_name>NO VOTERS</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100202">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3415 Taft Ave.</line1>
+    <state>MO</state>
+    <location_name>St Luke's Lutheran Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100203">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4071 Keokuk St.</line1>
+    <state>MO</state>
+    <location_name>Grbic Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100204">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4071 Keokuk St.</line1>
+    <state>MO</state>
+    <location_name>Grbic Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100205">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>3415 Taft Ave</line1>
+    <state>MO</state>
+    <location_name>St Luke's Lutheran Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100206">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4071 Keokuk St.</line1>
+    <state>MO</state>
+    <location_name>Grbic Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100207">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4071 Keokuk St.</line1>
+    <state>MO</state>
+    <location_name>Grbic Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100208">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>NO VOTERS</line1>
+    <state>MO</state>
+    <location_name>NO VOTERS</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100209">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1244 N. Union Blvd.</line1>
+    <state>MO</state>
+    <location_name>Berean SDA Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100210">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>1244 N. Union Blvd.</line1>
+    <state>MO</state>
+    <location_name>Berean SDA Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100211">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5819 Westminster</line1>
+    <state>MO</state>
+    <location_name>Hamilton School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100212">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5540 Enright Ave.</line1>
+    <state>MO</state>
+    <location_name>St Louis Connect Care</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100213">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5630 Page Ave.</line1>
+    <state>MO</state>
+    <location_name>Christ South Missionary Baptist</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100214">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5540 Enright Ave.</line1>
+    <state>MO</state>
+    <location_name>St. Louis Connect Care</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100215">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5941 Lillian Ave.</line1>
+    <state>MO</state>
+    <location_name>Greater Fellowship Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100216">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5760 W. Florissant Ave.</line1>
+    <state>MO</state>
+    <location_name>Walnut Park Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100217">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5019 Alcott Ave.</line1>
+    <state>MO</state>
+    <location_name>Walbridge Community Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100218">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5140 Riverview Blvd.</line1>
+    <state>MO</state>
+    <location_name>Northwest Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100219">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5019 Alcott Ave.</line1>
+    <state>MO</state>
+    <location_name>Walbridge Community Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100220">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5831 Pamplin Pl.</line1>
+    <state>MO</state>
+    <location_name>Herzog School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100221">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>5831 Pamplin Pl.</line1>
+    <state>MO</state>
+    <location_name>Herzog School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100222">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>8735 Goodfellow Blvd.</line1>
+    <state>MO</state>
+    <location_name>Holy Center Church Of God In Christ</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100223">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>NO VOTERS</line1>
+    <state>MO</state>
+    <location_name>NO VOTERS</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100224">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>225 N. Euclid Ave.</line1>
+    <state>MO</state>
+    <location_name>Schlafly Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100225">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>455 Lake Ave.</line1>
+    <state>MO</state>
+    <location_name>New City School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100226">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>225 N. Euclid Ave.</line1>
+    <state>MO</state>
+    <location_name>Schlafly Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100227">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>33 N. Skinker Blvd.</line1>
+    <state>MO</state>
+    <location_name>Unity Christ Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100228">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>NO VOTERS</line1>
+    <state>MO</state>
+    <location_name>NO VOTERS</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100229">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>33 N. Skinker Blvd.</line1>
+    <state>MO</state>
+    <location_name>Unity Christ Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100230">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6040 Waterman Blvd.</line1>
+    <state>MO</state>
+    <location_name>St. Roch's Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100231">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>6195 Washington Ave.</line1>
+    <state>MO</state>
+    <location_name>New Cote Brilliante Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100232">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4501 Westminster Pl.</line1>
+    <state>MO</state>
+    <location_name>2nd Presbyterian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100233">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>455 Lake Ave.</line1>
+    <state>MO</state>
+    <location_name>New City School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="445100234">
+  <polling_hours>06:00:00-19:00:00</polling_hours>
+  <address>
+    <city>St. Louis</city>
+    <line1>4501 Westminster Pl.</line1>
+    <state>MO</state>
+    <location_name>2nd Presbyterian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+</vip_object>
