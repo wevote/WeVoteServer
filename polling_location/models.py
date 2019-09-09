@@ -112,7 +112,8 @@ class PollingLocationManager(models.Model):
         new_polling_location = PollingLocation()
         proceed_to_update_or_save = True
         success = False
-        status = 'ENTERING update_or_create_polling_location'
+        status = ''
+        status += 'ENTERING update_or_create_polling_location '
 
         if positive_value_exists(we_vote_id):
             # If here we are dealing with an existing polling_location
@@ -120,19 +121,19 @@ class PollingLocationManager(models.Model):
         else:
             if not polling_location_id:
                 success = False
-                status = 'MISSING_POLLING_LOCATION_ID'
+                status += 'MISSING_POLLING_LOCATION_ID '
                 proceed_to_update_or_save = False
             elif not line1:
                 success = False
-                status = 'MISSING_POLLING_LOCATION_LINE1'
+                status += 'MISSING_POLLING_LOCATION_LINE1 '
                 proceed_to_update_or_save = False
             elif not city:
                 success = False
-                status = 'MISSING_POLLING_LOCATION_CITY'
+                status += 'MISSING_POLLING_LOCATION_CITY '
                 proceed_to_update_or_save = False
             elif not state:
                 success = False
-                status = 'MISSING_POLLING_LOCATION_STATE'
+                status += 'MISSING_POLLING_LOCATION_STATE '
                 proceed_to_update_or_save = False
             # Note: It turns out that some states, like Alaska, do not provide ZIP codes
             # elif not zip_long:
@@ -190,11 +191,11 @@ class PollingLocationManager(models.Model):
                     new_polling_location, new_polling_location_created = PollingLocation.objects.update_or_create(
                         polling_location_id__exact=polling_location_id, state=state, defaults=updated_values)
                 success = True
-                status = 'POLLING_LOCATION_SAVED'
+                status += 'POLLING_LOCATION_SAVED '
             except PollingLocation.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
-                status = 'MULTIPLE_MATCHING_ADDRESSES_FOUND'
+                status += 'MULTIPLE_MATCHING_ADDRESSES_FOUND '
                 exception_multiple_object_returned = True
 
         results = {
@@ -373,14 +374,15 @@ class PollingLocationManager(models.Model):
             return results
 
         try:
-            polling_location_list = PollingLocation.objects.all()
+            polling_location_query = PollingLocation.objects.all()
+            polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
             if positive_value_exists(state):
-                polling_location_list = polling_location_list.filter(state__iexact=state)
+                polling_location_query = polling_location_query.filter(state__iexact=state)
             if positive_value_exists(city):
-                polling_location_list = polling_location_list.filter(city__iexact=city)
+                polling_location_query = polling_location_query.filter(city__iexact=city)
             if positive_value_exists(polling_location_zip):
-                polling_location_list = polling_location_list.filter(zip_long__icontains=polling_location_zip)
-            polling_location_list = polling_location_list.order_by("city")
+                polling_location_query = polling_location_query.filter(zip_long__icontains=polling_location_zip)
+            polling_location_list = polling_location_query.order_by("city")
 
             if len(polling_location_list):
                 polling_location_list_found = True

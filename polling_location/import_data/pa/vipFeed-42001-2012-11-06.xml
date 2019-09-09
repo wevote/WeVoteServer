@@ -1,0 +1,760 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>42</vip_id>
+  <datetime>2012-10-26T06:33:00</datetime>
+  <description>VIP collects polling information from official government sources</description>
+</source>
+<state id="42">
+  <name>Pennsylvania</name>
+</state>
+<election id="4000">
+  <date>2012-11-06</date>
+  <election_type>State</election_type>
+  <state_id>42</state_id>
+  <statewide>Yes</statewide>
+</election>
+<locality id="11001">
+  <name>Adams</name>
+  <state_id>42</state_id>
+  <type>County</type>
+</locality>
+<precinct id="227">
+  <name>LIBERTY</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010028</polling_location_id>
+</precinct>
+<precinct id="224">
+  <name>GETTYSBURG 3</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010022</polling_location_id>
+</precinct>
+<precinct id="2245">
+  <name>HUNTINGTON</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010026</polling_location_id>
+</precinct>
+<precinct id="2247">
+  <name>BIGLERVILLE</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010005</polling_location_id>
+</precinct>
+<precinct id="2220">
+  <name>CARROLL VALLEY 2</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010009</polling_location_id>
+</precinct>
+<precinct id="2225">
+  <name>FRANKLIN 1</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010016</polling_location_id>
+</precinct>
+<precinct id="2211">
+  <name>BERWICK</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010004</polling_location_id>
+</precinct>
+<precinct id="2236">
+  <name>MENALLEN</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010032</polling_location_id>
+</precinct>
+<precinct id="2223">
+  <name>CONEWAGO 2</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010010</polling_location_id>
+</precinct>
+<precinct id="2234">
+  <name>GERMANY</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010019</polling_location_id>
+</precinct>
+<precinct id="2228">
+  <name>BONNEAUVILLE</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010006</polling_location_id>
+</precinct>
+<precinct id="229">
+  <name>GETTYSBURG 1</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010020</polling_location_id>
+</precinct>
+<precinct id="2248">
+  <name>BENDERSVILLE</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010003</polling_location_id>
+</precinct>
+<precinct id="2214">
+  <name>LATIMORE</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010027</polling_location_id>
+</precinct>
+<precinct id="2216">
+  <name>STRABAN 1</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010040</polling_location_id>
+</precinct>
+<precinct id="221">
+  <name>CUMBERLAND 3</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010013</polling_location_id>
+</precinct>
+<precinct id="2235">
+  <name>HAMILTONBAN</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010024</polling_location_id>
+</precinct>
+<precinct id="2246">
+  <name>HAMILTON</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010023</polling_location_id>
+</precinct>
+<precinct id="2226">
+  <name>BUTLER</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010007</polling_location_id>
+</precinct>
+<precinct id="2244">
+  <name>MT JOY 2</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010033</polling_location_id>
+</precinct>
+<precinct id="2243">
+  <name>EAST BERLIN</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010014</polling_location_id>
+</precinct>
+<precinct id="223">
+  <name>MT JOY 1</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010033</polling_location_id>
+</precinct>
+<precinct id="2232">
+  <name>STRABAN 2</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010041</polling_location_id>
+</precinct>
+<precinct id="2230">
+  <name>CUMBERLAND 2</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010012</polling_location_id>
+</precinct>
+<precinct id="2212">
+  <name>CUMBERLAND 4</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010013</polling_location_id>
+</precinct>
+<precinct id="2222">
+  <name>FREEDOM</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010018</polling_location_id>
+</precinct>
+<precinct id="2233">
+  <name>CONEWAGO 1</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010010</polling_location_id>
+</precinct>
+<precinct id="2249">
+  <name>ARENDTSVILLE</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010002</polling_location_id>
+</precinct>
+<precinct id="2238">
+  <name>YORK SPRINGS</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010044</polling_location_id>
+</precinct>
+<precinct id="2237">
+  <name>TYRONE</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010042</polling_location_id>
+</precinct>
+<precinct id="2210">
+  <name>CUMBERLAND 1</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010011</polling_location_id>
+</precinct>
+<precinct id="2221">
+  <name>READING 2</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010039</polling_location_id>
+</precinct>
+<precinct id="225">
+  <name>GETTYSBURG 2</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010021</polling_location_id>
+</precinct>
+<precinct id="2218">
+  <name>NEW OXFORD</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010036</polling_location_id>
+</precinct>
+<precinct id="2229">
+  <name>UNION</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010043</polling_location_id>
+</precinct>
+<precinct id="2231">
+  <name>MCSHERRYSTOWN 1</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010031</polling_location_id>
+</precinct>
+<precinct id="226">
+  <name>HIGHLAND</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010025</polling_location_id>
+</precinct>
+<precinct id="2213">
+  <name>READING 1</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010039</polling_location_id>
+</precinct>
+<precinct id="2227">
+  <name>FAIRFIELD</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010015</polling_location_id>
+</precinct>
+<precinct id="2239">
+  <name>ABBOTTSTOWN</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010001</polling_location_id>
+</precinct>
+<precinct id="2241">
+  <name>MCSHERRYSTOWN 2</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010031</polling_location_id>
+</precinct>
+<precinct id="222">
+  <name>CARROLL VALLEY 1</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010008</polling_location_id>
+</precinct>
+<precinct id="2224">
+  <name>FRANKLIN 2</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010017</polling_location_id>
+</precinct>
+<precinct id="228">
+  <name>LITTLESTOWN1</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010029</polling_location_id>
+</precinct>
+<precinct id="2217">
+  <name>LITTLESTOWN2</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010030</polling_location_id>
+</precinct>
+<precinct id="2219">
+  <name>MT PLEASANT1</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010034</polling_location_id>
+</precinct>
+<precinct id="2242">
+  <name>MT PLEASANT2</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010035</polling_location_id>
+</precinct>
+<precinct id="2215">
+  <name>OXFORD1</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010037</polling_location_id>
+</precinct>
+<precinct id="2240">
+  <name>OXFORD2</name>
+  <locality_id>11001</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440010038</polling_location_id>
+</precinct>
+<polling_location id="440010001">
+  <directions>FELLOWSHIP HALL</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>ABBOTTSTOWN</city>
+    <line1>100 E WATER ST</line1>
+    <state>PA</state>
+    <location_name>ST JOHN'S LUTHERAN CHURCH</location_name>
+    <zip>17301</zip>
+  </address>
+</polling_location>
+<polling_location id="440010002">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>ARENDTSVILLE</city>
+    <line1>48 PEARL ST</line1>
+    <state>PA</state>
+    <location_name>FIRE COMPANY BLDG</location_name>
+    <zip>17303</zip>
+  </address>
+</polling_location>
+<polling_location id="440010003">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>BENDERSVILLE</city>
+    <line1>144 PARK ST</line1>
+    <state>PA</state>
+    <location_name>BENDERSVILLE COMMUNITY BLDG</location_name>
+    <zip>17306</zip>
+  </address>
+</polling_location>
+<polling_location id="440010004">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>HANOVER</city>
+    <line1>85 MUNICIPAL RD</line1>
+    <state>PA</state>
+    <location_name>BERWICK TWP MUNICIPAL BLDG</location_name>
+    <zip>17331</zip>
+  </address>
+</polling_location>
+<polling_location id="440010005">
+  <directions>FELLOWSHIP HALL</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>BIGLERVILLE</city>
+    <line1>300 E YORK ST</line1>
+    <state>PA</state>
+    <location_name>TRINITY UNITED CHURCH OF CHRIST</location_name>
+    <zip>17307</zip>
+  </address>
+</polling_location>
+<polling_location id="440010006">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBURG</city>
+    <line1>46 E HANOVER ST</line1>
+    <state>PA</state>
+    <location_name>BONNEAUVILLE MUNICIPAL BLDG</location_name>
+    <zip>17325</zip>
+  </address>
+</polling_location>
+<polling_location id="440010007">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>BIGLERVILLE</city>
+    <line1>2880 TABLE ROCK RD</line1>
+    <state>PA</state>
+    <location_name>OAKSIDE COMMUNITY PARK BD RM</location_name>
+    <zip>17307</zip>
+  </address>
+</polling_location>
+<polling_location id="440010008">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>5685 FAIRFIELD RD</line1>
+    <state>PA</state>
+    <location_name>CARROLL VALLEY BORO OFFICE</location_name>
+    <zip>17320</zip>
+  </address>
+</polling_location>
+<polling_location id="440010009">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>123 SANDERS RD</line1>
+    <state>PA</state>
+    <location_name>CHILDRENS LEARNING CENTER</location_name>
+    <zip>17320</zip>
+  </address>
+</polling_location>
+<polling_location id="440010010">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>HANOVER</city>
+    <line1>5865 HANOVER RD</line1>
+    <state>PA</state>
+    <location_name>SAVES STATION</location_name>
+    <zip>17331</zip>
+  </address>
+</polling_location>
+<polling_location id="440010011">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBURG</city>
+    <line1>900 BIGLERVILLE RD</line1>
+    <state>PA</state>
+    <location_name>GETTYSBURG SCHOOL ADMIN BLDG</location_name>
+    <zip>17325</zip>
+  </address>
+</polling_location>
+<polling_location id="440010012">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBURG</city>
+    <line1>2005 TANEYTOWN RD</line1>
+    <state>PA</state>
+    <location_name>BARLOW FIRE HALL</location_name>
+    <zip>17325</zip>
+  </address>
+</polling_location>
+<polling_location id="440010013">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBURG</city>
+    <line1>1370 FAIRFIELD RD</line1>
+    <state>PA</state>
+    <location_name>TOWNSHIP MUNICIPAL BLDG</location_name>
+    <zip>17325</zip>
+  </address>
+</polling_location>
+<polling_location id="440010014">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>EAST BERLIN</city>
+    <line1>405 NORTH AVE</line1>
+    <state>PA</state>
+    <location_name>COMMUNITY CENTER</location_name>
+    <zip>17316</zip>
+  </address>
+</polling_location>
+<polling_location id="440010015">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>108 W MAIN ST</line1>
+    <state>PA</state>
+    <location_name>VILLAGE HALL</location_name>
+    <zip>17320</zip>
+  </address>
+</polling_location>
+<polling_location id="440010016">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>CASHTOWN</city>
+    <line1>1111 OLD RT 30</line1>
+    <state>PA</state>
+    <location_name>COMMUNITY FIRE CO BLDG</location_name>
+    <zip>17353</zip>
+  </address>
+</polling_location>
+<polling_location id="440010017">
+  <directions>UNION BLDG</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>BIGLERVILLE</city>
+    <line1>3161 CHAMBERSBURG RD</line1>
+    <state>PA</state>
+    <location_name>UFCW #296</location_name>
+    <zip>17307</zip>
+  </address>
+</polling_location>
+<polling_location id="440010018">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>2184 PUMPING STATION RD</line1>
+    <state>PA</state>
+    <location_name>TOWNSHIP MUNICIPAL BLDG</location_name>
+    <zip>17320</zip>
+  </address>
+</polling_location>
+<polling_location id="440010019">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>LITTLESTOWN</city>
+    <line1>427 MENGUS MILL RD</line1>
+    <state>PA</state>
+    <location_name>EAGLES PARK BLDG</location_name>
+    <zip>17340</zip>
+  </address>
+</polling_location>
+<polling_location id="440010020">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBURG</city>
+    <line1>35 N STRATTON ST</line1>
+    <state>PA</state>
+    <location_name>GETTYSBURG FIRE DEPT</location_name>
+    <zip>17325</zip>
+  </address>
+</polling_location>
+<polling_location id="440010021">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBURG</city>
+    <line1>126 W LINCOLN AVE</line1>
+    <state>PA</state>
+    <location_name>COLLEGE UNION BUILDING-ROOM</location_name>
+    <zip>17325</zip>
+  </address>
+</polling_location>
+<polling_location id="440010022">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBURG</city>
+    <line1>545 LONG LANE</line1>
+    <state>PA</state>
+    <location_name>GETTYSBURG RECREATION DEPT</location_name>
+    <zip>17325</zip>
+  </address>
+</polling_location>
+<polling_location id="440010023">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <line1>272 MUMMERTS CHURCH RD</line1>
+    <state>PA</state>
+    <location_name>TOWNSHIP MUNICIPAL BLDG</location_name>
+    <zip>17301</zip>
+  </address>
+</polling_location>
+<polling_location id="440010024">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>23 CARROLLS TRACT RD</line1>
+    <state>PA</state>
+    <location_name>HAMILTONBAN TWP BLDG</location_name>
+    <zip>17320</zip>
+  </address>
+</polling_location>
+<polling_location id="440010025">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBURG</city>
+    <line1>3641 FAIRFIELD RD</line1>
+    <state>PA</state>
+    <location_name>HIGHLAND TWP MUNICIPAL BLDG</location_name>
+    <zip>17372</zip>
+  </address>
+</polling_location>
+<polling_location id="440010026">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>YORK SPRINGS</city>
+    <line1>750 TROLLEY RD</line1>
+    <state>PA</state>
+    <location_name>TOWNSHIP MUNICIPAL BLDG</location_name>
+    <zip>17372</zip>
+  </address>
+</polling_location>
+<polling_location id="440010027">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>YORK SPRINGS</city>
+    <line1>559 OLD RT 15</line1>
+    <state>PA</state>
+    <location_name>LATIMORE TOWNSHIP BLDG</location_name>
+    <zip>17372</zip>
+  </address>
+</polling_location>
+<polling_location id="440010028">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>39 TOPPER RD</line1>
+    <state>PA</state>
+    <location_name>TOWNSHIP MUNICIPAL BLDG</location_name>
+    <zip>17320</zip>
+  </address>
+</polling_location>
+<polling_location id="440010029">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>LITTLESTOWN</city>
+    <line1>95 KEYSTONE ST</line1>
+    <state>PA</state>
+    <location_name>Y.M.C.A.</location_name>
+    <zip>17340</zip>
+  </address>
+</polling_location>
+<polling_location id="440010030">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>LITTLESTOWN</city>
+    <line1>11 W KING ST</line1>
+    <state>PA</state>
+    <location_name>VFW BANQUET HALL</location_name>
+    <zip>17340</zip>
+  </address>
+</polling_location>
+<polling_location id="440010031">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>MCSHERRYSTOWN</city>
+    <line1>342 MAIN ST</line1>
+    <state>PA</state>
+    <location_name>KNIGHTS OF COLUMBUS DINING HALL</location_name>
+    <zip>17344</zip>
+  </address>
+</polling_location>
+<polling_location id="440010032">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>ASPERS</city>
+    <line1>170 MEMORY LN</line1>
+    <state>PA</state>
+    <location_name>MENALLEN TOWNSHIP BUILDING</location_name>
+    <zip>17304</zip>
+  </address>
+</polling_location>
+<polling_location id="440010033">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBURG</city>
+    <line1>902 HOFFMAN HOME RD</line1>
+    <state>PA</state>
+    <location_name>TOWNSHIP MUNICIPAL BLDG</location_name>
+    <zip>17325</zip>
+  </address>
+</polling_location>
+<polling_location id="440010034">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBURG</city>
+    <line1>1035 BECK RD</line1>
+    <state>PA</state>
+    <location_name>TOWNSHIP MUNICIPAL BLDG</location_name>
+    <zip>17325</zip>
+  </address>
+</polling_location>
+<polling_location id="440010035">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBURG</city>
+    <line1>1016 BECK ROAD</line1>
+    <state>PA</state>
+    <location_name>MT PLEASANT TOWNSHIP MAINTENANCE BLDG</location_name>
+    <zip>17325</zip>
+  </address>
+</polling_location>
+<polling_location id="440010036">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>NEW OXFORD</city>
+    <line1>21 NORTH BOLTON ST</line1>
+    <state>PA</state>
+    <location_name>NEW OXFORD FIRE HALL</location_name>
+    <zip>17350</zip>
+  </address>
+</polling_location>
+<polling_location id="440010037">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>NEW OXFORD</city>
+    <line1>780 HANOVER ST</line1>
+    <state>PA</state>
+    <location_name>TOWNSHIP MUNICIPAL BLDG</location_name>
+    <zip>17350</zip>
+  </address>
+</polling_location>
+<polling_location id="440010038">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>NEW OXFORD</city>
+    <line1>50 VILLAGE DR</line1>
+    <state>PA</state>
+    <location_name>NICARRY MEETINGHOUSE</location_name>
+    <zip>17350</zip>
+  </address>
+</polling_location>
+<polling_location id="440010039">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>NEW OXFORD</city>
+    <line1>5371 CARLISLE PIKE NEW OXFORD</line1>
+    <state>PA</state>
+    <location_name>HAMPTON FIRE HALL</location_name>
+    <zip>17350</zip>
+  </address>
+</polling_location>
+<polling_location id="440010040">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBURG</city>
+    <line1>1075 OLD HARRISBURG RD</line1>
+    <state>PA</state>
+    <location_name>LUTHERAN RET VILLAGE</location_name>
+    <zip>17325</zip>
+  </address>
+</polling_location>
+<polling_location id="440010041">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBURG</city>
+    <line1>1745 GRANITE STATION RD</line1>
+    <state>PA</state>
+    <location_name>TOWNSHIP MUNICIPAL BLDG</location_name>
+    <zip>17325</zip>
+  </address>
+</polling_location>
+<polling_location id="440010042">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>GETTYSBUG</city>
+    <line1>2720 HEIDLERSBURG RD</line1>
+    <state>PA</state>
+    <location_name>HEIDLERSBURG FIRE HALL</location_name>
+    <zip>17325</zip>
+  </address>
+</polling_location>
+<polling_location id="440010043">
+  <directions>AUDITORIUM</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>LITTLESTOWN</city>
+    <line1>1144 BOLLINGER RD</line1>
+    <state>PA</state>
+    <location_name>LITTLESTOWN CHAPEL</location_name>
+    <zip>17340</zip>
+  </address>
+</polling_location>
+<polling_location id="440010044">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>YORK SPRINGS</city>
+    <line1>304 MAIN ST</line1>
+    <state>PA</state>
+    <location_name>FIRE COMPANY BLDG</location_name>
+    <zip>17372</zip>
+  </address>
+</polling_location>
+</vip_object>

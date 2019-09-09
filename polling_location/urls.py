@@ -32,4 +32,7 @@ urlpatterns = [
         name='polling_location_summary'),
     url(r'^(?P<polling_location_we_vote_id>wv[\w]{2}ploc[\w]+)/summary/$',
         views_admin.polling_location_summary_by_we_vote_id_view, name='polling_location_summary_by_we_vote_id'),
+    url(r'^soft_delete_duplicates/$',
+        views_admin.soft_delete_duplicates_view,
+        name='soft_delete_duplicates'),
 ]

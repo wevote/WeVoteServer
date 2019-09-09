@@ -1,0 +1,4682 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>42</vip_id>
+  <datetime>2012-10-26T12:39:00</datetime>
+  <description>VIP collects polling information from official government sources</description>
+</source>
+<state id="42">
+  <name>Pennsylvania</name>
+</state>
+<election id="4000">
+  <date>2012-11-06</date>
+  <election_type>State</election_type>
+  <state_id>42</state_id>
+  <statewide>Yes</statewide>
+</election>
+<locality id="11129">
+  <name>Westmoreland</name>
+  <state_id>42</state_id>
+  <type>County</type>
+</locality>
+<precinct id="22285">
+  <name>Arona</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290012</polling_location_id>
+</precinct>
+<precinct id="22237">
+  <name>North Belle Vernon 2</name>
+  <locality_id>11129</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290174</polling_location_id>
+</precinct>
+<precinct id="22208">
+  <name>Ligonier - S Ligonier</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290112</polling_location_id>
+</precinct>
+<precinct id="22291">
+  <name>Monessen 1-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290128</polling_location_id>
+</precinct>
+<precinct id="22195">
+  <name>Penn 5-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290208</polling_location_id>
+</precinct>
+<precinct id="22261">
+  <name>Hempfield - University</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290081</polling_location_id>
+</precinct>
+<precinct id="2298">
+  <name>Derry - Loyalhanna</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290027</polling_location_id>
+</precinct>
+<precinct id="22198">
+  <name>Fairfield - N Fairfield</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290046</polling_location_id>
+</precinct>
+<precinct id="2225">
+  <name>Hempfield - West Hempfield</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290084</polling_location_id>
+</precinct>
+<precinct id="22100">
+  <name>Manor</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290126</polling_location_id>
+</precinct>
+<precinct id="22245">
+  <name>Penn 3-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290203</polling_location_id>
+</precinct>
+<precinct id="2267">
+  <name>Vandergrift 2</name>
+  <locality_id>11129</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290265</polling_location_id>
+</precinct>
+<precinct id="2265">
+  <name>Mt Pleasant - Laurel Run</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290144</polling_location_id>
+</precinct>
+<precinct id="2217">
+  <name>Monessen 1-5</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290131</polling_location_id>
+</precinct>
+<precinct id="22223">
+  <name>West Newton 3</name>
+  <locality_id>11129</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290276</polling_location_id>
+</precinct>
+<precinct id="2268">
+  <name>Unity - Marguerite</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290259</polling_location_id>
+</precinct>
+<precinct id="22125">
+  <name>Hempfield - Haydenville</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290073</polling_location_id>
+</precinct>
+<precinct id="22193">
+  <name>Vandergrift 1</name>
+  <locality_id>11129</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290264</polling_location_id>
+</precinct>
+<precinct id="2294">
+  <name>North Huntingdon 7-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290194</polling_location_id>
+</precinct>
+<precinct id="22152">
+  <name>Salem - New Salem</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290220</polling_location_id>
+</precinct>
+<precinct id="22249">
+  <name>Salem - Steeles</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290222</polling_location_id>
+</precinct>
+<precinct id="22225">
+  <name>Unity - Mutual</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290260</polling_location_id>
+</precinct>
+<precinct id="2215">
+  <name>Mt Pleasant - Mammoth</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290145</polling_location_id>
+</precinct>
+<precinct id="22111">
+  <name>New Stanton</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290172</polling_location_id>
+</precinct>
+<precinct id="22300">
+  <name>Rostraver - Pricedale</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290214</polling_location_id>
+</precinct>
+<precinct id="22101">
+  <name>New Kensington 3-4</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290164</polling_location_id>
+</precinct>
+<precinct id="22174">
+  <name>Penn 1-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290199</polling_location_id>
+</precinct>
+<precinct id="22297">
+  <name>Mt Pleasant - Bridgeport</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290141</polling_location_id>
+</precinct>
+<precinct id="22114">
+  <name>Lower Burrell 4-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290122</polling_location_id>
+</precinct>
+<precinct id="2253">
+  <name>East Huntingdon - Ruffsdale</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290039</polling_location_id>
+</precinct>
+<precinct id="22144">
+  <name>Monessen 3-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290134</polling_location_id>
+</precinct>
+<precinct id="2299">
+  <name>Smithton</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290235</polling_location_id>
+</precinct>
+<precinct id="22146">
+  <name>Ligonier - N Ligonier</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290111</polling_location_id>
+</precinct>
+<precinct id="2259">
+  <name>Unity - Dennison</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290254</polling_location_id>
+</precinct>
+<precinct id="22275">
+  <name>Mt Pleasant - United</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290149</polling_location_id>
+</precinct>
+<precinct id="22296">
+  <name>South Huntingdon - Wyano</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290242</polling_location_id>
+</precinct>
+<precinct id="2260">
+  <name>North Huntingdon 4-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290184</polling_location_id>
+</precinct>
+<precinct id="22184">
+  <name>New Kensington 4-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290167</polling_location_id>
+</precinct>
+<precinct id="22181">
+  <name>Greensburg 2-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290050</polling_location_id>
+</precinct>
+<precinct id="22267">
+  <name>North Huntingdon 1-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290176</polling_location_id>
+</precinct>
+<precinct id="2289">
+  <name>Bell - Perrysville</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290014</polling_location_id>
+</precinct>
+<precinct id="22290">
+  <name>Monessen 2-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290133</polling_location_id>
+</precinct>
+<precinct id="2277">
+  <name>Hempfield - 2 Alwine</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290061</polling_location_id>
+</precinct>
+<precinct id="2269">
+  <name>North Huntingdon 2-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290180</polling_location_id>
+</precinct>
+<precinct id="22132">
+  <name>Allegheny 1 - Shearers</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290002</polling_location_id>
+</precinct>
+<precinct id="22141">
+  <name>West Newton 1</name>
+  <locality_id>11129</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290274</polling_location_id>
+</precinct>
+<precinct id="22147">
+  <name>Allegheny 3 - Sobers</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290004</polling_location_id>
+</precinct>
+<precinct id="22183">
+  <name>Arnold 2-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290009</polling_location_id>
+</precinct>
+<precinct id="2251">
+  <name>Scottdale 4</name>
+  <locality_id>11129</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290227</polling_location_id>
+</precinct>
+<precinct id="22102">
+  <name>Greensburg 3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290054</polling_location_id>
+</precinct>
+<precinct id="22165">
+  <name>Unity - Whitney</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290262</polling_location_id>
+</precinct>
+<precinct id="22238">
+  <name>New Kensington 6</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290170</polling_location_id>
+</precinct>
+<precinct id="2241">
+  <name>Latrobe 1</name>
+  <locality_id>11129</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290100</polling_location_id>
+</precinct>
+<precinct id="22171">
+  <name>North Belle Vernon 1</name>
+  <locality_id>11129</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290173</polling_location_id>
+</precinct>
+<precinct id="22253">
+  <name>Loyalhanna 2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290124</polling_location_id>
+</precinct>
+<precinct id="22109">
+  <name>Hempfield - Sibel</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290079</polling_location_id>
+</precinct>
+<precinct id="22289">
+  <name>New Alexandria</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290158</polling_location_id>
+</precinct>
+<precinct id="22119">
+  <name>Penn 3-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290205</polling_location_id>
+</precinct>
+<precinct id="2235">
+  <name>North Huntingdon 5-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290186</polling_location_id>
+</precinct>
+<precinct id="22192">
+  <name>North Huntingdon 6-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290189</polling_location_id>
+</precinct>
+<precinct id="22206">
+  <name>Derry 1</name>
+  <locality_id>11129</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290019</polling_location_id>
+</precinct>
+<precinct id="22292">
+  <name>Jeannette 2-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290094</polling_location_id>
+</precinct>
+<precinct id="22252">
+  <name>Derry 2</name>
+  <locality_id>11129</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290020</polling_location_id>
+</precinct>
+<precinct id="22108">
+  <name>Sewickley - Sewickley</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290232</polling_location_id>
+</precinct>
+<precinct id="22303">
+  <name>North Huntingdon 4-4</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290185</polling_location_id>
+</precinct>
+<precinct id="22157">
+  <name>North Huntingdon 3-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290182</polling_location_id>
+</precinct>
+<precinct id="2232">
+  <name>Latrobe 5</name>
+  <locality_id>11129</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290104</polling_location_id>
+</precinct>
+<precinct id="22136">
+  <name>New Kensington 3-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290163</polling_location_id>
+</precinct>
+<precinct id="2280">
+  <name>Hempfield - Valley</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290082</polling_location_id>
+</precinct>
+<precinct id="2230">
+  <name>New Kensington 4-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290166</polling_location_id>
+</precinct>
+<precinct id="22160">
+  <name>East Huntingdon - Strohms</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290041</polling_location_id>
+</precinct>
+<precinct id="22255">
+  <name>Oklahoma</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290197</polling_location_id>
+</precinct>
+<precinct id="22215">
+  <name>Hempfield - Eastview</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290069</polling_location_id>
+</precinct>
+<precinct id="222">
+  <name>New Kensington 4-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290165</polling_location_id>
+</precinct>
+<precinct id="2283">
+  <name>North Huntingdon 1-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290177</polling_location_id>
+</precinct>
+<precinct id="22186">
+  <name>Vandergrift 5</name>
+  <locality_id>11129</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290267</polling_location_id>
+</precinct>
+<precinct id="22219">
+  <name>Derry - Millwood</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290028</polling_location_id>
+</precinct>
+<precinct id="2261">
+  <name>Hempfield - North Carbon</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290078</polling_location_id>
+</precinct>
+<precinct id="22112">
+  <name>North Huntingdon 5-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290187</polling_location_id>
+</precinct>
+<precinct id="22140">
+  <name>Monessen 2-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290132</polling_location_id>
+</precinct>
+<precinct id="22159">
+  <name>Derry - Cooperstown</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290025</polling_location_id>
+</precinct>
+<precinct id="22258">
+  <name>Vandergrift 6</name>
+  <locality_id>11129</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290268</polling_location_id>
+</precinct>
+<precinct id="22221">
+  <name>Laurel Mountain</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290106</polling_location_id>
+</precinct>
+<precinct id="22294">
+  <name>Hempfield - Gayville</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290071</polling_location_id>
+</precinct>
+<precinct id="2285">
+  <name>North Huntingdon 2-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290179</polling_location_id>
+</precinct>
+<precinct id="223">
+  <name>Avonmore</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290013</polling_location_id>
+</precinct>
+<precinct id="22175">
+  <name>Unity - Dorothy</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290255</polling_location_id>
+</precinct>
+<precinct id="2237">
+  <name>Unity - Gravel Hill</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290256</polling_location_id>
+</precinct>
+<precinct id="22123">
+  <name>North Huntingdon 7-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290192</polling_location_id>
+</precinct>
+<precinct id="227">
+  <name>Youngwood 3</name>
+  <locality_id>11129</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290278</polling_location_id>
+</precinct>
+<precinct id="22117">
+  <name>Hempfield - 6 Luxor</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290065</polling_location_id>
+</precinct>
+<precinct id="2226">
+  <name>Jeannette 3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290095</polling_location_id>
+</precinct>
+<precinct id="22106">
+  <name>Scottdale 2</name>
+  <locality_id>11129</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290225</polling_location_id>
+</precinct>
+<precinct id="225">
+  <name>Lower Burrell 1-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290116</polling_location_id>
+</precinct>
+<precinct id="224">
+  <name>Arnold 1-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290007</polling_location_id>
+</precinct>
+<precinct id="22197">
+  <name>Fairfield - Fairfield</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290045</polling_location_id>
+</precinct>
+<precinct id="22116">
+  <name>Greensburg 6</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290056</polling_location_id>
+</precinct>
+<precinct id="22234">
+  <name>Penn 3-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290204</polling_location_id>
+</precinct>
+<precinct id="22288">
+  <name>Derry - Torrance</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290033</polling_location_id>
+</precinct>
+<precinct id="22220">
+  <name>Hempfield - Grapeville</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290072</polling_location_id>
+</precinct>
+<precinct id="22113">
+  <name>East Huntingdon - Bessemer 2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290038</polling_location_id>
+</precinct>
+<precinct id="2255">
+  <name>Derry - Scalp Level</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290031</polling_location_id>
+</precinct>
+<precinct id="22172">
+  <name>Mt Pleasant - Duncan</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290142</polling_location_id>
+</precinct>
+<precinct id="2288">
+  <name>Penn 5-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290208</polling_location_id>
+</precinct>
+<precinct id="2272">
+  <name>Mt Pleasant 1</name>
+  <locality_id>11129</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290138</polling_location_id>
+</precinct>
+<precinct id="22277">
+  <name>Youngwood 1</name>
+  <locality_id>11129</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290278</polling_location_id>
+</precinct>
+<precinct id="22214">
+  <name>North Huntingdon 6-4</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290191</polling_location_id>
+</precinct>
+<precinct id="22269">
+  <name>Sutersville</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290248</polling_location_id>
+</precinct>
+<precinct id="22110">
+  <name>South Greensburg 1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290236</polling_location_id>
+</precinct>
+<precinct id="2282">
+  <name>Greensburg 2-4</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290053</polling_location_id>
+</precinct>
+<precinct id="22115">
+  <name>Hempfield - 8 Bovard</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290067</polling_location_id>
+</precinct>
+<precinct id="22246">
+  <name>Salem - Hugus</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290218</polling_location_id>
+</precinct>
+<precinct id="22282">
+  <name>Madison</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290125</polling_location_id>
+</precinct>
+<precinct id="22204">
+  <name>Hempfield - High Park</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290074</polling_location_id>
+</precinct>
+<precinct id="22179">
+  <name>Sewickley - Lowber</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290230</polling_location_id>
+</precinct>
+<precinct id="2278">
+  <name>North Huntingdon 3-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290181</polling_location_id>
+</precinct>
+<precinct id="2223">
+  <name>North Huntingdon 4-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290183</polling_location_id>
+</precinct>
+<precinct id="2256">
+  <name>Penn 1-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290200</polling_location_id>
+</precinct>
+<precinct id="22205">
+  <name>Derry 4</name>
+  <locality_id>11129</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290021</polling_location_id>
+</precinct>
+<precinct id="2213">
+  <name>Ligonier 1</name>
+  <locality_id>11129</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290107</polling_location_id>
+</precinct>
+<precinct id="22118">
+  <name>Monessen 3-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290135</polling_location_id>
+</precinct>
+<precinct id="22283">
+  <name>Sewickley - Whyel</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290234</polling_location_id>
+</precinct>
+<precinct id="22302">
+  <name>Monessen 1-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290129</polling_location_id>
+</precinct>
+<precinct id="22295">
+  <name>East Huntingdon - Stoners</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290040</polling_location_id>
+</precinct>
+<precinct id="22145">
+  <name>Lower Burrell 4-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290121</polling_location_id>
+</precinct>
+<precinct id="22196">
+  <name>New Florence</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290159</polling_location_id>
+</precinct>
+<precinct id="22162">
+  <name>Derry - Kingston</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290026</polling_location_id>
+</precinct>
+<precinct id="2227">
+  <name>New Kensington 7-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290171</polling_location_id>
+</precinct>
+<precinct id="22178">
+  <name>Greensburg 5-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290056</polling_location_id>
+</precinct>
+<precinct id="22242">
+  <name>Irwin 4</name>
+  <locality_id>11129</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290090</polling_location_id>
+</precinct>
+<precinct id="2279">
+  <name>North Huntingdon 1-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290175</polling_location_id>
+</precinct>
+<precinct id="22222">
+  <name>Youngwood 2</name>
+  <locality_id>11129</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290278</polling_location_id>
+</precinct>
+<precinct id="22230">
+  <name>Greensburg 8-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290059</polling_location_id>
+</precinct>
+<precinct id="2263">
+  <name>Penn 2-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290201</polling_location_id>
+</precinct>
+<precinct id="22240">
+  <name>Irwin 3</name>
+  <locality_id>11129</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290090</polling_location_id>
+</precinct>
+<precinct id="2258">
+  <name>Washington - Beamers</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290269</polling_location_id>
+</precinct>
+<precinct id="22260">
+  <name>Hyde Park</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290087</polling_location_id>
+</precinct>
+<precinct id="22156">
+  <name>New Kensington 4-5</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290168</polling_location_id>
+</precinct>
+<precinct id="228">
+  <name>Scottdale 1</name>
+  <locality_id>11129</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290224</polling_location_id>
+</precinct>
+<precinct id="2273">
+  <name>Allegheny 4 - Stewarts</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290005</polling_location_id>
+</precinct>
+<precinct id="2220">
+  <name>Hempfield - 3 Maplewood</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290062</polling_location_id>
+</precinct>
+<precinct id="2292">
+  <name>Lower Burrell 2-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290117</polling_location_id>
+</precinct>
+<precinct id="2247">
+  <name>Hempfield - West Point</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290085</polling_location_id>
+</precinct>
+<precinct id="22133">
+  <name>North Huntingdon 7-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290193</polling_location_id>
+</precinct>
+<precinct id="22216">
+  <name>Derry - New Derry</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290029</polling_location_id>
+</precinct>
+<precinct id="22191">
+  <name>Upper Burrell 2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290263</polling_location_id>
+</precinct>
+<precinct id="22131">
+  <name>Greensburg 2-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290052</polling_location_id>
+</precinct>
+<precinct id="22217">
+  <name>Sewickley - E Herminie</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290229</polling_location_id>
+</precinct>
+<precinct id="22284">
+  <name>South Huntingdon - Mineral</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290239</polling_location_id>
+</precinct>
+<precinct id="22150">
+  <name>South Huntingdon - Hixon</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290237</polling_location_id>
+</precinct>
+<precinct id="22105">
+  <name>Unity - Beatty</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290252</polling_location_id>
+</precinct>
+<precinct id="22187">
+  <name>New Kensington 5</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290169</polling_location_id>
+</precinct>
+<precinct id="22262">
+  <name>Derry - Saxman</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290027</polling_location_id>
+</precinct>
+<precinct id="22129">
+  <name>Scottdale 3</name>
+  <locality_id>11129</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290226</polling_location_id>
+</precinct>
+<precinct id="2231">
+  <name>Ligonier - Idle Park</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290109</polling_location_id>
+</precinct>
+<precinct id="2287">
+  <name>West Newton 2</name>
+  <locality_id>11129</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290275</polling_location_id>
+</precinct>
+<precinct id="22138">
+  <name>Lower Burrell 2-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290118</polling_location_id>
+</precinct>
+<precinct id="22173">
+  <name>Arnold 2-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290011</polling_location_id>
+</precinct>
+<precinct id="2249">
+  <name>Hempfield - Fort Allen</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290070</polling_location_id>
+</precinct>
+<precinct id="22189">
+  <name>Lower Burrell 2-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290117</polling_location_id>
+</precinct>
+<precinct id="22236">
+  <name>Monessen 1-4</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290130</polling_location_id>
+</precinct>
+<precinct id="2281">
+  <name>North Huntingdon 6-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290190</polling_location_id>
+</precinct>
+<precinct id="22190">
+  <name>West Leechburg</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290273</polling_location_id>
+</precinct>
+<precinct id="22287">
+  <name>Derry - Cokeville</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290024</polling_location_id>
+</precinct>
+<precinct id="22194">
+  <name>Jeannette 1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290093</polling_location_id>
+</precinct>
+<precinct id="22279">
+  <name>Derry - Simpsons</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290032</polling_location_id>
+</precinct>
+<precinct id="22211">
+  <name>Bolivar</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290016</polling_location_id>
+</precinct>
+<precinct id="22259">
+  <name>Loyalhanna 1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290123</polling_location_id>
+</precinct>
+<precinct id="22224">
+  <name>Greensburg 1-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290048</polling_location_id>
+</precinct>
+<precinct id="22137">
+  <name>Greensburg 5-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290055</polling_location_id>
+</precinct>
+<precinct id="2291">
+  <name>Monessen 3-4</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290135</polling_location_id>
+</precinct>
+<precinct id="22121">
+  <name>Jeannette 5-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290097</polling_location_id>
+</precinct>
+<precinct id="2240">
+  <name>Derry - Peanut</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290030</polling_location_id>
+</precinct>
+<precinct id="22264">
+  <name>Jeannette 4</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290096</polling_location_id>
+</precinct>
+<precinct id="22268">
+  <name>Irwin 1</name>
+  <locality_id>11129</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290088</polling_location_id>
+</precinct>
+<precinct id="22293">
+  <name>Hempfield - Wegley</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290083</polling_location_id>
+</precinct>
+<precinct id="22148">
+  <name>Upper Burrell 1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290263</polling_location_id>
+</precinct>
+<precinct id="22250">
+  <name>Bell - Salina</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290015</polling_location_id>
+</precinct>
+<precinct id="2286">
+  <name>North Irwin</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290196</polling_location_id>
+</precinct>
+<precinct id="2271">
+  <name>North Huntingdon 7-4</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290195</polling_location_id>
+</precinct>
+<precinct id="2266">
+  <name>Trafford 1</name>
+  <locality_id>11129</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290249</polling_location_id>
+</precinct>
+<precinct id="22120">
+  <name>Greensburg 2-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290051</polling_location_id>
+</precinct>
+<precinct id="2229">
+  <name>Irwin 7</name>
+  <locality_id>11129</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290092</polling_location_id>
+</precinct>
+<precinct id="229">
+  <name>Greensburg 7-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290057</polling_location_id>
+</precinct>
+<precinct id="22182">
+  <name>Allegheny 2 - McKees</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290003</polling_location_id>
+</precinct>
+<precinct id="22201">
+  <name>St Clair - St Clair</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290247</polling_location_id>
+</precinct>
+<precinct id="22126">
+  <name>Hempfield - 4 Carbon</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290063</polling_location_id>
+</precinct>
+<precinct id="2250">
+  <name>Latrobe 3</name>
+  <locality_id>11129</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290102</polling_location_id>
+</precinct>
+<precinct id="2236">
+  <name>North Huntingdon 5-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290186</polling_location_id>
+</precinct>
+<precinct id="22207">
+  <name>Derry - Bradenville</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290023</polling_location_id>
+</precinct>
+<precinct id="22185">
+  <name>Arnold 1-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290008</polling_location_id>
+</precinct>
+<precinct id="22180">
+  <name>Monessen 1-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290127</polling_location_id>
+</precinct>
+<precinct id="22241">
+  <name>Salem - Slickville</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290221</polling_location_id>
+</precinct>
+<precinct id="221">
+  <name>Murrysville Sardis</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290156</polling_location_id>
+</precinct>
+<precinct id="2238">
+  <name>New Kensington 3-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290161</polling_location_id>
+</precinct>
+<precinct id="22244">
+  <name>Unity - Kuhns</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290257</polling_location_id>
+</precinct>
+<precinct id="22168">
+  <name>Hempfield - New Stanton</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290077</polling_location_id>
+</precinct>
+<precinct id="22304">
+  <name>Rostraver - Van Meter</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290215</polling_location_id>
+</precinct>
+<precinct id="22247">
+  <name>Salem - Trees Mills</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290223</polling_location_id>
+</precinct>
+<precinct id="22210">
+  <name>Greensburg 8-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290058</polling_location_id>
+</precinct>
+<precinct id="22170">
+  <name>Greensburg 4-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290050</polling_location_id>
+</precinct>
+<precinct id="2262">
+  <name>Hempfield - East Adamsburg</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290068</polling_location_id>
+</precinct>
+<precinct id="22263">
+  <name>Salem - Mechlings</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290219</polling_location_id>
+</precinct>
+<precinct id="2212">
+  <name>New Kensington 4-4</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290168</polling_location_id>
+</precinct>
+<precinct id="2243">
+  <name>South Huntingdon - Wayne</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290241</polling_location_id>
+</precinct>
+<precinct id="22202">
+  <name>Ligonier - Waterford</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290113</polling_location_id>
+</precinct>
+<precinct id="22166">
+  <name>Irwin 2</name>
+  <locality_id>11129</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290089</polling_location_id>
+</precinct>
+<precinct id="2254">
+  <name>Washington - Paulton</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290272</polling_location_id>
+</precinct>
+<precinct id="22227">
+  <name>East Huntingdon - Bessemer 1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290037</polling_location_id>
+</precinct>
+<precinct id="22153">
+  <name>Mt Pleasant 3</name>
+  <locality_id>11129</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290140</polling_location_id>
+</precinct>
+<precinct id="22139">
+  <name>New Kensington 7-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290171</polling_location_id>
+</precinct>
+<precinct id="2222">
+  <name>Allegheny 5 - Bellvue</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290006</polling_location_id>
+</precinct>
+<precinct id="2211">
+  <name>Cook</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290017</polling_location_id>
+</precinct>
+<precinct id="22276">
+  <name>Hunker</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290086</polling_location_id>
+</precinct>
+<precinct id="22127">
+  <name>South Greensburg 2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290236</polling_location_id>
+</precinct>
+<precinct id="22124">
+  <name>Export</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290044</polling_location_id>
+</precinct>
+<precinct id="22177">
+  <name>Monessen 4-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290137</polling_location_id>
+</precinct>
+<precinct id="22164">
+  <name>Rostraver - Lynnwood</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290213</polling_location_id>
+</precinct>
+<precinct id="22134">
+  <name>New Kensington 2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290160</polling_location_id>
+</precinct>
+<precinct id="22122">
+  <name>Ligonier 2</name>
+  <locality_id>11129</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290108</polling_location_id>
+</precinct>
+<precinct id="22281">
+  <name>Sewickley - Rillton</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290231</polling_location_id>
+</precinct>
+<precinct id="2216">
+  <name>Irwin 6</name>
+  <locality_id>11129</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290091</polling_location_id>
+</precinct>
+<precinct id="2214">
+  <name>Jeannette 5-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290098</polling_location_id>
+</precinct>
+<precinct id="22199">
+  <name>Fairfield - S Fairfield</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290047</polling_location_id>
+</precinct>
+<precinct id="2246">
+  <name>Greensburg 7-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290057</polling_location_id>
+</precinct>
+<precinct id="2239">
+  <name>Latrobe 4</name>
+  <locality_id>11129</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290103</polling_location_id>
+</precinct>
+<precinct id="22169">
+  <name>Vandergrift 4</name>
+  <locality_id>11129</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290267</polling_location_id>
+</precinct>
+<precinct id="2264">
+  <name>Hempfield - 1 Foxhill</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290060</polling_location_id>
+</precinct>
+<precinct id="22188">
+  <name>New Kensington 3-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290162</polling_location_id>
+</precinct>
+<precinct id="22266">
+  <name>Monessen 2-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290133</polling_location_id>
+</precinct>
+<precinct id="22254">
+  <name>South Huntingdon - Yukon</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290243</polling_location_id>
+</precinct>
+<precinct id="2257">
+  <name>Greensburg 1-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290049</polling_location_id>
+</precinct>
+<precinct id="2224">
+  <name>Penn 2-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290202</polling_location_id>
+</precinct>
+<precinct id="2296">
+  <name>Penn 4-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290206</polling_location_id>
+</precinct>
+<precinct id="2284">
+  <name>Jeannette 2-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290094</polling_location_id>
+</precinct>
+<precinct id="22155">
+  <name>North Huntingdon 6-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290188</polling_location_id>
+</precinct>
+<precinct id="2252">
+  <name>Latrobe 6</name>
+  <locality_id>11129</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290105</polling_location_id>
+</precinct>
+<precinct id="22200">
+  <name>Derry 3</name>
+  <locality_id>11129</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290021</polling_location_id>
+</precinct>
+<precinct id="22161">
+  <name>Unity - Baggaley</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290251</polling_location_id>
+</precinct>
+<precinct id="2233">
+  <name>Mt Pleasant 2</name>
+  <locality_id>11129</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290139</polling_location_id>
+</precinct>
+<precinct id="2221">
+  <name>Trafford 2</name>
+  <locality_id>11129</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290250</polling_location_id>
+</precinct>
+<precinct id="22251">
+  <name>Irwin 5</name>
+  <locality_id>11129</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290091</polling_location_id>
+</precinct>
+<precinct id="22233">
+  <name>Rostraver - Concord</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290210</polling_location_id>
+</precinct>
+<precinct id="22218">
+  <name>Latrobe 2</name>
+  <locality_id>11129</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290101</polling_location_id>
+</precinct>
+<precinct id="2245">
+  <name>Hempfield - Todd</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290080</polling_location_id>
+</precinct>
+<precinct id="226">
+  <name>Vandergrift 3</name>
+  <locality_id>11129</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290266</polling_location_id>
+</precinct>
+<precinct id="22135">
+  <name>Monessen 4-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290136</polling_location_id>
+</precinct>
+<precinct id="22154">
+  <name>Unity - Lloydsville</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290258</polling_location_id>
+</precinct>
+<precinct id="22272">
+  <name>Mt Pleasant - Ridgeview</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290147</polling_location_id>
+</precinct>
+<precinct id="2210">
+  <name>North Huntingdon 2-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290179</polling_location_id>
+</precinct>
+<precinct id="22103">
+  <name>North Huntingdon 4-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290184</polling_location_id>
+</precinct>
+<precinct id="22167">
+  <name>Unity - Roble</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290255</polling_location_id>
+</precinct>
+<precinct id="22257">
+  <name>Sewickley - W Herminie</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290233</polling_location_id>
+</precinct>
+<precinct id="22213">
+  <name>Ligonier - Wilpen</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290114</polling_location_id>
+</precinct>
+<precinct id="22158">
+  <name>Arnold 2-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290010</polling_location_id>
+</precinct>
+<precinct id="22286">
+  <name>Adamsburg</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290001</polling_location_id>
+</precinct>
+<precinct id="22104">
+  <name>Jeannette 6</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290099</polling_location_id>
+</precinct>
+<precinct id="22128">
+  <name>Hempfield - Middletown</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290076</polling_location_id>
+</precinct>
+<precinct id="22107">
+  <name>Lower Burrell 3-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290119</polling_location_id>
+</precinct>
+<precinct id="22232">
+  <name>Penn 4-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290207</polling_location_id>
+</precinct>
+<precinct id="22265">
+  <name>Rostraver - Webster</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290216</polling_location_id>
+</precinct>
+<precinct id="2297">
+  <name>Penn 5-3</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290208</polling_location_id>
+</precinct>
+<precinct id="22130">
+  <name>Lower Burrell 1-1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290115</polling_location_id>
+</precinct>
+<precinct id="22228">
+  <name>Youngstown</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290277</polling_location_id>
+</precinct>
+<precinct id="2219">
+  <name>Delmont</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290018</polling_location_id>
+</precinct>
+<precinct id="22235">
+  <name>Rostraver - Fellsburg</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290212</polling_location_id>
+</precinct>
+<precinct id="22229">
+  <name>East Huntingdon - Whites</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290042</polling_location_id>
+</precinct>
+<precinct id="22163">
+  <name>Bell - Roaring Run</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290015</polling_location_id>
+</precinct>
+<precinct id="22142">
+  <name>Lower Burrell 3-2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290120</polling_location_id>
+</precinct>
+<precinct id="2248">
+  <name>North Huntingdon 1-4</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290178</polling_location_id>
+</precinct>
+<precinct id="22209">
+  <name>Unity - Crabtree</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290253</polling_location_id>
+</precinct>
+<precinct id="22239">
+  <name>Salem - Five Points</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290217</polling_location_id>
+</precinct>
+<precinct id="22298">
+  <name>Donegal</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290034</polling_location_id>
+</precinct>
+<precinct id="22273">
+  <name>Derry - Altiers</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290022</polling_location_id>
+</precinct>
+<precinct id="22176">
+  <name>Donegal - Four Mile Run</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290035</polling_location_id>
+</precinct>
+<precinct id="22270">
+  <name>Donegal - Indian Creek</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290036</polling_location_id>
+</precinct>
+<precinct id="22256">
+  <name>East Vandergrift</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290043</polling_location_id>
+</precinct>
+<precinct id="22280">
+  <name>Hempfield - 5 Wendel-Herminie</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290064</polling_location_id>
+</precinct>
+<precinct id="22248">
+  <name>Hempfield - 7 Hannastown</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290066</polling_location_id>
+</precinct>
+<precinct id="2290">
+  <name>Hempfield - Lincoln Heights E</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290075</polling_location_id>
+</precinct>
+<precinct id="22226">
+  <name>Hempfield - Lincoln Heights W</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290075</polling_location_id>
+</precinct>
+<precinct id="2276">
+  <name>Hempfield - Weaver's Old Stand</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290079</polling_location_id>
+</precinct>
+<precinct id="22203">
+  <name>Ligonier - Laughlintown</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290110</polling_location_id>
+</precinct>
+<precinct id="2295">
+  <name>Mt Pleasant - Hecla</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290143</polling_location_id>
+</precinct>
+<precinct id="22271">
+  <name>Mt Pleasant - Pleasant Valley</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290146</polling_location_id>
+</precinct>
+<precinct id="2275">
+  <name>Mt Pleasant - Spring Garden</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290148</polling_location_id>
+</precinct>
+<precinct id="22274">
+  <name>Mt Pleasant - Westmoreland Homesteads</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290150</polling_location_id>
+</precinct>
+<precinct id="2234">
+  <name>Murrysville E Murrysville</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290151</polling_location_id>
+</precinct>
+<precinct id="2293">
+  <name>Murrysville East Manordale</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290152</polling_location_id>
+</precinct>
+<precinct id="2270">
+  <name>Murrysville Manordale</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290153</polling_location_id>
+</precinct>
+<precinct id="2228">
+  <name>Murrysville Newlonsburg</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290154</polling_location_id>
+</precinct>
+<precinct id="2244">
+  <name>Murrysville S Murrysville</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290155</polling_location_id>
+</precinct>
+<precinct id="2242">
+  <name>Murrysville W Murrysville</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290157</polling_location_id>
+</precinct>
+<precinct id="22143">
+  <name>Penn</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290198</polling_location_id>
+</precinct>
+<precinct id="22212">
+  <name>Rostraver - Collinsburg</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290209</polling_location_id>
+</precinct>
+<precinct id="2274">
+  <name>Rostraver - Cross Road</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290211</polling_location_id>
+</precinct>
+<precinct id="22301">
+  <name>South Huntingdon - Jacobs Creek</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290238</polling_location_id>
+</precinct>
+<precinct id="22299">
+  <name>South Huntingdon - Port Royal</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290239</polling_location_id>
+</precinct>
+<precinct id="22278">
+  <name>South Huntingdon - South Huntingdon</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290240</polling_location_id>
+</precinct>
+<precinct id="22231">
+  <name>Southwest Greensburg 1</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290244</polling_location_id>
+</precinct>
+<precinct id="22151">
+  <name>Southwest Greensburg 2</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290245</polling_location_id>
+</precinct>
+<precinct id="22305">
+  <name>Se</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290228</polling_location_id>
+</precinct>
+<precinct id="22306">
+  <name>St Clair - Se</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290246</polling_location_id>
+</precinct>
+<precinct id="22149">
+  <name>Unity - Pleasant Unity</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290261</polling_location_id>
+</precinct>
+<precinct id="22243">
+  <name>Washington - North Washington</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290270</polling_location_id>
+</precinct>
+<precinct id="2218">
+  <name>Washington - Oakland Cross Roads</name>
+  <locality_id>11129</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>441290271</polling_location_id>
+</precinct>
+<polling_location id="441290001">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Adamsburg</city>
+    <line1>495 Edna Rd</line1>
+    <state>PA</state>
+    <location_name>Adamsburg Fire Hall</location_name>
+    <zip>15611</zip>
+  </address>
+</polling_location>
+<polling_location id="441290002">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>4711 Leechburg Rd</line1>
+    <state>PA</state>
+    <location_name>Chieftain Archery</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290003">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Leechburg</city>
+    <line1>1098 Bagdad Rd</line1>
+    <state>PA</state>
+    <location_name>Mt Hope Church Of God</location_name>
+    <zip>15656</zip>
+  </address>
+</polling_location>
+<polling_location id="441290004">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Leechburg</city>
+    <line1>136 Community Bldg Rd</line1>
+    <state>PA</state>
+    <location_name>Allegheny Township Community Building</location_name>
+    <zip>15656</zip>
+  </address>
+</polling_location>
+<polling_location id="441290005">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Apollo</city>
+    <line1>470 Joyce Ave</line1>
+    <state>PA</state>
+    <location_name>Markle Vfd</location_name>
+    <zip>15613</zip>
+  </address>
+</polling_location>
+<polling_location id="441290006">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Leechburg</city>
+    <line1>250 Hyde Park Road</line1>
+    <state>PA</state>
+    <location_name>Kiski Area High School</location_name>
+    <zip>15656</zip>
+  </address>
+</polling_location>
+<polling_location id="441290007">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Arnold</city>
+    <line1>1632 Horne Blvd</line1>
+    <state>PA</state>
+    <location_name>Arnold Manor</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290008">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Arnold</city>
+    <line1>1528 Horne Blvd</line1>
+    <state>PA</state>
+    <location_name>Arnold Towers</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290009">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>1701 Alcoa Dr</line1>
+    <state>PA</state>
+    <location_name>Valley Middle School</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290010">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Arnold</city>
+    <line1>1100 Drey St</line1>
+    <state>PA</state>
+    <location_name>Hose House</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290011">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Arnold</city>
+    <line1>1739 Victoria Ave</line1>
+    <state>PA</state>
+    <location_name>Berkey Elementary School</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290012">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Arona</city>
+    <line1>2037 Main Street</line1>
+    <state>PA</state>
+    <location_name>Arona United Methodist Church</location_name>
+    <zip>15617</zip>
+  </address>
+</polling_location>
+<polling_location id="441290013">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Avonmore</city>
+    <line1>210 5th Street</line1>
+    <state>PA</state>
+    <location_name>Avonmore Fire Hall</location_name>
+    <zip>15618</zip>
+  </address>
+</polling_location>
+<polling_location id="441290014">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Salina</city>
+    <line1>2324 Rt 380</line1>
+    <state>PA</state>
+    <location_name>Bell Township Municipal Building</location_name>
+    <zip>15680</zip>
+  </address>
+</polling_location>
+<polling_location id="441290015">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Salina</city>
+    <line1>207 Main St</line1>
+    <state>PA</state>
+    <location_name>Bell Twp Vol Fire Dept</location_name>
+    <zip>15680</zip>
+  </address>
+</polling_location>
+<polling_location id="441290016">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Bolivar</city>
+    <line1>414 Second St</line1>
+    <state>PA</state>
+    <location_name>Bolivar Borough Building</location_name>
+    <zip>15923</zip>
+  </address>
+</polling_location>
+<polling_location id="441290017">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Stahlstown</city>
+    <line1>1698 State Route 711</line1>
+    <state>PA</state>
+    <location_name>Cook Twp Community Center</location_name>
+    <zip>15687</zip>
+  </address>
+</polling_location>
+<polling_location id="441290018">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Delmont</city>
+    <line1>305 Freeport St</line1>
+    <state>PA</state>
+    <location_name>Faith United Methodist Church</location_name>
+    <zip>15626</zip>
+  </address>
+</polling_location>
+<polling_location id="441290019">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Derry</city>
+    <line1>200 W. 2nd St</line1>
+    <state>PA</state>
+    <location_name>Derry Station Senior Citizen Center</location_name>
+    <zip>15627</zip>
+  </address>
+</polling_location>
+<polling_location id="441290020">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Derry</city>
+    <line1>117 Ligonier St</line1>
+    <state>PA</state>
+    <location_name>St Joseph'S Hall</location_name>
+    <zip>15627</zip>
+  </address>
+</polling_location>
+<polling_location id="441290021">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Derry</city>
+    <line1>100 W. 2nd St</line1>
+    <state>PA</state>
+    <location_name>Community Center</location_name>
+    <zip>15627</zip>
+  </address>
+</polling_location>
+<polling_location id="441290022">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Blairsville</city>
+    <line1>9626 Rt Route 22 West</line1>
+    <state>PA</state>
+    <location_name>Blairsville Vfw Post 5821</location_name>
+    <zip>15717</zip>
+  </address>
+</polling_location>
+<polling_location id="441290023">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Bradenville</city>
+    <line1>515 Amvets Dr</line1>
+    <state>PA</state>
+    <location_name>Bradenville Vfd Social Hall</location_name>
+    <zip>15620</zip>
+  </address>
+</polling_location>
+<polling_location id="441290024">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Blairsville</city>
+    <line1>969 Pizza Barn Rd</line1>
+    <state>PA</state>
+    <location_name>Pizza Barn Off Rte 217</location_name>
+    <zip>15717</zip>
+  </address>
+</polling_location>
+<polling_location id="441290025">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>4904 State Route 982</line1>
+    <state>PA</state>
+    <location_name>East/West Technology School</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290026">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>138 Kingston Club Rd</line1>
+    <state>PA</state>
+    <location_name>The Kingston Club</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290027">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>415 Brennan Ave</line1>
+    <state>PA</state>
+    <location_name>Koc Community Center</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290028">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Derry</city>
+    <line1>1426 Rte 217</line1>
+    <state>PA</state>
+    <location_name>Eastern Derry Twp Vfd Station 92</location_name>
+    <zip>15627</zip>
+  </address>
+</polling_location>
+<polling_location id="441290029">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Derry</city>
+    <line1>5684 Route 982</line1>
+    <state>PA</state>
+    <location_name>St Martin Catholic Church</location_name>
+    <zip>15671</zip>
+  </address>
+</polling_location>
+<polling_location id="441290030">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Ext Derry</city>
+    <line1>982 N Chestnut Street</line1>
+    <state>PA</state>
+    <location_name>Derry Area School Administration Bldg</location_name>
+    <zip>15627</zip>
+  </address>
+</polling_location>
+<polling_location id="441290031">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Derry</city>
+    <line1>716 W 4th Ave</line1>
+    <state>PA</state>
+    <location_name>Alpha Lion'S Den Ministries</location_name>
+    <zip>15627</zip>
+  </address>
+</polling_location>
+<polling_location id="441290032">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Alexandria</city>
+    <line1>8370 Route 22</line1>
+    <state>PA</state>
+    <location_name>New Alexandria Fireman'S Club</location_name>
+    <zip>15670</zip>
+  </address>
+</polling_location>
+<polling_location id="441290033">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Torrance</city>
+    <line1>121 Longview Dr</line1>
+    <state>PA</state>
+    <location_name>Torrance State Hospital</location_name>
+    <zip>15779</zip>
+  </address>
+</polling_location>
+<polling_location id="441290034">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Donegal</city>
+    <line1>340 Church Street</line1>
+    <state>PA</state>
+    <location_name>Borough Building</location_name>
+    <zip>15628</zip>
+  </address>
+</polling_location>
+<polling_location id="441290035">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Acme</city>
+    <line1>113 Community Center Lane</line1>
+    <state>PA</state>
+    <location_name>Donegal Twp Community Building</location_name>
+    <zip>15610</zip>
+  </address>
+</polling_location>
+<polling_location id="441290036">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Acme</city>
+    <line1>113 Community Center Lane</line1>
+    <state>PA</state>
+    <location_name>Donegal Twp Community Building</location_name>
+    <zip>15610</zip>
+  </address>
+</polling_location>
+<polling_location id="441290037">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>ive Mt. Pleasant</city>
+    <line1>555 Valley Kitchen Dr</line1>
+    <state>PA</state>
+    <location_name>Valley Kitchen Sales</location_name>
+    <zip>15666</zip>
+  </address>
+</polling_location>
+<polling_location id="441290038">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Scottdale</city>
+    <line1>109 West Overton Road</line1>
+    <state>PA</state>
+    <location_name>West Overton Museum</location_name>
+    <zip>15683</zip>
+  </address>
+</polling_location>
+<polling_location id="441290039">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Ruffsdale</city>
+    <line1>842 Rte 31</line1>
+    <state>PA</state>
+    <location_name>Ruffsdale Elementary School</location_name>
+    <zip>15679</zip>
+  </address>
+</polling_location>
+<polling_location id="441290040">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Alverton</city>
+    <line1>2390 Rte 981</line1>
+    <state>PA</state>
+    <location_name>E. Huntingdon Vfd Sub Station</location_name>
+    <zip>15612</zip>
+  </address>
+</polling_location>
+<polling_location id="441290041">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Tarrs</city>
+    <line1>120 Fire Dept. Rd</line1>
+    <state>PA</state>
+    <location_name>Vol Fire Dept Social Hall</location_name>
+    <zip>15688</zip>
+  </address>
+</polling_location>
+<polling_location id="441290042">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Alverton</city>
+    <line1>2358 Rte 981</line1>
+    <state>PA</state>
+    <location_name>New Field House</location_name>
+    <zip>15612</zip>
+  </address>
+</polling_location>
+<polling_location id="441290043">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>East Vandergrift</city>
+    <line1>254 Kennedy Ave</line1>
+    <state>PA</state>
+    <location_name>Borough Building</location_name>
+    <zip>15629</zip>
+  </address>
+</polling_location>
+<polling_location id="441290044">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Export</city>
+    <line1>5778 Kennedy Ave</line1>
+    <state>PA</state>
+    <location_name>Export Vfd Social Hall</location_name>
+    <zip>15632</zip>
+  </address>
+</polling_location>
+<polling_location id="441290045">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Bolivar</city>
+    <line1>159 Midget Camp Rd</line1>
+    <state>PA</state>
+    <location_name>Fairfield Municipal Building</location_name>
+    <zip>15923</zip>
+  </address>
+</polling_location>
+<polling_location id="441290046">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Rte 259 Bolivar</city>
+    <line1>104 Maple St</line1>
+    <state>PA</state>
+    <location_name>First Church Of Christ-Fellowship Hall</location_name>
+    <zip>15923</zip>
+  </address>
+</polling_location>
+<polling_location id="441290047">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Ligonier</city>
+    <line1>1575 Rte 259</line1>
+    <state>PA</state>
+    <location_name>Chestnut Ridge Community Center</location_name>
+    <zip>15658</zip>
+  </address>
+</polling_location>
+<polling_location id="441290048">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>137 N Pennsylvania Ave</line1>
+    <state>PA</state>
+    <location_name>Central Hose House</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290049">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>309 N Pennsylvania Ave</line1>
+    <state>PA</state>
+    <location_name>Ymca Annex</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290050">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>110 Vannear Ave</line1>
+    <state>PA</state>
+    <location_name>Voting Machine Warehouse</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290051">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>301 N Main Street</line1>
+    <state>PA</state>
+    <location_name>Greensburg Salem Middle School</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290052">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>6 Mclaughlin Dr</line1>
+    <state>PA</state>
+    <location_name>Vol. Fire Dept Hose Co #1</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290053">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>65 Mennel Dr</line1>
+    <state>PA</state>
+    <location_name>Greensburg Salem Sr High School</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290054">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>416 S Main Street</line1>
+    <state>PA</state>
+    <location_name>Greensburg City Hall</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290055">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>304 Alexander Ave</line1>
+    <state>PA</state>
+    <location_name>Vol Fire Dept Hose Co #3</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290056">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>542 W Otterman St</line1>
+    <state>PA</state>
+    <location_name>Greensburg Vfd #6 (Social Hall)</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290057">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>625 E Pittsburgh St</line1>
+    <state>PA</state>
+    <location_name>7Th Ward Hose House</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290058">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>. Greensburg</city>
+    <line1>900 Highland Ave</line1>
+    <state>PA</state>
+    <location_name>8Th Ward Hose House</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290059">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>535 Taylor St</line1>
+    <state>PA</state>
+    <location_name>Early Care Education Center(Former Quiqley Center)</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290060">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>194 Donohoe Rd</line1>
+    <state>PA</state>
+    <location_name>County Public Works Building</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290061">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>1284 Route 66</line1>
+    <state>PA</state>
+    <location_name>N Hempfield Vfc</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290062">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>108 Woodland Road</line1>
+    <state>PA</state>
+    <location_name>Maplewood United Presbyterian Church</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290063">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>421 Juniper Street</line1>
+    <state>PA</state>
+    <location_name>Carbon Vol Fire Dept Banquet Hall</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290064">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Irwin</city>
+    <line1>156 Northumberland Dr</line1>
+    <state>PA</state>
+    <location_name>West Hempfield Middle School</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290065">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>455 Bovard Luxor Road</line1>
+    <state>PA</state>
+    <location_name>Luxor Vol Fire Dept</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290066">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Hannastown</city>
+    <line1>189 Front St</line1>
+    <state>PA</state>
+    <location_name>Vol Fire Dept Building Hannastown</location_name>
+    <zip>15635</zip>
+  </address>
+</polling_location>
+<polling_location id="441290067">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Bovard</city>
+    <line1>Kasmir Way</line1>
+    <state>PA</state>
+    <location_name>Bovard Vfd Social Hall</location_name>
+    <zip>15619</zip>
+  </address>
+</polling_location>
+<polling_location id="441290068">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Adamsburg</city>
+    <line1>495 Edna Road</line1>
+    <state>PA</state>
+    <location_name>Adamsburg Fire Hall</location_name>
+    <zip>15611</zip>
+  </address>
+</polling_location>
+<polling_location id="441290069">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>555 Rial Lane</line1>
+    <state>PA</state>
+    <location_name>East Hempfield Elementary School</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290070">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>4497 State Rte 136</line1>
+    <state>PA</state>
+    <location_name>Word Of Life Ministries</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290071">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>22 Westview Dr</line1>
+    <state>PA</state>
+    <location_name>Keystone Church (Old Coal Ac)</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290072">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Grapeville</city>
+    <line1>2528 Newark St</line1>
+    <state>PA</state>
+    <location_name>Vol Fire Dept Grapeville</location_name>
+    <zip>15634</zip>
+  </address>
+</polling_location>
+<polling_location id="441290073">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>1966 Broadway Ave</line1>
+    <state>PA</state>
+    <location_name>Midway Vfd</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290074">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Jeannette</city>
+    <line1>400 Baughman Ave</line1>
+    <state>PA</state>
+    <location_name>High Park Vol Fire Dept</location_name>
+    <zip>15644</zip>
+  </address>
+</polling_location>
+<polling_location id="441290075">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Jeannette</city>
+    <line1>42 Millersdale Road</line1>
+    <state>PA</state>
+    <location_name>Community Building</location_name>
+    <zip>15644</zip>
+  </address>
+</polling_location>
+<polling_location id="441290076">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>1368 Middletown Road</line1>
+    <state>PA</state>
+    <location_name>Harrold Middle School</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290077">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Hunker</city>
+    <line1>1 Easy Living Dr</line1>
+    <state>PA</state>
+    <location_name>Easy Living Personal Care</location_name>
+    <zip>15639</zip>
+  </address>
+</polling_location>
+<polling_location id="441290078">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>820 Carbon Road</line1>
+    <state>PA</state>
+    <location_name>St Paul'S Church</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290079">
+  <directions>Room 2301 &amp; 2302</directions>
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Youngwood</city>
+    <line1>145 Pavilion Lane</line1>
+    <state>PA</state>
+    <location_name>Wccc Commissioner'S Hall</location_name>
+    <zip>15697</zip>
+  </address>
+</polling_location>
+<polling_location id="441290080">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>501 Fairfield Dr</line1>
+    <state>PA</state>
+    <location_name>Good Shepard Lutheran Church</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290081">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>1228 Brinkerton Rd</line1>
+    <state>PA</state>
+    <location_name>First Baptist Church</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290082">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Jeannette</city>
+    <line1>228 Pleasant Valley Road</line1>
+    <state>PA</state>
+    <location_name>Assembly Of God Church Rec Building</location_name>
+    <zip>15644</zip>
+  </address>
+</polling_location>
+<polling_location id="441290083">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Irwin</city>
+    <line1>175 Brush Creek Rd</line1>
+    <state>PA</state>
+    <location_name>Brush Creek United Church Of Christ Education Bldg</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290084">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Irwin</city>
+    <line1>469 Wendel Road</line1>
+    <state>PA</state>
+    <location_name>West Hempfield Elementary School</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290085">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>ive Greensburg</city>
+    <line1>100 Volunteer Dr</line1>
+    <state>PA</state>
+    <location_name>West Point Vfd</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290086">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Hunker</city>
+    <line1>468 Walnut Street</line1>
+    <state>PA</state>
+    <location_name>Hunker Vfd</location_name>
+    <zip>15639</zip>
+  </address>
+</polling_location>
+<polling_location id="441290087">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Hyde Park</city>
+    <line1>715 Main St</line1>
+    <state>PA</state>
+    <location_name>New Borough Building</location_name>
+    <zip>15641</zip>
+  </address>
+</polling_location>
+<polling_location id="441290088">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Irwin</city>
+    <line1>100 Western Ave</line1>
+    <state>PA</state>
+    <location_name>Irwin Manor</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290089">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Irwin</city>
+    <line1>1 First Street</line1>
+    <state>PA</state>
+    <location_name>Irwin Public Works Bldg</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290090">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Irwin</city>
+    <line1>617 Main St</line1>
+    <state>PA</state>
+    <location_name>First Presbyterian Church</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290091">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Irwin</city>
+    <line1>101 Caruthers Lane</line1>
+    <state>PA</state>
+    <location_name>Calvary Baptist Church</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290092">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Irwin</city>
+    <line1>780 Brush Hill Road</line1>
+    <state>PA</state>
+    <location_name>Jb'S Bright Beginnings</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290093">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Jeannette</city>
+    <line1>401 S 4th St</line1>
+    <state>PA</state>
+    <location_name>Jeannette Manor</location_name>
+    <zip>15644</zip>
+  </address>
+</polling_location>
+<polling_location id="441290094">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Jeannette</city>
+    <line1>131 N 2nd St</line1>
+    <state>PA</state>
+    <location_name>First Baptist Church</location_name>
+    <zip>15644</zip>
+  </address>
+</polling_location>
+<polling_location id="441290095">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Jeannette</city>
+    <line1>College Ave</line1>
+    <state>PA</state>
+    <location_name>Jeannette Italian Club</location_name>
+    <zip>15644</zip>
+  </address>
+</polling_location>
+<polling_location id="441290096">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Jeannette</city>
+    <line1>11th St</line1>
+    <state>PA</state>
+    <location_name>Jeannette Midget Athletic Assoc Bldg</location_name>
+    <zip>15644</zip>
+  </address>
+</polling_location>
+<polling_location id="441290097">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Jeannette</city>
+    <line1>Park Street</line1>
+    <state>PA</state>
+    <location_name>Vincent R Aiello (Former Seneca Highest)</location_name>
+    <zip>15644</zip>
+  </address>
+</polling_location>
+<polling_location id="441290098">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Jeannette</city>
+    <line1>610 Westmoreland Ave</line1>
+    <state>PA</state>
+    <location_name>Seneca Heights Community Building</location_name>
+    <zip>15644</zip>
+  </address>
+</polling_location>
+<polling_location id="441290099">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Jeannette</city>
+    <line1>Altman Rd</line1>
+    <state>PA</state>
+    <location_name>Jeannette Comm Park Maintenance Bldg</location_name>
+    <zip>15644</zip>
+  </address>
+</polling_location>
+<polling_location id="441290100">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>390 Oak Street</line1>
+    <state>PA</state>
+    <location_name>Vol. Fire Company #1 - Huber Hall</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290101">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>440 Main St</line1>
+    <state>PA</state>
+    <location_name>Latrobe Methodist Church</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290102">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>1420 Ridge Ave</line1>
+    <state>PA</state>
+    <location_name>Salvation Army Building</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290103">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>1607 Ridge Ave</line1>
+    <state>PA</state>
+    <location_name>Freewill Hose Company #3 &amp; #4</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290104">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>A Latrobe</city>
+    <line1>45 Avenue</line1>
+    <state>PA</state>
+    <location_name>Volunteer Fire Company #5</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290105">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>316 Lloyd Ave</line1>
+    <state>PA</state>
+    <location_name>Hose House #6</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290106">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Laughlintown</city>
+    <line1>39 Walnut Rd</line1>
+    <state>PA</state>
+    <location_name>Shelter House</location_name>
+    <zip>15655</zip>
+  </address>
+</polling_location>
+<polling_location id="441290107">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Ligonier</city>
+    <line1>115 N Fairfield St</line1>
+    <state>PA</state>
+    <location_name>Ligonier Vfd #1</location_name>
+    <zip>15658</zip>
+  </address>
+</polling_location>
+<polling_location id="441290108">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Ligonier</city>
+    <line1>120 E Main St</line1>
+    <state>PA</state>
+    <location_name>Town Hall</location_name>
+    <zip>15658</zip>
+  </address>
+</polling_location>
+<polling_location id="441290109">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Ligonier</city>
+    <line1>1280 Darlington Rd</line1>
+    <state>PA</state>
+    <location_name>Darlington Vol Fire Dept</location_name>
+    <zip>15658</zip>
+  </address>
+</polling_location>
+<polling_location id="441290110">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Ligonier</city>
+    <line1>122 Center St</line1>
+    <state>PA</state>
+    <location_name>Community Center</location_name>
+    <zip>15655</zip>
+  </address>
+</polling_location>
+<polling_location id="441290111">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>ive Ligonier</city>
+    <line1>1 Municipal Park Dr</line1>
+    <state>PA</state>
+    <location_name>New Township Municipal Building</location_name>
+    <zip>15658</zip>
+  </address>
+</polling_location>
+<polling_location id="441290112">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Rector</city>
+    <line1>628 Weaver Mill Rd</line1>
+    <state>PA</state>
+    <location_name>Rector United Methodist Church</location_name>
+    <zip>15677</zip>
+  </address>
+</polling_location>
+<polling_location id="441290113">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Ligonier</city>
+    <line1>362 Route 271</line1>
+    <state>PA</state>
+    <location_name>Vol Fire Dept #1</location_name>
+    <zip>15658</zip>
+  </address>
+</polling_location>
+<polling_location id="441290114">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Wilpen</city>
+    <line1>379 Wilpen Rd</line1>
+    <state>PA</state>
+    <location_name>Wilpen Vfd</location_name>
+    <zip>15658</zip>
+  </address>
+</polling_location>
+<polling_location id="441290115">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Lower Burrell</city>
+    <line1>2751 Grant St</line1>
+    <state>PA</state>
+    <location_name>Grace Community United Presbyterian Church</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290116">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>ive Lower Burrell</city>
+    <line1>273 Chester Dr</line1>
+    <state>PA</state>
+    <location_name>The Church Of God</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290117">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Lower Burrell</city>
+    <line1>2800 Bethel St</line1>
+    <state>PA</state>
+    <location_name>City Hall</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290118">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>2880 Leechburg St</line1>
+    <state>PA</state>
+    <location_name>Stewart Elementary School</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290119">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Lower Burrell</city>
+    <line1>200 Sylvan Dr</line1>
+    <state>PA</state>
+    <location_name>Lower Burrell Manor</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290120">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Lower Burrell</city>
+    <line1>3400 Garvers Ferry Rd</line1>
+    <state>PA</state>
+    <location_name>Trinity United Christian Church</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290121">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Lower Burrell</city>
+    <line1>34 New York Ave</line1>
+    <state>PA</state>
+    <location_name>Kinloch Vol Fire Dept</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290122">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Lower Burrell</city>
+    <line1>1009 Puckety Church Rd</line1>
+    <state>PA</state>
+    <location_name>Puckety Presbyterian Church</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290123">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Saltsburg</city>
+    <line1>220 5th St</line1>
+    <state>PA</state>
+    <location_name>Loyalhanna Municipal Building</location_name>
+    <zip>15681</zip>
+  </address>
+</polling_location>
+<polling_location id="441290124">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Slickville</city>
+    <line1>275 County Rd</line1>
+    <state>PA</state>
+    <location_name>Novak Oil Company Office Building</location_name>
+    <zip>15684</zip>
+  </address>
+</polling_location>
+<polling_location id="441290125">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Madison</city>
+    <line1>21 Firehall Lane</line1>
+    <state>PA</state>
+    <location_name>Madison Fire Hall</location_name>
+    <zip>15663</zip>
+  </address>
+</polling_location>
+<polling_location id="441290126">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Manor</city>
+    <line1>44 Main Street</line1>
+    <state>PA</state>
+    <location_name>Borough Building Community Room</location_name>
+    <zip>15665</zip>
+  </address>
+</polling_location>
+<polling_location id="441290127">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Monessen</city>
+    <line1>100 Parente Blvd</line1>
+    <state>PA</state>
+    <location_name>City Garage</location_name>
+    <zip>15062</zip>
+  </address>
+</polling_location>
+<polling_location id="441290128">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Monessen</city>
+    <line1>10 E Schoonemaker Ave</line1>
+    <state>PA</state>
+    <location_name>Eastgate Manor Multipurpose Room</location_name>
+    <zip>15062</zip>
+  </address>
+</polling_location>
+<polling_location id="441290129">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Monessen</city>
+    <line1>3rd Street</line1>
+    <state>PA</state>
+    <location_name>Valley Manor</location_name>
+    <zip>15062</zip>
+  </address>
+</polling_location>
+<polling_location id="441290130">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Monessen</city>
+    <line1>1501 Marion Ave</line1>
+    <state>PA</state>
+    <location_name>Vol Fire Dept Hilltop Fire Hall</location_name>
+    <zip>15062</zip>
+  </address>
+</polling_location>
+<polling_location id="441290131">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Monessen</city>
+    <line1>125 Park Manor Dr</line1>
+    <state>PA</state>
+    <location_name>Park Manor Admin Bldg</location_name>
+    <zip>15062</zip>
+  </address>
+</polling_location>
+<polling_location id="441290132">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Monessen</city>
+    <line1>848 Donner Ave</line1>
+    <state>PA</state>
+    <location_name>Westgate Manor</location_name>
+    <zip>15062</zip>
+  </address>
+</polling_location>
+<polling_location id="441290133">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Monessen</city>
+    <line1>629 Braddock Ave</line1>
+    <state>PA</state>
+    <location_name>Monessen House</location_name>
+    <zip>15062</zip>
+  </address>
+</polling_location>
+<polling_location id="441290134">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Monessen</city>
+    <line1>1000 Highland Ave</line1>
+    <state>PA</state>
+    <location_name>Highland Manor Admin Bldg</location_name>
+    <zip>15062</zip>
+  </address>
+</polling_location>
+<polling_location id="441290135">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Monessen</city>
+    <line1>1201 Patton Ave</line1>
+    <state>PA</state>
+    <location_name>St Michael'S Orthodox Church</location_name>
+    <zip>15062</zip>
+  </address>
+</polling_location>
+<polling_location id="441290136">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Monessen</city>
+    <line1>1000 Watkins Street</line1>
+    <state>PA</state>
+    <location_name>Temple Beth Am</location_name>
+    <zip>15062</zip>
+  </address>
+</polling_location>
+<polling_location id="441290137">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Monessen</city>
+    <line1>1245 State Rd</line1>
+    <state>PA</state>
+    <location_name>Monessen Sr High School</location_name>
+    <zip>15062</zip>
+  </address>
+</polling_location>
+<polling_location id="441290138">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Mt. Pleasant</city>
+    <line1>300 Eagle St</line1>
+    <state>PA</state>
+    <location_name>Ramsay Elementary School</location_name>
+    <zip>15666</zip>
+  </address>
+</polling_location>
+<polling_location id="441290139">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Mt Pleasant</city>
+    <line1>100 S Church St</line1>
+    <state>PA</state>
+    <location_name>Central Hose House</location_name>
+    <zip>15666</zip>
+  </address>
+</polling_location>
+<polling_location id="441290140">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>&amp; Washington Mt Pleasant</city>
+    <line1>Center Ave</line1>
+    <state>PA</state>
+    <location_name>3Rd Ward Fire Station</location_name>
+    <zip>15666</zip>
+  </address>
+</polling_location>
+<polling_location id="441290141">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Mt Pleasant</city>
+    <line1>481 Bridgeport Rd</line1>
+    <state>PA</state>
+    <location_name>Bridgeport United Methodist Church</location_name>
+    <zip>15666</zip>
+  </address>
+</polling_location>
+<polling_location id="441290142">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Mt Pleasant</city>
+    <line1>2414 School St</line1>
+    <state>PA</state>
+    <location_name>Lloyd Rumbaugh School</location_name>
+    <zip>15666</zip>
+  </address>
+</polling_location>
+<polling_location id="441290143">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Southwest</city>
+    <line1>1252 Boyer Rd</line1>
+    <state>PA</state>
+    <location_name>Hecla Vol Fire Dept</location_name>
+    <zip>15685</zip>
+  </address>
+</polling_location>
+<polling_location id="441290144">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Mt Pleasant</city>
+    <line1>941 Laurelville Lane</line1>
+    <state>PA</state>
+    <location_name>Laurelville Mennonite Church Center</location_name>
+    <zip>15666</zip>
+  </address>
+</polling_location>
+<polling_location id="441290145">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Mt Pleasant</city>
+    <line1>208 Poker Rd</line1>
+    <state>PA</state>
+    <location_name>Mt Pleasant Twp Municipal Building</location_name>
+    <zip>15664</zip>
+  </address>
+</polling_location>
+<polling_location id="441290146">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Acme</city>
+    <line1>2992 Rte 31</line1>
+    <state>PA</state>
+    <location_name>Acme United Methodist Church</location_name>
+    <zip>15610</zip>
+  </address>
+</polling_location>
+<polling_location id="441290147">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Mt Pleasant</city>
+    <line1>254 County Park Rd</line1>
+    <state>PA</state>
+    <location_name>Westmoreland County Mammoth Park Office</location_name>
+    <zip>15666</zip>
+  </address>
+</polling_location>
+<polling_location id="441290148">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Mt Pleasant</city>
+    <line1>271 State St</line1>
+    <state>PA</state>
+    <location_name>Mt Pleasant Senior High Field House</location_name>
+    <zip>15666</zip>
+  </address>
+</polling_location>
+<polling_location id="441290149">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>United</city>
+    <line1>81 United Road</line1>
+    <state>PA</state>
+    <location_name>Amvets Post 94</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441290150">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Mt Pleasant</city>
+    <line1>2319 Mt Pleasant Rd</line1>
+    <state>PA</state>
+    <location_name>Norvelt Fireman Roosevelt Hall</location_name>
+    <zip>15666</zip>
+  </address>
+</polling_location>
+<polling_location id="441290151">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Murrysville</city>
+    <line1>3916 Old Wm Penn Highway</line1>
+    <state>PA</state>
+    <location_name>First United Methodist Church Annex</location_name>
+    <zip>15668</zip>
+  </address>
+</polling_location>
+<polling_location id="441290152">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Export</city>
+    <line1>2200 Cornerstone Lane</line1>
+    <state>PA</state>
+    <location_name>Cornerstone Ministries</location_name>
+    <zip>15632</zip>
+  </address>
+</polling_location>
+<polling_location id="441290153">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Export</city>
+    <line1>2200 Cornerstone Lane</line1>
+    <state>PA</state>
+    <location_name>Cornerstone Ministries</location_name>
+    <zip>15632</zip>
+  </address>
+</polling_location>
+<polling_location id="441290154">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Murrysville</city>
+    <line1>4600 Old Wm Penn Highway</line1>
+    <state>PA</state>
+    <location_name>Newlonsburg Presbyterian Church</location_name>
+    <zip>15668</zip>
+  </address>
+</polling_location>
+<polling_location id="441290155">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Murrysville</city>
+    <line1>3091 Carson St</line1>
+    <state>PA</state>
+    <location_name>Community Center</location_name>
+    <zip>15668</zip>
+  </address>
+</polling_location>
+<polling_location id="441290156">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Murrysville</city>
+    <line1>5330 Logans Ferry Rd</line1>
+    <state>PA</state>
+    <location_name>Christ'S Lutheran Church</location_name>
+    <zip>15668</zip>
+  </address>
+</polling_location>
+<polling_location id="441290157">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Murrysville</city>
+    <line1>4100 Sardis Road</line1>
+    <state>PA</state>
+    <location_name>New Municipal Building</location_name>
+    <zip>15668</zip>
+  </address>
+</polling_location>
+<polling_location id="441290158">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Alexandria</city>
+    <line1>207 W Main St</line1>
+    <state>PA</state>
+    <location_name>Communtiy Center</location_name>
+    <zip>15670</zip>
+  </address>
+</polling_location>
+<polling_location id="441290159">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Florence</city>
+    <line1>177 13th St</line1>
+    <state>PA</state>
+    <location_name>Volunteer Fire Dept</location_name>
+    <zip>15944</zip>
+  </address>
+</polling_location>
+<polling_location id="441290160">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>785 Fourth Ave</line1>
+    <state>PA</state>
+    <location_name>Fire Hall #1</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290161">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>1045 Victoria Ave</line1>
+    <state>PA</state>
+    <location_name>Hill Top Fire Hall #3</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290162">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>1800 7th St</line1>
+    <state>PA</state>
+    <location_name>Martin Elementary School</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290163">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>ive New Kensington</city>
+    <line1>East Hill Dr</line1>
+    <state>PA</state>
+    <location_name>Aluminum City Terrace Community Bldg</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290164">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>1710 7th St</line1>
+    <state>PA</state>
+    <location_name>Fire Hall #4</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290165">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>1125 Leishman Ave</line1>
+    <state>PA</state>
+    <location_name>St Joseph</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290166">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>1090 Edgewood Rd</line1>
+    <state>PA</state>
+    <location_name>St Andrew</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290167">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>556 Camp Ave</line1>
+    <state>PA</state>
+    <location_name>Vol Fire Dept #5</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290168">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>110 Elmtree Rd</line1>
+    <state>PA</state>
+    <location_name>Greenwald Elementary School</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290169">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>601 5th Ave</line1>
+    <state>PA</state>
+    <location_name>United Presbyterian Church</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290170">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>325 Main St</line1>
+    <state>PA</state>
+    <location_name>Parnassus Manor</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290171">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>441 Pershing Dr</line1>
+    <state>PA</state>
+    <location_name>Pershing Heights</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290172">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Stanton</city>
+    <line1>108 S Main St</line1>
+    <state>PA</state>
+    <location_name>Volunteer Fire Dept</location_name>
+    <zip>15672</zip>
+  </address>
+</polling_location>
+<polling_location id="441290173">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Belle Vernon</city>
+    <line1>503 Speer St</line1>
+    <state>PA</state>
+    <location_name>Borough Building</location_name>
+    <zip>15012</zip>
+  </address>
+</polling_location>
+<polling_location id="441290174">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Belle Vernon</city>
+    <line1>535 Graham St</line1>
+    <state>PA</state>
+    <location_name>North Belle Vernon Vol Fire Dept</location_name>
+    <zip>15012</zip>
+  </address>
+</polling_location>
+<polling_location id="441290175">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Westmoreland City</city>
+    <line1>8651 Broadway</line1>
+    <state>PA</state>
+    <location_name>Westmoreland City Vol Fire Dept</location_name>
+    <zip>15692</zip>
+  </address>
+</polling_location>
+<polling_location id="441290176">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Westmoreland City</city>
+    <line1>681 Jackson Ave</line1>
+    <state>PA</state>
+    <location_name>Shafton Fire Hall</location_name>
+    <zip>15692</zip>
+  </address>
+</polling_location>
+<polling_location id="441290177">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>130 N Thompson Lane</line1>
+    <state>PA</state>
+    <location_name>Straw Pump Fire Hall</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290178">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>1219 Morris Ave</line1>
+    <state>PA</state>
+    <location_name>Sheridan Terrace Elementary School</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290179">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>890 Rose St</line1>
+    <state>PA</state>
+    <location_name>Fairmont-Hahntown Vfd</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290180">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>10583 Farview Dr</line1>
+    <state>PA</state>
+    <location_name>Norwin Alliance Church</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290181">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>11605 Dickens Dr</line1>
+    <state>PA</state>
+    <location_name>Sunset Valley Elementary School</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290182">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>1570 Clay Pike</line1>
+    <state>PA</state>
+    <location_name>Lutheran Church Of Our Savior</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290183">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>260 Maus Drive</line1>
+    <state>PA</state>
+    <location_name>Calvin Presbyterian Church</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290184">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>White Oak</city>
+    <line1>2800 Coulter Rd</line1>
+    <state>PA</state>
+    <location_name>Christ Methodist Church</location_name>
+    <zip>15131</zip>
+  </address>
+</polling_location>
+<polling_location id="441290185">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>260 Maus Dr</line1>
+    <state>PA</state>
+    <location_name>Calvin Presbyterian Church</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290186">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>860 Colonial Manor Rd</line1>
+    <state>PA</state>
+    <location_name>Penns Woods Civic Association</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290187">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>12727 Lincoln Way</line1>
+    <state>PA</state>
+    <location_name>New Hope Presbyterian Church</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290188">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>1218 Morris Ave</line1>
+    <state>PA</state>
+    <location_name>Sheridan Terrace Elementary School</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290189">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>411 Woodall Ave</line1>
+    <state>PA</state>
+    <location_name>Friendship Baptist Church</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290190">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>11279 Center Highway</line1>
+    <state>PA</state>
+    <location_name>N Huntingdon Township Townhouse</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290191">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>129 Robbins Station Rd</line1>
+    <state>PA</state>
+    <location_name>Circleville Fire Hall (Truck Garage)</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290192">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Irwin</city>
+    <line1>14335 State Rte 30</line1>
+    <state>PA</state>
+    <location_name>Hartford Heights Vfd</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290193">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Ardara</city>
+    <line1>3380 Nehrig Hill Road</line1>
+    <state>PA</state>
+    <location_name>Ardara United Presbyterian Church</location_name>
+    <zip>15615</zip>
+  </address>
+</polling_location>
+<polling_location id="441290194">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>860 Colonial Manor Road</line1>
+    <state>PA</state>
+    <location_name>Penns Woods Civic Association</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290195">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Huntingdon</city>
+    <line1>200 Leger Rd</line1>
+    <state>PA</state>
+    <location_name>St Elizabeth Ann Seton Church</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290196">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>North Irwin</city>
+    <line1>21 Second St</line1>
+    <state>PA</state>
+    <location_name>New Borough Town Hall Building</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290197">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Apollo</city>
+    <line1>171 Thorne St</line1>
+    <state>PA</state>
+    <location_name>Oklahoma Volunteer Fire Dept</location_name>
+    <zip>15613</zip>
+  </address>
+</polling_location>
+<polling_location id="441290198">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Penn</city>
+    <line1>610 N Railroad St</line1>
+    <state>PA</state>
+    <location_name>Penn Borough Volunteer Fire Dept</location_name>
+    <zip>15675</zip>
+  </address>
+</polling_location>
+<polling_location id="441290199">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Jeannette</city>
+    <line1>1655 Ridge Rd</line1>
+    <state>PA</state>
+    <location_name>Grandview Fire Hall</location_name>
+    <zip>15644</zip>
+  </address>
+</polling_location>
+<polling_location id="441290200">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Export</city>
+    <line1>6706 Mellon Rd</line1>
+    <state>PA</state>
+    <location_name>Wccc Bushy Run Education Center</location_name>
+    <zip>15632</zip>
+  </address>
+</polling_location>
+<polling_location id="441290201">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Harrison City</city>
+    <line1>3381 Rte 130</line1>
+    <state>PA</state>
+    <location_name>Warrior Center Field House</location_name>
+    <zip>15636</zip>
+  </address>
+</polling_location>
+<polling_location id="441290202">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Harrison City</city>
+    <line1>1010 Mill St</line1>
+    <state>PA</state>
+    <location_name>Harrison City Vfd Harrison Room Social Hall</location_name>
+    <zip>15636</zip>
+  </address>
+</polling_location>
+<polling_location id="441290203">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Claridge</city>
+    <line1>3100 Blocks Road</line1>
+    <state>PA</state>
+    <location_name>New Vfd Social Bldg Colton Hall</location_name>
+    <zip>15623</zip>
+  </address>
+</polling_location>
+<polling_location id="441290204">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Harrison City</city>
+    <line1>2001 Municipal Court</line1>
+    <state>PA</state>
+    <location_name>Penn Townshp Municipal Building</location_name>
+    <zip>15636</zip>
+  </address>
+</polling_location>
+<polling_location id="441290205">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Harrison City</city>
+    <line1>326 Raymaley Rd</line1>
+    <state>PA</state>
+    <location_name>New Life Presbyterian Church</location_name>
+    <zip>15636</zip>
+  </address>
+</polling_location>
+<polling_location id="441290206">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>ive Irwin</city>
+    <line1>171 Sunrise Dr</line1>
+    <state>PA</state>
+    <location_name>Sunrise Elementary School</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290207">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Irwin</city>
+    <line1>1030 Sandy Hill Rd</line1>
+    <state>PA</state>
+    <location_name>Penn Townshp Rescue 6 Ambulance Building</location_name>
+    <zip>15642</zip>
+  </address>
+</polling_location>
+<polling_location id="441290208">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Trafford</city>
+    <line1>123 Murrysville Road</line1>
+    <state>PA</state>
+    <location_name>Level Green Lions Club Community Building</location_name>
+    <zip>15085</zip>
+  </address>
+</polling_location>
+<polling_location id="441290209">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>West Newton</city>
+    <line1>514 Rostraver Dr</line1>
+    <state>PA</state>
+    <location_name>Collinsburg Fire Hall</location_name>
+    <zip>15089</zip>
+  </address>
+</polling_location>
+<polling_location id="441290210">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Belle Vernon</city>
+    <line1>205 Port Royal Rd</line1>
+    <state>PA</state>
+    <location_name>Municipal Building</location_name>
+    <zip>15012</zip>
+  </address>
+</polling_location>
+<polling_location id="441290211">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Belle Vernon</city>
+    <line1>270 Crest Ave</line1>
+    <state>PA</state>
+    <location_name>Belle Vernon School District Administration Bldg</location_name>
+    <zip>15012</zip>
+  </address>
+</polling_location>
+<polling_location id="441290212">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Belle Vernon</city>
+    <line1>1268 Fells Church Rd</line1>
+    <state>PA</state>
+    <location_name>Fells United Methodist Church</location_name>
+    <zip>15012</zip>
+  </address>
+</polling_location>
+<polling_location id="441290213">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Belle Vernon</city>
+    <line1>203 Johnson Ave</line1>
+    <state>PA</state>
+    <location_name>Pricedale Union Fellowship Hall</location_name>
+    <zip>15012</zip>
+  </address>
+</polling_location>
+<polling_location id="441290214">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Belle Vernon</city>
+    <line1>201 Johnson St</line1>
+    <state>PA</state>
+    <location_name>Pricedale Union Church Fellowship Hall</location_name>
+    <zip>15012</zip>
+  </address>
+</polling_location>
+<polling_location id="441290215">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Van Meter</city>
+    <line1>House 83</line1>
+    <state>15479</state>
+    <location_name>Stanley Slomiany Building House #84</location_name>
+    <zip>15479</zip>
+  </address>
+</polling_location>
+<polling_location id="441290216">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Belle Vernon</city>
+    <line1>956 Route 906 W</line1>
+    <state>15012</state>
+    <location_name>Webster Volunteer Fire Department</location_name>
+    <zip>15012</zip>
+  </address>
+</polling_location>
+<polling_location id="441290217">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>244 Congruity Road</line1>
+    <state>PA</state>
+    <location_name>Salem Township Municipal Building</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290218">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Alexandria</city>
+    <line1>140 C C Hall Dr</line1>
+    <state>PA</state>
+    <location_name>Metzger Elementary School</location_name>
+    <zip>15670</zip>
+  </address>
+</polling_location>
+<polling_location id="441290219">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Alexandria</city>
+    <line1>256 Roosevelt Way</line1>
+    <state>PA</state>
+    <location_name>Tax Collectors For Salem Township Crabtree Plaza</location_name>
+    <zip>15670</zip>
+  </address>
+</polling_location>
+<polling_location id="441290220">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Delmont</city>
+    <line1>718 Cloverleaf Circle</line1>
+    <state>PA</state>
+    <location_name>Cloverleaf Estates Community Bldg</location_name>
+    <zip>15626</zip>
+  </address>
+</polling_location>
+<polling_location id="441290221">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Slickville</city>
+    <line1>128 Main Street</line1>
+    <state>PA</state>
+    <location_name>Volunteer Fire Department</location_name>
+    <zip>15684</zip>
+  </address>
+</polling_location>
+<polling_location id="441290222">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Forbes Road</city>
+    <line1>332 Fire Station Rd</line1>
+    <state>PA</state>
+    <location_name>Forbes Road Vfd</location_name>
+    <zip>15633</zip>
+  </address>
+</polling_location>
+<polling_location id="441290223">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Delmont</city>
+    <line1>301 E Pittsburgh St</line1>
+    <state>PA</state>
+    <location_name>Salem Lutheran Church</location_name>
+    <zip>15626</zip>
+  </address>
+</polling_location>
+<polling_location id="441290224">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Scottdale</city>
+    <line1>215 N Chestnut St</line1>
+    <state>PA</state>
+    <location_name>Church Of Christ</location_name>
+    <zip>15683</zip>
+  </address>
+</polling_location>
+<polling_location id="441290225">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Scottdale</city>
+    <line1>20 Pearl St</line1>
+    <state>PA</state>
+    <location_name>Scottdale Manor</location_name>
+    <zip>15683</zip>
+  </address>
+</polling_location>
+<polling_location id="441290226">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Scottdale</city>
+    <line1>203 Market St</line1>
+    <state>PA</state>
+    <location_name>Christ United Methodist Church</location_name>
+    <zip>15683</zip>
+  </address>
+</polling_location>
+<polling_location id="441290227">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Scottdale</city>
+    <line1>801 S Broadway St</line1>
+    <state>PA</state>
+    <location_name>Scottdale Vol Fire Dept #4</location_name>
+    <zip>15683</zip>
+  </address>
+</polling_location>
+<polling_location id="441290228">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Seward</city>
+    <line1>233 Indiana St</line1>
+    <state>PA</state>
+    <location_name>Seward Borough Building</location_name>
+    <zip>15954</zip>
+  </address>
+</polling_location>
+<polling_location id="441290229">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Edwards Lane Herminie</city>
+    <line1>120 St</line1>
+    <state>PA</state>
+    <location_name>St Edward Church Hall</location_name>
+    <zip>15637</zip>
+  </address>
+</polling_location>
+<polling_location id="441290230">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Lowber</city>
+    <line1>22 Cherry St</line1>
+    <state>PA</state>
+    <location_name>Lowber Vfd Social Hall</location_name>
+    <zip>15660</zip>
+  </address>
+</polling_location>
+<polling_location id="441290231">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Rillton</city>
+    <line1>2567 Mars Hill Road</line1>
+    <state>PA</state>
+    <location_name>Volunteer Fire Dept Bldg Rillton</location_name>
+    <zip>15678</zip>
+  </address>
+</polling_location>
+<polling_location id="441290232">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Hutchinson</city>
+    <line1>261 Fire Hall Ave</line1>
+    <state>PA</state>
+    <location_name>Volunteer Fire Dept Bldg Hutchinson</location_name>
+    <zip>15640</zip>
+  </address>
+</polling_location>
+<polling_location id="441290233">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Herminie</city>
+    <line1>101 Sewickley Ave</line1>
+    <state>PA</state>
+    <location_name>Volunteer Fire Dept Bldg</location_name>
+    <zip>15637</zip>
+  </address>
+</polling_location>
+<polling_location id="441290234">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>PA</city>
+    <line1>109 Grace Lane</line1>
+    <state>PA</state>
+    <location_name>Grace Bible Church</location_name>
+    <zip>15679</zip>
+  </address>
+</polling_location>
+<polling_location id="441290235">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Smithton</city>
+    <line1>615 Center Street</line1>
+    <state>PA</state>
+    <location_name>Smithton Borough Building</location_name>
+    <zip>15479</zip>
+  </address>
+</polling_location>
+<polling_location id="441290236">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>1515 Poplar St</line1>
+    <state>PA</state>
+    <location_name>Municipal Building</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290237">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Smithton</city>
+    <line1>569 Barren Run Road</line1>
+    <state>PA</state>
+    <location_name>Barren Run United Methodist Church</location_name>
+    <zip>15479</zip>
+  </address>
+</polling_location>
+<polling_location id="441290238">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Jacobs Creek</city>
+    <line1>100 Main Street</line1>
+    <state>PA</state>
+    <location_name>St Nicholas Recreation Hall</location_name>
+    <zip>15448</zip>
+  </address>
+</polling_location>
+<polling_location id="441290239">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Smithton</city>
+    <line1>157 Fitz Henry Rd</line1>
+    <state>PA</state>
+    <location_name>Church Of The Nazarene</location_name>
+    <zip>15479</zip>
+  </address>
+</polling_location>
+<polling_location id="441290240">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Ruffsdale</city>
+    <line1>171 State Rte 31</line1>
+    <state>PA</state>
+    <location_name>Yough Intermediate/Middle School Gym</location_name>
+    <zip>15679</zip>
+  </address>
+</polling_location>
+<polling_location id="441290241">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>. West Newton</city>
+    <line1>90 Supervisor Dr</line1>
+    <state>PA</state>
+    <location_name>Turkeytown Volunteer Fire Dept Bldg</location_name>
+    <zip>15089</zip>
+  </address>
+</polling_location>
+<polling_location id="441290242">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Wyano</city>
+    <line1>2302 Third Street</line1>
+    <state>PA</state>
+    <location_name>Joe Tokarcik Building</location_name>
+    <zip>15695</zip>
+  </address>
+</polling_location>
+<polling_location id="441290243">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>. Yukon</city>
+    <line1>124 Highway St</line1>
+    <state>PA</state>
+    <location_name>Volunteer Fire Dept Bldg</location_name>
+    <zip>15698</zip>
+  </address>
+</polling_location>
+<polling_location id="441290244">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>420 Guthrie St</line1>
+    <state>PA</state>
+    <location_name>Sw Fire Dept</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290245">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>554 Stanton St</line1>
+    <state>PA</state>
+    <location_name>Greensburg Church Of The Brethern</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="441290246">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Seward</city>
+    <line1>550 Seward St</line1>
+    <state>PA</state>
+    <location_name>St Clair Twp Bldg</location_name>
+    <zip>15954</zip>
+  </address>
+</polling_location>
+<polling_location id="441290247">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Florence</city>
+    <line1>100 Osborne St</line1>
+    <state>PA</state>
+    <location_name>New Florence Manor</location_name>
+    <zip>15944</zip>
+  </address>
+</polling_location>
+<polling_location id="441290248">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Sutersville</city>
+    <line1>320 Municipal Ave</line1>
+    <state>PA</state>
+    <location_name>Municipal Building</location_name>
+    <zip>15083</zip>
+  </address>
+</polling_location>
+<polling_location id="441290249">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Trafford</city>
+    <line1>109 Brinton Ave</line1>
+    <state>PA</state>
+    <location_name>Trafford E.M.S. Building</location_name>
+    <zip>15085</zip>
+  </address>
+</polling_location>
+<polling_location id="441290250">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Trafford</city>
+    <line1>324 Fairmont Ave</line1>
+    <state>PA</state>
+    <location_name>St Mark'S Lutheran Church</location_name>
+    <zip>15085</zip>
+  </address>
+</polling_location>
+<polling_location id="441290251">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>4080 State Rte 982 Latrobe</line1>
+    <state>PA</state>
+    <location_name>Baggaley Elementary School</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290252">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>512 Brouwers Dr</line1>
+    <state>PA</state>
+    <location_name>Olympia Place</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290253">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>398 Cemetery Road</line1>
+    <state>PA</state>
+    <location_name>Marian Hall</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290254">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>1523 Lois Dr</line1>
+    <state>PA</state>
+    <location_name>Sonrise Church</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290255">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>300 Monastery Dr</line1>
+    <state>PA</state>
+    <location_name>St Vincent Grove Dining Room</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290256">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>131 High School Road</line1>
+    <state>PA</state>
+    <location_name>Greater Latrobe Senior High</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290257">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>219 Twin Lakes Road</line1>
+    <state>PA</state>
+    <location_name>Twin Lakes County Park Activities Center</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290258">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>128 Dickens St</line1>
+    <state>PA</state>
+    <location_name>Lloydsville Volunteer Fire Dept Building</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290259">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>1 Marguerite St</line1>
+    <state>PA</state>
+    <location_name>Marguerite Volunteer Fire Dept</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290260">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Greensburg</city>
+    <line1>214 Mutual Firehall Road</line1>
+    <state>PA</state>
+    <location_name>Mutual Fire Department Hall</location_name>
+    <zip>15601</zip>
+  </address>
+</polling_location>
+<polling_location id="441290261">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Pleasant Unity</city>
+    <line1>135 Johngeorge St</line1>
+    <state>PA</state>
+    <location_name>Pleasant Unity Social Hall</location_name>
+    <zip>15676</zip>
+  </address>
+</polling_location>
+<polling_location id="441290262">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>352 Charles Houck Rd</line1>
+    <state>PA</state>
+    <location_name>Living Hope Church</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290263">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>New Kensington</city>
+    <line1>3735 7th Street</line1>
+    <state>PA</state>
+    <location_name>Upper Burrell Twp Municipal Bulding</location_name>
+    <zip>15068</zip>
+  </address>
+</polling_location>
+<polling_location id="441290264">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Vandergrift</city>
+    <line1>128 C Washington Ave</line1>
+    <state>PA</state>
+    <location_name>Public Library</location_name>
+    <zip>15690</zip>
+  </address>
+</polling_location>
+<polling_location id="441290265">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Vandergrift</city>
+    <line1>278 Franklin Ave</line1>
+    <state>PA</state>
+    <location_name>Vol Fire Co #1</location_name>
+    <zip>15690</zip>
+  </address>
+</polling_location>
+<polling_location id="441290266">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Vandergrift</city>
+    <line1>420 Franklin Ave</line1>
+    <state>PA</state>
+    <location_name>Vandergrift Elementary School</location_name>
+    <zip>15690</zip>
+  </address>
+</polling_location>
+<polling_location id="441290267">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Vandergrift</city>
+    <line1>714 Wallace St</line1>
+    <state>PA</state>
+    <location_name>St Paul'S Lutheran Church</location_name>
+    <zip>15690</zip>
+  </address>
+</polling_location>
+<polling_location id="441290268">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Vandergrift</city>
+    <line1>306 Spruce St</line1>
+    <state>PA</state>
+    <location_name>Senior Citizen Center</location_name>
+    <zip>15690</zip>
+  </address>
+</polling_location>
+<polling_location id="441290269">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Apollo</city>
+    <line1>778 Rte 66 Apollo</line1>
+    <state>PA</state>
+    <location_name>Volunteer Fire Company</location_name>
+    <zip>15613</zip>
+  </address>
+</polling_location>
+<polling_location id="441290270">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Apollo</city>
+    <line1>285 Pine Run Church Rd</line1>
+    <state>PA</state>
+    <location_name>Washington Twp Municipal Bldg</location_name>
+    <zip>15613</zip>
+  </address>
+</polling_location>
+<polling_location id="441290271">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Export</city>
+    <line1>230 Mamont Dr</line1>
+    <state>PA</state>
+    <location_name>Mamont School Building</location_name>
+    <zip>15632</zip>
+  </address>
+</polling_location>
+<polling_location id="441290272">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Apollo</city>
+    <line1>4728 Rte 66 Apollo</line1>
+    <state>PA</state>
+    <location_name>Washington Elementary School</location_name>
+    <zip>15613</zip>
+  </address>
+</polling_location>
+<polling_location id="441290273">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>West Leechburg</city>
+    <line1>1015 Plazak St</line1>
+    <state>PA</state>
+    <location_name>Borough Building</location_name>
+    <zip>15656</zip>
+  </address>
+</polling_location>
+<polling_location id="441290274">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>West Newton</city>
+    <line1>302 Vine St</line1>
+    <state>PA</state>
+    <location_name>Christ Lutheran Church</location_name>
+    <zip>15089</zip>
+  </address>
+</polling_location>
+<polling_location id="441290275">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>West Newton</city>
+    <line1>100 Riverside Dr</line1>
+    <state>PA</state>
+    <location_name>West Newton Vfd</location_name>
+    <zip>15089</zip>
+  </address>
+</polling_location>
+<polling_location id="441290276">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>West Newton</city>
+    <line1>507 Pittsburgh St</line1>
+    <state>PA</state>
+    <location_name>Lion'S Field House</location_name>
+    <zip>15089</zip>
+  </address>
+</polling_location>
+<polling_location id="441290277">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Latrobe</city>
+    <line1>4351 Rte 982 Latrobe</line1>
+    <state>PA</state>
+    <location_name>Youngstown Borough Building</location_name>
+    <zip>15650</zip>
+  </address>
+</polling_location>
+<polling_location id="441290278">
+  <polling_hours>7:00AM - 8:00AM</polling_hours>
+  <address>
+    <city>Youngwood</city>
+    <line1>104 S 2nd St</line1>
+    <state>PA</state>
+    <location_name>Youngwood Vfd</location_name>
+    <zip>15697</zip>
+  </address>
+</polling_location>
+</vip_object>

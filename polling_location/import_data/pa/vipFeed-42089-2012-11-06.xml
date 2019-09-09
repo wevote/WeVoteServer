@@ -1,0 +1,820 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>42</vip_id>
+  <datetime>2012-10-26T06:33:00</datetime>
+  <description>VIP collects polling information from official government sources</description>
+</source>
+<state id="42">
+  <name>Pennsylvania</name>
+</state>
+<election id="4000">
+  <date>2012-11-06</date>
+  <election_type>State</election_type>
+  <state_id>42</state_id>
+  <statewide>Yes</statewide>
+</election>
+<locality id="11089">
+  <name>Monroe</name>
+  <state_id>42</state_id>
+  <type>County</type>
+</locality>
+<precinct id="2236">
+  <name>STROUDSBURG 3RD WARD</name>
+  <locality_id>11089</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890041</polling_location_id>
+</precinct>
+<precinct id="2248">
+  <name>STROUDSBURG 1ST WARD</name>
+  <locality_id>11089</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890039</polling_location_id>
+</precinct>
+<precinct id="2237">
+  <name>STROUDSBURG 2ND WARD</name>
+  <locality_id>11089</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890040</polling_location_id>
+</precinct>
+<precinct id="2223">
+  <name>ROSS</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890028</polling_location_id>
+</precinct>
+<precinct id="227">
+  <name>POLK</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890026</polling_location_id>
+</precinct>
+<precinct id="224">
+  <name>JACKSON</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890018</polling_location_id>
+</precinct>
+<precinct id="2228">
+  <name>TUNKHANNOCK</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890046</polling_location_id>
+</precinct>
+<precinct id="2245">
+  <name>STROUDSBURG 5TH WARD</name>
+  <locality_id>11089</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890043</polling_location_id>
+</precinct>
+<precinct id="2229">
+  <name>PRICE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890027</polling_location_id>
+</precinct>
+<precinct id="2247">
+  <name>STROUDSBURG 4TH WARD</name>
+  <locality_id>11089</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890042</polling_location_id>
+</precinct>
+<precinct id="2235">
+  <name>ELDRED</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890015</polling_location_id>
+</precinct>
+<precinct id="2234">
+  <name>PARADISE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890022</polling_location_id>
+</precinct>
+<precinct id="2232">
+  <name>BARRETT ONE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890001</polling_location_id>
+</precinct>
+<precinct id="2249">
+  <name>BARRETT TWO</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890002</polling_location_id>
+</precinct>
+<precinct id="2214">
+  <name>CHESNUTHILL ONE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890003</polling_location_id>
+</precinct>
+<precinct id="2220">
+  <name>CHESTNUTHILL FOUR</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890003</polling_location_id>
+</precinct>
+<precinct id="2238">
+  <name>CHESTNUTHILL THREE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890005</polling_location_id>
+</precinct>
+<precinct id="2242">
+  <name>CHESTNUTHILL TWO</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890004</polling_location_id>
+</precinct>
+<precinct id="2216">
+  <name>COOLBAUGH FOUR</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890008</polling_location_id>
+</precinct>
+<precinct id="2222">
+  <name>COOLBAUGH ONE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890006</polling_location_id>
+</precinct>
+<precinct id="225">
+  <name>COOLBAUGH THREE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890007</polling_location_id>
+</precinct>
+<precinct id="2213">
+  <name>COOLBAUGH TWO</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890007</polling_location_id>
+</precinct>
+<precinct id="2250">
+  <name>DELAWARE WATER GAP BORO</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890009</polling_location_id>
+</precinct>
+<precinct id="2227">
+  <name>EAST STROUDSBURG 1ST WARD</name>
+  <number>1</number>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890010</polling_location_id>
+</precinct>
+<precinct id="2212">
+  <name>EAST STROUDSBURG 2ND WARD</name>
+  <number>2</number>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890010</polling_location_id>
+</precinct>
+<precinct id="2244">
+  <name>EAST STROUDSBURG 3RD WARD</name>
+  <number>3</number>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890011</polling_location_id>
+</precinct>
+<precinct id="2218">
+  <name>EAST STROUDSBURG 4TH WARD</name>
+  <number>4</number>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890012</polling_location_id>
+</precinct>
+<precinct id="2226">
+  <name>EAST STROUDSBURG 5TH WARD</name>
+  <number>5</number>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890013</polling_location_id>
+</precinct>
+<precinct id="228">
+  <name>EAST STROUDSBURG 6TH WARD</name>
+  <number>6</number>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890014</polling_location_id>
+</precinct>
+<precinct id="223">
+  <name>HAMILTON NORTHERN</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890016</polling_location_id>
+</precinct>
+<precinct id="2233">
+  <name>HAMILTON SOUTHERN</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890017</polling_location_id>
+</precinct>
+<precinct id="2215">
+  <name>MIDDLE SMITHFIELD EASTERN</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890019</polling_location_id>
+</precinct>
+<precinct id="229">
+  <name>MIDDLE SMITHFIELD WESTERN</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890020</polling_location_id>
+</precinct>
+<precinct id="221">
+  <name>MOUNT POCONO BORO</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890021</polling_location_id>
+</precinct>
+<precinct id="2231">
+  <name>POCONO ONE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890023</polling_location_id>
+</precinct>
+<precinct id="2210">
+  <name>POCONO TWO</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890024</polling_location_id>
+</precinct>
+<precinct id="2230">
+  <name>POCONO THREE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890025</polling_location_id>
+</precinct>
+<precinct id="2240">
+  <name>POCONO FOUR</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890024</polling_location_id>
+</precinct>
+<precinct id="2225">
+  <name>SMITHFIELD ONE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890029</polling_location_id>
+</precinct>
+<precinct id="2221">
+  <name>SMITHFIELD TWO</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890030</polling_location_id>
+</precinct>
+<precinct id="2243">
+  <name>SMITHFIELD THREE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890031</polling_location_id>
+</precinct>
+<precinct id="2219">
+  <name>STROUD ONE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890032</polling_location_id>
+</precinct>
+<precinct id="226">
+  <name>STROUD TWO</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890033</polling_location_id>
+</precinct>
+<precinct id="2246">
+  <name>STROUD THREE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890034</polling_location_id>
+</precinct>
+<precinct id="2224">
+  <name>STROUD FOUR</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890035</polling_location_id>
+</precinct>
+<precinct id="2239">
+  <name>STROUD FIVE</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890036</polling_location_id>
+</precinct>
+<precinct id="222">
+  <name>STROUD SIX</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890037</polling_location_id>
+</precinct>
+<precinct id="2241">
+  <name>STROUD SEVEN</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890038</polling_location_id>
+</precinct>
+<precinct id="2211">
+  <name>TOBYHANNA EASTERN</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890044</polling_location_id>
+</precinct>
+<precinct id="2217">
+  <name>TOBYHANNA WESTERN</name>
+  <locality_id>11089</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440890045</polling_location_id>
+</precinct>
+<polling_location id="440890001">
+  <directions>Corner Of Route 390 &amp; Trailer Court</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Cresco</city>
+    <line1>993 Route 390</line1>
+    <state>PA</state>
+    <location_name>Barrett Municipal Township Building 01-1</location_name>
+    <zip>18326</zip>
+  </address>
+</polling_location>
+<polling_location id="440890002">
+  <directions>Route 191 And Route 390</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Mountainhome</city>
+    <state>PA</state>
+    <location_name>Mountainhome United Methodist Church Annex</location_name>
+    <zip>18342</zip>
+  </address>
+</polling_location>
+<polling_location id="440890003">
+  <directions>Behind Wawa (Voting Is Downstairs)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Brodheadsville</city>
+    <line1>Route 715</line1>
+    <state>PA</state>
+    <location_name>West End Fire Company</location_name>
+    <zip>18322</zip>
+  </address>
+</polling_location>
+<polling_location id="440890004">
+  <directions>Off Of Rt 115 (Merwinsburg Rd)And Valley Rd</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Effort</city>
+    <line1>Merwinsburg Road</line1>
+    <state>PA</state>
+    <location_name>St John'S Lutheran Church</location_name>
+    <zip>18330</zip>
+  </address>
+</polling_location>
+<polling_location id="440890005">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Brodheadsville</city>
+    <line1>Route 715</line1>
+    <state>PA</state>
+    <location_name>Chestnuthill Township Municipal Building</location_name>
+    <zip>18322</zip>
+  </address>
+</polling_location>
+<polling_location id="440890006">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Pocono Summit</city>
+    <line1>Fifth Avenue</line1>
+    <state>PA</state>
+    <location_name>Pocono Summit Lake Community House</location_name>
+    <zip>18346</zip>
+  </address>
+</polling_location>
+<polling_location id="440890007">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Tobyhanna</city>
+    <line1>217 Laurel Drive</line1>
+    <state>PA</state>
+    <location_name>Coolbaugh Township Firehouse</location_name>
+    <zip>18466</zip>
+  </address>
+</polling_location>
+<polling_location id="440890008">
+  <directions>On Route 196</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Tobyhanna</city>
+    <line1>440 Sterling Rd.</line1>
+    <state>PA</state>
+    <location_name>Vfw Post 3448</location_name>
+    <zip>18466</zip>
+  </address>
+</polling_location>
+<polling_location id="440890009">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Delaware Water Gap</city>
+    <line1>49 Main Street</line1>
+    <state>PA</state>
+    <location_name>Delaware Water Gap Town Hall</location_name>
+    <zip>18327</zip>
+  </address>
+</polling_location>
+<polling_location id="440890010">
+  <directions>Dansbury Commons (Meeting Room Downstairs)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>East Stroudsburg</city>
+    <line1>Corner Of Normal Street &amp; South Green Street</line1>
+    <state>PA</state>
+    <location_name>East Stroudsburg University</location_name>
+    <zip>18301</zip>
+  </address>
+</polling_location>
+<polling_location id="440890011">
+  <directions>(Gym Area In The Rear)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>East Stroudsburg</city>
+    <line1>226 Washington Street</line1>
+    <state>PA</state>
+    <location_name>Salvation Army Building</location_name>
+    <zip>18301</zip>
+  </address>
+</polling_location>
+<polling_location id="440890012">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>East Stroudsburg</city>
+    <line1>380 Chestnut Street</line1>
+    <state>PA</state>
+    <location_name>East Stroudsburg Fire Department</location_name>
+    <zip>18301</zip>
+  </address>
+</polling_location>
+<polling_location id="440890013">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>East Stroudsburg</city>
+    <line1>50 Vine Street</line1>
+    <state>PA</state>
+    <location_name>East Stroudsburg Senior High School, Administration Bldg.</location_name>
+    <zip>18301</zip>
+  </address>
+</polling_location>
+<polling_location id="440890014">
+  <directions>Corner Of East Broad Street &amp; North Courtland Street</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>East Stroudsburg</city>
+    <line1>160 North Courtland Street</line1>
+    <state>PA</state>
+    <location_name>First Baptist Church</location_name>
+    <zip>18301</zip>
+  </address>
+</polling_location>
+<polling_location id="440890015">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Kunkletown</city>
+    <line1>Kunkletown Road</line1>
+    <state>PA</state>
+    <location_name>Kunkletown Firehouse</location_name>
+    <zip>18058</zip>
+  </address>
+</polling_location>
+<polling_location id="440890016">
+  <directions>Behind Schoch'S Harley Davidson Shop Off Rt 33, At Synderville Exit</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Stroudsburg</city>
+    <line1>100 Gypsum Rd</line1>
+    <state>PA</state>
+    <location_name>Monroe County Public Saftey Center</location_name>
+    <zip>18360</zip>
+  </address>
+</polling_location>
+<polling_location id="440890017">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Sciota</city>
+    <line1>Fenner Ave</line1>
+    <state>PA</state>
+    <location_name>Hamilton Township Municipal Building</location_name>
+    <zip>18354</zip>
+  </address>
+</polling_location>
+<polling_location id="440890018">
+  <directions>Next To Jackson Township Municipal Bldg.</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Reeders</city>
+    <line1>2176 Route 715</line1>
+    <state>PA</state>
+    <location_name>Jackson Township Firehouse</location_name>
+    <zip>18352</zip>
+  </address>
+</polling_location>
+<polling_location id="440890019">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>East Stroudsburg</city>
+    <line1>5205 Milford Road</line1>
+    <state>PA</state>
+    <location_name>Middle Smithfield Presbyterian Church</location_name>
+    <zip>18302</zip>
+  </address>
+</polling_location>
+<polling_location id="440890020">
+  <directions>Off Route 209 ( Three Miles North Of Marshalls Creek)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>East Stroudsburg</city>
+    <line1>25 Municipal Drive</line1>
+    <state>PA</state>
+    <location_name>Middle Smithfield Municipal Building</location_name>
+    <zip>18302</zip>
+  </address>
+</polling_location>
+<polling_location id="440890021">
+  <directions>Off Route 611</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Mount Pocono</city>
+    <line1>20 Murray Street</line1>
+    <state>PA</state>
+    <location_name>Pocono Mountain Volunteer Fire Company</location_name>
+    <zip>18344</zip>
+  </address>
+</polling_location>
+<polling_location id="440890022">
+  <directions>On Route 940</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Cresco</city>
+    <line1>5912 Paradise Valley Road</line1>
+    <state>PA</state>
+    <location_name>Paradise Township Municipal Building</location_name>
+    <zip>18326</zip>
+  </address>
+</polling_location>
+<polling_location id="440890023">
+  <directions>Intersects With State Route 4006</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Tannersville</city>
+    <line1>Sullivan Trail</line1>
+    <state>PA</state>
+    <location_name>Mountain View Park Office</location_name>
+    <zip>18372</zip>
+  </address>
+</polling_location>
+<polling_location id="440890024">
+  <directions>The Community Room</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Tannersville</city>
+    <line1>3 Old Mill Rd</line1>
+    <state>PA</state>
+    <location_name>Northampton County Community College - Monroe Campus</location_name>
+    <zip>18372</zip>
+  </address>
+</polling_location>
+<polling_location id="440890025">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Tannersville</city>
+    <line1>158 Fish Hill Road</line1>
+    <state>PA</state>
+    <location_name>St Paul's Lutheran Church</location_name>
+    <zip>18372</zip>
+  </address>
+</polling_location>
+<polling_location id="440890026">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Kresgeville</city>
+    <line1>Route 209</line1>
+    <state>PA</state>
+    <location_name>Polk Township Firehouse</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="440890027">
+  <directions>Off Of Schoolhouse Road</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>East Stroudsburg</city>
+    <line1>10 Barren Road</line1>
+    <state>PA</state>
+    <location_name>Price Township Municipal Building</location_name>
+    <zip>18302</zip>
+  </address>
+</polling_location>
+<polling_location id="440890028">
+  <directions>Anchorage Rd &amp; Route 115</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Saylorsburg</city>
+    <line1>258 Anchorage Road</line1>
+    <state>PA</state>
+    <location_name>Ross Township Municipal Bldg.</location_name>
+    <zip>18353</zip>
+  </address>
+</polling_location>
+<polling_location id="440890029">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>East Stroudsburg</city>
+    <line1>20 Fawn Road</line1>
+    <state>PA</state>
+    <location_name>Vfw Post 2540</location_name>
+    <zip>18360</zip>
+  </address>
+</polling_location>
+<polling_location id="440890030">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>East Stroudsburg</city>
+    <line1>2000 Milford Road</line1>
+    <state>PA</state>
+    <location_name>Jt Lambert Intermediate School</location_name>
+    <zip>18301</zip>
+  </address>
+</polling_location>
+<polling_location id="440890031">
+  <directions>Rt 80 Get Off Delaware Water Gap Exit At Light Make Left Follow River Road, The School Will Be On Your Left</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>East Stroudsburg</city>
+    <line1>RR 5, Box 5210</line1>
+    <state>PA</state>
+    <location_name>Smithfield Elementary School</location_name>
+    <zip>18301</zip>
+  </address>
+</polling_location>
+<polling_location id="440890032">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Stroudsburg</city>
+    <line1>1211 North Fifth Street</line1>
+    <state>PA</state>
+    <location_name>Stroud Township Municipal Building</location_name>
+    <zip>18360</zip>
+  </address>
+</polling_location>
+<polling_location id="440890033">
+  <directions>Off Route 191</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>East Stroudsburg</city>
+    <line1>5339 Pinebrook Road</line1>
+    <state>PA</state>
+    <location_name>Pinebrook Bible Conference Fellowship Hall</location_name>
+    <zip>18301</zip>
+  </address>
+</polling_location>
+<polling_location id="440890034">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Stroudsburg</city>
+    <line1>915 Fifth St</line1>
+    <state>PA</state>
+    <location_name>Wesleyan Church</location_name>
+    <zip>18360</zip>
+  </address>
+</polling_location>
+<polling_location id="440890035">
+  <directions>Entry Is At The Rear Of The Fenced Garden</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Stroudsburg</city>
+    <line1>1002 N Ninth St</line1>
+    <state>PA</state>
+    <location_name>Hughes Library - Eastern Monroe County Public Library</location_name>
+    <zip>18360</zip>
+  </address>
+</polling_location>
+<polling_location id="440890036">
+  <directions>(Formerly Holiday Inn) Route 611 &amp; I-80</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Bartonsville</city>
+    <line1>63 Pennsylvania 611</line1>
+    <state>PA</state>
+    <location_name>Howard Johnson</location_name>
+    <zip>18321</zip>
+  </address>
+</polling_location>
+<polling_location id="440890037">
+  <directions>(On Business Route 209) Just Before Shafer'S Schoolhouse Road</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Stroudsburg</city>
+    <line1>2214 West Main St.</line1>
+    <state>PA</state>
+    <location_name>Pocono Mountain Assoc. Of Realtors Building</location_name>
+    <zip>18360</zip>
+  </address>
+</polling_location>
+<polling_location id="440890038">
+  <directions>Route 191 &amp; Poplar Valley Rd.</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Stroudsburg</city>
+    <state>PA</state>
+    <location_name>Poplar Valley Methodist Church</location_name>
+    <zip>18360</zip>
+  </address>
+</polling_location>
+<polling_location id="440890039">
+  <directions>1St Floor Rear Of The Building</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Stroudsburg</city>
+    <line1>1 Quaker Plaza</line1>
+    <state>PA</state>
+    <location_name>Monroe County Administrative Center</location_name>
+    <zip>18360</zip>
+  </address>
+</polling_location>
+<polling_location id="440890040">
+  <directions>1St Floor  Front Of The Building</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Stroudsburg</city>
+    <line1>1 Quaker Plaza</line1>
+    <state>PA</state>
+    <location_name>Monroe County Administrative Center</location_name>
+    <zip>18360</zip>
+  </address>
+</polling_location>
+<polling_location id="440890041">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Stroudsburg</city>
+    <line1>809 Main Street</line1>
+    <state>PA</state>
+    <location_name>Pocono Family Ymca</location_name>
+    <zip>18360</zip>
+  </address>
+</polling_location>
+<polling_location id="440890042">
+  <directions>High School Gym Lobby</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Stroudsburg</city>
+    <line1>1100 W. Main St.</line1>
+    <state>PA</state>
+    <location_name>Stroudsburg School District High School</location_name>
+    <zip>18360</zip>
+  </address>
+</polling_location>
+<polling_location id="440890043">
+  <directions>Lunch Room</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Stroudsburg</city>
+    <line1>1 Quaker Plaza</line1>
+    <state>PA</state>
+    <location_name>Monroe County Administrative Center</location_name>
+    <zip>18360</zip>
+  </address>
+</polling_location>
+<polling_location id="440890044">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Pocono Pines</city>
+    <line1>State Ave.</line1>
+    <state>PA</state>
+    <location_name>Tobyhanna State Government Bldg</location_name>
+    <zip>18350</zip>
+  </address>
+</polling_location>
+<polling_location id="440890045">
+  <directions>(Formerly Christ The King)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Blakeslee</city>
+    <line1>354 Route 940</line1>
+    <state>PA</state>
+    <location_name>Church Of God In Christ Community Support Center</location_name>
+    <zip>18610</zip>
+  </address>
+</polling_location>
+<polling_location id="440890046">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Long Pond</city>
+    <line1>1539 Long Pond Road</line1>
+    <state>PA</state>
+    <location_name>Tunkhannock Volunteer Fire Company</location_name>
+    <zip>18334</zip>
+  </address>
+</polling_location>
+</vip_object>
