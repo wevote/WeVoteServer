@@ -1,0 +1,1498 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>42</vip_id>
+  <datetime>2012-10-26T12:39:00</datetime>
+  <description>VIP collects polling information from official government sources</description>
+</source>
+<state id="42">
+  <name>Pennsylvania</name>
+</state>
+<election id="4000">
+  <date>2012-11-06</date>
+  <election_type>State</election_type>
+  <state_id>42</state_id>
+  <statewide>Yes</statewide>
+</election>
+<locality id="11081">
+  <name>Lycoming</name>
+  <state_id>42</state_id>
+  <type>County</type>
+</locality>
+<precinct id="2234">
+  <name>Montgomery</name>
+  <number>2900</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810039</polling_location_id>
+</precinct>
+<precinct id="2253">
+  <name>Hughesville 1</name>
+  <number>1601</number>
+  <locality_id>11081</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810017</polling_location_id>
+</precinct>
+<precinct id="2263">
+  <name>Piatt</name>
+  <number>3800</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810052</polling_location_id>
+</precinct>
+<precinct id="2242">
+  <name>Jersey Shore 4</name>
+  <number>1804</number>
+  <locality_id>11081</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810022</polling_location_id>
+</precinct>
+<precinct id="2252">
+  <name>Anthony</name>
+  <number>100</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810001</polling_location_id>
+</precinct>
+<precinct id="227">
+  <name>Williamsport 9</name>
+  <number>6009</number>
+  <locality_id>11081</locality_id>
+  <ward>9</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810076</polling_location_id>
+</precinct>
+<precinct id="2272">
+  <name>Salladasburg</name>
+  <number>4300</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810057</polling_location_id>
+</precinct>
+<precinct id="228">
+  <name>Williamsport 8</name>
+  <number>6008</number>
+  <locality_id>11081</locality_id>
+  <ward>8</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810075</polling_location_id>
+</precinct>
+<precinct id="2281">
+  <name>Picture Rocks</name>
+  <number>3900</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810053</polling_location_id>
+</precinct>
+<precinct id="2285">
+  <name>McHenry</name>
+  <number>2400</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810034</polling_location_id>
+</precinct>
+<precinct id="2284">
+  <name>Brown</name>
+  <number>500</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810005</polling_location_id>
+</precinct>
+<precinct id="2227">
+  <name>Williamsport 17</name>
+  <number>6017</number>
+  <locality_id>11081</locality_id>
+  <ward>17</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810080</polling_location_id>
+</precinct>
+<precinct id="2241">
+  <name>Wolf</name>
+  <number>5000</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810067</polling_location_id>
+</precinct>
+<precinct id="2280">
+  <name>Jackson</name>
+  <number>1700</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810018</polling_location_id>
+</precinct>
+<precinct id="2237">
+  <name>Duboistown</name>
+  <number>1000</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810011</polling_location_id>
+</precinct>
+<precinct id="2249">
+  <name>Loyalsock 3</name>
+  <number>2203</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810028</polling_location_id>
+</precinct>
+<precinct id="2224">
+  <name>Montoursville 1</name>
+  <number>3001</number>
+  <locality_id>11081</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810040</polling_location_id>
+</precinct>
+<precinct id="222">
+  <name>Limestone</name>
+  <number>2100</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810025</polling_location_id>
+</precinct>
+<precinct id="2283">
+  <name>McNett</name>
+  <number>2600</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810036</polling_location_id>
+</precinct>
+<precinct id="2222">
+  <name>Old Lycoming 1</name>
+  <number>3601</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810049</polling_location_id>
+</precinct>
+<precinct id="2214">
+  <name>Armstrong</name>
+  <number>200</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810002</polling_location_id>
+</precinct>
+<precinct id="2243">
+  <name>Cascade</name>
+  <number>600</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810006</polling_location_id>
+</precinct>
+<precinct id="2277">
+  <name>Brady</name>
+  <number>400</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810004</polling_location_id>
+</precinct>
+<precinct id="2256">
+  <name>Clinton  2</name>
+  <number>702</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810008</polling_location_id>
+</precinct>
+<precinct id="2213">
+  <name>Williamsport 2</name>
+  <number>6002</number>
+  <locality_id>11081</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810070</polling_location_id>
+</precinct>
+<precinct id="2258">
+  <name>Clinton 1</name>
+  <number>701</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810007</polling_location_id>
+</precinct>
+<precinct id="223">
+  <name>Loyalsock 2</name>
+  <number>2202</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810027</polling_location_id>
+</precinct>
+<precinct id="2211">
+  <name>Hepburn</name>
+  <number>1500</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810016</polling_location_id>
+</precinct>
+<precinct id="2217">
+  <name>Williamsport 4</name>
+  <number>6004</number>
+  <locality_id>11081</locality_id>
+  <ward>4</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810072</polling_location_id>
+</precinct>
+<precinct id="2236">
+  <name>Loyalsock 5</name>
+  <number>2205</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810030</polling_location_id>
+</precinct>
+<precinct id="225">
+  <name>Williamsport 14</name>
+  <number>6014</number>
+  <locality_id>11081</locality_id>
+  <ward>14</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810081</polling_location_id>
+</precinct>
+<precinct id="2266">
+  <name>Cogan House</name>
+  <number>800</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810009</polling_location_id>
+</precinct>
+<precinct id="2260">
+  <name>Williamsport 11</name>
+  <number>6011</number>
+  <locality_id>11081</locality_id>
+  <ward>11</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810078</polling_location_id>
+</precinct>
+<precinct id="2212">
+  <name>Woodward</name>
+  <number>5100</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810068</polling_location_id>
+</precinct>
+<precinct id="2274">
+  <name>Lewis</name>
+  <number>2000</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810024</polling_location_id>
+</precinct>
+<precinct id="2218">
+  <name>Williamsport 3</name>
+  <number>6003</number>
+  <locality_id>11081</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810071</polling_location_id>
+</precinct>
+<precinct id="2271">
+  <name>Penn</name>
+  <number>3700</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810051</polling_location_id>
+</precinct>
+<precinct id="2248">
+  <name>Jersey Shore 1</name>
+  <number>1801</number>
+  <locality_id>11081</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810019</polling_location_id>
+</precinct>
+<precinct id="2270">
+  <name>Nippenose</name>
+  <number>3500</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810048</polling_location_id>
+</precinct>
+<precinct id="2279">
+  <name>Cummings</name>
+  <number>900</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810010</polling_location_id>
+</precinct>
+<precinct id="2215">
+  <name>Williamsport 10</name>
+  <number>6010</number>
+  <locality_id>11081</locality_id>
+  <ward>10</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810077</polling_location_id>
+</precinct>
+<precinct id="2286">
+  <name>Franklin</name>
+  <number>1300</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810014</polling_location_id>
+</precinct>
+<precinct id="2276">
+  <name>Jordan</name>
+  <number>1900</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810023</polling_location_id>
+</precinct>
+<precinct id="2251">
+  <name>Williamsport 12</name>
+  <number>6012</number>
+  <locality_id>11081</locality_id>
+  <ward>12</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810079</polling_location_id>
+</precinct>
+<precinct id="2232">
+  <name>Mill Creek</name>
+  <number>2800</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810038</polling_location_id>
+</precinct>
+<precinct id="2250">
+  <name>Jersey Shore 3</name>
+  <number>1803</number>
+  <locality_id>11081</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810021</polling_location_id>
+</precinct>
+<precinct id="2265">
+  <name>Lycoming</name>
+  <number>2300</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810033</polling_location_id>
+</precinct>
+<precinct id="2267">
+  <name>Susquehanna</name>
+  <number>4600</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810063</polling_location_id>
+</precinct>
+<precinct id="224">
+  <name>Loyalsock 6</name>
+  <number>2206</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810031</polling_location_id>
+</precinct>
+<precinct id="2226">
+  <name>Loyalsock 1</name>
+  <number>2201</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810026</polling_location_id>
+</precinct>
+<precinct id="2231">
+  <name>Loyalsock 4</name>
+  <number>2204</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810029</polling_location_id>
+</precinct>
+<precinct id="2245">
+  <name>Porter</name>
+  <number>4200</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810056</polling_location_id>
+</precinct>
+<precinct id="2282">
+  <name>Pine</name>
+  <number>4000</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810054</polling_location_id>
+</precinct>
+<precinct id="2247">
+  <name>Fairfield</name>
+  <number>1200</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810013</polling_location_id>
+</precinct>
+<precinct id="2264">
+  <name>Bastress</name>
+  <number>300</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810003</polling_location_id>
+</precinct>
+<precinct id="226">
+  <name>Williamsport 1</name>
+  <number>6001</number>
+  <locality_id>11081</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810069</polling_location_id>
+</precinct>
+<precinct id="2219">
+  <name>Mifflin</name>
+  <number>2700</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810037</polling_location_id>
+</precinct>
+<precinct id="2269">
+  <name>Shrewsbury</name>
+  <number>4400</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810058</polling_location_id>
+</precinct>
+<precinct id="2228">
+  <name>Montoursville 3</name>
+  <number>3003</number>
+  <locality_id>11081</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810042</polling_location_id>
+</precinct>
+<precinct id="2229">
+  <name>Williamsport 7</name>
+  <number>6007</number>
+  <locality_id>11081</locality_id>
+  <ward>7</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810074</polling_location_id>
+</precinct>
+<precinct id="2268">
+  <name>Jersey Shore 2</name>
+  <number>1802</number>
+  <locality_id>11081</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810019</polling_location_id>
+</precinct>
+<precinct id="2216">
+  <name>Plunketts Creek</name>
+  <number>4100</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810055</polling_location_id>
+</precinct>
+<precinct id="229">
+  <name>Williamsport 15</name>
+  <number>6015</number>
+  <locality_id>11081</locality_id>
+  <ward>15</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810082</polling_location_id>
+</precinct>
+<precinct id="2275">
+  <name>McIntyre</name>
+  <number>2500</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810035</polling_location_id>
+</precinct>
+<precinct id="2220">
+  <name>Williamsport 5</name>
+  <number>6005</number>
+  <locality_id>11081</locality_id>
+  <ward>5</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810073</polling_location_id>
+</precinct>
+<precinct id="2225">
+  <name>Williamsport 16</name>
+  <number>6016</number>
+  <locality_id>11081</locality_id>
+  <ward>16</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810083</polling_location_id>
+</precinct>
+<precinct id="2261">
+  <name>Gamble</name>
+  <number>1400</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810015</polling_location_id>
+</precinct>
+<precinct id="2221">
+  <name>Williamsport 13</name>
+  <number>6013</number>
+  <locality_id>11081</locality_id>
+  <ward>13</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810080</polling_location_id>
+</precinct>
+<precinct id="2235">
+  <name>Upper Fairfield</name>
+  <number>4700</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810064</polling_location_id>
+</precinct>
+<precinct id="2273">
+  <name>Washington</name>
+  <number>4800</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810065</polling_location_id>
+</precinct>
+<precinct id="2257">
+  <name>Eldred</name>
+  <number>1100</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810012</polling_location_id>
+</precinct>
+<precinct id="2254">
+  <name>Montoursville 2</name>
+  <number>3002</number>
+  <locality_id>11081</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810041</polling_location_id>
+</precinct>
+<precinct id="2246">
+  <name>Hughesville 2</name>
+  <number>1602</number>
+  <locality_id>11081</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810017</polling_location_id>
+</precinct>
+<precinct id="221">
+  <name>Loyalsock 7</name>
+  <number>2207</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810032</polling_location_id>
+</precinct>
+<precinct id="2278">
+  <name>Watson</name>
+  <number>4900</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810066</polling_location_id>
+</precinct>
+<precinct id="2233">
+  <name>Old Lycoming 2</name>
+  <number>3602</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810050</polling_location_id>
+</precinct>
+<precinct id="2223">
+  <name>Williamsport 6</name>
+  <number>6006</number>
+  <locality_id>11081</locality_id>
+  <ward>6</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810074</polling_location_id>
+</precinct>
+<precinct id="2262">
+  <name>Morela</name>
+  <number>3100</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810043</polling_location_id>
+</precinct>
+<precinct id="2255">
+  <name>Muncy</name>
+  <number>3400</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810047</polling_location_id>
+</precinct>
+<precinct id="2239">
+  <name>Muncy 1</name>
+  <number>3201</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810044</polling_location_id>
+</precinct>
+<precinct id="2230">
+  <name>Muncy 2</name>
+  <number>3202</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810045</polling_location_id>
+</precinct>
+<precinct id="2240">
+  <name>Muncy Creek Township</name>
+  <number>3300</number>
+  <locality_id>11081</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810046</polling_location_id>
+</precinct>
+<precinct id="2238">
+  <name>So Wmspt 1</name>
+  <number>4501</number>
+  <locality_id>11081</locality_id>
+  <ward>1</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810059</polling_location_id>
+</precinct>
+<precinct id="2259">
+  <name>So Wmspt 2-1</name>
+  <number>4502</number>
+  <locality_id>11081</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810060</polling_location_id>
+</precinct>
+<precinct id="2244">
+  <name>So Wmspt 2-2</name>
+  <number>4503</number>
+  <locality_id>11081</locality_id>
+  <ward>2</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810061</polling_location_id>
+</precinct>
+<precinct id="2210">
+  <name>So Wmspt 3</name>
+  <number>4504</number>
+  <locality_id>11081</locality_id>
+  <ward>3</ward>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440810062</polling_location_id>
+</precinct>
+<polling_location id="440810001">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Linden</city>
+    <line1>3260 Quenshukeny Road</line1>
+    <state>PA</state>
+    <location_name>Anthony Township Building</location_name>
+    <zip>17744</zip>
+  </address>
+</polling_location>
+<polling_location id="440810002">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Armstrong</city>
+    <line1>502 Waterdale Road</line1>
+    <state>PA</state>
+    <location_name>Armstrong Township Building</location_name>
+    <zip>17702</zip>
+  </address>
+</polling_location>
+<polling_location id="440810003">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Bastress</city>
+    <line1>518 Coldwatertown Road</line1>
+    <state>PA</state>
+    <location_name>Bastress Township Building</location_name>
+    <zip>17702</zip>
+  </address>
+</polling_location>
+<polling_location id="440810004">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Montgomery</city>
+    <line1>1986 Elimsport Road</line1>
+    <state>PA</state>
+    <location_name>Brady Township Building</location_name>
+    <zip>17752</zip>
+  </address>
+</polling_location>
+<polling_location id="440810005">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Cedar Run</city>
+    <line1>18118 Rt. 414</line1>
+    <state>PA</state>
+    <location_name>Brown Township Volunteer Fire Company</location_name>
+    <zip>17727</zip>
+  </address>
+</polling_location>
+<polling_location id="440810006">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Trout Run</city>
+    <line1>1456 Kellyburg Road</line1>
+    <state>PA</state>
+    <location_name>Cascade Township Building</location_name>
+    <zip>17771</zip>
+  </address>
+</polling_location>
+<polling_location id="440810007">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Montgomery</city>
+    <line1>2106 Rt. 54 Highway</line1>
+    <state>PA</state>
+    <location_name>Clinton Township Building</location_name>
+    <zip>17752</zip>
+  </address>
+</polling_location>
+<polling_location id="440810008">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Montgomery</city>
+    <line1>196 Brick Church Rd</line1>
+    <state>PA</state>
+    <location_name>St. John Lutheran (Brick) Church</location_name>
+    <zip>17752</zip>
+  </address>
+</polling_location>
+<polling_location id="440810009">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Trout Run</city>
+    <line1>3779 Cogan House Rd</line1>
+    <state>PA</state>
+    <location_name>Cogan House Church Social Hall</location_name>
+    <zip>17771</zip>
+  </address>
+</polling_location>
+<polling_location id="440810010">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Waterville</city>
+    <line1>11009 N Rt. 44 Highway</line1>
+    <state>PA</state>
+    <location_name>Waterville Fire Co. Building</location_name>
+    <zip>17776</zip>
+  </address>
+</polling_location>
+<polling_location id="440810011">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Waterville</city>
+    <line1>2651 Euclid Ave.</line1>
+    <state>PA</state>
+    <location_name>Duboistown Borough Building</location_name>
+    <zip>17776</zip>
+  </address>
+</polling_location>
+<polling_location id="440810012">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Montoursville</city>
+    <line1>5556 Warrensville Road</line1>
+    <state>PA</state>
+    <location_name>Warrensville Fire Hall</location_name>
+    <zip>17754</zip>
+  </address>
+</polling_location>
+<polling_location id="440810013">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Montoursville</city>
+    <line1>834 Fairfield Church Rd</line1>
+    <state>PA</state>
+    <location_name>Fairfield Township Building</location_name>
+    <zip>17754</zip>
+  </address>
+</polling_location>
+<polling_location id="440810014">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Lairdsville</city>
+    <line1>61 School Lane</line1>
+    <state>PA</state>
+    <location_name>Franklin Township Building</location_name>
+    <zip>17742</zip>
+  </address>
+</polling_location>
+<polling_location id="440810015">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Trout Run</city>
+    <line1>17 Beech Valley Road</line1>
+    <state>PA</state>
+    <location_name>Gamble Township Building</location_name>
+    <zip>17771</zip>
+  </address>
+</polling_location>
+<polling_location id="440810016">
+  <directions>East Of Hepurnville</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Cogan Station</city>
+    <line1>615 Rt. 973</line1>
+    <state>PA</state>
+    <location_name>Hepburn Township Fire Hall</location_name>
+    <zip>17728</zip>
+  </address>
+</polling_location>
+<polling_location id="440810017">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Hughesville</city>
+    <line1>10 S. Railroad St.</line1>
+    <state>PA</state>
+    <location_name>Hughesville Fire Co. Hall</location_name>
+    <zip>17737</zip>
+  </address>
+</polling_location>
+<polling_location id="440810018">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Buttonwood</city>
+    <line1>824 Blockhouse Rd.</line1>
+    <state>PA</state>
+    <location_name>Jackson Township Building</location_name>
+    <zip>16930</zip>
+  </address>
+</polling_location>
+<polling_location id="440810019">
+  <directions>(Thompson St. Entrance)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Lansdale</city>
+    <line1>229 Broad St.</line1>
+    <state>PA</state>
+    <location_name>St. Johns Lutheran Church</location_name>
+    <zip>19446</zip>
+  </address>
+</polling_location>
+<polling_location id="440810020">
+  <directions>(Penna. Ave. Entrance--Ramp Side)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Lansdale</city>
+    <line1>229 Broad St</line1>
+    <state>PA</state>
+    <location_name>St. Johns Lutheran Church</location_name>
+    <zip>19446</zip>
+  </address>
+</polling_location>
+<polling_location id="440810021">
+  <directions>New Entrance</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Jersey Shore</city>
+    <line1>826 Allegheny St</line1>
+    <state>PA</state>
+    <location_name>Jersey Shore YMCA</location_name>
+    <zip>17740</zip>
+  </address>
+</polling_location>
+<polling_location id="440810022">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Jersey Shore</city>
+    <line1>1625 Walnut Street</line1>
+    <state>PA</state>
+    <location_name>Fairplay Gospel Fellowship</location_name>
+    <zip>17740</zip>
+  </address>
+</polling_location>
+<polling_location id="440810023">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Unityville</city>
+    <line1>4298 Route 42 Hwy</line1>
+    <state>PA</state>
+    <location_name>Jordan Township Building</location_name>
+    <zip>17774</zip>
+  </address>
+</polling_location>
+<polling_location id="440810024">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Trout Run</city>
+    <line1>241 State Route 14</line1>
+    <state>PA</state>
+    <location_name>Trout Run Fire Hall</location_name>
+    <zip>17771</zip>
+  </address>
+</polling_location>
+<polling_location id="440810025">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Jersey Shore</city>
+    <line1>6253 S Rt. 44 Highway</line1>
+    <state>PA</state>
+    <location_name>Limestone Township Building</location_name>
+    <zip>17740</zip>
+  </address>
+</polling_location>
+<polling_location id="440810026">
+  <directions>(At Bloomingrove Road)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>1400 Market Street</line1>
+    <state>PA</state>
+    <location_name>St. Luke Lutheran Church</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810027">
+  <directions>(Basement Hall)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <line1>1305 Northway Road</line1>
+    <state>PA</state>
+    <location_name>St. Ann's Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="440810028">
+  <directions>(First Floor)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>2898 Heshbon Road</line1>
+    <state>PA</state>
+    <location_name>Heshbon United Methodist Church</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810029">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>2501 E. Third St.</line1>
+    <state>PA</state>
+    <location_name>Loyalsock Township Building</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810030">
+  <directions>Owned By Faxon Kenmar United Methodist Church (Entrance On Sheridan Street)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>1225 Clayton Avenue</line1>
+    <state>PA</state>
+    <location_name>OLD BECHT SCHOOL</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810031">
+  <directions>Off Poco Farm Road (Parking Is Up Hill And To The Left)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>89 Kimble Hill Road</line1>
+    <state>PA</state>
+    <location_name>First Southern Baptist Church</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810032">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Montoursville</city>
+    <line1>1720 Sycamore Road</line1>
+    <state>PA</state>
+    <location_name>Loyalsock Twp. School District Building</location_name>
+    <zip>17754</zip>
+  </address>
+</polling_location>
+<polling_location id="440810033">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Perryville</city>
+    <line1>328 Dauber Road</line1>
+    <state>PA</state>
+    <location_name>Lycoming Township Building</location_name>
+    <zip>17728</zip>
+  </address>
+</polling_location>
+<polling_location id="440810034">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Cammal</city>
+    <line1>145 Railroad Street</line1>
+    <state>PA</state>
+    <location_name>McHenry Township Building</location_name>
+    <zip>17723</zip>
+  </address>
+</polling_location>
+<polling_location id="440810035">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Ralston</city>
+    <line1>10970 Route 14 Highway</line1>
+    <state>PA</state>
+    <location_name>Ralston Volunteer Fire Co. Hall</location_name>
+    <zip>17763</zip>
+  </address>
+</polling_location>
+<polling_location id="440810036">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>McNett</city>
+    <line1>1785 Yorktown Road</line1>
+    <state>PA</state>
+    <location_name>McNett Township Building</location_name>
+    <zip>17765</zip>
+  </address>
+</polling_location>
+<polling_location id="440810037">
+  <directions>Near Rt 973 West.</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Mifflin</city>
+    <line1>106 First Fork Rd.</line1>
+    <state>PA</state>
+    <location_name>Mifflin Township Building</location_name>
+    <zip>17740</zip>
+  </address>
+</polling_location>
+<polling_location id="440810038">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <line1>7393 Rt. 864 Highway</line1>
+    <state>PA</state>
+    <location_name>Allegheny Grange Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="440810039">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Montgomery</city>
+    <line1>41 W. Houston Ave.</line1>
+    <state>PA</state>
+    <location_name>First United Methodist Church</location_name>
+    <zip>17752</zip>
+  </address>
+</polling_location>
+<polling_location id="440810040">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <line1>25 N. Loyalsock Ave.</line1>
+    <state>PA</state>
+    <location_name>Episcopal House</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="440810041">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Montoursville</city>
+    <line1>821 Broad Street</line1>
+    <state>PA</state>
+    <location_name>Willing Hand Hose Co.</location_name>
+    <zip>17754</zip>
+  </address>
+</polling_location>
+<polling_location id="440810042">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Montoursville</city>
+    <line1>617 N. Loyalsock Ave.</line1>
+    <state>PA</state>
+    <location_name>Montoursville Borough Hall</location_name>
+    <zip>17754</zip>
+  </address>
+</polling_location>
+<polling_location id="440810043">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Moreland</city>
+    <line1>1220 Moreland Township Road</line1>
+    <state>PA</state>
+    <location_name>Moreland Township Building</location_name>
+    <zip>17756</zip>
+  </address>
+</polling_location>
+<polling_location id="440810044">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Muncy</city>
+    <line1>602 Market Street</line1>
+    <state>PA</state>
+    <location_name>First United Methodist Church</location_name>
+    <zip>17756</zip>
+  </address>
+</polling_location>
+<polling_location id="440810045">
+  <directions>1St Floor</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Muncy</city>
+    <line1>46 South Main Street</line1>
+    <state>PA</state>
+    <location_name>Muncy School District Office, Margaret Waldron Building</location_name>
+    <zip>17756</zip>
+  </address>
+</polling_location>
+<polling_location id="440810046">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Clarkstown</city>
+    <line1>3117 Clarkstown Road</line1>
+    <state>PA</state>
+    <location_name>Clarkstown United Methodist Church</location_name>
+    <zip>17756</zip>
+  </address>
+</polling_location>
+<polling_location id="440810047">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Pennsdale</city>
+    <line1>632 Village Road</line1>
+    <state>PA</state>
+    <location_name>Pennsdale Trinity United Methodist Church</location_name>
+    <zip>17756</zip>
+  </address>
+</polling_location>
+<polling_location id="440810048">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <line1>231 Antes Fort Front Street</line1>
+    <state>PA</state>
+    <location_name>Community Hall</location_name>
+    <zip>17720</zip>
+  </address>
+</polling_location>
+<polling_location id="440810049">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>1600 Doris Ave.</line1>
+    <state>PA</state>
+    <location_name>Gardenview Baptist Church</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810050">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <line1>1951 Green Ave.</line1>
+    <state>PA</state>
+    <location_name>Old Lycoming Township Building</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810051">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Penn</city>
+    <line1>4600 Beaver Lake Rd</line1>
+    <state>PA</state>
+    <location_name>Penn Township Building</location_name>
+    <zip>17737</zip>
+  </address>
+</polling_location>
+<polling_location id="440810052">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Jersey Shore</city>
+    <line1>9687 N Rt 220 Highway</line1>
+    <state>PA</state>
+    <location_name>Piatt Township Building</location_name>
+    <zip>17740</zip>
+  </address>
+</polling_location>
+<polling_location id="440810053">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Picture Rocks</city>
+    <line1>180 N Main Street</line1>
+    <state>PA</state>
+    <location_name>Picture Rocks Fire Hall</location_name>
+    <zip>17762</zip>
+  </address>
+</polling_location>
+<polling_location id="440810054">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>English Center</city>
+    <line1>11293 Little Pine Creek Rd</line1>
+    <state>PA</state>
+    <location_name>English Center Community Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="440810055">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>327 Dunwoody Road</line1>
+    <state>PA</state>
+    <location_name>Plunketts Creek Township Volunteer Fire Hall</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810056">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Jersey Shore</city>
+    <line1>5 Shaffer Ln</line1>
+    <state>PA</state>
+    <location_name>Porter Township Building</location_name>
+    <zip>17740</zip>
+  </address>
+</polling_location>
+<polling_location id="440810057">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Salladasburg</city>
+    <line1>310 Main Street</line1>
+    <state>PA</state>
+    <location_name>Salladasburg Methodist Church</location_name>
+    <zip>17740</zip>
+  </address>
+</polling_location>
+<polling_location id="440810058">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Hughesville</city>
+    <line1>143 Point Bethel Road</line1>
+    <state>PA</state>
+    <location_name>Shrewsbury Township Building</location_name>
+    <zip>17737</zip>
+  </address>
+</polling_location>
+<polling_location id="440810059">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>409 Main Street</line1>
+    <state>PA</state>
+    <location_name>South Williamsport United Methodist Church</location_name>
+    <zip>17702</zip>
+  </address>
+</polling_location>
+<polling_location id="440810060">
+  <directions>(Basement Entrance)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>South Williamsport</city>
+    <line1>324 Howard St.</line1>
+    <state>PA</state>
+    <location_name>Messiah Lutheran Church</location_name>
+    <zip>17702</zip>
+  </address>
+</polling_location>
+<polling_location id="440810061">
+  <directions>Basement (Use Entrance Off Winthrop St)</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>344 Winthrop St.</line1>
+    <state>PA</state>
+    <location_name>St. Lawrence Catholic Church</location_name>
+    <zip>17702</zip>
+  </address>
+</polling_location>
+<polling_location id="440810062">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>306 Clark Street</line1>
+    <state>PA</state>
+    <location_name>Independent Fire Co #1</location_name>
+    <zip>17702</zip>
+  </address>
+</polling_location>
+<polling_location id="440810063">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Nisbet</city>
+    <line1>166 W Village Drive</line1>
+    <state>PA</state>
+    <location_name>Nisbet Volunteer Fire Co. Hall</location_name>
+    <zip>17702</zip>
+  </address>
+</polling_location>
+<polling_location id="440810064">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Montoursville</city>
+    <line1>4090 Route 87 Highway</line1>
+    <state>PA</state>
+    <location_name>Upper Fairfield Township Building</location_name>
+    <zip>17754</zip>
+  </address>
+</polling_location>
+<polling_location id="440810065">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Washington</city>
+    <line1>15973 S Rt. 44 Highway</line1>
+    <state>PA</state>
+    <location_name>Washington Township Building</location_name>
+    <zip>17810</zip>
+  </address>
+</polling_location>
+<polling_location id="440810066">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <line1>2215 N Rt. 44 Highway</line1>
+    <state>PA</state>
+    <location_name>White Tail Camp Grounds</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="440810067">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Wolf</city>
+    <line1>695 Rt. 405 Highway</line1>
+    <state>PA</state>
+    <location_name>Wolf Township Building</location_name>
+    <zip>17737</zip>
+  </address>
+</polling_location>
+<polling_location id="440810068">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Linden</city>
+    <line1>4910 S. Rt. 220 Highway</line1>
+    <state>PA</state>
+    <location_name>Woodward Township Building</location_name>
+    <zip>17744</zip>
+  </address>
+</polling_location>
+<polling_location id="440810069">
+  <directions>Parking Lot Entrance</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>931 East Third Street</line1>
+    <state>PA</state>
+    <location_name>Third Street United Methodist Church</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810070">
+  <directions>Bishop Neumann High School - Catholic Community Center entrance</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>901 Penn Street</line1>
+    <state>PA</state>
+    <location_name>St. John Neumann Regional Academy</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810071">
+  <directions>Packer Street Entrance</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>34 Washington Boulevard</line1>
+    <state>PA</state>
+    <location_name>Calvary Baptist Church</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810072">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>400 Lycoming Street</line1>
+    <state>PA</state>
+    <location_name>Hepburn Hi-Rise Apartments</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810073">
+  <directions>Hitiching Post Room</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>815 West 4th Street</line1>
+    <state>PA</state>
+    <location_name>YWCA</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810074">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>2233 Linn Street</line1>
+    <state>PA</state>
+    <location_name>St. Matthews Lutheran Church</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810075">
+  <directions>Funston Avenue Entrance</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>825 Arch Street</line1>
+    <state>PA</state>
+    <location_name>Lycoming Presbyterian Church Fellowship Hall</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810076">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>656 Lloyd Street</line1>
+    <state>PA</state>
+    <location_name>UAW Local 787 Union Hall</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810077">
+  <directions>Corner of 7th and Memorial Avenue</directions>
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>601 7th Avenue</line1>
+    <state>PA</state>
+    <location_name>Central Baptist Church</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810078">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>1042 High Street</line1>
+    <state>PA</state>
+    <location_name>Williamsport Bridge Club</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810079">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>600 Campbell Street</line1>
+    <state>PA</state>
+    <location_name>The Center/Step</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810080">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>720 West Fourth Street</line1>
+    <state>PA</state>
+    <location_name>Annunciation Parish Hall</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810081">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>1501 Cherry Street</line1>
+    <state>PA</state>
+    <location_name>Ohev Sholom Synagogue</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810082">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>1157 Market Street</line1>
+    <state>PA</state>
+    <location_name>New Hope Church</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+<polling_location id="440810083">
+  <polling_hours>7:00AM - 8:00PM</polling_hours>
+  <address>
+    <city>Williamsport</city>
+    <line1>1250 Almond Street</line1>
+    <state>PA</state>
+    <location_name>First Church of Christ</location_name>
+    <zip>17701</zip>
+  </address>
+</polling_location>
+</vip_object>

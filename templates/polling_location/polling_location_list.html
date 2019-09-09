@@ -41,6 +41,9 @@
         <a href="{% url 'polling_location:polling_locations_add_latitude_and_longitude' %}?state_code={{ state_code }}">
             Add latitude/longitude to polling locations (up to 1000),
         </a>
+        <a href="{% url 'polling_location:soft_delete_duplicates' %}?state_code={{ state_code }}">
+            Delete duplicate polling locations,
+        </a>
     {% else %}
         (Choose state to add latitude/longitude to polling locations),
     {% endif %}

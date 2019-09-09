@@ -173,6 +173,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     try:
         polling_location_count_query = PollingLocation.objects.all()
         polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
+        polling_location_count_query = polling_location_count_query.exclude(polling_location_deleted=True)
         # If Google wasn't able to return ballot data in the past ignore that polling location
         polling_location_count_query = polling_location_count_query.filter(
             google_response_address_not_found__isnull=True)
@@ -180,6 +181,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
 
         polling_location_query = PollingLocation.objects.all()
         polling_location_query = polling_location_query.filter(state__iexact=state_code)
+        polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
         polling_location_query = polling_location_query.filter(
             google_response_address_not_found__isnull=True)
         # We used to have a limit of 500 ballots to pull per election, but now retrieve all

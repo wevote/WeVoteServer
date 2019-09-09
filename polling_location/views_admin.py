@@ -434,11 +434,11 @@ def polling_location_list_view(request):
     polling_location_search = request.GET.get('polling_location_search', '')
 
     polling_location_count_query = PollingLocation.objects.all()
-    polling_location_count_query = polling_location_count_query.filter(polling_location_deleted=False)
     polling_location_without_latitude_count = 0
     polling_location_query = PollingLocation.objects.all()
     if not positive_value_exists(polling_location_search):
-        polling_location_query = polling_location_query.filter(polling_location_deleted=False)
+        polling_location_count_query = polling_location_count_query.exclude(polling_location_deleted=True)
+        polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
 
     if positive_value_exists(show_bulk_retrieve):
         polling_location_count_query = polling_location_count_query.filter(use_for_bulk_retrieve=True)
@@ -452,7 +452,7 @@ def polling_location_list_view(request):
         polling_location_without_latitude_count_query = \
             polling_location_without_latitude_count_query.filter(state__iexact=state_code)
         polling_location_without_latitude_count_query = \
-            polling_location_without_latitude_count_query.filter(polling_location_deleted=False)
+            polling_location_without_latitude_count_query.exclude(polling_location_deleted=True)
         if positive_value_exists(show_bulk_retrieve):
             polling_location_without_latitude_count_query = \
                 polling_location_without_latitude_count_query.filter(use_for_bulk_retrieve=True)
@@ -566,6 +566,7 @@ def polling_locations_add_latitude_and_longitude_view(request):
         else:
             polling_location_query = polling_location_query.filter(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
         polling_location_query = polling_location_query.filter(state__iexact=state_code)
+        polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
         polling_location_query = polling_location_query.order_by('location_name')[:limit]
         polling_location_list = list(polling_location_query)
     except Exception as e:
@@ -669,3 +670,80 @@ def polling_location_summary_by_we_vote_id_view(request, polling_location_we_vot
         'polling_location':             polling_location_on_stage,
     }
     return render(request, 'polling_location/polling_location_summary.html', template_values)
+
+
+@login_required
+def soft_delete_duplicates_view(request):
+    """
+    Find polling location entries that have the same address and mark them as deleted
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    status = ""
+    state_code = request.GET.get('state_code', "")
+    google_civic_election_id = request.GET.get('google_civic_election_id', "")
+
+    if not positive_value_exists(state_code):
+        messages.add_message(request, messages.ERROR, 'State code required.')
+        return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    polling_location_list = []
+
+    try:
+        # Find all polling locations not already deleted
+        polling_location_query = PollingLocation.objects.all()
+        polling_location_query = polling_location_query.filter(state__iexact=state_code)
+        polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
+        polling_location_list = list(polling_location_query)
+    except Exception as e:
+        messages.add_message(request, messages.ERROR, 'No polling locations found. ' + str(e))
+
+    polling_locations_deleted = 0
+    polling_locations_reviewed = 0
+    previously_reviewed_we_vote_ids = []
+    for polling_location in polling_location_list:
+        try:
+            polling_locations_reviewed += 1
+            current_we_vote_id = polling_location.we_vote_id
+            if current_we_vote_id not in previously_reviewed_we_vote_ids:
+                previously_reviewed_we_vote_ids.append(current_we_vote_id)
+
+            duplicate_polling_location_query = PollingLocation.objects.all()
+            duplicate_polling_location_query = duplicate_polling_location_query.filter(state__iexact=state_code)
+            duplicate_polling_location_query = \
+                duplicate_polling_location_query.filter(city__exact=polling_location.city)
+            duplicate_polling_location_query = \
+                duplicate_polling_location_query.filter(line1__exact=polling_location.line1)
+            duplicate_polling_location_query = \
+                duplicate_polling_location_query.filter(zip_long__exact=polling_location.zip_long)
+            duplicate_polling_location_query = duplicate_polling_location_query.exclude(polling_location_deleted=True)
+            duplicate_polling_location_query = duplicate_polling_location_query.exclude(
+                we_vote_id__in=previously_reviewed_we_vote_ids)
+
+            mark_as_duplicates_list = list(duplicate_polling_location_query)
+
+            for duplicate_polling_location in mark_as_duplicates_list:
+                try:
+                    # Mark duplicates as a soft delete
+                    duplicate_polling_location.polling_location_deleted = True
+                    duplicate_polling_location.save()
+                    polling_locations_deleted += 1
+                except Exception as e:
+                    status += "COULD_NOT_SAVE-ERROR:" + str(e) + " "
+
+        except Exception as e:
+            pass
+
+    messages.add_message(request, messages.INFO,
+                         'Polling locations reviewed: ' + str(polling_locations_reviewed) +
+                         ", deleted: " + str(polling_locations_deleted))
+
+    url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+                    "&state_code=" + str(state_code)
+    return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()) + url_variables)
