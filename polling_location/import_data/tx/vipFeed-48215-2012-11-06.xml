@@ -1,0 +1,2579 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>48</vip_id>
+  <datetime>2012-10-25T10:00:00</datetime>
+  <description>VIP aggregates this data from official state sources</description>
+</source>
+<state id="48">
+  <name>Texas</name>
+</state>
+<election id="4000">
+  <date>2012-11-06</date>
+  <election_type>State</election_type>
+  <state_id>48</state_id>
+  <statewide>Yes</statewide>
+</election>
+<locality id="11215">
+  <name>Hidalgo</name>
+  <state_id>48</state_id>
+  <type>County</type>
+</locality>
+<precinct id="22203">
+  <name>230</name>
+  <number>230</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215032</polling_location_id>
+</precinct>
+<precinct id="22242">
+  <name>226</name>
+  <number>226</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215003</polling_location_id>
+</precinct>
+<precinct id="22117">
+  <name>113</name>
+  <number>113</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215006</polling_location_id>
+</precinct>
+<precinct id="225">
+  <name>10</name>
+  <number>10</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215028</polling_location_id>
+</precinct>
+<precinct id="2254">
+  <name>4</name>
+  <number>4</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215072</polling_location_id>
+</precinct>
+<precinct id="22128">
+  <name>88</name>
+  <number>88</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215063</polling_location_id>
+</precinct>
+<precinct id="22220">
+  <name>190</name>
+  <number>190</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215011</polling_location_id>
+</precinct>
+<precinct id="2250">
+  <name>206</name>
+  <number>206</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215051</polling_location_id>
+</precinct>
+<precinct id="22190">
+  <name>157</name>
+  <number>157</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215001</polling_location_id>
+</precinct>
+<precinct id="2263">
+  <name>103</name>
+  <number>103</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215038</polling_location_id>
+</precinct>
+<precinct id="22162">
+  <name>64</name>
+  <number>64</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215037</polling_location_id>
+</precinct>
+<precinct id="22241">
+  <name>75</name>
+  <number>75</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215012</polling_location_id>
+</precinct>
+<precinct id="2212">
+  <name>116</name>
+  <number>116</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215014</polling_location_id>
+</precinct>
+<precinct id="2239">
+  <name>35</name>
+  <number>35</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215039</polling_location_id>
+</precinct>
+<precinct id="22161">
+  <name>18</name>
+  <number>18</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215045</polling_location_id>
+</precinct>
+<precinct id="22130">
+  <name>5</name>
+  <number>5</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215034</polling_location_id>
+</precinct>
+<precinct id="22182">
+  <name>218</name>
+  <number>218</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215002</polling_location_id>
+</precinct>
+<precinct id="2221">
+  <name>108</name>
+  <number>108</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215054</polling_location_id>
+</precinct>
+<precinct id="22232">
+  <name>141</name>
+  <number>141</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215029</polling_location_id>
+</precinct>
+<precinct id="22158">
+  <name>15</name>
+  <number>15</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215041</polling_location_id>
+</precinct>
+<precinct id="22140">
+  <name>229</name>
+  <number>229</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215074</polling_location_id>
+</precinct>
+<precinct id="2224">
+  <name>161</name>
+  <number>161</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215058</polling_location_id>
+</precinct>
+<precinct id="22209">
+  <name>240</name>
+  <number>240</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215014</polling_location_id>
+</precinct>
+<precinct id="226">
+  <name>30</name>
+  <number>30</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215055</polling_location_id>
+</precinct>
+<precinct id="22224">
+  <name>254</name>
+  <number>254</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215037</polling_location_id>
+</precinct>
+<precinct id="2287">
+  <name>47</name>
+  <number>47</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215069</polling_location_id>
+</precinct>
+<precinct id="2229">
+  <name>204</name>
+  <number>204</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215027</polling_location_id>
+</precinct>
+<precinct id="2210">
+  <name>28</name>
+  <number>28</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215021</polling_location_id>
+</precinct>
+<precinct id="22189">
+  <name>153</name>
+  <number>153</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215041</polling_location_id>
+</precinct>
+<precinct id="2228">
+  <name>112</name>
+  <number>112</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215067</polling_location_id>
+</precinct>
+<precinct id="22157">
+  <name>70</name>
+  <number>70</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215041</polling_location_id>
+</precinct>
+<precinct id="22235">
+  <name>178</name>
+  <number>178</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215074</polling_location_id>
+</precinct>
+<precinct id="2227">
+  <name>107</name>
+  <number>107</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215008</polling_location_id>
+</precinct>
+<precinct id="223">
+  <name>105</name>
+  <number>105</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215070</polling_location_id>
+</precinct>
+<precinct id="22101">
+  <name>99</name>
+  <number>99</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215037</polling_location_id>
+</precinct>
+<precinct id="22154">
+  <name>225</name>
+  <number>225</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215041</polling_location_id>
+</precinct>
+<precinct id="2219">
+  <name>13</name>
+  <number>13</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215008</polling_location_id>
+</precinct>
+<precinct id="2281">
+  <name>156</name>
+  <number>156</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215049</polling_location_id>
+</precinct>
+<precinct id="2253">
+  <name>59</name>
+  <number>59</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215010</polling_location_id>
+</precinct>
+<precinct id="22240">
+  <name>250</name>
+  <number>250</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215061</polling_location_id>
+</precinct>
+<precinct id="22111">
+  <name>34</name>
+  <number>34</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215020</polling_location_id>
+</precinct>
+<precinct id="22123">
+  <name>57</name>
+  <number>57</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215061</polling_location_id>
+</precinct>
+<precinct id="22134">
+  <name>127</name>
+  <number>127</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215009</polling_location_id>
+</precinct>
+<precinct id="22152">
+  <name>169</name>
+  <number>169</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215036</polling_location_id>
+</precinct>
+<precinct id="22176">
+  <name>21</name>
+  <number>21</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215016</polling_location_id>
+</precinct>
+<precinct id="2211">
+  <name>73</name>
+  <number>73</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215013</polling_location_id>
+</precinct>
+<precinct id="22230">
+  <name>210</name>
+  <number>210</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215062</polling_location_id>
+</precinct>
+<precinct id="224">
+  <name>188</name>
+  <number>188</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215026</polling_location_id>
+</precinct>
+<precinct id="22175">
+  <name>173</name>
+  <number>173</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215068</polling_location_id>
+</precinct>
+<precinct id="22231">
+  <name>89</name>
+  <number>89</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215012</polling_location_id>
+</precinct>
+<precinct id="2276">
+  <name>55</name>
+  <number>55</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215073</polling_location_id>
+</precinct>
+<precinct id="22156">
+  <name>19</name>
+  <number>19</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215071</polling_location_id>
+</precinct>
+<precinct id="22170">
+  <name>44</name>
+  <number>44</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215046</polling_location_id>
+</precinct>
+<precinct id="22191">
+  <name>249</name>
+  <number>249</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215031</polling_location_id>
+</precinct>
+<precinct id="2266">
+  <name>150</name>
+  <number>150</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215007</polling_location_id>
+</precinct>
+<precinct id="2278">
+  <name>98</name>
+  <number>98</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215021</polling_location_id>
+</precinct>
+<precinct id="22223">
+  <name>213</name>
+  <number>213</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215004</polling_location_id>
+</precinct>
+<precinct id="2235">
+  <name>195</name>
+  <number>195</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215017</polling_location_id>
+</precinct>
+<precinct id="22113">
+  <name>16</name>
+  <number>16</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215056</polling_location_id>
+</precinct>
+<precinct id="22145">
+  <name>170</name>
+  <number>170</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215017</polling_location_id>
+</precinct>
+<precinct id="22213">
+  <name>24</name>
+  <number>24</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215043</polling_location_id>
+</precinct>
+<precinct id="2248">
+  <name>72</name>
+  <number>72</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215035</polling_location_id>
+</precinct>
+<precinct id="2240">
+  <name>139</name>
+  <number>139</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215005</polling_location_id>
+</precinct>
+<precinct id="22204">
+  <name>86</name>
+  <number>86</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215064</polling_location_id>
+</precinct>
+<precinct id="22212">
+  <name>162</name>
+  <number>162</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215058</polling_location_id>
+</precinct>
+<precinct id="2218">
+  <name>96</name>
+  <number>96</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215013</polling_location_id>
+</precinct>
+<precinct id="22105">
+  <name>33</name>
+  <number>33</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215025</polling_location_id>
+</precinct>
+<precinct id="22171">
+  <name>167</name>
+  <number>167</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215051</polling_location_id>
+</precinct>
+<precinct id="2233">
+  <name>219</name>
+  <number>219</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215037</polling_location_id>
+</precinct>
+<precinct id="2241">
+  <name>109</name>
+  <number>109</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215054</polling_location_id>
+</precinct>
+<precinct id="2284">
+  <name>54</name>
+  <number>54</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215065</polling_location_id>
+</precinct>
+<precinct id="2274">
+  <name>79</name>
+  <number>79</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215056</polling_location_id>
+</precinct>
+<precinct id="2257">
+  <name>61</name>
+  <number>61</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215023</polling_location_id>
+</precinct>
+<precinct id="2249">
+  <name>56</name>
+  <number>56</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215030</polling_location_id>
+</precinct>
+<precinct id="22143">
+  <name>179</name>
+  <number>179</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215056</polling_location_id>
+</precinct>
+<precinct id="2271">
+  <name>135</name>
+  <number>135</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215029</polling_location_id>
+</precinct>
+<precinct id="2255">
+  <name>9</name>
+  <number>9</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215002</polling_location_id>
+</precinct>
+<precinct id="2243">
+  <name>151</name>
+  <number>151</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215042</polling_location_id>
+</precinct>
+<precinct id="22137">
+  <name>93</name>
+  <number>93</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215027</polling_location_id>
+</precinct>
+<precinct id="2298">
+  <name>201</name>
+  <number>201</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215065</polling_location_id>
+</precinct>
+<precinct id="22248">
+  <name>137</name>
+  <number>137</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215034</polling_location_id>
+</precinct>
+<precinct id="22185">
+  <name>227</name>
+  <number>227</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215003</polling_location_id>
+</precinct>
+<precinct id="22249">
+  <name>131</name>
+  <number>131</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215012</polling_location_id>
+</precinct>
+<precinct id="22155">
+  <name>92</name>
+  <number>92</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215045</polling_location_id>
+</precinct>
+<precinct id="2247">
+  <name>102</name>
+  <number>102</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215028</polling_location_id>
+</precinct>
+<precinct id="22243">
+  <name>160</name>
+  <number>160</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215029</polling_location_id>
+</precinct>
+<precinct id="22251">
+  <name>242</name>
+  <number>242</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215022</polling_location_id>
+</precinct>
+<precinct id="22245">
+  <name>222</name>
+  <number>222</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215032</polling_location_id>
+</precinct>
+<precinct id="2256">
+  <name>83</name>
+  <number>83</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215040</polling_location_id>
+</precinct>
+<precinct id="22116">
+  <name>154</name>
+  <number>154</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215024</polling_location_id>
+</precinct>
+<precinct id="22121">
+  <name>58</name>
+  <number>58</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215016</polling_location_id>
+</precinct>
+<precinct id="2291">
+  <name>106</name>
+  <number>106</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215060</polling_location_id>
+</precinct>
+<precinct id="2214">
+  <name>67</name>
+  <number>67</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215059</polling_location_id>
+</precinct>
+<precinct id="22131">
+  <name>118</name>
+  <number>118</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215072</polling_location_id>
+</precinct>
+<precinct id="22234">
+  <name>243</name>
+  <number>243</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215002</polling_location_id>
+</precinct>
+<precinct id="2222">
+  <name>115</name>
+  <number>115</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215066</polling_location_id>
+</precinct>
+<precinct id="22219">
+  <name>177</name>
+  <number>177</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215074</polling_location_id>
+</precinct>
+<precinct id="2262">
+  <name>52</name>
+  <number>52</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215060</polling_location_id>
+</precinct>
+<precinct id="22119">
+  <name>40</name>
+  <number>40</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215015</polling_location_id>
+</precinct>
+<precinct id="22142">
+  <name>159</name>
+  <number>159</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215010</polling_location_id>
+</precinct>
+<precinct id="2252">
+  <name>43</name>
+  <number>43</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215011</polling_location_id>
+</precinct>
+<precinct id="22197">
+  <name>29</name>
+  <number>29</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215019</polling_location_id>
+</precinct>
+<precinct id="22115">
+  <name>166</name>
+  <number>166</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215051</polling_location_id>
+</precinct>
+<precinct id="2217">
+  <name>27</name>
+  <number>27</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215005</polling_location_id>
+</precinct>
+<precinct id="2286">
+  <name>145</name>
+  <number>145</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215017</polling_location_id>
+</precinct>
+<precinct id="2238">
+  <name>123</name>
+  <number>123</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215009</polling_location_id>
+</precinct>
+<precinct id="22118">
+  <name>50</name>
+  <number>50</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215017</polling_location_id>
+</precinct>
+<precinct id="2275">
+  <name>69</name>
+  <number>69</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215071</polling_location_id>
+</precinct>
+<precinct id="22179">
+  <name>209</name>
+  <number>209</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215012</polling_location_id>
+</precinct>
+<precinct id="2279">
+  <name>224</name>
+  <number>224</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215060</polling_location_id>
+</precinct>
+<precinct id="22207">
+  <name>46</name>
+  <number>46</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215004</polling_location_id>
+</precinct>
+<precinct id="2288">
+  <name>66</name>
+  <number>66</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215059</polling_location_id>
+</precinct>
+<precinct id="22226">
+  <name>142</name>
+  <number>142</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215014</polling_location_id>
+</precinct>
+<precinct id="22107">
+  <name>114</name>
+  <number>114</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215006</polling_location_id>
+</precinct>
+<precinct id="2245">
+  <name>187</name>
+  <number>187</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215019</polling_location_id>
+</precinct>
+<precinct id="2213">
+  <name>31</name>
+  <number>31</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215055</polling_location_id>
+</precinct>
+<precinct id="2251">
+  <name>146</name>
+  <number>146</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215034</polling_location_id>
+</precinct>
+<precinct id="2236">
+  <name>231</name>
+  <number>231</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215069</polling_location_id>
+</precinct>
+<precinct id="22236">
+  <name>217</name>
+  <number>217</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215037</polling_location_id>
+</precinct>
+<precinct id="2283">
+  <name>207</name>
+  <number>207</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215051</polling_location_id>
+</precinct>
+<precinct id="22187">
+  <name>87</name>
+  <number>87</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215001</polling_location_id>
+</precinct>
+<precinct id="22125">
+  <name>144</name>
+  <number>144</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215014</polling_location_id>
+</precinct>
+<precinct id="22216">
+  <name>184</name>
+  <number>184</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215036</polling_location_id>
+</precinct>
+<precinct id="22139">
+  <name>65</name>
+  <number>65</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215058</polling_location_id>
+</precinct>
+<precinct id="22109">
+  <name>42</name>
+  <number>42</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215016</polling_location_id>
+</precinct>
+<precinct id="2231">
+  <name>200</name>
+  <number>200</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215035</polling_location_id>
+</precinct>
+<precinct id="22122">
+  <name>77</name>
+  <number>77</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215022</polling_location_id>
+</precinct>
+<precinct id="22222">
+  <name>76</name>
+  <number>76</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215043</polling_location_id>
+</precinct>
+<precinct id="2296">
+  <name>63</name>
+  <number>63</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215028</polling_location_id>
+</precinct>
+<precinct id="2267">
+  <name>97</name>
+  <number>97</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215053</polling_location_id>
+</precinct>
+<precinct id="22163">
+  <name>196</name>
+  <number>196</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215057</polling_location_id>
+</precinct>
+<precinct id="2268">
+  <name>37</name>
+  <number>37</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215059</polling_location_id>
+</precinct>
+<precinct id="2242">
+  <name>49</name>
+  <number>49</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215069</polling_location_id>
+</precinct>
+<precinct id="2265">
+  <name>6</name>
+  <number>6</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215039</polling_location_id>
+</precinct>
+<precinct id="22174">
+  <name>45</name>
+  <number>45</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215001</polling_location_id>
+</precinct>
+<precinct id="2237">
+  <name>228</name>
+  <number>228</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215003</polling_location_id>
+</precinct>
+<precinct id="22135">
+  <name>74</name>
+  <number>74</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215051</polling_location_id>
+</precinct>
+<precinct id="22133">
+  <name>212</name>
+  <number>212</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215063</polling_location_id>
+</precinct>
+<precinct id="22202">
+  <name>245</name>
+  <number>245</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215010</polling_location_id>
+</precinct>
+<precinct id="22173">
+  <name>244</name>
+  <number>244</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215012</polling_location_id>
+</precinct>
+<precinct id="2277">
+  <name>38</name>
+  <number>38</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215026</polling_location_id>
+</precinct>
+<precinct id="2259">
+  <name>120</name>
+  <number>120</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215068</polling_location_id>
+</precinct>
+<precinct id="22215">
+  <name>140</name>
+  <number>140</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215029</polling_location_id>
+</precinct>
+<precinct id="22146">
+  <name>78</name>
+  <number>78</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215062</polling_location_id>
+</precinct>
+<precinct id="222">
+  <name>194</name>
+  <number>194</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215017</polling_location_id>
+</precinct>
+<precinct id="2220">
+  <name>36</name>
+  <number>36</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215033</polling_location_id>
+</precinct>
+<precinct id="22104">
+  <name>126</name>
+  <number>126</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215046</polling_location_id>
+</precinct>
+<precinct id="22247">
+  <name>251</name>
+  <number>251</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215009</polling_location_id>
+</precinct>
+<precinct id="229">
+  <name>95</name>
+  <number>95</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215018</polling_location_id>
+</precinct>
+<precinct id="22132">
+  <name>3</name>
+  <number>3</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215073</polling_location_id>
+</precinct>
+<precinct id="22100">
+  <name>164</name>
+  <number>164</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215053</polling_location_id>
+</precinct>
+<precinct id="22147">
+  <name>100</name>
+  <number>100</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215019</polling_location_id>
+</precinct>
+<precinct id="22201">
+  <name>121</name>
+  <number>121</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215067</polling_location_id>
+</precinct>
+<precinct id="2290">
+  <name>189</name>
+  <number>189</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215011</polling_location_id>
+</precinct>
+<precinct id="22106">
+  <name>138</name>
+  <number>138</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215005</polling_location_id>
+</precinct>
+<precinct id="22200">
+  <name>182</name>
+  <number>182</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215012</polling_location_id>
+</precinct>
+<precinct id="22237">
+  <name>256</name>
+  <number>256</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215012</polling_location_id>
+</precinct>
+<precinct id="22198">
+  <name>255</name>
+  <number>255</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215009</polling_location_id>
+</precinct>
+<precinct id="22148">
+  <name>2</name>
+  <number>2</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215067</polling_location_id>
+</precinct>
+<precinct id="2282">
+  <name>32</name>
+  <number>32</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215031</polling_location_id>
+</precinct>
+<precinct id="22126">
+  <name>39</name>
+  <number>39</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215049</polling_location_id>
+</precinct>
+<precinct id="2232">
+  <name>81</name>
+  <number>81</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215035</polling_location_id>
+</precinct>
+<precinct id="2273">
+  <name>202</name>
+  <number>202</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215030</polling_location_id>
+</precinct>
+<precinct id="22159">
+  <name>80</name>
+  <number>80</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215052</polling_location_id>
+</precinct>
+<precinct id="22228">
+  <name>248</name>
+  <number>248</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215002</polling_location_id>
+</precinct>
+<precinct id="2293">
+  <name>111</name>
+  <number>111</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215067</polling_location_id>
+</precinct>
+<precinct id="22165">
+  <name>155</name>
+  <number>155</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215015</polling_location_id>
+</precinct>
+<precinct id="22149">
+  <name>168</name>
+  <number>168</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215029</polling_location_id>
+</precinct>
+<precinct id="22167">
+  <name>198</name>
+  <number>198</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215057</polling_location_id>
+</precinct>
+<precinct id="22217">
+  <name>133</name>
+  <number>133</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215012</polling_location_id>
+</precinct>
+<precinct id="22172">
+  <name>215</name>
+  <number>215</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215026</polling_location_id>
+</precinct>
+<precinct id="22210">
+  <name>165</name>
+  <number>165</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215012</polling_location_id>
+</precinct>
+<precinct id="22252">
+  <name>143</name>
+  <number>143</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215014</polling_location_id>
+</precinct>
+<precinct id="2215">
+  <name>8</name>
+  <number>8</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215007</polling_location_id>
+</precinct>
+<precinct id="2216">
+  <name>124</name>
+  <number>124</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215029</polling_location_id>
+</precinct>
+<precinct id="221">
+  <name>62</name>
+  <number>62</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215029</polling_location_id>
+</precinct>
+<precinct id="22208">
+  <name>149</name>
+  <number>149</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215018</polling_location_id>
+</precinct>
+<precinct id="22184">
+  <name>253</name>
+  <number>253</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215022</polling_location_id>
+</precinct>
+<precinct id="22250">
+  <name>132</name>
+  <number>132</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215012</polling_location_id>
+</precinct>
+<precinct id="22195">
+  <name>12</name>
+  <number>12</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215048</polling_location_id>
+</precinct>
+<precinct id="22229">
+  <name>163</name>
+  <number>163</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215058</polling_location_id>
+</precinct>
+<precinct id="22211">
+  <name>172</name>
+  <number>172</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215068</polling_location_id>
+</precinct>
+<precinct id="22183">
+  <name>101</name>
+  <number>101</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215064</polling_location_id>
+</precinct>
+<precinct id="2234">
+  <name>203</name>
+  <number>203</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215026</polling_location_id>
+</precinct>
+<precinct id="22127">
+  <name>192</name>
+  <number>192</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215046</polling_location_id>
+</precinct>
+<precinct id="22138">
+  <name>110</name>
+  <number>110</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215061</polling_location_id>
+</precinct>
+<precinct id="22181">
+  <name>205</name>
+  <number>205</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215063</polling_location_id>
+</precinct>
+<precinct id="2285">
+  <name>199</name>
+  <number>199</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215065</polling_location_id>
+</precinct>
+<precinct id="2244">
+  <name>71</name>
+  <number>71</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215006</polling_location_id>
+</precinct>
+<precinct id="22206">
+  <name>147</name>
+  <number>147</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215033</polling_location_id>
+</precinct>
+<precinct id="22112">
+  <name>152</name>
+  <number>152</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215042</polling_location_id>
+</precinct>
+<precinct id="2292">
+  <name>85</name>
+  <number>85</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215004</polling_location_id>
+</precinct>
+<precinct id="22141">
+  <name>23</name>
+  <number>23</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215068</polling_location_id>
+</precinct>
+<precinct id="22205">
+  <name>129</name>
+  <number>129</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215051</polling_location_id>
+</precinct>
+<precinct id="22168">
+  <name>232</name>
+  <number>232</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215073</polling_location_id>
+</precinct>
+<precinct id="2258">
+  <name>90</name>
+  <number>90</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215041</polling_location_id>
+</precinct>
+<precinct id="2280">
+  <name>84</name>
+  <number>84</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215058</polling_location_id>
+</precinct>
+<precinct id="22221">
+  <name>235</name>
+  <number>235</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215015</polling_location_id>
+</precinct>
+<precinct id="2295">
+  <name>247</name>
+  <number>247</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215063</polling_location_id>
+</precinct>
+<precinct id="2230">
+  <name>7</name>
+  <number>7</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215020</polling_location_id>
+</precinct>
+<precinct id="2225">
+  <name>22</name>
+  <number>22</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215016</polling_location_id>
+</precinct>
+<precinct id="22194">
+  <name>125</name>
+  <number>125</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215012</polling_location_id>
+</precinct>
+<precinct id="22169">
+  <name>1</name>
+  <number>1</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215004</polling_location_id>
+</precinct>
+<precinct id="22227">
+  <name>20</name>
+  <number>20</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215044</polling_location_id>
+</precinct>
+<precinct id="22186">
+  <name>236</name>
+  <number>236</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215064</polling_location_id>
+</precinct>
+<precinct id="22180">
+  <name>241</name>
+  <number>241</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215012</polling_location_id>
+</precinct>
+<precinct id="2223">
+  <name>48</name>
+  <number>48</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215018</polling_location_id>
+</precinct>
+<precinct id="22144">
+  <name>104</name>
+  <number>104</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215011</polling_location_id>
+</precinct>
+<precinct id="2261">
+  <name>41</name>
+  <number>41</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215061</polling_location_id>
+</precinct>
+<precinct id="2269">
+  <name>94</name>
+  <number>94</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215027</polling_location_id>
+</precinct>
+<precinct id="2297">
+  <name>117</name>
+  <number>117</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215010</polling_location_id>
+</precinct>
+<precinct id="22108">
+  <name>216</name>
+  <number>216</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215053</polling_location_id>
+</precinct>
+<precinct id="2299">
+  <name>60</name>
+  <number>60</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215014</polling_location_id>
+</precinct>
+<precinct id="22244">
+  <name>246</name>
+  <number>246</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215020</polling_location_id>
+</precinct>
+<precinct id="2270">
+  <name>11</name>
+  <number>11</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215057</polling_location_id>
+</precinct>
+<precinct id="22225">
+  <name>237</name>
+  <number>237</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215041</polling_location_id>
+</precinct>
+<precinct id="2294">
+  <name>181</name>
+  <number>181</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215046</polling_location_id>
+</precinct>
+<precinct id="22160">
+  <name>17</name>
+  <number>17</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215036</polling_location_id>
+</precinct>
+<precinct id="22218">
+  <name>191</name>
+  <number>191</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215041</polling_location_id>
+</precinct>
+<precinct id="22120">
+  <name>148</name>
+  <number>148</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215020</polling_location_id>
+</precinct>
+<precinct id="22193">
+  <name>175</name>
+  <number>175</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215068</polling_location_id>
+</precinct>
+<precinct id="2260">
+  <name>68</name>
+  <number>68</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215024</polling_location_id>
+</precinct>
+<precinct id="22150">
+  <name>197</name>
+  <number>197</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215057</polling_location_id>
+</precinct>
+<precinct id="22136">
+  <name>158</name>
+  <number>158</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215050</polling_location_id>
+</precinct>
+<precinct id="22129">
+  <name>176</name>
+  <number>176</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215009</polling_location_id>
+</precinct>
+<precinct id="22166">
+  <name>257</name>
+  <number>257</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215057</polling_location_id>
+</precinct>
+<precinct id="22199">
+  <name>193</name>
+  <number>193</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215018</polling_location_id>
+</precinct>
+<precinct id="228">
+  <name>134</name>
+  <number>134</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215029</polling_location_id>
+</precinct>
+<precinct id="22214">
+  <name>180</name>
+  <number>180</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215045</polling_location_id>
+</precinct>
+<precinct id="22153">
+  <name>51</name>
+  <number>51</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215052</polling_location_id>
+</precinct>
+<precinct id="22192">
+  <name>119</name>
+  <number>119</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215041</polling_location_id>
+</precinct>
+<precinct id="22102">
+  <name>26</name>
+  <number>26</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215005</polling_location_id>
+</precinct>
+<precinct id="22246">
+  <name>82</name>
+  <number>82</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215048</polling_location_id>
+</precinct>
+<precinct id="22177">
+  <name>128</name>
+  <number>128</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215027</polling_location_id>
+</precinct>
+<precinct id="22151">
+  <name>220</name>
+  <number>220</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215002</polling_location_id>
+</precinct>
+<precinct id="2272">
+  <name>223</name>
+  <number>223</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215032</polling_location_id>
+</precinct>
+<precinct id="22103">
+  <name>14</name>
+  <number>14</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215042</polling_location_id>
+</precinct>
+<precinct id="2289">
+  <name>130</name>
+  <number>130</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215022</polling_location_id>
+</precinct>
+<precinct id="22233">
+  <name>233</name>
+  <number>233</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215044</polling_location_id>
+</precinct>
+<precinct id="22188">
+  <name>91</name>
+  <number>91</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215074</polling_location_id>
+</precinct>
+<precinct id="22114">
+  <name>234</name>
+  <number>234</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215044</polling_location_id>
+</precinct>
+<precinct id="2246">
+  <name>211</name>
+  <number>211</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215063</polling_location_id>
+</precinct>
+<precinct id="22196">
+  <name>221</name>
+  <number>221</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215032</polling_location_id>
+</precinct>
+<precinct id="2264">
+  <name>136</name>
+  <number>136</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215059</polling_location_id>
+</precinct>
+<precinct id="22164">
+  <name>174</name>
+  <number>174</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215073</polling_location_id>
+</precinct>
+<precinct id="22178">
+  <name>183</name>
+  <number>183</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215037</polling_location_id>
+</precinct>
+<precinct id="2226">
+  <name>239</name>
+  <number>239</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215047</polling_location_id>
+</precinct>
+<precinct id="22110">
+  <name>53</name>
+  <number>53</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215050</polling_location_id>
+</precinct>
+<precinct id="227">
+  <name>25</name>
+  <number>25</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215033</polling_location_id>
+</precinct>
+<precinct id="22124">
+  <name>122</name>
+  <number>122</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215003</polling_location_id>
+</precinct>
+<precinct id="22238">
+  <name>171</name>
+  <number>171</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215073</polling_location_id>
+</precinct>
+<precinct id="22239">
+  <name>238</name>
+  <number>238</number>
+  <locality_id>11215</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44215015</polling_location_id>
+</precinct>
+<polling_location id="44215001">
+  <directions>Gym</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>DONNA</city>
+    <line1>400 N SALINAS BLVD</line1>
+    <state>TX</state>
+    <location_name>W.A. Todd 9th Grade Campus</location_name>
+    <zip>78537-2970</zip>
+  </address>
+</polling_location>
+<polling_location id="44215002">
+  <directions>Main Entrance</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MISSION</city>
+    <line1>700 E TWO MILE RD</line1>
+    <state>TX</state>
+    <location_name>Veterans Memorial High School</location_name>
+    <zip>78574-1759</zip>
+  </address>
+</polling_location>
+<polling_location id="44215003">
+  <directions>Cafeteria</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>PHARR</city>
+    <line1>9701 S JACKSON RD</line1>
+    <state>TX</state>
+    <location_name>Valley View 5th Grade Campus</location_name>
+    <zip>78577-7258</zip>
+  </address>
+</polling_location>
+<polling_location id="44215004">
+  <directions>Cafeteria</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Mercades</city>
+    <line1>900 N. Missouri</line1>
+    <state>TX</state>
+    <location_name>Taylor Zachary</location_name>
+    <zip>79007-3612</zip>
+  </address>
+</polling_location>
+<polling_location id="44215005">
+  <directions>Foyer</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MCALLEN</city>
+    <line1>311 N 15TH ST</line1>
+    <state>TX</state>
+    <location_name>Tax Office</location_name>
+    <zip>78501-4705</zip>
+  </address>
+</polling_location>
+<polling_location id="44215006">
+  <directions>USDA Building</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>WESLACO</city>
+    <line1>514 W 4TH ST</line1>
+    <state>TX</state>
+    <location_name>Stephen F. Austin School</location_name>
+    <zip>78596</zip>
+  </address>
+</polling_location>
+<polling_location id="44215007">
+  <directions>Atrium (West Wing)</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MCALLEN</city>
+    <line1>1101 E VERMONT AVE</line1>
+    <state>TX</state>
+    <location_name>STC Nursing Center</location_name>
+    <zip>78503-1734</zip>
+  </address>
+</polling_location>
+<polling_location id="44215008">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>EDINBURG</city>
+    <line1>601 W FREDDY GONZALEZ DR</line1>
+    <state>TX</state>
+    <location_name>South Middle School</location_name>
+    <zip>78539-6133</zip>
+  </address>
+</polling_location>
+<polling_location id="44215009">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>ALAMO</city>
+    <line1>416 N TOWER RD</line1>
+    <state>TX</state>
+    <location_name>Sgt. Fernando de la Rosa Lib.</location_name>
+    <zip>78516-2795</zip>
+  </address>
+</polling_location>
+<polling_location id="44215010">
+  <directions>Conference Room</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>San Juan</city>
+    <line1>2301 N. Longoria Road</line1>
+    <state>TX</state>
+    <location_name>San Juan Fire Station #2</location_name>
+    <zip>78501-2538</zip>
+  </address>
+</polling_location>
+<polling_location id="44215011">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>San Carlos</city>
+    <line1>2 Mi. S. of E. Hwy 107 on 3rd Street</line1>
+    <state>TX</state>
+    <location_name>San Carlos Elementary School</location_name>
+    <zip>79313</zip>
+  </address>
+</polling_location>
+<polling_location id="44215012">
+  <directions>Room #7</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Mission</city>
+    <line1>6 3/4 Miles North Conway</line1>
+    <state>TX</state>
+    <location_name>Salinas Elementary School</location_name>
+    <zip>76676-3058</zip>
+  </address>
+</polling_location>
+<polling_location id="44215013">
+  <directions>Main Entrance</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MCALLEN</city>
+    <line1>7000 N MAIN ST</line1>
+    <state>TX</state>
+    <location_name>Rayburn Elem. School</location_name>
+    <zip>78504-3148</zip>
+  </address>
+</polling_location>
+<polling_location id="44215014">
+  <directions>Lobby</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Pharr</city>
+    <line1>500 E. Earling Rd</line1>
+    <state>TX</state>
+    <location_name>PSJA North High School</location_name>
+    <zip>78573-6914</zip>
+  </address>
+</polling_location>
+<polling_location id="44215015">
+  <directions>Auditorium</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Progreso</city>
+    <line1>210 FM 1015</line1>
+    <state>TX</state>
+    <location_name>Progreso Community Center</location_name>
+    <zip>78577-7258</zip>
+  </address>
+</polling_location>
+<polling_location id="44215016">
+  <directions>Equine Center</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>WESLACO</city>
+    <line1>1601 W SUGAR CANE DR</line1>
+    <state>TX</state>
+    <location_name>Pete Abrigo Agr. Sci. Complex</location_name>
+    <zip>78596-3842</zip>
+  </address>
+</polling_location>
+<polling_location id="44215017">
+  <directions>Portable</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Penitas</city>
+    <line1>1320 S. Main Street</line1>
+    <state>TX</state>
+    <location_name>Penitas Public Library</location_name>
+    <zip>75423</zip>
+  </address>
+</polling_location>
+<polling_location id="44215018">
+  <directions>Excersize Room</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MCALLEN</city>
+    <line1>3401 JORDAN AVE</line1>
+    <state>TX</state>
+    <location_name>Palmview Community Center</location_name>
+    <zip>78503-7803</zip>
+  </address>
+</polling_location>
+<polling_location id="44215019">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>PALMVIEW</city>
+    <line1>400 W VETERANS BLVD</line1>
+    <state>TX</state>
+    <location_name>Palmview City Hall</location_name>
+    <zip>78572-8327</zip>
+  </address>
+</polling_location>
+<polling_location id="44215020">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MCALLEN</city>
+    <line1>301 W HACKBERRY AVE</line1>
+    <state>TX</state>
+    <location_name>Palmer Pavilion</location_name>
+    <zip>78501-2538</zip>
+  </address>
+</polling_location>
+<polling_location id="44215021">
+  <directions>Library</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MISSION</city>
+    <line1>810 W GRIFFIN PKWY</line1>
+    <state>TX</state>
+    <location_name>O'Grady Elem. School</location_name>
+    <zip>78572-2211</zip>
+  </address>
+</polling_location>
+<polling_location id="44215022">
+  <directions>Library</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>ALAMO</city>
+    <line1>733 N ALAMO RD</line1>
+    <state>TX</state>
+    <location_name>North Alamo Elem. School</location_name>
+    <zip>78516-3700</zip>
+  </address>
+</polling_location>
+<polling_location id="44215023">
+  <directions>Cafeteria</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>PHARR</city>
+    <line1>903 N FLAG ST</line1>
+    <state>TX</state>
+    <location_name>Napper Elementary School</location_name>
+    <zip>78577-2912</zip>
+  </address>
+</polling_location>
+<polling_location id="44215024">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>EDINBURG</city>
+    <line1>4010 N DOOLITTLE RD</line1>
+    <state>TX</state>
+    <location_name>Montecristo Elem. School</location_name>
+    <zip>78542-0538</zip>
+  </address>
+</polling_location>
+<polling_location id="44215025">
+  <directions>Community Center</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Monte Alto</city>
+    <line1>1st &amp; Elizabeth St.</line1>
+    <state>TX</state>
+    <location_name>Monte Alto Community Center</location_name>
+    <zip>78574-1759</zip>
+  </address>
+</polling_location>
+<polling_location id="44215026">
+  <directions>Main Entrance</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MISSION</city>
+    <line1>1804 N SHARY RD</line1>
+    <state>TX</state>
+    <location_name>Mission Fire Station #3</location_name>
+    <zip>78572-3242</zip>
+  </address>
+</polling_location>
+<polling_location id="44215027">
+  <directions>Training Room</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MISSION</city>
+    <line1>415 W TOM LANDRY ST</line1>
+    <state>TX</state>
+    <location_name>Mission Fire Department</location_name>
+    <zip>78572-3709</zip>
+  </address>
+</polling_location>
+<polling_location id="44215028">
+  <directions>Community Center</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MISSION</city>
+    <line1>1201 E 8TH ST</line1>
+    <state>TX</state>
+    <location_name>Mission City Hall</location_name>
+    <zip>78572-5812</zip>
+  </address>
+</polling_location>
+<polling_location id="44215029">
+  <directions>South East Hallway</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MCALLEN</city>
+    <line1>3800 N MAIN ST</line1>
+    <state>TX</state>
+    <location_name>Milam Elementary School</location_name>
+    <zip>78501-3897</zip>
+  </address>
+</polling_location>
+<polling_location id="44215030">
+  <directions>Library</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Mercades</city>
+    <line1>950 W. 6th</line1>
+    <state>TX</state>
+    <location_name>Mercades Early Childhood Ctr.</location_name>
+    <zip>78574-1759</zip>
+  </address>
+</polling_location>
+<polling_location id="44215031">
+  <directions>Commission Rm.</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Mercades</city>
+    <line1>400 S. Ohio Avenue</line1>
+    <state>TX</state>
+    <location_name>Mercades City Hall</location_name>
+    <zip>78574</zip>
+  </address>
+</polling_location>
+<polling_location id="44215032">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>EDINBURG</city>
+    <line1>3420 W ROGERS RD</line1>
+    <state>TX</state>
+    <location_name>Magee Elem. School</location_name>
+    <zip>78541-7654</zip>
+  </address>
+</polling_location>
+<polling_location id="44215033">
+  <directions>Cafeteria</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>PHARR</city>
+    <line1>1212 S FIR ST</line1>
+    <state>TX</state>
+    <location_name>Liberty Middle School</location_name>
+    <zip>78577-6345</zip>
+  </address>
+</polling_location>
+<polling_location id="44215034">
+  <directions>Main Entrance</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>PHARR</city>
+    <line1>7107 S CAGE BLVD</line1>
+    <state>TX</state>
+    <location_name>Las Milpas Comm. Center</location_name>
+    <zip>78577-9339</zip>
+  </address>
+</polling_location>
+<polling_location id="44215035">
+  <directions>Excersize Room</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MCALLEN</city>
+    <line1>2601 LARK AVE</line1>
+    <state>TX</state>
+    <location_name>Lark Community Center</location_name>
+    <zip>78504-4281</zip>
+  </address>
+</polling_location>
+<polling_location id="44215036">
+  <directions>H.S. Auditorium</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>La Villa</city>
+    <line1>200 W. Hwy 107</line1>
+    <state>TX</state>
+    <location_name>La Villa High School</location_name>
+    <zip>79720-6555</zip>
+  </address>
+</polling_location>
+<polling_location id="44215037">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>La Joya</city>
+    <line1>5441 N. La Homa Road</line1>
+    <state>TX</state>
+    <location_name>Kika De La Garza School</location_name>
+    <zip>79336-3705</zip>
+  </address>
+</polling_location>
+<polling_location id="44215038">
+  <directions>Main Entrance</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MISSION</city>
+    <line1>921 E 12TH ST</line1>
+    <state>TX</state>
+    <location_name>Kika De La Garza Building</location_name>
+    <zip>78572-4418</zip>
+  </address>
+</polling_location>
+<polling_location id="44215039">
+  <directions>Conference Room</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>PHARR</city>
+    <line1>1011 W KELLY AVE</line1>
+    <state>TX</state>
+    <location_name>Jose Pepe Salinas Center</location_name>
+    <zip>78577-4505</zip>
+  </address>
+</polling_location>
+<polling_location id="44215040">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Sharyland</city>
+    <line1>2300 N. Glasscock</line1>
+    <state>TX</state>
+    <location_name>John S. Shary Elementary</location_name>
+    <zip>76692-2822</zip>
+  </address>
+</polling_location>
+<polling_location id="44215041">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Elsa</city>
+    <line1>500 W. 9th</line1>
+    <state>TX</state>
+    <location_name>John F. Kennedy School</location_name>
+    <zip>78570</zip>
+  </address>
+</polling_location>
+<polling_location id="44215042">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>EDINBURG</city>
+    <line1>904 S 12TH AVE</line1>
+    <state>TX</state>
+    <location_name>Jefferson Elem. School</location_name>
+    <zip>78539-5604</zip>
+  </address>
+</polling_location>
+<polling_location id="44215043">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>McCook</city>
+    <line1>28212 S. FM 2058</line1>
+    <state>TX</state>
+    <location_name>Immaculate Parish Hall</location_name>
+    <zip>78573-6914</zip>
+  </address>
+</polling_location>
+<polling_location id="44215044">
+  <directions>Council Chambers</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>HIDALGO</city>
+    <line1>704 E TEXANO DR</line1>
+    <state>TX</state>
+    <location_name>Hidalgo City Hall</location_name>
+    <zip>78557-4104</zip>
+  </address>
+</polling_location>
+<polling_location id="44215045">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Hargill</city>
+    <line1>11 Mi. N. of Edg. On Hwy 281</line1>
+    <state>TX</state>
+    <location_name>Hargill Elementary School</location_name>
+    <zip>78573-6914</zip>
+  </address>
+</polling_location>
+<polling_location id="44215046">
+  <directions>Room D1</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>ALAMO</city>
+    <line1>807 FM 495</line1>
+    <state>TX</state>
+    <location_name>Guerra Elem. School</location_name>
+    <zip>78516-7024</zip>
+  </address>
+</polling_location>
+<polling_location id="44215047">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>N. Edinburg</city>
+    <line1>10010 N. Via Fernandez</line1>
+    <state>TX</state>
+    <location_name>Guerra Elem. School</location_name>
+    <zip>77632</zip>
+  </address>
+</polling_location>
+<polling_location id="44215048">
+  <directions>Conference Room</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MISSION</city>
+    <line1>6603 S FM 494</line1>
+    <state>TX</state>
+    <location_name>Granjeno City Hall</location_name>
+    <zip>78572-1501</zip>
+  </address>
+</polling_location>
+<polling_location id="44215049">
+  <directions>Cafeteria</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>SAN JUAN</city>
+    <line1>230 E SGT LEONEL TREVINO RD</line1>
+    <state>TX</state>
+    <location_name>Garza-Pena Elementary School</location_name>
+    <zip>78589-3105</zip>
+  </address>
+</polling_location>
+<polling_location id="44215050">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>EDINBURG</city>
+    <line1>1100 E EBONY LN</line1>
+    <state>TX</state>
+    <location_name>Francisco Barrientes School</location_name>
+    <zip>78539-5843</zip>
+  </address>
+</polling_location>
+<polling_location id="44215051">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MCALLEN</city>
+    <line1>7800 N WARE RD</line1>
+    <state>TX</state>
+    <location_name>Fossum Middle School</location_name>
+    <zip>78504-5821</zip>
+  </address>
+</polling_location>
+<polling_location id="44215052">
+  <directions>Main Entrance</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Sullivan</city>
+    <line1>500 Cenizo Drive</line1>
+    <state>TX</state>
+    <location_name>Fire Station</location_name>
+    <zip>76645-2110</zip>
+  </address>
+</polling_location>
+<polling_location id="44215053">
+  <directions>Training Room</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MCALLEN</city>
+    <line1>4309 WARRIOR DR</line1>
+    <state>TX</state>
+    <location_name>Facilities &amp; Operations Bldg.</location_name>
+    <zip>78501-3396</zip>
+  </address>
+</polling_location>
+<polling_location id="44215054">
+  <directions>Training Room</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>EDINBURG</city>
+    <line1>317 N CLOSNER BLVD</line1>
+    <state>TX</state>
+    <location_name>Elections Annex Bldg.</location_name>
+    <zip>78541-3555</zip>
+  </address>
+</polling_location>
+<polling_location id="44215055">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>EDINBURG</city>
+    <line1>3101 N CLOSNER BLVD</line1>
+    <state>TX</state>
+    <location_name>Edinburg North High School</location_name>
+    <zip>78541-2592</zip>
+  </address>
+</polling_location>
+<polling_location id="44215056">
+  <directions>Station Entrance</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Edcouch</city>
+    <line1>200 W. Santa Rosa Ave.</line1>
+    <state>TX</state>
+    <location_name>Edcouch Fire Station</location_name>
+    <zip>78572-3242</zip>
+  </address>
+</polling_location>
+<polling_location id="44215057">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>LA JOYA</city>
+    <line1>105 MICHAEL ST</line1>
+    <state>TX</state>
+    <location_name>Economic Development Center Bldg</location_name>
+    <zip>78560-4133</zip>
+  </address>
+</polling_location>
+<polling_location id="44215058">
+  <directions>Gym/South Side</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MCALLEN</city>
+    <line1>4100 N 34TH ST</line1>
+    <state>TX</state>
+    <location_name>Dr. Casteneda Elementary</location_name>
+    <zip>78504-5422</zip>
+  </address>
+</polling_location>
+<polling_location id="44215059">
+  <directions>Cafeteria</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MCALLEN</city>
+    <line1>2112 N MAIN ST</line1>
+    <state>TX</state>
+    <location_name>Crockett Elementary School</location_name>
+    <zip>78501-4186</zip>
+  </address>
+</polling_location>
+<polling_location id="44215060">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>EDINBURG</city>
+    <line1>2821 W CANTON RD</line1>
+    <state>TX</state>
+    <location_name>Conterbury Elem. School</location_name>
+    <zip>78539-6647</zip>
+  </address>
+</polling_location>
+<polling_location id="44215061">
+  <directions>Lounge Area</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>WESLACO</city>
+    <line1>1902 JOE STEPHENS AVE STE 101</line1>
+    <state>TX</state>
+    <location_name>Co. Commissioner Pct. #1</location_name>
+    <zip>78596-3704</zip>
+  </address>
+</polling_location>
+<polling_location id="44215062">
+  <directions>Main Entrance</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>PALMVIEW</city>
+    <line1>724 S BREYFOGLE RD</line1>
+    <state>TX</state>
+    <location_name>Co. Comm. Pct #3 Ofc</location_name>
+    <zip>78572</zip>
+  </address>
+</polling_location>
+<polling_location id="44215063">
+  <directions>Conference Room</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>ALTON</city>
+    <line1>509 S ALTON BLVD</line1>
+    <state>TX</state>
+    <location_name>City Hall</location_name>
+    <zip>78573-6914</zip>
+  </address>
+</polling_location>
+<polling_location id="44215064">
+  <directions>Main Entrance</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Palmhurst</city>
+    <line1>1410 E. 3 Mile Rd</line1>
+    <state>TX</state>
+    <location_name>Church of Christ</location_name>
+    <zip>79336-5019</zip>
+  </address>
+</polling_location>
+<polling_location id="44215065">
+  <directions>Cafeteria</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MCALLEN</city>
+    <line1>1501 FREDDY GONZALES RD</line1>
+    <state>TX</state>
+    <location_name>Cayetano Cavazos Elem.</location_name>
+    <zip>78504-9591</zip>
+  </address>
+</polling_location>
+<polling_location id="44215066">
+  <directions>Cafeteria</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>PHARR</city>
+    <line1>1001 N FIR ST</line1>
+    <state>TX</state>
+    <location_name>Buckner Elementary</location_name>
+    <zip>78577-3409</zip>
+  </address>
+</polling_location>
+<polling_location id="44215067">
+  <directions>Comm. Chambers</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>WESLACO</city>
+    <line1>525 S KANSAS AVE</line1>
+    <state>TX</state>
+    <location_name>Braught Theatre</location_name>
+    <zip>78596-6215</zip>
+  </address>
+</polling_location>
+<polling_location id="44215068">
+  <directions>SW Corner</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>DONNA</city>
+    <line1>307 MILLER AVE</line1>
+    <state>TX</state>
+    <location_name>Boys and Girls Club</location_name>
+    <zip>78537-3042</zip>
+  </address>
+</polling_location>
+<polling_location id="44215069">
+  <directions>Annex</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>MCALLEN</city>
+    <line1>2604 GALVESTON AVE</line1>
+    <state>TX</state>
+    <location_name>Bowie Special Educatoin Dpt</location_name>
+    <zip>78501-7774</zip>
+  </address>
+</polling_location>
+<polling_location id="44215070">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>EDINBURG</city>
+    <line1>1202 N MONMACK RD</line1>
+    <state>TX</state>
+    <location_name>B.L. Garza Middle School</location_name>
+    <zip>78541-8480</zip>
+  </address>
+</polling_location>
+<polling_location id="44215071">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>EDINBURG</city>
+    <line1>9205 CARMEN AVILA RD</line1>
+    <state>TX</state>
+    <location_name>Avila Elem. School</location_name>
+    <zip>78542-0961</zip>
+  </address>
+</polling_location>
+<polling_location id="44215072">
+  <directions>Portable #18</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>SAN JUAN</city>
+    <line1>804 S STEWART RD</line1>
+    <state>TX</state>
+    <location_name>Austin Middle School</location_name>
+    <zip>78589-4200</zip>
+  </address>
+</polling_location>
+<polling_location id="44215073">
+  <directions>Main Enterence</directions>
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>DONNA</city>
+    <line1>1408 SILVER AVE</line1>
+    <state>TX</state>
+    <location_name>Amigos Del Valle</location_name>
+    <zip>78537-3332</zip>
+  </address>
+</polling_location>
+<polling_location id="44215074">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>ALAMO</city>
+    <line1>1429 S TOWER RD</line1>
+    <state>TX</state>
+    <location_name>Alamo Comm. Center</location_name>
+    <zip>78516-9490</zip>
+  </address>
+</polling_location>
+</vip_object>

@@ -1,0 +1,2829 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>48</vip_id>
+  <datetime>2012-10-25T10:00:00</datetime>
+  <description>VIP aggregates this data from official state sources</description>
+</source>
+<state id="48">
+  <name>Texas</name>
+</state>
+<election id="4000">
+  <date>2012-11-06</date>
+  <election_type>State</election_type>
+  <state_id>48</state_id>
+  <statewide>Yes</statewide>
+</election>
+<locality id="11141">
+  <name>El Paso</name>
+  <state_id>48</state_id>
+  <type>County</type>
+</locality>
+<precinct id="22105">
+  <name>90</name>
+  <number>90</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141078</polling_location_id>
+</precinct>
+<precinct id="2211">
+  <name>24</name>
+  <number>24</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141023</polling_location_id>
+</precinct>
+<precinct id="2246">
+  <name>142</name>
+  <number>142</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141122</polling_location_id>
+</precinct>
+<precinct id="22124">
+  <name>112</name>
+  <number>112</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141098</polling_location_id>
+</precinct>
+<precinct id="22150">
+  <name>171</name>
+  <number>171</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141146</polling_location_id>
+</precinct>
+<precinct id="22169">
+  <name>85</name>
+  <number>85</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141075</polling_location_id>
+</precinct>
+<precinct id="2210">
+  <name>33</name>
+  <number>33</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141028</polling_location_id>
+</precinct>
+<precinct id="22184">
+  <name>173</name>
+  <number>173</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141148</polling_location_id>
+</precinct>
+<precinct id="2283">
+  <name>102</name>
+  <number>102</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141089</polling_location_id>
+</precinct>
+<precinct id="22160">
+  <name>151</name>
+  <number>151</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141130</polling_location_id>
+</precinct>
+<precinct id="229">
+  <name>134</name>
+  <number>134</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141113</polling_location_id>
+</precinct>
+<precinct id="2291">
+  <name>117</name>
+  <number>117</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141102</polling_location_id>
+</precinct>
+<precinct id="22137">
+  <name>75</name>
+  <number>75</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141066</polling_location_id>
+</precinct>
+<precinct id="22143">
+  <name>5</name>
+  <number>5</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141005</polling_location_id>
+</precinct>
+<precinct id="2297">
+  <name>68</name>
+  <number>68</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141059</polling_location_id>
+</precinct>
+<precinct id="2270">
+  <name>77</name>
+  <number>77</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141067</polling_location_id>
+</precinct>
+<precinct id="2242">
+  <name>156</name>
+  <number>156</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141133</polling_location_id>
+</precinct>
+<precinct id="2224">
+  <name>37</name>
+  <number>37</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141031</polling_location_id>
+</precinct>
+<precinct id="22121">
+  <name>141</name>
+  <number>141</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141121</polling_location_id>
+</precinct>
+<precinct id="225">
+  <name>25</name>
+  <number>25</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141024</polling_location_id>
+</precinct>
+<precinct id="22133">
+  <name>74</name>
+  <number>74</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141065</polling_location_id>
+</precinct>
+<precinct id="22136">
+  <name>179</name>
+  <number>179</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141130</polling_location_id>
+</precinct>
+<precinct id="2287">
+  <name>114</name>
+  <number>114</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141099</polling_location_id>
+</precinct>
+<precinct id="2260">
+  <name>95</name>
+  <number>95</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141083</polling_location_id>
+</precinct>
+<precinct id="2230">
+  <name>48</name>
+  <number>48</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141040</polling_location_id>
+</precinct>
+<precinct id="22122">
+  <name>182</name>
+  <number>182</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141100</polling_location_id>
+</precinct>
+<precinct id="22146">
+  <name>177</name>
+  <number>177</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141020</polling_location_id>
+</precinct>
+<precinct id="2266">
+  <name>6</name>
+  <number>6</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141006</polling_location_id>
+</precinct>
+<precinct id="22117">
+  <name>62</name>
+  <number>62</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141053</polling_location_id>
+</precinct>
+<precinct id="2244">
+  <name>35</name>
+  <number>35</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141029</polling_location_id>
+</precinct>
+<precinct id="2238">
+  <name>46</name>
+  <number>46</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141038</polling_location_id>
+</precinct>
+<precinct id="22138">
+  <name>135</name>
+  <number>135</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141115</polling_location_id>
+</precinct>
+<precinct id="22177">
+  <name>174</name>
+  <number>174</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141076</polling_location_id>
+</precinct>
+<precinct id="2232">
+  <name>63</name>
+  <number>63</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141054</polling_location_id>
+</precinct>
+<precinct id="2265">
+  <name>78</name>
+  <number>78</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141068</polling_location_id>
+</precinct>
+<precinct id="22158">
+  <name>34</name>
+  <number>34</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141028</polling_location_id>
+</precinct>
+<precinct id="22128">
+  <name>131</name>
+  <number>131</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141108</polling_location_id>
+</precinct>
+<precinct id="2245">
+  <name>158</name>
+  <number>158</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141135</polling_location_id>
+</precinct>
+<precinct id="2214">
+  <name>8</name>
+  <number>8</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141008</polling_location_id>
+</precinct>
+<precinct id="2217">
+  <name>79</name>
+  <number>79</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141069</polling_location_id>
+</precinct>
+<precinct id="22172">
+  <name>20</name>
+  <number>20</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141019</polling_location_id>
+</precinct>
+<precinct id="22141">
+  <name>84</name>
+  <number>84</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141074</polling_location_id>
+</precinct>
+<precinct id="22135">
+  <name>120</name>
+  <number>120</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141104</polling_location_id>
+</precinct>
+<precinct id="22186">
+  <name>87</name>
+  <number>87</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141076</polling_location_id>
+</precinct>
+<precinct id="22139">
+  <name>70</name>
+  <number>70</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141061</polling_location_id>
+</precinct>
+<precinct id="2292">
+  <name>86</name>
+  <number>86</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141057</polling_location_id>
+</precinct>
+<precinct id="2267">
+  <name>94</name>
+  <number>94</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141082</polling_location_id>
+</precinct>
+<precinct id="22114">
+  <name>154</name>
+  <number>154</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141131</polling_location_id>
+</precinct>
+<precinct id="2237">
+  <name>57</name>
+  <number>57</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141048</polling_location_id>
+</precinct>
+<precinct id="22166">
+  <name>147</name>
+  <number>147</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141126</polling_location_id>
+</precinct>
+<precinct id="22165">
+  <name>169</name>
+  <number>169</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141144</polling_location_id>
+</precinct>
+<precinct id="22170">
+  <name>38</name>
+  <number>38</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141032</polling_location_id>
+</precinct>
+<precinct id="2289">
+  <name>21</name>
+  <number>21</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141020</polling_location_id>
+</precinct>
+<precinct id="22157">
+  <name>93</name>
+  <number>93</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141081</polling_location_id>
+</precinct>
+<precinct id="2221">
+  <name>65</name>
+  <number>65</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141056</polling_location_id>
+</precinct>
+<precinct id="22179">
+  <name>28</name>
+  <number>28</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141009</polling_location_id>
+</precinct>
+<precinct id="22151">
+  <name>139</name>
+  <number>139</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141119</polling_location_id>
+</precinct>
+<precinct id="2235">
+  <name>140</name>
+  <number>140</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141120</polling_location_id>
+</precinct>
+<precinct id="22171">
+  <name>163</name>
+  <number>163</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141138</polling_location_id>
+</precinct>
+<precinct id="22188">
+  <name>187</name>
+  <number>187</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141059</polling_location_id>
+</precinct>
+<precinct id="22159">
+  <name>159</name>
+  <number>159</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141136</polling_location_id>
+</precinct>
+<precinct id="2251">
+  <name>51</name>
+  <number>51</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141042</polling_location_id>
+</precinct>
+<precinct id="2279">
+  <name>14</name>
+  <number>14</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141013</polling_location_id>
+</precinct>
+<precinct id="2241">
+  <name>160</name>
+  <number>160</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141137</polling_location_id>
+</precinct>
+<precinct id="2294">
+  <name>44</name>
+  <number>44</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141037</polling_location_id>
+</precinct>
+<precinct id="22112">
+  <name>106</name>
+  <number>106</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141093</polling_location_id>
+</precinct>
+<precinct id="2274">
+  <name>143</name>
+  <number>143</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141123</polling_location_id>
+</precinct>
+<precinct id="22119">
+  <name>109</name>
+  <number>109</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141096</polling_location_id>
+</precinct>
+<precinct id="22175">
+  <name>101</name>
+  <number>101</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141088</polling_location_id>
+</precinct>
+<precinct id="22147">
+  <name>64</name>
+  <number>64</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141055</polling_location_id>
+</precinct>
+<precinct id="22178">
+  <name>176</name>
+  <number>176</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141019</polling_location_id>
+</precinct>
+<precinct id="22161">
+  <name>83</name>
+  <number>83</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141073</polling_location_id>
+</precinct>
+<precinct id="2219">
+  <name>55</name>
+  <number>55</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141046</polling_location_id>
+</precinct>
+<precinct id="2293">
+  <name>58</name>
+  <number>58</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141049</polling_location_id>
+</precinct>
+<precinct id="2243">
+  <name>23</name>
+  <number>23</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141022</polling_location_id>
+</precinct>
+<precinct id="2231">
+  <name>40</name>
+  <number>40</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141034</polling_location_id>
+</precinct>
+<precinct id="2250">
+  <name>80</name>
+  <number>80</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141070</polling_location_id>
+</precinct>
+<precinct id="22185">
+  <name>189</name>
+  <number>189</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141076</polling_location_id>
+</precinct>
+<precinct id="22116">
+  <name>1</name>
+  <number>1</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141001</polling_location_id>
+</precinct>
+<precinct id="2215">
+  <name>17</name>
+  <number>17</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141016</polling_location_id>
+</precinct>
+<precinct id="2258">
+  <name>157</name>
+  <number>157</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141134</polling_location_id>
+</precinct>
+<precinct id="22145">
+  <name>103</name>
+  <number>103</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141090</polling_location_id>
+</precinct>
+<precinct id="222">
+  <name>18</name>
+  <number>18</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141017</polling_location_id>
+</precinct>
+<precinct id="22106">
+  <name>148</name>
+  <number>148</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141127</polling_location_id>
+</precinct>
+<precinct id="2255">
+  <name>126</name>
+  <number>126</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141109</polling_location_id>
+</precinct>
+<precinct id="2286">
+  <name>82</name>
+  <number>82</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141072</polling_location_id>
+</precinct>
+<precinct id="2288">
+  <name>186</name>
+  <number>186</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141051</polling_location_id>
+</precinct>
+<precinct id="22120">
+  <name>122</name>
+  <number>122</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141106</polling_location_id>
+</precinct>
+<precinct id="2236">
+  <name>3</name>
+  <number>3</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141003</polling_location_id>
+</precinct>
+<precinct id="22164">
+  <name>175</name>
+  <number>175</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141081</polling_location_id>
+</precinct>
+<precinct id="2257">
+  <name>16</name>
+  <number>16</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141015</polling_location_id>
+</precinct>
+<precinct id="2263">
+  <name>32</name>
+  <number>32</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141028</polling_location_id>
+</precinct>
+<precinct id="2226">
+  <name>47</name>
+  <number>47</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141039</polling_location_id>
+</precinct>
+<precinct id="22131">
+  <name>149</name>
+  <number>149</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141128</polling_location_id>
+</precinct>
+<precinct id="2252">
+  <name>69</name>
+  <number>69</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141060</polling_location_id>
+</precinct>
+<precinct id="2299">
+  <name>61</name>
+  <number>61</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141052</polling_location_id>
+</precinct>
+<precinct id="22126">
+  <name>54</name>
+  <number>54</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141045</polling_location_id>
+</precinct>
+<precinct id="22109">
+  <name>138</name>
+  <number>138</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141118</polling_location_id>
+</precinct>
+<precinct id="22127">
+  <name>113</name>
+  <number>113</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141099</polling_location_id>
+</precinct>
+<precinct id="22176">
+  <name>2</name>
+  <number>2</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141002</polling_location_id>
+</precinct>
+<precinct id="22111">
+  <name>71</name>
+  <number>71</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141062</polling_location_id>
+</precinct>
+<precinct id="22168">
+  <name>150</name>
+  <number>150</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141129</polling_location_id>
+</precinct>
+<precinct id="22130">
+  <name>111</name>
+  <number>111</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141098</polling_location_id>
+</precinct>
+<precinct id="22149">
+  <name>89</name>
+  <number>89</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141076</polling_location_id>
+</precinct>
+<precinct id="22110">
+  <name>137</name>
+  <number>137</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141117</polling_location_id>
+</precinct>
+<precinct id="228">
+  <name>161</name>
+  <number>161</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141138</polling_location_id>
+</precinct>
+<precinct id="22173">
+  <name>180</name>
+  <number>180</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141149</polling_location_id>
+</precinct>
+<precinct id="2269">
+  <name>105</name>
+  <number>105</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141092</polling_location_id>
+</precinct>
+<precinct id="2268">
+  <name>36</name>
+  <number>36</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141030</polling_location_id>
+</precinct>
+<precinct id="2222">
+  <name>19</name>
+  <number>19</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141018</polling_location_id>
+</precinct>
+<precinct id="2239">
+  <name>97</name>
+  <number>97</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141085</polling_location_id>
+</precinct>
+<precinct id="22167">
+  <name>41</name>
+  <number>41</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141035</polling_location_id>
+</precinct>
+<precinct id="2282">
+  <name>104</name>
+  <number>104</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141091</polling_location_id>
+</precinct>
+<precinct id="223">
+  <name>119</name>
+  <number>119</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141103</polling_location_id>
+</precinct>
+<precinct id="226">
+  <name>15</name>
+  <number>15</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141014</polling_location_id>
+</precinct>
+<precinct id="22155">
+  <name>99</name>
+  <number>99</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141087</polling_location_id>
+</precinct>
+<precinct id="22104">
+  <name>108</name>
+  <number>108</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141095</polling_location_id>
+</precinct>
+<precinct id="22132">
+  <name>91</name>
+  <number>91</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141079</polling_location_id>
+</precinct>
+<precinct id="22162">
+  <name>172</name>
+  <number>172</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141147</polling_location_id>
+</precinct>
+<precinct id="2284">
+  <name>129</name>
+  <number>129</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141112</polling_location_id>
+</precinct>
+<precinct id="2216">
+  <name>133</name>
+  <number>133</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141114</polling_location_id>
+</precinct>
+<precinct id="2248">
+  <name>170</name>
+  <number>170</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141145</polling_location_id>
+</precinct>
+<precinct id="221">
+  <name>125</name>
+  <number>125</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141108</polling_location_id>
+</precinct>
+<precinct id="2259">
+  <name>100</name>
+  <number>100</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141087</polling_location_id>
+</precinct>
+<precinct id="2229">
+  <name>88</name>
+  <number>88</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141077</polling_location_id>
+</precinct>
+<precinct id="22156">
+  <name>162</name>
+  <number>162</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141139</polling_location_id>
+</precinct>
+<precinct id="22103">
+  <name>132</name>
+  <number>132</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141113</polling_location_id>
+</precinct>
+<precinct id="2261">
+  <name>96</name>
+  <number>96</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141084</polling_location_id>
+</precinct>
+<precinct id="2228">
+  <name>118</name>
+  <number>118</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141102</polling_location_id>
+</precinct>
+<precinct id="2285">
+  <name>92</name>
+  <number>92</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141080</polling_location_id>
+</precinct>
+<precinct id="2249">
+  <name>11</name>
+  <number>11</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141011</polling_location_id>
+</precinct>
+<precinct id="2213">
+  <name>42</name>
+  <number>42</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141036</polling_location_id>
+</precinct>
+<precinct id="22118">
+  <name>168</name>
+  <number>168</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141143</polling_location_id>
+</precinct>
+<precinct id="2240">
+  <name>12</name>
+  <number>12</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141011</polling_location_id>
+</precinct>
+<precinct id="2280">
+  <name>7</name>
+  <number>7</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141007</polling_location_id>
+</precinct>
+<precinct id="22102">
+  <name>59</name>
+  <number>59</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141050</polling_location_id>
+</precinct>
+<precinct id="22134">
+  <name>9</name>
+  <number>9</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141009</polling_location_id>
+</precinct>
+<precinct id="2277">
+  <name>185</name>
+  <number>185</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141052</polling_location_id>
+</precinct>
+<precinct id="22152">
+  <name>53</name>
+  <number>53</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141044</polling_location_id>
+</precinct>
+<precinct id="2220">
+  <name>45</name>
+  <number>45</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141038</polling_location_id>
+</precinct>
+<precinct id="22181">
+  <name>188</name>
+  <number>188</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141051</polling_location_id>
+</precinct>
+<precinct id="2253">
+  <name>130</name>
+  <number>130</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141112</polling_location_id>
+</precinct>
+<precinct id="224">
+  <name>56</name>
+  <number>56</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141047</polling_location_id>
+</precinct>
+<precinct id="2225">
+  <name>76</name>
+  <number>76</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141067</polling_location_id>
+</precinct>
+<precinct id="2254">
+  <name>124</name>
+  <number>124</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141108</polling_location_id>
+</precinct>
+<precinct id="22115">
+  <name>29</name>
+  <number>29</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141026</polling_location_id>
+</precinct>
+<precinct id="2278">
+  <name>121</name>
+  <number>121</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141105</polling_location_id>
+</precinct>
+<precinct id="22148">
+  <name>145</name>
+  <number>145</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141124</polling_location_id>
+</precinct>
+<precinct id="22123">
+  <name>166</name>
+  <number>166</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141110</polling_location_id>
+</precinct>
+<precinct id="2233">
+  <name>152</name>
+  <number>152</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141131</polling_location_id>
+</precinct>
+<precinct id="2212">
+  <name>60</name>
+  <number>60</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141051</polling_location_id>
+</precinct>
+<precinct id="22182">
+  <name>155</name>
+  <number>155</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141132</polling_location_id>
+</precinct>
+<precinct id="22142">
+  <name>39</name>
+  <number>39</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141033</polling_location_id>
+</precinct>
+<precinct id="2276">
+  <name>146</name>
+  <number>146</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141125</polling_location_id>
+</precinct>
+<precinct id="2271">
+  <name>128</name>
+  <number>128</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141111</polling_location_id>
+</precinct>
+<precinct id="2275">
+  <name>153</name>
+  <number>153</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141132</polling_location_id>
+</precinct>
+<precinct id="2273">
+  <name>110</name>
+  <number>110</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141097</polling_location_id>
+</precinct>
+<precinct id="2218">
+  <name>107</name>
+  <number>107</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141094</polling_location_id>
+</precinct>
+<precinct id="22100">
+  <name>43</name>
+  <number>43</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141037</polling_location_id>
+</precinct>
+<precinct id="2234">
+  <name>10</name>
+  <number>10</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141010</polling_location_id>
+</precinct>
+<precinct id="227">
+  <name>98</name>
+  <number>98</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141086</polling_location_id>
+</precinct>
+<precinct id="22163">
+  <name>72</name>
+  <number>72</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141063</polling_location_id>
+</precinct>
+<precinct id="22125">
+  <name>164</name>
+  <number>164</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141140</polling_location_id>
+</precinct>
+<precinct id="2290">
+  <name>167</name>
+  <number>167</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141142</polling_location_id>
+</precinct>
+<precinct id="22174">
+  <name>127</name>
+  <number>127</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141110</polling_location_id>
+</precinct>
+<precinct id="22187">
+  <name>191</name>
+  <number>191</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141111</polling_location_id>
+</precinct>
+<precinct id="22129">
+  <name>22</name>
+  <number>22</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141021</polling_location_id>
+</precinct>
+<precinct id="2247">
+  <name>13</name>
+  <number>13</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141012</polling_location_id>
+</precinct>
+<precinct id="2298">
+  <name>67</name>
+  <number>67</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141058</polling_location_id>
+</precinct>
+<precinct id="2295">
+  <name>144</name>
+  <number>144</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141124</polling_location_id>
+</precinct>
+<precinct id="22101">
+  <name>26</name>
+  <number>26</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141025</polling_location_id>
+</precinct>
+<precinct id="2272">
+  <name>165</name>
+  <number>165</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141141</polling_location_id>
+</precinct>
+<precinct id="22140">
+  <name>52</name>
+  <number>52</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141043</polling_location_id>
+</precinct>
+<precinct id="2281">
+  <name>116</name>
+  <number>116</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141101</polling_location_id>
+</precinct>
+<precinct id="2227">
+  <name>50</name>
+  <number>50</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141041</polling_location_id>
+</precinct>
+<precinct id="22180">
+  <name>181</name>
+  <number>181</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141111</polling_location_id>
+</precinct>
+<precinct id="2264">
+  <name>123</name>
+  <number>123</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141107</polling_location_id>
+</precinct>
+<precinct id="22107">
+  <name>31</name>
+  <number>31</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141027</polling_location_id>
+</precinct>
+<precinct id="22108">
+  <name>81</name>
+  <number>81</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141071</polling_location_id>
+</precinct>
+<precinct id="2262">
+  <name>115</name>
+  <number>115</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141100</polling_location_id>
+</precinct>
+<precinct id="22113">
+  <name>27</name>
+  <number>27</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141025</polling_location_id>
+</precinct>
+<precinct id="2256">
+  <name>66</name>
+  <number>66</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141057</polling_location_id>
+</precinct>
+<precinct id="22144">
+  <name>4</name>
+  <number>4</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141004</polling_location_id>
+</precinct>
+<precinct id="22153">
+  <name>136</name>
+  <number>136</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141116</polling_location_id>
+</precinct>
+<precinct id="2296">
+  <name>178</name>
+  <number>178</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141049</polling_location_id>
+</precinct>
+<precinct id="2223">
+  <name>49</name>
+  <number>49</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141041</polling_location_id>
+</precinct>
+<precinct id="22154">
+  <name>73</name>
+  <number>73</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141064</polling_location_id>
+</precinct>
+<precinct id="22183">
+  <name>30</name>
+  <number>30</number>
+  <locality_id>11141</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44141027</polling_location_id>
+</precinct>
+<polling_location id="44141001">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Anthony</city>
+    <line1>401 Wildcat Dr.</line1>
+    <state>TX</state>
+    <location_name>Anthony City Hall</location_name>
+    <zip>79821</zip>
+  </address>
+</polling_location>
+<polling_location id="44141002">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Vinton</city>
+    <line1>436 E. Vinton Rd.</line1>
+    <state>TX</state>
+    <location_name>Village of Vinton City Hall</location_name>
+    <zip>79821</zip>
+  </address>
+</polling_location>
+<polling_location id="44141003">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Banutillo</city>
+    <line1>7311 Bosque Rd.</line1>
+    <state>TX</state>
+    <location_name>Canutillo Middle School</location_name>
+    <zip>79835</zip>
+  </address>
+</polling_location>
+<polling_location id="44141004">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Canutillo</city>
+    <line1>651 Canutillo Ave.</line1>
+    <state>TX</state>
+    <location_name>Canutillo Elementary School</location_name>
+    <zip>79835</zip>
+  </address>
+</polling_location>
+<polling_location id="44141005">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>111 E. Borderland Rd.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 2</location_name>
+    <zip>79932</zip>
+  </address>
+</polling_location>
+<polling_location id="44141006">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>One Tennis West Ln.</line1>
+    <state>TX</state>
+    <location_name>Tennis West</location_name>
+    <zip>79932</zip>
+  </address>
+</polling_location>
+<polling_location id="44141007">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>500 Mulberry Ave.</line1>
+    <state>TX</state>
+    <location_name>Lincoln Middle School</location_name>
+    <zip>79932</zip>
+  </address>
+</polling_location>
+<polling_location id="44141008">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>115 Shorty Ln.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 15</location_name>
+    <zip>79932</zip>
+  </address>
+</polling_location>
+<polling_location id="44141009">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>4256 Roxbury Dr.</line1>
+    <state>TX</state>
+    <location_name>Zack White Elementary School</location_name>
+    <zip>79922</zip>
+  </address>
+</polling_location>
+<polling_location id="44141010">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>341 Thorn Ave.</line1>
+    <state>TX</state>
+    <location_name>Roberts Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141011">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1445 Nardo Goodman Dr.</line1>
+    <state>TX</state>
+    <location_name>Olga Kohlberg Elementary School</location_name>
+    <zip>79912</zip>
+  </address>
+</polling_location>
+<polling_location id="44141012">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>825 E. Redd Rd.</line1>
+    <state>TX</state>
+    <location_name>Franklin 9th Grade Center</location_name>
+    <zip>79912</zip>
+  </address>
+</polling_location>
+<polling_location id="44141013">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>6541 Bear Ridge Dr.</line1>
+    <state>TX</state>
+    <location_name>Tippin Elementary School</location_name>
+    <zip>79912</zip>
+  </address>
+</polling_location>
+<polling_location id="44141014">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>6767 Ojo De Agua Dr.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 27</location_name>
+    <zip>79912</zip>
+  </address>
+</polling_location>
+<polling_location id="44141015">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>7530 Lakehurst Rd.</line1>
+    <state>TX</state>
+    <location_name>Rosa Guerrero Elementary School</location_name>
+    <zip>79912</zip>
+  </address>
+</polling_location>
+<polling_location id="44141016">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>900 N. Resler Dr.</line1>
+    <state>TX</state>
+    <location_name>Franklin High School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141017">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1575 Belvidere St.</line1>
+    <state>TX</state>
+    <location_name>Monte Vista Retirement Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141018">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>7304 Good Samaritan Ct.</line1>
+    <state>TX</state>
+    <location_name>Good Samaritan Society - White Acres</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141019">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>940 Belvidere St.</line1>
+    <state>TX</state>
+    <location_name>Polk Elementary School</location_name>
+    <zip>79912</zip>
+  </address>
+</polling_location>
+<polling_location id="44141020">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>5890 Via Cuesta Dr.</line1>
+    <state>TX</state>
+    <location_name>Peace Lutheran Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141021">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>6500 N. Mesa St.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 22</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141022">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>6445 Escondido Dr.</line1>
+    <state>TX</state>
+    <location_name>Carlos Rivera Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141023">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>524 Thunderbird Dr.</line1>
+    <state>TX</state>
+    <location_name>Western Hills U.M.C.- Steward Family Life Center #A</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141024">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>5430 Buckley Dr.</line1>
+    <state>TX</state>
+    <location_name>Dr. Green Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141025">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>6508 Fiesta Dr.</line1>
+    <state>TX</state>
+    <location_name>Putnam Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141026">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>499 Cabaret Dr.</line1>
+    <state>TX</state>
+    <location_name>L. B. Johnson Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141027">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>650 Wallenberg Dr.</line1>
+    <state>TX</state>
+    <location_name>Polly Harris Senior Citizen Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141028">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3307 N. Stanton St.</line1>
+    <state>TX</state>
+    <location_name>Mesita Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141029">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>2510 N. St. Vrain St.</line1>
+    <state>TX</state>
+    <location_name>El Paso Tennis Club</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141030">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>220 Lawton Dr.</line1>
+    <state>TX</state>
+    <location_name>Vilas Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141031">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1001 S. Ochoa St.</line1>
+    <state>TX</state>
+    <location_name>Father Pinto Complex</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141032">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>721 E. Rio Grande Ave.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 3</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141033">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1221 E. San Antonio Ave.</line1>
+    <state>TX</state>
+    <location_name>Sun Plaza Housing</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141034">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1440 E. Cliff Dr.</line1>
+    <state>TX</state>
+    <location_name>Lamar Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141035">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1170 N. Walnut St.</line1>
+    <state>TX</state>
+    <location_name>Career &amp; Technology Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141036">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>320 S. Piedras St.</line1>
+    <state>TX</state>
+    <location_name>Beall Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141037">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>11141 Loma Roja Dr.</line1>
+    <state>TX</state>
+    <location_name>Dr. Nixon Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141038">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>5330 Sweetwater Dr.</line1>
+    <state>TX</state>
+    <location_name>Bradley Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141039">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>4909 Trojan Dr.</line1>
+    <state>TX</state>
+    <location_name>H.E. Charles Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141040">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>5425 Salem Dr.</line1>
+    <state>TX</state>
+    <location_name>Fannin Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141041">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>6301 Tiger Eye Dr.</line1>
+    <state>TX</state>
+    <location_name>Desertaire Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141042">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>4925 Fairbanks Dr.</line1>
+    <state>TX</state>
+    <location_name>El Paso Korean U.M.C.</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141043">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>4860 Tropicana Ave.</line1>
+    <state>TX</state>
+    <location_name>Collins Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141044">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>10275 Alcan St.</line1>
+    <state>TX</state>
+    <location_name>Newman Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141045">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>5932 Quail Ave.</line1>
+    <state>TX</state>
+    <location_name>Parkland High School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141046">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>4700 Rutherford Dr.</line1>
+    <state>TX</state>
+    <location_name>Whitaker Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141047">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>5249 Bastille Ave.</line1>
+    <state>TX</state>
+    <location_name>Dowell Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141048">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>5315 Threadgill Ave.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 23</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141049">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>9790 Pickerel Dr.</line1>
+    <state>TX</state>
+    <location_name>Dolphin Terrace Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141050">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Landham</city>
+    <line1>5411 Wren Ln.</line1>
+    <state>TX</state>
+    <location_name>Crosby Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141051">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3828 Hercules Ave.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 16</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141052">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3601 Edgar Park Rd.</line1>
+    <state>TX</state>
+    <location_name>Park Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141053">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>4435 Maxwell Ave.</line1>
+    <state>TX</state>
+    <location_name>Nolan Richardson Recreation Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141054">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>4931 Hercules Ave.</line1>
+    <state>TX</state>
+    <location_name>Magoffin Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141055">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>5414 Hondo Pass Dr.</line1>
+    <state>TX</state>
+    <location_name>Stanton Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141056">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3200 Ellerthorpe Ave.</line1>
+    <state>TX</state>
+    <location_name>Logan Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141057">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3700 Thomason Ave.</line1>
+    <state>TX</state>
+    <location_name>Burnet Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141058">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>5000 N. Stevens St.</line1>
+    <state>TX</state>
+    <location_name>Travis Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141059">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>2500 Mobile Ave.</line1>
+    <state>TX</state>
+    <location_name>Kathy White Housing Complex</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141060">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3134 Jefferson Ave.</line1>
+    <state>TX</state>
+    <location_name>Grand View Park Senior Citizen Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141061">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>2300 San Diego Ave.</line1>
+    <state>TX</state>
+    <location_name>Paul C. Moreno Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141062">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1800 Byron St.</line1>
+    <state>TX</state>
+    <location_name>Memorial Park Senior Citizen Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141063">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3500 Memphis Ave.</line1>
+    <state>TX</state>
+    <location_name>Austin High School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141064">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>4101 Altura Ave.</line1>
+    <state>TX</state>
+    <location_name>Coldwell Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141065">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3200 Pershing Dr.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 7</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141066">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>4700 Leeds Ave.</line1>
+    <state>TX</state>
+    <location_name>Cross of Grace Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141067">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>5415 Trowbridge Dr.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 13</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141068">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>600 Chelsea St.</line1>
+    <state>TX</state>
+    <location_name>Chelsea Plaza Housing</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141069">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>4240 Alameda Ave.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 5</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141070">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>4400 Blanco Ave.</line1>
+    <state>TX</state>
+    <location_name>Burleson Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141071">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>701 N. Glenwood St.</line1>
+    <state>TX</state>
+    <location_name>San Juan Recreation Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141072">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>5816 Stephenson Ave.</line1>
+    <state>TX</state>
+    <location_name>Hawkins Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141073">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>5505 Robert Alva Ave.</line1>
+    <state>TX</state>
+    <location_name>Henderson Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141074">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>5508 Delta Dr.</line1>
+    <state>TX</state>
+    <location_name>Clardy Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141075">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>6300 Delta Dr.</line1>
+    <state>TX</state>
+    <location_name>Fire Station #14</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141076">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>7024 Cielo Vista Dr.</line1>
+    <state>TX</state>
+    <location_name>Bonham Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141077">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>6101 Hughey Cir.</line1>
+    <state>TX</state>
+    <location_name>Ross Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141078">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>8301 Edgemere Blvd.</line1>
+    <state>TX</state>
+    <location_name>Fire Station #20</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141079">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>8101 Whitus Dr.</line1>
+    <state>TX</state>
+    <location_name>Mac Arthur Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141080">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>9000 Basil Ct.</line1>
+    <state>TX</state>
+    <location_name>Cielo Vista Park Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141081">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>2901 Mc Rae Blvd.</line1>
+    <state>TX</state>
+    <location_name>Scotsdale Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141082">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>10300 Edgemere Blvd.</line1>
+    <state>TX</state>
+    <location_name>Edgemere Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141083">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3001 Parkwood St.</line1>
+    <state>TX</state>
+    <location_name>Gary Del Palacio Recreation Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141084">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>2400 Zanzibar Rd.</line1>
+    <state>TX</state>
+    <location_name>Eastpoint Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141085">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>2405 Mc Rae Blvd.</line1>
+    <state>TX</state>
+    <location_name>Fire Station #19</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141086">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>10530 Janway Dr.</line1>
+    <state>TX</state>
+    <location_name>Eastwood Heights Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141087">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>11145 Edgemere Blvd.</line1>
+    <state>TX</state>
+    <location_name>Pebble Hills Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141088">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3200 Fierro Dr.</line1>
+    <state>TX</state>
+    <location_name>Eastside Senior Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141089">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>10712 Sam Snead Dr.</line1>
+    <state>TX</state>
+    <location_name>YWCA - East</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141090">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>10801 La Subida Dr.</line1>
+    <state>TX</state>
+    <location_name>Vista Hills Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141091">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1498 Lomaland Dr.</line1>
+    <state>TX</state>
+    <location_name>Fire Station #24</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141092">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>11201 Pebble Hills Blvd.</line1>
+    <state>TX</state>
+    <location_name>Indian Ridge Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141093">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>10955 Sam Snead Dr.</line1>
+    <state>TX</state>
+    <location_name>Glen Cove Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141094">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>2001 Lee Trevino Dr.</line1>
+    <state>TX</state>
+    <location_name>Hanks High School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141095">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1832 Tommy Aaron Dr.</line1>
+    <state>TX</state>
+    <location_name>Tierra Del Sol Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141096">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1641 Billie Marie Dr.</line1>
+    <state>TX</state>
+    <location_name>Desert View Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141097">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>11670 Chito Samaniego Dr.</line1>
+    <state>TX</state>
+    <location_name>Region 19 Head Start Multipurpose Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141098">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3535 Nolan Richardson Dr.</line1>
+    <state>TX</state>
+    <location_name>Jane Hambric Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141099">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>11530 Edgemere Blvd.</line1>
+    <state>TX</state>
+    <location_name>Bill Sybert Pre K-8 School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141100">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3830 Rich Beem Blvd.</line1>
+    <state>TX</state>
+    <location_name>Hurshel Antwine Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141101">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3451 Rich Beem Blvd.</line1>
+    <state>TX</state>
+    <location_name>Spec. Rafael Hernando III Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141102">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>2640 Robert Wynn St.</line1>
+    <state>TX</state>
+    <location_name>Benito Martinez Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141103">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1950 Firehouse Dr.</line1>
+    <state>TX</state>
+    <location_name>Helen Ball Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141104">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1800 Leroy Bonse Dr.</line1>
+    <state>TX</state>
+    <location_name>O'Shea Keleher Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141105">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>12000 Montwood Dr.</line1>
+    <state>TX</state>
+    <location_name>Montwood High School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141106">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>11851 Vista Del Sol Dr</line1>
+    <state>TX</state>
+    <location_name>Vista Del Sol Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141107">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1515 Rebecca Ann Dr.</line1>
+    <state>TX</state>
+    <location_name>Myrtle Cooper Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141108">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1501 Bob Hope Dr.</line1>
+    <state>TX</state>
+    <location_name>Sierra Vista Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141109">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>12230 Pine Springs Dr.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 35</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141110">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>4250 O'Shea Rd.</line1>
+    <state>TX</state>
+    <location_name>Red Sands Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141111">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>14400 Pebble Hills Blvd.</line1>
+    <state>TX</state>
+    <location_name>El Dorado 9th Grade Academy</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141112">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>2200 Sun Country Dr.</line1>
+    <state>TX</state>
+    <location_name>Lujan-Chavez Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141113">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>351 Nichols Rd.</line1>
+    <state>TX</state>
+    <location_name>Ramona Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141114">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1800 Winslow Rd.</line1>
+    <state>TX</state>
+    <location_name>Del Norte Heights Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141115">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>7090 Alameda Ave.</line1>
+    <state>TX</state>
+    <location_name>Ascarate Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141116">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>218 Barker Rd.</line1>
+    <state>TX</state>
+    <location_name>Cedar Grove Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141117">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>7615 Yuma Dr.</line1>
+    <state>TX</state>
+    <location_name>Ranchland Hills Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141118">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>7530 Acapulco Ave.</line1>
+    <state>TX</state>
+    <location_name>Hacienda Heights Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141119">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>8032 Alamo Ave.</line1>
+    <state>TX</state>
+    <location_name>Mesa Vista Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141120">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>7750 Lilac Way</line1>
+    <state>TX</state>
+    <location_name>Good Samaritan Towers</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141121">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>7901 San Jose Rd.</line1>
+    <state>TX</state>
+    <location_name>Fire Station #18</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141122">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>301 Midway Dr.</line1>
+    <state>TX</state>
+    <location_name>Riverside High School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141123">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>7900 Jersey St.</line1>
+    <state>TX</state>
+    <location_name>Thomas Manor Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141124">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>8200 Ryland Dr.</line1>
+    <state>TX</state>
+    <location_name>Loma Terrace Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141125">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>8300 Forest Haven Ct.</line1>
+    <state>TX</state>
+    <location_name>Marian Manor Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141126">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>7988 Alameda Ave.</line1>
+    <state>TX</state>
+    <location_name>Cadwallader Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141127">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>221 Prado Rd.</line1>
+    <state>TX</state>
+    <location_name>Alicia R. Chacon School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141128">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>8660 Northloop Dr.</line1>
+    <state>TX</state>
+    <location_name>Valley View Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141129">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>9009 Alameda Ave.</line1>
+    <state>TX</state>
+    <location_name>Robert F. Kennedy Pre-K Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141130">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>240 Mecca Dr.</line1>
+    <state>TX</state>
+    <location_name>Capistrano Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141131">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>920 Burgundy Dr.</line1>
+    <state>TX</state>
+    <location_name>Lebarron Park Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141132">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>9230 Elgin Dr.</line1>
+    <state>TX</state>
+    <location_name>Lancaster Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141133">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>9301 Alameda Ave.</line1>
+    <state>TX</state>
+    <location_name>Pavo Real Recreation Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141134">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>520 Southside Rd.</line1>
+    <state>TX</state>
+    <location_name>South Loop Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141135">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>13601 Ryderwood Ave</line1>
+    <state>TX</state>
+    <location_name>Horizon Heights Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141136">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>12899 Sparks Dr.</line1>
+    <state>TX</state>
+    <location_name>Sparks Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141137">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>693 N. Rio Vista Rd.</line1>
+    <state>TX</state>
+    <location_name>H. D. Hilley Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141138">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>500 Bauman Rd.</line1>
+    <state>TX</state>
+    <location_name>Robert R. Rojas Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141139">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>10150 Alameda Ave.</line1>
+    <state>TX</state>
+    <location_name>Socorro High School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141140">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>205 Buford Rd.</line1>
+    <state>TX</state>
+    <location_name>Escontrias Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141141">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Socorro</city>
+    <line1>11399 Socorro Rd.</line1>
+    <state>TX</state>
+    <location_name>Campestre Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141142">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>3550 Mark Jason Dr.</line1>
+    <state>TX</state>
+    <location_name>Montana Vista Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141143">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>300 N. Kenazo Dr.</line1>
+    <state>TX</state>
+    <location_name>Desert Hill Elementary School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141144">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>14510 Mc Mahon Ave.</line1>
+    <state>TX</state>
+    <location_name>Carroll T. Welch Intermediate School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141145">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>13100 Alameda Ave.</line1>
+    <state>TX</state>
+    <location_name>Clint ISD Early College Academy</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141146">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>12280 Socorro Rd.</line1>
+    <state>TX</state>
+    <location_name>Ana M. Garcia-Enriquez Middle School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141147">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>521 Mike Maros St.</line1>
+    <state>TX</state>
+    <location_name>Rio Valle Woman's Club</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141148">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>19200 Cobb St.</line1>
+    <state>TX</state>
+    <location_name>Tornillo Administration Building</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="44141149">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>El Paso</city>
+    <line1>1100 Colina De Paz Dr.</line1>
+    <state>TX</state>
+    <location_name>Desert Wind Pre K-8 School</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+</vip_object>

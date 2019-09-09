@@ -1,0 +1,2112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>48</vip_id>
+  <datetime>2012-10-25T10:00:00</datetime>
+  <description>VIP aggregates this data from official state sources</description>
+</source>
+<state id="48">
+  <name>Texas</name>
+</state>
+<election id="4000">
+  <date>2012-11-06</date>
+  <election_type>State</election_type>
+  <state_id>48</state_id>
+  <statewide>Yes</statewide>
+</election>
+<locality id="11355">
+  <name>Nueces</name>
+  <state_id>48</state_id>
+  <type>county</type>
+</locality>
+<precinct id="22102">
+  <name>87</name>
+  <number>87</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355053</polling_location_id>
+</precinct>
+<precinct id="2225">
+  <name>104</name>
+  <number>104</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355059</polling_location_id>
+</precinct>
+<precinct id="222">
+  <name>115</name>
+  <number>115</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355106</polling_location_id>
+</precinct>
+<precinct id="2276">
+  <name>110</name>
+  <number>110</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355077</polling_location_id>
+</precinct>
+<precinct id="2242">
+  <name>32</name>
+  <number>32</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355113</polling_location_id>
+</precinct>
+<precinct id="2220">
+  <name>64</name>
+  <number>64</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355006</polling_location_id>
+</precinct>
+<precinct id="2261">
+  <name>36</name>
+  <number>36</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355114</polling_location_id>
+</precinct>
+<precinct id="223">
+  <name>20</name>
+  <number>20</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355085</polling_location_id>
+</precinct>
+<precinct id="22114">
+  <name>89</name>
+  <number>89</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355105</polling_location_id>
+</precinct>
+<precinct id="22118">
+  <name>76</name>
+  <number>76</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355034</polling_location_id>
+</precinct>
+<precinct id="2236">
+  <name>94</name>
+  <number>94</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355004</polling_location_id>
+</precinct>
+<precinct id="2232">
+  <name>120</name>
+  <number>120</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355002</polling_location_id>
+</precinct>
+<precinct id="2224">
+  <name>82</name>
+  <number>82</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355092</polling_location_id>
+</precinct>
+<precinct id="2214">
+  <name>19</name>
+  <number>19</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355032</polling_location_id>
+</precinct>
+<precinct id="2297">
+  <name>39</name>
+  <number>39</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355093</polling_location_id>
+</precinct>
+<precinct id="2219">
+  <name>67</name>
+  <number>67</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355069</polling_location_id>
+</precinct>
+<precinct id="2293">
+  <name>31</name>
+  <number>31</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355093</polling_location_id>
+</precinct>
+<precinct id="22112">
+  <name>54</name>
+  <number>54</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355040</polling_location_id>
+</precinct>
+<precinct id="22116">
+  <name>15</name>
+  <number>15</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355014</polling_location_id>
+</precinct>
+<precinct id="2268">
+  <name>96</name>
+  <number>96</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355046</polling_location_id>
+</precinct>
+<precinct id="22119">
+  <name>10</name>
+  <number>10</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355044</polling_location_id>
+</precinct>
+<precinct id="2253">
+  <name>86</name>
+  <number>86</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355076</polling_location_id>
+</precinct>
+<precinct id="22113">
+  <name>7</name>
+  <number>7</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355041</polling_location_id>
+</precinct>
+<precinct id="2237">
+  <name>30</name>
+  <number>30</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355038</polling_location_id>
+</precinct>
+<precinct id="2213">
+  <name>119</name>
+  <number>119</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355090</polling_location_id>
+</precinct>
+<precinct id="2246">
+  <name>123</name>
+  <number>123</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355119</polling_location_id>
+</precinct>
+<precinct id="2223">
+  <name>84</name>
+  <number>84</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355101</polling_location_id>
+</precinct>
+<precinct id="2254">
+  <name>100</name>
+  <number>100</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355091</polling_location_id>
+</precinct>
+<precinct id="2239">
+  <name>85</name>
+  <number>85</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355017</polling_location_id>
+</precinct>
+<precinct id="2292">
+  <name>72</name>
+  <number>72</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355081</polling_location_id>
+</precinct>
+<precinct id="2227">
+  <name>113</name>
+  <number>113</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355084</polling_location_id>
+</precinct>
+<precinct id="2267">
+  <name>8</name>
+  <number>8</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355097</polling_location_id>
+</precinct>
+<precinct id="2243">
+  <name>70</name>
+  <number>70</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355063</polling_location_id>
+</precinct>
+<precinct id="224">
+  <name>124</name>
+  <number>124</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355107</polling_location_id>
+</precinct>
+<precinct id="2233">
+  <name>53</name>
+  <number>53</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355027</polling_location_id>
+</precinct>
+<precinct id="22120">
+  <name>109</name>
+  <number>109</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355068</polling_location_id>
+</precinct>
+<precinct id="2252">
+  <name>99</name>
+  <number>99</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355042</polling_location_id>
+</precinct>
+<precinct id="2263">
+  <name>26</name>
+  <number>26</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355080</polling_location_id>
+</precinct>
+<precinct id="2230">
+  <name>34</name>
+  <number>34</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355039</polling_location_id>
+</precinct>
+<precinct id="2255">
+  <name>80</name>
+  <number>80</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355071</polling_location_id>
+</precinct>
+<precinct id="2216">
+  <name>4</name>
+  <number>4</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355065</polling_location_id>
+</precinct>
+<precinct id="22100">
+  <name>90</name>
+  <number>90</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355094</polling_location_id>
+</precinct>
+<precinct id="2275">
+  <name>3</name>
+  <number>3</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355015</polling_location_id>
+</precinct>
+<precinct id="2271">
+  <name>29</name>
+  <number>29</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355055</polling_location_id>
+</precinct>
+<precinct id="2298">
+  <name>47</name>
+  <number>47</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355115</polling_location_id>
+</precinct>
+<precinct id="2270">
+  <name>59</name>
+  <number>59</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355076</polling_location_id>
+</precinct>
+<precinct id="2290">
+  <name>55</name>
+  <number>55</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355074</polling_location_id>
+</precinct>
+<precinct id="2283">
+  <name>106</name>
+  <number>106</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355013</polling_location_id>
+</precinct>
+<precinct id="2282">
+  <name>38</name>
+  <number>38</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355111</polling_location_id>
+</precinct>
+<precinct id="2258">
+  <name>69</name>
+  <number>69</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355117</polling_location_id>
+</precinct>
+<precinct id="22121">
+  <name>14</name>
+  <number>14</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355057</polling_location_id>
+</precinct>
+<precinct id="2291">
+  <name>24</name>
+  <number>24</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355008</polling_location_id>
+</precinct>
+<precinct id="2249">
+  <name>56</name>
+  <number>56</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355064</polling_location_id>
+</precinct>
+<precinct id="2285">
+  <name>35</name>
+  <number>35</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355059</polling_location_id>
+</precinct>
+<precinct id="2273">
+  <name>23</name>
+  <number>23</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355031</polling_location_id>
+</precinct>
+<precinct id="22115">
+  <name>41</name>
+  <number>41</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355112</polling_location_id>
+</precinct>
+<precinct id="227">
+  <name>116</name>
+  <number>116</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355096</polling_location_id>
+</precinct>
+<precinct id="2248">
+  <name>18</name>
+  <number>18</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355030</polling_location_id>
+</precinct>
+<precinct id="2286">
+  <name>103</name>
+  <number>103</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355011</polling_location_id>
+</precinct>
+<precinct id="2244">
+  <name>114</name>
+  <number>114</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355028</polling_location_id>
+</precinct>
+<precinct id="2266">
+  <name>6</name>
+  <number>6</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355095</polling_location_id>
+</precinct>
+<precinct id="2294">
+  <name>60</name>
+  <number>60</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355058</polling_location_id>
+</precinct>
+<precinct id="22105">
+  <name>108</name>
+  <number>108</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355045</polling_location_id>
+</precinct>
+<precinct id="2215">
+  <name>112</name>
+  <number>112</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355025</polling_location_id>
+</precinct>
+<precinct id="22125">
+  <name>16</name>
+  <number>16</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355060</polling_location_id>
+</precinct>
+<precinct id="2235">
+  <name>37</name>
+  <number>37</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355070</polling_location_id>
+</precinct>
+<precinct id="2277">
+  <name>61</name>
+  <number>61</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355022</polling_location_id>
+</precinct>
+<precinct id="2250">
+  <name>111</name>
+  <number>111</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355056</polling_location_id>
+</precinct>
+<precinct id="2251">
+  <name>43</name>
+  <number>43</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355003</polling_location_id>
+</precinct>
+<precinct id="2259">
+  <name>68</name>
+  <number>68</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355061</polling_location_id>
+</precinct>
+<precinct id="22127">
+  <name>126</name>
+  <number>126</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355108</polling_location_id>
+</precinct>
+<precinct id="2284">
+  <name>50</name>
+  <number>50</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355061</polling_location_id>
+</precinct>
+<precinct id="2238">
+  <name>17</name>
+  <number>17</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355021</polling_location_id>
+</precinct>
+<precinct id="22103">
+  <name>62</name>
+  <number>62</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355051</polling_location_id>
+</precinct>
+<precinct id="22123">
+  <name>28</name>
+  <number>28</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355019</polling_location_id>
+</precinct>
+<precinct id="2274">
+  <name>66</name>
+  <number>66</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355089</polling_location_id>
+</precinct>
+<precinct id="22106">
+  <name>127</name>
+  <number>127</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355060</polling_location_id>
+</precinct>
+<precinct id="2299">
+  <name>71</name>
+  <number>71</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355020</polling_location_id>
+</precinct>
+<precinct id="2247">
+  <name>65</name>
+  <number>65</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355048</polling_location_id>
+</precinct>
+<precinct id="2221">
+  <name>91</name>
+  <number>91</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355050</polling_location_id>
+</precinct>
+<precinct id="2281">
+  <name>12</name>
+  <number>12</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355116</polling_location_id>
+</precinct>
+<precinct id="228">
+  <name>63</name>
+  <number>63</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355036</polling_location_id>
+</precinct>
+<precinct id="22126">
+  <name>22</name>
+  <number>22</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355033</polling_location_id>
+</precinct>
+<precinct id="2217">
+  <name>2</name>
+  <number>2</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355005</polling_location_id>
+</precinct>
+<precinct id="2288">
+  <name>105</name>
+  <number>105</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355026</polling_location_id>
+</precinct>
+<precinct id="22111">
+  <name>27</name>
+  <number>27</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355099</polling_location_id>
+</precinct>
+<precinct id="2211">
+  <name>48</name>
+  <number>48</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355066</polling_location_id>
+</precinct>
+<precinct id="2287">
+  <name>97</name>
+  <number>97</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355029</polling_location_id>
+</precinct>
+<precinct id="22117">
+  <name>57</name>
+  <number>57</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355100</polling_location_id>
+</precinct>
+<precinct id="2265">
+  <name>33</name>
+  <number>33</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355083</polling_location_id>
+</precinct>
+<precinct id="2229">
+  <name>13</name>
+  <number>13</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355075</polling_location_id>
+</precinct>
+<precinct id="2222">
+  <name>75</name>
+  <number>75</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355102</polling_location_id>
+</precinct>
+<precinct id="22122">
+  <name>25</name>
+  <number>25</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355062</polling_location_id>
+</precinct>
+<precinct id="2278">
+  <name>121</name>
+  <number>121</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355110</polling_location_id>
+</precinct>
+<precinct id="2231">
+  <name>51</name>
+  <number>51</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355009</polling_location_id>
+</precinct>
+<precinct id="2256">
+  <name>118</name>
+  <number>118</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355016</polling_location_id>
+</precinct>
+<precinct id="22124">
+  <name>77</name>
+  <number>77</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355058</polling_location_id>
+</precinct>
+<precinct id="2269">
+  <name>58</name>
+  <number>58</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355052</polling_location_id>
+</precinct>
+<precinct id="22110">
+  <name>11</name>
+  <number>11</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355120</polling_location_id>
+</precinct>
+<precinct id="2234">
+  <name>93</name>
+  <number>93</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355010</polling_location_id>
+</precinct>
+<precinct id="2245">
+  <name>88</name>
+  <number>88</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355023</polling_location_id>
+</precinct>
+<precinct id="221">
+  <name>81</name>
+  <number>81</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355037</polling_location_id>
+</precinct>
+<precinct id="2279">
+  <name>98</name>
+  <number>98</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355047</polling_location_id>
+</precinct>
+<precinct id="225">
+  <name>122</name>
+  <number>122</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355086</polling_location_id>
+</precinct>
+<precinct id="22101">
+  <name>21</name>
+  <number>21</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355067</polling_location_id>
+</precinct>
+<precinct id="22104">
+  <name>46</name>
+  <number>46</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355118</polling_location_id>
+</precinct>
+<precinct id="22109">
+  <name>83</name>
+  <number>83</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355079</polling_location_id>
+</precinct>
+<precinct id="2210">
+  <name>40</name>
+  <number>40</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355073</polling_location_id>
+</precinct>
+<precinct id="2296">
+  <name>74</name>
+  <number>74</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355103</polling_location_id>
+</precinct>
+<precinct id="226">
+  <name>45</name>
+  <number>45</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355082</polling_location_id>
+</precinct>
+<precinct id="22107">
+  <name>42</name>
+  <number>42</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355035</polling_location_id>
+</precinct>
+<precinct id="229">
+  <name>73</name>
+  <number>73</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355072</polling_location_id>
+</precinct>
+<precinct id="2272">
+  <name>101</name>
+  <number>101</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355012</polling_location_id>
+</precinct>
+<precinct id="2260">
+  <name>79</name>
+  <number>79</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355098</polling_location_id>
+</precinct>
+<precinct id="2295">
+  <name>95</name>
+  <number>95</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355018</polling_location_id>
+</precinct>
+<precinct id="2228">
+  <name>49</name>
+  <number>49</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355024</polling_location_id>
+</precinct>
+<precinct id="2289">
+  <name>5</name>
+  <number>5</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355078</polling_location_id>
+</precinct>
+<precinct id="2240">
+  <name>1</name>
+  <number>1</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355088</polling_location_id>
+</precinct>
+<precinct id="2212">
+  <name>9</name>
+  <number>9</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355109</polling_location_id>
+</precinct>
+<precinct id="2262">
+  <name>92</name>
+  <number>92</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355104</polling_location_id>
+</precinct>
+<precinct id="2264">
+  <name>102</name>
+  <number>102</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355057</polling_location_id>
+</precinct>
+<precinct id="22108">
+  <name>44</name>
+  <number>44</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355001</polling_location_id>
+</precinct>
+<precinct id="2218">
+  <name>125</name>
+  <number>125</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355049</polling_location_id>
+</precinct>
+<precinct id="2280">
+  <name>78</name>
+  <number>78</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355007</polling_location_id>
+</precinct>
+<precinct id="2241">
+  <name>107</name>
+  <number>107</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355054</polling_location_id>
+</precinct>
+<precinct id="2257">
+  <name>52</name>
+  <number>52</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355043</polling_location_id>
+</precinct>
+<precinct id="2226">
+  <name>117</name>
+  <number>117</number>
+  <locality_id>11355</locality_id>
+  <mail_only>No</mail_only>
+  <polling_location_id>44355087</polling_location_id>
+</precinct>
+<polling_location id="44355001">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>510 Osage St.</line1>
+    <state>TX</state>
+    <location_name>Zavala Senior Center</location_name>
+    <zip>78405</zip>
+  </address>
+</polling_location>
+<polling_location id="44355002">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1110 Woodlawn Dr.</line1>
+    <state>TX</state>
+    <location_name>Woodlawn Elementary School</location_name>
+    <zip>78412</zip>
+  </address>
+</polling_location>
+<polling_location id="44355003">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3210 Churchill Dr.</line1>
+    <state>TX</state>
+    <location_name>Wm. Travis Elementary School</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355004">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>4621 Marie St.</line1>
+    <state>TX</state>
+    <location_name>Wm. Calk Elementary School</location_name>
+    <zip>78411</zip>
+  </address>
+</polling_location>
+<polling_location id="44355005">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>4525 S. Alameda St.</line1>
+    <state>TX</state>
+    <location_name>Windsor Park Athena School</location_name>
+    <zip>78412</zip>
+  </address>
+</polling_location>
+<polling_location id="44355006">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3925 Fort Worth St.</line1>
+    <state>TX</state>
+    <location_name>Wilson Elementary School</location_name>
+    <zip>78411</zip>
+  </address>
+</polling_location>
+<polling_location id="44355007">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1526 Cliff Maus Dr.</line1>
+    <state>TX</state>
+    <location_name>West Oso Elementary School</location_name>
+    <zip>78416</zip>
+  </address>
+</polling_location>
+<polling_location id="44355008">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>754 Flato Rd.</line1>
+    <state>TX</state>
+    <location_name>West Oso (Jr.) High School</location_name>
+    <zip>78405</zip>
+  </address>
+</polling_location>
+<polling_location id="44355009">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5723 Hampshire Rd.</line1>
+    <state>TX</state>
+    <location_name>Weldon Gibson Elementary School</location_name>
+    <zip>78408</zip>
+  </address>
+</polling_location>
+<polling_location id="44355010">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2726 Holly Rd.</line1>
+    <state>TX</state>
+    <location_name>Water Utility Bldg.</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355011">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>9768 LaBranch St.</line1>
+    <state>TX</state>
+    <location_name>Tuloso-Midway Middle School</location_name>
+    <zip>78410</zip>
+  </address>
+</polling_location>
+<polling_location id="44355012">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2653 McKinzie Rd.</line1>
+    <state>TX</state>
+    <location_name>Tuloso-Midway High School</location_name>
+    <zip>78410</zip>
+  </address>
+</polling_location>
+<polling_location id="44355013">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>4301 Schanen Blvd.</line1>
+    <state>TX</state>
+    <location_name>Tom Browne Middle School</location_name>
+    <zip>78413</zip>
+  </address>
+</polling_location>
+<polling_location id="44355014">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1355 FM 665</line1>
+    <state>TX</state>
+    <location_name>The People's Baptist Church</location_name>
+    <zip>78417</zip>
+  </address>
+</polling_location>
+<polling_location id="44355015">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>7502 Venice Dr.</line1>
+    <state>TX</state>
+    <location_name>The Lakes Masters Association</location_name>
+    <zip>78413</zip>
+  </address>
+</polling_location>
+<polling_location id="44355016">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5918 Kostoryz Rd.</line1>
+    <state>TX</state>
+    <location_name>Tabernacle of Praise Church</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355017">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1414 18th. St.</line1>
+    <state>TX</state>
+    <location_name>T.G. Allen Elementary School</location_name>
+    <zip>78404</zip>
+  </address>
+</polling_location>
+<polling_location id="44355018">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3210 S. Padre Island Dr.</line1>
+    <state>TX</state>
+    <location_name>St. Cyril &amp; Methodius Church</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355019">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Robstown</city>
+    <line1>3918 Cnty. Rd. 61</line1>
+    <state>TX</state>
+    <location_name>St. Anthony Catholic Church - Violet</location_name>
+    <zip>78380</zip>
+  </address>
+</polling_location>
+<polling_location id="44355020">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3001 McArdle Rd.</line1>
+    <state>TX</state>
+    <location_name>South Park Middle School</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355021">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>6902 Williams Dr.</line1>
+    <state>TX</state>
+    <location_name>Smith Elementary School</location_name>
+    <zip>78412</zip>
+  </address>
+</polling_location>
+<polling_location id="44355022">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2920 Soledad St.</line1>
+    <state>TX</state>
+    <location_name>Shaw Elementary School</location_name>
+    <zip>78405</zip>
+  </address>
+</polling_location>
+<polling_location id="44355023">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>6701 S. Staples St.</line1>
+    <state>TX</state>
+    <location_name>Second Baptist Church</location_name>
+    <zip>78413</zip>
+  </address>
+</polling_location>
+<polling_location id="44355024">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3221 McKinzie Rd.</line1>
+    <state>TX</state>
+    <location_name>Scott Vetters Scout Hut</location_name>
+    <zip>78410</zip>
+  </address>
+</polling_location>
+<polling_location id="44355025">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5717 Killarmet Dr.</line1>
+    <state>TX</state>
+    <location_name>Schanen Estates Elementary School</location_name>
+    <zip>78413</zip>
+  </address>
+</polling_location>
+<polling_location id="44355026">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Robstown</city>
+    <line1>800 W. Ave. D</line1>
+    <state>TX</state>
+    <location_name>San Pedro Elementary School</location_name>
+    <zip>78380</zip>
+  </address>
+</polling_location>
+<polling_location id="44355027">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>363 Norton St.</line1>
+    <state>TX</state>
+    <location_name>Sam Houston Elementary School</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355028">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5445 Greenwood Dr.</line1>
+    <state>TX</state>
+    <location_name>Saint John's Baptist Church</location_name>
+    <zip>78417</zip>
+  </address>
+</polling_location>
+<polling_location id="44355029">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>4462 Dinn St.</line1>
+    <state>TX</state>
+    <location_name>Rosas Garage</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355030">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>10110 Compton Rd.</line1>
+    <state>TX</state>
+    <location_name>Ronnie H. Polston County Bldg.</location_name>
+    <zip>78418</zip>
+  </address>
+</polling_location>
+<polling_location id="44355031">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Robstown</city>
+    <line1>16318 FM 624</line1>
+    <state>TX</state>
+    <location_name>River Hills Baptist Church</location_name>
+    <zip>78380</zip>
+  </address>
+</polling_location>
+<polling_location id="44355032">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Port Aransas</city>
+    <line1>710 W. Ave A</line1>
+    <state>TX</state>
+    <location_name>Port Aransas Civic Center Complex</location_name>
+    <zip>78373</zip>
+  </address>
+</polling_location>
+<polling_location id="44355033">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Robstown</city>
+    <line1>2391 Cnty. Rd. 67</line1>
+    <state>TX</state>
+    <location_name>Petronila Elementary School</location_name>
+    <zip>78380</zip>
+  </address>
+</polling_location>
+<polling_location id="44355034">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>501 S. Port Ave.</line1>
+    <state>TX</state>
+    <location_name>Pete Roel Enterprize</location_name>
+    <zip>78405</zip>
+  </address>
+</polling_location>
+<polling_location id="44355035">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2758 Santa Fe St.</line1>
+    <state>TX</state>
+    <location_name>Peerless Cleaners</location_name>
+    <zip>78404</zip>
+  </address>
+</polling_location>
+<polling_location id="44355036">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3707 Santa Fe St.</line1>
+    <state>TX</state>
+    <location_name>Parkway Presbyterian Church</location_name>
+    <zip>78411</zip>
+  </address>
+</polling_location>
+<polling_location id="44355037">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>14353 Commodores Dr.</line1>
+    <state>TX</state>
+    <location_name>Padre Isles Country Club</location_name>
+    <zip>78418</zip>
+  </address>
+</polling_location>
+<polling_location id="44355038">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1414 Martin Luther King Dr.</line1>
+    <state>TX</state>
+    <location_name>Oveal Williams Senior Center</location_name>
+    <zip>78401</zip>
+  </address>
+</polling_location>
+<polling_location id="44355039">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1080 S Clarkwood Rd.</line1>
+    <state>TX</state>
+    <location_name>Our Lady of Mnt. Carmel Mission</location_name>
+    <zip>78406</zip>
+  </address>
+</polling_location>
+<polling_location id="44355040">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Robstown</city>
+    <line1>208 E. Ave. H</line1>
+    <state>TX</state>
+    <location_name>Ortiz Intermediate School</location_name>
+    <zip>78380</zip>
+  </address>
+</polling_location>
+<polling_location id="44355041">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>842 Erwin Ave.</line1>
+    <state>TX</state>
+    <location_name>Oak Park Recreation Center</location_name>
+    <zip>78408</zip>
+  </address>
+</polling_location>
+<polling_location id="44355042">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3801 Leopard St.</line1>
+    <state>TX</state>
+    <location_name>Oak Park Elementary School</location_name>
+    <zip>78408</zip>
+  </address>
+</polling_location>
+<polling_location id="44355043">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>509 Old Robstown Rd.</line1>
+    <state>TX</state>
+    <location_name>Oak Park Elementary School</location_name>
+    <zip>78408</zip>
+  </address>
+</polling_location>
+<polling_location id="44355044">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Banquete</city>
+    <line1>6271 FM 666</line1>
+    <state>TX</state>
+    <location_name>Nueces County ESD #4</location_name>
+    <zip>78339</zip>
+  </address>
+</polling_location>
+<polling_location id="44355045">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Robstown</city>
+    <line1>3983 Wings Dr.</line1>
+    <state>TX</state>
+    <location_name>Nueces County Airport</location_name>
+    <zip>78380</zip>
+  </address>
+</polling_location>
+<polling_location id="44355046">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3001 Norton St.</line1>
+    <state>TX</state>
+    <location_name>Norton Street Church of Christ</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355047">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1818 Trojan Dr.</line1>
+    <state>TX</state>
+    <location_name>Moody High School</location_name>
+    <zip>78416</zip>
+  </address>
+</polling_location>
+<polling_location id="44355048">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5241 Kentner St.</line1>
+    <state>TX</state>
+    <location_name>Montclair Elementary School</location_name>
+    <zip>78412</zip>
+  </address>
+</polling_location>
+<polling_location id="44355049">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>7658 Cimarron Blvd.</line1>
+    <state>TX</state>
+    <location_name>Mireles Elementary School</location_name>
+    <zip>78414</zip>
+  </address>
+</polling_location>
+<polling_location id="44355050">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>7406 S. Padre Island Dr.</line1>
+    <state>TX</state>
+    <location_name>MG Building Materials</location_name>
+    <zip>78412</zip>
+  </address>
+</polling_location>
+<polling_location id="44355051">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1707 Ayers St.</line1>
+    <state>TX</state>
+    <location_name>Metro E (Wynn Seale Middle School)</location_name>
+    <zip>78404</zip>
+  </address>
+</polling_location>
+<polling_location id="44355052">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2401 S. Alameda St.</line1>
+    <state>TX</state>
+    <location_name>Menger Elementary School</location_name>
+    <zip>78404</zip>
+  </address>
+</polling_location>
+<polling_location id="44355053">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>4120 Carroll Ln.</line1>
+    <state>TX</state>
+    <location_name>Mary Helen Berlanga Elementary School</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355054">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>4201 Calallen Dr.</line1>
+    <state>TX</state>
+    <location_name>Magee Elementary School</location_name>
+    <zip>78410</zip>
+  </address>
+</polling_location>
+<polling_location id="44355055">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>7533 Lipes Blvd.</line1>
+    <state>TX</state>
+    <location_name>Luther Jones Elementary School</location_name>
+    <zip>78413</zip>
+  </address>
+</polling_location>
+<polling_location id="44355056">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>10702 IH 37</line1>
+    <state>TX</state>
+    <location_name>LULAC West Apartments</location_name>
+    <zip>78410</zip>
+  </address>
+</polling_location>
+<polling_location id="44355057">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Bishop</city>
+    <line1>717 E. 6th St.</line1>
+    <state>TX</state>
+    <location_name>Luehrs Junior High School</location_name>
+    <zip>78343</zip>
+  </address>
+</polling_location>
+<polling_location id="44355058">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>650 Osage St.</line1>
+    <state>TX</state>
+    <location_name>Lozano Instructional Education Ctr.</location_name>
+    <zip>78405</zip>
+  </address>
+</polling_location>
+<polling_location id="44355059">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Robstown</city>
+    <line1>1000 Ruben Chavez Rd.</line1>
+    <state>TX</state>
+    <location_name>Lotspeich Elementary School</location_name>
+    <zip>78380</zip>
+  </address>
+</polling_location>
+<polling_location id="44355060">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1306 FM 43</line1>
+    <state>TX</state>
+    <location_name>London Middle School</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355061">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3133 Swantner Dr.</line1>
+    <state>TX</state>
+    <location_name>Lindale Senior Center</location_name>
+    <zip>78404</zip>
+  </address>
+</polling_location>
+<polling_location id="44355062">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Robstown</city>
+    <line1>6923 FM 1833</line1>
+    <state>TX</state>
+    <location_name>Leona Schroeder Community Building</location_name>
+    <zip>78380</zip>
+  </address>
+</polling_location>
+<polling_location id="44355063">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5633 S. Staples St.</line1>
+    <state>TX</state>
+    <location_name>Legacy Home Health Center</location_name>
+    <zip>78411</zip>
+  </address>
+</polling_location>
+<polling_location id="44355064">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1455 Southgate Dr.</line1>
+    <state>TX</state>
+    <location_name>La Armada</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355065">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3602 Panama Dr.</line1>
+    <state>TX</state>
+    <location_name>Kostoryz Elementary School</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355066">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>4326 McArdle Rd.</line1>
+    <state>TX</state>
+    <location_name>Korean Presbyterian Church</location_name>
+    <zip>78411</zip>
+  </address>
+</polling_location>
+<polling_location id="44355067">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3933 Timon Blvd.</line1>
+    <state>TX</state>
+    <location_name>Kiwanis Recreation Center</location_name>
+    <zip>78404</zip>
+  </address>
+</polling_location>
+<polling_location id="44355068">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5225 Gollihar Rd.</line1>
+    <state>TX</state>
+    <location_name>King High School</location_name>
+    <zip>78412</zip>
+  </address>
+</polling_location>
+<polling_location id="44355069">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5922 Brockhampton St.</line1>
+    <state>TX</state>
+    <location_name>Kaffie Middle School</location_name>
+    <zip>78414</zip>
+  </address>
+</polling_location>
+<polling_location id="44355070">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Robstown</city>
+    <line1>710 E. Main St.</line1>
+    <state>TX</state>
+    <location_name>Johnny Calderon County Bldg.</location_name>
+    <zip>78380</zip>
+  </address>
+</polling_location>
+<polling_location id="44355071">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1102 Villarreal Rd.</line1>
+    <state>TX</state>
+    <location_name>John F. Kennedy Elementary School</location_name>
+    <zip>78416</zip>
+  </address>
+</polling_location>
+<polling_location id="44355072">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2730 Gollihar Rd.</line1>
+    <state>TX</state>
+    <location_name>James W. Fannin Elementary School</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355073">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>14030 Fortuna Bay Dr.</line1>
+    <state>TX</state>
+    <location_name>Island Presbyterian Church</location_name>
+    <zip>78418</zip>
+  </address>
+</polling_location>
+<polling_location id="44355074">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Robstown</city>
+    <line1>122 W. Ave. H</line1>
+    <state>TX</state>
+    <location_name>Irma V. Romero Elementary School</location_name>
+    <zip>78380</zip>
+  </address>
+</polling_location>
+<polling_location id="44355075">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Robstown</city>
+    <line1>400 W. Ligustrum Blvd.</line1>
+    <state>TX</state>
+    <location_name>Irma V. Romero Elementary School</location_name>
+    <zip>78380</zip>
+  </address>
+</polling_location>
+<polling_location id="44355076">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2910 S. Alameda St.</line1>
+    <state>TX</state>
+    <location_name>Incarnate Word Academy</location_name>
+    <zip>78404</zip>
+  </address>
+</polling_location>
+<polling_location id="44355077">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>11425 Leopard St.</line1>
+    <state>TX</state>
+    <location_name>Hilltop Community Center</location_name>
+    <zip>78410</zip>
+  </address>
+</polling_location>
+<polling_location id="44355078">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3900 Hamlin Dr.</line1>
+    <state>TX</state>
+    <location_name>Hamlin Middle School</location_name>
+    <zip>78411</zip>
+  </address>
+</polling_location>
+<polling_location id="44355079">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1520 Shely St.</line1>
+    <state>TX</state>
+    <location_name>H.E.B. Tennis Center</location_name>
+    <zip>78404</zip>
+  </address>
+</polling_location>
+<polling_location id="44355080">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>6301 Yorktown Blvd.</line1>
+    <state>TX</state>
+    <location_name>Grace Presbyterian Church</location_name>
+    <zip>78414</zip>
+  </address>
+</polling_location>
+<polling_location id="44355081">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3602 McArdle Rd.</line1>
+    <state>TX</state>
+    <location_name>Gloria Hicks Elementary School</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355082">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2320 Buford St.</line1>
+    <state>TX</state>
+    <location_name>George Wiggins Homes</location_name>
+    <zip>78405</zip>
+  </address>
+</polling_location>
+<polling_location id="44355083">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1315 Comanche St.</line1>
+    <state>TX</state>
+    <location_name>George Evans Elementary School</location_name>
+    <zip>78401</zip>
+  </address>
+</polling_location>
+<polling_location id="44355084">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>4401 Greenwood Dr.</line1>
+    <state>TX</state>
+    <location_name>Garcia Elementary School</location_name>
+    <zip>78416</zip>
+  </address>
+</polling_location>
+<polling_location id="44355085">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3126 Masterson Dr.</line1>
+    <state>TX</state>
+    <location_name>Galvan Elementary School</location_name>
+    <zip>78415</zip>
+  </address>
+</polling_location>
+<polling_location id="44355086">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2510 Waldron Rd.</line1>
+    <state>TX</state>
+    <location_name>Flour Bluff ISD</location_name>
+    <zip>78418</zip>
+  </address>
+</polling_location>
+<polling_location id="44355087">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2505 Waldron Rd.</line1>
+    <state>TX</state>
+    <location_name>Flour Bluff High School</location_name>
+    <zip>78418</zip>
+  </address>
+</polling_location>
+<polling_location id="44355088">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>430 S. Carancahua St.</line1>
+    <state>TX</state>
+    <location_name>First Presbyterian Church</location_name>
+    <zip>78401</zip>
+  </address>
+</polling_location>
+<polling_location id="44355089">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3722 S. Staples St.</line1>
+    <state>TX</state>
+    <location_name>Fire Station #7</location_name>
+    <zip>78411</zip>
+  </address>
+</polling_location>
+<polling_location id="44355090">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5901 S. Staples St.</line1>
+    <state>TX</state>
+    <location_name>Fire Station #14</location_name>
+    <zip>78413</zip>
+  </address>
+</polling_location>
+<polling_location id="44355091">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2120 Rand Morgan Rd.</line1>
+    <state>TX</state>
+    <location_name>Fire Station #12</location_name>
+    <zip>78410</zip>
+  </address>
+</polling_location>
+<polling_location id="44355092">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>501 Navigation Blvd.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 9</location_name>
+    <zip>78408</zip>
+  </address>
+</polling_location>
+<polling_location id="44355093">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1401 Morgan Ave.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 3</location_name>
+    <zip>78404</zip>
+  </address>
+</polling_location>
+<polling_location id="44355094">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>910 Airline Rd.</line1>
+    <state>TX</state>
+    <location_name>Fire Station # 11</location_name>
+    <zip>78412</zip>
+  </address>
+</polling_location>
+<polling_location id="44355095">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>654 Graham Rd.</line1>
+    <state>TX</state>
+    <location_name>Ethel Eyerly Community Center</location_name>
+    <zip>78418</zip>
+  </address>
+</polling_location>
+<polling_location id="44355096">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>4350 Aaron Dr.</line1>
+    <state>TX</state>
+    <location_name>Elliot Grant Middle School</location_name>
+    <zip>78413</zip>
+  </address>
+</polling_location>
+<polling_location id="44355097">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2829 Oso Parkway</line1>
+    <state>TX</state>
+    <location_name>Ella Barnes Elementary School</location_name>
+    <zip>78414</zip>
+  </address>
+</polling_location>
+<polling_location id="44355098">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3501 Kenwood Dr.</line1>
+    <state>TX</state>
+    <location_name>Driscoll Middle School</location_name>
+    <zip>78408</zip>
+  </address>
+</polling_location>
+<polling_location id="44355099">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Driscoll</city>
+    <line1>410 W. Ave. D</line1>
+    <state>TX</state>
+    <location_name>Driscoll I.S.D.</location_name>
+    <zip>78351</zip>
+  </address>
+</polling_location>
+<polling_location id="44355100">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>101 Baldwin Blvd.</line1>
+    <state>TX</state>
+    <location_name>Del Mar College</location_name>
+    <zip>78404</zip>
+  </address>
+</polling_location>
+<polling_location id="44355101">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5151 McArdle Rd.</line1>
+    <state>TX</state>
+    <location_name>Deaf and Hard of Hearing Center</location_name>
+    <zip>78411</zip>
+  </address>
+</polling_location>
+<polling_location id="44355102">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2625 Belton St.</line1>
+    <state>TX</state>
+    <location_name>David Crockett Elementary School</location_name>
+    <zip>78405</zip>
+  </address>
+</polling_location>
+<polling_location id="44355103">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>4321 Prescott St.</line1>
+    <state>TX</state>
+    <location_name>Cunningham Middle School</location_name>
+    <zip>78416</zip>
+  </address>
+</polling_location>
+<polling_location id="44355104">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5224 Greely Dr.</line1>
+    <state>TX</state>
+    <location_name>Cullen Middle School</location_name>
+    <zip>78412</zip>
+  </address>
+</polling_location>
+<polling_location id="44355105">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5732 Kimbrough Dr.</line1>
+    <state>TX</state>
+    <location_name>Corpus Christi Worship Centre</location_name>
+    <zip>78412</zip>
+  </address>
+</polling_location>
+<polling_location id="44355106">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5222 Merganser Dr.</line1>
+    <state>TX</state>
+    <location_name>Club Estates Elementary School</location_name>
+    <zip>78413</zip>
+  </address>
+</polling_location>
+<polling_location id="44355107">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2802 Cimarron Blvd.</line1>
+    <state>TX</state>
+    <location_name>Cimarron Senior Apartments</location_name>
+    <zip>78414</zip>
+  </address>
+</polling_location>
+<polling_location id="44355108">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Chapman Ranch</city>
+    <line1>1726 Cnty. Rd. 6</line1>
+    <state>TX</state>
+    <location_name>Chapman Ranch Gin</location_name>
+    <zip>78347</zip>
+  </address>
+</polling_location>
+<polling_location id="44355109">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>4602 Cornett Rd.</line1>
+    <state>TX</state>
+    <location_name>Calallen Middle School</location_name>
+    <zip>78410</zip>
+  </address>
+</polling_location>
+<polling_location id="44355110">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>5414 Tripoli Dr.</line1>
+    <state>TX</state>
+    <location_name>C.P. Yeager Elementary School</location_name>
+    <zip>78411</zip>
+  </address>
+</polling_location>
+<polling_location id="44355111">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2101 N. Port Ave.</line1>
+    <state>TX</state>
+    <location_name>Brooks Chapel A.M.E. Church</location_name>
+    <zip>78401</zip>
+  </address>
+</polling_location>
+<polling_location id="44355112">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2727 Morgan Ave.</line1>
+    <state>TX</state>
+    <location_name>Bonilla Plaza</location_name>
+    <zip>78405</zip>
+  </address>
+</polling_location>
+<polling_location id="44355113">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>6121 Durant Dr.</line1>
+    <state>TX</state>
+    <location_name>Blanche Moore Elementary School</location_name>
+    <zip>78414</zip>
+  </address>
+</polling_location>
+<polling_location id="44355114">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Bishop</city>
+    <line1>705 W. Main St.</line1>
+    <state>TX</state>
+    <location_name>Bishop Primary School</location_name>
+    <zip>78343</zip>
+  </address>
+</polling_location>
+<polling_location id="44355115">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>1815 Howard St.</line1>
+    <state>TX</state>
+    <location_name>Ben Garza Gym</location_name>
+    <zip>78408</zip>
+  </address>
+</polling_location>
+<polling_location id="44355116">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Banquete</city>
+    <line1>4339 Fourth St.</line1>
+    <state>TX</state>
+    <location_name>Banquete ISD</location_name>
+    <zip>78339</zip>
+  </address>
+</polling_location>
+<polling_location id="44355117">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3445 Pecan St.</line1>
+    <state>TX</state>
+    <location_name>Baker Middle School</location_name>
+    <zip>78411</zip>
+  </address>
+</polling_location>
+<polling_location id="44355118">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>2021 Agnes St.</line1>
+    <state>TX</state>
+    <location_name>Antonio Garcia Arts &amp; Education Center</location_name>
+    <zip>78405</zip>
+  </address>
+</polling_location>
+<polling_location id="44355119">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Corpus Christi</city>
+    <line1>3901 Cliff Crenshaw Dr.</line1>
+    <state>TX</state>
+    <location_name>Annaville Elementary School</location_name>
+    <zip>78410</zip>
+  </address>
+</polling_location>
+<polling_location id="44355120">
+  <polling_hours>07:00-19:00</polling_hours>
+  <address>
+    <city>Agua Dulce</city>
+    <line1>1514 2nd St.</line1>
+    <state>TX</state>
+    <location_name>Agua Dulce County Bldg.</location_name>
+    <zip>78330</zip>
+  </address>
+</polling_location>
+</vip_object>
