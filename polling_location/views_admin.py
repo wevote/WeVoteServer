@@ -717,11 +717,11 @@ def soft_delete_duplicates_view(request):
             duplicate_polling_location_query = PollingLocation.objects.all()
             duplicate_polling_location_query = duplicate_polling_location_query.filter(state__iexact=state_code)
             duplicate_polling_location_query = \
-                duplicate_polling_location_query.filter(city__exact=polling_location.city)
+                duplicate_polling_location_query.filter(city__iexact=polling_location.city)
             duplicate_polling_location_query = \
-                duplicate_polling_location_query.filter(line1__exact=polling_location.line1)
+                duplicate_polling_location_query.filter(line1__iexact=polling_location.line1)
             duplicate_polling_location_query = \
-                duplicate_polling_location_query.filter(zip_long__exact=polling_location.zip_long)
+                duplicate_polling_location_query.filter(zip_long__iexact=polling_location.zip_long)
             duplicate_polling_location_query = duplicate_polling_location_query.exclude(polling_location_deleted=True)
             duplicate_polling_location_query = duplicate_polling_location_query.exclude(
                 we_vote_id__in=previously_reviewed_we_vote_ids)

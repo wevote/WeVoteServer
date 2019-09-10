@@ -6,7 +6,8 @@ from ballot.controllers import choose_election_from_existing_data
 from django.http import HttpResponse
 import json
 from voter.models import VoterAddress, VoterAddressManager, VoterDeviceLinkManager
-from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, \
+from voter_guide.controllers import voter_guide_possibility_highlights_retrieve_for_api, \
+    voter_guide_possibility_retrieve_for_api, \
     voter_guide_possibility_position_save_for_api, \
     voter_guide_possibility_positions_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guide_save_for_api, \
@@ -68,7 +69,7 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
     except:
         google_civic_election_id_list = None
 
-    return voter_guide_possibility_position_save_for_api(
+    json_data = voter_guide_possibility_position_save_for_api(
         voter_device_id=voter_device_id,
         voter_guide_possibility_id=voter_guide_possibility_id,
         voter_guide_possibility_position_id=voter_guide_possibility_position_id,
@@ -86,6 +87,21 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
         organization_we_vote_id=organization_we_vote_id,
         position_should_be_removed=position_should_be_removed,
         google_civic_election_id_list=google_civic_election_id_list)
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_guide_possibility_highlights_retrieve_view(request):  # voterGuidePossibilityHighlightsRetrieve
+    """
+    Retrieve the possible highlights from one organization on one page.
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    url_to_scan = request.GET.get('url_to_scan', '')
+    json_data = voter_guide_possibility_highlights_retrieve_for_api(
+        voter_device_id=voter_device_id,
+        url_to_scan=url_to_scan)
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_guide_possibility_positions_retrieve_view(request):  # voterGuidePossibilityPositionsRetrieve
@@ -97,10 +113,11 @@ def voter_guide_possibility_positions_retrieve_view(request):  # voterGuidePossi
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_guide_possibility_id = request.GET.get('voter_guide_possibility_id', 0)
     voter_guide_possibility_position_id = request.GET.get('voter_guide_possibility_position_id', 0)
-    return voter_guide_possibility_positions_retrieve_for_api(
+    json_data = voter_guide_possibility_positions_retrieve_for_api(
         voter_device_id=voter_device_id,
         voter_guide_possibility_id=voter_guide_possibility_id,
         voter_guide_possibility_position_id=voter_guide_possibility_position_id)
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_guide_possibility_save_view(request):  # voterGuidePossibilitySave
