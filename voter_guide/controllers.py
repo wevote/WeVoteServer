@@ -1702,22 +1702,103 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilityHighlightsRetrieve
+        voter_device_id, url_to_scan):
+    status = "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE "
+    success = True
+    highlight_list = []
+    voter_we_vote_id = ''
+    names_already_included_list = []
+
+    # Once we know we have a voter_device_id to work with, get this working
+    voter_guide_possibility_manager = VoterGuidePossibilityManager()
+    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(url_to_scan, voter_we_vote_id)
+    if results['voter_guide_possibility_found']:
+        voter_guide_possibility_id = results['voter_guide_possibility_id']
+        results = voter_guide_possibility_positions_retrieve_for_api(
+            voter_device_id, voter_guide_possibility_id)
+        if results['possible_position_list']:
+            possible_position_list = results['possible_position_list']
+            for one_possible_position in possible_position_list:
+                if one_possible_position['position_we_vote_id']:
+                    display = 'STORED'
+                elif one_possible_position['position_should_be_removed']:
+                    display = 'DELETED'
+                else:
+                    display = 'POSSIBILITY'
+                if one_possible_position['ballot_item_name'] not in names_already_included_list:
+                    names_already_included_list.append(one_possible_position['ballot_item_name'])
+                    one_highlight = {
+                        'name': one_possible_position['ballot_item_name'],
+                        'we_vote_id': one_possible_position['candidate_we_vote_id'],
+                        'display': display,
+                        'stance': one_possible_position['position_stance'],
+                    }
+                    highlight_list.append(one_highlight)
+
+    super_light_candidate_list = True
+    results = retrieve_candidate_list_for_all_upcoming_elections(
+        super_light_candidate_list=super_light_candidate_list)
+    if results['candidate_list_found']:
+        all_possible_candidates_list_light = results['candidate_list_light']
+        for one_possible_candidate in all_possible_candidates_list_light:
+            if one_possible_candidate['name'] not in names_already_included_list:
+                names_already_included_list.append(one_possible_candidate['name'])
+                one_highlight = {
+                    'name':         one_possible_candidate['name'],
+                    'we_vote_id':   one_possible_candidate['we_vote_id'],
+                    'display':      'DEFAULT',
+                    'stance':       '',
+                }
+                highlight_list.append(one_highlight)
+            if 'alternate_names' in one_possible_candidate:
+                for one_alternate_name in one_possible_candidate['alternate_names']:
+                    if one_alternate_name not in names_already_included_list:
+                        names_already_included_list.append(one_alternate_name)
+                        one_highlight = {
+                            'name': one_alternate_name,
+                            'we_vote_id': one_possible_candidate['we_vote_id'],
+                            'display': 'DEFAULT',
+                            'stance': '',
+                        }
+                        highlight_list.append(one_highlight)
+
+    json_data = {
+        'status':           status,
+        'success':          success,
+        'url_to_scan':      url_to_scan,
+        'highlight_list':   highlight_list,
+    }
+    return json_data
+
+
 def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibilityPositionsRetrieve
         voter_device_id, voter_guide_possibility_id, voter_guide_possibility_position_id=0):
     status = "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE "
-    results = is_voter_device_id_valid(voter_device_id)
-    if not results['success']:
-        return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+    possible_endorsement_list = []
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if not positive_value_exists(voter_id):
-        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
-        json_data = {
-            'status': status,
-            'success': False,
-            'voter_device_id': voter_device_id,
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    # Do not require voter_device_id yet
+    # results = is_voter_device_id_valid(voter_device_id)
+    # if not results['success']:
+    #     status += results['status']
+    #     json_data = {
+    #         'status':                       status,
+    #         'success':                      results['success'],
+    #         'voter_guide_possibility_id':   voter_guide_possibility_id,
+    #         'possible_position_list':       possible_endorsement_list,
+    #     }
+    #     return json_data
+    #
+    # voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    # if not positive_value_exists(voter_id):
+    #     status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
+    #     json_data = {
+    #         'status':                       status,
+    #         'success':                      False,
+    #         'voter_guide_possibility_id':   voter_guide_possibility_id,
+    #         'possible_position_list':       possible_endorsement_list,
+    #     }
+    #     return json_data
 
     # TODO We will need the voter_id here so we can control volunteer actions
 
@@ -1795,7 +1876,6 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                 # Match incoming endorsements to candidates already in the database
                 results = match_endorsement_list_with_organizations_in_database(
                     possible_endorsement_list,
-                    limit_to_this_state_code,
                     attach_objects=False)
                 if results['possible_endorsement_list_found']:
                     possible_endorsement_list = results['possible_endorsement_list']
@@ -1823,7 +1903,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
         'voter_guide_possibility_id':   voter_guide_possibility_id,
         'possible_position_list':       possible_endorsement_list,
     }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    return json_data
 
 
 def voter_guide_possibility_save_for_api(  # voterGuidePossibilitySave
@@ -1991,7 +2071,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
                 'success': False,
                 'voter_device_id': voter_device_id,
             }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
@@ -2000,7 +2080,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
             'success': False,
             'voter_device_id': voter_device_id,
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     # At this point, we have a valid voter
 
@@ -2026,7 +2106,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
                 'status': status,
                 'success': success,
             }
-            return HttpResponse(json.dumps(json_data), content_type='application/json')
+            return json_data
         else:
             status += "FAILED_TO_RETRIEVE_VOTER_GUIDE_POSSIBILITY_POSITION_FOR_DELETE "
             status += results['status']
@@ -2034,7 +2114,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
                 'status': status,
                 'success': False,
             }
-            return HttpResponse(json.dumps(json_data), content_type='application/json')
+            return json_data
 
     if positive_value_exists(voter_guide_possibility_position_id):
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_position(
@@ -2046,7 +2126,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
                 'status': status,
                 'success': False,
             }
-            return HttpResponse(json.dumps(json_data), content_type='application/json')
+            return json_data
         voter_guide_possibility_position = results['voter_guide_possibility_position']
         voter_guide_possibility_id = voter_guide_possibility_position['voter_guide_possibility_parent_id']
     elif positive_value_exists(voter_guide_possibility_id):
@@ -2060,7 +2140,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
                 'status': status,
                 'success': False,
             }
-            return HttpResponse(json.dumps(json_data), content_type='application/json')
+            return json_data
 
         voter_guide_possibility = results['voter_guide_possibility']
         voter_guide_possibility_found = True
@@ -2080,7 +2160,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
                 'status': status,
                 'success': False,
             }
-            return HttpResponse(json.dumps(json_data), content_type='application/json')
+            return json_data
         voter_guide_possibility_position = create_results['voter_guide_possibility_position']
         voter_guide_possibility_position_id = voter_guide_possibility_position.id
 
@@ -2256,7 +2336,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
                 'success': success,
                 'voter_device_id': voter_device_id,
             }
-            return HttpResponse(json.dumps(json_data), content_type='application/json')
+            return json_data
     else:
         # If here we are looking at page of endorsements for one candidate
         # We will need all organizations so we can search the HTML of the possible voter guide for these names
@@ -2319,13 +2399,14 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
                     'success': success,
                     'voter_device_id': voter_device_id,
                 }
-                return HttpResponse(json.dumps(json_data), content_type='application/json')
+                return json_data
 
     # If here, the voter_guide_possibility was successfully saved, so we want to return the refreshed data
-    return voter_guide_possibility_positions_retrieve_for_api(
+    json_data = voter_guide_possibility_positions_retrieve_for_api(
         voter_device_id,
         voter_guide_possibility_id=voter_guide_possibility_id,
         voter_guide_possibility_position_id=voter_guide_possibility_position_id)
+    return json_data
 
 
 def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFollowRetrieve
