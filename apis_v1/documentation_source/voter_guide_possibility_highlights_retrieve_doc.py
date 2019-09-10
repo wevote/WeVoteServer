@@ -66,9 +66,9 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
                    '  "highlight_list": list [\n' \
                    '   {\n' \
                    '     "name": string,\n' \
-                   '     "candidate_id": string,\n' \
-                   '     "display": string,\n' \
-                   '     "stance": string,\n'\
+                   '     "we_vote_id": string,\n' \
+                   '     "display": string, (\'STORED\', \'DELETED\', \'POSSIBILITY\', or \'DEFAULT\')\n' \
+                   '     "stance": string, (\'SUPPORT\', \'OPPOSED\', or \'INFO_ONLY\')\n'\
                    '   }' \
                    '   ],\n' \
                    '}'
@@ -77,7 +77,7 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
         'api_name': 'voterGuidePossibilityHighlightsRetrieve',
         'api_slug': 'voterGuidePossibilityHighlightsRetrieve',
         'api_introduction':
-            "Retrieve all of the candidates that might be hi-lighted on an endorsement guide.",
+            "Retrieve all of the candidates that might be highlighted on an endorsement guide. DEFAULT = is in an upcoming election",
         'try_now_link': 'apis_v1:voterGuidePossibilityHighlightsRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
