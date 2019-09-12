@@ -896,6 +896,7 @@ def organization_edit_account_process_view(request):
     chosen_html_verification_string = request.POST.get('chosen_html_verification_string', None)
     chosen_hide_we_vote_logo = request.POST.get('chosen_hide_we_vote_logo', None)
     chosen_logo_url_https = request.POST.get('chosen_logo_url_https', None)
+    chosen_organization_api_pass_code = request.POST.get('chosen_organization_api_pass_code', None)
     chosen_social_share_description = request.POST.get('chosen_social_share_description', None)
     chosen_social_share_image_256x256_url_https = request.POST.get('chosen_social_share_image_256x256_url_https', None)
     chosen_sub_domain_string = request.POST.get('chosen_sub_domain_string', None)
@@ -940,6 +941,8 @@ def organization_edit_account_process_view(request):
                 organization_on_stage.chosen_hide_we_vote_logo = positive_value_exists(chosen_hide_we_vote_logo)
             # if chosen_logo_url_https is not None:
             #     organization_on_stage.chosen_logo_url_https = chosen_logo_url_https.strip()
+            if chosen_organization_api_pass_code is not None:
+                organization_on_stage.chosen_organization_api_pass_code = chosen_organization_api_pass_code.strip()
             if chosen_social_share_description is not None:
                 organization_on_stage.chosen_social_share_description = chosen_social_share_description.strip()
             # if chosen_social_share_image_256x256_url_https is not None:

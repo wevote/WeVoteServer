@@ -823,6 +823,15 @@
           <td colspan="3"><strong>Analytics</strong></td>
         </tr>
         <tr>
+          <td><a href="{% url 'apis_v1:organizationAnalyticsByVoterDocs' %}">organizationAnalyticsByVoter</a></td>
+          <td></td>
+          <td>
+            A list of voter-specific analytics about either a) one of your member's, or b) all of your members
+            based on the variables you send with the request. These analytics come from visits to organization's
+            custom URL, and not the main WeVote.US site.
+          </td>
+        </tr>
+        <tr>
           <td><a href="{% url 'apis_v1:saveAnalyticsActionDocs' %}">saveAnalyticsAction</a></td>
           <td></td>
           <td>Save an entry in the We Vote Analytics system so we can publish daily, monthly, election and sitewide

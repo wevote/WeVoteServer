@@ -1547,7 +1547,8 @@ def election_migration_view(request):
     # ########################################
     # Analytics Action
     analytics_action_manager = AnalyticsManager()
-    analytics_action_results = analytics_action_manager.retrieve_analytics_action_list('', we_vote_election_id)
+    analytics_action_results = analytics_action_manager.retrieve_analytics_action_list(
+        '', google_civic_election_id=we_vote_election_id)
     we_vote_election_analytics_action_count = 0
     if analytics_action_results['analytics_action_list_found']:
         we_vote_election_analytics_action_list = analytics_action_results['analytics_action_list']

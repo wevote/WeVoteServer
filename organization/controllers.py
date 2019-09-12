@@ -3,14 +3,15 @@
 # -*- coding: UTF-8 -*-
 
 from .models import Organization, OrganizationListManager, OrganizationManager, \
-    OrganizationReservedDomain, \
+    OrganizationReservedDomain, OrganizationMembershipLinkToVoter, \
     CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
     POLITICAL_ACTION_COMMITTEE, ORGANIZATION, PUBLIC_FIGURE, UNKNOWN, VOTER, ORGANIZATION_TYPE_CHOICES
-from analytics.models import ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, \
+from analytics.models import ACTION_BALLOT_VISIT, ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, \
     ACTION_ORGANIZATION_STOP_FOLLOWING, ACTION_ORGANIZATION_STOP_IGNORING, AnalyticsManager
 import base64
 from config.base import get_environment_variable
 from django.http import HttpResponse
+from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
 from follow.controllers import move_organization_followers_to_another_organization
 from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, \
@@ -190,6 +191,220 @@ def sub_domain_string_available(sub_domain_string, organization_id):
         'sub_domain_string_available': True,
         'status': status,
         'success': True,
+    }
+    return results
+
+
+def organization_analytics_by_voter_for_api(voter_device_id='',
+                                            organization_we_vote_id='', organization_api_pass_code='',
+                                            external_voter_id='', voter_we_vote_id='',
+                                            google_civic_election_id=0):
+    status = ""
+    success = False
+    is_signed_into_organization_account = False
+    election_list = []
+    voter_list = []
+
+    voter_manager = VoterManager()
+    status += "ORGANIZATION_ANALYTICS_BY_VOTER "
+    if positive_value_exists(voter_device_id):
+        read_only = True
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only)
+        if voter_results['voter_found']:
+            voter = voter_results['voter']
+            linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+            if not positive_value_exists(organization_we_vote_id):
+                organization_we_vote_id = linked_organization_we_vote_id
+            elif organization_we_vote_id == linked_organization_we_vote_id:
+                is_signed_into_organization_account = True
+
+    if not positive_value_exists(organization_we_vote_id):
+        status += "ORGANIZATION_WE_VOTE_ID_MISSING "
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'organization_we_vote_id':  organization_we_vote_id,
+            'voter_list':               voter_list,
+        }
+        return results
+
+    has_authorization_variables_required = is_signed_into_organization_account \
+        or positive_value_exists(organization_api_pass_code)
+    if not has_authorization_variables_required:
+        status += "ORGANIZATION_PASS_CODE_MISSING "
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'organization_we_vote_id':  organization_we_vote_id,
+            'voter_list':               voter_list,
+        }
+        return results
+
+    organization_manager = OrganizationManager()
+    if is_signed_into_organization_account:
+        results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+        if results['organization_found']:
+            organization_found = True
+            organization = results['organization']
+        else:
+            status += "ORGANIZATION_ANALYTICS_BY_VOTER_NOT_FOUND "
+            success = True
+            results = {
+                'success':                  success,
+                'status':                   status,
+                'organization_we_vote_id':  organization_we_vote_id,
+                'voter_list':               voter_list,
+            }
+            return results
+    else:
+        results = organization_manager.retrieve_organization_from_we_vote_id_and_pass_code(
+            organization_we_vote_id, organization_api_pass_code)
+        if results['organization_found']:
+            organization_found = True
+            organization = results['organization']
+        else:
+            status += "ORGANIZATION_ANALYTICS_BY_VOTER_NOT_FOUND_WITH_PASS_CODE "
+            success = True
+            results = {
+                'success':                  success,
+                'status':                   status,
+                'organization_we_vote_id':  organization_we_vote_id,
+                'voter_list':               voter_list,
+                'election_list':            election_list,
+            }
+            return results
+
+    voter_we_vote_id_list = []
+    if positive_value_exists(external_voter_id) and not positive_value_exists(voter_we_vote_id):
+        link_query = OrganizationMembershipLinkToVoter.objects.all()
+        link_query = link_query.filter(organization_we_vote_id=organization_we_vote_id)
+        link_query = link_query.filter(external_voter_id=external_voter_id)
+        link_list = list(link_query)
+        if len(link_list) == 0:
+            voter_we_vote_id_list = ['EXTERNAL_VOTER_ID_NOT_FOUND']
+            status += "NO_VOTERS_FOUND_WITH_EXTERNAL_ID: " + str(external_voter_id) + " "
+        else:
+            for external_voter in link_list:
+                voter_we_vote_id_list.append(external_voter.voter_we_vote_id)
+    elif positive_value_exists(voter_we_vote_id):
+        voter_we_vote_id_list = [voter_we_vote_id]
+
+    elections_retrieved_from_database = {}
+    analytics_manager = AnalyticsManager()
+    election_manager = ElectionManager()
+    success = True
+    results = analytics_manager.retrieve_analytics_action_list(
+        voter_we_vote_id_list=voter_we_vote_id_list,
+        google_civic_election_id=google_civic_election_id,
+        organization_we_vote_id=organization_we_vote_id,
+        action_constant=ACTION_BALLOT_VISIT,
+        distinct_for_members=True)
+    election_participation_list = results['analytics_action_list']
+    # Split up this one list into multiple lists, organized by voter
+    election_participation_dict_with_we_vote_id_lists = {}
+    election_participation_dict_with_external_id_lists = {}
+    for election_participation in election_participation_list:
+        link_query = OrganizationMembershipLinkToVoter.objects.all()
+        link_query = link_query.filter(organization_we_vote_id=organization_we_vote_id)
+        link_query = link_query.filter(voter_we_vote_id__iexact=election_participation.voter_we_vote_id)
+        link_list = list(link_query)
+        if len(link_list) > 0:
+            for external_voter in link_list:
+                if positive_value_exists(external_voter_id):
+                    # If one external_voter_id was requested, only return that one
+                    if external_voter_id == external_voter.external_voter_id:
+                        if external_voter.external_voter_id not in election_participation_dict_with_external_id_lists:
+                            election_participation_dict_with_external_id_lists[external_voter.external_voter_id] = []
+                        election_participation_dict_with_external_id_lists[external_voter.external_voter_id].append(
+                            election_participation)
+                else:
+                    if external_voter.external_voter_id not in election_participation_dict_with_external_id_lists:
+                        election_participation_dict_with_external_id_lists[external_voter.external_voter_id] = []
+                    election_participation_dict_with_external_id_lists[external_voter.external_voter_id].append(
+                        election_participation)
+        else:
+            if election_participation.voter_we_vote_id not in election_participation_dict_with_we_vote_id_lists:
+                election_participation_dict_with_we_vote_id_lists[election_participation.voter_we_vote_id] = []
+            election_participation_dict_with_we_vote_id_lists[election_participation.voter_we_vote_id].\
+                append(election_participation)
+
+    # Cycle through each voter pivoting on external_voter_id
+    for external_voter_id_key in election_participation_dict_with_external_id_lists.keys():
+        election_participation_list_for_one_voter = \
+            election_participation_dict_with_external_id_lists[external_voter_id_key]
+        this_election_already_seen_by_voter = []  # Reset for each voter
+        elections_visited = []
+        voter_we_vote_id_from_analytics = ''
+        for election_participation in election_participation_list_for_one_voter:
+            if not positive_value_exists(election_participation.google_civic_election_id):
+                continue
+            voter_we_vote_id_from_analytics = election_participation.voter_we_vote_id
+            if election_participation.google_civic_election_id not in elections_retrieved_from_database:
+                election_results = election_manager.retrieve_election(election_participation.google_civic_election_id)
+                if election_results['election_found']:
+                    election = election_results['election']
+                    elections_retrieved_from_database[election_participation.google_civic_election_id] = election
+            if election_participation.google_civic_election_id not in this_election_already_seen_by_voter:
+                this_election_already_seen_by_voter.append(election_participation.google_civic_election_id)
+                election_visited_dict = {
+                    'election_id': election_participation.google_civic_election_id,
+                }
+                elections_visited.append(election_visited_dict)
+
+        one_voter_dict = {
+            'external_voter_id':    external_voter_id_key,
+            'voter_we_vote_id':     voter_we_vote_id_from_analytics,
+            'elections_visited':    elections_visited,
+        }
+        voter_list.append(one_voter_dict)
+
+    # Now cycle through each voter with only voter_we_vote_id
+    for voter_we_vote_id_key in election_participation_dict_with_we_vote_id_lists.keys():
+        election_participation_list_for_one_voter = election_participation_dict_with_we_vote_id_lists[voter_we_vote_id_key]
+        this_election_already_seen_by_voter = []  # Reset for each voter
+        elections_visited = []
+        voter_we_vote_id_from_analytics = ''
+        for election_participation in election_participation_list_for_one_voter:
+            if not positive_value_exists(election_participation.google_civic_election_id):
+                continue
+            voter_we_vote_id_from_analytics = election_participation.voter_we_vote_id
+            if election_participation.google_civic_election_id not in elections_retrieved_from_database:
+                election_results = election_manager.retrieve_election(election_participation.google_civic_election_id)
+                if election_results['election_found']:
+                    election = election_results['election']
+                    elections_retrieved_from_database[election_participation.google_civic_election_id] = election
+            if election_participation.google_civic_election_id not in this_election_already_seen_by_voter:
+                this_election_already_seen_by_voter.append(election_participation.google_civic_election_id)
+                election_visited_dict = {
+                    'election_id': election_participation.google_civic_election_id,
+                }
+                elections_visited.append(election_visited_dict)
+
+        if positive_value_exists(voter_we_vote_id_from_analytics):
+            external_voter_id = organization_manager.fetch_external_voter_id(
+                organization_we_vote_id, voter_we_vote_id_from_analytics)
+            one_voter_dict = {
+                'external_voter_id':    external_voter_id,
+                'voter_we_vote_id':     voter_we_vote_id_from_analytics,
+                'elections_visited':    elections_visited,
+            }
+            voter_list.append(one_voter_dict)
+
+    for election_id in elections_retrieved_from_database.keys():
+        election = elections_retrieved_from_database[election_id]
+        election_dict = {
+            'election_id': election.google_civic_election_id,
+            'election_name': election.election_name,
+            'election_date': election.election_day_text,
+            'election_state': election.state_code,
+        }
+        election_list.append(election_dict)
+    results = {
+        'success':                  success,
+        'status':                   status,
+        'organization_we_vote_id':  organization_we_vote_id,
+        'election_list':            election_list,
+        'voter_list':               voter_list,
     }
     return results
 
