@@ -104,6 +104,17 @@ class OrganizationLinkToWordOrPhrase(models.Model):
     # published_datetime
 
 
+class OrganizationMembershipLinkToVoter(models.Model):
+    """
+    This is the link between an Organization and a We Vote voter account, so we can show organizations
+    data about their members.
+    """
+    organization_we_vote_id = models.CharField(verbose_name="we vote id for organization", max_length=255, unique=False)
+    voter_we_vote_id = models.CharField(verbose_name="we vote id for the voter owner", max_length=255, unique=False)
+    external_voter_id = models.CharField(
+        verbose_name="id for the voter in other system", max_length=255, unique=False)
+
+
 class OrganizationManager(models.Manager):
     """
     A class for working with the Organization model
@@ -149,6 +160,60 @@ class OrganizationManager(models.Manager):
             'success':                              success,
             'status':                               status,
             'organization_link_to_hashtag_created': organization_link_to_hashtag_created,
+        }
+        return results
+
+    def create_or_update_organization_membership_link_to_voter(
+            self, organization_we_vote_id, external_voter_id, voter_we_vote_id):
+        success = False
+        status = ""
+        insufficient_variables = False
+        organization_link_created = False
+        organization_link_updated = False
+
+        if not positive_value_exists(organization_we_vote_id):
+            status += 'CREATE_ORGANIZATION_MEMBERSHIP_LINK_TO_VOTER_MISSING_ORG_WE_VOTE_ID '
+            insufficient_variables = True
+        if not positive_value_exists(external_voter_id):
+            status += 'CREATE_ORGANIZATION_MEMBERSHIP_LINK_TO_VOTER_MISSING_EXTERNAL_VOTER_ID '
+            insufficient_variables = True
+        if not positive_value_exists(voter_we_vote_id):
+            status += 'CREATE_ORGANIZATION_MEMBERSHIP_LINK_TO_VOTER_MISSING_VOTER_WE_VOTE_ID '
+            insufficient_variables = True
+        if insufficient_variables:
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'organization_link_created':    organization_link_created,
+                'organization_link_updated':    organization_link_updated,
+            }
+            return results
+        try:
+            defaults = {
+                "organization_we_vote_id":  organization_we_vote_id,
+                "external_voter_id":        external_voter_id,
+                "voter_we_vote_id":         voter_we_vote_id,
+            }
+            new_organization_link_to_voter, created = OrganizationMembershipLinkToVoter.objects.update_or_create(
+                organization_we_vote_id__iexact=organization_we_vote_id,
+                external_voter_id=external_voter_id,
+                voter_we_vote_id__iexact=voter_we_vote_id,
+                defaults=defaults,)
+            status += "CREATE_ORGANIZATION_LINK_TO_VOTER_SUCCESSFUL "
+            success = True
+            organization_link_created = created
+            organization_link_updated = not created
+        except Exception as e:
+            handle_record_not_saved_exception(e, logger=logger)
+            success = False
+            status += "CREATE_ORGANIZATION_LINK_TO_VOTER_FAILED " + str(e) + " "
+            organization_link_created = False
+            organization_link_updated = False
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'organization_link_created':    organization_link_created,
+            'organization_link_updated':    organization_link_updated,
         }
         return results
 
@@ -303,6 +368,12 @@ class OrganizationManager(models.Manager):
     def retrieve_organization_from_we_vote_id(self, organization_we_vote_id, read_only=False):
         return self.retrieve_organization(0, organization_we_vote_id, read_only=read_only)
 
+    def retrieve_organization_from_we_vote_id_and_pass_code(self, organization_we_vote_id, organization_api_pass_code,
+                                                            read_only=False):
+        return self.retrieve_organization(0, organization_we_vote_id,
+                                          organization_api_pass_code=organization_api_pass_code,
+                                          read_only=read_only)
+
     def retrieve_organization_from_vote_smart_id(self, vote_smart_id, read_only=False):
         return self.retrieve_organization(0, '', vote_smart_id, read_only=read_only)
 
@@ -380,7 +451,7 @@ class OrganizationManager(models.Manager):
         return results
 
     def retrieve_organization(self, organization_id=None, we_vote_id=None, vote_smart_id=None, twitter_user_id=None,
-                              incoming_hostname=None, read_only=False):
+                              incoming_hostname=None, organization_api_pass_code=False, read_only=False):
         """
         Get an organization, based the passed in parameters
         :param organization_id:
@@ -388,6 +459,7 @@ class OrganizationManager(models.Manager):
         :param vote_smart_id:
         :param twitter_user_id:
         :param incoming_hostname:
+        :param organization_api_pass_code:
         :param read_only:
         :return: the matching organization object
         """
@@ -396,34 +468,48 @@ class OrganizationManager(models.Manager):
         exception_multiple_object_returned = False
         organization_on_stage = Organization()
         organization_on_stage_id = 0
-        status = "ERROR_ENTERING_RETRIEVE_ORGANIZATION"
+        status = "ERROR_ENTERING_RETRIEVE_ORGANIZATION "
         try:
             if positive_value_exists(organization_id):
-                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_ID"
+                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_ID "
                 if read_only:
                     organization_on_stage = Organization.objects.using('readonly').get(id=organization_id)
                 else:
                     organization_on_stage = Organization.objects.get(id=organization_id)
                 organization_on_stage_id = organization_on_stage.id
-                status = "ORGANIZATION_FOUND_WITH_ID"
+                status = "ORGANIZATION_FOUND_WITH_ID "
+            elif positive_value_exists(we_vote_id) and positive_value_exists(organization_api_pass_code):
+                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID_AND_PASS_CODE "
+                if read_only:
+                    organization_on_stage = Organization.objects.using('readonly').get(
+                        we_vote_id=we_vote_id,
+                        chosen_organization_api_pass_code=organization_api_pass_code,
+                    )
+                else:
+                    organization_on_stage = Organization.objects.get(
+                        we_vote_id=we_vote_id,
+                        chosen_organization_api_pass_code=organization_api_pass_code,
+                    )
+                organization_on_stage_id = organization_on_stage.id
+                status = "ORGANIZATION_FOUND_WITH_WE_VOTE_ID_AND_PASS_CODE "
             elif positive_value_exists(we_vote_id):
-                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID"
+                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID "
                 if read_only:
                     organization_on_stage = Organization.objects.using('readonly').get(we_vote_id=we_vote_id)
                 else:
                     organization_on_stage = Organization.objects.get(we_vote_id=we_vote_id)
                 organization_on_stage_id = organization_on_stage.id
-                status = "ORGANIZATION_FOUND_WITH_WE_VOTE_ID"
+                status = "ORGANIZATION_FOUND_WITH_WE_VOTE_ID "
             elif positive_value_exists(vote_smart_id):
-                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_VOTE_SMART_ID"
+                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_VOTE_SMART_ID "
                 if read_only:
                     organization_on_stage = Organization.objects.using('readonly').get(vote_smart_id=vote_smart_id)
                 else:
                     organization_on_stage = Organization.objects.get(vote_smart_id=vote_smart_id)
                 organization_on_stage_id = organization_on_stage.id
-                status = "ORGANIZATION_FOUND_WITH_VOTE_SMART_ID"
+                status = "ORGANIZATION_FOUND_WITH_VOTE_SMART_ID "
             elif positive_value_exists(twitter_user_id):
-                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_TWITTER_ID"
+                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_TWITTER_ID "
                 if read_only:
                     organization_on_stage = Organization.objects.using('readonly').get(twitter_user_id=twitter_user_id)
                 else:
@@ -448,10 +534,10 @@ class OrganizationManager(models.Manager):
             handle_record_found_more_than_one_exception(e, logger)
             error_result = True
             exception_multiple_object_returned = True
-            status = "ERROR_MORE_THAN_ONE_ORGANIZATION_FOUND"
+            status = "ERROR_MORE_THAN_ONE_ORGANIZATION_FOUND "
             # logger.warning("Organization.MultipleObjectsReturned")
         except Organization.DoesNotExist as e:
-            status += ", ORGANIZATION_NOT_FOUND"
+            status += ", ORGANIZATION_NOT_FOUND "
             # handle_exception(e, logger=logger, exception_message=status)
             error_result = True
             exception_does_not_exist = True
@@ -472,6 +558,16 @@ class OrganizationManager(models.Manager):
             'MultipleObjectsReturned':      exception_multiple_object_returned,
         }
         return results
+
+    def fetch_external_voter_id(self, organization_we_vote_id, voter_we_vote_id):
+        if positive_value_exists(organization_we_vote_id) and positive_value_exists(voter_we_vote_id):
+            link_query = OrganizationMembershipLinkToVoter.objects.all()
+            link_query = link_query.filter(organization_we_vote_id=organization_we_vote_id)
+            link_query = link_query.filter(voter_we_vote_id=voter_we_vote_id)
+            external_voter = link_query.first()
+            if external_voter:
+                return external_voter.external_voter_id
+        return ''
 
     def fetch_organization_id(self, we_vote_id):
         organization_id = 0
@@ -2514,6 +2610,8 @@ class Organization(models.Model):
     # Set to True to hide We Vote logo
     chosen_hide_we_vote_logo = models.BooleanField(default=False)
     chosen_logo_url_https = models.URLField(verbose_name='url of client logo', blank=True, null=True)
+    # Client chosen pass code that needs to be sent with organization-focused API calls
+    chosen_organization_api_pass_code = models.TextField(null=True, blank=True)
     # Client configured text that will show in index.html
     chosen_social_share_description = models.TextField(null=True, blank=True)
     chosen_social_share_master_url_https = models.URLField(

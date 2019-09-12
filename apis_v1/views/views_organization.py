@@ -14,8 +14,8 @@ from django_user_agents.utils import get_user_agent
 from django.views.decorators.csrf import csrf_exempt
 from follow.controllers import organization_suggestion_tasks_for_api
 import json
-from organization.controllers import full_domain_string_available, organization_retrieve_for_api, \
-    organization_photos_save_for_api, \
+from organization.controllers import full_domain_string_available, organization_analytics_by_voter_for_api, \
+    organization_retrieve_for_api, organization_photos_save_for_api, \
     organization_save_for_api, organization_search_for_api, organizations_followed_retrieve_for_api, \
     site_configuration_retrieve_for_api, sub_domain_string_available
 from organization.models import OrganizationManager
@@ -28,6 +28,30 @@ from wevote_functions.functions import convert_to_int, get_voter_device_id, \
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+
+
+def organization_analytics_by_voter_view(request):  # organizationAnalyticsByVoter
+    """
+    Retrieve analytics for an organization's members.
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    organization_api_pass_code = request.GET.get('organization_api_pass_code', '')
+    external_voter_id = request.GET.get('external_voter_id', '')
+    voter_we_vote_id = request.GET.get('voter_we_vote_id', '')
+    google_civic_election_id = request.GET.get('election_id', 0)
+
+    results = organization_analytics_by_voter_for_api(
+        voter_device_id=voter_device_id,
+        organization_we_vote_id=organization_we_vote_id,
+        organization_api_pass_code=organization_api_pass_code,
+        external_voter_id=external_voter_id,
+        voter_we_vote_id=voter_we_vote_id,
+        google_civic_election_id=google_civic_election_id,
+    )
+    return HttpResponse(json.dumps(results), content_type='application/json')
 
 
 def organization_count_view(request):

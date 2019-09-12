@@ -20,6 +20,7 @@ from import_export_facebook.controllers import voter_facebook_sign_in_retrieve_f
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 from import_export_twitter.controllers import voter_twitter_save_to_current_account_for_api
 import json
+from organization.models import OrganizationManager
 from position.controllers import voter_all_positions_retrieve_for_api, \
     voter_position_retrieve_for_api, voter_position_comment_save_for_api, voter_position_visibility_save_for_api
 from position_like.controllers import voter_position_like_off_save_for_api, \
@@ -1626,6 +1627,17 @@ def voter_update_view(request):  # voterUpdate
     except KeyError:
         name_save_only_if_no_existing_names = False
 
+    external_voter_id = request.GET.get('external_voter_id', False)
+    membership_organization_we_vote_id = request.GET.get('membership_organization_we_vote_id', False)
+    if external_voter_id is not False:
+        external_voter_id = external_voter_id.strip()
+        if external_voter_id.lower() == 'false':
+            external_voter_id = False
+    if membership_organization_we_vote_id is not False:
+        membership_organization_we_vote_id = membership_organization_we_vote_id.strip()
+        if membership_organization_we_vote_id.lower() == 'false':
+            membership_organization_we_vote_id = False
+
     try:
         twitter_profile_image_url_https = request.GET['twitter_profile_image_url_https']
         twitter_profile_image_url_https = twitter_profile_image_url_https.strip()
@@ -1723,6 +1735,9 @@ def voter_update_view(request):  # voterUpdate
         or notification_flag_integer_to_set is not False \
         or send_journal_list \
         else False
+    external_voter_id_to_be_saved = True \
+        if (membership_organization_we_vote_id is not False and external_voter_id is not False) \
+        else False
 
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
@@ -1754,10 +1769,13 @@ def voter_update_view(request):  # voterUpdate
         return response
 
     voter = voter_results['voter']
+    voter_we_vote_id = voter.we_vote_id
 
     # At this point, we have a valid voter
 
-    if not at_least_one_variable_has_changed:
+    if at_least_one_variable_has_changed or external_voter_id_to_be_saved:
+        pass
+    else:
         # If here, we want to return the latest data from the voter object
         status += "MISSING_VARIABLE-NO_VARIABLES_PASSED_IN_TO_CHANGE "
         json_data = {
@@ -1841,21 +1859,32 @@ def voter_update_view(request):  # voterUpdate
             first_name = False
             last_name = False
 
+    success = True
     voter_manager = VoterManager()
-    results = voter_manager.update_voter_by_id(
-        voter_id, facebook_email, facebook_profile_image_url_https,
-        first_name, middle_name, last_name,
-        interface_status_flags,
-        flag_integer_to_set, flag_integer_to_unset,
-        notification_settings_flags,
-        notification_flag_integer_to_set, notification_flag_integer_to_unset,
-        twitter_profile_image_url_https, we_vote_hosted_profile_image_url_large,
-        we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
-    voter = results['voter']
-    status += results['status']
+    voter_updated = False
+    if at_least_one_variable_has_changed:
+        results = voter_manager.update_voter_by_id(
+            voter_id, facebook_email, facebook_profile_image_url_https,
+            first_name, middle_name, last_name,
+            interface_status_flags,
+            flag_integer_to_set, flag_integer_to_unset,
+            notification_settings_flags,
+            notification_flag_integer_to_set, notification_flag_integer_to_unset,
+            twitter_profile_image_url_https, we_vote_hosted_profile_image_url_large,
+            we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
+        status += results['status']
+        success = results['success']
+        voter = results['voter']
+        voter_updated = results['voter_updated']
+    if external_voter_id_to_be_saved:
+        organization_manager = OrganizationManager()
+        results = organization_manager.create_or_update_organization_membership_link_to_voter(
+            membership_organization_we_vote_id, external_voter_id, voter_we_vote_id)
+        status += results['status']
+        success = results['success']
     json_data = {
         'status':                                   status,
-        'success':                                  results['success'],
+        'success':                                  success,
         'voter_device_id':                          voter_device_id,
         'facebook_email':                           facebook_email,
         'facebook_profile_image_url_https':         facebook_profile_image_url_https,
@@ -1866,7 +1895,7 @@ def voter_update_view(request):  # voterUpdate
         'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
         'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
         'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
-        'voter_updated':                            results['voter_updated'],
+        'voter_updated':                            voter_updated,
         'interface_status_flags':                   voter.interface_status_flags,
         'flag_integer_to_set':                      flag_integer_to_set,
         'flag_integer_to_unset':                    flag_integer_to_unset,

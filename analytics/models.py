@@ -401,12 +401,16 @@ class AnalyticsCountManager(models.Model):
             pass
         return count_result
 
-    def fetch_voter_ballot_visited(self, voter_we_vote_id):
+    def fetch_voter_ballot_visited(self, voter_we_vote_id, google_civic_election_id=0, organization_we_vote_id=''):
         count_result = None
         try:
             count_query = AnalyticsAction.objects.using('analytics').all()
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_query = count_query.filter(action_constant=ACTION_BALLOT_VISIT)
+            if positive_value_exists(google_civic_election_id):
+                count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(organization_we_vote_id):
+                count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             count_result = count_query.count()
         except Exception as e:
             pass
@@ -547,7 +551,8 @@ class AnalyticsManager(models.Model):
         return results
 
     def create_action_type2(
-            self, action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code, google_civic_election_id,
+            self, action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
+            organization_we_vote_id, google_civic_election_id,
             user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
             ballot_item_we_vote_id, voter_device_id=None):
         """
@@ -582,6 +587,7 @@ class AnalyticsManager(models.Model):
                 voter_id=voter_id,
                 is_signed_in=is_signed_in,
                 state_code=state_code,
+                organization_we_vote_id=organization_we_vote_id,
                 google_civic_election_id=google_civic_election_id,
                 ballot_item_we_vote_id=ballot_item_we_vote_id,
                 user_agent=user_agent_string,
@@ -605,7 +611,8 @@ class AnalyticsManager(models.Model):
         }
         return results
 
-    def retrieve_analytics_action_list(self, voter_we_vote_id='', google_civic_election_id=0):
+    def retrieve_analytics_action_list(self, voter_we_vote_id='', voter_we_vote_id_list=[], google_civic_election_id=0,
+                                       organization_we_vote_id='', action_constant='', distinct_for_members=False):
         success = False
         status = ""
         analytics_action_list = []
@@ -614,8 +621,17 @@ class AnalyticsManager(models.Model):
             list_query = AnalyticsAction.objects.using('analytics').all()
             if positive_value_exists(voter_we_vote_id):
                 list_query = list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            elif len(voter_we_vote_id_list):
+                list_query = list_query.filter(voter_we_vote_id__in=voter_we_vote_id_list)
             if positive_value_exists(google_civic_election_id):
                 list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(organization_we_vote_id):
+                list_query = list_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            if positive_value_exists(action_constant):
+                list_query = list_query.filter(action_constant=action_constant)
+            if positive_value_exists(distinct_for_members):
+                list_query = list_query.distinct(
+                    'google_civic_election_id', 'organization_we_vote_id', 'voter_we_vote_id')
             analytics_action_list = list(list_query)
             analytics_action_list_found = True
         except Exception as e:
@@ -781,7 +797,7 @@ class AnalyticsManager(models.Model):
                                             ballot_item_we_vote_id, voter_device_id)
         else:
             return self.create_action_type2(action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
-                                            google_civic_election_id,
+                                            organization_we_vote_id, google_civic_election_id,
                                             user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
                                             ballot_item_we_vote_id, voter_device_id)
 
