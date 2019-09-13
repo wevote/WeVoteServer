@@ -2410,7 +2410,7 @@ class VoterGuidePossibilityManager(models.Manager):
             voter_guide_possibility_position_found = True
             status += "VOTER_GUIDE_POSSIBILITY_POSITION_FOUND_WITH_ID "
             success = True
-        except VoterGuidePossibility.DoesNotExist:
+        except VoterGuidePossibilityPosition.DoesNotExist:
             status += "VOTER_GUIDE_POSSIBILITY_POSITION_NOT_FOUND_IN_DB "
             success = True
         except Exception as e:

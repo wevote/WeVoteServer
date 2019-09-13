@@ -2128,7 +2128,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
             }
             return json_data
         voter_guide_possibility_position = results['voter_guide_possibility_position']
-        voter_guide_possibility_id = voter_guide_possibility_position['voter_guide_possibility_parent_id']
+        voter_guide_possibility_id = voter_guide_possibility_position.voter_guide_possibility_parent_id
     elif positive_value_exists(voter_guide_possibility_id):
         # If we are here, it is because we are creating a new possibility_position
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility(
