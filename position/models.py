@@ -5584,6 +5584,7 @@ class PositionManager(models.Model):
                     voter_guide_we_vote_id = ""
                     results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
                         voter_guide_we_vote_id, linked_organization_we_vote_id, google_civic_election_id)
+                    status += results['status']
             # If here, we are storing an analytics entry
             state_code = ''
             organization_id_temp = 0
