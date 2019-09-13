@@ -95,7 +95,7 @@ class WeVoteSettingsManager(models.Model):
             value_type = WeVoteSetting.STRING
 
         # Does this setting already exist?
-        we_vote_setting = WeVoteSetting()
+        we_vote_setting = None
         we_vote_setting_id = 0
         we_vote_setting_exists = False
         we_vote_setting_does_not_exist = False

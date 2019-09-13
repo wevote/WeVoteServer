@@ -132,8 +132,9 @@ class VoterGuideManager(models.Manager):
         organization_found = False
         new_voter_guide_created = False
         status = ''
+        success = False
         if not google_civic_election_id or not organization_we_vote_id:
-            status = 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE'
+            status += 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE '
             success = False
             new_voter_guide_created = False
         else:
@@ -163,71 +164,91 @@ class VoterGuideManager(models.Manager):
                         elections_dict[google_civic_election_id] = election_state_code
 
             # Now update voter_guide
-            try:
-                if organization_found:
-                    pledge_to_vote_manager = PledgeToVoteManager()
-                    pledge_results = pledge_to_vote_manager.retrieve_pledge_count_from_organization_we_vote_id(
-                            organization_we_vote_id)
-                    if pledge_results['pledge_count_found']:
-                        pledge_count = pledge_results['pledge_count']
-                    else:
-                        pledge_count = 0
+            if organization_found:
+                pledge_to_vote_manager = PledgeToVoteManager()
+                pledge_results = pledge_to_vote_manager.retrieve_pledge_count_from_organization_we_vote_id(
+                        organization_we_vote_id)
+                if pledge_results['pledge_count_found']:
+                    pledge_count = pledge_results['pledge_count']
+                else:
+                    pledge_count = 0
 
-                    if positive_value_exists(election_state_code):
-                        election_state_code = election_state_code.lower()
-                    updated_values = {
-                        'google_civic_election_id': google_civic_election_id,
-                        'organization_we_vote_id':  organization_we_vote_id,
-                        'image_url':                organization.organization_photo_url(),
-                        'twitter_handle':           organization.organization_twitter_handle,
-                        'twitter_description':      organization.twitter_description,
-                        'twitter_followers_count':  organization.twitter_followers_count,
-                        'display_name':             organization.organization_name,
-                        'voter_guide_owner_type':   organization.organization_type,
-                        'vote_smart_ratings_only':  vote_smart_ratings_only,
-                        'state_code':               election_state_code,
-                        'we_vote_hosted_profile_image_url_large':  organization.we_vote_hosted_profile_image_url_large,
-                        'we_vote_hosted_profile_image_url_medium': organization.we_vote_hosted_profile_image_url_medium,
-                        'we_vote_hosted_profile_image_url_tiny':   organization.we_vote_hosted_profile_image_url_tiny,
-                        'pledge_count':             pledge_count,
-                    }
-                    if positive_value_exists(voter_guide_we_vote_id):
-                        updated_values['we_vote_id'] = voter_guide_we_vote_id
-                    if positive_value_exists(pledge_goal):
-                        updated_values['pledge_goal'] = pledge_goal
-                    if positive_value_exists(we_vote_hosted_profile_image_url_large):
-                        updated_values['we_vote_hosted_profile_image_url_large'] = \
-                            we_vote_hosted_profile_image_url_large
-                    if positive_value_exists(we_vote_hosted_profile_image_url_medium):
-                        updated_values['we_vote_hosted_profile_image_url_medium'] = \
-                            we_vote_hosted_profile_image_url_medium
-                    if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
-                        updated_values['we_vote_hosted_profile_image_url_tiny'] = we_vote_hosted_profile_image_url_tiny
-                    if positive_value_exists(google_civic_election_id):
-                        election_manager = ElectionManager()
-                        election_results = election_manager.retrieve_election(google_civic_election_id)
-                        if election_results['election_found']:
-                            election = election_results['election']
-                            updated_values['election_day_text'] = election.election_day_text
-
+                if positive_value_exists(election_state_code):
+                    election_state_code = election_state_code.lower()
+                updated_values = {
+                    'google_civic_election_id': google_civic_election_id,
+                    'organization_we_vote_id':  organization_we_vote_id,
+                    'image_url':                organization.organization_photo_url(),
+                    'twitter_handle':           organization.organization_twitter_handle,
+                    'twitter_description':      organization.twitter_description,
+                    'twitter_followers_count':  organization.twitter_followers_count,
+                    'display_name':             organization.organization_name,
+                    'voter_guide_owner_type':   organization.organization_type,
+                    'vote_smart_ratings_only':  vote_smart_ratings_only,
+                    'state_code':               election_state_code,
+                    'we_vote_hosted_profile_image_url_large':  organization.we_vote_hosted_profile_image_url_large,
+                    'we_vote_hosted_profile_image_url_medium': organization.we_vote_hosted_profile_image_url_medium,
+                    'we_vote_hosted_profile_image_url_tiny':   organization.we_vote_hosted_profile_image_url_tiny,
+                    'pledge_count':             pledge_count,
+                }
+                if positive_value_exists(voter_guide_we_vote_id):
+                    updated_values['we_vote_id'] = voter_guide_we_vote_id
+                if positive_value_exists(pledge_goal):
+                    updated_values['pledge_goal'] = pledge_goal
+                if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                    updated_values['we_vote_hosted_profile_image_url_large'] = \
+                        we_vote_hosted_profile_image_url_large
+                if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                    updated_values['we_vote_hosted_profile_image_url_medium'] = \
+                        we_vote_hosted_profile_image_url_medium
+                if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                    updated_values['we_vote_hosted_profile_image_url_tiny'] = we_vote_hosted_profile_image_url_tiny
+                if positive_value_exists(google_civic_election_id):
+                    election_manager = ElectionManager()
+                    election_results = election_manager.retrieve_election(google_civic_election_id)
+                    if election_results['election_found']:
+                        election = election_results['election']
+                        updated_values['election_day_text'] = election.election_day_text
+                try:
                     voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
                         organization_we_vote_id__iexact=organization_we_vote_id,
                         defaults=updated_values)
-                    success = True
-                    if new_voter_guide_created:
-                        status += 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION '
-                    else:
-                        status += 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION '
-                else:
+                except VoterGuide.MultipleObjectsReturned as e:
+                    handle_record_found_more_than_one_exception(e, logger=logger)
+                    status += 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_ORGANIZATION'
+                    exception_multiple_object_returned = True
+                    new_voter_guide_created = False
+                except Exception as e:
+                    handle_exception(e, logger=logger)
                     success = False
-                    status += 'VOTER_GUIDE_NOT_CREATED_BECAUSE_ORGANIZATION_NOT_FOUND_LOCALLY'
-            except VoterGuide.MultipleObjectsReturned as e:
-                handle_record_found_more_than_one_exception(e, logger=logger)
+                    status += 'UPDATE_OR_CREATE_ORGANIZATION_VOTER_GUIDE_BY_ELECTION_ID: ' + str(e) + ' '
+                    new_voter_guide_created = False
+                if new_voter_guide_created:
+                    if not positive_value_exists(voter_guide_on_stage.id):
+                        # Advance the we_vote_id_last_voter_guide_integer
+                        next_integer = fetch_next_we_vote_id_voter_guide_integer()
+                        status += 'UPDATE_OR_CREATE_ORGANIZATION_VOTER_GUIDE_BY_ELECTION_ID, NEXT_INTEGER: ' \
+                                  '' + str(next_integer) + ' '
+                        try:
+                            voter_guide_on_stage.we_vote_id = None
+                            voter_guide_on_stage.save()
+                        except Exception as e:
+                            handle_exception(e, logger=logger)
+                            status += 'UPDATE_OR_CREATE_ORGANIZATION_VOTER_GUIDE_AFTER_NEXT_INTEGER: ' + str(e) + ' '
+                            new_voter_guide_created = False
+                    if positive_value_exists(voter_guide_on_stage.id):
+                        status += 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION '
+                        success = True
+                    else:
+                        status += 'COULD_NOT_CREATE_VOTER_GUIDE '
+                        success = False
+                else:
+                    status += 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION '
+                    success = True
+            else:
                 success = False
-                status += 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_ORGANIZATION'
-                exception_multiple_object_returned = True
-                new_voter_guide_created = False
+                status += 'VOTER_GUIDE_NOT_CREATED_BECAUSE_ORGANIZATION_NOT_FOUND_LOCALLY'
 
         results = {
             'success':                  success,
@@ -251,6 +272,7 @@ class VoterGuideManager(models.Manager):
         voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
         new_voter_guide_created = False
+        status = ''
         if not vote_smart_time_span or not organization_we_vote_id:
             status = 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE_BY_TIME_SPAN'
             success = False
@@ -308,17 +330,22 @@ class VoterGuideManager(models.Manager):
                         defaults=updated_values)
                     success = True
                     if new_voter_guide_created:
-                        status = 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION_BY_TIME_SPAN'
+                        status += 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION_BY_TIME_SPAN '
                     else:
-                        status = 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION_BY_TIME_SPAN'
+                        status += 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION_BY_TIME_SPAN '
                 else:
                     success = False
-                    status = 'VOTER_GUIDE_NOT_CREATED_BECAUSE_ORGANIZATION_NOT_FOUND_LOCALLY'
+                    status += 'VOTER_GUIDE_NOT_CREATED_BECAUSE_ORGANIZATION_NOT_FOUND_LOCALLY '
             except VoterGuide.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
-                status = 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_ORGANIZATION_BY_TIME_SPAN'
+                status += 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_ORGANIZATION_BY_TIME_SPAN '
                 exception_multiple_object_returned = True
+                new_voter_guide_created = False
+            except Exception as e:
+                handle_exception(e, logger=logger)
+                success = False
+                status += 'UPDATE_OR_CREATE_ORGANIZATION_VOTER_GUIDE_BY_ELECTION_ID: ' + str(e) + ' '
                 new_voter_guide_created = False
 
         results = {
@@ -340,6 +367,7 @@ class VoterGuideManager(models.Manager):
         new_voter_guide = VoterGuide()
         voter_guide_owner_type = new_voter_guide.PUBLIC_FIGURE
         exception_multiple_object_returned = False
+        status = ''
         if not google_civic_election_id or not public_figure_we_vote_id:
             status = 'ERROR_VARIABLES_MISSING_FOR_PUBLIC_FIGURE_VOTER_GUIDE'
             new_voter_guide_created = False
@@ -372,14 +400,19 @@ class VoterGuideManager(models.Manager):
                     defaults=updated_values)
                 success = True
                 if new_voter_guide_created:
-                    status = 'VOTER_GUIDE_CREATED_FOR_PUBLIC_FIGURE'
+                    status += 'VOTER_GUIDE_CREATED_FOR_PUBLIC_FIGURE '
                 else:
-                    status = 'VOTER_GUIDE_UPDATED_FOR_PUBLIC_FIGURE'
+                    status += 'VOTER_GUIDE_UPDATED_FOR_PUBLIC_FIGURE '
             except VoterGuide.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
-                status = 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_PUBLIC_FIGURE'
+                status += 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_PUBLIC_FIGURE'
                 exception_multiple_object_returned = True
+                new_voter_guide_created = False
+            except Exception as e:
+                handle_exception(e, logger=logger)
+                success = False
+                status += 'UPDATE_OR_CREATE_PUBLIC_FIGURE_VOTER_GUIDE: ' + str(e) + ' '
                 new_voter_guide_created = False
 
         results = {
@@ -455,6 +488,11 @@ class VoterGuideManager(models.Manager):
                 status += 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_VOTER '
                 exception_multiple_object_returned = True
                 new_voter_guide_created = False
+            except Exception as e:
+                handle_exception(e, logger=logger)
+                success = False
+                status += 'UPDATE_OR_CREATE_VOTER_VOTER_GUIDE: ' + str(e) + ' '
+                new_voter_guide_created = False
 
         results = {
             'success':                  success,
@@ -479,9 +517,13 @@ class VoterGuideManager(models.Manager):
                                                               organization_we_vote_id__iexact=organization_we_vote_id)
                 voter_guide_found = True if voter_guide_query.count() > 0 else False
         except VoterGuide.MultipleObjectsReturned as e:
+            handle_exception(e, logger=logger)
             voter_guide_found = True
-        except VoterGuide.DoesNotExist:
+        except VoterGuide.DoesNotExist as e:
+            handle_exception(e, logger=logger)
             voter_guide_found = False
+        except Exception as e:
+            handle_exception(e, logger=logger)
         return voter_guide_found
 
     def retrieve_voter_guide(self, voter_guide_id=0, voter_guide_we_vote_id="", google_civic_election_id=0,
@@ -1210,25 +1252,7 @@ class VoterGuide(models.Model):
             # Attempt 1
             super(VoterGuide, self).save(*args, **kwargs)
         except Exception as e:
-            logger.error("VoterGuide Unable to Save Attempt 1: " + str(self.we_vote_id))
-            self.generate_new_we_vote_id()
-            try:
-                # Attempt 2
-                super(VoterGuide, self).save(*args, **kwargs)
-            except Exception as e:
-                logger.error("VoterGuide Unable to Save Attempt 2: " + str(self.we_vote_id))
-                self.generate_new_we_vote_id()
-                try:
-                    # Attempt 3
-                    super(VoterGuide, self).save(*args, **kwargs)
-                except Exception as e:
-                    logger.error("VoterGuide Unable to Save Attempt 3: " + str(self.we_vote_id))
-                    self.generate_new_we_vote_id()
-                    try:
-                        # Attempt 4
-                        super(VoterGuide, self).save(*args, **kwargs)
-                    except Exception as e:
-                        logger.error("VoterGuide Unable to Save Attempt 4 - FINAL: " + str(self.we_vote_id))
+            logger.error("VoterGuide Unable to Save Attempt 1: " + str(self.we_vote_id) + " " + str(e))
 
     def generate_new_we_vote_id(self):
         # ...generate a new id
