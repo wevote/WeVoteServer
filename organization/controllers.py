@@ -20,7 +20,7 @@ from image.controllers import cache_organization_sharing_image, retrieve_all_ima
 from import_export_facebook.models import FacebookManager
 import json
 from io import BytesIO, StringIO
-from PIL import Image
+from PIL import Image, ImageOps
 from position.controllers import add_position_network_count_entries_for_one_organization, \
     move_positions_to_another_organization, \
     update_position_entered_details_from_organization
@@ -47,8 +47,8 @@ TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 CHOSEN_FAVICON_MAX_WIDTH = 32
 CHOSEN_FAVICON_MAX_HEIGHT = 32
-CHOSEN_LOGO_MAX_WIDTH = 125
-CHOSEN_LOGO_MAX_HEIGHT = 30
+CHOSEN_LOGO_MAX_WIDTH = 128
+CHOSEN_LOGO_MAX_HEIGHT = 32
 CHOSEN_SOCIAL_SHARE_MASTER_MAX_WIDTH = 1600
 CHOSEN_SOCIAL_SHARE_MASTER_MAX_HEIGHT = 900
 
@@ -1435,9 +1435,8 @@ def organization_photos_save_for_api(  # organizationPhotosSave
                 image_data = BytesIO(byte_data)
                 python_image_library_image = Image.open(image_data)
                 format_to_cache = python_image_library_image.format
-                python_image_library_image = \
-                    python_image_library_image.resize(
-                        (CHOSEN_FAVICON_MAX_WIDTH, CHOSEN_FAVICON_MAX_HEIGHT), Image.ANTIALIAS)
+                python_image_library_image = ImageOps.fit(
+                    python_image_library_image, (CHOSEN_FAVICON_MAX_WIDTH, CHOSEN_FAVICON_MAX_HEIGHT), Image.ANTIALIAS)
                 python_image_library_image.format = format_to_cache
                 image_data_found = True
             except Exception as e:
@@ -1471,8 +1470,8 @@ def organization_photos_save_for_api(  # organizationPhotosSave
                 image_data = BytesIO(byte_data)
                 python_image_library_image = Image.open(image_data)
                 format_to_cache = python_image_library_image.format
-                python_image_library_image = \
-                    python_image_library_image.resize((CHOSEN_LOGO_MAX_WIDTH, CHOSEN_LOGO_MAX_HEIGHT), Image.ANTIALIAS)
+                python_image_library_image = ImageOps.fit(
+                    python_image_library_image, (CHOSEN_LOGO_MAX_WIDTH, CHOSEN_LOGO_MAX_HEIGHT), Image.ANTIALIAS)
                 python_image_library_image.format = format_to_cache
                 image_data_found = True
             except Exception as e:
@@ -1507,9 +1506,9 @@ def organization_photos_save_for_api(  # organizationPhotosSave
                 image_data = BytesIO(byte_data)
                 python_image_library_image = Image.open(image_data)
                 format_to_cache = python_image_library_image.format
-                python_image_library_image = \
-                    python_image_library_image.resize((CHOSEN_SOCIAL_SHARE_MASTER_MAX_WIDTH,
-                                                       CHOSEN_SOCIAL_SHARE_MASTER_MAX_HEIGHT), Image.ANTIALIAS)
+                python_image_library_image = ImageOps.fit(
+                    python_image_library_image,
+                    (CHOSEN_SOCIAL_SHARE_MASTER_MAX_WIDTH, CHOSEN_SOCIAL_SHARE_MASTER_MAX_HEIGHT), Image.ANTIALIAS)
                 python_image_library_image.format = format_to_cache
                 image_data_found = True
             except Exception as e:
