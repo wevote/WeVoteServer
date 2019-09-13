@@ -1210,19 +1210,25 @@ class VoterGuide(models.Model):
             # Attempt 1
             super(VoterGuide, self).save(*args, **kwargs)
         except Exception as e:
+            logger.error("VoterGuide Unable to Save Attempt 1: " + str(self.we_vote_id))
             self.generate_new_we_vote_id()
             try:
                 # Attempt 2
                 super(VoterGuide, self).save(*args, **kwargs)
             except Exception as e:
+                logger.error("VoterGuide Unable to Save Attempt 2: " + str(self.we_vote_id))
                 self.generate_new_we_vote_id()
                 try:
                     # Attempt 3
                     super(VoterGuide, self).save(*args, **kwargs)
                 except Exception as e:
+                    logger.error("VoterGuide Unable to Save Attempt 3: " + str(self.we_vote_id))
                     self.generate_new_we_vote_id()
-                    # Attempt 4
-                    super(VoterGuide, self).save(*args, **kwargs)
+                    try:
+                        # Attempt 4
+                        super(VoterGuide, self).save(*args, **kwargs)
+                    except Exception as e:
+                        logger.error("VoterGuide Unable to Save Attempt 4 - FINAL: " + str(self.we_vote_id))
 
     def generate_new_we_vote_id(self):
         # ...generate a new id
