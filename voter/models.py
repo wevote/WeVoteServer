@@ -169,7 +169,6 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-
     def create_developer(self, first_name, last_name, email, password):
         voter = Voter()
         try:
