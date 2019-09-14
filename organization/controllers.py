@@ -560,6 +560,61 @@ def organization_analyze_tweets(organization_we_vote_id):
     return results
 
 
+def move_membership_link_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
+    status = ''
+    success = False
+    voter_member_entries_moved = 0
+    voter_member_entries_not_moved = 0
+
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        status += "MOVE_MEMBERSHIP_LINK_ENTRIES_TO_ANOTHER_VOTER-" \
+                  "Missing either from_voter_we_vote_id or to_voter_we_vote_id "
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'from_voter_we_vote_id':    from_voter_we_vote_id,
+            'to_voter_we_vote_id':      to_voter_we_vote_id,
+            'voter_member_entries_moved':     voter_member_entries_moved,
+            'voter_member_entries_not_moved': voter_member_entries_not_moved,
+        }
+        return results
+
+    if from_voter_we_vote_id == to_voter_we_vote_id:
+        status += "MOVE_MEMBERSHIP_LINK_ENTRIES_TO_ANOTHER_VOTER-" \
+                  "from_voter_we_vote_id and to_voter_we_vote_id identical "
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'from_voter_we_vote_id':    from_voter_we_vote_id,
+            'to_voter_we_vote_id':      to_voter_we_vote_id,
+            'voter_member_entries_moved':     voter_member_entries_moved,
+            'voter_member_entries_not_moved': voter_member_entries_not_moved,
+        }
+        return results
+
+    voter_members_query = OrganizationMembershipLinkToVoter.objects.all()
+    voter_members_query = voter_members_query.filter(
+        voter_we_vote_id__iexact=from_voter_we_vote_id)
+    voter_members_list = list(voter_members_query)
+    for voter_member_link in voter_members_list:
+        try:
+            voter_member_link.voter_we_vote_id = to_voter_we_vote_id
+            voter_member_link.save()
+            voter_member_entries_moved += 1
+        except Exception as e:
+            voter_member_entries_not_moved += 1
+
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'from_voter_we_vote_id':    from_voter_we_vote_id,
+        'to_voter_we_vote_id':      to_voter_we_vote_id,
+        'voter_member_entries_moved':     voter_member_entries_moved,
+        'voter_member_entries_not_moved': voter_member_entries_not_moved,
+    }
+    return results
+
+
 def move_organization_data_to_another_organization(from_organization_we_vote_id, to_organization_we_vote_id):
     status = ""
     success = False
@@ -765,6 +820,12 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
         to_organization_id, to_organization_we_vote_id)
     status += " " + move_organization_followers_results['status']
 
+    # If anyone has been linked with external_voter_id as a member of the old voter's organization,
+    #  move those followers to the new voter's organization
+    move_organization_membership_link_results = move_organization_membership_link_to_another_organization(
+        from_organization_we_vote_id, to_organization_we_vote_id)
+    status += " " + move_organization_membership_link_results['status']
+
     # Transfer positions from "from" organization to the "to" organization
     move_positions_to_another_org_results = move_positions_to_another_organization(
         from_organization_id, from_organization_we_vote_id,
@@ -790,6 +851,35 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
     results = {
         'status': status,
         'success': success,
+    }
+    return results
+
+
+def move_organization_membership_link_to_another_organization(from_organization_we_vote_id, to_organization_we_vote_id):
+    status = ''
+    success = False
+    membership_link_entries_moved = 0
+    membership_link_entries_not_moved = 0
+
+    organization_members_query = OrganizationMembershipLinkToVoter.objects.all()
+    organization_members_query = organization_members_query.filter(
+        organization_we_vote_id__iexact=from_organization_we_vote_id)
+    organization_members_list = list(organization_members_query)
+    for organization_member_link in organization_members_list:
+        try:
+            organization_member_link.organization_we_vote_id = to_organization_we_vote_id
+            organization_member_link.save()
+            membership_link_entries_moved += 1
+        except Exception as e:
+            membership_link_entries_not_moved += 1
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_organization_we_vote_id': from_organization_we_vote_id,
+        'to_organization_we_vote_id': to_organization_we_vote_id,
+        'membership_link_entries_moved': membership_link_entries_moved,
+        'membership_link_entries_not_moved': membership_link_entries_not_moved,
     }
     return results
 

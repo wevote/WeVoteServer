@@ -5,7 +5,8 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter
     VoterDeviceLink, VoterDeviceLinkManager, VoterManager
 from django.http import HttpResponse
 from analytics.controllers import move_analytics_info_to_another_voter
-from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
+from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, \
+    ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
     ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
 from email_outbound.controllers import move_email_address_entries_to_another_voter, schedule_verification_email, \
     WEB_APP_ROOT_URL, WE_VOTE_SERVER_ROOT_URL, schedule_email_with_email_outbound_description
@@ -23,7 +24,8 @@ from image.controllers import cache_master_and_resized_image, TWITTER, FACEBOOK
 from import_export_facebook.models import FacebookManager
 from import_export_twitter.models import TwitterAuthManager
 import json
-from organization.controllers import move_organization_to_another_complete
+from organization.controllers import move_membership_link_entries_to_another_voter, \
+    move_organization_to_another_complete
 from organization.models import OrganizationListManager, OrganizationManager, INDIVIDUAL
 from position.controllers import duplicate_positions_to_another_voter, move_positions_to_another_voter
 from position.models import PositionListManager
@@ -1563,6 +1565,11 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     # Transfer the organizations the from_voter is following to the new_owner_voter
     move_follow_results = move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we_vote_id)
     status += " " + move_follow_results['status']
+
+    # Transfer the organizations the from_voter is a member of (with external_voter_id entry) to the new_owner_voter
+    move_membership_link_results = move_membership_link_entries_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id)
+    status += " " + move_membership_link_results['status']
 
     # Transfer the issues that the voter is following
     move_follow_issue_results = move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
