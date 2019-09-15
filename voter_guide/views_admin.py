@@ -1403,7 +1403,7 @@ def voter_guides_import_from_master_server_view(request):
 @login_required
 def generate_voter_guide_possibility_batch_view(request):
     """
-    Take a VoterGuideSuggested entry and transfer the data to the Import Export Batch System.
+    Take a VoterGuidePossibility entry and transfer the data to the Import Export Batch System.
     :param request:
     :return:
     """
