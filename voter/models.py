@@ -2280,6 +2280,8 @@ def fetch_voter_id_from_voter_we_vote_id(we_vote_id):
 
 # This method *just* returns the voter_we_vote_id or ""
 def fetch_voter_we_vote_id_from_voter_id(voter_id):
+    if not positive_value_exists(voter_id):
+        return ""
     voter_manager = VoterManager()
     results = voter_manager.retrieve_voter_by_id(voter_id, read_only=True)
     if results['voter_found']:

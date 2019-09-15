@@ -403,7 +403,7 @@ def extract_import_position_list_from_voter_guide_possibility(voter_guide_possib
 def extract_voter_guide_possibility_position_list_from_database(
         voter_guide_possibility, voter_guide_possibility_position_id=0):
     """
-    Get voter_guide_possibility data from the database and put it into the Suggested Voter Guide system format we use
+    Get voter_guide_possibility data from the database and put it into the Voter Guide Possibility system format we use
     :param voter_guide_possibility:
     :param voter_guide_possibility_position_id: This is included if we only want to retrieve one possible position
     :return:
@@ -1548,18 +1548,23 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     :return:
     """
     status = ""
-    results = is_voter_device_id_valid(voter_device_id)
-    if not results['success']:
-        return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+    voter_id = 0
+
+    if not positive_value_exists(voter_device_id):
+        status += "VOTER_DEVICE_ID_NOT_PROVIDED "
+    # results = is_voter_device_id_valid(voter_device_id)
+    # if not results['success']:
+    #     return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
-        json_data = {
-            'status': "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
-            'success': False,
-            'voter_device_id': voter_device_id,
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
+        # json_data = {
+        #     'status': "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID ",
+        #     'success': False,
+        #     'voter_device_id': voter_device_id,
+        # }
+        # return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     voter_who_submitted_we_vote_id = fetch_voter_we_vote_id_from_voter_id(voter_id)
     # TODO We will need the voter_id here so we can control volunteer actions
@@ -2041,9 +2046,9 @@ def voter_guide_possibility_save_for_api(  # voterGuidePossibilitySave
 
 
 def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPositionSave
-        voter_device_id,
-        voter_guide_possibility_id,
-        voter_guide_possibility_position_id,
+        voter_device_id=None,
+        voter_guide_possibility_id=None,
+        voter_guide_possibility_position_id=None,
         ballot_item_name=None,
         position_stance=None,
         statement_text=None,
@@ -2060,9 +2065,9 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
         google_civic_election_id_list=None):
     status = "VOTER_GUIDE_POSSIBILITY_POSITION_SAVE "
     success = True
-    results = is_voter_device_id_valid(voter_device_id)
-    if not results['success']:
-        return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+    # results = is_voter_device_id_valid(voter_device_id)
+    # if not results['success']:
+    #     return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
     if not positive_value_exists(voter_guide_possibility_id) \
             and not positive_value_exists(voter_guide_possibility_position_id):
@@ -2075,14 +2080,15 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
-        json_data = {
-            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_GUIDE_POSSIBILITY ",
-            'success': False,
-            'voter_device_id': voter_device_id,
-        }
-        return json_data
+        status += "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_GUIDE_POSSIBILITY "
+        # json_data = {
+        #     'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_GUIDE_POSSIBILITY ",
+        #     'success': False,
+        #     'voter_device_id': voter_device_id,
+        # }
+        # return json_data
 
-    # At this point, we have a valid voter
+    # At this point, we may or may not have a valid voter
 
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     voter_guide_possibility_position = VoterGuidePossibilityPosition()
@@ -2174,36 +2180,46 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
             voter_guide_possibility_type = voter_guide_possibility.voter_guide_possibility_type
 
     at_least_one_change = False
+    # 2019-09-15 Switched from "None" to "positive_value_exists": For now we don't need to be able to wipe out
+    # many of these variables via API call
     try:
-        if ballot_item_name is not None:
+        # if ballot_item_name is not None:
+        if positive_value_exists(ballot_item_name):
             voter_guide_possibility_position.ballot_item_name = ballot_item_name
             at_least_one_change = True
-        if candidate_twitter_handle is not None:
+        # if candidate_twitter_handle is not None:
+        if positive_value_exists(candidate_twitter_handle):
             voter_guide_possibility_position.candidate_twitter_handle = candidate_twitter_handle
             at_least_one_change = True
-        if candidate_we_vote_id is not None:
+        # if candidate_we_vote_id is not None:
+        if positive_value_exists(candidate_we_vote_id):
             voter_guide_possibility_position.candidate_we_vote_id = candidate_we_vote_id
             at_least_one_change = True
-        if measure_we_vote_id is not None:
+        # if measure_we_vote_id is not None:
+        if positive_value_exists(measure_we_vote_id):
             voter_guide_possibility_position.measure_we_vote_id = measure_we_vote_id
             at_least_one_change = True
         if more_info_url is not None:
             voter_guide_possibility_position.more_info_url = more_info_url
             at_least_one_change = True
-        if organization_name is not None:
+        # if organization_name is not None:
+        if positive_value_exists(organization_name):
             voter_guide_possibility_position.organization_name = organization_name
             at_least_one_change = True
-        if organization_twitter_handle is not None:
+        # if organization_twitter_handle is not None:
+        if positive_value_exists(organization_twitter_handle):
             voter_guide_possibility_position.organization_twitter_handle = organization_twitter_handle
             at_least_one_change = True
-        if organization_we_vote_id is not None:
+        # if organization_we_vote_id is not None:
+        if positive_value_exists(organization_we_vote_id):
             voter_guide_possibility_position.organization_we_vote_id = organization_we_vote_id
             at_least_one_change = True
         if position_should_be_removed is not None:
             voter_guide_possibility_position.position_should_be_removed = \
                 positive_value_exists(position_should_be_removed)
             at_least_one_change = True
-        if position_stance is not None:
+        # if position_stance is not None:
+        if positive_value_exists(position_stance):
             voter_guide_possibility_position.position_stance = position_stance
             at_least_one_change = True
         if possibility_should_be_ignored is not None:

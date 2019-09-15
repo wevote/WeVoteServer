@@ -1,7 +1,7 @@
 {# templates/voter_guide/voter_guide_possibility_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Suggested Voter Guides to Approve{% endblock %}
+{% block title %}Voter Guide Possibilities to Approve{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
@@ -21,7 +21,7 @@
     <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
 </p>
 
-<h1>Suggested Voter Guides</h1>
+<h1>Voter Guide Possibilities</h1>
 
 <ul>
     <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}"
@@ -193,7 +193,7 @@ Filters:&nbsp;
     "<strong>Capture Detailed Comments</strong>" means: There are detailed comments under each candidate or measure,
     and/or a unique link to the more detailed commentary for each candidate or measure that we can capture.<br />
     <br />
-    "<strong>Archived</strong>" means: We have extracted all of the data that we can from these Suggested Voter Guides.<br />
+    "<strong>Archived</strong>" means: We have extracted all of the data that we can from these Voter Guide Possibilities.<br />
     <br />
 
 
