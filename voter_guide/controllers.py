@@ -1709,7 +1709,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
 
 def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilityHighlightsRetrieve
         voter_device_id, url_to_scan):
-    status = "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE "
+    status = "VOTER_GUIDE_POSSIBILITY_HIGHLIGHTS_RETRIEVE "
     success = True
     highlight_list = []
     voter_we_vote_id = ''
