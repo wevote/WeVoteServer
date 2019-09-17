@@ -1769,10 +1769,15 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                         highlight_list.append(one_highlight)
 
     json_data = {
-        'status':           status,
-        'success':          success,
-        'url_to_scan':      url_to_scan,
-        'highlight_list':   highlight_list,
+        'status':               status,
+        'success':              success,
+        'url_to_scan':          url_to_scan,
+        'highlight_list':       highlight_list,
+        'never_highlight_on':   [  # TODO: 9/17/19, URLs for sites excluded from highlighting - should be in the db
+            '*.wevote.us',
+            'api.wevoteusa.org',
+            'localhost'
+        ]
     }
     return json_data
 
