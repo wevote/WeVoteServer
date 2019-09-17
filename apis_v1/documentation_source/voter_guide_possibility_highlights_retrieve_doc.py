@@ -14,11 +14,6 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
-            'name':         'url_to_scan',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'The url of the list of endorsements that the voter is viewing.',
-        },
-        {
             'name':         'api_key',
             'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
@@ -26,10 +21,9 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
     ]
     optional_query_parameter_list = [
         {
-            # 'name': 'voter_guide_possibility_position_id',
-            # 'value': 'integer',  # boolean, integer, long, string
-            # 'description': 'If you enter voter_guide_possibility_position_id the query will be limited '
-            #                'to just this entry.',
+            'name':         'url_to_scan',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The url of the list of endorsements that the voter is viewing.',
         },
     ]
 
@@ -64,13 +58,18 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "url_to_scan": string,\n' \
                    '  "highlight_list": list [\n' \
-                   '   {\n' \
-                   '     "name": string,\n' \
-                   '     "we_vote_id": string,\n' \
-                   '     "display": string, (\'STORED\', \'DELETED\', \'POSSIBILITY\', or \'DEFAULT\')\n' \
-                   '     "stance": string, (\'SUPPORT\', \'OPPOSED\', or \'INFO_ONLY\')\n'\
-                   '   }' \
-                   '   ],\n' \
+                   '    {\n' \
+                   '      "name": string,\n' \
+                   '      "we_vote_id": string,\n' \
+                   '      "display": string, (\'STORED\', \'DELETED\', \'POSSIBILITY\', or \'DEFAULT\')\n' \
+                   '      "stance": string, (\'SUPPORT\', \'OPPOSED\', or \'INFO_ONLY\')\n'\
+                   '    }\n' \
+                   '  ],\n' \
+                   '  "never_highlight_on": list [\n' \
+                   '     "*.wevote.us",\n' \
+                   '     "api.wevoteusa.org",\n' \
+                   '     "localhost"\n' \
+                   '  ]\n' \
                    '}'
 
     template_values = {

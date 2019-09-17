@@ -1709,6 +1709,13 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
 
 def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilityHighlightsRetrieve
         voter_device_id, url_to_scan):
+    """
+    Return the words to highlight for the "We Vote Endorsement Tool", and a list of site url fragments for sites that
+    we don't want to highlight on.
+    :param voter_device_id:
+    :param url_to_scan: Optional and non functional, would require a big rework of the "We Vote Endorsement Tool"
+    :return:
+    """
     status = "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE "
     success = True
     highlight_list = []
@@ -1769,10 +1776,15 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                         highlight_list.append(one_highlight)
 
     json_data = {
-        'status':           status,
-        'success':          success,
-        'url_to_scan':      url_to_scan,
-        'highlight_list':   highlight_list,
+        'status':               status,
+        'success':              success,
+        'url_to_scan':          url_to_scan,
+        'highlight_list':       highlight_list,
+        'never_highlight_on':   [  # TODO: 9/17/19, URLs for sites excluded from highlighting - should be in the db
+            '*.wevote.us',
+            'api.wevoteusa.org',
+            'localhost'
+        ]
     }
     return json_data
 
