@@ -24,6 +24,8 @@ def organization_subscription_list_view(request):
 
     plans_list = DonationManager.retrieve_subscription_plan_list()
     plans = []
+    monthly_price_stripe = ''
+    annual_price_stripe = ''
 
     for plan in plans_list['subscription_plan_list']:
         try:
@@ -53,7 +55,8 @@ def organization_subscription_list_view(request):
             'master_feature_package': plan.master_feature_package,
             'features_provided_bitmap': plan.features_provided_bitmap,
             'plan_created_at': nice_created_at,
-            'coupon_expires_date': nice_expires_dt
+            'coupon_expires_date': nice_expires_dt,
+            'is_archived': plan.is_archived,
         }
         plans.append(plan_dict)
 
