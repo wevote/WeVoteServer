@@ -88,6 +88,8 @@ urlpatterns = [
     url(r'^organizationFollow/', views_organization.organization_follow_api_view, name='organizationFollowView'),
     url(r'^organizationFollowIgnore/', views_organization.organization_follow_ignore_api_view,
         name='organizationFollowIgnoreView'),
+    url(r'^organizationIndex/(?P<organization_incoming_domain>[\w]+)', views_organization.organization_index_view,
+        name='organization_index'),
     url(r'^organizationsFoundOnUrl/', views_organization.organizations_found_on_url_api_view,
         name='organizationsFoundOnUrlView'),
     url(r'^organizationLinkToIssueSyncOut/',

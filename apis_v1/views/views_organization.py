@@ -10,6 +10,7 @@ from apis_v1.controllers import organization_count, organization_follow, organiz
     organization_stop_following, organization_stop_ignoring
 from config.base import get_environment_variable
 from django.http import HttpResponse
+from django.shortcuts import render
 from django_user_agents.utils import get_user_agent
 from django.views.decorators.csrf import csrf_exempt
 from follow.controllers import organization_suggestion_tasks_for_api
@@ -105,6 +106,21 @@ def organization_follow_ignore_api_view(request):  # organizationFollowIgnore
     return organization_follow_ignore(voter_device_id=voter_device_id, organization_id=organization_id,
                                       organization_we_vote_id=organization_we_vote_id,
                                       user_agent_string=user_agent_string, user_agent_object=user_agent_object)
+
+
+def organization_index_view(request, organization_incoming_domain):  # organizationIndex
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
+    html_title = "We Vote Custom"
+    meta_tag_description = "Custom: We Vote helps you vote your values, with help from your friends and other " \
+                           "people you trust. Through our nonpartisan, open source platform, we'll help you become a " \
+                           "better voter, up and down the ballot."
+    template_values = {
+        'html_title':                   html_title,
+        'meta_tag_description':         meta_tag_description,
+        'organization_incoming_domain': organization_incoming_domain,
+    }
+    return render(request, 'organization/organization_index.html', template_values)
 
 
 def organizations_found_on_url_api_view(request):  # organizationsFoundOnUrl
