@@ -2442,7 +2442,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         json_data = {
-            'status': 'ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID',
+            'status': 'ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID ',
             'success': False,
             'voter_device_id': voter_device_id,
             'voter_guides': [],
@@ -2464,7 +2464,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         json_data = {
-            'status': "ERROR_GUIDES_TO_FOLLOW_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'status': "ERROR_GUIDES_TO_FOLLOW_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID ",
             'success': False,
             'voter_device_id': voter_device_id,
             'voter_guides': [],
@@ -2490,7 +2490,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
         if not positive_value_exists(voter_we_vote_id):
             json_data = {
-                'status': "ERROR_GUIDES_TO_FOLLOW_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID VOTER_WE_VOTE_ID_NOT_FOUND",
+                'status': "ERROR_GUIDES_TO_FOLLOW_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID VOTER_WE_VOTE_ID_NOT_FOUND ",
                 'success': False,
                 'voter_device_id': voter_device_id,
                 'voter_guides': [],
@@ -2570,7 +2570,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
 
     except Exception as e:
         status += 'FAILED voter_guides_to_follow_retrieve_for_api, retrieve_voter_guides_for_election ' \
-                 '{error} [type: {error_type}]'.format(error=str(e), error_type=type(e))
+                 '{error} [type: {error_type}] '.format(error=str(e), error_type=type(e))
         success = False
 
     if success:

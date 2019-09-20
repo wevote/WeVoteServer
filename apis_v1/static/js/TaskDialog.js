@@ -1,3 +1,4 @@
+// WeVoteServer/apis_v1/static/js/TaskDialog.js
 $(function () {
   let dialog; let
     form;

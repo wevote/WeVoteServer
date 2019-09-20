@@ -3,6 +3,7 @@
 {% load staticfiles %}
 
 {% block js %}
+  {# planDialog is in WeVoteServer/apis_v1/static/js/planDialog.js #}
   <script src="{% static "js/PlanDialog.js" %}" type="text/javascript"></script>
 {% endblock %}
 {% block title %}Coupons{% endblock %}
@@ -40,6 +41,7 @@
           <th>Features</th>
           <th>Created</th>
           <th>Expires</th>
+          <th>Archived</th>
         </tr>
       </thead>
       {% for plan in plans %}
@@ -55,6 +57,7 @@
           <td style="width: 65px; text-align: center">{{ plan.features_provided_bitmap }}</td>
           <td style="width: 120px">{{ plan.plan_created_at }}</td>
           <td style="width: 85px" class="base-expire">{{ plan.coupon_expires_date }}</td>
+          <td style="width: 65px">{% if plan.is_archived %}{{ plan.is_archived }}{% endif %}</td>
         </tr>
       {% endfor %}
     </table>
