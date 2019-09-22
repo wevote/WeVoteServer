@@ -35,7 +35,7 @@ from validate_email import validate_email
 from voter_guide.controllers import duplicate_voter_guides, move_voter_guides_to_another_voter
 import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
-from donate.controllers import donation_history_for_a_voter, move_donation_info_to_another_voter
+from donate.controllers import donation_journal_history_for_a_voter, move_donation_info_to_another_voter
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -2137,7 +2137,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
                                           is_tablet=user_agent_object.is_tablet)
 
         facebook_profile, voter_photo_large, voter_photo_medium = get_displayable_images(voter, facebook_user)
-        donation_list = donation_history_for_a_voter(voter.we_vote_id)
+        donation_list = donation_journal_history_for_a_voter(voter.we_vote_id)
         json_data = {
             'status':                           status,
             'success':                          True,

@@ -16,7 +16,7 @@ from apis_v1.documentation_source import all_ballot_items_retrieve_doc, ballot_i
     measure_retrieve_doc, measures_sync_out_doc, measure_list_for_upcoming_elections_retrieve_doc, \
     office_retrieve_doc, offices_sync_out_doc, organization_analytics_by_voter_doc, \
     organization_count_doc, organizations_followed_retrieve_doc, \
-    organization_follow_doc, organization_follow_ignore_doc, organizations_found_on_url_doc, \
+    organization_follow_doc, organization_follow_ignore_doc, organization_index_doc, organizations_found_on_url_doc, \
     organization_link_to_issue_sync_out_doc, organization_link_to_issue_doc, organization_stop_following_doc, \
     organization_stop_ignoring_doc, organization_photos_save_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, organizations_sync_out_doc, \
@@ -469,6 +469,16 @@ def organization_follow_ignore_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = organization_follow_ignore_doc.organization_follow_ignore_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def organization_index_doc_view(request):
+    """
+    Show documentation about organizationIndex
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = organization_index_doc.organization_index_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
