@@ -108,7 +108,7 @@ def organization_follow_ignore_api_view(request):  # organizationFollowIgnore
                                       user_agent_string=user_agent_string, user_agent_object=user_agent_object)
 
 
-def organization_index_view(request, organization_incoming_domain):  # organizationIndex
+def organization_index_view(request, organization_incoming_domain=''):  # organizationIndex
     user_agent_string = request.META['HTTP_USER_AGENT']
     user_agent_object = get_user_agent(request)
     html_title = "We Vote Custom"

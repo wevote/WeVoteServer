@@ -4,16 +4,16 @@
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from django.http import HttpResponse
-from donate.controllers import donation_with_stripe_for_api, donation_process_stripe_webhook_event, \
-    donation_refund_for_api, donation_subscription_cancellation_for_api, donation_history_for_a_voter
-from voter.models import VoterManager, voter_has_authority
+from django.views.decorators.csrf import csrf_exempt
+from donate.controllers import donation_active_paid_plan_retrieve, donation_with_stripe_for_api, \
+    donation_process_stripe_webhook_event, \
+    donation_refund_for_api, donation_subscription_cancellation_for_api, donation_journal_history_for_a_voter
 from donate.models import DonationManager, OrganizationSubscriptionPlans
 import json
-from voter.models import fetch_voter_we_vote_id_from_voter_device_link
+from voter.models import fetch_voter_we_vote_id_from_voter_device_link, VoterManager, voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import get_voter_device_id, positive_value_exists
 import stripe
-from django.views.decorators.csrf import csrf_exempt
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -47,7 +47,9 @@ def donation_with_stripe_view(request):  # donationWithStripe
     else:
         logger.error('donation_with_stripe_view voter_we_vote_id is missing')
 
-    linked_organization_we_vote_id = VoterManager().retrieve_linked_organization_by_voter_we_vote_id(voter_we_vote_id)
+    voter_manager = VoterManager()
+    linked_organization_we_vote_id = \
+        voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
 
     if positive_value_exists(token):
         results = donation_with_stripe_for_api(request, token, email, donation_amount, monthly_donation,
@@ -57,80 +59,27 @@ def donation_with_stripe_view(request):  # donationWithStripe
         org_subs_already_exists = results['org_subs_already_exists'] if \
             'org_subs_already_exists' in results else False
 
-        donation_manager = DonationManager()
-        donation_plan_definition_list = []
-        donation_plan_definition_list_json = []
-        if positive_value_exists(linked_organization_we_vote_id):
-            plan_results = donation_manager.retrieve_donation_plan_definition_list(
-                organization_we_vote_id=linked_organization_we_vote_id, return_json_version=True)
-            donation_plan_definition_list = plan_results['donation_plan_definition_list']
-            donation_plan_definition_list_json = plan_results['donation_plan_definition_list_json']
-        elif positive_value_exists(voter_we_vote_id):
-            plan_results = donation_manager.retrieve_donation_plan_definition_list(
-                voter_we_vote_id=voter_we_vote_id, return_json_version=True)
-            donation_plan_definition_list = plan_results['donation_plan_definition_list']
-            donation_plan_definition_list_json = plan_results['donation_plan_definition_list_json']
-
-        status += "SUCCESSFULLY_RETRIEVED_DONATION_HISTORY "
-        success = True
-        active_paid_plan_found = False
-        active_paid_plan = {
-            'last_amount_paid': 0,
-            'plan_type_enum': '',
-            'subscription_active': False,
-            'subscription_canceled_at': '',
-            'subscription_ended_at': '',
-            'subscription_id': 0,
-        }
-        donation_plan_id = ''
-        for donation_plan_definition in donation_plan_definition_list:
-            if positive_value_exists(donation_plan_definition.is_organization_plan):
-                if positive_value_exists(donation_plan_definition.donation_plan_is_active):
-                    active_paid_plan_found = True
-                    plan_type_enum = donation_plan_definition.plan_type_enum
-                    coupon_code = donation_plan_definition.coupon_code
-                    donation_plan_id = donation_plan_definition.donation_plan_id
-                    break
-
-        # We assume these are in order of newest first
-        # for one_entry in donation_list:
-        #     if one_entry['record_enum'] == 'SUBSCRIPTION_SETUP_AND_INITIAL':
-        #         subscription_found = True
-        #         subscription_id = one_entry['subscription_id']
-        #         last_amount_paid = one_entry['amount']
-        #         plan_type_enum = one_entry['plan_type_enum']
-        #         # subscription_active = not positive_value_exists(one_entry['subscription_canceled_at']) \
-        #         #     and not positive_value_exists(one_entry['subscription_ended_at'])
-        #         # subscription_canceled_at = one_entry['subscription_canceled_at']
-        #         # subscription_ended_at = one_entry['subscription_ended_at']
-
-        if active_paid_plan_found:
-            active_paid_plan = {
-                # 'last_amount_paid':         last_amount_paid,
-                'coupon_code': coupon_code,
-                'plan_type_enum': plan_type_enum,
-                'subscription_active': active_paid_plan_found,
-                # 'subscription_canceled_at': subscription_canceled_at,
-                # 'subscription_ended_at':    subscription_ended_at,
-                'donation_plan_id': donation_plan_id,
-            }
+        active_results = donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_vote_id)
+        active_paid_plan = active_results['active_paid_plan']
+        donation_plan_definition_list_json = active_results['donation_plan_definition_list_json']
 
         json_data = {
             'status': results['status'],
             'success': results['success'],
-            'charge_id': results['charge_id'],
             'active_paid_plan': active_paid_plan,
             'amount_paid': results['amount_paid'],
-            'plan_type_enum': results['plan_type_enum'],
+            'charge_id': results['charge_id'],
             'customer_id': results['customer_id'],
-            'saved_donation_in_log': results['donation_entry_saved'],
-            'saved_stripe_donation': results['saved_stripe_donation'],
-            'monthly_donation': monthly_donation,
-            'subscription': results['subscription'],
-            'donation_list': donation_history_for_a_voter(voter_we_vote_id),
+            'donation_list': donation_journal_history_for_a_voter(voter_we_vote_id),
             'donation_plan_definition_list':    donation_plan_definition_list_json,
             'error_message_for_voter': results['error_message_for_voter'],
-            'org_subs_already_exists': org_subs_already_exists
+            'monthly_donation': monthly_donation,
+            'organization_saved': results['organization_saved'],
+            'org_subs_already_exists': org_subs_already_exists,
+            'plan_type_enum': results['plan_type_enum'],
+            'saved_donation_in_log': results['donation_entry_saved'],
+            'saved_stripe_donation': results['saved_stripe_donation'],
+            'subscription': results['subscription'],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -140,6 +89,7 @@ def donation_with_stripe_view(request):  # donationWithStripe
             'success': False,
             'amount_paid': 0,
             'error_message_for_voter': 'Cannot connect to payment processor.',
+            'organization_saved': False,
             'plan_type_enum': '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -163,7 +113,7 @@ def donation_refund_view(request):  # donationRefund
             json_data = {
                 'success': str(results),
                 'charge_id': charge_id,
-                'donation_list': donation_history_for_a_voter(voter_we_vote_id),
+                'donation_list': donation_journal_history_for_a_voter(voter_we_vote_id),
                 'voter_we_vote_id': voter_we_vote_id,
             }
         else:
@@ -184,29 +134,31 @@ def donation_refund_view(request):  # donationRefund
 
 def donation_cancel_subscription_view(request):  # donationCancelSubscription
     """
-    Cancel a stripe subscription
+    Cancel a stripe subscription or subscription plan
     :type request: object
     :param request:
     :return:
     """
 
-    subscription_id = request.GET.get('subscription_id', '')
+    plan_type_enum = request.GET.get('plan_type_enum', '')
+    stripe_subscription_id = request.GET.get('subscription_id', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
 
     if positive_value_exists(voter_device_id):
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
-        if len(subscription_id) > 0:
-            json_data = donation_subscription_cancellation_for_api(request, subscription_id, voter_we_vote_id)
+        if len(voter_we_vote_id) > 0:
+            json_data = donation_subscription_cancellation_for_api(
+                voter_we_vote_id, plan_type_enum=plan_type_enum, stripe_subscription_id=stripe_subscription_id)
         else:
             logger.error('donation_cancel_subscription_view voter_we_vote_id is missing')
             json_data = {
-                'status': "VOTER_WE_VOTE_ID_IS_MISSING",
+                'status': "VOTER_WE_VOTE_ID_IS_MISSING ",
                 'success': False,
             }
     else:
         logger.error('donation_cancel_subscription_view stripe_subscription_id is missing')
         json_data = {
-            'status': "STRIPE_SUBSCRIPTION_ID_IS_MISSING",
+            'status': "STRIPE_SUBSCRIPTION_ID_IS_MISSING ",
             'success': False,
         }
 
@@ -256,7 +208,6 @@ def donation_history_list_view(request):
     subscription_id = request.GET.get('subscription_id', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     status = ""
-    active_paid_plan_found = False
     active_paid_plan = {
         'last_amount_paid':         0,
         'plan_type_enum':           '',
@@ -265,17 +216,8 @@ def donation_history_list_view(request):
         'subscription_ended_at':    '',
         'subscription_id':          subscription_id,
     }
-    coupon_code = ''
     donation_list = []
-    donation_plan_definition_list = []
     donation_plan_definition_list_json = []
-    donation_plan_id = ''
-    plan_type_enum = ''
-    last_amount_paid = 0
-    subscription_active = ''
-    subscription_canceled_at = ''
-    subscription_ended_at = ''
-    subscription_found = False
 
     if positive_value_exists(voter_device_id):
         voter_manager = VoterManager()
@@ -285,57 +227,15 @@ def donation_history_list_view(request):
             status += "DONATION_HISTORY_LIST-INVALID_VOTER_DEVICE_ID_PASSED "
             success = False
         else:
+            success = True
             voter = results['voter']
             voter_we_vote_id = voter.we_vote_id
             linked_organization_we_vote_id = voter.linked_organization_we_vote_id
 
-            donation_list = donation_history_for_a_voter(voter_we_vote_id)
-            donation_manager = DonationManager()
-            if positive_value_exists(linked_organization_we_vote_id):
-                plan_results = donation_manager.retrieve_donation_plan_definition_list(
-                    organization_we_vote_id=linked_organization_we_vote_id, return_json_version=True)
-                donation_plan_definition_list = plan_results['donation_plan_definition_list']
-                donation_plan_definition_list_json = plan_results['donation_plan_definition_list_json']
-            elif positive_value_exists(voter_we_vote_id):
-                plan_results = donation_manager.retrieve_donation_plan_definition_list(
-                    voter_we_vote_id=voter_we_vote_id, return_json_version=True)
-                donation_plan_definition_list = plan_results['donation_plan_definition_list']
-                donation_plan_definition_list_json = plan_results['donation_plan_definition_list_json']
-
-            status += "SUCCESSFULLY_RETRIEVED_DONATION_HISTORY "
-            success = True
-
-            for donation_plan_definition in donation_plan_definition_list:
-                if positive_value_exists(donation_plan_definition.is_organization_plan):
-                    if positive_value_exists(donation_plan_definition.donation_plan_is_active):
-                        active_paid_plan_found = True
-                        plan_type_enum = donation_plan_definition.plan_type_enum
-                        coupon_code = donation_plan_definition.coupon_code
-                        donation_plan_id = donation_plan_definition.donation_plan_id
-                        break
-
-            # We assume these are in order of newest first
-            # for one_entry in donation_list:
-            #     if one_entry['record_enum'] == 'SUBSCRIPTION_SETUP_AND_INITIAL':
-            #         subscription_found = True
-            #         subscription_id = one_entry['subscription_id']
-            #         last_amount_paid = one_entry['amount']
-            #         plan_type_enum = one_entry['plan_type_enum']
-            #         # subscription_active = not positive_value_exists(one_entry['subscription_canceled_at']) \
-            #         #     and not positive_value_exists(one_entry['subscription_ended_at'])
-            #         # subscription_canceled_at = one_entry['subscription_canceled_at']
-            #         # subscription_ended_at = one_entry['subscription_ended_at']
-
-            if active_paid_plan_found:
-                active_paid_plan = {
-                    # 'last_amount_paid':         last_amount_paid,
-                    'coupon_code':              coupon_code,
-                    'plan_type_enum':           plan_type_enum,
-                    'subscription_active':      active_paid_plan_found,
-                    # 'subscription_canceled_at': subscription_canceled_at,
-                    # 'subscription_ended_at':    subscription_ended_at,
-                    'donation_plan_id':         donation_plan_id,
-                }
+            donation_list = donation_journal_history_for_a_voter(voter_we_vote_id)
+            active_results = donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_vote_id)
+            active_paid_plan = active_results['active_paid_plan']
+            donation_plan_definition_list_json = active_results['donation_plan_definition_list_json']
 
         json_data = {
             'active_paid_plan':                 active_paid_plan,
@@ -481,7 +381,8 @@ def does_paid_subscription_exist_for_api(request):  # doesOrgHavePaidPlan
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
     else:
         logger.error('donation_with_stripe_view voter_we_vote_id is missing')
-    organization_we_vote_id = VoterManager().retrieve_linked_organization_by_voter_we_vote_id(voter_we_vote_id)
+    voter_manager = VoterManager()
+    organization_we_vote_id = voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
     found_live_paid_subscription_for_the_org = DonationManager.does_paid_subscription_exist(organization_we_vote_id)
 
     json_data = {

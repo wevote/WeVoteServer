@@ -2,23 +2,15 @@
 <html class="chekov" lang="en">
 <head>
     {% load staticfiles %}
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1" name="viewport">
-    <link href="//fonts.googleapis.com/css?family=Roboto:300,400,400italic,500,500italic,700,700italic|Roboto+Mono:400,500,700|Material+Icons" rel="stylesheet">
-    <link href="{% static "apis_v1/apis_v1.css" %}" rel="stylesheet">
-    <meta content="We Vote API Server" property="og:site_name">
-    <meta content="website" property="og:type">
-    <meta content="en" property="og:locale">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <link href="//fonts.googleapis.com/css?family=Roboto:300,400,400italic,500,500italic,700,700italic|Roboto+Mono:400,500,700|Material+Icons" rel="stylesheet" />
+    <link href="{% static "apis_v1/apis_v1.css" %}" rel="stylesheet" />
+    <meta content="We Vote API Server" property="og:site_name" />
+    <meta content="website" property="og:type" />
+    <meta content="en" property="og:locale" />
     <title>{{ api_name }}</title>
     <meta content="We Vote APIs: {{ api_name }}" property="og:title"/>
-    </meta>
-    </meta>
-    </meta>
-    </meta>
-    </link>
-    </link>
-    </meta>
-    </meta>
     <link rel="shortcut icon" type="image/x-icon" href="https://wevote.us/img/global/icons/favicon-32x32.png" />
 </head>
 <body class="devsite-doc-page devsite-header-no-upper-tabs" id="top_of_page">
@@ -126,7 +118,7 @@
     {{ api_introduction|safe }}
     {% load template_filters %}
 
-        <form name="{{ api_name }}" method="{% if get_or_post == "GET" %}get{% else %}post{% endif %}" action="{% url try_now_link %}" target="_blank">
+        <form name="{{ api_name }}" method="{% if get_or_post == "GET" %}get{% else %}post{% endif %}" action="{% url try_now_link %}{{ try_now_link_additional_path }}" target="_blank">
         {% csrf_token %}
             <table>
                 <tr>

@@ -30,7 +30,6 @@ PUBLIC_FIGURE = 'PF'
 UNKNOWN = 'U'
 VOTER = 'V'
 
-
 logger = wevote_functions.admin.get_logger(__name__)
 
 
@@ -588,6 +587,12 @@ class LocalSwitch(object):
             return True
         else:
             return False
+
+
+def convert_pennies_integer_to_dollars_string(pennies_integer):
+    cents_to_dollars_format_string = '{:,.2f}'
+    dollars_string = cents_to_dollars_format_string.format(pennies_integer / 100)
+    return dollars_string
 
 
 # This is how we make sure a variable is a boolean
