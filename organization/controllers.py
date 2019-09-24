@@ -11,6 +11,7 @@ from analytics.models import ACTION_BALLOT_VISIT, ACTION_ORGANIZATION_FOLLOW, AC
 import base64
 from config.base import get_environment_variable
 from django.http import HttpResponse
+from donate.controllers import move_donation_info_to_another_organization
 from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
 from follow.controllers import move_organization_followers_to_another_organization
@@ -832,6 +833,10 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
         to_organization_id, to_organization_we_vote_id,
         to_voter_id, to_voter_we_vote_id)
     status += " " + move_positions_to_another_org_results['status']
+
+    move_donation_results = move_donation_info_to_another_organization(
+        from_organization_we_vote_id, to_organization_we_vote_id)
+    status += " " + move_donation_results['status']
 
     # There might be some useful information in the from_voter's organization that needs to be moved
     move_organization_results = move_organization_data_to_another_organization(

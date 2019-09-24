@@ -1206,7 +1206,7 @@ class DonationManager(models.Model):
         return
 
     @staticmethod
-    def move_donations_between_donors(from_voter, to_voter):
+    def move_donate_link_to_voter_from_voter_to_voter(from_voter, to_voter):
         """
 
         :param from_voter:
@@ -1214,46 +1214,244 @@ class DonationManager(models.Model):
         :return:
         """
         status = ''
+        donate_link_list = []
         voter_we_vote_id = from_voter.we_vote_id
         to_voter_we_vote_id = to_voter.we_vote_id
 
         try:
-            rows = DonationJournal.objects.get(voter_we_vote_id__iexact=voter_we_vote_id)
-            rows.voter_we_vote_id = to_voter_we_vote_id
-            rows.save()
-            status = "move_donations_between_donors MOVED-DONATIONS-FROM-" + \
-                     voter_we_vote_id + "-TO-" + to_voter_we_vote_id + " "
+            donate_link_query = DonateLinkToVoter.objects.all()
+            donate_link_query = donate_link_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            donate_link_list = list(donate_link_query)
+            status += "move_donate_link_to_voter_from_voter_to_voter LIST_RETRIEVED-" + \
+                      voter_we_vote_id + "-TO-" + to_voter_we_vote_id + " LENGTH: " + str(len(donate_link_list)) + " "
             logger.debug(status)
-
-        except DonationJournal.DoesNotExist:
-            # The not-loggedin-voter rarely has made a donation, so this is not a problem
-            status += " NO-DONATIONS-TO-MOVE-FROM-" + \
-                      voter_we_vote_id + "-TO-" + to_voter_we_vote_id + " "
-            logger.debug("move_donations_between_donors 1:" + status)
-            results = {
-                'status': status,
-                'success': False,
-                'from_voter': from_voter,
-                'to_voter': to_voter,
-            }
-            return results
-
+            success = True
         except Exception as e:
-            status += " EXCEPTION-IN-move_donations_between_donors "
-            logger.error("move_donations_between_donors 2:" + status)
-            results = {
-                'status': status,
-                'success': False,
-                'from_voter': from_voter,
-                'to_voter': to_voter,
-            }
-            return results
+            status += "RETRIEVE_EXCEPTION_IN-move_donate_link_to_voter_from_voter_to_voter "
+            logger.error("move_donate_link_to_voter_from_voter_to_voter 2:" + status)
+            success = False
+
+        donate_link_migration_count = 0
+        donate_link_migration_fails = 0
+        for donate_link in donate_link_list:
+            try:
+                donate_link.voter_we_vote_id = to_voter_we_vote_id
+                donate_link.save()
+                donate_link_migration_count += 1
+            except Exception as e:
+                donate_link_migration_fails += 1
+
+        if positive_value_exists(donate_link_migration_count):
+            status += "DONATE_LINK_MOVED: " + str(donate_link_migration_count) + " "
+        if positive_value_exists(donate_link_migration_fails):
+            status += "DONATE_LINK_FAILS: " + str(donate_link_migration_fails) + " "
 
         results = {
             'status': status,
-            'success': True,
+            'success': success,
             'from_voter': from_voter,
             'to_voter': to_voter,
+        }
+        return results
+
+    @staticmethod
+    def move_donation_journal_entries_from_voter_to_voter(from_voter, to_voter):
+        """
+
+        :param from_voter:
+        :param to_voter:
+        :return:
+        """
+        status = ''
+        donation_journal_list = []
+        voter_we_vote_id = from_voter.we_vote_id
+        to_voter_we_vote_id = to_voter.we_vote_id
+
+        try:
+            donation_journal_query = DonationJournal.objects.all()
+            donation_journal_query = donation_journal_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            donation_journal_list = list(donation_journal_query)
+            status += "move_donation_journal_entries_from_voter_to_voter LIST_RETRIEVED-" + \
+                      voter_we_vote_id + "-TO-" + to_voter_we_vote_id + \
+                      " LENGTH: " + str(len(donation_journal_list)) + " "
+            logger.debug(status)
+            success = True
+        except Exception as e:
+            status += "RETRIEVE_EXCEPTION_IN-move_donation_journal_entries_from_voter_to_voter "
+            logger.error("move_donation_journal_entries_from_voter_to_voter 2:" + status)
+            success = False
+
+        donation_journal_migration_count = 0
+        donation_journal_migration_fails = 0
+        for donation_journal in donation_journal_list:
+            try:
+                donation_journal.voter_we_vote_id = to_voter_we_vote_id
+                donation_journal.save()
+                donation_journal_migration_count += 1
+            except Exception as e:
+                donation_journal_migration_fails += 1
+
+        if positive_value_exists(donation_journal_migration_count):
+            status += "DONATION_JOURNAL_MOVED: " + str(donation_journal_migration_count) + " "
+        if positive_value_exists(donation_journal_migration_fails):
+            status += "DONATION_JOURNAL_FAILS: " + str(donation_journal_migration_fails) + " "
+
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter': from_voter,
+            'to_voter': to_voter,
+        }
+        return results
+
+    @staticmethod
+    def move_donation_plan_definition_entries_from_voter_to_voter(from_voter, to_voter):
+        """
+
+        :param from_voter:
+        :param to_voter:
+        :return:
+        """
+        status = ''
+        donation_plan_definition_list = []
+        voter_we_vote_id = from_voter.we_vote_id
+        to_voter_we_vote_id = to_voter.we_vote_id
+
+        try:
+            donation_plan_definition_query = DonationPlanDefinition.objects.all()
+            donation_plan_definition_query = donation_plan_definition_query.filter(
+                voter_we_vote_id__iexact=voter_we_vote_id)
+            donation_plan_definition_list = list(donation_plan_definition_query)
+            status += "move_donation_plan_definition_entries_from_voter_to_voter LIST_RETRIEVED-" + \
+                      voter_we_vote_id + "-TO-" + to_voter_we_vote_id + \
+                      " LENGTH: " + str(len(donation_plan_definition_list)) + " "
+            logger.debug(status)
+            success = True
+        except Exception as e:
+            status += "RETRIEVE_EXCEPTION_IN-move_donation_plan_definition_entries_from_voter_to_voter "
+            logger.error("move_donation_plan_definition_entries_from_voter_to_voter 2:" + status)
+            success = False
+
+        donation_plan_definition_migration_count = 0
+        donation_plan_definition_migration_fails = 0
+        for donation_plan_definition in donation_plan_definition_list:
+            try:
+                donation_plan_definition.voter_we_vote_id = to_voter_we_vote_id
+                donation_plan_definition.save()
+                donation_plan_definition_migration_count += 1
+            except Exception as e:
+                donation_plan_definition_migration_fails += 1
+
+        if positive_value_exists(donation_plan_definition_migration_count):
+            status += "DONATION_PLAN_DEFINITION_MOVED: " + str(donation_plan_definition_migration_count) + " "
+        if positive_value_exists(donation_plan_definition_migration_fails):
+            status += "DONATION_PLAN_DEFINITION_FAILS: " + str(donation_plan_definition_migration_fails) + " "
+
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter': from_voter,
+            'to_voter': to_voter,
+        }
+        return results
+
+    @staticmethod
+    def move_donation_journal_entries_from_organization_to_organization(
+            from_organization_we_vote_id, to_organization_we_vote_id):
+        """
+
+        :param from_organization_we_vote_id:
+        :param to_organization_we_vote_id:
+        :return:
+        """
+        status = ''
+        donation_journal_list = []
+
+        try:
+            donation_journal_query = DonationJournal.objects.all()
+            donation_journal_query = donation_journal_query.filter(
+                organization_we_vote_id__iexact=from_organization_we_vote_id)
+            donation_journal_list = list(donation_journal_query)
+            status += "move_donation_journal_entries_from_organization_to_organization LIST_RETRIEVED-" + \
+                      from_organization_we_vote_id + "-TO-" + to_organization_we_vote_id +  \
+                      " LENGTH: " + str(len(donation_journal_list)) + " "
+            logger.debug(status)
+            success = True
+        except Exception as e:
+            status += "RETRIEVE_EXCEPTION_IN-move_donation_journal_entries_from_organization_to_organization "
+            logger.error("move_donation_journal_entries_from_organization_to_organization 2:" + status)
+            success = False
+
+        donation_journal_migration_count = 0
+        donation_journal_migration_fails = 0
+        for donation_journal in donation_journal_list:
+            try:
+                donation_journal.organization_we_vote_id = to_organization_we_vote_id
+                donation_journal.save()
+                donation_journal_migration_count += 1
+            except Exception as e:
+                donation_journal_migration_fails += 1
+
+        if positive_value_exists(donation_journal_migration_count):
+            status += "DONATION_JOURNAL_MOVED: " + str(donation_journal_migration_count) + " "
+        if positive_value_exists(donation_journal_migration_fails):
+            status += "DONATION_JOURNAL_FAILS: " + str(donation_journal_migration_fails) + " "
+
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'from_organization_we_vote_id': from_organization_we_vote_id,
+            'to_organization_we_vote_id':   to_organization_we_vote_id,
+        }
+        return results
+
+    @staticmethod
+    def move_donation_plan_definition_entries_from_organization_to_organization(
+            from_organization_we_vote_id, to_organization_we_vote_id):
+        """
+
+        :param from_organization_we_vote_id:
+        :param to_organization_we_vote_id:
+        :return:
+        """
+        status = ''
+        donation_plan_definition_list = []
+
+        try:
+            donation_plan_definition_query = DonationPlanDefinition.objects.all()
+            donation_plan_definition_query = donation_plan_definition_query.filter(
+                organization_we_vote_id__iexact=from_organization_we_vote_id)
+            donation_plan_definition_list = list(donation_plan_definition_query)
+            status += "move_donation_plan_definition_entries_from_organization_to_organization LIST_RETRIEVED-" + \
+                      from_organization_we_vote_id + "-TO-" + to_organization_we_vote_id + \
+                      " LENGTH: " + str(len(donation_plan_definition_list)) + " "
+            logger.debug(status)
+            success = True
+        except Exception as e:
+            status += "RETRIEVE_EXCEPTION_IN-move_donation_plan_definition_entries_from_organization_to_organization "
+            logger.error("move_donation_plan_definition_entries_from_organization_to_organization 2:" + status)
+            success = False
+
+        donation_plan_definition_migration_count = 0
+        donation_plan_definition_migration_fails = 0
+        for donation_plan_definition in donation_plan_definition_list:
+            try:
+                donation_plan_definition.organization_we_vote_id = to_organization_we_vote_id
+                donation_plan_definition.save()
+                donation_plan_definition_migration_count += 1
+            except Exception as e:
+                donation_plan_definition_migration_fails += 1
+
+        if positive_value_exists(donation_plan_definition_migration_count):
+            status += "DONATION_PLAN_DEFINITION_MOVED: " + str(donation_plan_definition_migration_count) + " "
+        if positive_value_exists(donation_plan_definition_migration_fails):
+            status += "DONATION_PLAN_DEFINITION_FAILS: " + str(donation_plan_definition_migration_fails) + " "
+
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'from_organization_we_vote_id': from_organization_we_vote_id,
+            'to_organization_we_vote_id':   to_organization_we_vote_id,
         }
         return results
 
