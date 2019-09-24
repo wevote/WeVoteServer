@@ -997,6 +997,33 @@ class DonationManager(models.Model):
         return results
 
     @staticmethod
+    def retrieve_master_feature_package(chosen_feature_package):
+        status = ''
+        master_feature_package = None
+        master_feature_package_found = False
+
+        try:
+            master_feature_package = MasterFeaturePackage.objects.get(
+                master_feature_package__iexact=chosen_feature_package)
+            master_feature_package_found = True
+            success = True
+        except MasterFeaturePackage.DoesNotExist:
+            status += "MASTER_FEATURE_PACKAGE_NOT_FOUND "
+            success = True
+        except Exception as e:
+            status += "MASTER_FEATURE_PACKAGE_EXCEPTION: " + str(e) + " "
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'master_feature_package':       master_feature_package,
+            'master_feature_package_found': master_feature_package_found,
+        }
+
+        return results
+
+    @staticmethod
     def does_donation_journal_charge_exist(charge_id):
         """
 
@@ -1621,7 +1648,8 @@ class DonationManager(models.Model):
     @staticmethod
     def create_initial_master_feature_packages():
         """
-        The master feature packages we want to keep updated
+        The master feature packages we want to keep updated.
+        Make sure these match the features provided in organizationIndex
         :return:
         """
         master_feature_package, package_created = MasterFeaturePackage.objects.update_or_create(

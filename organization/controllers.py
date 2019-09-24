@@ -1497,7 +1497,7 @@ def organization_photos_save_for_api(  # organizationPhotosSave
             'success':                      False,
             'chosen_favicon_url_https':     '',
             'chosen_logo_url_https':        '',
-            'chosen_social_share_master_url_https': '',
+            'chosen_social_share_master_image_url_https': '',
             'organization_id':              organization_id,
             'organization_we_vote_id':      organization_we_vote_id,
             'organization_updated':         False,
@@ -1511,7 +1511,7 @@ def organization_photos_save_for_api(  # organizationPhotosSave
     # Now convert the file_reader data (from Javascript) into a URL stored in our AWS bucket
     chosen_favicon_url_https = False
     chosen_logo_url_https = False
-    chosen_social_share_master_url_https = False
+    chosen_social_share_master_image_url_https = False
 
     if kind_of_image_chosen_favicon:
         image_data_found = False
@@ -1616,7 +1616,7 @@ def organization_photos_save_for_api(  # organizationPhotosSave
             status += cache_results['status']
             if cache_results['success']:
                 cached_master_we_vote_image = cache_results['we_vote_image']
-                chosen_social_share_master_url_https = cached_master_we_vote_image.we_vote_image_url
+                chosen_social_share_master_image_url_https = cached_master_we_vote_image.we_vote_image_url
     elif delete_chosen_social_share_master_image:
         # For now we aren't actually deleting these images here -- we just remove them from the organization
         pass
@@ -1626,7 +1626,7 @@ def organization_photos_save_for_api(  # organizationPhotosSave
         organization_id=organization_id, organization_we_vote_id=organization_we_vote_id,
         chosen_favicon_url_https=chosen_favicon_url_https,
         chosen_logo_url_https=chosen_logo_url_https,
-        chosen_social_share_master_url_https=chosen_social_share_master_url_https,
+        chosen_social_share_master_image_url_https=chosen_social_share_master_image_url_https,
         delete_chosen_favicon=delete_chosen_favicon,
         delete_chosen_logo=delete_chosen_logo,
         delete_chosen_social_share_master_image=delete_chosen_social_share_master_image)
@@ -1640,8 +1640,8 @@ def organization_photos_save_for_api(  # organizationPhotosSave
         'status':                               status,
         'chosen_favicon_url_https':             chosen_favicon_url_https if chosen_favicon_url_https else '',
         'chosen_logo_url_https':                chosen_logo_url_https if chosen_logo_url_https else '',
-        'chosen_social_share_master_url_https': chosen_social_share_master_url_https
-        if chosen_social_share_master_url_https else '',
+        'chosen_social_share_master_image_url_https': chosen_social_share_master_image_url_https
+        if chosen_social_share_master_image_url_https else '',
         'delete_chosen_favicon':                delete_chosen_favicon,
         'delete_chosen_logo':                   delete_chosen_logo,
         'delete_chosen_social_share_master_image':  delete_chosen_social_share_master_image,
@@ -1681,7 +1681,7 @@ def organization_retrieve_for_api(
             'chosen_logo_url_https':            '',
             'chosen_social_share_description':  '',
             'chosen_social_share_image_256x256_url_https': '',
-            'chosen_social_share_master_url_https': '',
+            'chosen_social_share_master_image_url_https': '',
             'chosen_sub_domain_string':         '',
             'chosen_subscription_plan':         '',
             'subscription_plan_end_day_text':   '',
@@ -1750,7 +1750,7 @@ def organization_retrieve_for_api(
             'chosen_hide_we_vote_logo':         organization.chosen_hide_we_vote_logo,
             'chosen_logo_url_https':            organization.chosen_logo_url_https,
             'chosen_social_share_description':  organization.chosen_social_share_description,
-            'chosen_social_share_master_url_https':         organization.chosen_social_share_master_url_https,
+            'chosen_social_share_master_image_url_https':         organization.chosen_social_share_master_image_url_https,
             'chosen_social_share_image_256x256_url_https':  organization.chosen_social_share_image_256x256_url_https,
             'chosen_sub_domain_string':         organization.chosen_sub_domain_string,
             'chosen_subscription_plan':         organization.chosen_subscription_plan,
@@ -1804,7 +1804,7 @@ def organization_retrieve_for_api(
             'chosen_logo_url_https':            '',
             'chosen_social_share_description':  '',
             'chosen_social_share_image_256x256_url_https': '',
-            'chosen_social_share_master_url_https': '',
+            'chosen_social_share_master_image_url_https': '',
             'chosen_sub_domain_string':         '',
             'chosen_subscription_plan':         '',
             'subscription_plan_end_day_text':   '',

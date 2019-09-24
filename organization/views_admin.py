@@ -966,6 +966,7 @@ def organization_edit_account_process_view(request):
                 for feature_package in master_feature_package_list:
                     if feature_package.master_feature_package == chosen_feature_package:
                         organization_on_stage.chosen_feature_package = chosen_feature_package
+                        organization_on_stage.features_provided_bitmap = feature_package.features_provided_bitmap
 
             organization_on_stage.save()
             organization_id = organization_on_stage.id
