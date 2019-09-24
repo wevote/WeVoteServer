@@ -800,6 +800,53 @@ def donation_process_subscription_updated(event):
     return donation_process_subscription_deleted(event)
 
 
+def move_donation_info_to_another_organization(from_organization_we_vote_id, to_organization_we_vote_id):
+    status = "MOVE_DONATION_INFO_TO_ANOTHER_ORGANIZATION"
+    success = True
+
+    if not positive_value_exists(from_organization_we_vote_id) or not positive_value_exists(to_organization_we_vote_id):
+        status += "MISSING_ORGANIZATION_WE_VOTE_ID "
+        success = False
+
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'from_organization_we_vote_id': from_organization_we_vote_id,
+            'to_organization_we_vote_id':   to_organization_we_vote_id,
+        }
+        return results
+
+    if from_organization_we_vote_id == to_organization_we_vote_id:
+        status += "MOVE_DONATION_INFO-FROM_AND_TO_ORGANIZATION_WE_VOTE_IDS_IDENTICAL "
+        success = False
+
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'from_organization_we_vote_id': from_organization_we_vote_id,
+            'to_organization_we_vote_id':   to_organization_we_vote_id,
+        }
+        return results
+
+    # All we really need to do is find the donations that are associated with the "from" organization, and change their
+    # organization_we_vote_id to the "to" organization.
+    results = DonationManager.move_donation_journal_entries_from_organization_to_organization(
+        from_organization_we_vote_id, to_organization_we_vote_id)
+    status += results['status']
+
+    results = DonationManager.move_donation_plan_definition_entries_from_organization_to_organization(
+        from_organization_we_vote_id, to_organization_we_vote_id)
+    status += results['status']
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_organization_we_vote_id': from_organization_we_vote_id,
+        'to_organization_we_vote_id': to_organization_we_vote_id,
+    }
+    return results
+
+
 def move_donation_info_to_another_voter(from_voter, to_voter):
     """
     Within a session, if the voter donates before logging in, the donations will be created under a new unique
@@ -811,12 +858,12 @@ def move_donation_info_to_another_voter(from_voter, to_voter):
     :param to_voter:
     :return:
     """
-    status = "MOVE_DONATION_INFO "
-    success = False
+    status = "MOVE_DONATION_INFO_TO_ANOTHER_VOTER "
+    success = True
 
     if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
             or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
-        status = textwrap.shorten("MOVE_DONATION_INFO_MISSING_FROM_OR_TO_VOTER_ID " + status, width=255,
+        status += textwrap.shorten("MOVE_DONATION_INFO_MISSING_FROM_OR_TO_VOTER_ID " + status, width=255,
                                   placeholder="...")
 
         results = {
@@ -832,8 +879,22 @@ def move_donation_info_to_another_voter(from_voter, to_voter):
 
     # All we really need to do is find the donations that are associated with the "from" voter, and change their
     # voter_we_vote_id to the "to" voter.
-    results = DonationManager.move_donations_between_donors(from_voter, to_voter)
+    results = DonationManager.move_donation_journal_entries_from_voter_to_voter(from_voter, to_voter)
+    status += results['status']
 
+    donate_link_results = DonationManager.move_donate_link_to_voter_from_voter_to_voter(from_voter, to_voter)
+    status += donate_link_results['status']
+
+    donation_plan_results = \
+        DonationManager.move_donation_plan_definition_entries_from_voter_to_voter(from_voter, to_voter)
+    status += donation_plan_results['status']
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_voter': from_voter,
+        'to_voter': to_voter,
+    }
     return results
 
 
