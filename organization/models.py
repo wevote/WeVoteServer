@@ -1439,7 +1439,7 @@ class OrganizationManager(models.Manager):
             self, organization_id=False, organization_we_vote_id=False,
             chosen_favicon_url_https=False,
             chosen_logo_url_https=False,
-            chosen_social_share_master_url_https=False,
+            chosen_social_share_master_image_url_https=False,
             delete_chosen_favicon=False,
             delete_chosen_logo=False,
             delete_chosen_social_share_master_image=False):
@@ -1452,12 +1452,12 @@ class OrganizationManager(models.Manager):
         values_changed = False
         chosen_favicon_url_https = chosen_favicon_url_https.strip() if chosen_favicon_url_https else False
         chosen_logo_url_https = chosen_logo_url_https.strip() if chosen_logo_url_https else False
-        chosen_social_share_master_url_https = chosen_social_share_master_url_https.strip() \
-            if chosen_social_share_master_url_https else False
+        chosen_social_share_master_image_url_https = chosen_social_share_master_image_url_https.strip() \
+            if chosen_social_share_master_image_url_https else False
 
         if not positive_value_exists(chosen_favicon_url_https) \
                 and not positive_value_exists(chosen_logo_url_https) \
-                and not positive_value_exists(chosen_social_share_master_url_https) \
+                and not positive_value_exists(chosen_social_share_master_image_url_https) \
                 and not positive_value_exists(delete_chosen_favicon) \
                 and not positive_value_exists(delete_chosen_logo) \
                 and not positive_value_exists(delete_chosen_social_share_master_image):
@@ -1497,11 +1497,11 @@ class OrganizationManager(models.Manager):
             elif delete_chosen_logo:
                 organization.chosen_logo_url_https = None
                 values_changed = True
-            if chosen_social_share_master_url_https:
-                organization.chosen_social_share_master_url_https = str(chosen_social_share_master_url_https)
+            if chosen_social_share_master_image_url_https:
+                organization.chosen_social_share_master_image_url_https = str(chosen_social_share_master_image_url_https)
                 values_changed = True
             elif delete_chosen_social_share_master_image:
-                organization.chosen_social_share_master_url_https = None
+                organization.chosen_social_share_master_image_url_https = None
                 values_changed = True
             if values_changed:
                 organization.save()
@@ -2614,7 +2614,7 @@ class Organization(models.Model):
     chosen_organization_api_pass_code = models.TextField(null=True, blank=True)
     # Client configured text that will show in index.html
     chosen_social_share_description = models.TextField(null=True, blank=True)
-    chosen_social_share_master_url_https = models.URLField(
+    chosen_social_share_master_image_url_https = models.URLField(
         verbose_name='url of client social share master image', blank=True, null=True)
     chosen_social_share_image_256x256_url_https = models.URLField(
         verbose_name='url of client social share image', blank=True, null=True)

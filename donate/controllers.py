@@ -5,7 +5,7 @@
 
 from config.base import get_environment_variable
 from datetime import datetime, timezone
-from donate.models import DonationManager
+from donate.models import DonationManager, MasterFeaturePackage
 from organization.models import OrganizationManager
 from wevote_functions.functions import get_ip_from_headers, positive_value_exists
 from wevote_functions.admin import get_logger
@@ -528,10 +528,22 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
         organization_results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
         if organization_results['organization_found']:
             organization = organization_results['organization']
-            organization.chosen_feature_package = chosen_feature_package
-            organization.save()
-            status += "ORGANIZATION_FEATURE_PACKAGE_SAVED "
-            organization_saved = True
+            try:
+                master_feature_package_query = MasterFeaturePackage.objects.all()
+                master_feature_package_list = list(master_feature_package_query)
+                for feature_package in master_feature_package_list:
+                    if feature_package.master_feature_package == chosen_feature_package:
+                        organization.features_provided_bitmap = feature_package.features_provided_bitmap
+            except Exception as e:
+                status += "UNABLE_TO_UPDATE_FEATURES_PROVIDED_BITMAP: " + str(e) + " "
+            try:
+                organization.chosen_feature_package = chosen_feature_package
+                organization.save()
+                organization_saved = True
+                status += "ORGANIZATION_FEATURE_PACKAGE_SAVED "
+            except Exception as e:
+                organization_saved = False
+                status += "ORGANIZATION_FEATURE_PACKAGE_NOT_SAVED: " + str(e) + " "
 
     results = {
         'status': status,
@@ -1047,10 +1059,23 @@ def donation_subscription_cancellation_for_api(voter_we_vote_id, plan_type_enum=
     organization_results = organization_manager.retrieve_organization_from_we_vote_id(linked_organization_we_vote_id)
     if organization_results['organization_found']:
         organization = organization_results['organization']
-        organization.chosen_feature_package = 'FREE'
-        organization.save()
-        status += "ORGANIZATION_FEATURE_PACKAGE_SAVED "
-        organization_saved = True
+        chosen_feature_package = "FREE"
+        try:
+            master_feature_package_query = MasterFeaturePackage.objects.all()
+            master_feature_package_list = list(master_feature_package_query)
+            for feature_package in master_feature_package_list:
+                if feature_package.master_feature_package == chosen_feature_package:
+                    organization.features_provided_bitmap = feature_package.features_provided_bitmap
+        except Exception as e:
+            status += "UNABLE_TO_UPDATE_FEATURES_PROVIDED_BITMAP: " + str(e) + " "
+        try:
+            organization.chosen_feature_package = chosen_feature_package
+            organization.save()
+            organization_saved = True
+            status += "ORGANIZATION_FEATURE_PACKAGE_SAVED "
+        except Exception as e:
+            organization_saved = False
+            status += "ORGANIZATION_FEATURE_PACKAGE_NOT_SAVED: " + str(e) + " "
 
     json_returned = {
         'status':           status,
