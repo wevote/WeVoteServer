@@ -17,6 +17,7 @@
     <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Organizations</a> -
     <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Opinions/Positions</a> -
     <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
+    <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guide Possibilities</a> -
     <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
 </p>
 
@@ -52,7 +53,7 @@
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
 
-    {# Show elections which are either marquee or battleground #}
+    {# Show offices which are either marquee or battleground #}
     <label for="show_marquee_or_battleground_id">
       <input type="checkbox" name="show_marquee_or_battleground" id="show_marquee_or_battleground_id" value="1"
              {% if show_marquee_or_battleground %}checked{% endif %} /> Show Battleground Races

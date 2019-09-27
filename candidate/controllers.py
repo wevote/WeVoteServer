@@ -1532,6 +1532,115 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                         # Remove the http... from the candidate website
                         organization_website_stripped = extract_website_from_url(organization_website)
                         if organization_website_stripped not in \
+                                ('bit.ly',
+                                 'en.wikipedia.org',
+                                 'facebook.com',
+                                 'instagram.com',
+                                 'linkedin.com',
+                                 'nationbuilder.com',
+                                 'secure.actblue.com',
+                                 'tinyurl.com',
+                                 'twitter.com'):
+                            if organization_website_stripped in all_html_lower_case:
+                                organization_we_vote_ids_list.append(
+                                    one_ballot_item_dict['organization_we_vote_id'])
+                                endorsement_list_light_modified.append(one_ballot_item_dict)
+                                continue
+
+        except Exception as error_message:
+            status += "SCRAPE_ONE_LINE_ERROR: {error_message}".format(error_message=error_message)
+
+        success = True
+        status += "FINISHED_SCRAPING_PAGE "
+    except timeout:
+        status += "ENDORSEMENTS-WEB_PAGE_SCRAPE_TIMEOUT_ERROR "
+        success = False
+    except IOError as error_instance:
+        # Catch the error message coming back from urllib.request.urlopen and pass it in the status
+        error_message = error_instance
+        status += "SCRAPE_SOCIAL_IO_ERROR: {error_message}".format(error_message=error_message)
+        success = False
+    except Exception as error_instance:
+        error_message = error_instance
+        status += "SCRAPE_GENERAL_EXCEPTION_ERROR: {error_message}".format(error_message=error_message)
+        success = False
+
+    at_least_one_endorsement_found = positive_value_exists(len(organization_we_vote_ids_list)) \
+        or positive_value_exists(len(measure_we_vote_ids_list))
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'at_least_one_endorsement_found':   at_least_one_endorsement_found,
+        'page_redirected':                  False,
+        'endorsement_list_light':           endorsement_list_light_modified,
+    }
+    return results
+
+
+def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_list_light):
+    organization_we_vote_ids_list = []
+    endorsement_list_light_modified = []
+    measure_we_vote_ids_list = []
+    status = ""
+    success = False
+    if len(site_url) < 10:
+        status += 'FIND_ENDORSEMENTS_ON_CANDIDATE_PAGE-PROPER_URL_NOT_PROVIDED: ' + site_url
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'at_least_one_endorsement_found':   False,
+            'page_redirected':                  False,
+            'endorsement_list_light':           endorsement_list_light_modified,
+        }
+        return results
+
+    urllib._urlopener = FakeFirefoxURLopener()
+    headers = {
+        'User-Agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+           }
+    # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    # 'Accept-Encoding': 'none',
+    # 'Accept-Language': 'en-US,en;q=0.8',
+    # 'Connection': 'keep-alive'
+    # 'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+    try:
+        request = urllib.request.Request(site_url, None, headers)
+        page = urllib.request.urlopen(request, timeout=5)
+        all_html_raw = page.read()
+        all_html = all_html_raw.decode("utf8")
+        page.close()
+        try:
+            all_html_lower_case = all_html.lower()
+            for one_ballot_item_dict in endorsement_list_light:
+                # Add empty candidate_we_vote_id
+                one_ballot_item_dict['candidate_we_vote_id'] = ""
+                if positive_value_exists(one_ballot_item_dict['organization_we_vote_id']) \
+                        and one_ballot_item_dict['organization_we_vote_id'] \
+                        not in organization_we_vote_ids_list:
+                    if positive_value_exists(one_ballot_item_dict['organization_name']):
+                        if one_ballot_item_dict['organization_name'].lower() in all_html_lower_case:
+                            organization_we_vote_ids_list.append(one_ballot_item_dict['organization_we_vote_id'])
+                            endorsement_list_light_modified.append(one_ballot_item_dict)
+                            continue
+                        elif 'alternate_names' in one_ballot_item_dict:
+                            alternate_name_found = False
+                            alternate_names = one_ballot_item_dict['alternate_names']
+                            for organization_name_alternate in alternate_names:
+                                if organization_name_alternate.lower() in all_html_lower_case:
+                                    organization_we_vote_ids_list.append(
+                                        one_ballot_item_dict['organization_we_vote_id'])
+                                    endorsement_list_light_modified.append(one_ballot_item_dict)
+                                    alternate_name_found = True
+                                    break
+                            if alternate_name_found:
+                                continue
+                    if 'organization_website' in one_ballot_item_dict and \
+                            positive_value_exists(one_ballot_item_dict['organization_website']):
+                        organization_website = one_ballot_item_dict['organization_website'].lower()
+                        # Remove the http... from the candidate website
+                        organization_website_stripped = extract_website_from_url(organization_website)
+                        if organization_website_stripped not in \
                                 ('en.wikipedia.org',
                                  'facebook.com',
                                  'instagram.com',
@@ -1576,11 +1685,10 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
 
 
 def find_organization_endorsements_of_candidates_on_one_web_page(site_url, endorsement_list_light):
-    candidate_we_vote_ids_list = []
-    endorsement_list_light_modified = []
-    measure_we_vote_ids_list = []
     status = ""
     success = False
+    at_least_one_endorsement_found = False
+    endorsement_list_light_modified = []
     if len(site_url) < 10:
         status = 'FIND_ENDORSEMENTS-PROPER_URL_NOT_PROVIDED: ' + site_url
         results = {
@@ -1608,58 +1716,160 @@ def find_organization_endorsements_of_candidates_on_one_web_page(site_url, endor
         all_html_raw = page.read()
         all_html = all_html_raw.decode("utf8")
         page.close()
-        try:
-            all_html_lower_case = all_html.lower()
-            for one_ballot_item_dict in endorsement_list_light:
-                # Add empty organization_we_vote_id
-                one_ballot_item_dict['organization_we_vote_id'] = ""
-                # Hanging off each ballot_item_dict is a alternate_names that includes
-                #  shortened alternative names that we should check against all_html_lower_case
-                if positive_value_exists(one_ballot_item_dict['measure_we_vote_id']) \
-                        and one_ballot_item_dict['measure_we_vote_id'] not in measure_we_vote_ids_list:
-                    alternate_names = one_ballot_item_dict['alternate_names']
-                    for ballot_item_display_name_alternate in alternate_names:
-                        if ballot_item_display_name_alternate in all_html_lower_case:
-                            measure_we_vote_ids_list.append(one_ballot_item_dict['measure_we_vote_id'])
-                            endorsement_list_light_modified.append(one_ballot_item_dict)
-                            continue
-                elif positive_value_exists(one_ballot_item_dict['candidate_we_vote_id']) \
-                        and one_ballot_item_dict['candidate_we_vote_id'] not in candidate_we_vote_ids_list:
-                    if positive_value_exists(one_ballot_item_dict['ballot_item_display_name']) and \
-                            one_ballot_item_dict['ballot_item_display_name'].lower() in all_html_lower_case:
-                        candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
+        all_html_lower_case = all_html.lower()
+        scan_results = organization_endorsements_scanner(endorsement_list_light, all_html_lower_case)
+        status += scan_results['status']
+        success = scan_results['success']
+        endorsement_list_light_modified = scan_results['endorsement_list_light']
+        # at_least_one_endorsement_found = scan_results['at_least_one_endorsement_found']
+
+        status += "FINISHED_SCRAPING_PAGE "
+    except timeout:
+        status += "ENDORSEMENTS-WEB_PAGE_SCRAPE_TIMEOUT_ERROR "
+        success = False
+    except IOError as error_instance:
+        # Catch the error message coming back from urllib.request.urlopen and pass it in the status
+        error_message = error_instance
+        status += "SCRAPE_SOCIAL_IO_ERROR: {error_message}".format(error_message=error_message)
+        success = False
+    except Exception as error_instance:
+        error_message = error_instance
+        status += "SCRAPE_GENERAL_EXCEPTION_ERROR: {error_message}".format(error_message=error_message)
+        success = False
+
+    reorder_results = reorder_endorsement_list_to_match_candidates_on_one_web_page(
+        site_url, endorsement_list_light_modified)
+    if reorder_results['success']:
+        endorsement_list_light_modified = reorder_results['endorsement_list_light']
+        at_least_one_endorsement_found = reorder_results['at_least_one_endorsement_found']
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'at_least_one_endorsement_found':   at_least_one_endorsement_found,
+        'page_redirected':                  False,
+        'endorsement_list_light':           endorsement_list_light_modified,
+    }
+    return results
+
+
+def organization_endorsements_scanner(endorsement_list_light, text_to_search_lower_case,
+                                      candidate_we_vote_ids_list=[], measure_we_vote_ids_list=[]):
+    """
+    Take the list of candidates and measures (in endorsement_list_light) and search the text_to_search_lower_case
+    provided. Return the ones found.
+    :param endorsement_list_light:
+    :param text_to_search_lower_case:
+    :param candidate_we_vote_ids_list:
+    :param measure_we_vote_ids_list:
+    :return:
+    """
+    endorsement_list_light_modified = []
+    status = ""
+    success = True
+    try:
+        for one_ballot_item_dict in endorsement_list_light:
+            # Add empty organization_we_vote_id
+            one_ballot_item_dict['organization_we_vote_id'] = ""
+            # Hanging off each ballot_item_dict is a alternate_names that includes
+            #  shortened alternative names that we should check against all_html_lower_case
+            if positive_value_exists(one_ballot_item_dict['measure_we_vote_id']) \
+                    and one_ballot_item_dict['measure_we_vote_id'] not in measure_we_vote_ids_list:
+                alternate_names = one_ballot_item_dict['alternate_names']
+                for ballot_item_display_name_alternate in alternate_names:
+                    if ballot_item_display_name_alternate in text_to_search_lower_case:
+                        measure_we_vote_ids_list.append(one_ballot_item_dict['measure_we_vote_id'])
                         endorsement_list_light_modified.append(one_ballot_item_dict)
                         continue
-                    if 'ballot_item_website' in one_ballot_item_dict and \
-                            positive_value_exists(one_ballot_item_dict['ballot_item_website']):
-                        ballot_item_website = one_ballot_item_dict['ballot_item_website'].lower()
-                        # Remove the http... from the candidate website
-                        ballot_item_website_stripped = extract_website_from_url(ballot_item_website)
-                        if ballot_item_website_stripped not in \
-                                ('en.wikipedia.org',
-                                 'facebook.com',
-                                 'instagram.com',
-                                 'linkedin.com',
-                                 'nationbuilder.com',
-                                 'secure.actblue.com',
-                                 'twitter.com'):
-                            if ballot_item_website_stripped in all_html_lower_case:
-                                candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
-                                endorsement_list_light_modified.append(one_ballot_item_dict)
-                                continue
-                    if one_ballot_item_dict['alternate_names']:
-                        alternate_name_found = False
-                        for ballot_item_display_name_alternate in one_ballot_item_dict['alternate_names']:
-                            if ballot_item_display_name_alternate.lower() in all_html_lower_case:
-                                candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
-                                endorsement_list_light_modified.append(one_ballot_item_dict)
-                                alternate_name_found = True
-                                break
-                        if alternate_name_found:
+            elif positive_value_exists(one_ballot_item_dict['candidate_we_vote_id']) \
+                    and one_ballot_item_dict['candidate_we_vote_id'] not in candidate_we_vote_ids_list:
+                if positive_value_exists(one_ballot_item_dict['ballot_item_display_name']) and \
+                        one_ballot_item_dict['ballot_item_display_name'].lower() in text_to_search_lower_case:
+                    candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
+                    endorsement_list_light_modified.append(one_ballot_item_dict)
+                    continue
+                if 'ballot_item_website' in one_ballot_item_dict and \
+                        positive_value_exists(one_ballot_item_dict['ballot_item_website']):
+                    ballot_item_website = one_ballot_item_dict['ballot_item_website'].lower()
+                    # Remove the http... from the candidate website
+                    ballot_item_website_stripped = extract_website_from_url(ballot_item_website)
+                    if ballot_item_website_stripped not in \
+                            ('bit.ly',
+                             'en.wikipedia.org',
+                             'facebook.com',
+                             'instagram.com',
+                             'linkedin.com',
+                             'nationbuilder.com',
+                             'secure.actblue.com',
+                             'tinyurl.com',
+                             'twitter.com'):
+                        if ballot_item_website_stripped in text_to_search_lower_case:
+                            candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
+                            endorsement_list_light_modified.append(one_ballot_item_dict)
                             continue
+                if one_ballot_item_dict['alternate_names']:
+                    alternate_name_found = False
+                    for ballot_item_display_name_alternate in one_ballot_item_dict['alternate_names']:
+                        if ballot_item_display_name_alternate.lower() in text_to_search_lower_case:
+                            candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
+                            endorsement_list_light_modified.append(one_ballot_item_dict)
+                            alternate_name_found = True
+                            break
+                    if alternate_name_found:
+                        continue
+            else:
+                testing = 1
+    except Exception as error_message:
+        status += "SCRAPE_ONE_LINE_ERROR: {error_message}".format(error_message=error_message)
 
-        except Exception as error_message:
-            status += "SCRAPE_ONE_LINE_ERROR: {error_message}".format(error_message=error_message)
+    at_least_one_endorsement_found = positive_value_exists(len(candidate_we_vote_ids_list)) \
+        or positive_value_exists(len(measure_we_vote_ids_list))
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'at_least_one_endorsement_found':   at_least_one_endorsement_found,
+        'page_redirected':                  False,
+        'endorsement_list_light':           endorsement_list_light_modified,
+        'candidate_we_vote_ids_list':       candidate_we_vote_ids_list,
+        'measure_we_vote_ids_list':         measure_we_vote_ids_list,
+    }
+    return results
+
+
+def reorder_endorsement_list_to_match_candidates_on_one_web_page(site_url, endorsement_list_light):
+    candidate_we_vote_ids_list = []
+    endorsement_list_light_modified = []
+    measure_we_vote_ids_list = []
+    status = ""
+    success = False
+
+    urllib._urlopener = FakeFirefoxURLopener()
+    headers = {
+        'User-Agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+           }
+    try:
+        request = urllib.request.Request(site_url, None, headers)
+        page = urllib.request.urlopen(request, timeout=5)
+        all_lines = page.readlines()
+        page.close()
+        for one_line in all_lines:
+            one_line_decoded = one_line.decode()
+            try:
+                one_line_decoded_lower_case = one_line_decoded.lower()
+                scan_results = organization_endorsements_scanner(
+                    endorsement_list_light, one_line_decoded_lower_case,
+                    candidate_we_vote_ids_list=candidate_we_vote_ids_list,
+                    measure_we_vote_ids_list=measure_we_vote_ids_list)
+                status += scan_results['status']
+                endorsement_list_light_new_segment = scan_results['endorsement_list_light']
+                endorsement_list_light_modified += endorsement_list_light_new_segment
+                candidate_we_vote_ids_list = scan_results['candidate_we_vote_ids_list']
+                measure_we_vote_ids_list = scan_results['measure_we_vote_ids_list']
+
+            except Exception as error_message:
+                status += "SCRAPE_ONE_LINE_ERROR: {error_message}".format(error_message=error_message)
 
         success = True
         status += "FINISHED_SCRAPING_PAGE "

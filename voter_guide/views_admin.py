@@ -1875,15 +1875,41 @@ def voter_guide_list_view(request):
     else:
         limit_number = 75
 
-    # voter_guide_list_object = VoterGuideListManager()
-    # results = voter_guide_list_object.retrieve_all_voter_guides_order_by(
-    #     order_by, limit_number, voter_guide_search, google_civic_election_id, show_individuals)
+    google_civic_election_id_list = []
+    election_manager = ElectionManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+
+        # Make sure we always include the current election in the election_list, even if it is older
+        if positive_value_exists(google_civic_election_id):
+            this_election_found = False
+            for one_election in election_list:
+                if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                    this_election_found = True
+                    break
+            if not this_election_found:
+                results = election_manager.retrieve_election(google_civic_election_id)
+                if results['election_found']:
+                    one_election = results['election']
+                    election_list.append(one_election)
+        # Limit this search to upcoming_elections only
+        for one_election in election_list:
+            google_civic_election_id_list.append(one_election.google_civic_election_id)
 
     voter_guide_query = VoterGuide.objects.all()
     voter_guide_query = voter_guide_query.order_by(order_by)
     voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
     if positive_value_exists(google_civic_election_id):
         voter_guide_query = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
+    elif positive_value_exists(show_all_elections):
+        pass
+    else:
+        voter_guide_query = voter_guide_query.filter(google_civic_election_id__in=google_civic_election_id_list)
+
     if not positive_value_exists(show_individuals):
         voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
 
@@ -1961,27 +1987,6 @@ def voter_guide_list_view(request):
         one_voter_guide.issue_list = issue_list_manager.fetch_organization_issue_list(
             one_voter_guide.organization_we_vote_id)
         modified_voter_guide_list.append(one_voter_guide)
-
-    election_manager = ElectionManager()
-    if positive_value_exists(show_all_elections):
-        results = election_manager.retrieve_elections()
-        election_list = results['election_list']
-    else:
-        results = election_manager.retrieve_upcoming_elections()
-        election_list = results['election_list']
-
-        # Make sure we always include the current election in the election_list, even if it is older
-        if positive_value_exists(google_civic_election_id):
-            this_election_found = False
-            for one_election in election_list:
-                if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
-                    this_election_found = True
-                    break
-            if not this_election_found:
-                results = election_manager.retrieve_election(google_civic_election_id)
-                if results['election_found']:
-                    one_election = results['election']
-                    election_list.append(one_election)
 
     messages.add_message(request, messages.INFO, 'We found {voter_guides_count} existing voter guides. '
                                                  ''.format(voter_guides_count=voter_guides_count))

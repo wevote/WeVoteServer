@@ -214,6 +214,7 @@ def candidate_list_view(request):
     page = convert_to_int(request.GET.get('page', 0))
     page = page if positive_value_exists(page) else 0  # Prevent negative pages
     show_election_statistics = request.GET.get('show_election_statistics', False)
+    show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
     # Remove "&page=" and everything after
     if "&page=" in current_page_url:
         location_of_page_variable = current_page_url.find("&page=")
@@ -265,13 +266,65 @@ def candidate_list_view(request):
     candidate_list_count = 0
     candidate_count_start = 0
 
+    election_manager = ElectionManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+
+    battleground_office_we_vote_ids = []
+    if positive_value_exists(show_marquee_or_battleground):
+        # If we are trying to highlight all of the candidates that are in battleground races,
+        # collect the office_we_vote_id's
+        try:
+            office_queryset = ContestOffice.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
+            elif positive_value_exists(show_all_elections):
+                # Return offices from all elections
+                pass
+            else:
+                # Limit this search to upcoming_elections only
+                google_civic_election_id_list = []
+                for one_election in election_list:
+                    google_civic_election_id_list.append(one_election.google_civic_election_id)
+                office_queryset = office_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+            if positive_value_exists(state_code):
+                office_queryset = office_queryset.filter(state_code__iexact=state_code)
+            if positive_value_exists(show_marquee_or_battleground):
+                office_queryset = office_queryset.filter(Q(ballotpedia_is_marquee=True) | Q(is_battleground_race=True))
+            office_queryset = office_queryset.order_by("office_name")
+            office_list_count = office_queryset.count()
+            office_list = list(office_queryset)
+
+            if len(office_list):
+                battleground_office_we_vote_ids = []
+                for one_office in office_list:
+                    battleground_office_we_vote_ids.append(one_office.we_vote_id)
+        except ContestOffice.DoesNotExist:
+            # No offices found. Not a problem.
+            office_list_count = 0
+        except Exception as e:
+            office_list_count = 0
     try:
         candidate_list = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id):
             candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+        elif positive_value_exists(show_all_elections):
+            # Return candidates from all elections
+            pass
+        else:
+            # Limit this search to upcoming_elections only
+            google_civic_election_id_list = []
+            for one_election in election_list:
+                google_civic_election_id_list.append(one_election.google_civic_election_id)
+            candidate_list = candidate_list.filter(google_civic_election_id__in=google_civic_election_id_list)
         if positive_value_exists(state_code):
             candidate_list = candidate_list.filter(state_code__iexact=state_code)
-
+        if positive_value_exists(show_marquee_or_battleground):
+            candidate_list = candidate_list.filter(contest_office_we_vote_id__in=battleground_office_we_vote_ids)
         if positive_value_exists(candidate_search):
             search_words = candidate_search.split()
             for one_word in search_words:
@@ -361,14 +414,6 @@ def candidate_list_view(request):
     messages.add_message(request, messages.INFO, status_print_list)
 
     messages_on_stage = get_messages(request)
-
-    election_manager = ElectionManager()
-    if positive_value_exists(show_all_elections):
-        results = election_manager.retrieve_elections()
-        election_list = results['election_list']
-    else:
-        results = election_manager.retrieve_upcoming_elections()
-        election_list = results['election_list']
 
     # Provide this election to the template so we can show election statistics
     election = None
@@ -538,6 +583,7 @@ def candidate_list_view(request):
         'review_mode':              review_mode,
         'show_all_elections':       show_all_elections,
         'show_election_statistics': show_election_statistics,
+        'show_marquee_or_battleground': show_marquee_or_battleground,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
         'total_twitter_handles':    total_twitter_handles,
