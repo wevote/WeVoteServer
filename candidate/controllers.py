@@ -1498,41 +1498,55 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
     try:
         request = urllib.request.Request(site_url, None, headers)
         page = urllib.request.urlopen(request, timeout=5)
-        for line in page.readlines():
-            try:
-                decoded_line = line.decode()
-                if len(decoded_line) >= 10:  # Only proceed if the line is longer than 10 characters
-                    decoded_line_lower_case = decoded_line.lower()
-                    for one_ballot_item_dict in endorsement_list_light:
-                        # Add empty candidate_we_vote_id
-                        one_ballot_item_dict['candidate_we_vote_id'] = ""
-                        if positive_value_exists(one_ballot_item_dict['organization_we_vote_id']) \
-                                and one_ballot_item_dict['organization_we_vote_id'] \
-                                not in organization_we_vote_ids_list:
-                            if positive_value_exists(one_ballot_item_dict['organization_name']):
-                                if one_ballot_item_dict['organization_name'].lower() in decoded_line_lower_case:
-                                    organization_we_vote_ids_list.append(one_ballot_item_dict['organization_we_vote_id'])
-                                    endorsement_list_light_modified.append(one_ballot_item_dict)
-                                elif 'alternate_names' in one_ballot_item_dict:
-                                    alternate_names = one_ballot_item_dict['alternate_names']
-                                    for organization_name_alternate in alternate_names:
-                                        if organization_name_alternate.lower() in decoded_line_lower_case:
-                                            organization_we_vote_ids_list.append(
-                                                one_ballot_item_dict['organization_we_vote_id'])
-                                            endorsement_list_light_modified.append(one_ballot_item_dict)
-                                            break
-                            elif 'organization_website' in one_ballot_item_dict and \
-                                    positive_value_exists(one_ballot_item_dict['organization_website']):
-                                organization_website = one_ballot_item_dict['organization_website'].lower()
-                                # Remove the http... from the candidate website
-                                organization_website_stripped = extract_website_from_url(organization_website)
-                                if organization_website_stripped in decoded_line_lower_case:
+        all_html_raw = page.read()
+        all_html = all_html_raw.decode("utf8")
+        page.close()
+        try:
+            all_html_lower_case = all_html.lower()
+            for one_ballot_item_dict in endorsement_list_light:
+                # Add empty candidate_we_vote_id
+                one_ballot_item_dict['candidate_we_vote_id'] = ""
+                if positive_value_exists(one_ballot_item_dict['organization_we_vote_id']) \
+                        and one_ballot_item_dict['organization_we_vote_id'] \
+                        not in organization_we_vote_ids_list:
+                    if positive_value_exists(one_ballot_item_dict['organization_name']):
+                        if one_ballot_item_dict['organization_name'].lower() in all_html_lower_case:
+                            organization_we_vote_ids_list.append(one_ballot_item_dict['organization_we_vote_id'])
+                            endorsement_list_light_modified.append(one_ballot_item_dict)
+                            continue
+                        elif 'alternate_names' in one_ballot_item_dict:
+                            alternate_name_found = False
+                            alternate_names = one_ballot_item_dict['alternate_names']
+                            for organization_name_alternate in alternate_names:
+                                if organization_name_alternate.lower() in all_html_lower_case:
                                     organization_we_vote_ids_list.append(
                                         one_ballot_item_dict['organization_we_vote_id'])
                                     endorsement_list_light_modified.append(one_ballot_item_dict)
+                                    alternate_name_found = True
+                                    break
+                            if alternate_name_found:
+                                continue
+                    if 'organization_website' in one_ballot_item_dict and \
+                            positive_value_exists(one_ballot_item_dict['organization_website']):
+                        organization_website = one_ballot_item_dict['organization_website'].lower()
+                        # Remove the http... from the candidate website
+                        organization_website_stripped = extract_website_from_url(organization_website)
+                        if organization_website_stripped not in \
+                                ('en.wikipedia.org',
+                                 'facebook.com',
+                                 'instagram.com',
+                                 'linkedin.com',
+                                 'nationbuilder.com',
+                                 'secure.actblue.com',
+                                 'twitter.com'):
+                            if organization_website_stripped in all_html_lower_case:
+                                organization_we_vote_ids_list.append(
+                                    one_ballot_item_dict['organization_we_vote_id'])
+                                endorsement_list_light_modified.append(one_ballot_item_dict)
+                                continue
 
-            except Exception as error_message:
-                status += "SCRAPE_ONE_LINE_ERROR: {error_message}".format(error_message=error_message)
+        except Exception as error_message:
+            status += "SCRAPE_ONE_LINE_ERROR: {error_message}".format(error_message=error_message)
 
         success = True
         status += "FINISHED_SCRAPING_PAGE "
@@ -1591,40 +1605,61 @@ def find_organization_endorsements_of_candidates_on_one_web_page(site_url, endor
     try:
         request = urllib.request.Request(site_url, None, headers)
         page = urllib.request.urlopen(request, timeout=5)
-        for line in page.readlines():
-            try:
-                decoded_line = line.decode()
-                if len(decoded_line) >= 10:  # Only proceed if the line is longer than 10 characters
-                    decoded_line_lower_case = decoded_line.lower()
-                    for one_ballot_item_dict in endorsement_list_light:
-                        # Add empty organization_we_vote_id
-                        one_ballot_item_dict['organization_we_vote_id'] = ""
-                        # Hanging off each ballot_item_dict is a alternate_names that includes
-                        #  shortened alternative names that we should check against decoded_line_lower_case
-                        if positive_value_exists(one_ballot_item_dict['measure_we_vote_id']) \
-                                and one_ballot_item_dict['measure_we_vote_id'] not in measure_we_vote_ids_list:
-                            alternate_names = one_ballot_item_dict['alternate_names']
-                            for ballot_item_display_name_alternate in alternate_names:
-                                if ballot_item_display_name_alternate in decoded_line_lower_case:
-                                    measure_we_vote_ids_list.append(one_ballot_item_dict['measure_we_vote_id'])
-                                    endorsement_list_light_modified.append(one_ballot_item_dict)
-                        elif positive_value_exists(one_ballot_item_dict['candidate_we_vote_id']) \
-                                and one_ballot_item_dict['candidate_we_vote_id'] not in candidate_we_vote_ids_list:
-                            if positive_value_exists(one_ballot_item_dict['ballot_item_display_name']) and \
-                                    one_ballot_item_dict['ballot_item_display_name'].lower() in decoded_line_lower_case:
+        all_html_raw = page.read()
+        all_html = all_html_raw.decode("utf8")
+        page.close()
+        try:
+            all_html_lower_case = all_html.lower()
+            for one_ballot_item_dict in endorsement_list_light:
+                # Add empty organization_we_vote_id
+                one_ballot_item_dict['organization_we_vote_id'] = ""
+                # Hanging off each ballot_item_dict is a alternate_names that includes
+                #  shortened alternative names that we should check against all_html_lower_case
+                if positive_value_exists(one_ballot_item_dict['measure_we_vote_id']) \
+                        and one_ballot_item_dict['measure_we_vote_id'] not in measure_we_vote_ids_list:
+                    alternate_names = one_ballot_item_dict['alternate_names']
+                    for ballot_item_display_name_alternate in alternate_names:
+                        if ballot_item_display_name_alternate in all_html_lower_case:
+                            measure_we_vote_ids_list.append(one_ballot_item_dict['measure_we_vote_id'])
+                            endorsement_list_light_modified.append(one_ballot_item_dict)
+                            continue
+                elif positive_value_exists(one_ballot_item_dict['candidate_we_vote_id']) \
+                        and one_ballot_item_dict['candidate_we_vote_id'] not in candidate_we_vote_ids_list:
+                    if positive_value_exists(one_ballot_item_dict['ballot_item_display_name']) and \
+                            one_ballot_item_dict['ballot_item_display_name'].lower() in all_html_lower_case:
+                        candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
+                        endorsement_list_light_modified.append(one_ballot_item_dict)
+                        continue
+                    if 'ballot_item_website' in one_ballot_item_dict and \
+                            positive_value_exists(one_ballot_item_dict['ballot_item_website']):
+                        ballot_item_website = one_ballot_item_dict['ballot_item_website'].lower()
+                        # Remove the http... from the candidate website
+                        ballot_item_website_stripped = extract_website_from_url(ballot_item_website)
+                        if ballot_item_website_stripped not in \
+                                ('en.wikipedia.org',
+                                 'facebook.com',
+                                 'instagram.com',
+                                 'linkedin.com',
+                                 'nationbuilder.com',
+                                 'secure.actblue.com',
+                                 'twitter.com'):
+                            if ballot_item_website_stripped in all_html_lower_case:
                                 candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
                                 endorsement_list_light_modified.append(one_ballot_item_dict)
-                            elif 'ballot_item_website' in one_ballot_item_dict and \
-                                    positive_value_exists(one_ballot_item_dict['ballot_item_website']):
-                                ballot_item_website = one_ballot_item_dict['ballot_item_website'].lower()
-                                # Remove the http... from the candidate website
-                                ballot_item_website_stripped = extract_website_from_url(ballot_item_website)
-                                if ballot_item_website_stripped in decoded_line_lower_case:
-                                    candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
-                                    endorsement_list_light_modified.append(one_ballot_item_dict)
+                                continue
+                    if one_ballot_item_dict['alternate_names']:
+                        alternate_name_found = False
+                        for ballot_item_display_name_alternate in one_ballot_item_dict['alternate_names']:
+                            if ballot_item_display_name_alternate.lower() in all_html_lower_case:
+                                candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
+                                endorsement_list_light_modified.append(one_ballot_item_dict)
+                                alternate_name_found = True
+                                break
+                        if alternate_name_found:
+                            continue
 
-            except Exception as error_message:
-                status += "SCRAPE_ONE_LINE_ERROR: {error_message}".format(error_message=error_message)
+        except Exception as error_message:
+            status += "SCRAPE_ONE_LINE_ERROR: {error_message}".format(error_message=error_message)
 
         success = True
         status += "FINISHED_SCRAPING_PAGE "
