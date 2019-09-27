@@ -5,11 +5,11 @@
         <tr>
             <th></th>
             <th>Organization/Candidate</th>
-            <th></th>
-            <th>Voter Guide Source</th>
-            <th>Actions / Notes</th>
+            <th>Source</th>
             <th>Ballot Items</th>
-            <th>Submitted Time (PT)</th>
+            <th>View</th>
+            <th>Import</th>
+            <th>Date Submitted (PT)</th>
             <th>Select</th>
         </tr>
         </thead>
@@ -20,14 +20,11 @@
             {% if voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES or voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE %}
                 {% if voter_guide_possibility.organization %}
                     {% if voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny %}
-                    <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                       target="_blank">
-                        <img src="{{ voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny }}" width="24px" /></a>{% endif %}
-                    <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                       target="_blank">
+                        <img src="{{ voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny }}" width="24px" />
+                    {% endif %}
                     {% if voter_guide_possibility.organization.organization_name %}
-                        {{ voter_guide_possibility.organization.organization_name }}
-                    {% else %}(name missing){% endif %}</a>
+                      <strong>{{ voter_guide_possibility.organization.organization_name }}</strong>
+                    {% else %}(name missing){% endif %}
                 {% else %}
                     {% if voter_guide_possibility.organization_name %}
                       {{ voter_guide_possibility.organization_name|default_if_none:"" }}
@@ -36,14 +33,15 @@
                     {% endif %}
                 {% endif %}
                 {% if voter_guide_possibility.organization_twitter_handle %}
-                    <br />
                     <span>
+                        &nbsp;
                         <a href="https://twitter.com/{{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}"
                            class="u-no-break"
                            target="_blank">
-                        <i class="fa fa-twitter"></i> {{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}
+                        <i class="fa fa-twitter"></i>
                         <span class="glyphicon glyphicon-new-window"></span>
                         </a>
+                        &nbsp;
                     </span>
                 {% endif %}
             {% elif voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE %}
@@ -78,12 +76,6 @@
             {% endif %}
             </td>
             <td>
-                <a href="{% url 'voter_guide:voter_guide_create' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
-                   class="btn btn-success btn-sm"
-                   role="button"
-                   target="_blank">edit</a>
-            </td>
-            <td>
                 {% include "voter_guide/voter_guide_dynamically_prefix_link_protocol.html" with link=voter_guide_possibility.voter_guide_possibility_url text=voter_guide_possibility.voter_guide_possibility_url|truncatechars:60 count=forloop.counter only %}
                 {% if voter_guide_possibility.contributor_comments or voter_guide_possibility.contributor_email %}
                   <br />
@@ -108,7 +100,24 @@
                   <span class="glyphicon glyphicon-new-window"></span>
                 </a>
                 {% endif %}
-           </td>
+            </td>
+            <td>
+              {% if voter_guide_possibility.number_of_ballot_items %}
+                  {{ voter_guide_possibility.number_of_ballot_items|default_if_none:"" }} total<br />
+              {% endif %}
+              {% if voter_guide_possibility.number_of_ballot_items_not_matched %}
+                  <span class="u-no-break" style="color: red"> ({{ voter_guide_possibility.number_of_ballot_items_not_matched }} not matched)</span>
+              {% endif %}
+              {% if voter_guide_possibility.number_of_endorsements_with_position %}
+                  <span class="u-no-break" style="color: green"> ({{ voter_guide_possibility.number_of_endorsements_with_position }} stored)</span>
+              {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'voter_guide:voter_guide_create' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
+                   class="btn btn-success btn-sm"
+                   role="button"
+                   target="_blank">VIEW DETAILS <span class="glyphicon glyphicon-new-window"></span></a>
+            </td>
             <td>
                 {% if voter_guide_possibility.ignore_this_source %}
                 <strong>Ignore this Source</strong>
@@ -130,14 +139,14 @@
                 <a href="{% url 'voter_guide:generate_voter_guide_possibility_batch' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
                    class="btn btn-success btn-sm"
                    role="button"
-                   target="_blank">Import Positions</a>
+                   target="_blank">IMPORT POSITIONS <span class="glyphicon glyphicon-new-window"></span></a>
                 {% endif %}
                 {% if voter_guide_possibility.batch_header_id %}
                 <br />
                 <a href="{% url 'import_export_batches:batch_action_list' %}?batch_header_id={{ voter_guide_possibility.batch_header_id }}&kind_of_batch=POSITION"
                    class="u-no-break"
                    target="_blank">
-                  import batch results <span class="glyphicon glyphicon-new-window"></span>
+                  import results <span class="glyphicon glyphicon-new-window"></span>
                 </a>
                 {% endif %}
                 {% if voter_guide_possibility.positions_ready_to_save_as_batch and voter_guide_possibility.internal_notes %}
@@ -150,23 +159,12 @@
                 {% endif %}
             </td>
             <td>
-              {% if voter_guide_possibility.number_of_ballot_items %}
-                  {{ voter_guide_possibility.number_of_ballot_items|default_if_none:"" }} total<br />
-              {% endif %}
-              {% if voter_guide_possibility.number_of_ballot_items_not_matched %}
-                  <span class="u-no-break" style="color: red"> ({{ voter_guide_possibility.number_of_ballot_items_not_matched }} not matched)</span>
-              {% endif %}
-              {% if voter_guide_possibility.number_of_endorsements_with_position %}
-                  <span class="u-no-break" style="color: green"> ({{ voter_guide_possibility.number_of_endorsements_with_position }} with position)</span>
-              {% endif %}
-            </td>
-            <td>
               <span class="u-no-break">{{ voter_guide_possibility.date_last_changed|default_if_none:"" }}</span>
-              {% if voter_guide_possibility.voter_who_submitted_we_vote_id %}
+              {% if voter_guide_possibility.voter_who_submitted_we_vote_id and voter_guide_possibility.voter_who_submitted_name %}
                   <br />
                   <a href="{% url 'voter:voter_edit_we_vote_id' voter_guide_possibility.voter_who_submitted_we_vote_id %}"
                      target="_blank">
-                    from {{ voter_guide_possibility.voter_who_submitted_name|default_if_none:"" }}</a>
+                    by <strong>{{ voter_guide_possibility.voter_who_submitted_name|default_if_none:"" }}</strong></a>
               {% endif %}
             </td>
             <td>

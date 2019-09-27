@@ -174,13 +174,28 @@ def office_list_view(request):
     office_list = []
     updated_office_list = []
     office_list_count = 0
+
+    election_manager = ElectionManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+
     try:
         office_queryset = ContestOffice.objects.all()
         if positive_value_exists(google_civic_election_id):
             office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
-        else:
-            # TODO Limit this search to upcoming_elections only
+        elif positive_value_exists(show_all_elections):
+            # Return offices from all elections
             pass
+        else:
+            # Limit this search to upcoming_elections only
+            google_civic_election_id_list = []
+            for one_election in election_list:
+                google_civic_election_id_list.append(one_election.google_civic_election_id)
+            office_queryset = office_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
         if positive_value_exists(state_code):
             office_queryset = office_queryset.filter(state_code__iexact=state_code)
         if positive_value_exists(show_marquee_or_battleground):
@@ -244,14 +259,6 @@ def office_list_view(request):
 
             updated_office_list.append(office)
 
-    election_manager = ElectionManager()
-    if positive_value_exists(show_all_elections):
-        results = election_manager.retrieve_elections()
-        election_list = results['election_list']
-    else:
-        results = election_manager.retrieve_upcoming_elections()
-        election_list = results['election_list']
-
     # Make sure we always include the current election in the election_list, even if it is older
     if positive_value_exists(google_civic_election_id):
         this_election_found = False
@@ -299,9 +306,6 @@ def office_list_view(request):
         'google_civic_election_id': google_civic_election_id,
     }
     return render(request, 'office/office_list.html', template_values)
-
-    # select_for_marking_organization_ids = request.POST.getlist('select_for_marking_checks[]')
-    # which_marking = request.POST.get("which_marking")
 
 
 @login_required

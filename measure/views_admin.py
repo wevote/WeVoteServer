@@ -424,6 +424,28 @@ def measure_list_view(request):
     state_code = request.GET.get('state_code', '')
     measure_search = request.GET.get('measure_search', '')
 
+    google_civic_election_id_list = []
+    election_manager = ElectionManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+
+        # Make sure we always include the current election in the election_list, even if it is older
+        if positive_value_exists(google_civic_election_id):
+            this_election_found = False
+            for one_election in election_list:
+                if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                    this_election_found = True
+                    break
+            if not this_election_found:
+                results = election_manager.retrieve_election(google_civic_election_id)
+                if results['election_found']:
+                    one_election = results['election']
+                    election_list.append(one_election)
+
     measure_list_count = 0
     position_list_manager = PositionListManager()
     measure_list_modified = []
@@ -431,6 +453,13 @@ def measure_list_view(request):
         measure_list = ContestMeasure.objects.order_by('measure_title')
         if positive_value_exists(google_civic_election_id):
             measure_list = measure_list.filter(google_civic_election_id=google_civic_election_id)
+        elif positive_value_exists(show_all_elections):
+            pass
+        else:
+            # Limit this search to upcoming_elections only
+            for one_election in election_list:
+                google_civic_election_id_list.append(one_election.google_civic_election_id)
+            measure_list = measure_list.filter(google_civic_election_id__in=google_civic_election_id_list)
         if positive_value_exists(state_code):
             measure_list = measure_list.filter(state_code__iexact=state_code)
 
@@ -485,27 +514,6 @@ def measure_list_view(request):
         # This is fine
         measure_list_modified = []
         pass
-
-    election_manager = ElectionManager()
-    if positive_value_exists(show_all_elections):
-        results = election_manager.retrieve_elections()
-        election_list = results['election_list']
-    else:
-        results = election_manager.retrieve_upcoming_elections()
-        election_list = results['election_list']
-
-    # Make sure we always include the current election in the election_list, even if it is older
-    if positive_value_exists(google_civic_election_id):
-        this_election_found = False
-        for one_election in election_list:
-            if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
-                this_election_found = True
-                break
-        if not this_election_found:
-            results = election_manager.retrieve_election(google_civic_election_id)
-            if results['election_found']:
-                one_election = results['election']
-                election_list.append(one_election)
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())

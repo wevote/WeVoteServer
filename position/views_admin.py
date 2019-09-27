@@ -182,6 +182,30 @@ def position_list_view(request):
 
     position_search = request.GET.get('position_search', '')
 
+    election_manager = ElectionManager()
+    google_civic_election_id_list = []
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+
+        # Make sure we always include the current election in the election_list, even if it is older
+        if positive_value_exists(google_civic_election_id):
+            this_election_found = False
+            for one_election in election_list:
+                if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                    this_election_found = True
+                    break
+            if not this_election_found:
+                results = election_manager.retrieve_election(google_civic_election_id)
+                if results['election_found']:
+                    one_election = results['election']
+                    election_list.append(one_election)
+        for one_election in election_list:
+            google_civic_election_id_list.append(one_election.google_civic_election_id)
+
     # Make sure all positions in this election have a speaker_type
     public_position_list_clean_count = 0
     friend_position_list_clean_count = 0
@@ -213,7 +237,15 @@ def position_list_view(request):
     public_position_list_query = public_position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
     if positive_value_exists(google_civic_election_id):
-        public_position_list_query = public_position_list_query.filter(google_civic_election_id=google_civic_election_id)
+        public_position_list_query = public_position_list_query.filter(
+            google_civic_election_id=google_civic_election_id)
+    elif positive_value_exists(show_all_elections):
+        # Return offices from all elections
+        pass
+    else:
+        # Limit this search to upcoming_elections only
+        public_position_list_query = public_position_list_query.filter(
+            google_civic_election_id__in=google_civic_election_id_list)
 
     if positive_value_exists(position_search):
         search_words = position_search.split()
@@ -276,6 +308,13 @@ def position_list_view(request):
     if positive_value_exists(google_civic_election_id):
         friends_only_position_list_query = friends_only_position_list_query.filter(
             google_civic_election_id=google_civic_election_id)
+    elif positive_value_exists(show_all_elections):
+        # Return offices from all elections
+        pass
+    else:
+        # Limit this search to upcoming_elections only
+        friends_only_position_list_query = friends_only_position_list_query.filter(
+            google_civic_election_id__in=google_civic_election_id_list)
 
     if positive_value_exists(position_search):
         search_words = position_search.split()
@@ -374,27 +413,6 @@ def position_list_view(request):
     #     if positive_value_exists(integrity_error_count) and positive_value_exists(positions_updated):
     #         messages.add_message(request, messages.ERROR, str(integrity_error_count) +
     #                              ' integrity errors.')
-
-    election_manager = ElectionManager()
-    if positive_value_exists(show_all_elections):
-        results = election_manager.retrieve_elections()
-        election_list = results['election_list']
-    else:
-        results = election_manager.retrieve_upcoming_elections()
-        election_list = results['election_list']
-
-        # Make sure we always include the current election in the election_list, even if it is older
-        if positive_value_exists(google_civic_election_id):
-            this_election_found = False
-            for one_election in election_list:
-                if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
-                    this_election_found = True
-                    break
-            if not this_election_found:
-                results = election_manager.retrieve_election(google_civic_election_id)
-                if results['election_found']:
-                    one_election = results['election']
-                    election_list.append(one_election)
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
