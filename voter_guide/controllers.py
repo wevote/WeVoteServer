@@ -27,8 +27,10 @@ from position.controllers import retrieve_ballot_item_we_vote_ids_for_organizati
     retrieve_ballot_item_we_vote_ids_for_organization_static
 from position.models import ANY_STANCE, INFORMATION_ONLY, OPPOSE, \
     PositionEntered, PositionManager, PositionListManager, SUPPORT
+from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
     fetch_voter_we_vote_id_from_voter_id, VoterManager
+from voter_guide.controllers_possibility import candidates_found_on_url, organizations_found_on_url
 from voter_guide.models import ENDORSEMENTS_FOR_CANDIDATE, ORGANIZATION_ENDORSING_CANDIDATES, UNKNOWN_TYPE, \
     VoterGuide, VoterGuideListManager, VoterGuideManager, \
     VoterGuidePossibility, VoterGuidePossibilityManager, VoterGuidePossibilityPosition
@@ -1537,14 +1539,12 @@ def voter_guides_import_from_structured_json(structured_json):
     return voter_guides_results
 
 
-def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possibility_id=0, url_to_scan='',
-                                             is_candidate_focused_page=False):
+def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possibility_id=0, url_to_scan=''):
     """
     voterGuidePossibilityRetrieve
     :param voter_device_id:
     :param voter_guide_possibility_id:
     :param url_to_scan:
-    :param is_candidate_focused_page:
     :return:
     """
     status = ""
@@ -1596,8 +1596,15 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
         voter_guide_possibility = results['voter_guide_possibility']
         voter_guide_possibility_id = results['voter_guide_possibility_id']
         organization_we_vote_id = results['organization_we_vote_id']
+        if positive_value_exists(voter_guide_possibility.candidate_name) \
+                or positive_value_exists(voter_guide_possibility.candidate_twitter_handle) \
+                or positive_value_exists(voter_guide_possibility.candidate_we_vote_id):
+            is_candidate_focused_page = True
+        else:
+            is_candidate_focused_page = False
     elif positive_value_exists(results['success']):
-        # Create new entry
+        # Current entry not found. Create new entry.
+        is_candidate_focused_page = False  # To be extended to also save candidate focused endorsement pages
         if positive_value_exists(is_candidate_focused_page):
             voter_guide_possibility_type = ENDORSEMENTS_FOR_CANDIDATE
         else:
@@ -1622,11 +1629,15 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     hide_from_active_review = False
     ignore_this_source = False
     internal_notes = ""
+    possible_candidate_name = ""
+    possible_candidate_twitter_handle = ""
     possible_organization_name = ""
     possible_organization_twitter_handle = ""
     limit_to_this_state_code = ""
     voter_guide_possibility_edit = ""
+    voter_guide_possibility_type = ""
     if voter_guide_possibility_found:
+        candidate_we_vote_id = voter_guide_possibility.candidate_we_vote_id
         candidates_missing_from_we_vote = voter_guide_possibility.candidates_missing_from_we_vote
         cannot_find_endorsements = voter_guide_possibility.cannot_find_endorsements
         capture_detailed_comments = voter_guide_possibility.capture_detailed_comments
@@ -1646,23 +1657,44 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
             str(voter_guide_possibility_id)
 
     organization_dict = {}
+    possible_owner_of_website_organizations_list = []
+    twitter_user_manager = TwitterUserManager()
     if positive_value_exists(organization_we_vote_id):
         organization_manager = OrganizationManager()
         organization_results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
         status += organization_results['status']
         if organization_results['organization_found']:
             organization = organization_results['organization']
+            organization_twitter_handle = twitter_user_manager.fetch_twitter_handle_from_organization_we_vote_id(
+                organization_we_vote_id)
             organization_dict = {
                 'organization_we_vote_id': organization_we_vote_id,
                 'organization_name': organization.organization_name,
                 'organization_website': organization.organization_website,
-                'organization_twitter_handle': organization.organization_twitter_handle,
+                'organization_twitter_handle': organization_twitter_handle,
                 'organization_email': organization.organization_email,
                 'organization_facebook': organization.organization_facebook,
                 'we_vote_hosted_profile_image_url_medium': organization.we_vote_hosted_profile_image_url_medium,
                 'we_vote_hosted_profile_image_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
             }
+    elif not positive_value_exists(is_candidate_focused_page):
+        # As long as we know there isn't a candidate_we_vote_id, try to find organization owner
+        if positive_value_exists(possible_organization_name) \
+                or positive_value_exists(possible_organization_twitter_handle):
+            # Search for organizations that match
+            organization_list_manager = OrganizationListManager()
+            results = organization_list_manager.organization_search_find_any_possibilities(
+                organization_name=possible_organization_name,
+                organization_twitter_handle=possible_organization_twitter_handle
+            )
+            if results['organizations_found']:
+                possible_owner_of_website_organizations_list = results['organizations_list']
+        elif positive_value_exists(url_to_scan):
+            scrape_results = organizations_found_on_url(url_to_scan, limit_to_this_state_code)
+            possible_owner_of_website_organizations_list = scrape_results['organization_list']
+
     candidate_dict = {}
+    possible_owner_of_website_candidates_list = []
     if positive_value_exists(candidate_we_vote_id):
         candidate_manager = CandidateCampaignManager()
         candidate_results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
@@ -1670,15 +1702,46 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
         if candidate_results['candidate_campaign_found']:
             candidate = candidate_results['candidate_campaign']
             candidate_dict = {
-                'candidate_we_vote_id': candidate_we_vote_id,
-                'candidate_name': candidate.candidate_name,
-                'candidate_website': candidate.candidate_url,
-                'candidate_twitter_handle': candidate.candidate_twitter_handle,
-                'candidate_email': candidate.candidate_email,
-                'candidate_facebook': candidate.facebook_url,
-                'we_vote_hosted_profile_image_url_medium': candidate.we_vote_hosted_profile_image_url_medium,
-                'we_vote_hosted_profile_image_url_tiny': candidate.we_vote_hosted_profile_image_url_tiny,
+                'candidate_we_vote_id':         candidate.we_vote_id,
+                'candidate_name':               candidate.candidate_name,
+                'candidate_website':            candidate.candidate_url,
+                'candidate_twitter_handle':     candidate.candidate_twitter_handle,
+                'candidate_email':              candidate.candidate_email,
+                'candidate_facebook':           candidate.facebook_url,
+                'candidate_photo_url_medium':   candidate.we_vote_hosted_profile_image_url_medium,
+                'candidate_photo_url_tiny':     candidate.we_vote_hosted_profile_image_url_tiny,
             }
+    elif positive_value_exists(is_candidate_focused_page):
+        if positive_value_exists(possible_candidate_name) or positive_value_exists(possible_candidate_twitter_handle):
+            google_civic_election_id_list = retrieve_upcoming_election_id_list(
+                limit_to_this_state_code=limit_to_this_state_code)
+            candidate_list_manager = CandidateCampaignListManager()
+            results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
+                google_civic_election_id_list, limit_to_this_state_code,
+                possible_candidate_twitter_handle, possible_candidate_name)
+            possible_candidate_list = []
+            if results['candidate_list_found']:
+                possible_candidate_list = results['candidate_list']
+            elif results['candidate_found']:
+                possible_candidate_list.append(results['candidate'])
+            for candidate in possible_candidate_list:
+                possible_candidate_dict = {
+                    'candidate_we_vote_id':         candidate.we_vote_id,
+                    'candidate_name':               candidate.candidate_name,
+                    'candidate_website':            candidate.candidate_url,
+                    'candidate_twitter_handle':     candidate.candidate_twitter_handle,
+                    'candidate_email':              candidate.candidate_email,
+                    'candidate_facebook':           candidate.facebook_url,
+                    'candidate_photo_url_medium':   candidate.we_vote_hosted_profile_image_url_medium,
+                    'candidate_photo_url_tiny':     candidate.we_vote_hosted_profile_image_url_tiny,
+                }
+                possible_owner_of_website_candidates_list.append(possible_candidate_dict)
+        elif positive_value_exists(url_to_scan):
+            google_civic_election_id_list = retrieve_upcoming_election_id_list(
+                limit_to_this_state_code=limit_to_this_state_code)
+            scrape_results = candidates_found_on_url(url_to_scan, google_civic_election_id_list,
+                                                     limit_to_this_state_code)
+            possible_owner_of_website_candidates_list = scrape_results['candidate_list']
 
     json_data = {
         'status':                               status,
@@ -1695,8 +1758,10 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
         'organization':                         organization_dict,
         'possible_candidate_name':              possible_candidate_name,
         'possible_candidate_twitter_handle':    possible_candidate_twitter_handle,
+        'possible_owner_of_website_candidates_list':    possible_owner_of_website_candidates_list,
         'possible_organization_name':           possible_organization_name,
         'possible_organization_twitter_handle': possible_organization_twitter_handle,
+        'possible_owner_of_website_organizations_list': possible_owner_of_website_organizations_list,
         'limit_to_this_state_code':             limit_to_this_state_code,
         'url_to_scan':                          url_to_scan,
         'voter_device_id':                      voter_device_id,
@@ -1951,14 +2016,13 @@ def voter_guide_possibility_save_for_api(  # voterGuidePossibilitySave
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
-        json_data = {
-            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_GUIDE_POSSIBILITY ",
-            'success': False,
-            'voter_device_id': voter_device_id,
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-    # At this point, we have a valid voter
+        status += "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_GUIDE_POSSIBILITY "
+        # json_data = {
+        #     'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_GUIDE_POSSIBILITY ",
+        #     'success': False,
+        #     'voter_device_id': voter_device_id,
+        # }
+        # return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     results = voter_guide_possibility_manager.retrieve_voter_guide_possibility(
@@ -1986,10 +2050,6 @@ def voter_guide_possibility_save_for_api(  # voterGuidePossibilitySave
         if capture_detailed_comments is not None:
             voter_guide_possibility.capture_detailed_comments = \
                 positive_value_exists(capture_detailed_comments)
-            at_least_one_change = True
-        if clear_organization_options is not None:
-            voter_guide_possibility.clear_organization_options = \
-                positive_value_exists(clear_organization_options)
             at_least_one_change = True
         if contributor_comments is not None:
             voter_guide_possibility.contributor_comments = contributor_comments
@@ -2028,6 +2088,11 @@ def voter_guide_possibility_save_for_api(  # voterGuidePossibilitySave
             at_least_one_change = True
         if voter_guide_possibility_type is not None:
             voter_guide_possibility.voter_guide_possibility_type = voter_guide_possibility_type
+            at_least_one_change = True
+        if clear_organization_options is not None:
+            voter_guide_possibility.organization_we_vote_id = ''
+            voter_guide_possibility.organization_name = ''
+            voter_guide_possibility.organization_twitter_handle = ''
             at_least_one_change = True
 
         if at_least_one_change:

@@ -96,8 +96,35 @@ def voter_guide_possibility_retrieve_doc_template_values(url_root):
                    '   },\n' \
                    '  "possible_candidate_name": string,\n' \
                    '  "possible_candidate_twitter_handle": string,\n' \
+                   '  "possible_owner_of_website_candidates_list": list,\n' \
+                   '   [\n' \
+                   '     {\n' \
+                   '       "candidate_we_vote_id": string,\n' \
+                   '       "candidate_name": string,\n' \
+                   '       "candidate_website": string,\n' \
+                   '       "candidate_twitter_handle": string,\n' \
+                   '       "candidate_email": string,\n' \
+                   '       "candidate_facebook": string,\n' \
+                   '       "candidate_photo_url_medium": string,\n'\
+                   '       "candidate_photo_url_tiny": string,\n' \
+                   '     },\n' \
+                   '   ]\n' \
                    '  "possible_organization_name": string,\n' \
                    '  "possible_organization_twitter_handle": string,\n' \
+                   '  "possible_owner_of_website_organizations_list": list,\n' \
+                   '   [\n' \
+                   '     {\n' \
+                   '       "organization_id": integer,\n' \
+                   '       "organization_we_vote_id": string,\n' \
+                   '       "organization_name": string,\n' \
+                   '       "organization_website": string,\n' \
+                   '       "organization_twitter_handle": string,\n' \
+                   '       "organization_email": string,\n' \
+                   '       "organization_facebook": string,\n' \
+                   '       "organization_photo_url_medium": string,\n'\
+                   '       "organization_photo_url_tiny": string,\n' \
+                   '     },\n' \
+                   '   ]\n' \
                    '  "limit_to_this_state_code": string,\n' \
                    '  "url_to_scan": string,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \

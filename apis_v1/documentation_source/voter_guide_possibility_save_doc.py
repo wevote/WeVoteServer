@@ -26,6 +26,11 @@ def voter_guide_possibility_save_doc_template_values(url_root):
     ]
     optional_query_parameter_list = [
         {
+            'name':         'candidate_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The we_vote_id of the candidate these endorsements are about.',
+        },
+        {
             'name':         'candidates_missing_from_we_vote',
             'value':        'boolean',  # boolean, integer, long, string
             'description':  'Are there candidates endorsed on this page that we do not have in our Candidate table?',
@@ -66,20 +71,32 @@ def voter_guide_possibility_save_doc_template_values(url_root):
             'description':  'Internal notes from a We Vote political data manager.',
         },
         {
+            'name':         'limit_to_this_state_code',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'All of these endorsements relate to candidates or ballot items in this state.',
+        },
+        {
             'name':         'organization_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The we_vote_id of the organization making these endorsements.',
+        },
+        {
+            'name':         'possible_candidate_name',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The name of the candidate these endorsements are about,, '
+                            'for possible matching with candidate in We Vote database.',
+        },
+        {
+            'name':         'possible_candidate_twitter_handle',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The Twitter handle of the candidate these endorsements are about, '
+                            'for possible matching with candidate in We Vote database.',
         },
         {
             'name':         'possible_organization_name',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The name of the organization making these endorsements, '
                             'for possible matching with organization in We Vote database.',
-        },
-        {
-            'name':         'limit_to_this_state_code',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'All of these endorsements relate to candidates or ballot items in this state.',
         },
         {
             'name':         'possible_organization_twitter_handle',
@@ -143,8 +160,35 @@ def voter_guide_possibility_save_doc_template_values(url_root):
                    '   },\n' \
                    '  "possible_candidate_name": string,\n' \
                    '  "possible_candidate_twitter_handle": string,\n' \
+                   '  "possible_owner_of_website_candidates_list": list,\n' \
+                   '   [\n' \
+                   '     {\n' \
+                   '       "candidate_we_vote_id": string,\n' \
+                   '       "candidate_name": string,\n' \
+                   '       "candidate_website": string,\n' \
+                   '       "candidate_twitter_handle": string,\n' \
+                   '       "candidate_email": string,\n' \
+                   '       "candidate_facebook": string,\n' \
+                   '       "candidate_photo_url_medium": string,\n'\
+                   '       "candidate_photo_url_tiny": string,\n' \
+                   '     },\n' \
+                   '   ]\n' \
                    '  "possible_organization_name": string,\n' \
                    '  "possible_organization_twitter_handle": string,\n' \
+                   '  "possible_owner_of_website_organizations_list": list,\n' \
+                   '   [\n' \
+                   '     {\n' \
+                   '       "organization_id": integer,\n' \
+                   '       "organization_we_vote_id": string,\n' \
+                   '       "organization_name": string,\n' \
+                   '       "organization_website": string,\n' \
+                   '       "organization_twitter_handle": string,\n' \
+                   '       "organization_email": string,\n' \
+                   '       "organization_facebook": string,\n' \
+                   '       "organization_photo_url_medium": string,\n'\
+                   '       "organization_photo_url_tiny": string,\n' \
+                   '     },\n' \
+                   '   ]\n' \
                    '  "limit_to_this_state_code": string,\n' \
                    '  "url_to_scan": string,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
