@@ -1150,6 +1150,10 @@ class CandidateCampaignListManager(models.Model):
                     'candidate_photo_url_medium':   candidate.we_vote_hosted_profile_image_url_medium,
                     'candidate_photo_url_tiny':     candidate.we_vote_hosted_profile_image_url_tiny,
                     'candidate_we_vote_id':         candidate.we_vote_id,
+                    'candidate_name':               candidate.candidate_name,  # For Voter Guide Possibility System
+                    'candidate_website':            candidate.candidate_url,  # For Voter Guide Possibility System
+                    'candidate_twitter_handle':     candidate.candidate_twitter_handle,  # For Voter Guide Possibility
+                    'candidate_facebook':           candidate.facebook_url,  # For Voter Guide Possibility System
                     'id':                           candidate.id,
                     'office_we_vote_id':            candidate.contest_office_we_vote_id,
                     'order_on_ballot':              candidate.order_on_ballot,
