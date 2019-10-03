@@ -260,6 +260,7 @@ urlpatterns = [
     url(r'^voterTwitterSaveToCurrentAccount/',
         views_voter.voter_twitter_save_to_current_account_view, name='voterTwitterSaveToCurrentAccountView'),
     url(r'^voterUpdate/', views_voter.voter_update_view, name='voterUpdateView'),
+    url(r'^voterVerifySecretCode/', views_voter.voter_verify_secret_code_view, name='voterVerifySecretCodeView'),
 
     ##########################
     # API Documentation Views
@@ -486,4 +487,6 @@ urlpatterns = [
     url(r'^docs/voterTwitterSaveToCurrentAccount/$',
         views_docs.voter_twitter_save_to_current_account_doc_view, name='voterTwitterSaveToCurrentAccountDocs'),
     url(r'^docs/voterUpdate/$', views_docs.voter_update_doc_view, name='voterUpdateDocs'),
+    url(r'^docs/voterVerifySecretCode/$',
+        views_docs.voter_verify_secret_code_doc_view, name='voterVerifySecretCodeDocs'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

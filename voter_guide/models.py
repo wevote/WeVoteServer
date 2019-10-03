@@ -2188,8 +2188,16 @@ class VoterGuidePossibilityManager(models.Manager):
                     success = True
             elif positive_value_exists(voter_guide_possibility_url):
                 status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_URL "  # Set this in case the get fails
+                # Search both http and https
+                voter_guide_possibility_url_alternate = \
+                    voter_guide_possibility_url.lower().replace("https://", "http://")
+                # If a replacement didn't happen...
+                if len(voter_guide_possibility_url_alternate) == len(voter_guide_possibility_url):
+                    voter_guide_possibility_url_alternate = \
+                        voter_guide_possibility_url.lower().replace("http://", "https://")
                 voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
-                    voter_guide_possibility_url=voter_guide_possibility_url)
+                    Q(voter_guide_possibility_url__iexact=voter_guide_possibility_url) |
+                    Q(voter_guide_possibility_url__iexact=voter_guide_possibility_url_alternate))
                 voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
                 if voter_guide_possibility_on_stage is not None:
                     voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id

@@ -54,7 +54,7 @@ from apis_v1.documentation_source import all_ballot_items_retrieve_doc, ballot_i
     voter_opposing_save_doc, voter_retrieve_doc, voter_sign_out_doc, voter_split_into_two_accounts_doc, \
     voter_stop_opposing_save_doc, \
     voter_stop_supporting_save_doc, voter_supporting_save_doc, voter_twitter_save_to_current_account_doc, \
-    voter_update_doc, email_ballot_data_doc
+    voter_update_doc, voter_verify_secret_code_doc, email_ballot_data_doc
 from config.base import get_environment_variable
 from django.contrib.messages import get_messages
 from django.shortcuts import render
@@ -1384,6 +1384,16 @@ def voter_bookmark_status_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_bookmark_status_retrieve_doc.voter_bookmark_status_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_verify_secret_code_doc_view(request):
+    """
+    Show documentation about voterVerifySecretCode
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = voter_verify_secret_code_doc.voter_verify_secret_code_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
