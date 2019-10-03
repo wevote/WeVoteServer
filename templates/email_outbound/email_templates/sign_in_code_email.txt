@@ -1,0 +1,16 @@
+Hello,
+
+To sign into We Vote, please enter the following code on the page where you requested your sign in code:
+{{ secret_numerical_code }}
+
+If you did not request this link to We Vote, please do not follow the link. You can notify us that there was a problem by forwarding this email to info@WeVote.US.
+
+Thank you,
+The We Vote Team
+
+
+
+========================================
+This message was sent to {{ recipient_email }}. If you don't want to receive these emails from We Vote in the future, please follow the link below to unsubscribe.
+{{ recipient_unsubscribe }}
+We Vote, Attention: Community Team, 1717 Clemens Rd, Oakland, CA 94602

@@ -15,6 +15,7 @@ LINK_TO_SIGN_IN_TEMPLATE = 'LINK_TO_SIGN_IN_TEMPLATE'
 VERIFY_EMAIL_ADDRESS_TEMPLATE = 'VERIFY_EMAIL_ADDRESS_TEMPLATE'
 SEND_BALLOT_TO_SELF = 'SEND_BALLOT_TO_SELF'
 SEND_BALLOT_TO_FRIENDS = 'SEND_BALLOT_TO_FRIENDS'
+SIGN_IN_CODE_EMAIL_TEMPLATE = 'SIGN_IN_CODE_EMAIL_TEMPLATE'
 KIND_OF_EMAIL_TEMPLATE_CHOICES = (
     (GENERIC_EMAIL_TEMPLATE,  'Generic Email'),
     (FRIEND_ACCEPTED_INVITATION_TEMPLATE, 'Accept an invitation to be a Friend'),
@@ -23,6 +24,7 @@ KIND_OF_EMAIL_TEMPLATE_CHOICES = (
     (VERIFY_EMAIL_ADDRESS_TEMPLATE, 'Verify Senders Email Address'),
     (SEND_BALLOT_TO_SELF, 'Send ballot to self'),
     (SEND_BALLOT_TO_FRIENDS, 'Send ballot to friends'),
+    (SIGN_IN_CODE_EMAIL_TEMPLATE, 'Send code to verify sign in.'),
 )
 
 TO_BE_PROCESSED = 'TO_BE_PROCESSED'
@@ -202,12 +204,12 @@ class EmailManager(models.Model):
             )
             email_outbound_description_saved = True
             success = True
-            status = "EMAIL_OUTBOUND_DESCRIPTION_CREATED"
+            status = "EMAIL_OUTBOUND_DESCRIPTION_CREATED "
         except Exception as e:
             email_outbound_description_saved = False
             email_outbound_description = EmailOutboundDescription()
             success = False
-            status = "EMAIL_OUTBOUND_DESCRIPTION_NOT_CREATED"
+            status = "EMAIL_OUTBOUND_DESCRIPTION_NOT_CREATED "
 
         results = {
             'success':                          success,

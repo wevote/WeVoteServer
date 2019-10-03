@@ -721,7 +721,9 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
     text_for_email_address = request.GET.get('text_for_email_address', '')
     incoming_email_we_vote_id = request.GET.get('email_we_vote_id', '')
     resend_verification_email = positive_value_exists(request.GET.get('resend_verification_email', False))
+    resend_verification_code_email = positive_value_exists(request.GET.get('resend_verification_code_email', False))
     send_link_to_sign_in = positive_value_exists(request.GET.get('send_link_to_sign_in', False))
+    send_sign_in_code_email = positive_value_exists(request.GET.get('send_sign_in_code_email', False))
     make_primary_email = positive_value_exists(request.GET.get('make_primary_email', False))
     delete_email = positive_value_exists(request.GET.get('delete_email', ""))
     is_cordova = positive_value_exists(request.GET.get('is_cordova', False))
@@ -730,10 +732,11 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
                                                text_for_email_address=text_for_email_address,
                                                incoming_email_we_vote_id=incoming_email_we_vote_id,
                                                send_link_to_sign_in=send_link_to_sign_in,
+                                               send_sign_in_code_email=send_sign_in_code_email,
                                                resend_verification_email=resend_verification_email,
+                                               resend_verification_code_email=resend_verification_code_email,
                                                make_primary_email=make_primary_email,
                                                delete_email=delete_email,
-                                               is_cordova=is_cordova,
                                                )
 
     json_data = {
@@ -750,6 +753,7 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
         'email_address_deleted':            results['email_address_deleted'],
         'verification_email_sent':          results['verification_email_sent'],
         'link_to_sign_in_email_sent':       results['link_to_sign_in_email_sent'],
+        'sign_in_code_email_sent':          results['sign_in_code_email_sent'],
         'email_address_found':              results['email_address_found'],
         'email_address_list_found':         results['email_address_list_found'],
         'email_address_list':               results['email_address_list'],
@@ -1906,3 +1910,33 @@ def voter_update_view(request):  # voterUpdate
 
     response = HttpResponse(json.dumps(json_data), content_type='application/json')
     return response
+
+
+def voter_verify_secret_code_view(request):  # voterVerifySecretCode
+    """
+    Retrieve a single voter based on voter_device
+    :param request:
+    :return:
+    """
+    status = ''
+    success = True
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    secret_code = request.GET.get('secret_code', None)
+
+    voter_device_link_manager = VoterDeviceLinkManager()
+    results = voter_device_link_manager.voter_verify_secret_code(
+        voter_device_id=voter_device_id, secret_code=secret_code)
+    secret_code_verified = results['secret_code_verified']
+    number_of_tries_remaining_for_this_code = results['number_of_tries_remaining_for_this_code']
+    secret_code_system_locked_for_this_voter_device_id = results['secret_code_system_locked_for_this_voter_device_id']
+    voter_must_request_new_code = results['voter_must_request_new_code']
+
+    json_data = {
+        'status':                                   status,
+        'success':                                  success,
+        'number_of_tries_remaining_for_this_code':      number_of_tries_remaining_for_this_code,
+        'secret_code_system_locked_for_this_voter_device_id': secret_code_system_locked_for_this_voter_device_id,
+        'secret_code_verified':                     secret_code_verified,
+        'voter_must_request_new_code':              voter_must_request_new_code,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')

@@ -99,11 +99,6 @@
           <td>Create an empty voter entry attached to a voter_device_id</td>
         </tr>
         <tr>
-          <td><a href="{% url 'apis_v1:voterUpdateDocs' %}">voterUpdate</a></td>
-          <td></td>
-          <td>Save profile-related fields for an existing voter.</td>
-        </tr>
-        <tr>
           <td><a href="{% url 'apis_v1:voterEmailAddressRetrieveDocs' %}">voterEmailAddressRetrieve</a></td>
           <td></td>
           <td>Retrieve all of the voter's email addresses, including the status of each email.</td>
@@ -133,6 +128,16 @@
           <td><a href="{% url 'apis_v1:voterRetrieveDocs' %}">voterRetrieve</a></td>
           <td></td>
           <td>Export key voter data to JSON format</td>
+        </tr>
+        <tr>
+          <td><a href="{% url 'apis_v1:voterUpdateDocs' %}">voterUpdate</a></td>
+          <td></td>
+          <td>Save profile-related fields for an existing voter.</td>
+        </tr>
+        <tr>
+          <td><a href="{% url 'apis_v1:voterVerifySecretCodeDocs' %}">voterVerifySecretCode</a></td>
+          <td></td>
+          <td>Voter submits this six digit code to verify that they received an SMS message or email.</td>
         </tr>
 
         {###  ###}

@@ -1591,6 +1591,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     voter_guide_possibility_found = False
     candidate_we_vote_id = ""
     organization_we_vote_id = ""
+    is_candidate_focused_page = False
     if results['voter_guide_possibility_found']:
         voter_guide_possibility_found = True
         voter_guide_possibility = results['voter_guide_possibility']
