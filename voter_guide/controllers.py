@@ -418,6 +418,7 @@ def extract_voter_guide_possibility_position_list_from_database(
     # DEBUG=1 Phase out state_code for entire voter_guide_possibility?
     state_code = voter_guide_possibility.state_code \
         if positive_value_exists(voter_guide_possibility.state_code) else ""
+
     # ######################
     # If we are starting from a single organization endorsing many candidates,
     # we store that organization information once
@@ -458,7 +459,9 @@ def extract_voter_guide_possibility_position_list_from_database(
     if positive_value_exists(voter_guide_possibility_position_id):
         possibility_position_query = possibility_position_query.filter(id=voter_guide_possibility_position_id)
     possibility_position_list = list(possibility_position_query)
+    candidate_manager = CandidateCampaignManager()
     for possibility_position in possibility_position_list:
+        candidate_alternate_names = []
         if positive_value_exists(possibility_position.more_info_url):
             more_info_url = possibility_position.more_info_url
         else:
@@ -474,6 +477,11 @@ def extract_voter_guide_possibility_position_list_from_database(
                 if positive_value_exists(possibility_position.candidate_we_vote_id) else ""
             candidate_twitter_handle = possibility_position.candidate_twitter_handle \
                 if positive_value_exists(possibility_position.candidate_twitter_handle) else ""
+            # If this is a list of candidates being endorsed by one organization, add on the alternate_names
+            if positive_value_exists(candidate_we_vote_id):
+                candidate_results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+                if candidate_results['candidate_campaign_found']:
+                    candidate_alternate_names = candidate_results['candidate_campaign'].display_alternate_names_list()
         elif voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
             # ######################
             # If we are starting from a single candidate endorsed by many "organizations" (which may be people),
@@ -495,6 +503,7 @@ def extract_voter_guide_possibility_position_list_from_database(
             'possibility_position_id': possibility_position.id,
             'possibility_position_number': possibility_position.possibility_position_number,
             'ballot_item_name': possibility_position.ballot_item_name,
+            'candidate_alternate_names': candidate_alternate_names,
             'candidate_twitter_handle': candidate_twitter_handle,
             'candidate_we_vote_id': candidate_we_vote_id,
             # 'contest_office_name': contest_office_name,
@@ -1780,6 +1789,7 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
     highlight_list = []
     voter_we_vote_id = ''
     names_already_included_list = []
+    candidate_manager = CandidateCampaignManager()
 
     # Once we know we have a voter_device_id to work with, get this working
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
@@ -1800,12 +1810,39 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                 if one_possible_position['ballot_item_name'] not in names_already_included_list:
                     names_already_included_list.append(one_possible_position['ballot_item_name'])
                     one_highlight = {
-                        'name': one_possible_position['ballot_item_name'],
-                        'we_vote_id': one_possible_position['candidate_we_vote_id'],
-                        'display': display,
-                        'stance': one_possible_position['position_stance'],
+                        'name':         one_possible_position['ballot_item_name'],
+                        'we_vote_id':   one_possible_position['candidate_we_vote_id'],
+                        'display':      display,
+                        'stance':       one_possible_position['position_stance'],
                     }
                     highlight_list.append(one_highlight)
+                if positive_value_exists(one_possible_position['candidate_we_vote_id']):
+                    candidate_results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(
+                        one_possible_position['candidate_we_vote_id'])
+                    if candidate_results['candidate_campaign_found']:
+                        one_candidate = candidate_results['candidate_campaign']
+                        if positive_value_exists(one_candidate.display_candidate_name()) \
+                                and one_candidate.display_candidate_name() not in names_already_included_list:
+                            names_already_included_list.append(one_candidate.display_candidate_name())
+                            one_highlight = {
+                                'name':         one_candidate.display_candidate_name(),
+                                'we_vote_id':   one_possible_position['candidate_we_vote_id'],
+                                'display':      display,
+                                'stance':       one_possible_position['position_stance'],
+                            }
+                            highlight_list.append(one_highlight)
+                        alternate_names = one_candidate.display_alternate_names_list()
+                        for alternate_name in alternate_names:
+                            if positive_value_exists(alternate_name) \
+                                    and alternate_name not in names_already_included_list:
+                                names_already_included_list.append(alternate_name)
+                                one_highlight = {
+                                    'name':         alternate_name,
+                                    'we_vote_id':   one_possible_position['candidate_we_vote_id'],
+                                    'display':      display,
+                                    'stance':       one_possible_position['position_stance'],
+                                }
+                                highlight_list.append(one_highlight)
 
     super_light_candidate_list = True
     results = retrieve_candidate_list_for_all_upcoming_elections(
@@ -1827,10 +1864,10 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                     if one_alternate_name not in names_already_included_list:
                         names_already_included_list.append(one_alternate_name)
                         one_highlight = {
-                            'name': one_alternate_name,
-                            'we_vote_id': one_possible_candidate['we_vote_id'],
-                            'display': 'DEFAULT',
-                            'stance': '',
+                            'name':         one_alternate_name,
+                            'we_vote_id':   one_possible_candidate['we_vote_id'],
+                            'display':      'DEFAULT',
+                            'stance':       '',
                         }
                         highlight_list.append(one_highlight)
 
