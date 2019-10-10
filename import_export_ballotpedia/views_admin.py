@@ -629,6 +629,10 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
                                      ''.format(google_civic_election_id=google_civic_election_id,
                                                status=status))
                 batch_header_id = results['batch_header_id']
+                # Go straight to the list of batches
+                return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
+                                            "?kind_of_batch=" + str(kind_of_batch) +
+                                            "&google_civic_election_id=" + str(google_civic_election_id))
             elif 'batch_header_id' in results and results['batch_header_id']:
                 messages.add_message(request, messages.INFO,
                                      kind_of_batch +

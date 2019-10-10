@@ -4085,7 +4085,6 @@ class BatchManager(models.Model):
                         batch_header_column_011='state_code',
                         batch_header_column_012='election_day',
                         batch_header_column_013='google_civic_election_id',
-                        batch_header_column_014='candidate_contact_form_url',
                     )
                     batch_header_id = batch_header.id
 
@@ -4107,7 +4106,6 @@ class BatchManager(models.Model):
                             batch_header_map_011='state_code',
                             batch_header_map_012='election_day',
                             batch_header_map_013='google_civic_election_id',
-                            batch_header_map_014='candidate_contact_form_url',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -4154,7 +4152,6 @@ class BatchManager(models.Model):
                     batch_row_011=state_code,
                     batch_row_012=election_day,
                     batch_row_013=google_civic_election_id,
-                    batch_row_014=candidate_contact_form_url,
                 )
                 number_of_measure_positions += 1
             except Exception as e:
@@ -4184,7 +4181,7 @@ class BatchSet(models.Model):
     batch_set_name = models.CharField(max_length=255)
     batch_set_description_text = models.CharField(max_length=255)
     batch_set_source = models.CharField(max_length=255)
-    source_uri = models.URLField(blank=True, null=True, verbose_name='uri where data is coming from')
+    source_uri = models.URLField(max_length=255, blank=True, null=True, verbose_name='uri where data is coming from')
     import_date = models.DateTimeField(verbose_name="date when batch set was imported", null=True, auto_now=True)
 
 
@@ -4209,7 +4206,7 @@ class BatchDescription(models.Model):
     batch_description_text = models.CharField(max_length=255)
     # Have the batch rows under this description been analyzed?
     batch_description_analyzed = models.BooleanField(default=False)
-    source_uri = models.URLField(blank=True, null=True, verbose_name='uri where data is coming from')
+    source_uri = models.URLField(max_length=255, blank=True, null=True, verbose_name='uri where data is coming from')
     date_created = models.DateTimeField(verbose_name='date first saved', null=True, auto_now=True)
 
 
@@ -4476,7 +4473,7 @@ class BatchRowActionMeasure(models.Model):
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
-    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
+    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', max_length=255, blank=True, null=True)
 
     ballotpedia_district_id = models.PositiveIntegerField(
         verbose_name="ballotpedia district id", default=0, null=False, blank=False)
@@ -4492,10 +4489,12 @@ class BatchRowActionMeasure(models.Model):
         verbose_name="ballotpedia measure summary", null=True, blank=True, default="")
     ballotpedia_measure_text = models.TextField(
         verbose_name="ballotpedia measure text", null=True, blank=True, default="")
-    ballotpedia_measure_url = models.URLField(verbose_name='ballotpedia url of measure', blank=True, null=True)
+    ballotpedia_measure_url = models.URLField(
+        verbose_name='ballotpedia url of measure', max_length=255, blank=True, null=True)
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
-    ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+    ballotpedia_photo_url = models.URLField(
+        verbose_name='url of ballotpedia logo', max_length=255, blank=True, null=True)
     ballotpedia_yes_vote_description = models.TextField(
         verbose_name="what a yes vote means", null=True, blank=True, default=None)
     ballotpedia_no_vote_description = models.TextField(
@@ -4556,7 +4555,8 @@ class BatchRowActionContestOffice(models.Model):
     # The office's name as passed over by Ballotpedia. This helps us do exact matches when id is missing
     ballotpedia_office_name = models.CharField(verbose_name="office name exactly as received from ballotpedia",
                                                max_length=255, null=True, blank=True)
-    ballotpedia_office_url = models.URLField(verbose_name='url of office on ballotpedia', blank=True, null=True)
+    ballotpedia_office_url = models.URLField(
+        verbose_name='url of office on ballotpedia', max_length=255, blank=True, null=True)
     # Equivalent of contest_office in We Vote
     ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia race integer id", null=True, blank=True)
     # Federal, State, Local,
@@ -4777,16 +4777,17 @@ class BatchRowActionPolitician(models.Model):
     # The full name of the party the official belongs to.
     political_party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
     state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
-    politician_url = models.URLField(verbose_name='latest website url of politician', blank=True, null=True)
+    politician_url = models.URLField(
+        verbose_name='latest website url of politician', max_length=255, blank=True, null=True)
 
     politician_twitter_handle = models.CharField(verbose_name='politician twitter screen_name', max_length=255,
-                                                  null=True, unique=False)
-    we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
-                                                             blank=True, null=True)
-    we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
-                                                              blank=True, null=True)
-    we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url', blank=True,
-                                                            null=True)
+                                                 null=True, unique=False)
+    we_vote_hosted_profile_image_url_large = models.URLField(
+        verbose_name='we vote hosted large image url', max_length=255, blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.URLField(
+        verbose_name='we vote hosted medium image url', max_length=255, blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.URLField(
+        verbose_name='we vote hosted tiny image url', max_length=255, blank=True, null=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
     politician_facebook_id = models.CharField(verbose_name='politician facebook user name', max_length=255, null=True,
                                               unique=False)
@@ -4850,9 +4851,9 @@ class BatchRowActionCandidate(models.Model):
     # A URL for a photo of the candidate.
     photo_url = models.CharField(verbose_name="photoUrl", max_length=255, null=True, blank=True)
     photo_url_from_maplight = models.URLField(
-        verbose_name='candidate portrait url of candidate from maplight', blank=True, null=True)
+        verbose_name='candidate portrait url of candidate from maplight', max_length=255, blank=True, null=True)
     photo_url_from_vote_smart = models.URLField(
-        verbose_name='candidate portrait url of candidate from vote smart', blank=True, null=True)
+        verbose_name='candidate portrait url of candidate from vote smart', max_length=255, blank=True, null=True)
     # The order the candidate appears on the ballot relative to other candidates for this contest.
     order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
@@ -4864,10 +4865,12 @@ class BatchRowActionCandidate(models.Model):
     # State code
     state_code = models.CharField(verbose_name="state this candidate serves", max_length=2, null=True, blank=True)
     # The URL for the candidate's campaign web site.
-    candidate_url = models.URLField(verbose_name='website url of candidate campaign', blank=True, null=True)
-    candidate_contact_form_url = models.URLField(verbose_name='website url of candidate contact form',
-                                                 blank=True, null=True)
-    facebook_url = models.URLField(verbose_name='facebook url of candidate campaign', blank=True, null=True)
+    candidate_url = models.URLField(
+        verbose_name='website url of candidate campaign', max_length=255, blank=True, null=True)
+    candidate_contact_form_url = models.URLField(
+        verbose_name='website url of candidate contact form', max_length=255, blank=True, null=True)
+    facebook_url = models.URLField(
+        verbose_name='facebook url of candidate campaign', max_length=255, blank=True, null=True)
 
     twitter_url = models.URLField(verbose_name='twitter url of candidate campaign', blank=True, null=True)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
@@ -4897,7 +4900,7 @@ class BatchRowActionCandidate(models.Model):
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
-    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
+    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', max_length=255, blank=True, null=True)
 
     ballotpedia_candidate_id = models.PositiveIntegerField(
         verbose_name="ballotpedia integer id", null=True, blank=True)
@@ -4906,7 +4909,8 @@ class BatchRowActionCandidate(models.Model):
                                                   max_length=255, null=True, blank=True)
     ballotpedia_candidate_summary = models.TextField(verbose_name="candidate summary from ballotpedia",
                                                      null=True, blank=True, default=None)
-    ballotpedia_candidate_url = models.URLField(verbose_name='url of candidate on ballotpedia', blank=True, null=True)
+    ballotpedia_candidate_url = models.URLField(
+        verbose_name='url of candidate on ballotpedia', max_length=255, blank=True, null=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
     # The id of the image for retrieval from Ballotpedia API
     ballotpedia_image_id = models.PositiveIntegerField(verbose_name="ballotpedia image id", null=True, blank=True)
@@ -4919,7 +4923,8 @@ class BatchRowActionCandidate(models.Model):
     # Equivalent of politician in We Vote
     ballotpedia_person_id = models.PositiveIntegerField(
         verbose_name="ballotpedia person integer id", null=True, blank=True)
-    ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+    ballotpedia_photo_url = models.URLField(
+        verbose_name='url of ballotpedia logo', max_length=255, blank=True, null=True)
     # Equivalent of contest_office in We Vote
     ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia race integer id", null=True, blank=True)
 
@@ -4935,7 +4940,8 @@ class BatchRowActionCandidate(models.Model):
                                                       max_length=255, null=True, blank=True)
 
     # From VIP standard format
-    candidate_ctcl_person_id = models.CharField(verbose_name="candidate person id", max_length=255, null=True, blank=True)
+    candidate_ctcl_person_id = models.CharField(
+        verbose_name="candidate person id", max_length=255, null=True, blank=True)
 
     status = models.TextField(verbose_name="batch row action candidate status", null=True, blank=True, default="")
 
@@ -4957,7 +4963,8 @@ class BatchRowActionOrganization(models.Model):
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True)
     organization_name = models.CharField(
         verbose_name="organization name", max_length=255, null=False, blank=False)
-    organization_website = models.URLField(verbose_name='url of the endorsing organization', blank=True, null=True)
+    organization_website = models.URLField(
+        verbose_name='url of the endorsing organization', max_length=255, blank=True, null=True)
     organization_email = models.EmailField(
         verbose_name='organization contact email address', max_length=255, unique=False, null=True, blank=True)
     organization_contact_name = models.CharField(max_length=255, null=True, unique=False)
@@ -5012,14 +5019,17 @@ class BatchRowActionOrganization(models.Model):
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
-    wikipedia_thumbnail_url = models.URLField(verbose_name='url of wikipedia logo thumbnail', blank=True, null=True)
+    wikipedia_thumbnail_url = models.URLField(
+        verbose_name='url of wikipedia logo thumbnail', max_length=255, blank=True, null=True)
     wikipedia_thumbnail_width = models.IntegerField(verbose_name="width of photo", null=True, blank=True)
     wikipedia_thumbnail_height = models.IntegerField(verbose_name="height of photo", null=True, blank=True)
-    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
+    wikipedia_photo_url = models.URLField(
+        verbose_name='url of wikipedia logo', max_length=255, blank=True, null=True)
 
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
-    ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+    ballotpedia_photo_url = models.URLField(
+        verbose_name='url of ballotpedia logo', max_length=255, blank=True, null=True)
 
     organization_type = models.CharField(
         verbose_name="type of org", max_length=1, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
@@ -5047,8 +5057,8 @@ class BatchRowActionPosition(models.Model):
     ballot_item_display_name = models.CharField(verbose_name="text name for ballot item",
                                                 max_length=255, null=True, blank=True)
     # We cache the url to an image for the candidate, measure or office for rapid display
-    ballot_item_image_url_https = models.URLField(verbose_name='url of https image for candidate, measure or office',
-                                                  blank=True, null=True)
+    ballot_item_image_url_https = models.URLField(
+        verbose_name='url of https image for candidate, measure or office', max_length=255, blank=True, null=True)
     ballot_item_twitter_handle = models.CharField(verbose_name='twitter screen_name for candidate, measure, or office',
                                                   max_length=255, null=True, unique=False)
 
@@ -5056,8 +5066,8 @@ class BatchRowActionPosition(models.Model):
     speaker_display_name = models.CharField(
         verbose_name="name of the org or person with position", max_length=255, null=True, blank=True, unique=False)
     # We cache the url to an image for the org, voter, or public_figure for rapid display
-    speaker_image_url_https = models.URLField(verbose_name='url of https image for org or person with position',
-                                              blank=True, null=True)
+    speaker_image_url_https = models.URLField(
+        verbose_name='url of https image for org or person with position', max_length=255, blank=True, null=True)
     speaker_twitter_handle = models.CharField(verbose_name='twitter screen_name for org or person with position',
                                               max_length=255, null=True, unique=False)
 
@@ -5153,7 +5163,8 @@ class BatchRowActionPosition(models.Model):
     statement_text = models.TextField(null=True, blank=True, )
     statement_html = models.TextField(null=True, blank=True, )
     # A link to any location with more information about this position
-    more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more info about this position')
+    more_info_url = models.URLField(
+        blank=True, null=True, max_length=255, verbose_name='url with more info about this position')
 
     # Did this position come from a web scraper?
     from_scraper = models.BooleanField(default=False)
@@ -5219,7 +5230,8 @@ class BatchRowActionBallotItem(models.Model):
     measure_subtitle = models.TextField(verbose_name="google civic referendum subtitle",
                                         null=True, blank=True, default="")
     measure_text = models.TextField(verbose_name="measure text", null=True, blank=True, default="")
-    measure_url = models.URLField(verbose_name='url of measure', blank=True, null=True)
+    measure_url = models.URLField(
+        verbose_name='url of measure', max_length=255, blank=True, null=True)
     yes_vote_description = models.TextField(verbose_name="what a yes vote means", null=True, blank=True, default=None)
     no_vote_description = models.TextField(verbose_name="what a no vote means", null=True, blank=True, default=None)
 
