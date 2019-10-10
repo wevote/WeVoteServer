@@ -461,7 +461,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
     state_code = request.GET.get('state_code', '')
     retrieve_races = positive_value_exists(request.GET.get('retrieve_races', False))
     retrieve_measures = positive_value_exists(request.GET.get('retrieve_measures', False))
-    import_limit = convert_to_int(request.GET.get('import_limit', 1000))
+    import_limit = convert_to_int(request.GET.get('import_limit', 1000))  # If > 1000, we get error 414 (url too long)
 
     polling_location_list = []
     polling_location_count = 0
@@ -618,6 +618,14 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
                                      kind_of_batch +
                                      ' import batch for {google_civic_election_id} election saved. '
                                      'status: {status}'
+                                     ''.format(google_civic_election_id=google_civic_election_id,
+                                               status=status))
+                batch_header_id = results['batch_header_id']
+            elif 'multiple_batches_found' in results and results['multiple_batches_found']:
+                messages.add_message(request, messages.INFO,
+                                     kind_of_batch +
+                                     ' multiple import batches for {google_civic_election_id} election saved.'
+                                     ' status: {status}'
                                      ''.format(google_civic_election_id=google_civic_election_id,
                                                status=status))
                 batch_header_id = results['batch_header_id']
