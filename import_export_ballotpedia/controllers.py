@@ -1005,6 +1005,7 @@ def retrieve_ballotpedia_measures_by_district_from_api(google_civic_election_id,
                                                        ballotpedia_district_id_list):
     success = True
     status = ""
+    multiple_batches_found = False
 
     if not positive_value_exists(google_civic_election_id):
         results = {
@@ -1049,7 +1050,7 @@ def retrieve_ballotpedia_measures_by_district_from_api(google_civic_election_id,
     ballotpedia_election_count = 0
     for one_ballotpedia_election in ballotpedia_election_list:
         if positive_value_exists(one_ballotpedia_election.ballotpedia_election_id):
-            ballotpedia_elections_string += str(one_ballotpedia_election.ballotpedia_election_id)
+            ballotpedia_elections_string += str(one_ballotpedia_election.ballotpedia_election_id) + ","
             ballotpedia_election_count += 1
     # Remove last comma
     if ballotpedia_election_count > 1:
@@ -1057,72 +1058,131 @@ def retrieve_ballotpedia_measures_by_district_from_api(google_civic_election_id,
 
     # #########################
     # Get string with all districts within which we want to check for measures
+    ballotpedia_district_id_not_used_list = []
+    chunks_of_district_strings = []
     measure_district_string = ""
-    measure_count = 0
+    measure_district_count = 0
     for one_district in ballotpedia_district_id_list:
-        measure_district_string += str(one_district) + ","
-        measure_count += 1
+        # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
+        #  measure_district_string, but capture the districts not used
+        # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+        if len(measure_district_string) < 3796:
+            measure_district_string += str(one_district) + ","
+            measure_district_count += 1
+        else:
+            # In the future we might want to set up a second query to get the races for these districts
+            ballotpedia_district_id_not_used_list.append(one_district)
+
     # Remove last comma
-    if measure_count > 1:
+    if measure_district_count > 1:
         measure_district_string = measure_district_string[:-1]
+    chunks_of_district_strings.append(measure_district_string)
 
-    response = requests.get(BALLOTPEDIA_API_MEASURES_URL, params={
-        "access_token":             BALLOTPEDIA_API_KEY,
-        "filters[election][in]":    ballotpedia_elections_string,
-        "filters[district][in]":    measure_district_string,
-        "limit":                    1000,
-    })
+    # Now add all of the districts that were missed from the first retrieve
+    while len(ballotpedia_district_id_not_used_list):
+        measure_district_string = ""
+        measure_district_count = 0
+        temp_ballotpedia_district_id_not_used_list = []
+        for one_district in ballotpedia_district_id_not_used_list:
+            # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
+            #  measure_district_string, but capture the districts not used
+            # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+            if len(measure_district_string) < 3796:
+                measure_district_string += str(one_district) + ","
+                measure_district_count += 1
+            else:
+                # In the future we might want to set up a second query to get the races for these districts
+                temp_ballotpedia_district_id_not_used_list.append(one_district)
 
-    if not hasattr(response, 'text') or not positive_value_exists(response.text):
-        success = False
-        status += "NO_RESPONSE_TEXT_FOUND"
-        if positive_value_exists(response.url):
-            status += ": " + response.url
-        results = {
-            'success': success,
-            'status': status,
-            'batch_header_id': batch_header_id,
-        }
-        return results
+        # Remove last comma
+        if measure_district_count > 1:
+            measure_district_string = measure_district_string[:-1]
+        chunks_of_district_strings.append(measure_district_string)
 
-    if hasattr(response, 'success') and not positive_value_exists(response.success):
-        success = False
-        status += "RESPONSE_SUCCESS_IS_FALSE"
-        if positive_value_exists(response.url):
-            status += ": " + response.url + " "
-        if positive_value_exists(response.error):
-            status += "error: " + str(response.error)
-        results = {
-            'success': success,
-            'status': status,
-            'batch_header_id': batch_header_id,
-        }
-        return results
+        ballotpedia_district_id_not_used_list = temp_ballotpedia_district_id_not_used_list
 
-    structured_json = json.loads(response.text)
+    batches_found = 0
+    final_json_list = []
+    measures_already_retrieved = []
+    for measure_district_string in chunks_of_district_strings:
+        response = requests.get(BALLOTPEDIA_API_MEASURES_URL, params={
+            "access_token":             BALLOTPEDIA_API_KEY,
+            "filters[election][in]":    ballotpedia_elections_string,
+            "filters[district][in]":    measure_district_string,
+            "limit":                    1000,
+        })
 
-    # Use Ballotpedia API call counter to track the number of queries we are doing each day
-    ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-    ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_MEASURES_TYPE,
-                                                         google_civic_election_id=google_civic_election_id)
+        if not hasattr(response, 'text') or not positive_value_exists(response.text):
+            success = False
+            status += "NO_RESPONSE_TEXT_FOUND"
+            if positive_value_exists(response.url):
+                status += ": " + response.url
+            results = {
+                'success': success,
+                'status': status,
+                'batch_header_id': batch_header_id,
+            }
+            return results
 
-    groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id, state_code)
-    modified_json_list = groom_results['modified_json_list']
-    kind_of_batch = groom_results['kind_of_batch']
+        if hasattr(response, 'success') and not positive_value_exists(response.success):
+            success = False
+            status += "RESPONSE_SUCCESS_IS_FALSE"
+            if positive_value_exists(response.url):
+                status += ": " + response.url + " "
+            if positive_value_exists(response.error):
+                status += "error: " + str(response.error)
+            results = {
+                'success': success,
+                'status': status,
+                'batch_header_id': batch_header_id,
+            }
+            return results
 
-    if positive_value_exists(len(modified_json_list)):
-        results = store_ballotpedia_json_response_to_import_batch_system(
-            modified_json_list, google_civic_election_id, kind_of_batch, state_code=state_code)
-        status += results['status']
-        if 'batch_header_id' in results:
-            batch_header_id = results['batch_header_id']
-    else:
-        status += "NO_MEASURES_RETURNED "
+        try:
+            structured_json = json.loads(response.text)
+        except Exception as e:
+            success = False
+            status += "JSON.LOADS_FAILED " + str(e) + " "
+            results = {
+                'success': success,
+                'status': status,
+                'batch_header_id': batch_header_id,
+            }
+            return results
 
+        # Use Ballotpedia API call counter to track the number of queries we are doing each day
+        ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+        ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_MEASURES_TYPE,
+                                                             google_civic_election_id=google_civic_election_id)
+
+        groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id, state_code)
+        modified_json_list = groom_results['modified_json_list']
+        kind_of_batch = groom_results['kind_of_batch']
+        for one_new_dict in modified_json_list:
+            if one_new_dict['ballotpedia_measure_id'] not in measures_already_retrieved:
+                final_json_list.append(one_new_dict)
+                measures_already_retrieved.append(one_new_dict['ballotpedia_measure_id'])
+
+        # Since the overall script might time out, we store the offices in an intermediate step
+        if positive_value_exists(len(final_json_list)):
+            status += "MEASURES_RETURNED "
+            results = store_ballotpedia_json_response_to_import_batch_system(
+                final_json_list, google_civic_election_id, kind_of_batch, state_code=state_code)
+            final_json_list = []
+            batches_found += 1
+            status += results['status']
+            if 'batch_header_id' in results:
+                batch_header_id = results['batch_header_id']
+        else:
+            status += "NO_MEASURES_RETURNED "
+
+    if batches_found > 1:
+        multiple_batches_found = True
     results = {
         'success': success,
         'status': status,
         'batch_header_id': batch_header_id,
+        'multiple_batches_found': multiple_batches_found,
     }
     return results
 

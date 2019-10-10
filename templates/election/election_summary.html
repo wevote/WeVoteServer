@@ -372,7 +372,7 @@
   </li>
 
   <li>
-    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&retrieve_measures=1&import_limit=100" target="_blank">
+    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&retrieve_measures=1" target="_blank">
         Ballotpedia: Retrieve Measures for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}</a> (in new window)<br />
         Reach out to Ballotpedia API and retrieve the measures for all districts covered by this election.
         This needs to be run before trying to retrieve ballot items. It is also a good idea to merge/groom the measures
