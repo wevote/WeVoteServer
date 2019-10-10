@@ -118,7 +118,8 @@ class ContestMeasure(models.Model):
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
-    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
+    wikipedia_photo_url = models.URLField(
+        verbose_name='url of wikipedia logo', max_length=255, blank=True, null=True)
 
     ballotpedia_district_id = models.PositiveIntegerField(
         verbose_name="ballotpedia district id", default=0, null=False, blank=False)
@@ -134,10 +135,12 @@ class ContestMeasure(models.Model):
         verbose_name="ballotpedia measure summary", null=True, blank=True, default="")
     ballotpedia_measure_text = models.TextField(
         verbose_name="ballotpedia measure text", null=True, blank=True, default="")
-    ballotpedia_measure_url = models.URLField(verbose_name='ballotpedia url of measure', blank=True, null=True)
+    ballotpedia_measure_url = models.URLField(
+        verbose_name='ballotpedia url of measure', max_length=255, blank=True, null=True)
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
-    ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+    ballotpedia_photo_url = models.URLField(
+        verbose_name='url of ballotpedia logo', max_length=255, blank=True, null=True)
     ballotpedia_yes_vote_description = models.TextField(
         verbose_name="what a yes vote means", null=True, blank=True, default=None)
     ballotpedia_no_vote_description = models.TextField(
@@ -221,7 +224,8 @@ class MeasureCampaign(models.Model):
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google election id", default=0, null=False, blank=False)
     # The URL for the candidate's campaign web site.
-    url = models.URLField(verbose_name='website url of campaign', blank=True, null=True)
+    url = models.URLField(
+        verbose_name='website url of campaign', max_length=255, blank=True, null=True)
     facebook_url = models.URLField(verbose_name='facebook url of campaign', blank=True, null=True)
     twitter_url = models.URLField(verbose_name='twitter url of campaign', blank=True, null=True)
     google_plus_url = models.URLField(verbose_name='google plus url of campaign', blank=True, null=True)

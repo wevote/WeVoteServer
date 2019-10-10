@@ -1241,9 +1241,9 @@ class CandidateCampaign(models.Model):
     # A URL for a photo of the candidate.
     photo_url = models.CharField(verbose_name="photoUrl", max_length=255, null=True, blank=True)
     photo_url_from_maplight = models.URLField(
-        verbose_name='candidate portrait url of candidate from maplight', blank=True, null=True)
+        verbose_name='candidate portrait url of candidate from maplight', max_length=255, blank=True, null=True)
     photo_url_from_vote_smart = models.URLField(
-        verbose_name='candidate portrait url of candidate from vote smart', blank=True, null=True)
+        verbose_name='candidate portrait url of candidate from vote smart', max_length=255, blank=True, null=True)
     # The order the candidate appears on the ballot relative to other candidates for this contest.
     order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
@@ -1256,9 +1256,10 @@ class CandidateCampaign(models.Model):
     state_code = models.CharField(verbose_name="state this candidate serves",
                                   max_length=2, null=True, blank=True, db_index=True)
     # The URL for the candidate's campaign web site.
-    candidate_url = models.URLField(verbose_name='website url of candidate campaign', blank=True, null=True)
-    candidate_contact_form_url = models.URLField(verbose_name='website url of candidate contact form',
-                                                 blank=True, null=True)
+    candidate_url = models.URLField(
+        verbose_name='website url of candidate campaign', max_length=255, blank=True, null=True)
+    candidate_contact_form_url = models.URLField(
+        verbose_name='website url of candidate contact form', max_length=255, blank=True, null=True)
     facebook_url = models.URLField(verbose_name='facebook url of candidate campaign', blank=True, null=True)
     facebook_url_is_broken = models.BooleanField(verbose_name="facebook url is broken", default=False)
     facebook_profile_image_url_https = models.URLField(verbose_name='url of profile image from facebook',
@@ -1299,7 +1300,8 @@ class CandidateCampaign(models.Model):
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
-    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
+    wikipedia_photo_url = models.URLField(
+        verbose_name='url of wikipedia logo', max_length=255, blank=True, null=True)
     linkedin_url = models.CharField(
         verbose_name="linkedin url of candidate", max_length=255, null=True, blank=True)
     linkedin_photo_url = models.URLField(verbose_name='url of linkedin logo', blank=True, null=True)
@@ -1316,12 +1318,13 @@ class CandidateCampaign(models.Model):
                                                   max_length=255, null=True, blank=True)
     ballotpedia_candidate_summary = models.TextField(verbose_name="candidate summary from ballotpedia",
                                                      null=True, blank=True, default=None)
-    ballotpedia_candidate_url = models.URLField(verbose_name='url of candidate on ballotpedia', blank=True, null=True)
+    ballotpedia_candidate_url = models.URLField(
+        verbose_name='url of candidate on ballotpedia', max_length=255, blank=True, null=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
     # The id of the image for retrieval from Ballotpedia API
     ballotpedia_image_id = models.PositiveIntegerField(verbose_name="ballotpedia image id", null=True, blank=True)
     ballotpedia_profile_image_url_https = models.URLField(
-        verbose_name='locally cached url of candidate profile image from ballotpedia', blank=True, null=True)
+        verbose_name='locally cached candidate profile image from ballotpedia', max_length=255, blank=True, null=True)
     # Equivalent to Elected Office
     ballotpedia_office_id = models.PositiveIntegerField(
         verbose_name="ballotpedia elected office integer id", null=True, blank=True)
@@ -1330,7 +1333,8 @@ class CandidateCampaign(models.Model):
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     # Equivalent to Politician
     ballotpedia_person_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
-    ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+    ballotpedia_photo_url = models.URLField(
+        verbose_name='url of ballotpedia logo', max_length=255, blank=True, null=True)
     # Equivalent to Contest Office
     ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia race integer id", null=True, blank=True)
 
