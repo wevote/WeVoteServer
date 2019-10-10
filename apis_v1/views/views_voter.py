@@ -29,6 +29,7 @@ from ballot.controllers import choose_election_and_prepare_ballot_data, voter_ba
 from ballot.models import OFFICE, CANDIDATE, MEASURE, VoterBallotSavedManager
 from bookmark.controllers import voter_all_bookmarks_status_retrieve_for_api, voter_bookmark_off_save_for_api, \
     voter_bookmark_on_save_for_api, voter_bookmark_status_retrieve_for_api
+from sms.controllers import voter_sms_phone_number_save_for_api
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
     voter_stop_supporting_save, voter_supporting_save_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
@@ -1300,6 +1301,51 @@ def voter_sign_out_view(request):  # voterSignOut
         'sign_out_all_devices': sign_out_all_devices,
         'success':              results['success'],
         'status':               results['status'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_sms_phone_number_save_view(request):  # voterSMSPhoneNumberSave
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    sms_phone_number = request.GET.get('sms_phone_number', '')
+    incoming_sms_we_vote_id = request.GET.get('sms_we_vote_id', '')
+    resend_verification_sms = positive_value_exists(request.GET.get('resend_verification_sms', False))
+    send_sign_in_code_sms = positive_value_exists(request.GET.get('send_sign_in_code_sms', False))
+    make_primary_sms_phone_number = positive_value_exists(request.GET.get('make_primary_sms_phone_number', False))
+    delete_sms = positive_value_exists(request.GET.get('delete_sms', ""))
+
+    results = voter_sms_phone_number_save_for_api(
+        voter_device_id=voter_device_id,
+        sms_phone_number=sms_phone_number,
+        incoming_sms_we_vote_id=incoming_sms_we_vote_id,
+        send_sign_in_code_sms=send_sign_in_code_sms,
+        resend_verification_sms=resend_verification_sms,
+        make_primary_sms_phone_number=make_primary_sms_phone_number,
+        delete_sms=delete_sms,
+        )
+
+    json_data = {
+        'status':                           results['status'],
+        'success':                          results['success'],
+        'voter_device_id':                  voter_device_id,
+        'sms_phone_number':                 sms_phone_number,
+        'make_primary_sms_phone_number':    make_primary_sms_phone_number,
+        'delete_sms':                       delete_sms,
+        'email_address_we_vote_id':         results['email_address_we_vote_id'],
+        'email_address_saved_we_vote_id':   results['email_address_saved_we_vote_id'],
+        'email_address_already_owned_by_other_voter':   results['email_address_already_owned_by_other_voter'],
+        'email_address_created':            results['email_address_created'],
+        'email_address_deleted':            results['email_address_deleted'],
+        'verification_email_sent':          results['verification_email_sent'],
+        'link_to_sign_in_email_sent':       results['link_to_sign_in_email_sent'],
+        'sign_in_code_email_sent':          results['sign_in_code_email_sent'],
+        'email_address_found':              results['email_address_found'],
+        'email_address_list_found':         results['email_address_list_found'],
+        'email_address_list':               results['email_address_list'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

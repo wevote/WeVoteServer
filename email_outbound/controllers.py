@@ -490,8 +490,8 @@ def schedule_sign_in_code_email(sender_voter_we_vote_id, recipient_voter_we_vote
                                 recipient_email_we_vote_id, recipient_voter_email,
                                 secret_numerical_code):
     """
-    When a voter wants to sign in with a pre-existing email, create and send an outbound email with a link
-    that the voter can click to sign in.
+    When a voter wants to sign in with a pre-existing email, create and send an outbound email with a secret
+    code that can be entered into the interface where the code was requested.
     :param sender_voter_we_vote_id:
     :param recipient_voter_we_vote_id:
     :param recipient_email_we_vote_id:

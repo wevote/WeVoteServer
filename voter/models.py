@@ -1715,6 +1715,9 @@ class Voter(AbstractBaseUser):
         verbose_name="we vote id for primary email for this voter", max_length=255, null=True, blank=True, unique=True)
     # This "email_ownership_is_verified" is a copy of the master data in EmailAddress.email_ownership_is_verified
     email_ownership_is_verified = models.BooleanField(default=False)
+    normalized_sms_phone_number = models.CharField(max_length=50, null=True, blank=True)
+    primary_sms_we_vote_id = models.CharField(
+        verbose_name="we vote id for primary phone number", max_length=255, null=True, blank=True, unique=True)
     first_name = models.CharField(verbose_name='first name', max_length=255, null=True, blank=True)
     middle_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)

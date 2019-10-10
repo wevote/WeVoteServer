@@ -137,6 +137,7 @@ INSTALLED_APPS = (
     'rest_framework',    # Jan 2019, looks abandoned
     'scheduled_tasks',
     'search',
+    'sms',
     'support_oppose_deciding',
     'tag',
     'twitter',  # See also import_export_twitter
