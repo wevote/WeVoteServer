@@ -806,6 +806,7 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
                                                       ballotpedia_district_id_list):
     success = True
     status = ""
+    multiple_batches_found = False
 
     if not positive_value_exists(google_civic_election_id):
         results = {
@@ -899,6 +900,7 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
     }
     kind_of_election_list.append(kind_of_election_dict)
 
+    batches_found = 0
     final_json_list = []
     for office_district_string in chunks_of_district_strings:
         for kind_of_election_dict in kind_of_election_list:
@@ -989,14 +991,18 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
             final_json_list = []
             status += results['status']
             if 'batch_header_id' in results:
+                batches_found += 1
                 batch_header_id = results['batch_header_id']
         else:
             status += "NO_OFFICES_RETURNED "
 
+    if batches_found > 1:
+        multiple_batches_found = True
     results = {
         'success': success,
         'status': status,
         'batch_header_id': batch_header_id,
+        'multiple_batches_found': multiple_batches_found,
     }
     return results
 
