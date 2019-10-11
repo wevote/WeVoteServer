@@ -96,7 +96,8 @@ class Politician(models.Model):
     # The full name of the party the official belongs to.
     political_party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
     state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
-    politician_url = models.URLField(verbose_name='latest website url of politician', blank=True, null=True)
+    politician_url = models.URLField(
+        verbose_name='latest website url of politician', max_length=255, blank=True, null=True)
 
     politician_twitter_handle = models.CharField(
         verbose_name='politician twitter screen_name', max_length=255, null=True, unique=False)

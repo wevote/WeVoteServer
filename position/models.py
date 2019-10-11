@@ -86,31 +86,38 @@ class PositionEntered(models.Model):
     ballot_item_display_name = models.CharField(verbose_name="text name for ballot item",
                                                 max_length=255, null=True, blank=True, db_index=True)
     # We cache the url to an image for the candidate, measure or office for rapid display
-    ballot_item_image_url_https = models.URLField(verbose_name='url of https image for candidate, measure or office',
-                                                  blank=True, null=True)
-    ballot_item_image_url_https_large = models.URLField(verbose_name='url of https large version image for candidate,'
-                                                                     ' measure or office', blank=True, null=True)
-    ballot_item_image_url_https_medium = models.URLField(verbose_name='url of https medium version image for candidate,'
-                                                                      ' measure or office', blank=True, null=True)
-    ballot_item_image_url_https_tiny = models.URLField(verbose_name='url of https tiny version image for candidate,'
-                                                                    ' measure or office', blank=True, null=True)
-    ballot_item_twitter_handle = models.CharField(verbose_name='twitter screen_name for candidate, measure, or office',
-                                                  max_length=255, null=True, unique=False)
+    ballot_item_image_url_https = models.URLField(
+        verbose_name='url of https image for candidate, measure or office', max_length=255, blank=True, null=True)
+    ballot_item_image_url_https_large = models.URLField(
+        verbose_name='url of https large version image for candidate, measure or office', max_length=255,
+        blank=True, null=True)
+    ballot_item_image_url_https_medium = models.URLField(
+        verbose_name='url of https medium version image for candidate, measure or office', max_length=255,
+        blank=True, null=True)
+    ballot_item_image_url_https_tiny = models.URLField(
+        verbose_name='url of https tiny version image for candidate, measure or office', max_length=255,
+        blank=True, null=True)
+    ballot_item_twitter_handle = models.CharField(
+        verbose_name='twitter screen_name for candidate, measure, or office', max_length=255, null=True, unique=False)
 
     # What is the organization name, voter name, or public figure name? We cache this here for rapid display
     speaker_display_name = models.CharField(
         verbose_name="name of the org or person with position", max_length=255, null=True, blank=True, unique=False)
     # We cache the url to an image for the org, voter, or public_figure for rapid display
-    speaker_image_url_https = models.URLField(verbose_name='url of https image for org or person with position',
-                                              blank=True, null=True)
-    speaker_image_url_https_large = models.URLField(verbose_name='url of https large version image for org or '
-                                                                 'person with position', blank=True, null=True)
-    speaker_image_url_https_medium = models.URLField(verbose_name='url of https medium version image for org or '
-                                                                  'person with position', blank=True, null=True)
-    speaker_image_url_https_tiny = models.URLField(verbose_name='url of https tiny version image for org or '
-                                                                'person with position', blank=True, null=True)
-    speaker_twitter_handle = models.CharField(verbose_name='twitter screen_name for org or person with position',
-                                              max_length=255, null=True, unique=False)
+    speaker_image_url_https = models.URLField(
+        verbose_name='url of https image for org or person with position', max_length=255, blank=True, null=True)
+    speaker_image_url_https_large = models.URLField(
+        verbose_name='url of https large version image for org or person with position', max_length=255,
+        blank=True, null=True)
+    speaker_image_url_https_medium = models.URLField(
+        verbose_name='url of https medium version image for org or person with position', max_length=255,
+        blank=True, null=True)
+    speaker_image_url_https_tiny = models.URLField(
+        verbose_name='url of https tiny version image for org or person with position', max_length=255,
+        blank=True, null=True)
+    speaker_twitter_handle = models.CharField(
+        verbose_name='twitter screen_name for org or person with position', max_length=255,
+        null=True, unique=False)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
                                                   null=False, blank=True, default=0)
     speaker_type = models.CharField(
@@ -223,7 +230,8 @@ class PositionEntered(models.Model):
     statement_text = models.TextField(null=True, blank=True)  # Would be better with db_index=True, but overflows index
     statement_html = models.TextField(null=True, blank=True)
     # A link to any location with more information about this position
-    more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more info about this position')
+    more_info_url = models.URLField(verbose_name='url with more info about this position', max_length=255,
+                                    blank=True, null=True)
 
     # Did this position come from a web scraper?
     from_scraper = models.BooleanField(default=False)
@@ -476,14 +484,17 @@ class PositionForFriends(models.Model):
                                                 max_length=255, null=True, blank=True, db_index=True)
     # We cache the url to an image for the candidate, measure or office for rapid display
     ballot_item_image_url_https = models.URLField(
-        verbose_name='url of https image for candidate, measure or office',
+        verbose_name='url of https image for candidate, measure or office', max_length=255,
         blank=True, null=True)
-    ballot_item_image_url_https_large = models.URLField(verbose_name='url of https large version image for candidate,'
-                                                                     ' measure or office', blank=True, null=True)
-    ballot_item_image_url_https_medium = models.URLField(verbose_name='url of https medium version image for candidate,'
-                                                                      ' measure or office', blank=True, null=True)
-    ballot_item_image_url_https_tiny = models.URLField(verbose_name='url of https tiny version image for candidate,'
-                                                                    ' measure or office', blank=True, null=True)
+    ballot_item_image_url_https_large = models.URLField(
+        verbose_name='url of https large version image for candidate, measure or office', max_length=255,
+        blank=True, null=True)
+    ballot_item_image_url_https_medium = models.URLField(
+        verbose_name='url of https medium version image for candidate, measure or office', max_length=255,
+        blank=True, null=True)
+    ballot_item_image_url_https_tiny = models.URLField(
+        verbose_name='url of https tiny version image for candidate, measure or office', max_length=255,
+        blank=True, null=True)
     ballot_item_twitter_handle = models.CharField(
         verbose_name='twitter screen_name for candidate, measure, or office',
         max_length=255, null=True, unique=False)
@@ -492,14 +503,18 @@ class PositionForFriends(models.Model):
     speaker_display_name = models.CharField(
         verbose_name="name of the org or person with position", max_length=255, null=True, blank=True, unique=False)
     # We cache the url to an image for the org, voter, or public_figure for rapid display
-    speaker_image_url_https = models.URLField(verbose_name='url of https image for org or person with position',
-                                              blank=True, null=True)
-    speaker_image_url_https_large = models.URLField(verbose_name='url of https large version image for org or '
-                                                                 'person with position', blank=True, null=True)
-    speaker_image_url_https_medium = models.URLField(verbose_name='url of https medium version image for org or '
-                                                                  'person with position', blank=True, null=True)
-    speaker_image_url_https_tiny = models.URLField(verbose_name='url of https tiny version image for org or '
-                                                                'person with position', blank=True, null=True)
+    speaker_image_url_https = models.URLField(
+        verbose_name='url of https image for org or person with position', max_length=255,
+        blank=True, null=True)
+    speaker_image_url_https_large = models.URLField(
+        verbose_name='url of https large version image for org or person with position', max_length=255,
+        blank=True, null=True)
+    speaker_image_url_https_medium = models.URLField(
+        verbose_name='url of https medium version image for org or person with position', max_length=255,
+        blank=True, null=True)
+    speaker_image_url_https_tiny = models.URLField(
+        verbose_name='url of https tiny version image for org or person with position', max_length=255,
+        blank=True, null=True)
     speaker_twitter_handle = models.CharField(verbose_name='twitter screen_name for org or person with position',
                                               max_length=255, null=True, unique=False)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
@@ -612,7 +627,8 @@ class PositionForFriends(models.Model):
     statement_text = models.TextField(null=True, blank=True)  # Would be better with db_index=True, but overflows index
     statement_html = models.TextField(null=True, blank=True)
     # A link to any location with more information about this position
-    more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more info about this position')
+    more_info_url = models.URLField(verbose_name='url with more info about this position', max_length=255,
+        blank=True, null=True)
 
     # Did this position come from a web scraper?
     from_scraper = models.BooleanField(default=False)
@@ -1457,6 +1473,7 @@ class PositionListManager(models.Model):
         :param incoming_voter_we_vote_id:
         :return:
         """
+        status = ""
         if not positive_value_exists(incoming_voter_id) and not positive_value_exists(incoming_voter_we_vote_id):
             results = {
                 'status':           'REPAIR_ALL_POSITIONS-MISSING_VOTER_ID_OR_WE_VOTE_ID ',
@@ -1465,7 +1482,6 @@ class PositionListManager(models.Model):
             }
             return results
 
-        status = ""
         organization_manager = OrganizationManager()
         voter_manager = VoterManager()
         if positive_value_exists(incoming_voter_id):
@@ -3366,6 +3382,7 @@ class PositionListManager(models.Model):
         position_list_objects = []
         filters = []
         position_list_found = False
+        status = ''
 
         try:
             position_queryset = PositionEntered.objects.all()
@@ -3408,20 +3425,20 @@ class PositionListManager(models.Model):
 
             if len(position_list_objects):
                 position_list_found = True
-                status = 'DUPLICATE_POSITIONS_RETRIEVED'
+                status += 'DUPLICATE_POSITIONS_RETRIEVED '
                 success = True
             else:
-                status = 'NO_DUPLICATE_POSITIONS_RETRIEVED'
+                status += 'NO_DUPLICATE_POSITIONS_RETRIEVED '
                 success = True
         except PositionEntered.DoesNotExist:
             # No candidates found. Not a problem.
-            status = 'NO_DUPLICATE_POSITIONS_FOUND_DoesNotExist'
+            status += 'NO_DUPLICATE_POSITIONS_FOUND_DoesNotExist '
             position_list_objects = []
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_possible_duplicate_positions ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED retrieve_possible_duplicate_positions ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
             success = False
 
         results = {
@@ -3734,6 +3751,7 @@ class PositionManager(models.Model):
         position_found = False
         google_civic_election_id = 0
         state_code = ''
+        status = ''
         one_unique_ballot_item_variable_received = positive_value_exists(office_we_vote_id) or \
             positive_value_exists(candidate_we_vote_id) or \
             positive_value_exists(measure_we_vote_id)
@@ -3749,7 +3767,7 @@ class PositionManager(models.Model):
         if not voter_id \
                 or not one_unique_ballot_item_variable_received \
                 or visibility_setting not in (FRIENDS_ONLY, SHOW_PUBLIC):
-            status = "CREATE_POSITION_FOR_VISIBILITY_CHANGE-MISSING_REQUIRED_VARIABLE"
+            status += "CREATE_POSITION_FOR_VISIBILITY_CHANGE-MISSING_REQUIRED_VARIABLE "
             success = False
             results = {
                 'success':              success,
@@ -3763,7 +3781,7 @@ class PositionManager(models.Model):
 
         problem_with_duplicate = False
         success = False
-        status = "CREATE_POSITION_FOR_VISIBILITY_CHANGE"
+        status += "CREATE_POSITION_FOR_VISIBILITY_CHANGE "
         try:
             # Check for duplicate in other table
             position_we_vote_id = ""
@@ -3783,12 +3801,12 @@ class PositionManager(models.Model):
             if duplicate_results['position_found']:
                 problem_with_duplicate = True
                 success = False
-                status = 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-EXISTING_POSITION_CHECK_FAILED'
+                status += 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-EXISTING_POSITION_CHECK_FAILED '
 
         except Exception as e:
             problem_with_duplicate = True
             success = False
-            status = 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-EXISTING_POSITION_CHECK_FAILED'
+            status += 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-EXISTING_POSITION_CHECK_FAILED '
 
         if problem_with_duplicate:
             results = {
@@ -3888,7 +3906,7 @@ class PositionManager(models.Model):
             position_we_vote_id = position_on_stage.we_vote_id
             position_found = True
             success = True
-            status = 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-NEW_POSITION_SAVED'
+            status += 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-NEW_POSITION_SAVED '
 
             if positive_value_exists(organization_id) and positive_value_exists(organization_we_vote_id) \
                     and positive_value_exists(google_civic_election_id):
@@ -3901,7 +3919,7 @@ class PositionManager(models.Model):
 
         except Exception as e:
             success = False
-            status = 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-NEW_POSITION_COULD_NOT_BE_SAVED'
+            status += 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-NEW_POSITION_COULD_NOT_BE_SAVED '
 
         results = {
             'success':              success,
@@ -4817,6 +4835,7 @@ class PositionManager(models.Model):
         return results
 
     def transfer_to_public_position(self, existing_position):
+        status = ""
         # Check to make sure existing_position comes from PositionForFriends
         if not existing_position._meta.object_name == "PositionForFriends":
             results = {
@@ -4829,7 +4848,6 @@ class PositionManager(models.Model):
             }
             return results
 
-        status = ""
         # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
         # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we use only organization
 

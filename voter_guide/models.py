@@ -2768,7 +2768,8 @@ class VoterGuidePossibility(models.Model):
     # We are relying on built-in Python id field
 
     # Where a volunteer thinks there is a voter guide
-    voter_guide_possibility_url = models.URLField(verbose_name='url of possible voter guide', blank=True, null=True)
+    voter_guide_possibility_url = models.URLField(
+        verbose_name='url of possible voter guide', max_length=255, blank=True, null=True)
 
     # The unique id of the organization making the endorsements, if/when we know it
     organization_we_vote_id = models.CharField(
@@ -2887,7 +2888,8 @@ class VoterGuidePossibilityPosition(models.Model):
     google_civic_election_id = models.PositiveIntegerField(null=True)
     position_stance = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
     # A link to any location with more information about this position
-    more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more info about this position')
+    more_info_url = models.URLField(
+        verbose_name='url with more info about this position', max_length=255, blank=True, null=True)
     # We don't want to work with this possibility any more
     possibility_should_be_ignored = models.BooleanField(default=False,
                                                         verbose_name='Soft delete. Stop analyzing this entry.')

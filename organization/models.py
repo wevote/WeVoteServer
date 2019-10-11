@@ -2520,7 +2520,8 @@ class Organization(models.Model):
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True, db_index=True)
     organization_name = models.CharField(
         verbose_name="organization name", max_length=255, null=False, blank=False)
-    organization_website = models.URLField(verbose_name='url of the endorsing organization', blank=True, null=True)
+    organization_website = models.URLField(
+        verbose_name='url of the endorsing organization', max_length=255, blank=True, null=True)
     organization_email = models.EmailField(
         verbose_name='organization contact email address', max_length=255, unique=False, null=True, blank=True)
     organization_contact_name = models.CharField(max_length=255, null=True, unique=False)
@@ -2585,14 +2586,17 @@ class Organization(models.Model):
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
-    wikipedia_thumbnail_url = models.URLField(verbose_name='url of wikipedia logo thumbnail', blank=True, null=True)
+    wikipedia_thumbnail_url = models.URLField(
+        verbose_name='url of wikipedia logo thumbnail', max_length=255, blank=True, null=True)
     wikipedia_thumbnail_width = models.IntegerField(verbose_name="width of photo", null=True, blank=True)
     wikipedia_thumbnail_height = models.IntegerField(verbose_name="height of photo", null=True, blank=True)
-    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
+    wikipedia_photo_url = models.URLField(
+        verbose_name='url of wikipedia logo', max_length=255, blank=True, null=True)
 
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
-    ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+    ballotpedia_photo_url = models.URLField(
+        verbose_name='url of ballotpedia logo', max_length=255, blank=True, null=True)
 
     issue_analysis_done = models.BooleanField(default=False)
     issue_analysis_admin_notes = models.TextField(verbose_name="we vote admin notes", null=True, blank=True)
@@ -2604,23 +2608,25 @@ class Organization(models.Model):
     # This is the domain name the client has configured for their We Vote configured site
     chosen_domain_string = models.CharField(
         verbose_name="client domain name for we vote site", max_length=255, null=True, blank=True)
-    chosen_favicon_url_https = models.URLField(verbose_name='url of client favicon', blank=True, null=True)
+    chosen_favicon_url_https = models.URLField(
+        verbose_name='url of client favicon', max_length=255, blank=True, null=True)
     chosen_google_analytics_account_number = models.CharField(max_length=255, null=True, blank=True)
     chosen_html_verification_string = models.CharField(max_length=255, null=True, blank=True)
     # Set to True to hide We Vote logo
     chosen_hide_we_vote_logo = models.BooleanField(default=False)
-    chosen_logo_url_https = models.URLField(verbose_name='url of client logo', blank=True, null=True)
+    chosen_logo_url_https = models.URLField(
+        verbose_name='url of client logo', max_length=255, blank=True, null=True)
     # Client chosen pass code that needs to be sent with organization-focused API calls
     chosen_organization_api_pass_code = models.TextField(null=True, blank=True)
     # Client configured text that will show in index.html
     chosen_social_share_description = models.TextField(null=True, blank=True)
     chosen_social_share_master_image_url_https = models.URLField(
-        verbose_name='url of client social share master image', blank=True, null=True)
+        verbose_name='url of client social share master image', max_length=255, blank=True, null=True)
     chosen_social_share_image_256x256_url_https = models.URLField(
-        verbose_name='url of client social share image', blank=True, null=True)
+        verbose_name='url of client social share image', max_length=255, blank=True, null=True)
     # This is the subdomain the client has configured for yyy.WeVote.US
     chosen_sub_domain_string = models.CharField(
-        verbose_name="client we vote subdomain", max_length=255, null=True, blank=True)
+        verbose_name="client we vote sub domain", max_length=255, null=True, blank=True)
     chosen_subscription_plan = models.PositiveIntegerField(verbose_name="number of the plan client chose", default=0)
     # Last date the subscription is paid through ex/ 20200415
     subscription_plan_end_day_text = models.CharField(
@@ -2635,7 +2641,8 @@ class Organization(models.Model):
     # These get copied from features_provided_bitmap in MasterFeaturePackage table
     features_provided_bitmap = models.PositiveIntegerField(verbose_name="features that are active", default=0)
 
-    organization_endorsements_api_url = models.URLField(verbose_name='endorsements importer url', blank=True, null=True)
+    organization_endorsements_api_url = models.URLField(
+        verbose_name='endorsements importer url', max_length=255, blank=True, null=True)
 
     def __unicode__(self):
         return str(self.organization_name)

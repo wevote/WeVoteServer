@@ -104,7 +104,8 @@ class ContestOffice(models.Model):
     # The office's name as passed over by Ballotpedia. This helps us do exact matches when id is missing
     ballotpedia_office_name = models.CharField(verbose_name="office name exactly as received from ballotpedia",
                                                max_length=255, null=True, blank=True)
-    ballotpedia_office_url = models.URLField(verbose_name='url of office on ballotpedia', blank=True, null=True)
+    ballotpedia_office_url = models.URLField(
+        verbose_name='url of office on ballotpedia', max_length=255, blank=True, null=True)
     ballotpedia_district_id = models.PositiveIntegerField(verbose_name="ballotpedia district id", null=True, blank=True)
     # Equivalent to contest_office
     ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)

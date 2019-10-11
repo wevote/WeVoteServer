@@ -80,14 +80,15 @@ class WeVoteImage(models.Model):
                                                                  blank=True, null=True)
     twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
     issue_image_url_https = models.URLField(verbose_name='url of issue image', blank=True, null=True)
-    ballotpedia_profile_image_url = models.URLField(verbose_name='profile image from ballotpedia',
-                                                    blank=True, null=True)
+    ballotpedia_profile_image_url = models.URLField(
+        verbose_name='profile image from ballotpedia', max_length=255, blank=True, null=True)
     chosen_favicon_image_url_https = models.URLField(verbose_name='org favicon image', blank=True, null=True)
     chosen_logo_image_url_https = models.URLField(verbose_name='org logo image', blank=True, null=True)
     chosen_social_share_master_image_url_https = models.URLField(
         verbose_name='org master share image', blank=True, null=True)
     linkedin_profile_image_url = models.URLField(verbose_name='profile image from linkedin', blank=True, null=True)
-    wikipedia_profile_image_url = models.URLField(verbose_name='profile image from wikipedia', blank=True, null=True)
+    wikipedia_profile_image_url = models.URLField(
+        verbose_name='profile image from wikipedia', max_length=255, blank=True, null=True)
     other_source = models.CharField(verbose_name="other source of image", max_length=255, null=True, blank=True)
     other_source_image_url = models.URLField(verbose_name='other source url of image', blank=True, null=True)
     source_image_still_valid = models.BooleanField(verbose_name="is the url of source image still valid", default=False)

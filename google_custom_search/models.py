@@ -33,7 +33,7 @@ class GoogleSearchUser(models.Model):
     item_formatted_url = models.URLField(verbose_name="item formatted url", null=True, blank=True)
     item_meta_tags_description = models.CharField(verbose_name="searched item meta tags description", max_length=1000,
                                                   null=True, blank=True)
-    search_request_url = models.URLField(verbose_name="search request url", null=True, blank=True)
+    search_request_url = models.URLField(verbose_name="search request url", max_length=255, null=True, blank=True)
     from_ballotpedia = models.BooleanField(default=False, verbose_name="searched link from ballotpedia")
     from_facebook = models.BooleanField(default=False, verbose_name="searched link from facebook")
     from_linkedin = models.BooleanField(default=False, verbose_name="searched link from linkedin")

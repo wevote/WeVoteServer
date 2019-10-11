@@ -670,7 +670,8 @@ class ElectedOfficial(models.Model):
     state_code = models.CharField(verbose_name="state this elected official serves", max_length=2, null=True,
                                   blank=True)
     # The URL for the elected_official's campaign web site.
-    elected_official_url = models.URLField(verbose_name='website url of elected official', blank=True, null=True)
+    elected_official_url = models.URLField(
+        verbose_name='website url of elected official', max_length=255, blank=True, null=True)
     facebook_url = models.URLField(verbose_name='facebook url of elected official', blank=True, null=True)
     facebook_profile_image_url_https = models.URLField(verbose_name='url of profile image from facebook',
                                                        blank=True, null=True)
@@ -715,16 +716,17 @@ class ElectedOfficial(models.Model):
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
-    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
+    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', max_length=255, blank=True, null=True)
     linkedin_url = models.CharField(
         verbose_name="linkedin url of elected_official", max_length=255, null=True, blank=True)
-    linkedin_photo_url = models.URLField(verbose_name='url of linkedin logo', blank=True, null=True)
+    linkedin_photo_url = models.URLField(verbose_name='url of linkedin logo', max_length=255, blank=True, null=True)
 
     # other_source_url is the location (ex/ http://mywebsite.com/elected_official1.html) where we find
     # the other_source_photo_url OR the original url of the photo before we store it locally
     other_source_url = models.CharField(
         verbose_name="other source url of elected_official", max_length=255, null=True, blank=True)
-    other_source_photo_url = models.URLField(verbose_name='url of other source image', blank=True, null=True)
+    other_source_photo_url = models.URLField(
+        verbose_name='url of other source image', max_length=255, blank=True, null=True)
 
     ballotpedia_elected_official_id = models.PositiveIntegerField(
         verbose_name="ballotpedia integer id", null=True, blank=True)
@@ -732,12 +734,13 @@ class ElectedOfficial(models.Model):
     ballotpedia_elected_official_name = models.CharField(
         verbose_name="elected official name exactly as received from ballotpedia", max_length=255, null=True,
         blank=True)
-    ballotpedia_elected_official_url = models.URLField(verbose_name='url of elected official on ballotpedia',
-                                                       blank=True, null=True)
+    ballotpedia_elected_official_url = models.URLField(
+        verbose_name='url of elected official on ballotpedia', max_length=255, blank=True, null=True)
     # This is just the characters in the Ballotpedia URL
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
-    ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+    ballotpedia_photo_url = models.URLField(
+        verbose_name='url of ballotpedia logo', max_length=255, blank=True, null=True)
 
     # CTCL elected official data fields
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
