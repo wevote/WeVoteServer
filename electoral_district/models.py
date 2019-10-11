@@ -80,11 +80,13 @@ class ElectoralDistrict(models.Model):
     ocd_id_external_id = models.CharField(verbose_name="ocd id external identifier", max_length=255, blank=True,
                                           null=True)
     ballotpedia_district_id = models.PositiveIntegerField(blank=True, null=True)
-    ballotpedia_district_kml = models.URLField(verbose_name='url of kml file on ballotpedia', blank=True, null=True)
+    ballotpedia_district_kml = models.URLField(
+        verbose_name='url of kml file on ballotpedia', max_length=255, blank=True, null=True)
     ballotpedia_district_latitude = models.FloatField(null=True, verbose_name='latitude')
     ballotpedia_district_longitude = models.FloatField(null=True, verbose_name='longitude')
     ballotpedia_district_type = models.CharField(null=True, blank=True, max_length=255)
-    ballotpedia_district_url = models.URLField(verbose_name='url of district on ballotpedia', blank=True, null=True)
+    ballotpedia_district_url = models.URLField(
+        verbose_name='url of district on ballotpedia', max_length=255, blank=True, null=True)
     ballotpedia_district_ocd_id = models.CharField(verbose_name="ocd id identifier", max_length=255, blank=True,
                                                    null=True)
 

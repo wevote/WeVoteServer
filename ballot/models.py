@@ -83,7 +83,7 @@ class BallotItem(models.Model):
     measure_subtitle = models.TextField(verbose_name="google civic referendum subtitle",
                                         null=True, blank=True, default="")
     measure_text = models.TextField(verbose_name="measure text", null=True, blank=True, default="")
-    measure_url = models.URLField(verbose_name='url of measure', blank=True, null=True)
+    measure_url = models.URLField(verbose_name='url of measure', max_length=255, blank=True, null=True)
     yes_vote_description = models.TextField(verbose_name="what a yes vote means", null=True, blank=True, default=None)
     no_vote_description = models.TextField(verbose_name="what a no vote means", null=True, blank=True, default=None)
 
@@ -566,6 +566,7 @@ class BallotItemManager(models.Model):
 
         new_ballot_item_created = False
         new_ballot_item = ''
+        status = ''
 
         try:
             if positive_value_exists(state_code):
@@ -577,7 +578,7 @@ class BallotItemManager(models.Model):
                 google_civic_election_id=google_civic_election_id)
             if new_ballot_item:
                 success = True
-                status = "CONTEST_OFFICE_CREATED"
+                status += "CONTEST_OFFICE_BALLOT_ITEM_BEING_CREATED "
                 new_ballot_item_created = True
                 new_ballot_item.contest_office_id = defaults['contest_office_id']
                 new_ballot_item.contest_office_we_vote_id = defaults['contest_office_we_vote_id']
@@ -599,14 +600,14 @@ class BallotItemManager(models.Model):
                     state_code_from_defaults = state_code_from_defaults.lower()
                     new_ballot_item.state_code = state_code_from_defaults
                 new_ballot_item.save()
-                status = "NEW_BALLOT_ITEM_CREATED "
+                status += "NEW_BALLOT_ITEM_CREATED "
             else:
                 success = False
-                status = "BALLOT_ITEM_CREATE_FAILED"
+                status += "BALLOT_ITEM_CREATE_FAILED "
         except Exception as e:
             success = False
             new_ballot_item_created = False
-            status = "BALLOT_ITEM_RETRIEVE_ERROR"
+            status += "BALLOT_ITEM_RETRIEVE_ERROR "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
@@ -679,11 +680,11 @@ class BallotItemManager(models.Model):
                 existing_ballot_item_entry.save()
                 ballot_item_updated = True
                 success = True
-                status = "BALLOT_ITEM_UPDATED"
+                status += "BALLOT_ITEM_UPDATED "
         except Exception as e:
             success = False
             ballot_item_updated = False
-            status = "BALLOT_ITEM_RETRIEVE_ERROR"
+            status += "BALLOT_ITEM_RETRIEVE_ERROR "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
@@ -703,6 +704,7 @@ class BallotItemListManager(models.Model):
     def delete_all_ballot_items_for_voter(self, voter_id, google_civic_election_id):
         ballot_item_list_deleted = False
         ballot_items_deleted_count = 0
+        status = ''
         try:
             ballot_item_queryset = BallotItem.objects.filter(voter_id=voter_id)
             if positive_value_exists(google_civic_election_id):
@@ -711,16 +713,16 @@ class BallotItemListManager(models.Model):
             ballot_item_queryset.delete()
 
             ballot_item_list_deleted = True
-            status = 'BALLOT_ITEMS_DELETED'
+            status += 'BALLOT_ITEMS_DELETED '
         except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_ITEMS_DELETED_DoesNotExist'
+            status += 'NO_BALLOT_ITEMS_DELETED_DoesNotExist '
             ballot_items_deleted_count = 0
         except Exception as e:
             handle_exception(e, logger=logger)
             ballot_items_deleted_count = 0
-            status = 'FAILED delete_all_ballot_items_for_voter ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED delete_all_ballot_items_for_voter ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
 
         results = {
             'success':                  True if ballot_item_list_deleted else False,
@@ -735,6 +737,7 @@ class BallotItemListManager(models.Model):
     def retrieve_ballot_items_for_election(self, google_civic_election_id):
         ballot_item_list = []
         ballot_item_list_found = False
+        status = ''
         try:
             # We cannot use 'readonly' because the result set sometimes gets modified with .save()
             ballot_item_queryset = BallotItem.objects.all()
@@ -745,19 +748,19 @@ class BallotItemListManager(models.Model):
             success = True
             if positive_value_exists(ballot_item_list):
                 ballot_item_list_found = True
-                status = 'BALLOT_ITEMS_FOUND '
+                status += 'BALLOT_ITEMS_FOUND '
             else:
-                status = 'NO_BALLOT_ITEMS_FOUND, not positive_value_exists '
+                status += 'NO_BALLOT_ITEMS_FOUND, not positive_value_exists '
         except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
             success = True
-            status = 'NO_BALLOT_ITEMS_FOUND '
+            status += 'NO_BALLOT_ITEMS_FOUND '
             ballot_item_list = []
         except Exception as e:
             success = False
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_ballot_items_for_election ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED retrieve_ballot_items_for_election ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
 
         results = {
             'success':                  success,
@@ -776,6 +779,7 @@ class BallotItemListManager(models.Model):
         """
         ballot_item_list = []
         ballot_item_list_found = False
+        status = ''
         try:
             ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
             ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
@@ -784,17 +788,17 @@ class BallotItemListManager(models.Model):
 
             if positive_value_exists(ballot_item_list):
                 ballot_item_list_found = True
-                status = 'BALLOT_ITEMS_FOUND_WITHOUT_STATE '
+                status += 'BALLOT_ITEMS_FOUND_WITHOUT_STATE '
             else:
-                status = 'NO_BALLOT_ITEMS_WITHOUT_STATE_FOUND, not positive_value_exists '
+                status += 'NO_BALLOT_ITEMS_WITHOUT_STATE_FOUND, not positive_value_exists '
         except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_ITEMS_WITHOUT_STATE_FOUND '
+            status += 'NO_BALLOT_ITEMS_WITHOUT_STATE_FOUND '
             ballot_item_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_ballot_items_for_election_lacking_state ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            status += 'FAILED retrieve_ballot_items_for_election_lacking_state ' \
+                      '{error} [type: {error_type}] '.format(error=e.message, error_type=type(e))
 
         results = {
             'success':                  True if ballot_item_list_found else False,
@@ -807,22 +811,23 @@ class BallotItemListManager(models.Model):
     def count_ballot_items_for_election_lacking_state(self, google_civic_election_id):
         ballot_item_list_count = 0
         success = False
+        status = ''
         try:
             ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
             ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
             ballot_item_queryset = ballot_item_queryset.filter(Q(state_code=None) | Q(state_code=""))
             ballot_item_list_count = ballot_item_queryset.count()
 
-            status = 'BALLOT_ITEMS_WITHOUT_STATE_FOUND '
+            status += 'BALLOT_ITEMS_WITHOUT_STATE_FOUND '
             success = True
         except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_ITEMS_WITHOUT_STATE_FOUND '
+            status += 'NO_BALLOT_ITEMS_WITHOUT_STATE_FOUND '
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_ballot_items_for_election_lacking_state ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            status += 'FAILED retrieve_ballot_items_for_election_lacking_state ' \
+                      '{error} [type: {error_type}] '.format(error=e.message, error_type=type(e))
 
         results = {
             'success':                  success,
@@ -834,9 +839,10 @@ class BallotItemListManager(models.Model):
     def retrieve_all_ballot_items_for_contest_measure(self, measure_id, measure_we_vote_id):
         ballot_item_list = []
         ballot_item_list_found = False
+        status = ''
 
         if not positive_value_exists(measure_id) and not positive_value_exists(measure_we_vote_id):
-            status = 'VALID_MEASURE_ID_AND_MEASURE_WE_VOTE_ID_MISSING'
+            status += 'VALID_MEASURE_ID_AND_MEASURE_WE_VOTE_ID_MISSING'
             results = {
                 'success':                  True if ballot_item_list_found else False,
                 'status':                   status,
@@ -859,17 +865,17 @@ class BallotItemListManager(models.Model):
 
             if len(ballot_item_list):
                 ballot_item_list_found = True
-                status = 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_contest_measure '
+                status += 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_contest_measure '
             else:
-                status = 'NO_BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_contest_measure '
+                status += 'NO_BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_contest_measure '
         except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_ITEMS_FOUND_DoesNotExist, retrieve_all_ballot_items_for_contest_measure '
+            status += 'NO_BALLOT_ITEMS_FOUND_DoesNotExist, retrieve_all_ballot_items_for_contest_measure '
             ballot_item_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_all_ballot_items_for_contest_measure ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            status += 'FAILED retrieve_all_ballot_items_for_contest_measure ' \
+                      '{error} [type: {error_type}] '.format(error=e.message, error_type=type(e))
 
         results = {
             'success':                      True if ballot_item_list_found else False,
@@ -884,9 +890,10 @@ class BallotItemListManager(models.Model):
     def retrieve_all_ballot_items_for_contest_office(self, office_id, office_we_vote_id):
         ballot_item_list = []
         ballot_item_list_found = False
+        status = ''
 
         if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
-            status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING'
+            status += 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING '
             results = {
                 'success':                  True if ballot_item_list_found else False,
                 'status':                   status,
@@ -909,17 +916,17 @@ class BallotItemListManager(models.Model):
 
             if len(ballot_item_list):
                 ballot_item_list_found = True
-                status = 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_contest_office '
+                status += 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_contest_office '
             else:
-                status = 'NO_BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_contest_office '
+                status += 'NO_BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_contest_office '
         except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_ITEMS_FOUND_DoesNotExist, retrieve_all_ballot_items_for_contest_office '
+            status += 'NO_BALLOT_ITEMS_FOUND_DoesNotExist, retrieve_all_ballot_items_for_contest_office '
             ballot_item_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_all_ballot_items_for_contest_office ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED retrieve_all_ballot_items_for_contest_office ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
 
         results = {
             'success':                      True if ballot_item_list_found else False,
@@ -979,7 +986,7 @@ class BallotItemListManager(models.Model):
         except Exception as e:
             success = False
             status += 'FAILED retrieve_ballot_item_duplicate_list ' \
-                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
@@ -993,9 +1000,10 @@ class BallotItemListManager(models.Model):
 
     def delete_all_ballot_items_for_contest_office(self, office_id, office_we_vote_id):
         ballot_items_deleted_count = 0
+        status = ''
 
         if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
-            status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING'
+            status += 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING '
             success = False
             results = {
                 'success':                  success,
@@ -1015,14 +1023,14 @@ class BallotItemListManager(models.Model):
             ballot_items_deleted_count = ballot_item_queryset.count()
             ballot_item_queryset.delete()
 
-            status = 'BALLOT_ITEMS_DELETE, delete_all_ballot_items_for_contest_office '
+            status += 'BALLOT_ITEMS_DELETE, delete_all_ballot_items_for_contest_office '
             success = True
         except Exception as e:
             success = False
             ballot_items_deleted_count = 0
             handle_exception(e, logger=logger)
-            status = 'FAILED delete_all_ballot_items_for_contest_office ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED delete_all_ballot_items_for_contest_office ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
 
         results = {
             'success':                      success,
@@ -1037,6 +1045,7 @@ class BallotItemListManager(models.Model):
         polling_location_we_vote_id = ''
         ballot_item_list = []
         ballot_item_list_found = False
+        status = ''
         try:
             if positive_value_exists(voter_id):
                 # Intentionally not using 'readonly' here as the default
@@ -1051,17 +1060,17 @@ class BallotItemListManager(models.Model):
 
             if len(ballot_item_list):
                 ballot_item_list_found = True
-                status = 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_voter '
+                status += 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_voter '
             else:
-                status = 'NO_BALLOT_ITEMS_FOUND_0 '
+                status += 'NO_BALLOT_ITEMS_FOUND_0 '
         except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_ITEMS_FOUND_DoesNotExist '
+            status += 'NO_BALLOT_ITEMS_FOUND_DoesNotExist '
             ballot_item_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_all_ballot_items_for_voter ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            status += 'FAILED retrieve_all_ballot_items_for_voter ' \
+                      '{error} [type: {error_type}] '.format(error=e.message, error_type=type(e))
 
         results = {
             'success':                      True if ballot_item_list_found else False,
@@ -1079,6 +1088,7 @@ class BallotItemListManager(models.Model):
         voter_id = 0
         ballot_item_list = []
         ballot_item_list_found = False
+        status = ''
         try:
             if positive_value_exists(for_editing):
                 ballot_item_queryset = BallotItem.objects.all()
@@ -1092,17 +1102,17 @@ class BallotItemListManager(models.Model):
 
             if len(ballot_item_list):
                 ballot_item_list_found = True
-                status = 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_polling_location '
+                status += 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_polling_location '
             else:
-                status = 'NO_BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_polling_location '
+                status += 'NO_BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_polling_location '
         except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_ITEMS_FOUND_DoesNotExist, retrieve_all_ballot_items_for_polling_location '
+            status += 'NO_BALLOT_ITEMS_FOUND_DoesNotExist, retrieve_all_ballot_items_for_polling_location '
             ballot_item_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_all_ballot_items_for_polling_location ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            status += 'FAILED retrieve_all_ballot_items_for_polling_location ' \
+                      '{error} [type: {error_type}] '.format(error=e.message, error_type=type(e))
 
         results = {
             'success':                      True if ballot_item_list_found else False,
@@ -1323,6 +1333,7 @@ class BallotItemListManager(models.Model):
         ballot_item_list_objects = []
         ballot_item_list_found = False
         ballot_item_list_count = 0
+        status = ''
 
         if not positive_value_exists(google_civic_election_id):
             # We must have a google_civic_election_id
@@ -1394,20 +1405,20 @@ class BallotItemListManager(models.Model):
 
             if ballot_item_list_count:
                 ballot_item_list_found = True
-                status = 'DUPLICATE_BALLOT_ITEMS_RETRIEVED '
+                status += 'DUPLICATE_BALLOT_ITEMS_RETRIEVED '
                 success = True
             else:
-                status = 'NO_DUPLICATE_BALLOT_ITEMS_RETRIEVED '
+                status += 'NO_DUPLICATE_BALLOT_ITEMS_RETRIEVED '
                 success = True
         except BallotItem.DoesNotExist:
             # No ballot_items found. Not a problem.
-            status = 'NO_DUPLICATE_BALLOT_ITEMS_FOUND_DoesNotExist '
+            status += 'NO_DUPLICATE_BALLOT_ITEMS_FOUND_DoesNotExist '
             ballot_item_list_objects = []
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_possible_duplicate_ballot_items ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED retrieve_possible_duplicate_ballot_items ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
             success = False
 
         results = {
@@ -1618,6 +1629,7 @@ class BallotReturnedManager(models.Model):
         exception_multiple_object_returned = False
         ballot_returned_found = False
         ballot_returned = BallotReturned()
+        status = ''
 
         try:
             if positive_value_exists(ballot_returned_id):
@@ -1626,21 +1638,21 @@ class BallotReturnedManager(models.Model):
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
-                status = "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
+                status += "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
             elif positive_value_exists(ballot_returned_we_vote_id):
                 ballot_returned = BallotReturned.objects.get(we_vote_id__iexact=ballot_returned_we_vote_id)
                 # If still here, we found an existing ballot_returned
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
-                status = "BALLOT_RETURNED_FOUND_FROM_BALLOT_RETURNED_WE_VOTE_ID "
+                status += "BALLOT_RETURNED_FOUND_FROM_BALLOT_RETURNED_WE_VOTE_ID "
             elif positive_value_exists(ballot_location_shortcut):
                 ballot_returned = BallotReturned.objects.get(ballot_location_shortcut=ballot_location_shortcut)
                 # If still here, we found an existing ballot_returned
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
-                status = "BALLOT_RETURNED_FOUND_FROM_BALLOT_RETURNED_LOCATION_SHORTCUT "
+                status += "BALLOT_RETURNED_FOUND_FROM_BALLOT_RETURNED_LOCATION_SHORTCUT "
             elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
                 ballot_returned = BallotReturned.objects.get(voter_id=voter_id,
                                                              google_civic_election_id=google_civic_election_id)
@@ -1648,7 +1660,7 @@ class BallotReturnedManager(models.Model):
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
-                status = "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
+                status += "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
             elif positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
                 ballot_returned = BallotReturned.objects.get(polling_location_we_vote_id=polling_location_we_vote_id,
                                                              google_civic_election_id=google_civic_election_id)
@@ -1656,7 +1668,7 @@ class BallotReturnedManager(models.Model):
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
-                status = "BALLOT_RETURNED_FOUND_FROM_POLLING_LOCATION_WE_VOTE_ID "
+                status += "BALLOT_RETURNED_FOUND_FROM_POLLING_LOCATION_WE_VOTE_ID "
             elif positive_value_exists(google_civic_election_id):
                 ballot_returned_query = BallotReturned.objects.filter(google_civic_election_id=google_civic_election_id)
                 ballot_returned_query = ballot_returned_query.order_by("-ballot_location_shortcut")
@@ -1666,27 +1678,27 @@ class BallotReturnedManager(models.Model):
                     ballot_returned_id = ballot_returned.id
                     ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                     success = True
-                    status = "BALLOT_RETURNED_FOUND_FROM_GOOGLE_CIVIC_ELECTION_ID "
+                    status += "BALLOT_RETURNED_FOUND_FROM_GOOGLE_CIVIC_ELECTION_ID "
                 else:
                     ballot_returned_found = False
                     success = True
-                    status = "BALLOT_RETURNED_NOT_FOUND_FROM_GOOGLE_CIVIC_ELECTION_ID "
+                    status += "BALLOT_RETURNED_NOT_FOUND_FROM_GOOGLE_CIVIC_ELECTION_ID "
             else:
                 ballot_returned_found = False
                 success = False
-                status = "COULD_NOT_RETRIEVE_BALLOT_RETURNED-MISSING_VARIABLES "
+                status += "COULD_NOT_RETRIEVE_BALLOT_RETURNED-MISSING_VARIABLES "
 
         except BallotReturned.MultipleObjectsReturned as e:
             exception_multiple_object_returned = True
             success = False
-            status = "MULTIPLE_BALLOT_RETURNED-MUST_DELETE_ALL "
+            status += "MULTIPLE_BALLOT_RETURNED-MUST_DELETE_ALL "
         except BallotReturned.DoesNotExist:
             exception_does_not_exist = True
             success = True
-            status = "BALLOT_RETURNED_NOT_FOUND "
+            status += "BALLOT_RETURNED_NOT_FOUND "
         except Exception as e:
             success = False
-            status = "COULD_NOT_RETRIEVE_BALLOT_RETURNED-EXCEPTION "
+            status += "COULD_NOT_RETRIEVE_BALLOT_RETURNED-EXCEPTION "
 
         results = {
             'success':                  success,
@@ -1703,6 +1715,7 @@ class BallotReturnedManager(models.Model):
                                                       google_civic_election_id,
                                                       voter_id=0, polling_location_we_vote_id='',
                                                       latitude='', longitude=''):
+        status = ''
         # Protect against ever saving test elections in the BallotReturned table
         if positive_value_exists(google_civic_election_id) and convert_to_int(google_civic_election_id) == 2000:
             results = {
@@ -1752,16 +1765,16 @@ class BallotReturnedManager(models.Model):
                 ballot_returned.text_for_map_search = text_for_map_search
 
                 ballot_returned.save()
-                status = "SAVED_BALLOT_RETURNED_WITH_NORMALIZED_VALUES"
+                status += "SAVED_BALLOT_RETURNED_WITH_NORMALIZED_VALUES"
                 success = True
                 ballot_returned_found = True
             else:
-                status = "UNABLE_TO_CREATE_BALLOT_RETURNED_WITH_NORMALIZED_VALUES"
+                status += "UNABLE_TO_CREATE_BALLOT_RETURNED_WITH_NORMALIZED_VALUES"
                 success = False
                 ballot_returned_found = False
 
         except Exception as e:
-            status = "UNABLE_TO_CREATE_BALLOT_RETURNED_WITH_NORMALIZED_VALUES_EXCEPTION"
+            status += "UNABLE_TO_CREATE_BALLOT_RETURNED_WITH_NORMALIZED_VALUES_EXCEPTION"
             success = False
             ballot_returned = None
             ballot_returned_found = False
@@ -1800,6 +1813,7 @@ class BallotReturnedManager(models.Model):
 
     def update_ballot_returned_with_normalized_values(self, google_civic_address_dict, ballot_returned,
                                                       latitude='', longitude=''):
+        status = ''
         try:
             text_for_map_search = ''
             if self.is_ballot_returned_different(google_civic_address_dict, ballot_returned):
@@ -1823,14 +1837,14 @@ class BallotReturnedManager(models.Model):
                 ballot_returned.text_for_map_search = text_for_map_search
 
                 ballot_returned.save()
-                status = "UPDATED_BALLOT_RETURNED_WITH_NORMALIZED_VALUES "
+                status += "UPDATED_BALLOT_RETURNED_WITH_NORMALIZED_VALUES "
                 success = True
             else:
-                status = "BALLOT_RETURNED_ALREADY_MATCHES_NORMALIZED_VALUES "
+                status += "BALLOT_RETURNED_ALREADY_MATCHES_NORMALIZED_VALUES "
                 success = False
 
         except Exception as e:
-            status = "UNABLE_TO_UPDATE_BALLOT_RETURNED_WITH_NORMALIZED_VALUES_EXCEPTION "
+            status += "UNABLE_TO_UPDATE_BALLOT_RETURNED_WITH_NORMALIZED_VALUES_EXCEPTION "
             success = False
 
         results = {
@@ -2368,6 +2382,7 @@ class BallotReturnedListManager(models.Model):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         ballot_returned_list = []
         ballot_returned_list_found = False
+        status = ''
 
         if not positive_value_exists(google_civic_election_id) \
                 and not positive_value_exists(polling_location_we_vote_id):
@@ -2394,16 +2409,16 @@ class BallotReturnedListManager(models.Model):
 
             if len(ballot_returned_list):
                 ballot_returned_list_found = True
-                status = 'BALLOT_RETURNED_LIST_FOUND'
+                status += 'BALLOT_RETURNED_LIST_FOUND'
             else:
-                status = 'NO_BALLOT_RETURNED_LIST_FOUND'
+                status += 'NO_BALLOT_RETURNED_LIST_FOUND'
         except BallotReturned.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
+            status += 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
             ballot_returned_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_ballot_returned_list ' \
+            status += 'FAILED retrieve_ballot_returned_list ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
         results = {
@@ -2476,6 +2491,7 @@ class BallotReturnedListManager(models.Model):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         ballot_returned_list = []
         ballot_returned_list_found = False
+        status = ''
 
         try:
             ballot_returned_queryset = BallotReturned.objects.order_by('-id')
@@ -2526,16 +2542,16 @@ class BallotReturnedListManager(models.Model):
 
             if len(ballot_returned_list):
                 ballot_returned_list_found = True
-                status = 'BALLOT_RETURNED_LIST_FOUND'
+                status += 'BALLOT_RETURNED_LIST_FOUND'
             else:
-                status = 'NO_BALLOT_RETURNED_LIST_FOUND'
+                status += 'NO_BALLOT_RETURNED_LIST_FOUND'
         except BallotReturned.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
+            status += 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
             ballot_returned_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_ballot_returned_list_for_election ' \
+            status += 'FAILED retrieve_ballot_returned_list_for_election ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
         results = {
@@ -2548,6 +2564,7 @@ class BallotReturnedListManager(models.Model):
 
     def fetch_ballot_returned_list_count_for_election(self, google_civic_election_id, state_code=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
+        status = ''
         try:
             ballot_returned_queryset = BallotReturned.objects.using('readonly').all()
             ballot_returned_queryset = ballot_returned_queryset.filter(
@@ -2558,17 +2575,18 @@ class BallotReturnedListManager(models.Model):
             return ballot_returned_queryset.count()
         except BallotReturned.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
+            status += 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
             ballot_returned_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_ballot_returned_list_for_election ' \
+            status += 'FAILED retrieve_ballot_returned_list_for_election ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
         return 0
 
     def fetch_ballot_returned_entries_needed_lat_long_for_election(self, google_civic_election_id, state_code=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
+        status = ''
         try:
             ballot_returned_queryset = BallotReturned.objects.using('readonly').all()
             ballot_returned_queryset = ballot_returned_queryset.exclude(
@@ -2583,11 +2601,11 @@ class BallotReturnedListManager(models.Model):
             return ballot_returned_queryset.count()
         except BallotReturned.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
+            status += 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
             ballot_returned_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_ballot_returned_list_for_election ' \
+            status += 'FAILED retrieve_ballot_returned_list_for_election ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
         return 0
@@ -2596,6 +2614,7 @@ class BallotReturnedListManager(models.Model):
                                                     polling_location_we_vote_id):
         ballot_returned_list_objects = []
         ballot_returned_list_found = False
+        status = ''
 
         if not positive_value_exists(normalized_line1) \
                 and not positive_value_exists(normalized_zip):
@@ -2623,19 +2642,19 @@ class BallotReturnedListManager(models.Model):
 
             if len(ballot_returned_list_objects):
                 ballot_returned_list_found = True
-                status = 'DUPLICATE_BALLOT_RETURNED_ITEMS_RETRIEVED'
+                status += 'DUPLICATE_BALLOT_RETURNED_ITEMS_RETRIEVED'
                 success = True
             else:
-                status = 'NO_DUPLICATE_BALLOT_RETURNED_ITEMS_RETRIEVED'
+                status += 'NO_DUPLICATE_BALLOT_RETURNED_ITEMS_RETRIEVED'
                 success = True
         except BallotReturned.DoesNotExist:
             # No ballot_returned found. Not a problem.
-            status = 'NO_DUPLICATE_BALLOT_RETURNED_ITEMS_FOUND_DoesNotExist'
+            status += 'NO_DUPLICATE_BALLOT_RETURNED_ITEMS_FOUND_DoesNotExist'
             ballot_returned_list_objects = []
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_possible_duplicate_ballot_returned ' \
+            status += 'FAILED retrieve_possible_duplicate_ballot_returned ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
