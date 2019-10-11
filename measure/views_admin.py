@@ -369,12 +369,12 @@ def measure_merge_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
+    # Remove contest measure 2
+    contest_measure2_on_stage.delete()
+
     # Note: wait to wrap in try/except block
     contest_measure1_on_stage.save()
     # There isn't any measure data to refresh from other master tables
-
-    # Remove contest measure 2
-    contest_measure2_on_stage.delete()
 
     if redirect_to_contest_measure_list:
         return HttpResponseRedirect(reverse('measure:measure_list', args=()) +
@@ -387,6 +387,7 @@ def measure_merge_process_view(request):
                                     "&state_code=" + str(state_code))
 
     return HttpResponseRedirect(reverse('measure:measure_edit', args=(contest_measure1_on_stage.id,)))
+
 
 def add_contest_measure_title_to_next_spot(contest_measure_to_update, google_civic_measure_title_to_add):
     if not positive_value_exists(google_civic_measure_title_to_add):
