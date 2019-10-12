@@ -50,6 +50,7 @@ social-auth-core==3.0.0
 static3==0.7.0
 stripe==2.16.0
 tweepy==3.7.0
+twilio==6.31.1
 # Unipath==1.1s
 uritemplate==3.0.0
 usaddress==0.5.10
