@@ -160,5 +160,10 @@
   "_comment":                       "Scheduled Tasks, Retain History of completed tasks for n days",
   "SCHEDULED_TASKS_RETAIN_HISTORY":  90,
 
+  "_comment":                       "Twilio SMS Credentials",
+  "TWILIO_ACCOUNT_SID":             "",
+  "TWILIO_AUTH_TOKEN":              "",
+  "SYSTEM_SENDER_SMS_PHONE_NUMBER": "",
+
   "_comment":                       "End of json_environment_variables.json"
 }
