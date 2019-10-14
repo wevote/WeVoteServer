@@ -2102,7 +2102,9 @@ def voter_guide_possibility_list_view(request):
 
     if positive_value_exists(len(voter_guide_possibility_list)):
         # Add VoterGuidePossibilityPosition data. Don't scan for new possibilities.
-        voter_guide_possibility_list = augment_with_voter_guide_possibility_position_data(voter_guide_possibility_list)
+        # voter_guide_possibility_list = \
+        #     augment_with_voter_guide_possibility_position_data(voter_guide_possibility_list)
+        pass
 
     # Now populate the election drop down
     if positive_value_exists(show_all_elections):
