@@ -801,7 +801,7 @@ def donation_process_subscription_updated(event):
 
 
 def move_donation_info_to_another_organization(from_organization_we_vote_id, to_organization_we_vote_id):
-    status = "MOVE_DONATION_INFO_TO_ANOTHER_ORGANIZATION"
+    status = "MOVE_DONATION_INFO_TO_ANOTHER_ORGANIZATION "
     success = True
 
     if not positive_value_exists(from_organization_we_vote_id) or not positive_value_exists(to_organization_we_vote_id):
