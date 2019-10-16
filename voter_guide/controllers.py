@@ -1885,7 +1885,13 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
         'never_highlight_on':   [  # TODO: 9/17/19, URLs for sites excluded from highlighting - should be in the db
             '*.wevote.us',
             'api.wevoteusa.org',
-            'localhost'
+            'localhost',
+            'meet.google.com',
+            'sketchviewer.com',
+            'www.google.com',
+            'slack.com',
+            'dashlane.com',
+            'github.com'
         ]
     }
     return json_data
