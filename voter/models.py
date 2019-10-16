@@ -2354,6 +2354,7 @@ class VoterDeviceLinkManager(models.Model):
             else:
                 missing_required_variables = True
                 voter_device_link_id = 0
+                status += "UPDATE-MISSING_VOTER_DEVICE_ID "
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
             error_result = True

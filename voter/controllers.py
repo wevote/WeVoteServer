@@ -1493,6 +1493,21 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     to_voter_we_vote_id = ""
 
     voter_device_id = voter_device_link.voter_device_id
+
+    if not positive_value_exists(voter_device_id):
+        status += "MERGE-MISSING_VOTER_DEVICE_ID "
+        success = False
+        results = {
+            'status': status,
+            'success': success,
+            'voter_device_id': voter_device_id,
+            'current_voter_found': current_voter_found,
+            'email_owner_voter_found': email_owner_voter_found,
+            'facebook_owner_voter_found': facebook_owner_voter_found,
+            'invitation_owner_voter_found': invitation_owner_voter_found,
+        }
+        return results
+
     try:
         from_voter_id = voter.id
         from_voter_we_vote_id = voter.we_vote_id
@@ -1688,6 +1703,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         success = True
         status += "MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED "
     else:
+        status += update_link_results['status']
         status += "VOTER_DEVICE_LINK_NOT_UPDATED "
 
     # Data healing scripts
