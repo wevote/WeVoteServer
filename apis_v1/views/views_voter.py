@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django_user_agents.utils import get_user_agent
 from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
     voter_email_address_sign_in_for_api, voter_email_address_verify_for_api
+from email_outbound.models import EmailManager
 from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
 from follow.controllers import voter_issue_follow_for_api
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
@@ -33,10 +34,10 @@ from sms.controllers import voter_sms_phone_number_save_for_api
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
     voter_stop_supporting_save, voter_supporting_save_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
-    voter_photo_save_for_api, voter_retrieve_for_api, voter_sign_out_for_api, \
+    voter_merge_two_accounts_action, voter_photo_save_for_api, voter_retrieve_for_api, voter_sign_out_for_api, \
     voter_split_into_two_accounts_for_api
 from voter.models import BALLOT_ADDRESS, VoterAddress, \
-    VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager
+    VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager, fetch_voter_id_from_voter_we_vote_id
 from voter_guide.controllers import voter_follow_all_organizations_followed_by_organization_for_api
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_maximum_number_to_retrieve_from_request, \
@@ -750,6 +751,7 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
         'email_address_we_vote_id':         results['email_address_we_vote_id'],
         'email_address_saved_we_vote_id':   results['email_address_saved_we_vote_id'],
         'email_address_already_owned_by_other_voter':   results['email_address_already_owned_by_other_voter'],
+        'email_address_already_owned_by_this_voter':    results['email_address_already_owned_by_this_voter'],
         'email_address_created':            results['email_address_created'],
         'email_address_deleted':            results['email_address_deleted'],
         'verification_email_sent':          results['verification_email_sent'],
@@ -1960,7 +1962,8 @@ def voter_update_view(request):  # voterUpdate
 
 def voter_verify_secret_code_view(request):  # voterVerifySecretCode
     """
-    Retrieve a single voter based on voter_device
+    Compare a time-limited 6 digit secret code against this specific voter_device_id. If correct, sign in the
+    voter_device_id.
     :param request:
     :return:
     """
@@ -1968,19 +1971,118 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
     success = True
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     secret_code = request.GET.get('secret_code', None)
+    code_sent_to_sms_phone_number = request.GET.get('code_sent_to_sms_phone_number', None)
+    code_sent_to_email = request.GET.get('code_sent_to_email', None)
 
     voter_device_link_manager = VoterDeviceLinkManager()
+    voter_manager = VoterManager()
     results = voter_device_link_manager.voter_verify_secret_code(
         voter_device_id=voter_device_id, secret_code=secret_code)
+    incorrect_secret_code_entered = results['incorrect_secret_code_entered']
     secret_code_verified = results['secret_code_verified']
     number_of_tries_remaining_for_this_code = results['number_of_tries_remaining_for_this_code']
     secret_code_system_locked_for_this_voter_device_id = results['secret_code_system_locked_for_this_voter_device_id']
     voter_must_request_new_code = results['voter_must_request_new_code']
 
+    if not positive_value_exists(secret_code_verified):
+        status += results['status']
+
+    voter_found = False
+    voter = None
+    voter_device_link = None
+    if positive_value_exists(secret_code_verified):
+        link_results = voter_device_link_manager.retrieve_voter_device_link(
+            voter_device_id=voter_device_id, read_only=True)
+        if link_results['voter_device_link_found']:
+            voter_device_link = link_results['voter_device_link']
+            if positive_value_exists(voter_device_link.voter_id):
+                results = voter_manager.retrieve_voter_by_id(voter_device_link.voter_id, read_only=False)
+                if results['voter_found']:
+                    voter = results['voter']
+                    voter_found = True
+                else:
+                    status += results['status']
+        else:
+            status += link_results['status']
+
+        if not voter_found:
+            secret_code_verified = False
+            voter_must_request_new_code = True
+
+        if voter_found:
+            if positive_value_exists(code_sent_to_sms_phone_number):
+                pass
+            else:
+                # Default to code being sent to an email address
+                existing_verified_email_address_found = False
+                new_owner_voter = None
+                email_manager = EmailManager()
+                # Check to see if this email_address is already owned by an existing account
+                # We get the new email being verified, so we can find the normalized_email_address and check to see
+                # if that is in use by someone else.
+                secret_key_results = email_manager.retrieve_email_address_object_from_secret_key(
+                    voter_device_link.email_secret_key)
+                if secret_key_results['email_address_object_found']:
+                    email_object_from_secret_key = secret_key_results['email_address_object']
+
+                    matching_results = email_manager.retrieve_email_address_object(
+                        email_object_from_secret_key.normalized_email_address)
+                    if matching_results['email_address_object_found']:
+                        email_address_from_normalized = matching_results['email_address_object']
+                        if positive_value_exists(email_address_from_normalized.email_ownership_is_verified):
+                            if positive_value_exists(email_address_from_normalized.voter_we_vote_id):
+                                voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                                    email_address_from_normalized.voter_we_vote_id)
+                                if voter_results['voter_found']:
+                                    voter_from_normalized = voter_results['voter']
+                                    # If here we know the voter account still exists
+                                    if voter_from_normalized.we_vote_id != voter.we_vote_id:
+                                        existing_verified_email_address_found = True
+                                        new_owner_voter = voter_from_normalized
+                    elif matching_results['email_address_list_found']:
+                        email_address_list = matching_results['email_address_list']
+                        for email_address_from_normalized in email_address_list:
+                            if positive_value_exists(email_address_from_normalized.email_ownership_is_verified):
+                                if positive_value_exists(email_address_from_normalized.voter_we_vote_id):
+                                    voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                                        email_address_from_normalized.voter_we_vote_id)
+                                    if voter_results['voter_found']:
+                                        voter_from_normalized = voter_results['voter']
+                                        # If here we know the voter account still exists
+                                        if voter_from_normalized.we_vote_id != voter.we_vote_id:
+                                            existing_verified_email_address_found = True
+                                            new_owner_voter = voter_from_normalized
+                                            break
+                    else:
+                        pass
+
+                if existing_verified_email_address_found:
+                    # Merge existing account with new account
+                    merge_results = voter_merge_two_accounts_action(
+                        voter, new_owner_voter, voter_device_link, status=status)
+                    status += merge_results['status']
+                    success = merge_results['success']
+                else:
+                    # Find and verify the unverified email we are verifying
+                    email_results = email_manager.verify_email_address_object_from_secret_key(
+                        voter_device_link.email_secret_key)
+                    if email_results['email_address_object_found']:
+                        email_address_object = email_results['email_address_object']
+                        status += "EMAIL_ADDRESS_FOUND_FROM_VERIFY "
+                        try:
+                            # Attach the email_address_object to the current voter
+                            voter_manager.update_voter_email_ownership_verified(
+                                voter, email_address_object)
+                        except Exception as e:
+                            status += "UNABLE_TO_CONNECT_VERIFIED_EMAIL_WITH_THIS_ACCOUNT " + str(e) + " "
+                    else:
+                        status += email_results['status']
+
     json_data = {
         'status':                                   status,
         'success':                                  success,
-        'number_of_tries_remaining_for_this_code':      number_of_tries_remaining_for_this_code,
+        'incorrect_secret_code_entered':            incorrect_secret_code_entered,
+        'number_of_tries_remaining_for_this_code':  number_of_tries_remaining_for_this_code,
         'secret_code_system_locked_for_this_voter_device_id': secret_code_system_locked_for_this_voter_device_id,
         'secret_code_verified':                     secret_code_verified,
         'voter_must_request_new_code':              voter_must_request_new_code,

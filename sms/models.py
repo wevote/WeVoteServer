@@ -51,8 +51,10 @@ class SMSPhoneNumber(models.Model):
         verbose_name='sms address', max_length=50, null=False, blank=False, unique=False)
     # Has this sms been verified by the owner?
     sms_ownership_is_verified = models.BooleanField(default=False)
-    # Has this sms had a permanent bounce? If so, we should not send smss to it.
+    # Has this sms had a permanent bounce? If so, we should not send sms to it.
     sms_permanent_bounce = models.BooleanField(default=False)
+    secret_key = models.CharField(
+        verbose_name="secret key to verify ownership of sms", max_length=255, null=True, blank=True, unique=True)
     deleted = models.BooleanField(default=False)  # If sms address is removed from person's account, mark as deleted
 
     # We override the save function so we can auto-generate we_vote_id

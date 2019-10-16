@@ -314,7 +314,7 @@ class EmailManager(models.Model):
             status += "RETRIEVE_EMAIL_ADDRESS_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'FAILED retrieve_email_address_object EmailAddress'
+            status += 'FAILED retrieve_email_address_object EmailAddress ' + str(e) + ' '
 
         results = {
             'success':                          success,
@@ -339,6 +339,7 @@ class EmailManager(models.Model):
         email_address_object = EmailAddress()
         email_address_object_id = 0
         email_address_object_we_vote_id = ""
+        status = ''
 
         try:
             if positive_value_exists(email_secret_key):
@@ -349,17 +350,17 @@ class EmailManager(models.Model):
                 email_address_object_we_vote_id = email_address_object.we_vote_id
                 email_address_object_found = True
                 success = True
-                status = "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_SECRET_KEY"
+                status += "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_SECRET_KEY "
             else:
                 email_address_object_found = False
                 success = False
-                status = "RETRIEVE_EMAIL_ADDRESS_BY_SECRET_KEY_VARIABLES_MISSING"
+                status += "RETRIEVE_EMAIL_ADDRESS_BY_SECRET_KEY_VARIABLE_MISSING "
         except EmailAddress.DoesNotExist:
             success = True
-            status = "RETRIEVE_EMAIL_ADDRESS_BY_SECRET_KEY_NOT_FOUND"
+            status += "RETRIEVE_EMAIL_ADDRESS_BY_SECRET_KEY_NOT_FOUND "
         except Exception as e:
             success = False
-            status = 'FAILED retrieve_email_address_object_from_secret_key EmailAddress'
+            status += 'FAILED retrieve_email_address_object_from_secret_key EmailAddress ' + str(e) + ' '
 
         results = {
             'success':                          success,
@@ -453,7 +454,7 @@ class EmailManager(models.Model):
         email_ownership_is_verified = False
         if email_address_object_found:
             try:
-                # Note that we leave the secret key in place so we can the owner we_vote_id in a subsequent call
+                # Note that we leave the secret key in place so we can find the owner we_vote_id in a subsequent call
                 email_address_object.email_ownership_is_verified = True
                 email_address_object.save()
                 email_ownership_is_verified = True
