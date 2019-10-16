@@ -1024,7 +1024,11 @@ def voter_email_address_save_for_api(voter_device_id='',
             email_address_we_vote_id = verified_email_address_object.we_vote_id
             email_address_saved_we_vote_id = ""
             text_for_email_address = verified_email_address_object.normalized_email_address
-            recipient_email_address_secret_key = verified_email_address_object.secret_key
+            if positive_value_exists(verified_email_address_object.secret_key):
+                recipient_email_address_secret_key = verified_email_address_object.secret_key
+            else:
+                recipient_email_address_secret_key = \
+                    email_manager.update_email_address_with_new_secret_key(email_address_we_vote_id)
             email_address_created = False
             email_address_found = True
         else:
@@ -1065,7 +1069,11 @@ def voter_email_address_save_for_api(voter_device_id='',
             email_address_we_vote_id = email_address_object.we_vote_id
             email_address_saved_we_vote_id = ""
             text_for_email_address = email_address_object.normalized_email_address
-            recipient_email_address_secret_key = email_address_object.secret_key
+            if positive_value_exists(email_address_object.secret_key):
+                recipient_email_address_secret_key = email_address_object.secret_key
+            else:
+                recipient_email_address_secret_key = \
+                    email_manager.update_email_address_with_new_secret_key(email_address_we_vote_id)
             email_address_created = False
             email_address_found = True
             if delete_email:
@@ -1220,7 +1228,11 @@ def voter_email_address_save_for_api(voter_device_id='',
                 new_email_address_object = email_save_results['email_address_object']
                 email_address_we_vote_id = new_email_address_object.we_vote_id
                 email_address_saved_we_vote_id = new_email_address_object.we_vote_id
-                recipient_email_address_secret_key = new_email_address_object.secret_key
+                if positive_value_exists(new_email_address_object.secret_key):
+                    recipient_email_address_secret_key = new_email_address_object.secret_key
+                else:
+                    recipient_email_address_secret_key = \
+                        email_manager.update_email_address_with_new_secret_key(email_address_we_vote_id)
                 email_address_created = True
                 email_address_found = True
                 success = True

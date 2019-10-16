@@ -269,7 +269,11 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array
         recipient_voter_we_vote_id = sender_voter.we_vote_id
         recipient_email_we_vote_id = sender_email_address_object.we_vote_id
         recipient_voter_email = sender_email_address_object.normalized_email_address
-        recipient_email_address_secret_key = sender_email_address_object.secret_key
+        if positive_value_exists(sender_email_address_object.secret_key):
+            recipient_email_address_secret_key = sender_email_address_object.secret_key
+        else:
+            recipient_email_address_secret_key = \
+                email_manager.update_email_address_with_new_secret_key(recipient_email_we_vote_id)
         send_now = False
         verification_context = None  # TODO DALE Figure out best way to do this
 
