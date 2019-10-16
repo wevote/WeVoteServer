@@ -2,8 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.core.mail import EmailMultiAlternatives
 from django.db import models
+from twilio.rest import Client
+from config.base import get_environment_variable
 from wevote_functions.functions import generate_random_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_sms_integer, fetch_site_unique_id_prefix
 
@@ -118,6 +119,74 @@ class SMSScheduled(models.Model):
     sms_description_id = models.PositiveIntegerField(
         verbose_name="the internal id of SMSOutboundDescription", default=0, null=False)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+
+
+def convert_phone_number_to_e164(phone_number):
+    # https://www.twilio.com/docs/glossary/what-e164    we want +15105551212
+    # Assume only US, Canada, Mexico numbers
+    just_the_digits = ''.join(filter(str.isdigit, phone_number))
+    lnum = len(just_the_digits)
+
+    if lnum == 10 and just_the_digits[0] is not '1':   # 5105551212
+        return "+1" + just_the_digits
+    elif lnum == 11 and just_the_digits[0] is '1':     # 15105551212
+        return "+" + just_the_digits
+    else:
+        return False
+
+
+def send_scheduled_sms_via_twilio(sms_scheduled):
+    """
+    Send a single scheduled sms
+    :param sms_scheduled:
+    :return:
+    """
+    status = ""
+    success = False
+    sms_scheduled_sent = False
+
+    twilio_api_turned_off_for_testing = False
+    if twilio_api_turned_off_for_testing:
+        status += "TWILIO_TURNED_OFF_FOR_TESTING "
+        results = {
+            'success':              success,
+            'status':               status,
+            'sms_scheduled_sent':   True,
+        }
+        return results
+
+    try:
+        account_sid = get_environment_variable("TWILIO_ACCOUNT_SID")
+        auth_token = get_environment_variable("TWILIO_AUTH_TOKEN")
+        from_phone_number = get_environment_variable("SYSTEM_SENDER_SMS_PHONE_NUMBER")
+        to = convert_phone_number_to_e164(sms_scheduled.sender_voter_sms)
+        if not to:
+            status += "SENDING_VIA_TWILIO_INVALID_TO_NUMBER "
+            print("invalid to phone number for twilio: " + sms_scheduled.sender_voter_sms)
+        elif len(account_sid) and len(account_sid):
+            client = Client(account_sid, auth_token)
+            message = client.messages.create(
+                to,
+                from_=from_phone_number,
+                body=sms_scheduled.message_text)
+            status += "SENDING_VIA_TWILIO "
+            if message.error_code:
+                status += "TWILLIO_ERROR_" + message.error_code + " MSG_" + message.error_message
+            else:
+                success = True
+                sms_scheduled_sent = True
+        else:
+            status += "COULD_NOT_SEND_VIA_TWILIO_ACCOUNT_SETTINGS_ARE_INCORRECT "
+    except Exception as e:
+        print(e)
+        status += "COULD_NOT_SEND_VIA_TWILIO "
+
+    results = {
+        'success':              success,
+        'status':               status,
+        'sms_scheduled_sent':   sms_scheduled_sent,
+    }
+    return results
 
 
 class SMSManager(models.Model):
@@ -613,7 +682,7 @@ class SMSManager(models.Model):
             success = False
 
         if success:
-            return self.send_scheduled_sms_via_twilio(sms_scheduled)
+            return send_scheduled_sms_via_twilio(sms_scheduled)
         else:
             sms_scheduled_sent = False
             results = {
@@ -622,49 +691,6 @@ class SMSManager(models.Model):
                 'sms_scheduled_sent': sms_scheduled_sent,
             }
             return results
-
-    def send_scheduled_sms_via_twilio(self, sms_scheduled):
-        """
-        Send a single scheduled sms
-        :param sms_scheduled:
-        :return:
-        """
-        status = ""
-        success = True
-        twilio_api_turned_off_for_testing = False
-        if twilio_api_turned_off_for_testing:
-            status += "TWILIO_TURNED_OFF_FOR_TESTING "
-            results = {
-                'success':              success,
-                'status':               status,
-                'sms_scheduled_sent':   True,
-            }
-            return results
-
-        system_sender_sms_phone_number = "123456"  # TODO DALE Make system variable
-
-        # mail = EmailMultiAlternatives(
-        #     subject=sms_scheduled.subject,
-        #     body=sms_scheduled.message_text,
-        #     from_sms=system_sender_sms_phone_number,
-        #     to=[sms_scheduled.recipient_voter_sms],
-        #     headers={"Reply-To": sms_scheduled.sender_voter_sms}
-        # )
-
-        try:
-            # mail.send()
-            status += "SENDING_VIA_TWILIO "
-        except Exception as e:
-            status += "COULD_NOT_SEND_VIA_TWILIO "
-
-        sms_scheduled_sent = True
-
-        results = {
-            'success':              success,
-            'status':               status,
-            'sms_scheduled_sent':   sms_scheduled_sent,
-        }
-        return results
 
     def update_sms_phone_number_object_as_verified(self, sms_phone_number_object):
         try:
