@@ -1588,7 +1588,7 @@ class VoterManager(BaseUserManager):
             if should_save_voter:
                 voter.save()
                 voter_updated = True
-            status += "UPDATED_VOTER_EMAIL_OWNERSHIP"
+            status += "UPDATED_VOTER_EMAIL_OWNERSHIP "
             success = True
         except Exception as e:
             status += "UNABLE_TO_UPDATE_INCOMING_VOTER "
@@ -1718,6 +1718,7 @@ class Voter(AbstractBaseUser):
     normalized_sms_phone_number = models.CharField(max_length=50, null=True, blank=True)
     primary_sms_we_vote_id = models.CharField(
         verbose_name="we vote id for primary phone number", max_length=255, null=True, blank=True, unique=True)
+    primary_sms_ownership_is_verified = models.BooleanField(default=False)
     first_name = models.CharField(verbose_name='first name', max_length=255, null=True, blank=True)
     middle_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
@@ -1909,7 +1910,8 @@ class Voter(AbstractBaseUser):
         return ''
 
     def is_signed_in(self):
-        if self.signed_in_with_email() or self.signed_in_facebook() or self.signed_in_twitter():
+        if self.signed_in_with_email() or self.signed_in_facebook() or self.signed_in_with_sms_phone_number() \
+                or self.signed_in_twitter():
             return True
         return False
 
@@ -1947,6 +1949,12 @@ class Voter(AbstractBaseUser):
         if self.has_email_with_verified_ownership():
             return True
         return False
+
+    def signed_in_with_sms_phone_number(self):
+        verified_sms_found = (positive_value_exists(self.normalized_sms_phone_number) or
+                              positive_value_exists(self.primary_sms_we_vote_id)) and \
+                              self.primary_sms_ownership_is_verified
+        return verified_sms_found
 
     def has_data_to_preserve(self):
         # Does this voter record have any values associated in this table that are unique
@@ -2019,7 +2027,13 @@ class VoterDeviceLink(models.Model):
     state_code = models.CharField(verbose_name="us state the device is most recently active in",
                                   max_length=255, null=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # last_updated
+    # secret_code is a six digit number that can be sent via text or email to sign in
     secret_code = models.CharField(verbose_name="single use secret code tied to this device", max_length=6, null=True)
+    # We store a random string for email and another for sms that allows us to tie an unverified email or sms to a voter
+    email_secret_key = models.CharField(
+        verbose_name="secret key to verify ownership of email", max_length=255, null=True, blank=True, unique=True)
+    sms_secret_key = models.CharField(
+        verbose_name="secret key to verify ownership of sms", max_length=255, null=True, blank=True, unique=True)
     # Each secret code requested is only valid for one day
     date_secret_code_generated = models.DateTimeField(null=True)
     # A voter may only attempt to enter a secret code 5 times before a new secret code must be requested
@@ -2291,8 +2305,15 @@ class VoterDeviceLinkManager(models.Model):
     def update_voter_device_link_with_new_secret_code(self, voter_device_link):
         return self.update_voter_device_link(voter_device_link, generate_new_secret_code=True)
 
+    def update_voter_device_link_with_email_secret_key(self, voter_device_link, email_secret_key=False):
+        return self.update_voter_device_link(voter_device_link, email_secret_key=email_secret_key)
+
+    def update_voter_device_link_with_sms_secret_key(self, voter_device_link, sms_secret_key=False):
+        return self.update_voter_device_link(voter_device_link, sms_secret_key=sms_secret_key)
+
     def update_voter_device_link(self, voter_device_link, voter_object=None, google_civic_election_id=0, state_code='',
-                                 generate_new_secret_code=False, delete_secret_code=False):
+                                 generate_new_secret_code=False, delete_secret_code=False,
+                                 email_secret_key=False, sms_secret_key=False):
         """
         Update existing voter_device_link with a new voter_id or google_civic_election_id
         """
@@ -2314,6 +2335,10 @@ class VoterDeviceLinkManager(models.Model):
                     voter_device_link.google_civic_election_id = 0
                 if positive_value_exists(state_code):
                     voter_device_link.state_code = state_code
+                if email_secret_key is not False:
+                    voter_device_link.email_secret_key = email_secret_key
+                if sms_secret_key is not False:
+                    voter_device_link.sms_secret_key = sms_secret_key
                 if positive_value_exists(generate_new_secret_code):
                     voter_device_link.secret_code = generate_random_string(string_length=6, chars=string.digits)
                     timezone = pytz.timezone("America/Los_Angeles")
@@ -2352,6 +2377,7 @@ class VoterDeviceLinkManager(models.Model):
         status = ""
         # NUMBER_OF_FAILED_TRIES_ALLOWED_PER_SECRET_CODE = 5
         # NUMBER_OF_FAILED_TRIES_ALLOWED_ALL_TIME = 25
+        incorrect_secret_code_entered = False
         number_of_tries_remaining_for_this_code = 0
         secret_code_system_locked_for_this_voter_device_id = False
         secret_code_verified = False
@@ -2384,30 +2410,34 @@ class VoterDeviceLinkManager(models.Model):
                     number_of_tries_remaining_for_this_code = NUMBER_OF_FAILED_TRIES_ALLOWED_PER_SECRET_CODE - \
                         secret_code_number_of_failed_tries_for_this_code
 
-                if voter_device_link.date_secret_code_generated \
-                        and positive_value_exists(voter_device_link.secret_code):
-                    # We have an existing secret code. Verify it is still valid.
-                    timezone = pytz.timezone("America/Los_Angeles")
-                    datetime_now = timezone.localize(datetime.now())
-                    secret_code_is_stale_duration = timedelta(days=1)
-                    secret_code_is_stale_date = voter_device_link.date_secret_code_generated + \
-                        secret_code_is_stale_duration
-                    if secret_code_is_stale_date > datetime_now:
-                        if secret_code == voter_device_link.secret_code:
-                            status += "VALID_SECRET_CODE_FOUND "
-                            secret_code_verified = True
-                            voter_must_request_new_code = False
+                    if not positive_value_exists(number_of_tries_remaining_for_this_code):
+                        voter_must_request_new_code = True
+                        status += "VOTER_DEVICE_LINK_NO_MORE_TRIES_REMAINING_FOR_THIS_CODE "
+                    elif voter_device_link.date_secret_code_generated \
+                            and positive_value_exists(voter_device_link.secret_code):
+                        # We have an existing secret code. Verify it is still valid.
+                        timezone = pytz.timezone("America/Los_Angeles")
+                        datetime_now = timezone.localize(datetime.now())
+                        secret_code_is_stale_duration = timedelta(days=1)
+                        secret_code_is_stale_date = voter_device_link.date_secret_code_generated + \
+                            secret_code_is_stale_duration
+                        if secret_code_is_stale_date > datetime_now:
+                            if secret_code == voter_device_link.secret_code:
+                                status += "VALID_SECRET_CODE_FOUND "
+                                secret_code_verified = True
+                                voter_must_request_new_code = False
+                            else:
+                                status += "SECRET_CODE_DOES_NOT_MATCH "
+                                incorrect_secret_code_entered = True
+                                voter_must_request_new_code = False
                         else:
-                            status += "SECRET_CODE_DOES_NOT_MATCH "
-                            voter_must_request_new_code = False
+                            number_of_tries_remaining_for_this_code = 0
+                            voter_must_request_new_code = True
+                            status += "SECRET_CODE_HAS_EXPIRED "
                     else:
                         number_of_tries_remaining_for_this_code = 0
                         voter_must_request_new_code = True
-                        status += "SECRET_CODE_HAS_EXPIRED "
-                else:
-                    number_of_tries_remaining_for_this_code = 0
-                    voter_must_request_new_code = True
-                    status += "VOTER_DEVICE_LINK_MISSING_SECRET_CODE "
+                        status += "VOTER_DEVICE_LINK_MISSING_SECRET_CODE "
             if secret_code_verified:
                 # Remove existing secret code and reset counters
                 try:
@@ -2446,8 +2476,9 @@ class VoterDeviceLinkManager(models.Model):
         results = {
             'status':                                   status,
             'success':                                  success,
+            'incorrect_secret_code_entered':            incorrect_secret_code_entered,
             'number_of_tries_remaining_for_this_code':  number_of_tries_remaining_for_this_code,
-            'secret_code_requests_locked':              secret_code_system_locked_for_this_voter_device_id,
+            'secret_code_system_locked_for_this_voter_device_id':   secret_code_system_locked_for_this_voter_device_id,
             'secret_code_verified':                     secret_code_verified,
             'voter_must_request_new_code':              voter_must_request_new_code,
         }

@@ -1161,7 +1161,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 except Exception as e:
                     status += "UNABLE_TO_MAKE_FACEBOOK_EMAIL_THE_PRIMARY " + str(e) + " "
 
-        # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
+        # Now we have voter (from voter_device_id) and email_owner_voter (from facebook_secret_key)
         # We are going to make the email_owner_voter the new master
         from_voter_id = voter.id
         from_voter_we_vote_id = voter.we_vote_id
@@ -1472,6 +1472,53 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         to_voter_we_vote_id = invitation_owner_voter.we_vote_id
         new_owner_voter = invitation_owner_voter
         status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
+
+    return voter_merge_two_accounts_action(
+        voter, new_owner_voter, voter_device_link, status,
+        email_owner_voter_found, facebook_owner_voter_found, invitation_owner_voter_found)
+
+
+def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
+        voter, new_owner_voter, voter_device_link, status='',
+        email_owner_voter_found=False, facebook_owner_voter_found=False, invitation_owner_voter_found=False):
+
+    success = True
+    current_voter_found = False
+    from_voter_id = 0
+    from_voter_we_vote_id = ""
+    to_voter_id = 0
+    to_voter_we_vote_id = ""
+
+    voter_device_id = voter_device_link.voter_device_id
+    try:
+        from_voter_id = voter.id
+        from_voter_we_vote_id = voter.we_vote_id
+        current_voter_found = True
+    except Exception as e:
+        pass
+
+    try:
+        to_voter_id = new_owner_voter.id
+        to_voter_we_vote_id = new_owner_voter.we_vote_id
+    except Exception as e:
+        pass
+
+    if not positive_value_exists(from_voter_id) or not positive_value_exists(from_voter_we_vote_id) \
+            or not positive_value_exists(to_voter_id) or not positive_value_exists(to_voter_we_vote_id):
+        status += "MISSING_TO_OR_FROM_VOTER_IDS "
+        success = False
+        results = {
+            'status': status,
+            'success': success,
+            'voter_device_id': voter_device_id,
+            'current_voter_found': current_voter_found,
+            'email_owner_voter_found': email_owner_voter_found,
+            'facebook_owner_voter_found': facebook_owner_voter_found,
+            'invitation_owner_voter_found': invitation_owner_voter_found,
+        }
+        return results
+
+    voter_device_link_manager = VoterDeviceLinkManager()
 
     # The from_voter and to_voter may both have their own linked_organization_we_vote_id
     organization_manager = OrganizationManager()
