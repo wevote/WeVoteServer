@@ -1992,7 +1992,7 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
     voter_device_link = None
     if positive_value_exists(secret_code_verified):
         link_results = voter_device_link_manager.retrieve_voter_device_link(
-            voter_device_id=voter_device_id, read_only=False)  # We need to be able to update this
+            voter_device_id=voter_device_id)
         if link_results['voter_device_link_found']:
             voter_device_link = link_results['voter_device_link']
             if positive_value_exists(voter_device_link.voter_id):
