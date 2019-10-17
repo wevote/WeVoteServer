@@ -632,7 +632,7 @@ def figure_out_google_civic_election_id_voter_is_watching_by_voter_id(voter_id):
 
     # We retrieve voter_device_link
     voter_device_link_manager = VoterDeviceLinkManager()
-    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id, voter_id)
+    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id, voter_id=voter_id)
     if not voter_device_link_results['voter_device_link_found']:
         status += "VALID_VOTER_DEVICE_ID_MISSING: " + voter_device_link_results['status']
         results = {

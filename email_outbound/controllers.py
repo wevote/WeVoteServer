@@ -923,6 +923,7 @@ def voter_email_address_save_for_api(voter_device_id='',
             'link_to_sign_in_email_sent':       False,
             'sign_in_code_email_sent':          False,
             'email_address_already_owned_by_other_voter': False,
+            'email_address_already_owned_by_this_voter': False,
             'email_address_found':              False,
             'email_address_list_found':         False,
             'email_address_list':               [],
@@ -949,6 +950,7 @@ def voter_email_address_save_for_api(voter_device_id='',
                 'link_to_sign_in_email_sent':       False,
                 'sign_in_code_email_sent':          False,
                 'email_address_already_owned_by_other_voter': False,
+                'email_address_already_owned_by_this_voter': False,
                 'email_address_found':              False,
                 'email_address_list_found':         False,
                 'email_address_list':               [],
@@ -970,6 +972,7 @@ def voter_email_address_save_for_api(voter_device_id='',
             'link_to_sign_in_email_sent':       False,
             'sign_in_code_email_sent':          False,
             'email_address_already_owned_by_other_voter': False,
+            'email_address_already_owned_by_this_voter': False,
             'email_address_found':              False,
             'email_address_list_found':         False,
             'email_address_list':               [],
@@ -994,6 +997,7 @@ def voter_email_address_save_for_api(voter_device_id='',
             'link_to_sign_in_email_sent':       False,
             'sign_in_code_email_sent':          False,
             'email_address_already_owned_by_other_voter': False,
+            'email_address_already_owned_by_this_voter': False,
             'email_address_found':              False,
             'email_address_list_found':         False,
             'email_address_list':               [],
@@ -1045,6 +1049,7 @@ def voter_email_address_save_for_api(voter_device_id='',
                 'link_to_sign_in_email_sent':   False,
                 'sign_in_code_email_sent':      False,
                 'email_address_already_owned_by_other_voter': True,
+                'email_address_already_owned_by_this_voter': False,
                 'email_address_found':          True,
                 'email_address_list_found':     False,
                 'email_address_list':           [],
@@ -1079,6 +1084,7 @@ def voter_email_address_save_for_api(voter_device_id='',
             if delete_email:
                 # If this email is cached in a voter record, remove it as long as primary_email_we_vote_id
                 # matches email_address_object.we_vote_id
+                primary_email_address_deleted = False
                 if positive_value_exists(voter.primary_email_we_vote_id) \
                         and voter.primary_email_we_vote_id.lower() == email_address_object.we_vote_id.lower():
                     try:
@@ -1086,6 +1092,7 @@ def voter_email_address_save_for_api(voter_device_id='',
                         voter.email_ownership_is_verified = False
                         voter.email = None
                         voter.save()
+                        primary_email_address_deleted = True
                         status += "VOTER_PRIMARY_EMAIL_ADDRESS_REMOVED "
                         success = True
                     except Exception as e:
@@ -1100,40 +1107,45 @@ def voter_email_address_save_for_api(voter_device_id='',
                     success = False
 
                 if email_address_deleted:
-                    # If there are any other verified emails, promote the first one to be the voter's verified email
-                    temp_text_for_email_address = ""
-                    temp_incoming_email_we_vote_id = ""
-                    email_promotion_results = email_manager.retrieve_email_address_object(
-                        temp_text_for_email_address, temp_incoming_email_we_vote_id, voter_we_vote_id)
-                    email_address_list_for_promotion = []
-                    if email_promotion_results['email_address_object_found']:
-                        email_address_object = email_promotion_results['email_address_object']
-                        email_address_list_for_promotion.append(email_address_object)
-                        email_address_list_found_for_promotion_to_primary = True
-                    elif email_promotion_results['email_address_list_found']:
-                        # This email was used by more than one person
-                        email_address_list_for_promotion = email_promotion_results['email_address_list']
-                        email_address_list_found_for_promotion_to_primary = True
-                    else:
-                        email_address_list_found_for_promotion_to_primary = False
-
-                    if email_address_list_found_for_promotion_to_primary:
-                        for email_address_object_for_promotion in email_address_list_for_promotion:
-                            if positive_value_exists(email_address_object_for_promotion.email_ownership_is_verified):
-                                # Assign this as voter's new primary email
+                    # Delete all other emails associated with this account that are not be verified
+                    if positive_value_exists(text_for_email_address):
+                        duplicate_results = email_manager.retrieve_email_address_object(
+                            text_for_email_address, voter_we_vote_id=voter_we_vote_id)
+                        if duplicate_results['email_address_object_found']:
+                            email_address_object_to_delete = duplicate_results['email_address_object']
+                            if not positive_value_exists(email_address_object_to_delete.email_ownership_is_verified):
                                 try:
-                                    voter.primary_email_we_vote_id = email_address_object_for_promotion.we_vote_id
-                                    voter.email_ownership_is_verified = True
-                                    voter.email = email_address_object_for_promotion.normalized_email_address
-                                    voter.save()
-                                    status += "SAVED_EMAIL_ADDRESS_AS_NEW_PRIMARY "
-                                    success = True
+                                    email_address_object_to_delete.delete()
+                                    status += "DELETED_DUP_EMAIL_ADDRESS "
                                 except Exception as e:
-                                    status += "UNABLE_TO_SAVE_EMAIL_ADDRESS_AS_NEW_PRIMARY "
-                                    remove_cached_results = \
-                                        voter_manager.remove_voter_cached_email_entries_from_email_address_object(
-                                            email_address_object_for_promotion)
-                                    status += remove_cached_results['status']
+                                    status += "UNABLE_TO_DELETE_DUP_EMAIL_ADDRESS "
+                        elif duplicate_results['email_address_list_found']:
+                            email_address_list_for_delete = duplicate_results['email_address_list']
+                            for email_address_object_to_delete in email_address_list_for_delete:
+                                if not positive_value_exists(
+                                        email_address_object_to_delete.email_ownership_is_verified):
+                                    try:
+                                        email_address_object_to_delete.delete()
+                                        status += "DELETED_DUP_EMAIL_ADDRESS "
+                                    except Exception as e:
+                                        status += "UNABLE_TO_DELETE_DUP_EMAIL_ADDRESS "
+
+                    # If there are any other verified emails, promote the first one to be the voter's verified email
+                    if positive_value_exists(primary_email_address_deleted):
+                        email_promotion_results = email_manager.retrieve_voter_email_address_list(voter_we_vote_id)
+                        email_address_list_for_promotion = []
+                        if email_promotion_results['email_address_list_found']:
+                            # This email was used by more than one person
+                            email_address_list_for_promotion = email_promotion_results['email_address_list']
+                            email_address_list_found_for_promotion_to_primary = True
+                        else:
+                            email_address_list_found_for_promotion_to_primary = False
+
+                        if email_address_list_found_for_promotion_to_primary:
+                            for email_address_object_for_promotion in email_address_list_for_promotion:
+                                if positive_value_exists(
+                                        email_address_object_for_promotion.email_ownership_is_verified):
+                                    # Assign this as voter's new primary email
                                     try:
                                         voter.primary_email_we_vote_id = email_address_object_for_promotion.we_vote_id
                                         voter.email_ownership_is_verified = True
@@ -1142,8 +1154,21 @@ def voter_email_address_save_for_api(voter_device_id='',
                                         status += "SAVED_EMAIL_ADDRESS_AS_NEW_PRIMARY "
                                         success = True
                                     except Exception as e:
-                                        status += "UNABLE_TO_REMOVE_VOTER_PRIMARY_EMAIL_ADDRESS2 "
-                                break  # Stop looking at email addresses to make the new primary
+                                        status += "UNABLE_TO_SAVE_EMAIL_ADDRESS_AS_NEW_PRIMARY "
+                                        remove_cached_results = \
+                                            voter_manager.remove_voter_cached_email_entries_from_email_address_object(
+                                                email_address_object_for_promotion)
+                                        status += remove_cached_results['status']
+                                        try:
+                                            voter.primary_email_we_vote_id = email_address_object_for_promotion.we_vote_id
+                                            voter.email_ownership_is_verified = True
+                                            voter.email = email_address_object_for_promotion.normalized_email_address
+                                            voter.save()
+                                            status += "SAVED_EMAIL_ADDRESS_AS_NEW_PRIMARY "
+                                            success = True
+                                        except Exception as e:
+                                            status += "UNABLE_TO_REMOVE_VOTER_PRIMARY_EMAIL_ADDRESS2 "
+                                    break  # Stop looking at email addresses to make the new primary
 
                 break  # TODO DALE Is there ever a case where we want to delete more than one email at a time?
             elif make_primary_email and positive_value_exists(incoming_email_we_vote_id):
@@ -1255,7 +1280,7 @@ def voter_email_address_save_for_api(voter_device_id='',
         if email_scheduled_saved:
             link_to_sign_in_email_sent = True
             success = True
-    elif send_sign_in_code_email and not email_address_already_owned_by_this_voter:
+    elif send_sign_in_code_email:
         # Run the code to send email with sign in verification code (6 digit)
         email_address_we_vote_id = email_address_we_vote_id if positive_value_exists(email_address_we_vote_id) \
             else incoming_email_we_vote_id

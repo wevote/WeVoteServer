@@ -389,7 +389,7 @@ def cache_voter_master_images(voter_id):
     if positive_value_exists(voter.we_vote_id):
         cache_all_kind_of_images_results['voter_we_vote_id'] = voter.we_vote_id
         # DALE 2018-06-19 I don't see why we need a google_civic_election_id for storing a voter's photos
-        voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(0, voter_id)
+        voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(0, voter_id=voter_id)
         if voter_device_link_results['success']:
             voter_device_link = voter_device_link_results['voter_device_link']
         else:

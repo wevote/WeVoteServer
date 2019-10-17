@@ -2108,7 +2108,7 @@ class VoterDeviceLinkManager(models.Model):
         results = []
         try:
             results = voter_device_link_manager.retrieve_voter_device_link(
-                voter_device_id, voter_id, voter_device_link_id, read_only=read_only)
+                voter_device_id, voter_id=voter_id, voter_device_link_id=voter_device_link_id, read_only=read_only)
         except Exception as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
 
