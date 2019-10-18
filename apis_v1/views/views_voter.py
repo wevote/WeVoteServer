@@ -30,7 +30,8 @@ from ballot.controllers import choose_election_and_prepare_ballot_data, voter_ba
 from ballot.models import OFFICE, CANDIDATE, MEASURE, VoterBallotSavedManager
 from bookmark.controllers import voter_all_bookmarks_status_retrieve_for_api, voter_bookmark_off_save_for_api, \
     voter_bookmark_on_save_for_api, voter_bookmark_status_retrieve_for_api
-from sms.controllers import voter_sms_phone_number_save_for_api
+from sms.controllers import voter_sms_phone_number_retrieve_for_api, voter_sms_phone_number_save_for_api
+from sms.models import SMSManager
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
     voter_stop_supporting_save, voter_supporting_save_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
@@ -1307,6 +1308,24 @@ def voter_sign_out_view(request):  # voterSignOut
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def voter_sms_phone_number_retrieve_view(request):  # voterSMSPhoneNumberRetrieve
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = voter_sms_phone_number_retrieve_for_api(voter_device_id=voter_device_id)
+
+    json_data = {
+        'status':                   results['status'],
+        'success':                  results['success'],
+        'voter_device_id':          voter_device_id,
+        'sms_phone_number_list_found': results['sms_phone_number_list_found'],
+        'sms_phone_number_list':       results['sms_phone_number_list'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
 def voter_sms_phone_number_save_view(request):  # voterSMSPhoneNumberSave
     """
     :param request:
@@ -1337,17 +1356,18 @@ def voter_sms_phone_number_save_view(request):  # voterSMSPhoneNumberSave
         'sms_phone_number':                 sms_phone_number,
         'make_primary_sms_phone_number':    make_primary_sms_phone_number,
         'delete_sms':                       delete_sms,
-        'email_address_we_vote_id':         results['email_address_we_vote_id'],
-        'email_address_saved_we_vote_id':   results['email_address_saved_we_vote_id'],
-        'email_address_already_owned_by_other_voter':   results['email_address_already_owned_by_other_voter'],
-        'email_address_created':            results['email_address_created'],
-        'email_address_deleted':            results['email_address_deleted'],
-        'verification_email_sent':          results['verification_email_sent'],
-        'link_to_sign_in_email_sent':       results['link_to_sign_in_email_sent'],
-        'sign_in_code_email_sent':          results['sign_in_code_email_sent'],
-        'email_address_found':              results['email_address_found'],
-        'email_address_list_found':         results['email_address_list_found'],
-        'email_address_list':               results['email_address_list'],
+        'sms_phone_number_we_vote_id':      results['sms_phone_number_we_vote_id'],
+        'sms_phone_number_saved_we_vote_id':    results['sms_phone_number_saved_we_vote_id'],
+        'sms_phone_number_already_owned_by_other_voter':    results['sms_phone_number_already_owned_by_other_voter'],
+        'sms_phone_number_already_owned_by_this_voter':     results['sms_phone_number_already_owned_by_this_voter'],
+        'sms_phone_number_created':         results['sms_phone_number_created'],
+        'sms_phone_number_deleted':         results['sms_phone_number_deleted'],
+        'verification_sms_sent':            results['verification_sms_sent'],
+        'link_to_sign_in_sms_sent':         results['link_to_sign_in_sms_sent'],
+        'sign_in_code_sms_sent':            results['sign_in_code_sms_sent'],
+        'sms_phone_number_found':           results['sms_phone_number_found'],
+        'sms_phone_number_list_found':      results['sms_phone_number_list_found'],
+        'sms_phone_number_list':            results['sms_phone_number_list'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1972,7 +1992,6 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     secret_code = request.GET.get('secret_code', None)
     code_sent_to_sms_phone_number = request.GET.get('code_sent_to_sms_phone_number', None)
-    code_sent_to_email = request.GET.get('code_sent_to_email', None)
 
     voter_device_link_manager = VoterDeviceLinkManager()
     voter_manager = VoterManager()
@@ -2011,7 +2030,69 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
 
         if voter_found:
             if positive_value_exists(code_sent_to_sms_phone_number):
-                pass
+                existing_verified_sms_found = False
+                new_owner_voter = None
+                sms_manager = SMSManager()
+                # Check to see if this sms is already owned by an existing account
+                # We get the new sms being verified, so we can find the normalized_sms_phone_number and check to see
+                # if that is in use by someone else.
+                secret_key_results = sms_manager.retrieve_sms_phone_number_from_secret_key(
+                    voter_device_link.sms_secret_key)
+                if secret_key_results['sms_phone_number_found']:
+                    sms_from_secret_key = secret_key_results['sms_phone_number']
+
+                    matching_results = sms_manager.retrieve_sms_phone_number(
+                        sms_from_secret_key.normalized_sms_phone_number)
+                    if matching_results['sms_phone_number_found']:
+                        sms_phone_number_from_normalized = matching_results['sms_phone_number']
+                        if positive_value_exists(sms_phone_number_from_normalized.sms_ownership_is_verified):
+                            if positive_value_exists(sms_phone_number_from_normalized.voter_we_vote_id):
+                                voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                                    sms_phone_number_from_normalized.voter_we_vote_id)
+                                if voter_results['voter_found']:
+                                    voter_from_normalized = voter_results['voter']
+                                    # If here we know the voter account still exists
+                                    if voter_from_normalized.we_vote_id != voter.we_vote_id:
+                                        existing_verified_sms_found = True
+                                        new_owner_voter = voter_from_normalized
+                    elif matching_results['sms_phone_number_list_found']:
+                        sms_phone_number_list = matching_results['sms_phone_number_list']
+                        for sms_phone_number_from_normalized in sms_phone_number_list:
+                            if positive_value_exists(sms_phone_number_from_normalized.sms_ownership_is_verified):
+                                if positive_value_exists(sms_phone_number_from_normalized.voter_we_vote_id):
+                                    voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                                        sms_phone_number_from_normalized.voter_we_vote_id)
+                                    if voter_results['voter_found']:
+                                        voter_from_normalized = voter_results['voter']
+                                        # If here we know the voter account still exists
+                                        if voter_from_normalized.we_vote_id != voter.we_vote_id:
+                                            existing_verified_sms_found = True
+                                            new_owner_voter = voter_from_normalized
+                                            break
+                    else:
+                        pass
+
+                if existing_verified_sms_found:
+                    # Merge existing account with new account
+                    merge_results = voter_merge_two_accounts_action(
+                        voter, new_owner_voter, voter_device_link, status=status)
+                    status += merge_results['status']
+                    success = merge_results['success']
+                else:
+                    # Find and verify the unverified email we are verifying
+                    sms_results = sms_manager.verify_sms_phone_number_from_secret_key(
+                        voter_device_link.sms_secret_key)
+                    if sms_results['sms_phone_number_found']:
+                        sms_phone_number = sms_results['sms_phone_number']
+                        status += "SMS_FOUND_FROM_VERIFY "
+                        try:
+                            # Attach the sms_phone_number to the current voter
+                            voter_manager.update_voter_sms_ownership_verified(
+                                voter, sms_phone_number)
+                        except Exception as e:
+                            status += "UNABLE_TO_CONNECT_VERIFIED_SMS_WITH_THIS_ACCOUNT " + str(e) + " "
+                    else:
+                        status += sms_results['status']
             else:
                 # Default to code being sent to an email address
                 existing_verified_email_address_found = False

@@ -114,7 +114,8 @@ def augment_email_address_list(email_address_list, voter):
     return results
 
 
-def merge_duplicates_in_email_address_list(email_address_list, voter):
+def heal_primary_email_data_for_voter(email_address_list, voter):
+    primary_email_address = None
     primary_email_address_found = False
     primary_email_address_we_vote_id = None
 
@@ -234,7 +235,7 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
     email_addresses_not_moved = 0
 
     if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
-        status += "MOVE_EMAIL_ADDRESS_ENTRIES_MISSING_FROM_OR_TO_VOTER_ID"
+        status += "MOVE_EMAIL_ADDRESS_ENTRIES_MISSING_FROM_OR_TO_VOTER_ID "
         results = {
             'status': status,
             'success': success,
@@ -246,7 +247,7 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
         return results
 
     if from_voter_we_vote_id == to_voter_we_vote_id:
-        status += "MOVE_EMAIL_ADDRESS_ENTRIES-IDENTICAL_FROM_AND_TO_VOTER_ID"
+        status += "MOVE_EMAIL_ADDRESS_ENTRIES-IDENTICAL_FROM_AND_TO_VOTER_ID "
         results = {
             'status': status,
             'success': success,
@@ -558,9 +559,8 @@ def schedule_sign_in_code_email(sender_voter_we_vote_id, recipient_voter_we_vote
     return results
 
 
-def voter_email_address_retrieve_for_api(voter_device_id):
+def voter_email_address_retrieve_for_api(voter_device_id):  # voterEmailAddressRetrieve
     """
-    voterEmailAddressRetrieve
     :param voter_device_id:
     :return:
     """
@@ -596,6 +596,9 @@ def voter_email_address_retrieve_for_api(voter_device_id):
     voter_we_vote_id = voter.we_vote_id
 
     email_manager = EmailManager()
+    merge_results = email_manager.find_and_merge_all_duplicate_emails(voter_we_vote_id)
+    status += merge_results['status']
+
     email_address_list_augmented = []
     email_results = email_manager.retrieve_voter_email_address_list(voter_we_vote_id)
     status += email_results['status']
@@ -603,8 +606,8 @@ def voter_email_address_retrieve_for_api(voter_device_id):
         email_address_list_found = True
         email_address_list = email_results['email_address_list']
 
-        # Remove duplicates: email_we_vote_id
-        merge_results = merge_duplicates_in_email_address_list(email_address_list, voter)
+        # Make sure the voter's primary email address matches email table data
+        merge_results = heal_primary_email_data_for_voter(email_address_list, voter)
         email_address_list = merge_results['email_address_list']
         status += merge_results['status']
 
@@ -677,10 +680,11 @@ def voter_email_address_sign_in_for_api(voter_device_id, email_secret_key):  # v
 
     email_manager = EmailManager()
     # Look to see if there is an EmailAddress entry for the incoming text_for_email_address or email_we_vote_id
-    email_results = email_manager.email_address_sign_in_from_secret_key(email_secret_key)
+    email_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key)
     if not email_results['email_address_object_found']:
+        status += email_results['status']
         error_results = {
-            'status':                                   "EMAIL_NOT_FOUND_FROM_SECRET_KEY",
+            'status':                                   status,
             'success':                                  False,
             'voter_device_id':                          voter_device_id,
             'email_ownership_is_verified':              False,
@@ -1244,8 +1248,8 @@ def voter_email_address_save_for_api(voter_device_id='',
         elif not positive_value_exists(incoming_email_we_vote_id):
             # Save the new email address
             email_ownership_is_verified = False
-            email_save_results = email_manager.create_email_address(text_for_email_address, voter_we_vote_id,
-                                                                    email_ownership_is_verified, make_primary_email)
+            email_save_results = email_manager.create_email_address(
+                text_for_email_address, voter_we_vote_id, email_ownership_is_verified, make_primary_email)
 
             if email_save_results['email_address_object_saved']:
                 # Send verification email
@@ -1265,9 +1269,10 @@ def voter_email_address_save_for_api(voter_device_id='',
             else:
                 send_verification_email = False
                 success = False
-                status += " UNABLE_TO_SAVE_EMAIL_ADDRESS"
+                status += "UNABLE_TO_SAVE_EMAIL_ADDRESS "
 
     secret_code_system_locked_for_this_voter_device_id = False
+    voter_device_link_manager = VoterDeviceLinkManager()
     if send_link_to_sign_in and not email_address_already_owned_by_this_voter:
         # Run the code to send sign in email
         email_address_we_vote_id = email_address_we_vote_id if positive_value_exists(email_address_we_vote_id) \
@@ -1285,7 +1290,6 @@ def voter_email_address_save_for_api(voter_device_id='',
         email_address_we_vote_id = email_address_we_vote_id if positive_value_exists(email_address_we_vote_id) \
             else incoming_email_we_vote_id
         # We need to link a randomly generated 6 digit code to this voter_device_id
-        voter_device_link_manager = VoterDeviceLinkManager()
         results = voter_device_link_manager.retrieve_voter_secret_code_up_to_date(voter_device_id)
         secret_code = results['secret_code']
         secret_code_system_locked_for_this_voter_device_id = \
@@ -1302,10 +1306,12 @@ def voter_email_address_save_for_api(voter_device_id='',
                 status += update_results['status']
         else:
             status += "VOTER_DEVICE_LINK_NOT_UPDATED_WITH_EMAIL_SECRET_KEY "
+
         if positive_value_exists(secret_code):
-            link_send_results = schedule_sign_in_code_email(voter_we_vote_id, voter_we_vote_id,
-                                                            email_address_we_vote_id, text_for_email_address,
-                                                            secret_code)
+            link_send_results = schedule_sign_in_code_email(
+                voter_we_vote_id, voter_we_vote_id,
+                email_address_we_vote_id, text_for_email_address,
+                secret_code)
             status += link_send_results['status']
             email_scheduled_saved = link_send_results['email_scheduled_saved']
             if email_scheduled_saved:

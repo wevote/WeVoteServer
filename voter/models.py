@@ -11,6 +11,7 @@ from exception.models import handle_exception, handle_record_found_more_than_one
     handle_record_not_saved_exception
 from import_export_facebook.models import FacebookManager
 import pytz
+from sms.models import SMSManager
 import string
 import sys
 from twitter.models import TwitterUserManager
@@ -635,21 +636,18 @@ class VoterManager(BaseUserManager):
         return results
 
     def retrieve_voter_by_id(self, voter_id, read_only=False):
-        email = ''
-        voter_we_vote_id = ''
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, read_only=read_only)
+        return voter_manager.retrieve_voter(voter_id, read_only=read_only)
 
     def retrieve_voter_by_email(self, email, read_only=False):
         voter_id = ''
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email, read_only=read_only)
+        return voter_manager.retrieve_voter(voter_id, email=email, read_only=read_only)
 
     def retrieve_voter_by_we_vote_id(self, voter_we_vote_id, read_only=False):
         voter_id = ''
-        email = ''
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, read_only=read_only)
+        return voter_manager.retrieve_voter(voter_id, voter_we_vote_id=voter_we_vote_id, read_only=read_only)
 
     def retrieve_voter_by_twitter_request_token(self, twitter_request_token):
         voter_id = ''
@@ -660,7 +658,6 @@ class VoterManager(BaseUserManager):
 
     def retrieve_voter_by_facebook_id(self, facebook_id, read_only=False):
         voter_id = ''
-        email = ''
         voter_we_vote_id = ''
 
         facebook_manager = FacebookManager()
@@ -670,7 +667,7 @@ class VoterManager(BaseUserManager):
             voter_we_vote_id = facebook_link_to_voter.voter_we_vote_id
 
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, read_only=read_only)
+        return voter_manager.retrieve_voter(voter_id, voter_we_vote_id=voter_we_vote_id, read_only=read_only)
 
     def retrieve_voter_by_facebook_id_old(self, facebook_id):
         """
@@ -679,15 +676,11 @@ class VoterManager(BaseUserManager):
         :return:
         """
         voter_id = ''
-        email = ''
-        voter_we_vote_id = ''
-        twitter_request_token = ''
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id)
+        return voter_manager.retrieve_voter(voter_id, facebook_id=facebook_id)
 
     def retrieve_voter_by_twitter_id(self, twitter_id, read_only=False):
         voter_id = ''
-        email = ''
         voter_we_vote_id = ''
 
         twitter_user_manager = TwitterUserManager()
@@ -698,7 +691,19 @@ class VoterManager(BaseUserManager):
             voter_we_vote_id = twitter_link_to_voter.voter_we_vote_id
 
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, read_only=read_only)
+        return voter_manager.retrieve_voter(voter_id, voter_we_vote_id=voter_we_vote_id, read_only=read_only)
+
+    def retrieve_voter_by_sms(self, normalized_sms_phone_number, read_only=False):
+        voter_id = ''
+        voter_we_vote_id = ''
+
+        sms_manager = SMSManager()
+        results = sms_manager.retrieve_voter_we_vote_id_from_normalized_sms_phone_number(normalized_sms_phone_number)
+        if results['voter_we_vote_id_found']:
+            voter_we_vote_id = results['voter_we_vote_id']
+
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, voter_we_vote_id=voter_we_vote_id, read_only=read_only)
 
     def retrieve_voter_by_twitter_id_old(self, twitter_id):
         """
@@ -718,30 +723,18 @@ class VoterManager(BaseUserManager):
 
     def retrieve_voter_by_organization_we_vote_id(self, organization_we_vote_id, read_only=False):
         voter_id = ''
-        email = ''
-        voter_we_vote_id = ''
-        twitter_request_token = ''
-        facebook_id = 0
-        twitter_id = 0
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
-                                            twitter_id, organization_we_vote_id, read_only=read_only)
+        return voter_manager.retrieve_voter(voter_id, organization_we_vote_id=organization_we_vote_id,
+                                            read_only=read_only)
 
     def retrieve_voter_by_primary_email_we_vote_id(self, primary_email_we_vote_id, read_only=False):
         voter_id = ''
-        email = ''
-        voter_we_vote_id = ''
-        twitter_request_token = ''
-        facebook_id = 0
-        twitter_id = 0
-        organization_we_vote_id = ''
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
-                                            twitter_id, organization_we_vote_id, primary_email_we_vote_id,
+        return voter_manager.retrieve_voter(voter_id, primary_email_we_vote_id=primary_email_we_vote_id,
                                             read_only=read_only)
 
     def retrieve_voter(self, voter_id, email='', voter_we_vote_id='', twitter_request_token='', facebook_id=0,
-                       twitter_id=0, organization_we_vote_id='', primary_email_we_vote_id='', read_only=False):
+                       twitter_id=0, sms='', organization_we_vote_id='', primary_email_we_vote_id='', read_only=False):
         voter_id = convert_to_int(voter_id)
         if not validate_email(email):
             # We do not want to search for an invalid email
@@ -945,6 +938,51 @@ class VoterManager(BaseUserManager):
         if positive_value_exists(email_address_object.we_vote_id):
             voter_by_primary_email_results = voter_manager.retrieve_voter_by_primary_email_we_vote_id(
                 email_address_object.we_vote_id)
+            if voter_by_primary_email_results['voter_found']:
+                voter_found_by_primary_email_we_vote_id = voter_by_primary_email_results['voter']
+
+                # Wipe this voter's email values...
+                try:
+                    voter_found_by_primary_email_we_vote_id.email = None
+                    voter_found_by_primary_email_we_vote_id.primary_email_we_vote_id = None
+                    voter_found_by_primary_email_we_vote_id.email_ownership_is_verified = False
+                    voter_found_by_primary_email_we_vote_id.save()
+                    status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID "
+                    success = True
+                except Exception as e:
+                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID " + str(e) + " "
+
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    def remove_voter_cached_sms_entries_from_sms_phone_number(self, sms_phone_number):
+        status = ""
+        success = False
+
+        voter_manager = VoterManager()
+        if positive_value_exists(sms_phone_number.normalized_sms_phone_number):
+            voter_found_by_sms_results = voter_manager.retrieve_voter_by_sms(
+                sms_phone_number.normalized_sms_phone_number)
+            if voter_found_by_sms_results['voter_found']:
+                voter_found_by_sms = voter_found_by_sms_results['voter']
+
+                # Wipe this voter's sms values...
+                try:
+                    voter_found_by_sms.sms = None
+                    voter_found_by_sms.primary_sms_we_vote_id = None
+                    voter_found_by_sms.sms_ownership_is_verified = False
+                    voter_found_by_sms.save()
+                    status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_SMS "
+                    success = True
+                except Exception as e:
+                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_SMS " + str(e) + " "
+
+        if positive_value_exists(sms_phone_number.we_vote_id):
+            voter_by_primary_email_results = voter_manager.retrieve_voter_by_primary_email_we_vote_id(
+                sms_phone_number.we_vote_id)
             if voter_by_primary_email_results['voter_found']:
                 voter_found_by_primary_email_we_vote_id = voter_by_primary_email_results['voter']
 
@@ -1609,13 +1647,61 @@ class VoterManager(BaseUserManager):
                 success = True
             except Exception as e:
                 success = False
-                status += "UNABLE_TO_UPDATE_VOTER_EMAIL_OWNERSHIP2 "
+                status += "UNABLE_TO_UPDATE_VOTER_EMAIL_OWNERSHIP2 " + str(e) + ' '
 
         results = {
             'status': status,
             'success': success,
             'voter': voter,
             'voter_updated': voter_updated,
+        }
+        return results
+
+    def update_voter_sms_ownership_verified(self, voter, sms_phone_number):
+        status = ""
+        success = True  # Assume success unless we hit a problem
+        voter_updated = False
+        voter_manager = VoterManager()
+
+        try:
+            should_save_voter = False
+            if sms_phone_number.sms_ownership_is_verified:
+                voter.primary_sms_we_vote_id = sms_phone_number.we_vote_id
+                voter.normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
+                voter.sms_ownership_is_verified = True
+                should_save_voter = True
+
+            if should_save_voter:
+                voter.save()
+                voter_updated = True
+            status += "UPDATED_VOTER_SMS_OWNERSHIP "
+            success = True
+        except Exception as e:
+            status += "UNABLE_TO_UPDATE_INCOMING_VOTER " + str(e) + ' '
+            # We tried to update the incoming voter found but got an error, so we retrieve voter's based on
+            #  normalized_email address, and then by primary_email_we_vote_id
+            remove_cached_results = voter_manager.remove_voter_cached_sms_entries_from_sms_phone_number(
+                sms_phone_number)
+            status += remove_cached_results['status']
+
+            # And now, try to save again
+            try:
+                voter.primary_sms_we_vote_id = sms_phone_number.we_vote_id
+                voter.normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
+                voter.sms_ownership_is_verified = True
+                voter.save()
+                voter_updated = True
+                status += "UPDATED_VOTER_EMAIL_OWNERSHIP2 "
+                success = True
+            except Exception as e:
+                success = False
+                status += "UNABLE_TO_UPDATE_VOTER_EMAIL_OWNERSHIP2 " + str(e) + ' '
+
+        results = {
+            'status':           status,
+            'success':          success,
+            'voter':            voter,
+            'voter_updated':    voter_updated,
         }
         return results
 
@@ -1718,7 +1804,7 @@ class Voter(AbstractBaseUser):
     normalized_sms_phone_number = models.CharField(max_length=50, null=True, blank=True)
     primary_sms_we_vote_id = models.CharField(
         verbose_name="we vote id for primary phone number", max_length=255, null=True, blank=True, unique=True)
-    primary_sms_ownership_is_verified = models.BooleanField(default=False)
+    sms_ownership_is_verified = models.BooleanField(default=False)
     first_name = models.CharField(verbose_name='first name', max_length=255, null=True, blank=True)
     middle_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)

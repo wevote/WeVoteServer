@@ -219,6 +219,111 @@ class EmailManager(models.Model):
         }
         return results
 
+    def find_and_merge_all_duplicate_emails(self, voter_we_vote_id):
+        success = True
+        status = ''
+        already_merged_email_we_vote_ids = []
+
+        list_results = self.retrieve_voter_email_address_list(voter_we_vote_id)
+        if list_results['email_address_list_found']:
+            initial_email_address_list = list_results['email_address_list']
+            for email_address_object in initial_email_address_list:
+                for comparison_email_address_object in initial_email_address_list:
+                    if comparison_email_address_object.we_vote_id in already_merged_email_we_vote_ids:
+                        # If this email has already been merged, skip forward
+                        continue
+                    if email_address_object.normalized_email_address != \
+                            comparison_email_address_object.normalized_email_address:
+                        # If we are looking at different email addresses, skip forward
+                        continue
+                    if email_address_object.we_vote_id == comparison_email_address_object.we_vote_id:
+                        # If we are looking at the same email entry, skip forward
+                        continue
+                    # Now merge verified email addresses where both are verified
+                    if email_address_object.email_ownership_is_verified \
+                            and comparison_email_address_object.email_ownership_is_verified:
+                        merge_results = self.merge_two_duplicate_emails(
+                            email_address_object, comparison_email_address_object)
+                        status += merge_results['status']
+                        already_merged_email_we_vote_ids.append(email_address_object.we_vote_id)
+                        already_merged_email_we_vote_ids.append(comparison_email_address_object.we_vote_id)
+
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    def merge_two_duplicate_emails(self, email_address_object1, email_address_object2):
+        """
+        We assume that the checking to see if these are duplicates has been done outside of this function.
+        We will keep email_address_object1 and eliminate email_address_object2.
+        :param email_address_object1:
+        :param email_address_object2:
+        :return:
+        """
+        success = True
+        status = ''
+
+        try:
+            test_we_vote_id = email_address_object1.we_vote_id
+            test_we_vote_id = email_address_object2.we_vote_id
+        except Exception as e:
+            status += 'PROBLEM_WITH_EMAIL1_OR_EMAIL2 ' + str(e) + ' '
+            success = False
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        if email_address_object1.voter_we_vote_id != email_address_object2.voter_we_vote_id:
+            status += 'ONLY_MERGE_EMAILS_FROM_SAME_VOTER '
+            success = False
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        if email_address_object1.normalized_email_address != email_address_object2.normalized_email_address:
+            status += 'ONLY_MERGE_EMAILS_WITH_SAME_NORMALIZED_EMAIL_ADDRESS '
+            success = False
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        at_least_one_is_verified = email_address_object1.email_ownership_is_verified \
+            or email_address_object2.email_ownership_is_verified
+        at_least_one_is_not_bouncing = not email_address_object1.email_permanent_bounce \
+            or not email_address_object2.email_permanent_bounce
+
+        try:
+            email_address_object1.email_ownership_is_verified = at_least_one_is_verified
+            email_address_object1.email_permanent_bounce = at_least_one_is_not_bouncing
+            email_address_object1.save()
+        except Exception as e:
+            status += "COULD_NOT_SAVE_EMAIL1 " + str(e) + " "
+
+        # We don't need to handle repairing the primary email link here
+        # because it is done in heal_primary_email_data_for_voter
+
+        # Are there any scheduled emails for email_address_object2 waiting to send?
+
+        try:
+            email_address_object2.delete()
+        except Exception as e:
+            status += "COULD_NOT_DELETE_EMAIL2 " + str(e) + " "
+            success = False
+
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
     def parse_raw_emails_into_list(self, email_addresses_raw):
         success = True
         status = "EMAIL_MANAGER_PARSE_RAW_EMAILS"
@@ -339,15 +444,18 @@ class EmailManager(models.Model):
         email_address_object = EmailAddress()
         email_address_object_id = 0
         email_address_object_we_vote_id = ""
+        email_ownership_is_verified = False
         status = ''
 
         try:
             if positive_value_exists(email_secret_key):
                 email_address_object = EmailAddress.objects.get(
                     secret_key=email_secret_key,
+                    deleted=False
                 )
                 email_address_object_id = email_address_object.id
                 email_address_object_we_vote_id = email_address_object.we_vote_id
+                email_ownership_is_verified = email_address_object.email_ownership_is_verified
                 email_address_object_found = True
                 success = True
                 status += "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_SECRET_KEY "
@@ -361,50 +469,6 @@ class EmailManager(models.Model):
         except Exception as e:
             success = False
             status += 'FAILED retrieve_email_address_object_from_secret_key EmailAddress ' + str(e) + ' '
-
-        results = {
-            'success':                          success,
-            'status':                           status,
-            'email_address_object_found':       email_address_object_found,
-            'email_address_object_id':          email_address_object_id,
-            'email_address_object_we_vote_id':  email_address_object_we_vote_id,
-            'email_address_object':             email_address_object,
-        }
-        return results
-
-    def email_address_sign_in_from_secret_key(self, email_secret_key):
-        """
-        :param email_secret_key:
-        :return:
-        """
-        email_address_object_found = False
-        email_address_object = EmailAddress()
-        email_address_object_id = 0
-        email_address_object_we_vote_id = ""
-        email_ownership_is_verified = False
-
-        try:
-            if positive_value_exists(email_secret_key):
-                email_address_object = EmailAddress.objects.get(
-                    secret_key=email_secret_key,
-                    deleted=False
-                )
-                email_address_object_id = email_address_object.id
-                email_address_object_we_vote_id = email_address_object.we_vote_id
-                email_ownership_is_verified = email_address_object.email_ownership_is_verified
-                email_address_object_found = True
-                success = True
-                status = "EMAIL_ADDRESS_SIGN_IN_BY_WE_VOTE_ID"
-            else:
-                email_address_object_found = False
-                success = False
-                status = "EMAIL_ADDRESS_SIGN_IN_VARIABLES_MISSING"
-        except EmailAddress.DoesNotExist:
-            success = True
-            status = "EMAIL_ADDRESS_SIGN_IN_NOT_FOUND"
-        except Exception as e:
-            success = False
-            status = 'FAILED email_address_sign_in_from_secret_key EmailAddress'
 
         results = {
             'success':                          success,
@@ -427,29 +491,29 @@ class EmailManager(models.Model):
         email_address_object = EmailAddress()
         email_address_object_id = 0
         email_address_object_we_vote_id = ""
+        status = ''
 
         try:
             if positive_value_exists(email_secret_key):
                 email_address_object = EmailAddress.objects.get(
                     secret_key=email_secret_key,
-                    email_ownership_is_verified=False,
                     deleted=False
                 )
                 email_address_object_id = email_address_object.id
                 email_address_object_we_vote_id = email_address_object.we_vote_id
                 email_address_object_found = True
                 success = True
-                status = "VERIFY_EMAIL_ADDRESS_FOUND_BY_WE_VOTE_ID"
+                status += "VERIFY_EMAIL_ADDRESS_FOUND_BY_WE_VOTE_ID "
             else:
                 email_address_object_found = False
                 success = False
-                status = "VERIFY_EMAIL_ADDRESS_VARIABLES_MISSING"
+                status += "VERIFY_EMAIL_ADDRESS_VARIABLES_MISSING "
         except EmailAddress.DoesNotExist:
             success = True
-            status = "VERIFY_EMAIL_ADDRESS_NOT_FOUND"
+            status += "VERIFY_EMAIL_ADDRESS_NOT_FOUND "
         except Exception as e:
             success = False
-            status = 'FAILED verify_email_address_object_from_secret_key EmailAddress'
+            status += 'FAILED verify_email_address_object_from_secret_key EmailAddress '
 
         email_ownership_is_verified = False
         if email_address_object_found:
@@ -460,7 +524,7 @@ class EmailManager(models.Model):
                 email_ownership_is_verified = True
             except Exception as e:
                 success = False
-                status = 'FAILED_TO_SAVE_EMAIL_OWNERSHIP_IS_VERIFIED'
+                status += 'FAILED_TO_SAVE_EMAIL_OWNERSHIP_IS_VERIFIED '
 
         results = {
             'success':                          success,
