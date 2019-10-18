@@ -8,6 +8,7 @@ from analytics.controllers import move_analytics_info_to_another_voter
 from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, \
     ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
     ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
+from donate.controllers import donation_journal_history_for_a_voter, move_donation_info_to_another_voter
 from email_outbound.controllers import move_email_address_entries_to_another_voter, schedule_verification_email, \
     WEB_APP_ROOT_URL, WE_VOTE_SERVER_ROOT_URL, schedule_email_with_email_outbound_description
 from email_outbound.models import EmailManager, EmailAddress, FRIEND_INVITATION_TEMPLATE, TO_BE_PROCESSED, \
@@ -30,12 +31,12 @@ from organization.models import OrganizationListManager, OrganizationManager, IN
 from position.controllers import duplicate_positions_to_another_voter, move_positions_to_another_voter
 from position.models import PositionListManager
 import robot_detection
+from sms.controllers import move_sms_phone_number_entries_to_another_voter
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from validate_email import validate_email
 from voter_guide.controllers import duplicate_voter_guides, move_voter_guides_to_another_voter
 import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
-from donate.controllers import donation_journal_history_for_a_voter, move_donation_info_to_another_voter
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -1654,6 +1655,21 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
             voter.save()
         except Exception as e:
             status += "CANNOT_CLEAR_OUT_VOTER_EMAIL_INFO: " + str(e) + " "
+
+    # Bring over all sms phone numbers from the from_voter over to the to_voter
+    move_sms_phone_number_results = move_sms_phone_number_entries_to_another_voter(from_voter_we_vote_id,
+                                                                                   to_voter_we_vote_id)
+    status += " " + move_sms_phone_number_results['status']
+
+    if positive_value_exists(voter.primary_sms_we_vote_id):
+        # Remove the sms information so we don't have a future conflict
+        try:
+            voter.normalized_sms_phone_number = None
+            voter.primary_sms_we_vote_id = None
+            voter.sms_ownership_is_verified = False
+            voter.save()
+        except Exception as e:
+            status += "CANNOT_CLEAR_OUT_VOTER_SMS_INFO: " + str(e) + " "
 
     # Bring over Facebook information
     move_facebook_results = move_facebook_info_to_another_voter(voter, new_owner_voter)

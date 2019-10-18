@@ -25,13 +25,11 @@ def voter_verify_secret_code_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         'voter_device_id',
-        #     'value':        'string',  # boolean, integer, long, string
-        #     'description':  'An 88 character unique identifier linked to a voter record on the server. '
-        #                     'If not provided, a new voter_device_id (and voter entry) '
-        #                     'will be generated, and the voter_device_id will be returned.',
-        # },
+        {
+            'name':         'code_sent_to_sms_phone_number',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'If true, process this verification for an SMS phone number. If false, process for email.',
+        },
     ]
 
     potential_status_codes_list = [
@@ -55,10 +53,11 @@ def voter_verify_secret_code_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string (description of what happened),\n' \
                    '  "success": boolean (True as long as no db errors),\n' \
-                   '  "number_of_tries_remaining": integer,\n' \
+                   '  "incorrect_secret_code_entered": boolean,\n' \
+                   '  "number_of_tries_remaining_for_this_code": integer,\n' \
                    '  "secret_code_verified": boolean,\n' \
                    '  "voter_must_request_new_code": boolean,\n' \
-                   '  "voter_secret_code_requests_locked": string,\n' \
+                   '  "secret_code_system_locked_for_this_voter_device_id": string,\n' \
                    '}'
 
     template_values = {

@@ -135,6 +135,16 @@
           <td>Save profile-related fields for an existing voter.</td>
         </tr>
         <tr>
+          <td><a href="{% url 'apis_v1:voterSMSPhoneNumberRetrieveDocs' %}">voterSMSPhoneNumberRetrieve</a></td>
+          <td></td>
+          <td>Retrieve all of the voter's sms phone numbers, including the status of each phone number.</td>
+        </tr>
+        <tr>
+          <td><a href="{% url 'apis_v1:voterSMSPhoneNumberSaveDocs' %}">voterSMSPhoneNumberSave</a></td>
+          <td></td>
+          <td>Save or update sms phone number for an existing voter.</td>
+        </tr>
+        <tr>
           <td><a href="{% url 'apis_v1:voterVerifySecretCodeDocs' %}">voterVerifySecretCode</a></td>
           <td></td>
           <td>Voter submits this six digit code to verify that they received an SMS message or email.</td>

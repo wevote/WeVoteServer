@@ -159,19 +159,19 @@ def send_scheduled_sms_via_twilio(sms_scheduled):
         account_sid = get_environment_variable("TWILIO_ACCOUNT_SID")
         auth_token = get_environment_variable("TWILIO_AUTH_TOKEN")
         from_phone_number = get_environment_variable("SYSTEM_SENDER_SMS_PHONE_NUMBER")
-        to = convert_phone_number_to_e164(sms_scheduled.sender_voter_sms)
+        to = convert_phone_number_to_e164(sms_scheduled.recipient_voter_sms)
         if not to:
             status += "SENDING_VIA_TWILIO_INVALID_TO_NUMBER "
-            print("invalid to phone number for twilio: " + sms_scheduled.sender_voter_sms)
+            print("invalid to phone number for twilio: " + sms_scheduled.recipient_voter_sms)
         elif len(account_sid) and len(account_sid):
             client = Client(account_sid, auth_token)
             message = client.messages.create(
                 to,
                 from_=from_phone_number,
                 body=sms_scheduled.message_text)
-            status += "SENDING_VIA_TWILIO "
+            status += "SENT_VIA_TWILIO "
             if message.error_code:
-                status += "TWILLIO_ERROR_" + message.error_code + " MSG_" + message.error_message
+                status += "TWILIO_ERROR_" + message.error_code + " MSG_" + message.error_message
             else:
                 success = True
                 sms_scheduled_sent = True
@@ -198,40 +198,42 @@ class SMSManager(models.Model):
 
     def create_sms_phone_number(self, normalized_sms_phone_number, voter_we_vote_id='', sms_ownership_is_verified=False,
                                 make_primary_sms=True):
+        secret_key = generate_random_string(12)
         normalized_sms_phone_number = str(normalized_sms_phone_number)
         normalized_sms_phone_number = normalized_sms_phone_number.strip()
         normalized_sms_phone_number = normalized_sms_phone_number.lower()
 
         if not positive_value_exists(normalized_sms_phone_number):
-            sms_phone_number_object = SMSPhoneNumber()
+            sms_phone_number = SMSPhoneNumber()
             results = {
                 'success':                      False,
                 'status':                       "SMS_PHONE_NUMBER_FOR_VOTER_MISSING_RAW_SMS",
-                'sms_phone_number_object_saved':   False,
-                'sms_phone_number_object':         sms_phone_number_object,
+                'sms_phone_number_saved':   False,
+                'sms_phone_number':         sms_phone_number,
             }
             return results
 
         try:
-            sms_phone_number_object = SMSPhoneNumber.objects.create(
+            sms_phone_number = SMSPhoneNumber.objects.create(
                 normalized_sms_phone_number=normalized_sms_phone_number,
                 voter_we_vote_id=voter_we_vote_id,
                 sms_ownership_is_verified=sms_ownership_is_verified,
+                secret_key=secret_key,
             )
-            sms_phone_number_object_saved = True
+            sms_phone_number_saved = True
             success = True
             status = "SMS_PHONE_NUMBER_FOR_VOTER_CREATED "
         except Exception as e:
-            sms_phone_number_object_saved = False
-            sms_phone_number_object = SMSPhoneNumber()
+            sms_phone_number_saved = False
+            sms_phone_number = SMSPhoneNumber()
             success = False
             status = "SMS_PHONE_NUMBER_FOR_VOTER_NOT_CREATED "
 
         results = {
             'success':                    success,
             'status':                     status,
-            'sms_phone_number_object_saved': sms_phone_number_object_saved,
-            'sms_phone_number_object':       sms_phone_number_object,
+            'sms_phone_number_saved': sms_phone_number_saved,
+            'sms_phone_number':       sms_phone_number,
         }
         return results
 
@@ -261,7 +263,7 @@ class SMSManager(models.Model):
             sms_description_saved = False
             sms_description = SMSOutboundDescription()
             success = False
-            status += "SMS_DESCRIPTION_NOT_CREATED "
+            status += "SMS_DESCRIPTION_NOT_CREATED " + str(e) + ' '
 
         results = {
             'success':                  success,
@@ -271,41 +273,41 @@ class SMSManager(models.Model):
         }
         return results
 
-    def retrieve_sms_phone_number_object(self, normalized_sms_phone_number, sms_phone_number_object_we_vote_id='',
-                                         voter_we_vote_id=''):
+    def retrieve_sms_phone_number(self, normalized_sms_phone_number, sms_phone_number_we_vote_id='',
+                                  voter_we_vote_id=''):
         """
         There are cases where we store multiple entries for the same normalized_sms_phone_number (prior to an sms
         address being verified)
         :param normalized_sms_phone_number:
-        :param sms_phone_number_object_we_vote_id:
+        :param sms_phone_number_we_vote_id:
         :param voter_we_vote_id:
         :return:
         """
         exception_does_not_exist = False
         exception_multiple_object_returned = False
-        sms_phone_number_object_found = False
-        sms_phone_number_object = SMSPhoneNumber()
-        sms_phone_number_object_id = 0
+        sms_phone_number_found = False
+        sms_phone_number = SMSPhoneNumber()
+        sms_phone_number_id = 0
         sms_phone_number_list_found = False
         sms_phone_number_list = []
         status = ""
 
         try:
-            if positive_value_exists(sms_phone_number_object_we_vote_id):
+            if positive_value_exists(sms_phone_number_we_vote_id):
                 if positive_value_exists(voter_we_vote_id):
-                    sms_phone_number_object = SMSPhoneNumber.objects.get(
-                        we_vote_id__iexact=sms_phone_number_object_we_vote_id,
+                    sms_phone_number = SMSPhoneNumber.objects.get(
+                        we_vote_id__iexact=sms_phone_number_we_vote_id,
                         voter_we_vote_id__iexact=voter_we_vote_id,
                         deleted=False
                     )
                 else:
-                    sms_phone_number_object = SMSPhoneNumber.objects.get(
-                        we_vote_id__iexact=sms_phone_number_object_we_vote_id,
+                    sms_phone_number = SMSPhoneNumber.objects.get(
+                        we_vote_id__iexact=sms_phone_number_we_vote_id,
                         deleted=False
                     )
-                sms_phone_number_object_id = sms_phone_number_object.id
-                sms_phone_number_object_we_vote_id = sms_phone_number_object.we_vote_id
-                sms_phone_number_object_found = True
+                sms_phone_number_id = sms_phone_number.id
+                sms_phone_number_we_vote_id = sms_phone_number.we_vote_id
+                sms_phone_number_found = True
                 success = True
                 status += "RETRIEVE_SMS_PHONE_NUMBER_FOUND_BY_WE_VOTE_ID "
             elif positive_value_exists(normalized_sms_phone_number):
@@ -328,10 +330,10 @@ class SMSManager(models.Model):
                 if len(sms_phone_number_list):
                     if len(sms_phone_number_list) == 1:
                         # If only one sms is found, return the results as a single sms
-                        sms_phone_number_object = sms_phone_number_list[0]
-                        sms_phone_number_object_id = sms_phone_number_object.id
-                        sms_phone_number_object_we_vote_id = sms_phone_number_object.we_vote_id
-                        sms_phone_number_object_found = True
+                        sms_phone_number = sms_phone_number_list[0]
+                        sms_phone_number_id = sms_phone_number.id
+                        sms_phone_number_we_vote_id = sms_phone_number.we_vote_id
+                        sms_phone_number_found = True
                         sms_phone_number_list_found = False
                         success = True
                         status += "RETRIEVE_SMS_PHONE_NUMBER_FOUND_BY_NORMALIZED_SMS_PHONE_NUMBER "
@@ -344,7 +346,7 @@ class SMSManager(models.Model):
                     sms_phone_number_list_found = False
                     status += 'RETRIEVE_SMS_PHONE_NUMBER_OBJECT-NO_SMS_PHONE_NUMBER_LIST_RETRIEVED '
             else:
-                sms_phone_number_object_found = False
+                sms_phone_number_found = False
                 success = False
                 status += "RETRIEVE_SMS_PHONE_NUMBER_VARIABLES_MISSING "
         except SMSPhoneNumber.DoesNotExist:
@@ -353,122 +355,154 @@ class SMSManager(models.Model):
             status += "RETRIEVE_SMS_PHONE_NUMBER_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'FAILED retrieve_sms_phone_number_object SMSPhoneNumber'
+            status += 'FAILED retrieve_sms_phone_number SMSPhoneNumber '
 
         results = {
-            'success':                          success,
-            'status':                           status,
-            'DoesNotExist':                     exception_does_not_exist,
-            'MultipleObjectsReturned':          exception_multiple_object_returned,
-            'sms_phone_number_object_found':       sms_phone_number_object_found,
-            'sms_phone_number_object_id':          sms_phone_number_object_id,
-            'sms_phone_number_object_we_vote_id':  sms_phone_number_object_we_vote_id,
-            'sms_phone_number_object':             sms_phone_number_object,
-            'sms_phone_number_list_found':         sms_phone_number_list_found,
-            'sms_phone_number_list':               sms_phone_number_list,
+            'success':                      success,
+            'status':                       status,
+            'DoesNotExist':                 exception_does_not_exist,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+            'sms_phone_number_found':       sms_phone_number_found,
+            'sms_phone_number_id':          sms_phone_number_id,
+            'sms_phone_number_we_vote_id':  sms_phone_number_we_vote_id,
+            'sms_phone_number':             sms_phone_number,
+            'sms_phone_number_list_found':  sms_phone_number_list_found,
+            'sms_phone_number_list':        sms_phone_number_list,
         }
         return results
 
-    # def sms_phone_number_sign_in_from_secret_key(self, sms_secret_key):
-    #     """
-    #     :param sms_secret_key:
-    #     :return:
-    #     """
-    #     sms_phone_number_object_found = False
-    #     sms_phone_number_object = SMSPhoneNumber()
-    #     sms_phone_number_object_id = 0
-    #     sms_phone_number_object_we_vote_id = ""
-    #     sms_ownership_is_verified = False
-    #
-    #     try:
-    #         if positive_value_exists(sms_secret_key):
-    #             sms_phone_number_object = SMSPhoneNumber.objects.get(
-    #                 secret_key=sms_secret_key,
-    #                 deleted=False
-    #             )
-    #             sms_phone_number_object_id = sms_phone_number_object.id
-    #             sms_phone_number_object_we_vote_id = sms_phone_number_object.we_vote_id
-    #             sms_ownership_is_verified = sms_phone_number_object.sms_ownership_is_verified
-    #             sms_phone_number_object_found = True
-    #             success = True
-    #             status = "SMS_PHONE_NUMBER_SIGN_IN_BY_WE_VOTE_ID"
-    #         else:
-    #             sms_phone_number_object_found = False
-    #             success = False
-    #             status = "SMS_PHONE_NUMBER_SIGN_IN_VARIABLES_MISSING"
-    #     except SMSPhoneNumber.DoesNotExist:
-    #         success = True
-    #         status = "SMS_PHONE_NUMBER_SIGN_IN_NOT_FOUND"
-    #     except Exception as e:
-    #         success = False
-    #         status = 'FAILED sms_phone_number_sign_in_from_secret_key SMSPhoneNumber'
-    #
-    #     results = {
-    #         'success':                          success,
-    #         'status':                           status,
-    #         'sms_phone_number_object_found':       sms_phone_number_object_found,
-    #         'sms_phone_number_object_id':          sms_phone_number_object_id,
-    #         'sms_phone_number_object_we_vote_id':  sms_phone_number_object_we_vote_id,
-    #         'sms_phone_number_object':             sms_phone_number_object,
-    #         'sms_ownership_is_verified':      sms_ownership_is_verified,
-    #     }
-    #     return results
-    #
-    # def verify_sms_phone_number_object_from_secret_key(self, sms_secret_key):
-    #     """
-    #
-    #     :param sms_secret_key:
-    #     :return:
-    #     """
-    #     sms_phone_number_object_found = False
-    #     sms_phone_number_object = SMSPhoneNumber()
-    #     sms_phone_number_object_id = 0
-    #     sms_phone_number_object_we_vote_id = ""
-    #
-    #     try:
-    #         if positive_value_exists(sms_secret_key):
-    #             sms_phone_number_object = SMSPhoneNumber.objects.get(
-    #                 secret_key=sms_secret_key,
-    #                 sms_ownership_is_verified=False,
-    #                 deleted=False
-    #             )
-    #             sms_phone_number_object_id = sms_phone_number_object.id
-    #             sms_phone_number_object_we_vote_id = sms_phone_number_object.we_vote_id
-    #             sms_phone_number_object_found = True
-    #             success = True
-    #             status = "VERIFY_SMS_PHONE_NUMBER_FOUND_BY_WE_VOTE_ID"
-    #         else:
-    #             sms_phone_number_object_found = False
-    #             success = False
-    #             status = "VERIFY_SMS_PHONE_NUMBER_VARIABLES_MISSING"
-    #     except SMSPhoneNumber.DoesNotExist:
-    #         success = True
-    #         status = "VERIFY_SMS_PHONE_NUMBER_NOT_FOUND"
-    #     except Exception as e:
-    #         success = False
-    #         status = 'FAILED verify_sms_phone_number_object_from_secret_key SMSPhoneNumber'
-    #
-    #     sms_ownership_is_verified = False
-    #     if sms_phone_number_object_found:
-    #         try:
-    #             # Note that we leave the secret key in place so we can the owner we_vote_id in a subsequent call
-    #             sms_phone_number_object.sms_ownership_is_verified = True
-    #             sms_phone_number_object.save()
-    #             sms_ownership_is_verified = True
-    #         except Exception as e:
-    #             success = False
-    #             status = 'FAILED_TO_SAVE_SMS_OWNERSHIP_IS_VERIFIED'
-    #
-    #     results = {
-    #         'success':                          success,
-    #         'status':                           status,
-    #         'sms_phone_number_object_found':       sms_phone_number_object_found,
-    #         'sms_phone_number_object_id':          sms_phone_number_object_id,
-    #         'sms_phone_number_object_we_vote_id':  sms_phone_number_object_we_vote_id,
-    #         'sms_phone_number_object':             sms_phone_number_object,
-    #         'sms_ownership_is_verified':      sms_ownership_is_verified,
-    #     }
-    #     return results
+    def retrieve_voter_we_vote_id_from_normalized_sms_phone_number(self, normalized_sms_phone_number):
+        success = True
+        status = ''
+        voter_we_vote_id_found = False
+        voter_we_vote_id = ''
+
+        try:
+            sms_phone_number_queryset = SMSPhoneNumber.objects.all()
+            sms_phone_number_queryset = sms_phone_number_queryset.filter(
+                normalized_sms_phone_number__iexact=normalized_sms_phone_number,
+                sms_ownership_is_verified=True,
+                deleted=False
+            )
+            sms_phone_number_list = sms_phone_number_queryset
+            if len(sms_phone_number_list):
+                sms_phone_number = sms_phone_number_list[0]
+                voter_we_vote_id = sms_phone_number.voter_we_vote_id
+                voter_we_vote_id_found = True
+        except Exception as e:
+            success = False
+            status += "RETRIEVE_VOTER_WE_VOTE_ID_FAILED " + str(e) + ' '
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'voter_we_vote_id_found':   voter_we_vote_id_found,
+            'voter_we_vote_id':         voter_we_vote_id,
+        }
+        return results
+
+    def retrieve_sms_phone_number_from_secret_key(self, sms_secret_key):
+        """
+        :param sms_secret_key:
+        :return:
+        """
+        sms_phone_number_found = False
+        sms_phone_number = SMSPhoneNumber()
+        sms_phone_number_id = 0
+        sms_phone_number_we_vote_id = ""
+        sms_ownership_is_verified = False
+        status = ''
+
+        try:
+            if positive_value_exists(sms_secret_key):
+                sms_phone_number = SMSPhoneNumber.objects.get(
+                    secret_key=sms_secret_key,
+                    deleted=False
+                )
+                sms_phone_number_id = sms_phone_number.id
+                sms_phone_number_we_vote_id = sms_phone_number.we_vote_id
+                sms_ownership_is_verified = sms_phone_number.sms_ownership_is_verified
+                sms_phone_number_found = True
+                success = True
+                status += "SMS_PHONE_NUMBER_SIGN_IN_BY_WE_VOTE_ID"
+            else:
+                sms_phone_number_found = False
+                success = False
+                status += "SMS_PHONE_NUMBER_SIGN_IN_VARIABLES_MISSING"
+        except SMSPhoneNumber.DoesNotExist:
+            success = True
+            status += "SMS_PHONE_NUMBER_SIGN_IN_NOT_FOUND"
+        except Exception as e:
+            success = False
+            status += 'FAILED retrieve_sms_phone_number_from_secret_key SMSPhoneNumber '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'sms_phone_number_found':       sms_phone_number_found,
+            'sms_phone_number_id':          sms_phone_number_id,
+            'sms_phone_number_we_vote_id':  sms_phone_number_we_vote_id,
+            'sms_phone_number':             sms_phone_number,
+            'sms_ownership_is_verified':    sms_ownership_is_verified,
+        }
+        return results
+
+    def verify_sms_phone_number_from_secret_key(self, sms_secret_key):
+        """
+
+        :param sms_secret_key:
+        :return:
+        """
+        sms_phone_number_found = False
+        sms_phone_number = SMSPhoneNumber()
+        sms_phone_number_id = 0
+        sms_phone_number_we_vote_id = ""
+        status = ''
+
+        try:
+            if positive_value_exists(sms_secret_key):
+                sms_phone_number = SMSPhoneNumber.objects.get(
+                    secret_key=sms_secret_key,
+                    sms_ownership_is_verified=False,
+                    deleted=False
+                )
+                sms_phone_number_id = sms_phone_number.id
+                sms_phone_number_we_vote_id = sms_phone_number.we_vote_id
+                sms_phone_number_found = True
+                success = True
+                status += "VERIFY_SMS_PHONE_NUMBER_FOUND_BY_WE_VOTE_ID "
+            else:
+                sms_phone_number_found = False
+                success = False
+                status += "VERIFY_SMS_PHONE_NUMBER_VARIABLES_MISSING "
+        except SMSPhoneNumber.DoesNotExist:
+            success = True
+            status += "VERIFY_SMS_PHONE_NUMBER_NOT_FOUND "
+        except Exception as e:
+            success = False
+            status += 'FAILED verify_sms_phone_number_from_secret_key SMSPhoneNumber '
+
+        sms_ownership_is_verified = False
+        if sms_phone_number_found:
+            try:
+                # Note that we leave the secret key in place so we can the owner we_vote_id in a subsequent call
+                sms_phone_number.sms_ownership_is_verified = True
+                sms_phone_number.save()
+                sms_ownership_is_verified = True
+            except Exception as e:
+                success = False
+                status += 'FAILED_TO_SAVE_SMS_OWNERSHIP_IS_VERIFIED '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'sms_phone_number_found':       sms_phone_number_found,
+            'sms_phone_number_id':          sms_phone_number_id,
+            'sms_phone_number_we_vote_id':  sms_phone_number_we_vote_id,
+            'sms_phone_number':             sms_phone_number,
+            'sms_ownership_is_verified':    sms_ownership_is_verified,
+        }
+        return results
 
     def retrieve_voter_sms_phone_number_list(self, voter_we_vote_id):
         """
@@ -530,8 +564,8 @@ class SMSManager(models.Model):
     def retrieve_primary_sms_with_ownership_verified(self, voter_we_vote_id, normalized_sms_phone_number=''):
         sms_phone_number_list = []
         sms_phone_number_list_found = False
-        sms_phone_number_object = SMSPhoneNumber()
-        sms_phone_number_object_found = False
+        sms_phone_number = SMSPhoneNumber()
+        sms_phone_number_found = False
         status = ''
         try:
             if positive_value_exists(voter_we_vote_id):
@@ -570,22 +604,22 @@ class SMSManager(models.Model):
             status += 'FAILED retrieve_primary_sms_with_ownership_verified SMSPhoneNumber ' + str(e) + ' '
 
         if sms_phone_number_list_found:
-            sms_phone_number_object_found = True
-            sms_phone_number_object = sms_phone_number_list[0]
+            sms_phone_number_found = True
+            sms_phone_number = sms_phone_number_list[0]
 
         results = {
             'success':                          success,
             'status':                           status,
-            'sms_phone_number_object_found':    sms_phone_number_object_found,
-            'sms_phone_number_object':          sms_phone_number_object,
+            'sms_phone_number_found':    sms_phone_number_found,
+            'sms_phone_number':          sms_phone_number,
         }
         return results
 
     def fetch_primary_sms_with_ownership_verified(self, voter_we_vote_id):
         results = self.retrieve_primary_sms_with_ownership_verified(voter_we_vote_id)
-        if results['sms_phone_number_object_found']:
-            sms_phone_number_object = results['sms_phone_number_object']
-            return sms_phone_number_object.normalized_sms_phone_number
+        if results['sms_phone_number_found']:
+            sms_phone_number = results['sms_phone_number']
+            return sms_phone_number.normalized_sms_phone_number
 
         return ""
 
@@ -692,10 +726,23 @@ class SMSManager(models.Model):
             }
             return results
 
-    def update_sms_phone_number_object_as_verified(self, sms_phone_number_object):
+    def update_sms_phone_number_with_new_secret_key(self, sms_we_vote_id):
+        results = self.retrieve_sms_phone_number('', sms_we_vote_id)
+        if results['sms_phone_number_found']:
+            sms_phone_number = results['sms_phone_number']
+            try:
+                sms_phone_number.secret_key = generate_random_string(12)
+                sms_phone_number.save()
+                return sms_phone_number.secret_key
+            except Exception as e:
+                return ""
+        else:
+            return ""
+
+    def update_sms_phone_number_as_verified(self, sms_phone_number):
         try:
-            sms_phone_number_object.sms_ownership_is_verified = True
-            sms_phone_number_object.save()
-            return sms_phone_number_object
+            sms_phone_number.sms_ownership_is_verified = True
+            sms_phone_number.save()
+            return sms_phone_number
         except Exception as e:
-            return sms_phone_number_object
+            return sms_phone_number

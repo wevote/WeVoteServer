@@ -2,32 +2,19 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from analytics.controllers import move_analytics_info_to_another_voter
 from candidate.controllers import FakeFirefoxURLopener
 from config.base import get_environment_variable
-from donate.controllers import move_donation_info_to_another_voter
-from email_outbound.controllers import move_email_address_entries_to_another_voter
 from email_outbound.models import EmailManager
-from follow.controllers import move_follow_entries_to_another_voter
-from friend.controllers import move_friend_invitations_to_another_voter, move_friends_to_another_voter
 from friend.models import FriendManager
 from image.controllers import FACEBOOK, cache_master_and_resized_image
 from import_export_facebook.models import FacebookManager
-from organization.controllers import move_organization_to_another_complete
 from organization.models import OrganizationManager, INDIVIDUAL
-from position.controllers import move_positions_to_another_voter
-from position.models import PositionListManager
-import re
 from socket import timeout
 import urllib.request
 from urllib.error import HTTPError
-from voter.controllers import move_facebook_info_to_another_voter, move_twitter_info_to_another_voter, \
-    merge_voter_accounts
 from voter.models import VoterDeviceLinkManager, VoterManager
-from voter_guide.controllers import move_voter_guides_to_another_voter
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
-from wevote_settings.models import RemoteRequestHistoryManager, RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS
 
 logger = wevote_functions.admin.get_logger(__name__)
 
