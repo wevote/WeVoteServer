@@ -2039,7 +2039,7 @@ class Voter(AbstractBaseUser):
     def signed_in_with_sms_phone_number(self):
         verified_sms_found = (positive_value_exists(self.normalized_sms_phone_number) or
                               positive_value_exists(self.primary_sms_we_vote_id)) and \
-                              self.primary_sms_ownership_is_verified
+                              self.sms_ownership_is_verified
         return verified_sms_found
 
     def has_data_to_preserve(self):
@@ -2146,6 +2146,59 @@ class VoterDeviceLinkManager(models.Model):
 
     def __str__(self):              # __unicode__ on Python 2
         return "Voter Device Id Manager"
+
+    def clear_secret_key(self, email_secret_key='', sms_secret_key=''):
+        email_secret_key_found = False
+        sms_secret_key_found = False
+        voter_device_link = None
+        status = ''
+        success = True
+
+        try:
+            if positive_value_exists(email_secret_key):
+                voter_device_link = VoterDeviceLink.objects.get(
+                    email_secret_key=email_secret_key,
+                )
+                email_secret_key_found = True
+        except VoterDeviceLink.DoesNotExist:
+            status += "EMAIL_SECRET_KEY_NOT_FOUND "
+        except Exception as e:
+            success = False
+            status += 'EMAIL_SECRET_KEY_RETRIEVE_ERROR ' + str(e) + ' '
+
+        if email_secret_key_found:
+            try:
+                voter_device_link.email_secret_key = None
+                voter_device_link.save()
+            except Exception as e:
+                success = False
+                status += 'EMAIL_SECRET_KEY_SAVE_ERROR ' + str(e) + ' '
+
+        try:
+            if positive_value_exists(sms_secret_key):
+                voter_device_link = VoterDeviceLink.objects.get(
+                    sms_secret_key=sms_secret_key,
+                )
+                sms_secret_key_found = True
+        except VoterDeviceLink.DoesNotExist:
+            status += "SMS_SECRET_KEY_NOT_FOUND "
+        except Exception as e:
+            success = False
+            status += 'SMS_SECRET_KEY_RETRIEVE_ERROR ' + str(e) + ' '
+
+        if sms_secret_key_found:
+            try:
+                voter_device_link.sms_secret_key = None
+                voter_device_link.save()
+            except Exception as e:
+                success = False
+                status += 'SMS_SECRET_KEY_SAVE_ERROR ' + str(e) + ' '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+        }
+        return results
 
     def delete_all_voter_device_links(self, voter_device_id):
         voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)

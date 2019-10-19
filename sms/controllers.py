@@ -7,7 +7,6 @@ from .models import GENERIC_SMS_TEMPLATE, SMSPhoneNumber, SMSManager, SMSSchedul
     SENT, SIGN_IN_CODE_SMS_TEMPLATE, TO_BE_PROCESSED, WAITING_FOR_VERIFICATION
 from config.base import get_environment_variable
 import json
-from organization.models import OrganizationManager, INDIVIDUAL
 import phonenumbers
 from voter.models import VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
@@ -452,7 +451,10 @@ def schedule_sign_in_code_sms(sender_voter_we_vote_id, recipient_voter_we_vote_i
         "secret_numerical_code":    secret_numerical_code,
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
-    verification_from_sms = "123456"  # TODO DALE Make system variable
+    try:
+        verification_from_sms = get_environment_variable("SYSTEM_SENDER_SMS_PHONE_NUMBER")
+    except Exception as e:
+        verification_from_sms = ''
 
     outbound_results = sms_manager.create_sms_description(
         sender_voter_we_vote_id, verification_from_sms, recipient_voter_we_vote_id,
@@ -638,165 +640,6 @@ def voter_sms_phone_number_sign_in_for_api(voter_device_id, sms_secret_key):  # 
     return json_data
 
 
-def voter_sms_phone_number_verify_for_api(voter_device_id, sms_secret_key):  # voterSMSPhoneNumberVerify
-    """
-
-    :param voter_device_id:
-    :param sms_secret_key:
-    :return:
-    """
-    sms_secret_key_belongs_to_this_voter = False
-    voter_ownership_saved = False
-    status = "ENTERING_VOTER_SMS_PHONE_NUMBER_VERIFY "
-    success = False
-
-    # If a voter_device_id is passed in that isn't valid, we want to throw an error
-    device_id_results = is_voter_device_id_valid(voter_device_id)
-    if not device_id_results['success']:
-        status += device_id_results['status']
-        json_data = {
-            'status':                                   device_id_results['status'],
-            'success':                                  False,
-            'voter_device_id':                          voter_device_id,
-            'sms_ownership_is_verified':              False,
-            'sms_secret_key_belongs_to_this_voter':   False,
-            'sms_phone_number_found':                      False,
-        }
-        return json_data
-
-    if not positive_value_exists(sms_secret_key):
-        status += "VOTER_SMS_PHONE_NUMBER_VERIFY_MISSING_SECRET_KEY "
-        error_results = {
-            'status':                                   status,
-            'success':                                  False,
-            'voter_device_id':                          voter_device_id,
-            'sms_ownership_is_verified':              False,
-            'sms_secret_key_belongs_to_this_voter':   False,
-            'sms_phone_number_found':                      False,
-        }
-        return error_results
-
-    voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-    voter_id = voter_results['voter_id']
-    if not positive_value_exists(voter_id):
-        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
-        error_results = {
-            'status':                                   status,
-            'success':                                  False,
-            'voter_device_id':                          voter_device_id,
-            'sms_ownership_is_verified':              False,
-            'sms_secret_key_belongs_to_this_voter':   False,
-            'sms_phone_number_found':                      False,
-        }
-        return error_results
-    voter = voter_results['voter']
-    voter_we_vote_id = voter.we_vote_id
-
-    sms_manager = SMSManager()
-    # Look to see if there is an SMSPhoneNumber entry for the incoming sms_phone_number or sms_we_vote_id
-    sms_results = sms_manager.verify_sms_phone_number_from_secret_key(sms_secret_key)
-    if sms_results['sms_phone_number_found']:
-        sms_phone_number = sms_results['sms_phone_number']
-        sms_phone_number_found = True
-        status += "SMS_PHONE_NUMBER_FOUND_FROM_VERIFY "
-
-        sms_ownership_is_verified = sms_phone_number.sms_ownership_is_verified
-        if voter_we_vote_id == sms_phone_number.voter_we_vote_id:
-            sms_secret_key_belongs_to_this_voter = True
-            voter_ownership_results = voter_manager.update_voter_sms_ownership_verified(voter, sms_phone_number)
-            voter_ownership_saved = voter_ownership_results['voter_updated']
-            if voter_ownership_saved:
-                voter = voter_ownership_results['voter']
-        else:
-            sms_owner_results = voter_manager.retrieve_voter_by_we_vote_id(sms_phone_number.voter_we_vote_id)
-            if sms_owner_results['voter_found']:
-                sms_owner_voter = sms_owner_results['voter']
-                voter_manager.update_voter_sms_ownership_verified(sms_owner_voter, sms_phone_number)
-                # If we verify it but don't use it to sign in, don't set voter_ownership_saved
-                # (which invalidates sms_secret_key below)
-    else:
-        sms_results = sms_manager.retrieve_sms_phone_number_from_secret_key(sms_secret_key)
-        if sms_results['sms_phone_number_found']:
-            status += "SMS_PHONE_NUMBER_FOUND_FROM_RETRIEVE "
-            sms_phone_number = sms_results['sms_phone_number']
-            sms_phone_number_found = True
-
-            sms_ownership_is_verified = sms_phone_number.sms_ownership_is_verified
-            if voter_we_vote_id == sms_phone_number.voter_we_vote_id:
-                sms_secret_key_belongs_to_this_voter = True
-                voter_ownership_results = voter_manager.update_voter_sms_ownership_verified(voter,
-                                                                                              sms_phone_number)
-                voter_ownership_saved = voter_ownership_results['voter_updated']
-                if voter_ownership_saved:
-                    voter = voter_ownership_results['voter']
-        else:
-            status += "SMS_NOT_FOUND_FROM_SECRET_KEY "
-            error_results = {
-                'status':                                   status,
-                'success':                                  False,
-                'voter_device_id':                          voter_device_id,
-                'sms_ownership_is_verified':              False,
-                'sms_secret_key_belongs_to_this_voter':   False,
-                'sms_phone_number_found':                      False,
-            }
-            return error_results
-
-    # send previous scheduled sms
-    sms_manager = SMSManager()
-    send_status = WAITING_FOR_VERIFICATION
-    scheduled_sms_results = sms_manager.retrieve_scheduled_sms_list_from_send_status(
-        sms_phone_number.voter_we_vote_id, send_status)
-    if scheduled_sms_results['scheduled_sms_list_found']:
-        scheduled_sms_list = scheduled_sms_results['scheduled_sms_list']
-        for scheduled_sms in scheduled_sms_list:
-            send_results = sms_manager.send_scheduled_sms(scheduled_sms)
-            sms_scheduled_sent = send_results['sms_scheduled_sent']
-            status += send_results['status']
-            if sms_scheduled_sent:
-                # If scheduled sms sent successfully then change their status from WAITING_FOR_VERIFICATION to SENT
-                send_status = SENT
-                update_scheduled_sms_results = sms_manager.update_scheduled_sms_with_new_send_status(
-                    scheduled_sms, send_status)
-
-    if voter_ownership_saved:
-        if not positive_value_exists(voter.linked_organization_we_vote_id):
-            # Create new organization
-            organization_name = voter.get_full_name()
-            organization_website = ""
-            organization_twitter_handle = ""
-            organization_twitter_id = ""
-            organization_sms = ""
-            organization_facebook = ""
-            organization_image = voter.voter_photo_url()
-            organization_type = INDIVIDUAL
-            organization_manager = OrganizationManager()
-            create_results = organization_manager.create_organization(
-                organization_name, organization_website, organization_twitter_handle,
-                organization_sms, organization_facebook, organization_image, organization_twitter_id,
-                organization_type)
-            if create_results['organization_created']:
-                # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
-                organization = create_results['organization']
-                try:
-                    voter.linked_organization_we_vote_id = organization.we_vote_id
-                    voter.save()
-                except Exception as e:
-                    status += "UNABLE_TO_LINK_NEW_ORGANIZATION_TO_VOTER "
-
-        # TODO DALE We want to invalidate the sms_secret key used
-
-    json_data = {
-        'status':                                   status,
-        'success':                                  success,
-        'voter_device_id':                          voter_device_id,
-        'sms_ownership_is_verified':                sms_ownership_is_verified,
-        'sms_secret_key_belongs_to_this_voter':     sms_secret_key_belongs_to_this_voter,
-        'sms_phone_number_found':                   sms_phone_number_found,
-    }
-    return json_data
-
-
 def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
         voter_device_id='',
         sms_phone_number='',
@@ -826,7 +669,6 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
     send_verification_sms = False
     sms_phone_number_found = False
     sms_phone_number_list_found = False
-    messages_to_send = []
     status = ""
     success = False
 
@@ -834,22 +676,22 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
     device_id_results = is_voter_device_id_valid(voter_device_id)
     if not device_id_results['success']:
         json_data = {
-            'status':                           device_id_results['status'],
-            'success':                          False,
-            'voter_device_id':                  voter_device_id,
-            'sms_phone_number':           sms_phone_number,
-            'sms_phone_number_we_vote_id':         incoming_sms_we_vote_id,
-            'sms_phone_number_saved_we_vote_id':   "",
-            'sms_phone_number_created':            False,
-            'sms_phone_number_deleted':            False,
-            'verification_sms_sent':          False,
-            'link_to_sign_in_sms_sent':       False,
-            'sign_in_code_sms_sent':          False,
+            'status':                               device_id_results['status'],
+            'success':                              False,
+            'voter_device_id':                      voter_device_id,
+            'sms_phone_number':                     sms_phone_number,
+            'sms_phone_number_we_vote_id':          incoming_sms_we_vote_id,
+            'sms_phone_number_saved_we_vote_id':    "",
+            'sms_phone_number_created':             False,
+            'sms_phone_number_deleted':             False,
+            'verification_sms_sent':                False,
+            'link_to_sign_in_sms_sent':             False,
+            'sign_in_code_sms_sent':                False,
             'sms_phone_number_already_owned_by_other_voter': False,
             'sms_phone_number_already_owned_by_this_voter': False,
-            'sms_phone_number_found':              False,
-            'sms_phone_number_list_found':         False,
-            'sms_phone_number_list':               [],
+            'sms_phone_number_found':               False,
+            'sms_phone_number_list_found':          False,
+            'sms_phone_number_list':                [],
             'secret_code_system_locked_for_this_voter_device_id': False,
         }
         return json_data
@@ -861,44 +703,44 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
     elif positive_value_exists(sms_phone_number):
         if not validate_sms_phone_number(sms_phone_number):
             error_results = {
-                'status':                           "VOTER_SMS_PHONE_NUMBER_SAVE_MISSING_VALID_SMS",
-                'success':                          False,
-                'voter_device_id':                  voter_device_id,
-                'sms_phone_number':           sms_phone_number,
-                'sms_phone_number_we_vote_id':         incoming_sms_we_vote_id,
-                'sms_phone_number_saved_we_vote_id':   "",
-                'sms_phone_number_created':            False,
-                'sms_phone_number_deleted':            False,
-                'verification_sms_sent':          False,
-                'link_to_sign_in_sms_sent':       False,
-                'sign_in_code_sms_sent':          False,
+                'status':                               "VOTER_SMS_PHONE_NUMBER_SAVE_MISSING_VALID_SMS ",
+                'success':                              False,
+                'voter_device_id':                      voter_device_id,
+                'sms_phone_number':                     sms_phone_number,
+                'sms_phone_number_we_vote_id':          incoming_sms_we_vote_id,
+                'sms_phone_number_saved_we_vote_id':    "",
+                'sms_phone_number_created':             False,
+                'sms_phone_number_deleted':             False,
+                'verification_sms_sent':                False,
+                'link_to_sign_in_sms_sent':             False,
+                'sign_in_code_sms_sent':                False,
                 'sms_phone_number_already_owned_by_other_voter': False,
                 'sms_phone_number_already_owned_by_this_voter': False,
-                'sms_phone_number_found':              False,
-                'sms_phone_number_list_found':         False,
-                'sms_phone_number_list':               [],
+                'sms_phone_number_found':               False,
+                'sms_phone_number_list_found':          False,
+                'sms_phone_number_list':                [],
                 'secret_code_system_locked_for_this_voter_device_id': False,
             }
             return error_results
     else:
         # We need EITHER incoming_sms_we_vote_id or sms_phone_number
         error_results = {
-            'status':                           "VOTER_SMS_PHONE_NUMBER_SAVE_MISSING_SMS",
-            'success':                          False,
-            'voter_device_id':                  voter_device_id,
-            'sms_phone_number':           sms_phone_number,
-            'sms_phone_number_we_vote_id':         "",
-            'sms_phone_number_saved_we_vote_id':   incoming_sms_we_vote_id,
-            'sms_phone_number_created':            False,
-            'sms_phone_number_deleted':            False,
-            'verification_sms_sent':          False,
-            'link_to_sign_in_sms_sent':       False,
-            'sign_in_code_sms_sent':          False,
+            'status':                               "VOTER_SMS_PHONE_NUMBER_SAVE_MISSING_SMS ",
+            'success':                              False,
+            'voter_device_id':                      voter_device_id,
+            'sms_phone_number':                     sms_phone_number,
+            'sms_phone_number_we_vote_id':          "",
+            'sms_phone_number_saved_we_vote_id':    incoming_sms_we_vote_id,
+            'sms_phone_number_created':             False,
+            'sms_phone_number_deleted':             False,
+            'verification_sms_sent':                False,
+            'link_to_sign_in_sms_sent':             False,
+            'sign_in_code_sms_sent':                False,
             'sms_phone_number_already_owned_by_other_voter': False,
             'sms_phone_number_already_owned_by_this_voter': False,
-            'sms_phone_number_found':              False,
-            'sms_phone_number_list_found':         False,
-            'sms_phone_number_list':               [],
+            'sms_phone_number_found':               False,
+            'sms_phone_number_list_found':          False,
+            'sms_phone_number_list':                [],
             'secret_code_system_locked_for_this_voter_device_id': False,
         }
         return error_results
@@ -908,22 +750,22 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         error_results = {
-            'status':                           "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
-            'success':                          False,
-            'voter_device_id':                  voter_device_id,
-            'sms_phone_number':           sms_phone_number,
-            'sms_phone_number_we_vote_id':         "",
-            'sms_phone_number_saved_we_vote_id':   "",
-            'sms_phone_number_created':            False,
-            'sms_phone_number_deleted':            False,
-            'verification_sms_sent':          False,
-            'link_to_sign_in_sms_sent':       False,
-            'sign_in_code_sms_sent':          False,
+            'status':                               "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID ",
+            'success':                              False,
+            'voter_device_id':                      voter_device_id,
+            'sms_phone_number':                     sms_phone_number,
+            'sms_phone_number_we_vote_id':          "",
+            'sms_phone_number_saved_we_vote_id':    "",
+            'sms_phone_number_created':             False,
+            'sms_phone_number_deleted':             False,
+            'verification_sms_sent':                False,
+            'link_to_sign_in_sms_sent':             False,
+            'sign_in_code_sms_sent':                False,
             'sms_phone_number_already_owned_by_other_voter': False,
             'sms_phone_number_already_owned_by_this_voter': False,
-            'sms_phone_number_found':              False,
-            'sms_phone_number_list_found':         False,
-            'sms_phone_number_list':               [],
+            'sms_phone_number_found':               False,
+            'sms_phone_number_list_found':          False,
+            'sms_phone_number_list':                [],
             'secret_code_system_locked_for_this_voter_device_id': False,
         }
         return error_results
@@ -933,16 +775,19 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
     sms_manager = SMSManager()
     sms_phone_number_already_owned_by_this_voter = False
     sms_phone_number_already_owned_by_other_voter = False
+    recipient_sms_secret_key = ''
     verified_sms_phone_number = SMSPhoneNumber()
     verified_sms_phone_number_we_vote_id = ""
-    parsed_sms_phone_number = phonenumbers.parse(sms_phone_number, "US")
-    normalized_sms_phone_number = \
-        phonenumbers.format_number(parsed_sms_phone_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
+    if positive_value_exists(sms_phone_number):
+        parsed_sms_phone_number = phonenumbers.parse(sms_phone_number, "US")
+        normalized_sms_phone_number = \
+            phonenumbers.format_number(parsed_sms_phone_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
+    else:
+        normalized_sms_phone_number = ''
     sms_phone_number_list = []
     # Is this sms already verified by another account?
-    temp_voter_we_vote_id = ""
     find_verified_sms_results = sms_manager.retrieve_primary_sms_with_ownership_verified(
-        temp_voter_we_vote_id, normalized_sms_phone_number)
+        normalized_sms_phone_number=normalized_sms_phone_number, sms_we_vote_id=incoming_sms_we_vote_id)
     if find_verified_sms_results['sms_phone_number_found']:
         verified_sms_phone_number = find_verified_sms_results['sms_phone_number']
         verified_sms_phone_number_we_vote_id = verified_sms_phone_number.we_vote_id
@@ -961,7 +806,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
             sms_phone_number_created = False
             sms_phone_number_found = True
         else:
-            status += "SMS_ALREADY_OWNED_BY_ANOTHER_VOTER"
+            status += "SMS_ALREADY_OWNED_BY_ANOTHER_VOTER "
             error_results = {
                 'status':                               status,
                 'success':                              True,
@@ -1033,35 +878,35 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                     success = False
 
                 if sms_phone_number_deleted:
-                    # Delete all other emails associated with this account that are not be verified
+                    # Delete all other identical phone numbers associated with this account that are not be verified
                     if positive_value_exists(normalized_sms_phone_number):
                         duplicate_results = sms_manager.retrieve_sms_phone_number(
                             normalized_sms_phone_number, voter_we_vote_id=voter_we_vote_id)
-                        if duplicate_results['email_address_object_found']:
-                            email_address_object_to_delete = duplicate_results['email_address_object']
-                            if not positive_value_exists(email_address_object_to_delete.email_ownership_is_verified):
+                        if duplicate_results['sms_phone_number_found']:
+                            sms_phone_number_to_delete = duplicate_results['sms_phone_number']
+                            if not positive_value_exists(sms_phone_number_to_delete.sms_ownership_is_verified):
                                 try:
-                                    email_address_object_to_delete.delete()
-                                    status += "DELETED_DUP_EMAIL_ADDRESS "
+                                    sms_phone_number_to_delete.delete()
+                                    status += "DELETED_DUP_SMS1 "
                                 except Exception as e:
-                                    status += "UNABLE_TO_DELETE_DUP_EMAIL_ADDRESS "
-                        elif duplicate_results['email_address_list_found']:
-                            email_address_list_for_delete = duplicate_results['email_address_list']
-                            for email_address_object_to_delete in email_address_list_for_delete:
+                                    status += "UNABLE_TO_DELETE_DUP_SMS1 "
+                        elif duplicate_results['sms_phone_number_list_found']:
+                            sms_phone_number_list_for_delete = duplicate_results['sms_phone_number_list']
+                            for sms_phone_number_to_delete in sms_phone_number_list_for_delete:
                                 if not positive_value_exists(
-                                        email_address_object_to_delete.email_ownership_is_verified):
+                                        sms_phone_number_to_delete.sms_ownership_is_verified):
                                     try:
-                                        email_address_object_to_delete.delete()
-                                        status += "DELETED_DUP_EMAIL_ADDRESS "
+                                        sms_phone_number_to_delete.delete()
+                                        status += "DELETED_DUP_SMS2 "
                                     except Exception as e:
-                                        status += "UNABLE_TO_DELETE_DUP_EMAIL_ADDRESS "
+                                        status += "UNABLE_TO_DELETE_DUP_SMS2 "
 
                     # If there are any other verified sms, promote the first one to be the voter's verified sms
                     if positive_value_exists(primary_sms_phone_number_deleted):
                         temp_sms_phone_number = ""
                         temp_incoming_sms_we_vote_id = ""
                         sms_promotion_results = sms_manager.retrieve_sms_phone_number(
-                            temp_sms_phone_number, temp_incoming_sms_we_vote_id, voter_we_vote_id)
+                            temp_sms_phone_number, temp_incoming_sms_we_vote_id, voter_we_vote_id=voter_we_vote_id)
                         sms_phone_number_list_for_promotion = []
                         if sms_promotion_results['sms_phone_number_list_found']:
                             # This sms was used by more than one person
@@ -1077,7 +922,8 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                                     try:
                                         voter.primary_sms_we_vote_id = sms_phone_number_for_promotion.we_vote_id
                                         voter.sms_ownership_is_verified = True
-                                        voter.normalized_sms_phone_number = sms_phone_number_for_promotion.normalized_sms_phone_number
+                                        voter.normalized_sms_phone_number = \
+                                            sms_phone_number_for_promotion.normalized_sms_phone_number
                                         voter.save()
                                         status += "SAVED_SMS_PHONE_NUMBER_AS_NEW_PRIMARY "
                                         success = True
@@ -1174,7 +1020,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
             # Save the new sms address
             sms_ownership_is_verified = False
             sms_save_results = sms_manager.create_sms_phone_number(
-                normalized_sms_phone_number, voter_we_vote_id, sms_ownership_is_verified, make_primary_sms_phone_number)
+                normalized_sms_phone_number, voter_we_vote_id, sms_ownership_is_verified)
 
             if sms_save_results['sms_phone_number_saved']:
                 # Send verification sms
@@ -1182,7 +1028,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                 new_sms_phone_number = sms_save_results['sms_phone_number']
                 sms_phone_number_we_vote_id = new_sms_phone_number.we_vote_id
                 sms_phone_number_saved_we_vote_id = new_sms_phone_number.we_vote_id
-                normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
+                normalized_sms_phone_number = new_sms_phone_number.normalized_sms_phone_number
                 if positive_value_exists(new_sms_phone_number.secret_key):
                     recipient_sms_secret_key = new_sms_phone_number.secret_key
                 else:
@@ -1211,7 +1057,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
             results['secret_code_system_locked_for_this_voter_device_id']
 
         # And we need to store the secret_key (as opposed to the 6 digit secret code) in the voter_device_link
-        #  so we can match this email to this session
+        #  so we can match this phone number to this session
         link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
         if link_results['voter_device_link_found']:
             voter_device_link = link_results['voter_device_link']
@@ -1219,6 +1065,12 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                 voter_device_link, recipient_sms_secret_key)
             if not positive_value_exists(update_results['success']):
                 status += update_results['status']
+                # Wipe out existing value and save again
+                voter_device_link_manager.clear_secret_key(sms_secret_key=recipient_sms_secret_key)
+                update_results = voter_device_link_manager.update_voter_device_link_with_sms_secret_key(
+                    voter_device_link, recipient_sms_secret_key)
+                if not positive_value_exists(update_results['success']):
+                    status += update_results['status']
         else:
             status += "VOTER_DEVICE_LINK_NOT_UPDATED_WITH_SMS_SECRET_KEY "
 
