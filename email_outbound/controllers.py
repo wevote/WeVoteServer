@@ -1304,6 +1304,12 @@ def voter_email_address_save_for_api(voter_device_id='',
                 voter_device_link, recipient_email_address_secret_key)
             if not positive_value_exists(update_results['success']):
                 status += update_results['status']
+                # Wipe out existing value and save again
+                voter_device_link_manager.clear_secret_key(email_secret_key=recipient_email_address_secret_key)
+                update_results = voter_device_link_manager.update_voter_device_link_with_email_secret_key(
+                    voter_device_link, recipient_email_address_secret_key)
+                if not positive_value_exists(update_results['success']):
+                    status += update_results['status']
         else:
             status += "VOTER_DEVICE_LINK_NOT_UPDATED_WITH_EMAIL_SECRET_KEY "
 

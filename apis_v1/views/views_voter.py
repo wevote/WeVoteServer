@@ -2093,6 +2093,14 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
                             status += "UNABLE_TO_CONNECT_VERIFIED_SMS_WITH_THIS_ACCOUNT " + str(e) + " "
                     else:
                         status += sms_results['status']
+
+                if positive_value_exists(voter_device_link.sms_secret_key):
+                    # We remove secret_key's to avoid future collisions in the voter_device_link
+                    clear_results = sms_manager.clear_secret_key_from_sms_phone_number(voter_device_link.sms_secret_key)
+                    status += clear_results['status']
+                    clear_results = voter_device_link_manager.clear_secret_key(
+                        sms_secret_key=voter_device_link.sms_secret_key)
+                    status += clear_results['status']
             else:
                 # Default to code being sent to an email address
                 existing_verified_email_address_found = False
@@ -2158,6 +2166,15 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
                             status += "UNABLE_TO_CONNECT_VERIFIED_EMAIL_WITH_THIS_ACCOUNT " + str(e) + " "
                     else:
                         status += email_results['status']
+
+                if positive_value_exists(voter_device_link.email_secret_key):
+                    # We remove secret_key's to avoid future collisions in the voter_device_link
+                    clear_results = email_manager.clear_secret_key_from_email_address(
+                        voter_device_link.email_secret_key)
+                    status += clear_results['status']
+                    clear_results = voter_device_link_manager.clear_secret_key(
+                        email_secret_key=voter_device_link.email_secret_key)
+                    status += clear_results['status']
 
     json_data = {
         'status':                                   status,

@@ -140,6 +140,48 @@ class EmailManager(models.Model):
     def __unicode__(self):
         return "EmailManager"
 
+    def clear_secret_key_from_email_address(self, email_secret_key):
+        """
+
+        :param email_secret_key:
+        :return:
+        """
+        email_address_found = False
+        email_address = None
+        status = ''
+
+        try:
+            if positive_value_exists(email_secret_key):
+                email_address = EmailAddress.objects.get(
+                    secret_key=email_secret_key,
+                )
+                email_address_found = True
+                success = True
+            else:
+                email_address_found = False
+                success = False
+                status += "SECRET_KEY_MISSING "
+        except EmailAddress.DoesNotExist:
+            success = True
+            status += "EMAIL_ADDRESS_NOT_FOUND "
+        except Exception as e:
+            success = False
+            status += 'EMAIL_ADDRESS_DB_RETRIEVE_ERROR ' + str(e) + ' '
+
+        if email_address_found:
+            try:
+                email_address.secret_key = None
+                email_address.save()
+            except Exception as e:
+                success = False
+                status += 'EMAIL_ADDRESS_DB_SAVE_ERROR ' + str(e) + ' '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+        }
+        return results
+
     def create_email_address_for_voter(self, normalized_email_address, voter, email_ownership_is_verified=False):
         return self.create_email_address(normalized_email_address, voter.we_vote_id, email_ownership_is_verified)
 
