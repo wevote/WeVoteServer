@@ -473,6 +473,7 @@ def schedule_sign_in_code_sms(sender_voter_we_vote_id, recipient_voter_we_vote_i
         if sms_scheduled_saved:
             send_results = sms_manager.send_scheduled_sms(sms_scheduled)
             sms_scheduled_sent = send_results['sms_scheduled_sent']
+            status += send_results['status']
 
     results = {
         'status':               status,
@@ -841,7 +842,6 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
 
         # Cycle through all SMSPhoneNumber entries with "sms_phone_number" or "incoming_sms_we_vote_id"
         for sms_phone_number in sms_phone_number_list:
-            sms_phone_number_already_owned_by_this_voter = True
             sms_phone_number_we_vote_id = sms_phone_number.we_vote_id
             sms_phone_number_saved_we_vote_id = ""
             normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
@@ -925,6 +925,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                                         voter.normalized_sms_phone_number = \
                                             sms_phone_number_for_promotion.normalized_sms_phone_number
                                         voter.save()
+                                        sms_phone_number_already_owned_by_this_voter = True
                                         status += "SAVED_SMS_PHONE_NUMBER_AS_NEW_PRIMARY "
                                         success = True
                                     except Exception as e:
@@ -961,6 +962,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                             voter.sms_ownership_is_verified = True
                             voter.normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
                             voter.save()
+                            sms_phone_number_already_owned_by_this_voter = True
                             status += "SAVED_SMS_PHONE_NUMBER_AS_PRIMARY-HEALING_DATA "
                             success = True
                         except Exception as e:
@@ -974,6 +976,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                                 voter.sms_ownership_is_verified = True
                                 voter.normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
                                 voter.save()
+                                sms_phone_number_already_owned_by_this_voter = True
                                 status += "SAVED_SMS_PHONE_NUMBER_AS_NEW_PRIMARY "
                                 success = True
                             except Exception as e:
@@ -996,6 +999,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                             voter.sms_ownership_is_verified = True
                             voter.normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
                             voter.save()
+                            sms_phone_number_already_owned_by_this_voter = True
                             status += "SAVED_SMS_PHONE_NUMBER_AS_PRIMARY "
                             success = True
                         except Exception as e:
@@ -1012,10 +1016,6 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
         if sms_phone_number_deleted:
             # We cannot proceed with this sms address, since it was just marked deleted
             pass
-        elif sms_phone_number_already_owned_by_this_voter:
-            # We send back a message that the sms already owned by setting sms_phone_number_found = True
-            if resend_verification_sms:
-                send_verification_sms = True
         elif not positive_value_exists(incoming_sms_we_vote_id):
             # Save the new sms address
             sms_ownership_is_verified = False
