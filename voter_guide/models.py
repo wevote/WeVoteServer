@@ -1958,6 +1958,7 @@ class VoterGuidePossibilityManager(models.Manager):
                     voter_guide_possibility_url__iexact=voter_guide_possibility_url,
                     voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
                     target_google_civic_election_id=target_google_civic_election_id,
+                    hide_from_active_review=False,
                 )
                 voter_guide_possibility_found = True
                 success = True
