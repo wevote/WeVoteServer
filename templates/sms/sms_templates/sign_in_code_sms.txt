@@ -1,1 +1,1 @@
-Your We Vote verification code is: {{ secret_numerical_code }} Please don't share this code with anyone; We Vote staff will never ask for this code.
+Your We Vote verification code is: {{ secret_numerical_code }} Thank you for being a voter! Please don't share this code with anyone; We Vote staff will never ask for this code.

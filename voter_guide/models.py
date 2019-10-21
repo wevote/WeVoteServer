@@ -1958,6 +1958,7 @@ class VoterGuidePossibilityManager(models.Manager):
                     voter_guide_possibility_url__iexact=voter_guide_possibility_url,
                     voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
                     target_google_civic_election_id=target_google_civic_election_id,
+                    hide_from_active_review=False,
                 )
                 voter_guide_possibility_found = True
                 success = True
@@ -2198,7 +2199,7 @@ class VoterGuidePossibilityManager(models.Manager):
                 voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
                     Q(voter_guide_possibility_url__iexact=voter_guide_possibility_url) |
                     Q(voter_guide_possibility_url__iexact=voter_guide_possibility_url_alternate))
-                voter_guide_possibility_on_stage = voter_guide_possibility_query.filter(hide_from_active_review=False)
+                voter_guide_possibility_query = voter_guide_possibility_query.filter(hide_from_active_review=False)
                 voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
                 if voter_guide_possibility_on_stage is not None:
                     voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
