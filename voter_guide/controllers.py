@@ -154,6 +154,7 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
         # (UNKNOWN_TYPE, 'List of Endorsements for One Candidate'),
         if one_voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
                 or one_voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE:
+            # Note that this extraction is limited to 200 possibilities to avoid very slow page loads
             results = extract_voter_guide_possibility_position_list_from_database(one_voter_guide_possibility)
             if results['possible_endorsement_list_found']:
                 possible_endorsement_list = results['possible_endorsement_list']
@@ -171,6 +172,7 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
                     possible_endorsement_list = results['possible_endorsement_list']
                     possible_endorsement_list_found = True
         elif one_voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
+            # Note that this extraction is limited to 200 possibilities to avoid very slow page loads
             results = extract_voter_guide_possibility_position_list_from_database(one_voter_guide_possibility)
             if results['possible_endorsement_list_found']:
                 possible_endorsement_list = results['possible_endorsement_list']
@@ -193,7 +195,7 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
                 voter_guide_possibility_manager.number_of_measures_in_database(one_voter_guide_possibility.id)
             one_voter_guide_possibility.positions_ready_to_save_as_batch = \
                 voter_guide_possibility_manager.positions_ready_to_save_as_batch(one_voter_guide_possibility)
-            maximum_number_of_possible_endorsements_analyzed = 10
+            maximum_number_of_possible_endorsements_analyzed = 200
             number_of_possible_endorsements_analyzed = 0
             for one_possible_endorsement in possible_endorsement_list:
                 number_of_possible_endorsements_analyzed += 1
@@ -464,6 +466,7 @@ def extract_voter_guide_possibility_position_list_from_database(
         voter_guide_possibility_parent_id=voter_guide_possibility.id).order_by('possibility_position_number')
     if positive_value_exists(voter_guide_possibility_position_id):
         possibility_position_query = possibility_position_query.filter(id=voter_guide_possibility_position_id)
+    possibility_position_query = possibility_position_query[:200]  # Limit to 200 to avoid very slow page loading
     possibility_position_list = list(possibility_position_query)
     candidate_manager = CandidateCampaignManager()
     for possibility_position in possibility_position_list:

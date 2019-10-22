@@ -336,6 +336,7 @@ def voter_guide_create_view(request):
                     is_list_of_endorsements_for_candidate = False
 
                 # Fill the possible_endorsement_list with the latest data
+                # Note that this extraction is limited to 200 possibilities to avoid very slow page loads
                 results = extract_voter_guide_possibility_position_list_from_database(voter_guide_possibility)
 
                 if results['possible_endorsement_list_found']:
@@ -2102,8 +2103,8 @@ def voter_guide_possibility_list_view(request):
 
     if positive_value_exists(len(voter_guide_possibility_list)):
         # Add VoterGuidePossibilityPosition data. Don't scan for new possibilities.
-        # voter_guide_possibility_list = \
-        #     augment_with_voter_guide_possibility_position_data(voter_guide_possibility_list)
+        voter_guide_possibility_list = \
+            augment_with_voter_guide_possibility_position_data(voter_guide_possibility_list)
         pass
 
     # Now populate the election drop down
