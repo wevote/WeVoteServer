@@ -1323,28 +1323,31 @@ def voter_email_address_save_for_api(voter_device_id='',
         secret_code_system_locked_for_this_voter_device_id = \
             results['secret_code_system_locked_for_this_voter_device_id']
 
-        # And we need to store the secret_key (as opposed to the 6 digit secret code) in the voter_device_link
-        #  so we can match this email to this session
-        link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
-        if link_results['voter_device_link_found']:
-            voter_device_link = link_results['voter_device_link']
-            update_results = voter_device_link_manager.update_voter_device_link_with_email_secret_key(
-                voter_device_link, recipient_email_address_secret_key)
-            if positive_value_exists(update_results['success']):
-                status += "UPDATED_VOTER_DEVICE_LINK_WITH_SECRET_KEY "
-            else:
-                status += update_results['status']
-                status += "COULD_NOT_UPDATE_VOTER_DEVICE_LINK_WITH_SECRET_KEY "
-                # Wipe out existing value and save again
-                voter_device_link_manager.clear_secret_key(email_secret_key=recipient_email_address_secret_key)
+        if positive_value_exists(secret_code_system_locked_for_this_voter_device_id):
+            status += "SECRET_CODE_SYSTEM_LOCKED-EMAIL_SAVE "
+            success = True
+        elif positive_value_exists(secret_code):
+            # And we need to store the secret_key (as opposed to the 6 digit secret code) in the voter_device_link
+            #  so we can match this email to this session
+            link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+            if link_results['voter_device_link_found']:
+                voter_device_link = link_results['voter_device_link']
                 update_results = voter_device_link_manager.update_voter_device_link_with_email_secret_key(
                     voter_device_link, recipient_email_address_secret_key)
-                if not positive_value_exists(update_results['success']):
+                if positive_value_exists(update_results['success']):
+                    status += "UPDATED_VOTER_DEVICE_LINK_WITH_SECRET_KEY "
+                else:
                     status += update_results['status']
-        else:
-            status += "VOTER_DEVICE_LINK_NOT_UPDATED_WITH_EMAIL_SECRET_KEY "
+                    status += "COULD_NOT_UPDATE_VOTER_DEVICE_LINK_WITH_SECRET_KEY "
+                    # Wipe out existing value and save again
+                    voter_device_link_manager.clear_secret_key(email_secret_key=recipient_email_address_secret_key)
+                    update_results = voter_device_link_manager.update_voter_device_link_with_email_secret_key(
+                        voter_device_link, recipient_email_address_secret_key)
+                    if not positive_value_exists(update_results['success']):
+                        status += update_results['status']
+            else:
+                status += "VOTER_DEVICE_LINK_NOT_UPDATED_WITH_EMAIL_SECRET_KEY "
 
-        if positive_value_exists(secret_code):
             status += 'ABOUT_TO_SEND_SIGN_IN_CODE '
             link_send_results = schedule_sign_in_code_email(
                 voter_we_vote_id, voter_we_vote_id,
@@ -1359,10 +1362,6 @@ def voter_email_address_save_for_api(voter_device_id='',
             else:
                 status += 'SCHEDULE_SIGN_IN_CODE_EMAIL_FAILED '
                 success = False
-        elif positive_value_exists(secret_code_system_locked_for_this_voter_device_id):
-            status += "SECRET_CODE_SYSTEM_LOCKED "
-            success = True
-            secret_code_system_locked_for_this_voter_device_id = True
         else:
             status += results['status']
             status += 'RETRIEVE_VOTER_SECRET_CODE_UP_TO_DATE_FAILED '

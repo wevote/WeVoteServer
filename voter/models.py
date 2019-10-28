@@ -2531,7 +2531,7 @@ class VoterDeviceLinkManager(models.Model):
                     NUMBER_OF_FAILED_TRIES_ALLOWED_ALL_TIME:
                 number_of_tries_remaining_for_this_code = 0
                 secret_code_system_locked_for_this_voter_device_id = True
-                status += "SECRET_CODE_SYSTEM_LOCKED "
+                status += "SECRET_CODE_SYSTEM_LOCKED-VERIFY_CODE "
             else:
                 if voter_device_link.secret_code_number_of_failed_tries_for_this_code is not None \
                         and voter_device_link.secret_code_number_of_failed_tries_for_this_code > \
