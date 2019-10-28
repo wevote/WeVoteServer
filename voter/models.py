@@ -2488,7 +2488,7 @@ class VoterDeviceLinkManager(models.Model):
                     voter_device_link.date_secret_code_generated = None
                     voter_device_link.secret_code_number_of_failed_tries_for_this_code = None
                 voter_device_link.save()
-
+                status += "UPDATED_VOTER_DEVICE_LINK "
                 voter_device_link_id = voter_device_link.id
             else:
                 missing_required_variables = True
