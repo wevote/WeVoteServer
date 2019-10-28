@@ -744,6 +744,7 @@ class EmailManager(models.Model):
 
     def schedule_email(self, email_outbound_description, subject, message_text, message_html,
                        send_status=TO_BE_PROCESSED):
+        status = ''
         try:
             email_scheduled = EmailScheduled.objects.create(
                 sender_voter_we_vote_id=email_outbound_description.sender_voter_we_vote_id,
@@ -760,13 +761,13 @@ class EmailManager(models.Model):
             email_scheduled_saved = True
             email_scheduled_id = email_scheduled.id
             success = True
-            status = "SCHEDULE_EMAIL_CREATED"
+            status += "SCHEDULE_EMAIL_CREATED "
         except Exception as e:
             email_scheduled_saved = False
             email_scheduled = EmailScheduled()
             email_scheduled_id = 0
             success = False
-            status = "SCHEDULE_EMAIL_NOT_CREATED"
+            status += "SCHEDULE_EMAIL_NOT_CREATED " + str(e) + ' '
 
         results = {
             'success':                  success,
@@ -846,7 +847,7 @@ class EmailManager(models.Model):
             mail.send()
             status += "SENDING_VIA_SENDGRID "
         except Exception as e:
-            status += "COULD_NOT_SEND_VIA_SENDGRID "
+            status += "COULD_NOT_SEND_VIA_SENDGRID " + str(e) + ' '
 
         email_scheduled_sent = True
 
