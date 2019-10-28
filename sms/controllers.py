@@ -1056,25 +1056,28 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
         secret_code_system_locked_for_this_voter_device_id = \
             results['secret_code_system_locked_for_this_voter_device_id']
 
-        # And we need to store the secret_key (as opposed to the 6 digit secret code) in the voter_device_link
-        #  so we can match this phone number to this session
-        link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
-        if link_results['voter_device_link_found']:
-            voter_device_link = link_results['voter_device_link']
-            update_results = voter_device_link_manager.update_voter_device_link_with_sms_secret_key(
-                voter_device_link, recipient_sms_secret_key)
-            if not positive_value_exists(update_results['success']):
-                status += update_results['status']
-                # Wipe out existing value and save again
-                voter_device_link_manager.clear_secret_key(sms_secret_key=recipient_sms_secret_key)
+        if positive_value_exists(secret_code_system_locked_for_this_voter_device_id):
+            status += results['status']
+            success = True
+        elif positive_value_exists(secret_code):
+            # And we need to store the secret_key (as opposed to the 6 digit secret code) in the voter_device_link
+            #  so we can match this phone number to this session
+            link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+            if link_results['voter_device_link_found']:
+                voter_device_link = link_results['voter_device_link']
                 update_results = voter_device_link_manager.update_voter_device_link_with_sms_secret_key(
                     voter_device_link, recipient_sms_secret_key)
                 if not positive_value_exists(update_results['success']):
                     status += update_results['status']
-        else:
-            status += "VOTER_DEVICE_LINK_NOT_UPDATED_WITH_SMS_SECRET_KEY "
+                    # Wipe out existing value and save again
+                    voter_device_link_manager.clear_secret_key(sms_secret_key=recipient_sms_secret_key)
+                    update_results = voter_device_link_manager.update_voter_device_link_with_sms_secret_key(
+                        voter_device_link, recipient_sms_secret_key)
+                    if not positive_value_exists(update_results['success']):
+                        status += update_results['status']
+            else:
+                status += "VOTER_DEVICE_LINK_NOT_UPDATED_WITH_SMS_SECRET_KEY "
 
-        if positive_value_exists(secret_code):
             link_send_results = schedule_sign_in_code_sms(
                 voter_we_vote_id, voter_we_vote_id,
                 sms_phone_number_we_vote_id, normalized_sms_phone_number,
@@ -1087,10 +1090,6 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
             else:
                 status += 'SCHEDULE_SIGN_IN_CODE_SMS_FAILED '
                 success = False
-        elif positive_value_exists(results['secret_code_system_locked_for_this_voter_device_id']):
-            status += results['status']
-            success = True
-            secret_code_system_locked_for_this_voter_device_id = True
         else:
             status += results['status']
             status += 'RETRIEVE_VOTER_SECRET_CODE_UP_TO_DATE_FAILED '

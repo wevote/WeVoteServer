@@ -761,6 +761,8 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
         'email_address_found':              results['email_address_found'],
         'email_address_list_found':         results['email_address_list_found'],
         'email_address_list':               results['email_address_list'],
+        'secret_code_system_locked_for_this_voter_device_id':
+            results['secret_code_system_locked_for_this_voter_device_id'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1368,6 +1370,8 @@ def voter_sms_phone_number_save_view(request):  # voterSMSPhoneNumberSave
         'sms_phone_number_found':           results['sms_phone_number_found'],
         'sms_phone_number_list_found':      results['sms_phone_number_list_found'],
         'sms_phone_number_list':            results['sms_phone_number_list'],
+        'secret_code_system_locked_for_this_voter_device_id':
+            results['secret_code_system_locked_for_this_voter_device_id'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
