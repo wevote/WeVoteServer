@@ -408,7 +408,7 @@ def schedule_verification_email(sender_voter_we_vote_id, recipient_voter_we_vote
 
 def schedule_link_to_sign_in_email(sender_voter_we_vote_id, recipient_voter_we_vote_id,
                                    recipient_email_we_vote_id, recipient_voter_email,
-                                   recipient_email_address_secret_key):
+                                   recipient_email_address_secret_key, is_cordova):
     """
     When a voter wants to sign in with a pre-existing email, create and send an outbound email with a link
     that the voter can click to sign in.
@@ -417,6 +417,7 @@ def schedule_link_to_sign_in_email(sender_voter_we_vote_id, recipient_voter_we_v
     :param recipient_email_we_vote_id:
     :param recipient_voter_email:
     :param recipient_email_address_secret_key:
+    :param is_cordova:
     :return:
     """
     email_scheduled_saved = False
@@ -444,9 +445,8 @@ def schedule_link_to_sign_in_email(sender_voter_we_vote_id, recipient_voter_we_v
 
     subject = "Sign in link you requested"
     link_to_sign_in = WEB_APP_ROOT_URL + "/sign_in_email/" + recipient_email_address_secret_key
-    # 2019-09-30 Relying on web browser version for previous app versions
-    # if is_cordova:
-    #     link_to_sign_in = "wevotetwitterscheme://sign_in_email/" + recipient_email_address_secret_key
+    if is_cordova:
+        link_to_sign_in = "wevotetwitterscheme://sign_in_email/" + recipient_email_address_secret_key
 
     template_variables_for_json = {
         "subject":                      subject,
@@ -889,7 +889,8 @@ def voter_email_address_save_for_api(voter_device_id='',
                                      resend_verification_email=False,
                                      resend_verification_code_email=False,
                                      make_primary_email=False,
-                                     delete_email=False):
+                                     delete_email=False,
+                                     is_cordova=False):
     """
     voterEmailAddressSave
     :param voter_device_id:
@@ -901,6 +902,7 @@ def voter_email_address_save_for_api(voter_device_id='',
     :param resend_verification_code_email:
     :param make_primary_email:
     :param delete_email:
+    :param is_cordova:
     :return:
     """
     email_address_we_vote_id = ""
@@ -1306,7 +1308,7 @@ def voter_email_address_save_for_api(voter_device_id='',
             else incoming_email_we_vote_id
         link_send_results = schedule_link_to_sign_in_email(voter_we_vote_id, voter_we_vote_id,
                                                            email_address_we_vote_id, text_for_email_address,
-                                                           recipient_email_address_secret_key)
+                                                           recipient_email_address_secret_key, is_cordova)
         status += link_send_results['status']
         email_scheduled_saved = link_send_results['email_scheduled_saved']
         if email_scheduled_saved:
