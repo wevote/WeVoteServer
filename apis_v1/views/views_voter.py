@@ -740,6 +740,7 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
                                                resend_verification_code_email=resend_verification_code_email,
                                                make_primary_email=make_primary_email,
                                                delete_email=delete_email,
+                                               is_cordova=is_cordova,
                                                )
 
     json_data = {
