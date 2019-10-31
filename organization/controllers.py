@@ -1530,8 +1530,10 @@ def organization_photos_save_for_api(  # organizationPhotosSave
                 image_data = BytesIO(byte_data)
                 python_image_library_image = Image.open(image_data)
                 format_to_cache = python_image_library_image.format
-                python_image_library_image = ImageOps.fit(
-                    python_image_library_image, (CHOSEN_FAVICON_MAX_WIDTH, CHOSEN_FAVICON_MAX_HEIGHT), Image.ANTIALIAS)
+                python_image_library_image.thumbnail((CHOSEN_FAVICON_MAX_WIDTH, CHOSEN_FAVICON_MAX_HEIGHT),
+                                                     Image.ANTIALIAS)
+                # python_image_library_image = ImageOps.fit(
+                #    python_image_library_image, (CHOSEN_FAVICON_MAX_WIDTH, CHOSEN_FAVICON_MAX_HEIGHT), Image.ANTIALIAS)
                 python_image_library_image.format = format_to_cache
                 image_data_found = True
             except Exception as e:
@@ -1565,8 +1567,10 @@ def organization_photos_save_for_api(  # organizationPhotosSave
                 image_data = BytesIO(byte_data)
                 python_image_library_image = Image.open(image_data)
                 format_to_cache = python_image_library_image.format
-                python_image_library_image = ImageOps.fit(
-                    python_image_library_image, (CHOSEN_LOGO_MAX_WIDTH, CHOSEN_LOGO_MAX_HEIGHT), Image.ANTIALIAS)
+                python_image_library_image.thumbnail((CHOSEN_LOGO_MAX_WIDTH, CHOSEN_LOGO_MAX_HEIGHT), Image.ANTIALIAS)
+                # Did not keep image within size limit
+                # python_image_library_image = ImageOps.fit(
+                #     python_image_library_image, (CHOSEN_LOGO_MAX_WIDTH, CHOSEN_LOGO_MAX_HEIGHT), Image.ANTIALIAS)
                 python_image_library_image.format = format_to_cache
                 image_data_found = True
             except Exception as e:
@@ -1601,9 +1605,11 @@ def organization_photos_save_for_api(  # organizationPhotosSave
                 image_data = BytesIO(byte_data)
                 python_image_library_image = Image.open(image_data)
                 format_to_cache = python_image_library_image.format
-                python_image_library_image = ImageOps.fit(
-                    python_image_library_image,
+                python_image_library_image.thumbnail(
                     (CHOSEN_SOCIAL_SHARE_MASTER_MAX_WIDTH, CHOSEN_SOCIAL_SHARE_MASTER_MAX_HEIGHT), Image.ANTIALIAS)
+                # python_image_library_image = ImageOps.fit(
+                #     python_image_library_image,
+                #     (CHOSEN_SOCIAL_SHARE_MASTER_MAX_WIDTH, CHOSEN_SOCIAL_SHARE_MASTER_MAX_HEIGHT), Image.ANTIALIAS)
                 python_image_library_image.format = format_to_cache
                 image_data_found = True
             except Exception as e:
