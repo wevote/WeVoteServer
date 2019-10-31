@@ -930,8 +930,8 @@ def organization_edit_account_process_view(request):
                         status += domain_results['status']
                 else:
                     organization_on_stage.chosen_domain_string = None
-            # if chosen_favicon_url_https is not None:
-            #     organization_on_stage.chosen_favicon_url_https = chosen_favicon_url_https
+            if chosen_favicon_url_https is not None:
+                organization_on_stage.chosen_favicon_url_https = chosen_favicon_url_https
             if chosen_google_analytics_account_number is not None:
                 organization_on_stage.chosen_google_analytics_account_number = \
                     chosen_google_analytics_account_number.strip()
@@ -939,15 +939,15 @@ def organization_edit_account_process_view(request):
                 organization_on_stage.chosen_html_verification_string = chosen_html_verification_string.strip()
             if chosen_hide_we_vote_logo is not None:
                 organization_on_stage.chosen_hide_we_vote_logo = positive_value_exists(chosen_hide_we_vote_logo)
-            # if chosen_logo_url_https is not None:
-            #     organization_on_stage.chosen_logo_url_https = chosen_logo_url_https.strip()
+            if chosen_logo_url_https is not None:
+                organization_on_stage.chosen_logo_url_https = chosen_logo_url_https.strip()
             if chosen_organization_api_pass_code is not None:
                 organization_on_stage.chosen_organization_api_pass_code = chosen_organization_api_pass_code.strip()
             if chosen_social_share_description is not None:
                 organization_on_stage.chosen_social_share_description = chosen_social_share_description.strip()
-            # if chosen_social_share_image_256x256_url_https is not None:
-            #     organization_on_stage.chosen_social_share_image_256x256_url_https = \
-            #         chosen_social_share_image_256x256_url_https.strip()
+            if chosen_social_share_image_256x256_url_https is not None:
+                organization_on_stage.chosen_social_share_image_256x256_url_https = \
+                    chosen_social_share_image_256x256_url_https.strip()
             if chosen_sub_domain_string is not None:
                 if positive_value_exists(chosen_sub_domain_string):
                     domain_results = sub_domain_string_available(chosen_sub_domain_string, organization_id)
