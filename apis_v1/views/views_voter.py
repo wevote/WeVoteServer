@@ -322,9 +322,11 @@ def voter_address_save_view(request):  # voterAddressSave
     ballot_location_display_name = ''
     ballot_returned_we_vote_id = ''
     text_for_map_search_saved = ''
+    substituted_address_nearby = False
     voter_entered_address = True
     voter_specific_ballot_from_google_civic = False
     status = ""
+    success = True
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     try:
@@ -348,7 +350,7 @@ def voter_address_save_view(request):  # voterAddressSave
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     if not address_variable_exists:
-        status += "MISSING_GET_VARIABLE-ADDRESS"
+        status += "MISSING_GET_VARIABLE-ADDRESS "
         json_data = {
             'status':               status,
             'success':              False,
@@ -367,7 +369,7 @@ def voter_address_save_view(request):  # voterAddressSave
         voter_device_link = voter_device_link_results['voter_device_link']
         voter_id = voter_device_link.voter_id
     else:
-        status += "VOTER_DEVICE_LINK_NOT_FOUND_FROM_DEVICE_ID"
+        status += "VOTER_DEVICE_LINK_NOT_FOUND_FROM_DEVICE_ID "
         json_data = {
             'status':               status,
             'success':              False,
@@ -395,10 +397,11 @@ def voter_address_save_view(request):  # voterAddressSave
     # TODO DALE 2017-07-17 This needs a fresh look:
     # , google_civic_election_id
 
+    status += voter_address_save_results['status']
     # If simple_save is passed in only save address and then send response (you must pass in a google_civic_election_id)
     if positive_value_exists(simple_save) and positive_value_exists(google_civic_election_id):
         success = voter_address_save_results['success'] and voter_address_save_results['voter_address_found']
-        status += "SIMPLE_ADDRESS_SAVE"
+        status += "SIMPLE_ADDRESS_SAVE "
         json_data = {
             'status':               status,
             'success':              success,
@@ -417,7 +420,10 @@ def voter_address_save_view(request):  # voterAddressSave
 
         turn_off_direct_voter_ballot_retrieve = False  # Search for this variable elsewhere
         default_election_data_source_is_ballotpedia = True
-        if turn_off_direct_voter_ballot_retrieve:
+        if positive_value_exists(simple_save):
+            # Do not retrieve / return a ballot
+            pass
+        elif turn_off_direct_voter_ballot_retrieve:
             # We set this option when we want to force the retrieval of a nearby ballot
             pass
         elif default_election_data_source_is_ballotpedia:
@@ -537,7 +543,7 @@ def voter_address_save_view(request):  # voterAddressSave
             voter_entered_address = voter_address.voter_entered_address
             voter_specific_ballot_from_google_civic = voter_address.refreshed_from_google
             voter_address_update_results = voter_address_manager.update_existing_voter_address_object(voter_address)
-
+            status += voter_address_update_results['status']
             if voter_address_update_results['success']:
                 # Replace the former google_civic_election_id from this voter_device_link
                 voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
@@ -549,9 +555,26 @@ def voter_address_save_view(request):  # voterAddressSave
                     voter_address = voter_address_update_results['voter_address']
                     text_for_map_search_saved = voter_address.text_for_map_search
 
-    json_data = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id,
-                                                    ballot_returned_we_vote_id)
-    json_data['simple_save'] = simple_save
+    if positive_value_exists(simple_save):
+        # Do not retrieve / return a ballot
+        json_data = {
+            'status':                       status,
+            'success':                      success,
+            'google_civic_election_id':     google_civic_election_id,
+            'text_for_map_search':          text_for_map_search,
+            'simple_save':                  simple_save,
+            'substituted_address_nearby':   substituted_address_nearby,
+            'ballot_found':                 False,
+            'ballot_caveat':                None,
+            'is_from_substituted_address':  None,
+            'is_from_test_ballot':          None,
+            'ballot_item_list':             [],
+        }
+    else:
+        json_data = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id,
+                                                        ballot_returned_we_vote_id)
+        json_data['simple_save'] = simple_save
+
     json_data['address'] = {
         'text_for_map_search':          text_for_map_search_saved,
         'google_civic_election_id':     google_civic_election_id,
