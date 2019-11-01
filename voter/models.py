@@ -3000,14 +3000,15 @@ class VoterAddressManager(models.Model):
                     voter_id__exact=voter_id, address_type=address_type, defaults=updated_values)
                 voter_address_on_stage_found = voter_address_on_stage.id
                 success = True
+                status += "UPDATE_OR_CREATE_SUCCESSFUL "
             except VoterAddress.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
-                status = 'MULTIPLE_MATCHING_ADDRESSES_FOUND'
+                status += 'MULTIPLE_MATCHING_ADDRESSES_FOUND '
                 exception_multiple_object_returned = True
         else:
             success = False
-            status = 'MISSING_VOTER_ID_OR_ADDRESS_TYPE'
+            status += 'MISSING_VOTER_ID_OR_ADDRESS_TYPE '
 
         results = {
             'success':                  success,
