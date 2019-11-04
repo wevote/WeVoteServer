@@ -19,7 +19,7 @@ import json
 from organization.controllers import full_domain_string_available, organization_analytics_by_voter_for_api, \
     organization_retrieve_for_api, organization_photos_save_for_api, \
     organization_save_for_api, organization_search_for_api, organizations_followed_retrieve_for_api, \
-    site_configuration_retrieve_for_api, sub_domain_string_available
+    site_configuration_retrieve_for_api, subdomain_string_available
 from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOWED, CHOSEN_GOOGLE_ANALYTICS_ALLOWED, \
     CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED, CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED, CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED, \
     OrganizationManager
@@ -275,32 +275,33 @@ def organization_photos_save_view(request):  # organizationPhotosSave
 
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin', 'political_data_manager'}
-    voter_has_authority_required = False
+    voter_has_staff_authority_required = False
     if voter_has_authority(request, authority_required):
-        voter_has_authority_required = True
-    else:
-        voter_manager = VoterManager()
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-        if voter_results['voter_found']:
-            voter = voter_results['voter']
-            voter_is_signed_in = voter.is_signed_in()
+        voter_has_staff_authority_required = True
 
-            if positive_value_exists(voter_is_signed_in):
-                voter_twitter_handle = voter_manager.fetch_twitter_handle_from_voter_we_vote_id(voter.we_vote_id)
-                # Is this voter linked to this organization?
-                if positive_value_exists(voter.linked_organization_we_vote_id) \
-                        and positive_value_exists(organization_we_vote_id) \
-                        and voter.linked_organization_we_vote_id == organization_we_vote_id:
-                    # organization_linked_to_this_voter = True
-                    voter_has_authority_required = True
-                # Does this voter have the same Twitter handle as this organization?
-                elif positive_value_exists(voter_twitter_handle) \
-                        and positive_value_exists(organization_twitter_handle) \
-                        and voter_twitter_handle.lower() == organization_twitter_handle.lower():
-                    # voter_owns_twitter_handle = True
-                    voter_has_authority_required = True
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    organization_linked_to_this_voter = False
+    voter_owns_twitter_handle = False
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_is_signed_in = voter.is_signed_in()
 
-    if not voter_has_authority_required:
+        if positive_value_exists(voter_is_signed_in):
+            voter_twitter_handle = voter_manager.fetch_twitter_handle_from_voter_we_vote_id(voter.we_vote_id)
+            # Is this voter linked to this organization?
+            if positive_value_exists(voter.linked_organization_we_vote_id) \
+                    and positive_value_exists(organization_we_vote_id) \
+                    and voter.linked_organization_we_vote_id == organization_we_vote_id:
+                organization_linked_to_this_voter = True
+            # Does this voter have the same Twitter handle as this organization?
+            elif positive_value_exists(voter_twitter_handle) \
+                    and positive_value_exists(organization_twitter_handle) \
+                    and voter_twitter_handle.lower() == organization_twitter_handle.lower():
+                voter_owns_twitter_handle = True
+
+    if not voter_has_staff_authority_required \
+            and not organization_linked_to_this_voter and not voter_owns_twitter_handle:
         status += "VOTER_LACKS_AUTHORITY_TO_SAVE_ORGANIZATION "
         results = {
             'status': status,
@@ -362,6 +363,7 @@ def organization_save_view(request):  # organizationSave
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     organization_website = request.GET.get('organization_website', False)
     # We only want to allow save if either this is your organization (i.e., you have the Twitter handle)
+    status = ''
     organization_linked_to_this_voter = False
     voter_is_signed_in = False
     voter_owns_twitter_handle = False
@@ -380,7 +382,7 @@ def organization_save_view(request):  # organizationSave
 
     organization_manager = OrganizationManager()
     chosen_domain_string = request.GET.get('chosen_domain_string', False)
-    chosen_sub_domain_string = request.GET.get('chosen_sub_domain_string', False)
+    chosen_subdomain_string = request.GET.get('chosen_subdomain_string', False)
 
     chosen_google_analytics_account_number = request.GET.get('chosen_google_analytics_account_number', False)
     chosen_html_verification_string = request.GET.get('chosen_html_verification_string', False)
@@ -390,104 +392,107 @@ def organization_save_view(request):  # organizationSave
 
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin', 'political_data_manager', 'verified_volunteer'}
-    voter_has_authority_required = False
+    voter_has_staff_authority_required = False
     if voter_has_authority(request, authority_required):
-        voter_has_authority_required = True
-    else:
-        voter_manager = VoterManager()
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-        if voter_results['voter_found']:
-            voter = voter_results['voter']
-            voter_is_signed_in = voter.is_signed_in()
+        voter_has_staff_authority_required = True
 
-            # Is this voter linked to this organization?
-            if positive_value_exists(voter.linked_organization_we_vote_id) \
-                    and positive_value_exists(organization_we_vote_id) \
-                    and voter.linked_organization_we_vote_id == organization_we_vote_id:
-                organization_linked_to_this_voter = True
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_is_signed_in = voter.is_signed_in()
 
-            # Does this voter have the same Facebook id as this organization? If so, link this organization to
-            #  this particular voter
-            voter_facebook_id = voter_manager.fetch_facebook_id_from_voter_we_vote_id(voter.we_vote_id)
-            if positive_value_exists(voter_facebook_id) \
-                    and positive_value_exists(facebook_id) \
-                    and voter_facebook_id == facebook_id:
-                voter_owns_facebook_id = True
+        # Is this voter linked to this organization?
+        if positive_value_exists(voter.linked_organization_we_vote_id) \
+                and positive_value_exists(organization_we_vote_id) \
+                and voter.linked_organization_we_vote_id == organization_we_vote_id:
+            organization_linked_to_this_voter = True
 
-            # Does this voter have the same Twitter handle as this organization? If so, link this organization to
-            #  this particular voter
-            voter_twitter_handle = voter_manager.fetch_twitter_handle_from_voter_we_vote_id(voter.we_vote_id)
-            if positive_value_exists(voter_twitter_handle) \
-                    and positive_value_exists(organization_twitter_handle) \
-                    and voter_twitter_handle.lower() == organization_twitter_handle.lower():
-                voter_owns_twitter_handle = True
+        # Does this voter have the same Facebook id as this organization? If so, link this organization to
+        #  this particular voter
+        voter_facebook_id = voter_manager.fetch_facebook_id_from_voter_we_vote_id(voter.we_vote_id)
+        if positive_value_exists(voter_facebook_id) \
+                and positive_value_exists(facebook_id) \
+                and voter_facebook_id == facebook_id:
+            voter_owns_facebook_id = True
 
-    if not voter_has_authority_required:
-        if not voter_owns_twitter_handle and not voter_owns_facebook_id and not organization_linked_to_this_voter:
-            # Only refuse entry if *both* conditions are not met
-            results = {
-                'status': "VOTER_LACKS_AUTHORITY_TO_SAVE_ORGANIZATION",
-                'success': False,
-                'chosen_domain_string': '',
-                'full_domain_string_already_taken': None,
-                'chosen_favicon_url_https': '',
-                'chosen_google_analytics_account_number': '',
-                'chosen_html_verification_string': '',
-                'chosen_hide_we_vote_logo': '',
-                'chosen_logo_url_https': '',
-                'chosen_social_share_description': '',
-                'chosen_social_share_image_256x256_url_https': '',
-                'chosen_sub_domain_string': '',
-                'sub_domain_string_already_taken': None,
-                'chosen_subscription_plan': '',
-                'facebook_id': facebook_id,
-                'facebook_email': facebook_email,
-                'facebook_profile_image_url_https': facebook_profile_image_url_https,
-                'new_organization_created': False,
-                'organization_description': organization_description,
-                'organization_email': organization_email,
-                'organization_facebook': organization_facebook,
-                'organization_id': organization_id,
-                'organization_instagram_handle': organization_instagram_handle,
-                'organization_name': organization_name,
-                'organization_photo_url': organization_image,
-                'organization_twitter_handle': organization_twitter_handle,
-                'organization_type': organization_type,
-                'organization_we_vote_id': organization_we_vote_id,
-                'organization_website': organization_website,
-                'refresh_from_twitter': refresh_from_twitter,
-                'twitter_followers_count': 0,
-                'twitter_description': "",
-            }
-            return HttpResponse(json.dumps(results), content_type='application/json')
+        # Does this voter have the same Twitter handle as this organization? If so, link this organization to
+        #  this particular voter
+        voter_twitter_handle = voter_manager.fetch_twitter_handle_from_voter_we_vote_id(voter.we_vote_id)
+        if positive_value_exists(voter_twitter_handle) \
+                and positive_value_exists(organization_twitter_handle) \
+                and voter_twitter_handle.lower() == organization_twitter_handle.lower():
+            voter_owns_twitter_handle = True
+
+    if not voter_has_staff_authority_required \
+            and not voter_owns_twitter_handle and not voter_owns_facebook_id and not organization_linked_to_this_voter:
+        # Only refuse entry if *all* conditions are not met
+        status += "VOTER_LACKS_AUTHORITY_TO_SAVE_ORGANIZATION "
+        results = {
+            'status': status,
+            'success': False,
+            'chosen_domain_string': '',
+            'full_domain_string_already_taken': None,
+            'chosen_favicon_url_https': '',
+            'chosen_google_analytics_account_number': '',
+            'chosen_html_verification_string': '',
+            'chosen_hide_we_vote_logo': '',
+            'chosen_logo_url_https': '',
+            'chosen_social_share_description': '',
+            'chosen_social_share_image_256x256_url_https': '',
+            'chosen_subdomain_string': '',
+            'subdomain_string_already_taken': None,
+            'chosen_subscription_plan': '',
+            'facebook_id': facebook_id,
+            'facebook_email': facebook_email,
+            'facebook_profile_image_url_https': facebook_profile_image_url_https,
+            'new_organization_created': False,
+            'organization_description': organization_description,
+            'organization_email': organization_email,
+            'organization_facebook': organization_facebook,
+            'organization_id': organization_id,
+            'organization_instagram_handle': organization_instagram_handle,
+            'organization_name': organization_name,
+            'organization_photo_url': organization_image,
+            'organization_twitter_handle': organization_twitter_handle,
+            'organization_type': organization_type,
+            'organization_we_vote_id': organization_we_vote_id,
+            'organization_website': organization_website,
+            'refresh_from_twitter': refresh_from_twitter,
+            'twitter_followers_count': 0,
+            'twitter_description': "",
+        }
+        return HttpResponse(json.dumps(results), content_type='application/json')
 
     full_domain_string_already_taken = None
-    sub_domain_string_already_taken = None
+    subdomain_string_already_taken = None
     if voter_is_signed_in and organization_linked_to_this_voter:
-        # Check to make sure it is ok to assign this full_domain or sub_domain to this organization
+        # Check to make sure it is ok to assign this full_domain or subdomain to this organization
         # Voter must be signed in to save this
-        if positive_value_exists(chosen_domain_string) or positive_value_exists(chosen_sub_domain_string):
+        if positive_value_exists(chosen_domain_string) or positive_value_exists(chosen_subdomain_string):
             if not positive_value_exists(organization_id) and positive_value_exists(organization_we_vote_id):
                 results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
                 if results['success']:
                     organization_id = results['organization_id']
         full_domain_string_already_taken = False
         if positive_value_exists(chosen_domain_string):
-            domain_results = full_domain_string_available(chosen_domain_string, organization_id)
+            domain_results = full_domain_string_available(chosen_domain_string,
+                                                          requesting_organization_id=organization_id)
             if not domain_results['full_domain_string_available']:
                 full_domain_string_already_taken = True
                 # Do not save it
                 chosen_domain_string = False
-        sub_domain_string_already_taken = False
-        if positive_value_exists(chosen_sub_domain_string):
-            domain_results = sub_domain_string_available(chosen_sub_domain_string, organization_id)
-            if not domain_results['sub_domain_string_available']:
-                sub_domain_string_already_taken = True
+        subdomain_string_already_taken = False
+        if positive_value_exists(chosen_subdomain_string):
+            domain_results = subdomain_string_available(chosen_subdomain_string,
+                                                         requesting_organization_id=organization_id)
+            if not domain_results['subdomain_string_available']:
+                subdomain_string_already_taken = True
                 # Do not save it
-                chosen_sub_domain_string = False
+                chosen_subdomain_string = False
     else:
         chosen_domain_string = False
-        chosen_sub_domain_string = False
+        chosen_subdomain_string = False
 
     results = organization_save_for_api(
         voter_device_id=voter_device_id,
@@ -511,11 +516,11 @@ def organization_save_view(request):  # organizationSave
         chosen_html_verification_string=chosen_html_verification_string,
         chosen_hide_we_vote_logo=chosen_hide_we_vote_logo,
         chosen_social_share_description=chosen_social_share_description,
-        chosen_sub_domain_string=chosen_sub_domain_string,
+        chosen_subdomain_string=chosen_subdomain_string,
         chosen_subscription_plan=chosen_subscription_plan,
     )
     results['full_domain_string_already_taken'] = full_domain_string_already_taken
-    results['sub_domain_string_already_taken'] = sub_domain_string_already_taken
+    results['subdomain_string_already_taken'] = subdomain_string_already_taken
 
     return HttpResponse(json.dumps(results), content_type='application/json')
 

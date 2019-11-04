@@ -519,15 +519,15 @@ class OrganizationManager(models.Manager):
             elif positive_value_exists(incoming_hostname):
                 status = "ERROR_RETRIEVING_ORGANIZATION_WITH_INCOMING_HOSTNAME "
                 incoming_hostname = incoming_hostname.strip().lower()
-                incoming_sub_domain = incoming_hostname.replace('.wevote.us', '')
+                incoming_subdomain = incoming_hostname.replace('.wevote.us', '')
                 if read_only:
                     organization_on_stage = Organization.objects.using('readonly')\
                         .get(Q(chosen_domain_string__iexact=incoming_hostname) |
-                             Q(chosen_sub_domain_string__iexact=incoming_sub_domain))
+                             Q(chosen_subdomain_string__iexact=incoming_subdomain))
                 else:
                     organization_on_stage = Organization.objects\
                         .get(Q(chosen_domain_string__iexact=incoming_hostname) |
-                             Q(chosen_sub_domain_string__iexact=incoming_sub_domain))
+                             Q(chosen_subdomain_string__iexact=incoming_subdomain))
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_INCOMING_HOSTNAME "
         except Organization.MultipleObjectsReturned as e:
@@ -868,7 +868,7 @@ class OrganizationManager(models.Manager):
             chosen_domain_string=False, chosen_google_analytics_account_number=False,
             chosen_html_verification_string=False, chosen_hide_we_vote_logo=None,
             chosen_social_share_description=False,
-            chosen_sub_domain_string=False, chosen_subscription_plan=False,
+            chosen_subdomain_string=False, chosen_subscription_plan=False,
     ):
         """
         Either update or create an organization entry.
@@ -895,7 +895,7 @@ class OrganizationManager(models.Manager):
         :param chosen_html_verification_string:
         :param chosen_hide_we_vote_logo:
         :param chosen_social_share_description:
-        :param chosen_sub_domain_string:
+        :param chosen_subdomain_string:
         :param chosen_subscription_plan:
         :return:
         """
@@ -933,7 +933,7 @@ class OrganizationManager(models.Manager):
             if chosen_html_verification_string is not False else False
         chosen_social_share_description = chosen_social_share_description.strip() \
             if chosen_social_share_description is not False else False
-        chosen_sub_domain_string = chosen_sub_domain_string.strip() if chosen_sub_domain_string is not False else False
+        chosen_subdomain_string = chosen_subdomain_string.strip() if chosen_subdomain_string is not False else False
 
         # Values that can only be updated by a refresh_from_twitter
         twitter_user_id = False
@@ -1038,9 +1038,9 @@ class OrganizationManager(models.Manager):
                 if chosen_social_share_description is not False:
                     value_changed = True
                     organization_on_stage.chosen_social_share_description = chosen_social_share_description
-                if chosen_sub_domain_string is not False:
+                if chosen_subdomain_string is not False:
                     value_changed = True
-                    organization_on_stage.chosen_sub_domain_string = chosen_sub_domain_string
+                    organization_on_stage.chosen_subdomain_string = chosen_subdomain_string
                 if chosen_subscription_plan is not False:
                     value_changed = True
                     organization_on_stage.chosen_subscription_plan = chosen_subscription_plan
@@ -1250,9 +1250,9 @@ class OrganizationManager(models.Manager):
                     if chosen_social_share_description is not False:
                         value_changed = True
                         organization_on_stage.chosen_social_share_description = chosen_social_share_description
-                    if chosen_sub_domain_string is not False:
+                    if chosen_subdomain_string is not False:
                         value_changed = True
-                        organization_on_stage.chosen_sub_domain_string = chosen_sub_domain_string
+                        organization_on_stage.chosen_subdomain_string = chosen_subdomain_string
                     if chosen_subscription_plan is not False:
                         value_changed = True
                         organization_on_stage.chosen_subscription_plan = chosen_subscription_plan
@@ -1398,9 +1398,9 @@ class OrganizationManager(models.Manager):
                     if chosen_social_share_description is not False:
                         value_changed = True
                         organization_on_stage.chosen_social_share_description = chosen_social_share_description
-                    if chosen_sub_domain_string is not False:
+                    if chosen_subdomain_string is not False:
                         value_changed = True
-                        organization_on_stage.chosen_sub_domain_string = chosen_sub_domain_string
+                        organization_on_stage.chosen_subdomain_string = chosen_subdomain_string
                     if chosen_subscription_plan is not False:
                         value_changed = True
                         organization_on_stage.chosen_subscription_plan = chosen_subscription_plan
@@ -2627,6 +2627,8 @@ class Organization(models.Model):
     # This is the subdomain the client has configured for yyy.WeVote.US
     chosen_sub_domain_string = models.CharField(
         verbose_name="client we vote sub domain", max_length=255, null=True, blank=True)
+    chosen_subdomain_string = models.CharField(
+        verbose_name="client we vote subdomain", max_length=255, null=True, blank=True)
     chosen_subscription_plan = models.PositiveIntegerField(verbose_name="number of the plan client chose", default=0)
     # Last date the subscription is paid through ex/ 20200415
     subscription_plan_end_day_text = models.CharField(
@@ -2824,3 +2826,5 @@ class OrganizationReservedDomain(models.Model):
     # Ex/ zoom (referring to zoom.wevote.us)
     sub_domain_string = models.CharField(
         verbose_name="we vote sub domain", max_length=255, null=True, blank=True, unique=True)
+    subdomain_string = models.CharField(
+        verbose_name="we vote subdomain", max_length=255, null=True, blank=True, unique=True)

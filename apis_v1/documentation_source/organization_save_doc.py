@@ -67,7 +67,7 @@ def organization_save_doc_template_values(url_root):
                             'It is changed by a client in Settings section.',
         },
         {
-            'name':         'chosen_sub_domain_string',
+            'name':         'chosen_subdomain_string',
             'value':        'string',  # boolean, integer, long, string
             'description':  'This is the value of client\'s customized subdomain. Ex/ cats.WeVote.US '
                             'It is changed by a client in Settings section.',

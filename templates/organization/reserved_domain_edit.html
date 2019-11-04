@@ -29,17 +29,17 @@
 
 {# Subdomain of WeVote.US #}
 <div class="form-group">
-    <label for="sub_domain_string_id" class="col-sm-2 control-label">
+    <label for="subdomain_string_id" class="col-sm-2 control-label">
       Sub Domain Name
-      {% if sub_domain_string %}
-      <a href="https://{{ sub_domain_string }}.wevote.us"
+      {% if subdomain_string %}
+      <a href="https://{{ subdomain_string }}.wevote.us"
          target="_blank"
          class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
       {% endif %}
     </label>
     <div class="col-sm-9">
-        <input type="text" name="sub_domain_string" id="sub_domain_string_id"
-               value="{{ sub_domain_string|default_if_none:"" }}"
+        <input type="text" name="subdomain_string" id="subdomain_string_id"
+               value="{{ subdomain_string|default_if_none:"" }}"
                class="form-control" />
       .WeVote.US
     </div>
@@ -97,9 +97,9 @@
            class="">edit</a>
         <br />
     {% endif %}
-    {% if organization.chosen_sub_domain_string %}
-        {{ organization.chosen_sub_domain_string }}.WeVote.US
-        <a href="https://{{ organization.chosen_sub_domain_string }}.wevote.us"
+    {% if organization.chosen_subdomain_string %}
+        {{ organization.chosen_subdomain_string }}.WeVote.US
+        <a href="https://{{ organization.chosen_subdomain_string }}.wevote.us"
            target="_blank"
            class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
         &nbsp;
@@ -112,9 +112,9 @@
 {% for reserved_domain in reserved_domain_list %}
     {% if reserved_domain.full_domain_string %}
         {{reserved_domain.full_domain_string}}
-    {% elif reserved_domain.sub_domain_string %}
-        {{reserved_domain.sub_domain_string}}.WeVote.US
-        <a href="https://{{ sub_domain_string }}.wevote.us"
+    {% elif reserved_domain.subdomain_string %}
+        {{reserved_domain.subdomain_string}}.WeVote.US
+        <a href="https://{{ subdomain_string }}.wevote.us"
            target="_blank"
            class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
     {% endif %}

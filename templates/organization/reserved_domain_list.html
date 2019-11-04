@@ -34,9 +34,9 @@
             <a href="https://{{ reserved_domain.full_domain_string }}"
                target="_blank"
                class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-        {% elif reserved_domain.sub_domain_string %}
-            <strong>{{reserved_domain.sub_domain_string}}</strong>.WeVote.US
-            <a href="https://{{ sub_domain_string }}.wevote.us"
+        {% elif reserved_domain.subdomain_string %}
+            <strong>{{reserved_domain.subdomain_string}}</strong>.WeVote.US
+            <a href="https://{{ subdomain_string }}.wevote.us"
                target="_blank"
                class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
@@ -60,9 +60,9 @@
                class="">edit</a>
             <br />
         {% endif %}
-        {% if organization.chosen_sub_domain_string %}
-            <strong>{{ organization.chosen_sub_domain_string }}</strong>.WeVote.US
-            <a href="https://{{ organization.chosen_sub_domain_string }}.wevote.us"
+        {% if organization.chosen_subdomain_string %}
+            <strong>{{ organization.chosen_subdomain_string }}</strong>.WeVote.US
+            <a href="https://{{ organization.chosen_subdomain_string }}.wevote.us"
                target="_blank"
                class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
             &nbsp;

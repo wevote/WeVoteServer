@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import full_domain_string_available, organizations_import_from_master_server, \
-    push_organization_data_to_other_table_caches, sub_domain_string_available
+    push_organization_data_to_other_table_caches, subdomain_string_available
 from .models import GROUP, INDIVIDUAL, Organization, OrganizationReservedDomain
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
@@ -899,7 +899,7 @@ def organization_edit_account_process_view(request):
     chosen_organization_api_pass_code = request.POST.get('chosen_organization_api_pass_code', None)
     chosen_social_share_description = request.POST.get('chosen_social_share_description', None)
     chosen_social_share_image_256x256_url_https = request.POST.get('chosen_social_share_image_256x256_url_https', None)
-    chosen_sub_domain_string = request.POST.get('chosen_sub_domain_string', None)
+    chosen_subdomain_string = request.POST.get('chosen_subdomain_string', None)
     chosen_feature_package = request.POST.get('chosen_feature_package', None)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     state_code = request.POST.get('state_code', None)
@@ -920,7 +920,8 @@ def organization_edit_account_process_view(request):
             # Update
             if chosen_domain_string is not None:
                 if positive_value_exists(chosen_domain_string):
-                    domain_results = full_domain_string_available(chosen_domain_string, organization_id)
+                    domain_results = full_domain_string_available(chosen_domain_string,
+                                                                  requesting_organization_id=organization_id)
                     if domain_results['full_domain_string_available']:
                         organization_on_stage.chosen_domain_string = chosen_domain_string.strip()
                     else:
@@ -948,18 +949,19 @@ def organization_edit_account_process_view(request):
             if chosen_social_share_image_256x256_url_https is not None:
                 organization_on_stage.chosen_social_share_image_256x256_url_https = \
                     chosen_social_share_image_256x256_url_https.strip()
-            if chosen_sub_domain_string is not None:
-                if positive_value_exists(chosen_sub_domain_string):
-                    domain_results = sub_domain_string_available(chosen_sub_domain_string, organization_id)
-                    if domain_results['sub_domain_string_available']:
-                        organization_on_stage.chosen_sub_domain_string = chosen_sub_domain_string.strip()
+            if chosen_subdomain_string is not None:
+                if positive_value_exists(chosen_subdomain_string):
+                    domain_results = subdomain_string_available(chosen_subdomain_string,
+                                                                 requesting_organization_id=organization_id)
+                    if domain_results['subdomain_string_available']:
+                        organization_on_stage.chosen_subdomain_string = chosen_subdomain_string.strip()
                     else:
-                        message = 'Cannot save sub domain: \'' + chosen_sub_domain_string + '\', status: ' + \
+                        message = 'Cannot save sub domain: \'' + chosen_subdomain_string + '\', status: ' + \
                                   domain_results['status']
                         messages.add_message(request, messages.ERROR, message)
                         status += domain_results['status']
                 else:
-                    organization_on_stage.chosen_sub_domain_string = None
+                    organization_on_stage.chosen_subdomain_string = None
             if chosen_feature_package is not None:
                 master_feature_package_query = MasterFeaturePackage.objects.all()
                 master_feature_package_list = list(master_feature_package_query)
@@ -1685,13 +1687,13 @@ def reserved_domain_edit_view(request):
     messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(google_civic_election_id)
     full_domain_string = ''
-    sub_domain_string = ''
+    subdomain_string = ''
     reserved_domain_found = False
     try:
         if positive_value_exists(reserved_domain_id):
             reserved_domain = OrganizationReservedDomain.objects.get(id=reserved_domain_id)
             full_domain_string = reserved_domain.full_domain_string
-            sub_domain_string = reserved_domain.sub_domain_string
+            subdomain_string = reserved_domain.subdomain_string
             reserved_domain_found = True
     except OrganizationReservedDomain.MultipleObjectsReturned as e:
         messages.add_message(request, messages.INFO,
@@ -1707,7 +1709,7 @@ def reserved_domain_edit_view(request):
         'reserved_domain_id':       reserved_domain_id,
         'reserved_domain_found':    reserved_domain_found,
         'state_code':               state_code,
-        'sub_domain_string':        sub_domain_string,
+        'subdomain_string':         subdomain_string,
     }
 
     return render(request, 'organization/reserved_domain_edit.html', template_values)
@@ -1729,12 +1731,12 @@ def reserved_domain_edit_process_view(request):
 
     full_domain_string = request.POST.get('full_domain_string', '')
     reserved_domain_id = convert_to_int(request.POST.get('reserved_domain_id', 0))
-    sub_domain_string = request.POST.get('sub_domain_string', '')
+    subdomain_string = request.POST.get('subdomain_string', '')
 
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     state_code = request.POST.get('state_code', False)
 
-    if not positive_value_exists(full_domain_string) and not positive_value_exists(sub_domain_string):
+    if not positive_value_exists(full_domain_string) and not positive_value_exists(subdomain_string):
         messages.add_message(request, messages.INFO, 'Please enter either a full domain, or a sub domain.')
         messages_on_stage = get_messages(request)
         template_values = {
@@ -1743,7 +1745,7 @@ def reserved_domain_edit_process_view(request):
             'messages_on_stage':        messages_on_stage,
             'reserved_domain_id':       reserved_domain_id,
             'state_code':               state_code,
-            'sub_domain_string':        sub_domain_string,
+            'subdomain_string':         subdomain_string,
         }
 
         return render(request, 'organization/reserved_domain_edit.html', template_values)
@@ -1763,7 +1765,7 @@ def reserved_domain_edit_process_view(request):
 
     organization_domain_list = []
     reserved_domain_list = []
-    if positive_value_exists(full_domain_string) or positive_value_exists(sub_domain_string):
+    if positive_value_exists(full_domain_string) or positive_value_exists(subdomain_string):
         # Double-check that we don't have a reserved entry already in the Organization table
         try:
             organization_list_query = Organization.objects.using('readonly').all()
@@ -1771,7 +1773,7 @@ def reserved_domain_edit_process_view(request):
                 organization_list_query = organization_list_query.filter(chosen_domain_string__iexact=full_domain_string)
             else:
                 organization_list_query = organization_list_query.\
-                    filter(chosen_sub_domain_string__iexact=sub_domain_string)
+                    filter(chosen_subdomain_string__iexact=subdomain_string)
             organization_domain_list = list(organization_list_query)
         except Exception as e:
             messages.add_message(request, messages.ERROR, 'Could not find existing organization domain.'
@@ -1788,7 +1790,7 @@ def reserved_domain_edit_process_view(request):
                 reserved_domain_list_query = reserved_domain_list_query.\
                     filter(full_domain_string__iexact=full_domain_string)
             else:
-                reserved_domain_list_query = reserved_domain_list_query.filter(sub_domain_string__iexact=sub_domain_string)
+                reserved_domain_list_query = reserved_domain_list_query.filter(subdomain_string__iexact=subdomain_string)
             reserved_domain_list = list(reserved_domain_list_query)
         except Exception as e:
             messages.add_message(request, messages.ERROR, 'Could not find existing reserved domain.'
@@ -1807,7 +1809,7 @@ def reserved_domain_edit_process_view(request):
             'reserved_domain_list':     reserved_domain_list,
             'reserved_domain_id':       reserved_domain_id,
             'state_code':               state_code,
-            'sub_domain_string':        sub_domain_string,
+            'subdomain_string':         subdomain_string,
         }
 
         return render(request, 'organization/reserved_domain_edit.html', template_values)
@@ -1821,11 +1823,11 @@ def reserved_domain_edit_process_view(request):
                 string_updated = full_domain_string.strip()
             else:
                 reserved_domain.full_domain_string = None
-            if positive_value_exists(sub_domain_string):
-                reserved_domain.sub_domain_string = sub_domain_string.strip()
-                string_updated = sub_domain_string.strip()
+            if positive_value_exists(subdomain_string):
+                reserved_domain.subdomain_string = subdomain_string.strip()
+                string_updated = subdomain_string.strip()
             else:
-                reserved_domain.sub_domain_string = None
+                reserved_domain.subdomain_string = None
             reserved_domain.save()
             reserved_domain_id = reserved_domain.id
 
@@ -1844,9 +1846,9 @@ def reserved_domain_edit_process_view(request):
                     full_domain_string=full_domain_string,
                 )
                 messages.add_message(request, messages.INFO, 'New reserved full domain saved.')
-            elif positive_value_exists(sub_domain_string):
+            elif positive_value_exists(subdomain_string):
                 reserved_domain = OrganizationReservedDomain.objects.create(
-                    sub_domain_string=sub_domain_string,
+                    subdomain_string=subdomain_string,
                 )
                 messages.add_message(request, messages.INFO, 'New reserved sub domain saved.')
             else:
@@ -1873,7 +1875,7 @@ def reserved_domain_list_view(request):
     show_all = request.GET.get('show_all', False)
     show_full_domains = request.GET.get('show_full_domains', False)
     show_more = request.GET.get('show_more', False)
-    show_sub_domains = request.GET.get('show_sub_domains', False)
+    show_subdomains = request.GET.get('show_subdomains', False)
     state_code = request.GET.get('state_code', '')
 
     messages_on_stage = get_messages(request)
@@ -1881,16 +1883,16 @@ def reserved_domain_list_view(request):
     # ##########################################
     # Pull from OrganizationReservedDomain table
     reserved_domain_list_query = OrganizationReservedDomain.objects.using('readonly').all()
-    if positive_value_exists(show_full_domains) and not positive_value_exists(show_sub_domains):
+    if positive_value_exists(show_full_domains) and not positive_value_exists(show_subdomains):
         reserved_domain_list_query = reserved_domain_list_query.exclude(full_domain_string__isnull=True). \
             exclude(full_domain_string__exact='')
         reserved_domain_list_query = reserved_domain_list_query.order_by('full_domain_string')
-    elif positive_value_exists(show_sub_domains) and not positive_value_exists(show_full_domains):
-        reserved_domain_list_query = reserved_domain_list_query.exclude(sub_domain_string__isnull=True). \
-            exclude(sub_domain_string__exact='')
-        reserved_domain_list_query = reserved_domain_list_query.order_by('sub_domain_string')
+    elif positive_value_exists(show_subdomains) and not positive_value_exists(show_full_domains):
+        reserved_domain_list_query = reserved_domain_list_query.exclude(subdomain_string__isnull=True). \
+            exclude(subdomain_string__exact='')
+        reserved_domain_list_query = reserved_domain_list_query.order_by('subdomain_string')
     else:
-        reserved_domain_list_query = reserved_domain_list_query.order_by('sub_domain_string').\
+        reserved_domain_list_query = reserved_domain_list_query.order_by('subdomain_string').\
             order_by('full_domain_string')
 
     if positive_value_exists(domain_search):
@@ -1900,7 +1902,7 @@ def reserved_domain_list_view(request):
             new_filter = Q(full_domain_string__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(sub_domain_string__icontains=one_word)
+            new_filter = Q(subdomain_string__icontains=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -1929,20 +1931,20 @@ def reserved_domain_list_view(request):
     # organization_domain_list_query = organization_domain_list_query. \
     #     exclude(chosen_domain_string__isnull=True). \
     #     exclude(chosen_domain_string__exact=''). \
-    #     exclude(chosen_sub_domain_string__isnull=True). \
-    #     exclude(chosen_sub_domain_string__exact='')
-    if positive_value_exists(show_full_domains) and not positive_value_exists(show_sub_domains):
+    #     exclude(chosen_subdomain_string__isnull=True). \
+    #     exclude(chosen_subdomain_string__exact='')
+    if positive_value_exists(show_full_domains) and not positive_value_exists(show_subdomains):
         organization_domain_list_query = organization_domain_list_query.filter(chosen_domain_string__isnull=False)
         organization_domain_list_query = organization_domain_list_query.order_by('chosen_domain_string')
-    elif positive_value_exists(show_sub_domains) and not positive_value_exists(show_full_domains):
-        organization_domain_list_query = organization_domain_list_query.filter(chosen_sub_domain_string__isnull=False)
-        organization_domain_list_query = organization_domain_list_query.order_by('chosen_sub_domain_string')
+    elif positive_value_exists(show_subdomains) and not positive_value_exists(show_full_domains):
+        organization_domain_list_query = organization_domain_list_query.filter(chosen_subdomain_string__isnull=False)
+        organization_domain_list_query = organization_domain_list_query.order_by('chosen_subdomain_string')
     else:
         organization_domain_list_query = organization_domain_list_query.filter(
             Q(chosen_domain_string__isnull=False) |
-            Q(chosen_sub_domain_string__isnull=False)
+            Q(chosen_subdomain_string__isnull=False)
         )
-        organization_domain_list_query = organization_domain_list_query.order_by('chosen_sub_domain_string').\
+        organization_domain_list_query = organization_domain_list_query.order_by('chosen_subdomain_string').\
             order_by('chosen_domain_string')
 
     if positive_value_exists(domain_search):
@@ -1952,7 +1954,7 @@ def reserved_domain_list_view(request):
             new_filter = Q(chosen_domain_string__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(chosen_sub_domain_string__icontains=one_word)
+            new_filter = Q(chosen_subdomain_string__icontains=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -1991,7 +1993,7 @@ def reserved_domain_list_view(request):
         # 'show_all':                 show_all,
         # 'show_more':                show_more,
         'show_full_domains':        show_full_domains,
-        'show_sub_domains':         show_sub_domains,
+        'show_subdomains':          show_subdomains,
         # 'sort_by':                  sort_by,
         'state_code':               state_code,
     }

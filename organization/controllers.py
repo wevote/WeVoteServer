@@ -2,6 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from .controllers_fastly import add_wevote_subdomain_to_fastly, add_subdomain_route53_record, \
+    get_wevote_subdomain_status
 from .models import Organization, OrganizationListManager, OrganizationManager, \
     OrganizationReservedDomain, OrganizationMembershipLinkToVoter, \
     CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
@@ -54,11 +56,11 @@ CHOSEN_SOCIAL_SHARE_MASTER_MAX_WIDTH = 1600
 CHOSEN_SOCIAL_SHARE_MASTER_MAX_HEIGHT = 900
 
 
-def full_domain_string_available(full_domain_string, organization_id):
+def full_domain_string_available(full_domain_string, requesting_organization_id):
     """
     Make sure this full domain name (website address) isn't already taken
     :param full_domain_string:
-    :param organization_id:
+    :param requesting_organization_id:
     :return:
     """
     status = ""
@@ -72,7 +74,7 @@ def full_domain_string_available(full_domain_string, organization_id):
         return results
     try:
         organization_list_query = Organization.objects.using('readonly').all()
-        organization_list_query = organization_list_query.exclude(id=organization_id)
+        organization_list_query = organization_list_query.exclude(id=requesting_organization_id)
         organization_list_query = organization_list_query.filter(chosen_domain_string__iexact=full_domain_string)
         organization_domain_match_count = organization_list_query.count()
         if positive_value_exists(organization_domain_match_count):
@@ -125,31 +127,31 @@ def full_domain_string_available(full_domain_string, organization_id):
     return results
 
 
-def sub_domain_string_available(sub_domain_string, organization_id):
+def subdomain_string_available(subdomain_string, requesting_organization_id):
     """
     Make sure this sub domain name (website address) isn't already taken
-    :param sub_domain_string:
-    :param organization_id:
+    :param subdomain_string:
+    :param requesting_organization_id:
     :return:
     """
     status = ""
-    if not positive_value_exists(sub_domain_string):
-        status += "MISSING_SUB_DOMAIN_STRING "
+    if not positive_value_exists(subdomain_string):
+        status += "MISSING_SUBDOMAIN_STRING "
         results = {
-            'sub_domain_string_available': False,
+            'subdomain_string_available':   False,
             'status':                       status,
             'success':                      False,
         }
         return results
     try:
         organization_list_query = Organization.objects.using('readonly').all()
-        organization_list_query = organization_list_query.exclude(id=organization_id)
-        organization_list_query = organization_list_query.filter(chosen_sub_domain_string__iexact=sub_domain_string)
+        organization_list_query = organization_list_query.exclude(id=requesting_organization_id)
+        organization_list_query = organization_list_query.filter(chosen_subdomain_string__iexact=subdomain_string)
         organization_domain_match_count = organization_list_query.count()
         if positive_value_exists(organization_domain_match_count):
-            status += "SUB_DOMAIN_STRING_FOUND-OWNED_BY_ORGANIZATION "
+            status += "SUBDOMAIN_STRING_FOUND-OWNED_BY_ORGANIZATION "
             results = {
-                'sub_domain_string_available':  False,
+                'subdomain_string_available':   False,
                 'status':                       status,
                 'success':                      True,
             }
@@ -158,7 +160,7 @@ def sub_domain_string_available(sub_domain_string, organization_id):
         status += 'PROBLEM_QUERYING_ORGANIZATION_TABLE {error} [type: {error_type}] ' \
                   ''.format(error=e, error_type=type(e))
         results = {
-            'sub_domain_string_available':  False,
+            'subdomain_string_available':   False,
             'status':                       status,
             'success':                      False,
         }
@@ -167,12 +169,12 @@ def sub_domain_string_available(sub_domain_string, organization_id):
     # Double-check that we don't have a reserved entry already in the OrganizationReservedDomain table
     try:
         reserved_domain_list_query = OrganizationReservedDomain.objects.using('readonly').all()
-        reserved_domain_list_query = reserved_domain_list_query.filter(sub_domain_string__iexact=sub_domain_string)
+        reserved_domain_list_query = reserved_domain_list_query.filter(subdomain_string__iexact=subdomain_string)
         reserved_domain_match_count = reserved_domain_list_query.count()
         if positive_value_exists(reserved_domain_match_count):
-            status += "SUB_DOMAIN_STRING_FOUND-RESERVED "
+            status += "SUBDOMAIN_STRING_FOUND-RESERVED "
             results = {
-                'sub_domain_string_available':  False,
+                'subdomain_string_available':   False,
                 'status':                       status,
                 'success':                      True,
             }
@@ -181,17 +183,17 @@ def sub_domain_string_available(sub_domain_string, organization_id):
         status += 'PROBLEM_QUERYING_ORGANIZATION_RESERVED_DOMAIN_TABLE {error} [type: {error_type}] ' \
                   ''.format(error=e, error_type=type(e))
         results = {
-            'sub_domain_string_available':  False,
+            'subdomain_string_available':   False,
             'status':                       status,
             'success':                      False,
         }
         return results
 
-    status += "SUB_DOMAIN_STRING_AVAILABLE "
+    status += "SUBDOMAIN_STRING_AVAILABLE "
     results = {
-        'sub_domain_string_available': True,
-        'status': status,
-        'success': True,
+        'subdomain_string_available':   True,
+        'status':                       status,
+        'success':                      True,
     }
     return results
 
@@ -1693,7 +1695,7 @@ def organization_retrieve_for_api(
             'chosen_social_share_description':  '',
             'chosen_social_share_image_256x256_url_https': '',
             'chosen_social_share_master_image_url_https': '',
-            'chosen_sub_domain_string':         '',
+            'chosen_subdomain_string':          '',
             'chosen_subscription_plan':         '',
             'subscription_plan_end_day_text':   '',
             'subscription_plan_features_active': '',  # Replace with features_provided_bitmap
@@ -1763,7 +1765,7 @@ def organization_retrieve_for_api(
             'chosen_social_share_description':  organization.chosen_social_share_description,
             'chosen_social_share_master_image_url_https':         organization.chosen_social_share_master_image_url_https,
             'chosen_social_share_image_256x256_url_https':  organization.chosen_social_share_image_256x256_url_https,
-            'chosen_sub_domain_string':         organization.chosen_sub_domain_string,
+            'chosen_subdomain_string':          organization.chosen_subdomain_string,
             'chosen_subscription_plan':         organization.chosen_subscription_plan,
             'subscription_plan_end_day_text':   organization.subscription_plan_end_day_text,
             'subscription_plan_features_active': organization.subscription_plan_features_active,  # Replace
@@ -1816,7 +1818,7 @@ def organization_retrieve_for_api(
             'chosen_social_share_description':  '',
             'chosen_social_share_image_256x256_url_https': '',
             'chosen_social_share_master_image_url_https': '',
-            'chosen_sub_domain_string':         '',
+            'chosen_subdomain_string':          '',
             'chosen_subscription_plan':         '',
             'subscription_plan_end_day_text':   '',
             'subscription_plan_features_active': '',  # Replace with features_provided_bitmap
@@ -1853,7 +1855,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
                               chosen_domain_string, chosen_google_analytics_account_number,
                               chosen_html_verification_string, chosen_hide_we_vote_logo,
                               chosen_social_share_description,
-                              chosen_sub_domain_string, chosen_subscription_plan):
+                              chosen_subdomain_string, chosen_subscription_plan):
     """
     We use this to store displayable organization data
     TODO: Make sure voter's can't change their Twitter handles here.
@@ -1878,7 +1880,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
     :param chosen_html_verification_string:
     :param chosen_hide_we_vote_logo:
     :param chosen_social_share_description:
-    :param chosen_sub_domain_string:
+    :param chosen_subdomain_string:
     :param chosen_subscription_plan:
     :return:
     """
@@ -1904,15 +1906,15 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'status':                       "ORGANIZATION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING",
             'success':                      False,
             'chosen_domain_string':         chosen_domain_string,
-            'chosen_favicon_url_https':         '',
+            'chosen_favicon_url_https':     '',
             'chosen_google_analytics_account_number': chosen_google_analytics_account_number,
             'chosen_html_verification_string':  chosen_html_verification_string,
-            'chosen_hide_we_vote_logo':            chosen_hide_we_vote_logo,
-            'chosen_logo_url_https':            '',
+            'chosen_hide_we_vote_logo':     chosen_hide_we_vote_logo,
+            'chosen_logo_url_https':        '',
             'chosen_social_share_description':  chosen_social_share_description,
             'chosen_social_share_image_256x256_url_https': '',
-            'chosen_sub_domain_string':          chosen_sub_domain_string,
-            'chosen_subscription_plan':         chosen_subscription_plan,
+            'chosen_subdomain_string':      chosen_subdomain_string,
+            'chosen_subscription_plan':     chosen_subscription_plan,
             'subscription_plan_end_day_text':   '',  # Not something that can be saved directly from WebApp
             'subscription_plan_features_active': '',  # Replace
             'chosen_feature_package':       '',  # Not something that can be saved directly from WebApp
@@ -1938,18 +1940,18 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
         results = {
             'status':                       "NEW_ORGANIZATION_REQUIRED_VARIABLES_MISSING",
             'success':                      False,
-            'chosen_domain_string':             chosen_domain_string,
-            'chosen_favicon_url_https':         '',
+            'chosen_domain_string':         chosen_domain_string,
+            'chosen_favicon_url_https':     '',
             'chosen_google_analytics_account_number': chosen_google_analytics_account_number,
             'chosen_html_verification_string':  chosen_html_verification_string,
-            'chosen_hide_we_vote_logo':            chosen_hide_we_vote_logo,
-            'chosen_logo_url_https':            '',
+            'chosen_hide_we_vote_logo':     chosen_hide_we_vote_logo,
+            'chosen_logo_url_https':        '',
             'chosen_social_share_description':  chosen_social_share_description,
             'chosen_social_share_image_256x256_url_https': '',
-            'chosen_sub_domain_string':          chosen_sub_domain_string,
-            'chosen_subscription_plan':         chosen_subscription_plan,
-            'subscription_plan_end_day_text':   '',  # Not something that can be saved directly from WebApp
-            'subscription_plan_features_active': '',  # Replace
+            'chosen_subdomain_string':      chosen_subdomain_string,
+            'chosen_subscription_plan':     chosen_subscription_plan,
+            'subscription_plan_end_day_text':       '',  # Not something that can be saved directly from WebApp
+            'subscription_plan_features_active':    '',  # Replace
             'chosen_feature_package':       '',  # Not something that can be saved directly from WebApp
             'features_provided_bitmap':     '',  # Not something that can be saved directly from WebApp
             'new_organization_created':     False,
@@ -2009,6 +2011,15 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             facebook_email = facebook_auth_response.facebook_email
 
     organization_manager = OrganizationManager()
+    chosen_subdomain_string_previous = ''
+    if positive_value_exists(organization_we_vote_id):
+        # Retrieve existing organization so we can check to see if the updated chosen_subdomain_string has just been
+        # added or removed.
+        retrieve_results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+        if retrieve_results['organization_found']:
+            organization_previous_state = retrieve_results['organization']
+            chosen_subdomain_string_previous = organization_previous_state.chosen_subdomain_string
+
     save_results = organization_manager.update_or_create_organization(
         organization_id=organization_id, we_vote_id=organization_we_vote_id,
         organization_website_search=organization_website, organization_twitter_search=organization_twitter_handle,
@@ -2026,7 +2037,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
         chosen_html_verification_string=chosen_html_verification_string,
         chosen_hide_we_vote_logo=chosen_hide_we_vote_logo,
         chosen_social_share_description=chosen_social_share_description,
-        chosen_sub_domain_string=chosen_sub_domain_string, chosen_subscription_plan=chosen_subscription_plan,
+        chosen_subdomain_string=chosen_subdomain_string, chosen_subscription_plan=chosen_subscription_plan,
     )
 
     success = save_results['success']
@@ -2088,6 +2099,35 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
                     success = False
                     status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID_FROM_FACEBOOK "
 
+        # Now see about adding chosen_subdomain_string networking information
+        if positive_value_exists(chosen_subdomain_string) or positive_value_exists(chosen_subdomain_string_previous):
+            if positive_value_exists(chosen_subdomain_string):
+                subdomain_results = get_wevote_subdomain_status(chosen_subdomain_string)
+                status += subdomain_results['status']
+                if not subdomain_results['success']:
+                    status += "COULD_NOT_GET_SUBDOMAIN_STATUS "
+                elif not positive_value_exists(subdomain_results['subdomain_exists']):
+                    # If here, this is a new chosen_subdomain_string to add to our network
+                    status += "NEW_CHOSEN_SUBDOMAIN_STRING_DOES_NOT_EXIST "
+                    add_results = add_wevote_subdomain_to_fastly(chosen_subdomain_string)
+                    status += add_results['status']
+                else:
+                    status += "CHOSEN_SUBDOMAIN_ALREADY_EXISTS "
+            if positive_value_exists(chosen_subdomain_string_previous):
+                if chosen_subdomain_string_previous is not chosen_subdomain_string:
+                    # Any benefit to deleting prior subdomain from Fastly?
+                    pass
+
+        if positive_value_exists(chosen_subdomain_string):
+            # add domain to aws route53 DNS
+            route53_results = add_subdomain_route53_record(chosen_subdomain_string)
+            if route53_results['success']:
+                status += "SUBDOMAIN_ROUTE53_ADDED "
+            else:
+                status += route53_results['status']
+                status += "SUBDOMAIN_ROUTE53_NOT_ADDED "
+            # We don't delete subdomain records from our DNS
+
         # Voter guide names are currently locked to the organization name, so we want to update all voter guides
         voter_guide_manager = VoterGuideManager()
         results = voter_guide_manager.update_organization_voter_guides_with_organization_data(organization)
@@ -2123,7 +2163,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'chosen_logo_url_https':            organization.chosen_logo_url_https,
             'chosen_social_share_description':  organization.chosen_social_share_description,
             'chosen_social_share_image_256x256_url_https': organization.chosen_social_share_image_256x256_url_https,
-            'chosen_sub_domain_string':          organization.chosen_sub_domain_string,
+            'chosen_subdomain_string':          organization.chosen_subdomain_string,
             'chosen_subscription_plan':         organization.chosen_subscription_plan,
             'subscription_plan_end_day_text':   organization.subscription_plan_end_day_text,
             'subscription_plan_features_active': organization.subscription_plan_features_active,
@@ -2177,7 +2217,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'chosen_logo_url_https':            '',
             'chosen_social_share_description':  chosen_social_share_description,
             'chosen_social_share_image_256x256_url_https': '',
-            'chosen_sub_domain_string':          chosen_sub_domain_string,
+            'chosen_subdomain_string':          chosen_subdomain_string,
             'chosen_subscription_plan':         chosen_subscription_plan,
             'subscription_plan_end_day_text':   '',
             'subscription_plan_features_active': '',
