@@ -139,6 +139,7 @@
   "AWS_SECRET_ACCESS_KEY":          "",
   "AWS_REGION_NAME":                "us-west-2",
   "AWS_STORAGE_BUCKET_NAME":        "wevote-images",
+  "AWS_HOSTED_ZONE_ID":             "",
   "PROFILE_IMAGE_TINY_WIDTH":       32,
   "PROFILE_IMAGE_TINY_HEIGHT":      32,
   "PROFILE_IMAGE_MEDIUM_WIDTH":     48,
@@ -164,6 +165,12 @@
   "TWILIO_ACCOUNT_SID":             "",
   "TWILIO_AUTH_TOKEN":              "",
   "SYSTEM_SENDER_SMS_PHONE_NUMBER": "",
+
+  "_comment":                       "Fastly Content Delivery Network Settings",
+  "FASTLY_API_HOSTNAME":            "https://api.fastly.com",
+  "FASTLY_API_SERVICE_ID":          "",
+  "FASTLY_API_TOKEN":               "",
+  "FASTLY_WILDCARD_CNAME":          "",
 
   "_comment":                       "End of json_environment_variables.json"
 }
