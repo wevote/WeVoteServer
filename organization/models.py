@@ -2625,8 +2625,6 @@ class Organization(models.Model):
     chosen_social_share_image_256x256_url_https = models.URLField(
         verbose_name='url of client social share image', max_length=255, blank=True, null=True)
     # This is the subdomain the client has configured for yyy.WeVote.US
-    chosen_sub_domain_string = models.CharField(
-        verbose_name="client we vote sub domain", max_length=255, null=True, blank=True)
     chosen_subdomain_string = models.CharField(
         verbose_name="client we vote subdomain", max_length=255, null=True, blank=True)
     chosen_subscription_plan = models.PositiveIntegerField(verbose_name="number of the plan client chose", default=0)
@@ -2824,7 +2822,5 @@ class OrganizationReservedDomain(models.Model):
     full_domain_string = models.CharField(
         verbose_name="full domain", max_length=255, null=True, blank=True, unique=True)
     # Ex/ zoom (referring to zoom.wevote.us)
-    sub_domain_string = models.CharField(
-        verbose_name="we vote sub domain", max_length=255, null=True, blank=True, unique=True)
     subdomain_string = models.CharField(
         verbose_name="we vote subdomain", max_length=255, null=True, blank=True, unique=True)
