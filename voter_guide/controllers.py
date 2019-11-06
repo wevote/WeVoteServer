@@ -44,6 +44,20 @@ VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # vot
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
+# TODO: 9/17/19, URLs for sites excluded from highlighting - should be in the db
+URLS_TO_NEVER_HIGHLIGHT = [
+    '*.google.com',
+    '*.newrelic.com',
+    '*.wevote.us',
+    'api.wevoteusa.org',
+    'dashlane.com',
+    'github.com'
+    'localhost',
+    'sketchviewer.com',
+    'slack.com',
+    'zendesk.com',
+]
+
 
 def convert_candidate_endorsement_list_light_to_possible_endorsement_list(endorsement_list_light):
     status = ""
@@ -1885,17 +1899,7 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
         'success':              success,
         'url_to_scan':          url_to_scan,
         'highlight_list':       highlight_list,
-        'never_highlight_on':   [  # TODO: 9/17/19, URLs for sites excluded from highlighting - should be in the db
-            '*.wevote.us',
-            'api.wevoteusa.org',
-            'localhost',
-            'meet.google.com',
-            'sketchviewer.com',
-            'www.google.com',
-            'slack.com',
-            'dashlane.com',
-            'github.com'
-        ]
+        'never_highlight_on':   URLS_TO_NEVER_HIGHLIGHT,
     }
     return json_data
 

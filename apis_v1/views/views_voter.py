@@ -778,6 +778,7 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
         'email_address_already_owned_by_other_voter':   results['email_address_already_owned_by_other_voter'],
         'email_address_already_owned_by_this_voter':    results['email_address_already_owned_by_this_voter'],
         'email_address_created':            results['email_address_created'],
+        'email_address_not_valid':          results['email_address_not_valid'],
         'email_address_deleted':            results['email_address_deleted'],
         'verification_email_sent':          results['verification_email_sent'],
         'link_to_sign_in_email_sent':       results['link_to_sign_in_email_sent'],

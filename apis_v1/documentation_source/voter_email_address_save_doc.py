@@ -83,6 +83,7 @@ def voter_email_address_save_doc_template_values(url_root):
                    '  "email_address_saved_we_vote_id": string,\n' \
                    '  "email_address_created": boolean,\n' \
                    '  "email_address_deleted": boolean,\n' \
+                   '  "email_address_not_valid": boolean,\n' \
                    '  "verification_email_sent": boolean,\n' \
                    '  "email_address_already_owned_by_other_voter": boolean,\n' \
                    '  "email_address_found": boolean,\n' \
