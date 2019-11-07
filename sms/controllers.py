@@ -797,6 +797,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
 
     if sms_phone_number_already_owned_by_other_voter:
         if send_sign_in_code_sms:
+            # Make sure the verified sms number has a secret_key
             sms_phone_number_we_vote_id = verified_sms_phone_number.we_vote_id
             sms_phone_number_saved_we_vote_id = ""
             if positive_value_exists(verified_sms_phone_number.secret_key):
@@ -828,220 +829,220 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                 'secret_code_system_locked_for_this_voter_device_id': False,
             }
             return error_results
-    else:
-        # Look to see if there is an SMSPhoneNumber entry for the incoming sms_phone_number or
-        #  incoming_sms_we_vote_id for this voter
-        sms_results = sms_manager.retrieve_sms_phone_number(normalized_sms_phone_number, incoming_sms_we_vote_id,
-                                                            voter_we_vote_id)
-        if sms_results['sms_phone_number_found']:
-            sms_phone_number = sms_results['sms_phone_number']
-            sms_phone_number_list.append(sms_phone_number)
-        elif sms_results['sms_phone_number_list_found']:
-            # This sms was used by more than one person
-            sms_phone_number_list = sms_results['sms_phone_number_list']
 
-        # Cycle through all SMSPhoneNumber entries with "sms_phone_number" or "incoming_sms_we_vote_id"
-        for sms_phone_number in sms_phone_number_list:
-            sms_phone_number_we_vote_id = sms_phone_number.we_vote_id
-            sms_phone_number_saved_we_vote_id = ""
-            normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
-            if positive_value_exists(sms_phone_number.secret_key):
-                recipient_sms_secret_key = sms_phone_number.secret_key
-            else:
-                recipient_sms_secret_key = \
-                    sms_manager.update_sms_phone_number_with_new_secret_key(sms_phone_number_we_vote_id)
-            sms_phone_number_created = False
-            sms_phone_number_found = True
-            if delete_sms:
-                # If this sms is cached in a voter record, remove it as long as primary_sms_we_vote_id
-                # matches sms_phone_number.we_vote_id
-                primary_sms_phone_number_deleted = False
-                if positive_value_exists(voter.primary_sms_we_vote_id) \
-                        and voter.primary_sms_we_vote_id.lower() == sms_phone_number.we_vote_id.lower():
-                    try:
-                        voter.primary_sms_we_vote_id = None
-                        voter.sms_ownership_is_verified = False
-                        voter.normalized_sms_phone_number = None
-                        voter.save()
-                        primary_sms_phone_number_deleted = True
-                        status += "VOTER_PRIMARY_SMS_PHONE_NUMBER_REMOVED "
-                        success = True
-                    except Exception as e:
-                        status += "UNABLE_TO_REMOVE_VOTER_PRIMARY_SMS_PHONE_NUMBER "
+    # Look to see if there is an SMSPhoneNumber entry for the incoming sms_phone_number or
+    #  incoming_sms_we_vote_id for this voter
+    sms_results = sms_manager.retrieve_sms_phone_number(normalized_sms_phone_number, incoming_sms_we_vote_id,
+                                                        voter_we_vote_id)
+    if sms_results['sms_phone_number_found']:
+        sms_phone_number = sms_results['sms_phone_number']
+        sms_phone_number_list.append(sms_phone_number)
+    elif sms_results['sms_phone_number_list_found']:
+        # This sms was used by more than one person
+        sms_phone_number_list = sms_results['sms_phone_number_list']
+
+    # Cycle through all SMSPhoneNumber entries with "sms_phone_number" or "incoming_sms_we_vote_id"
+    for sms_phone_number in sms_phone_number_list:
+        sms_phone_number_we_vote_id = sms_phone_number.we_vote_id
+        sms_phone_number_saved_we_vote_id = ""
+        normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
+        if positive_value_exists(sms_phone_number.secret_key):
+            recipient_sms_secret_key = sms_phone_number.secret_key
+        else:
+            recipient_sms_secret_key = \
+                sms_manager.update_sms_phone_number_with_new_secret_key(sms_phone_number_we_vote_id)
+        sms_phone_number_created = False
+        sms_phone_number_found = True
+        if delete_sms:
+            # If this sms is cached in a voter record, remove it as long as primary_sms_we_vote_id
+            # matches sms_phone_number.we_vote_id
+            primary_sms_phone_number_deleted = False
+            if positive_value_exists(voter.primary_sms_we_vote_id) \
+                    and voter.primary_sms_we_vote_id.lower() == sms_phone_number.we_vote_id.lower():
                 try:
-                    sms_phone_number.delete()
-                    sms_phone_number_deleted = True
-                    status += "DELETED_SMS_PHONE_NUMBER "
+                    voter.primary_sms_we_vote_id = None
+                    voter.sms_ownership_is_verified = False
+                    voter.normalized_sms_phone_number = None
+                    voter.save()
+                    primary_sms_phone_number_deleted = True
+                    status += "VOTER_PRIMARY_SMS_PHONE_NUMBER_REMOVED "
                     success = True
                 except Exception as e:
-                    status += "UNABLE_TO_DELETE_SMS_PHONE_NUMBER "
-                    success = False
+                    status += "UNABLE_TO_REMOVE_VOTER_PRIMARY_SMS_PHONE_NUMBER "
+            try:
+                sms_phone_number.delete()
+                sms_phone_number_deleted = True
+                status += "DELETED_SMS_PHONE_NUMBER "
+                success = True
+            except Exception as e:
+                status += "UNABLE_TO_DELETE_SMS_PHONE_NUMBER "
+                success = False
 
-                if sms_phone_number_deleted:
-                    # Delete all other identical phone numbers associated with this account that are not be verified
-                    if positive_value_exists(normalized_sms_phone_number):
-                        duplicate_results = sms_manager.retrieve_sms_phone_number(
-                            normalized_sms_phone_number, voter_we_vote_id=voter_we_vote_id)
-                        if duplicate_results['sms_phone_number_found']:
-                            sms_phone_number_to_delete = duplicate_results['sms_phone_number']
-                            if not positive_value_exists(sms_phone_number_to_delete.sms_ownership_is_verified):
+            if sms_phone_number_deleted:
+                # Delete all other identical phone numbers associated with this account that are not be verified
+                if positive_value_exists(normalized_sms_phone_number):
+                    duplicate_results = sms_manager.retrieve_sms_phone_number(
+                        normalized_sms_phone_number, voter_we_vote_id=voter_we_vote_id)
+                    if duplicate_results['sms_phone_number_found']:
+                        sms_phone_number_to_delete = duplicate_results['sms_phone_number']
+                        if not positive_value_exists(sms_phone_number_to_delete.sms_ownership_is_verified):
+                            try:
+                                sms_phone_number_to_delete.delete()
+                                status += "DELETED_DUP_SMS1 "
+                            except Exception as e:
+                                status += "UNABLE_TO_DELETE_DUP_SMS1 "
+                    elif duplicate_results['sms_phone_number_list_found']:
+                        sms_phone_number_list_for_delete = duplicate_results['sms_phone_number_list']
+                        for sms_phone_number_to_delete in sms_phone_number_list_for_delete:
+                            if not positive_value_exists(
+                                    sms_phone_number_to_delete.sms_ownership_is_verified):
                                 try:
                                     sms_phone_number_to_delete.delete()
-                                    status += "DELETED_DUP_SMS1 "
+                                    status += "DELETED_DUP_SMS2 "
                                 except Exception as e:
-                                    status += "UNABLE_TO_DELETE_DUP_SMS1 "
-                        elif duplicate_results['sms_phone_number_list_found']:
-                            sms_phone_number_list_for_delete = duplicate_results['sms_phone_number_list']
-                            for sms_phone_number_to_delete in sms_phone_number_list_for_delete:
-                                if not positive_value_exists(
-                                        sms_phone_number_to_delete.sms_ownership_is_verified):
-                                    try:
-                                        sms_phone_number_to_delete.delete()
-                                        status += "DELETED_DUP_SMS2 "
-                                    except Exception as e:
-                                        status += "UNABLE_TO_DELETE_DUP_SMS2 "
+                                    status += "UNABLE_TO_DELETE_DUP_SMS2 "
 
-                    # If there are any other verified sms, promote the first one to be the voter's verified sms
-                    if positive_value_exists(primary_sms_phone_number_deleted):
-                        temp_sms_phone_number = ""
-                        temp_incoming_sms_we_vote_id = ""
-                        sms_promotion_results = sms_manager.retrieve_sms_phone_number(
-                            temp_sms_phone_number, temp_incoming_sms_we_vote_id, voter_we_vote_id=voter_we_vote_id)
-                        sms_phone_number_list_for_promotion = []
-                        if sms_promotion_results['sms_phone_number_list_found']:
-                            # This sms was used by more than one person
-                            sms_phone_number_list_for_promotion = sms_promotion_results['sms_phone_number_list']
-                            sms_phone_number_list_found_for_promotion_to_primary = True
-                        else:
-                            sms_phone_number_list_found_for_promotion_to_primary = False
+                # If there are any other verified sms, promote the first one to be the voter's verified sms
+                if positive_value_exists(primary_sms_phone_number_deleted):
+                    temp_sms_phone_number = ""
+                    temp_incoming_sms_we_vote_id = ""
+                    sms_promotion_results = sms_manager.retrieve_sms_phone_number(
+                        temp_sms_phone_number, temp_incoming_sms_we_vote_id, voter_we_vote_id=voter_we_vote_id)
+                    sms_phone_number_list_for_promotion = []
+                    if sms_promotion_results['sms_phone_number_list_found']:
+                        # This sms was used by more than one person
+                        sms_phone_number_list_for_promotion = sms_promotion_results['sms_phone_number_list']
+                        sms_phone_number_list_found_for_promotion_to_primary = True
+                    else:
+                        sms_phone_number_list_found_for_promotion_to_primary = False
 
-                        if sms_phone_number_list_found_for_promotion_to_primary:
-                            for sms_phone_number_for_promotion in sms_phone_number_list_for_promotion:
-                                if positive_value_exists(sms_phone_number_for_promotion.sms_ownership_is_verified):
-                                    # Assign this as voter's new primary sms
+                    if sms_phone_number_list_found_for_promotion_to_primary:
+                        for sms_phone_number_for_promotion in sms_phone_number_list_for_promotion:
+                            if positive_value_exists(sms_phone_number_for_promotion.sms_ownership_is_verified):
+                                # Assign this as voter's new primary sms
+                                try:
+                                    voter.primary_sms_we_vote_id = sms_phone_number_for_promotion.we_vote_id
+                                    voter.sms_ownership_is_verified = True
+                                    voter.normalized_sms_phone_number = \
+                                        sms_phone_number_for_promotion.normalized_sms_phone_number
+                                    voter.save()
+                                    sms_phone_number_already_owned_by_this_voter = True
+                                    status += "SAVED_SMS_PHONE_NUMBER_AS_NEW_PRIMARY "
+                                    success = True
+                                except Exception as e:
+                                    status += "UNABLE_TO_SAVE_SMS_PHONE_NUMBER_AS_NEW_PRIMARY "
+                                    remove_cached_results = \
+                                        voter_manager.remove_voter_cached_sms_entries_from_sms_phone_number(
+                                            sms_phone_number_for_promotion)
+                                    status += remove_cached_results['status']
                                     try:
                                         voter.primary_sms_we_vote_id = sms_phone_number_for_promotion.we_vote_id
                                         voter.sms_ownership_is_verified = True
                                         voter.normalized_sms_phone_number = \
                                             sms_phone_number_for_promotion.normalized_sms_phone_number
                                         voter.save()
-                                        sms_phone_number_already_owned_by_this_voter = True
                                         status += "SAVED_SMS_PHONE_NUMBER_AS_NEW_PRIMARY "
                                         success = True
                                     except Exception as e:
-                                        status += "UNABLE_TO_SAVE_SMS_PHONE_NUMBER_AS_NEW_PRIMARY "
-                                        remove_cached_results = \
-                                            voter_manager.remove_voter_cached_sms_entries_from_sms_phone_number(
-                                                sms_phone_number_for_promotion)
-                                        status += remove_cached_results['status']
-                                        try:
-                                            voter.primary_sms_we_vote_id = sms_phone_number_for_promotion.we_vote_id
-                                            voter.sms_ownership_is_verified = True
-                                            voter.normalized_sms_phone_number = \
-                                                sms_phone_number_for_promotion.normalized_sms_phone_number
-                                            voter.save()
-                                            status += "SAVED_SMS_PHONE_NUMBER_AS_NEW_PRIMARY "
-                                            success = True
-                                        except Exception as e:
-                                            status += "UNABLE_TO_REMOVE_VOTER_PRIMARY_SMS_PHONE_NUMBER2 "
-                                    break  # Stop looking at sms addresses to make the new primary
+                                        status += "UNABLE_TO_REMOVE_VOTER_PRIMARY_SMS_PHONE_NUMBER2 "
+                                break  # Stop looking at sms addresses to make the new primary
 
-                break  # TODO DALE Is there ever a case where we want to delete more than one sms at a time?
-            elif make_primary_sms_phone_number and positive_value_exists(incoming_sms_we_vote_id):
-                # We know we want to make incoming_sms_we_vote_id the primary sms
-                if not sms_phone_number.sms_ownership_is_verified:
-                    # Do not make an unverified sms primary
-                    pass
-                elif sms_phone_number.we_vote_id.lower() == incoming_sms_we_vote_id.lower():
-                    # Make sure this is the primary
-                    if positive_value_exists(voter.primary_sms_we_vote_id) \
-                            and voter.primary_sms_we_vote_id.lower() == sms_phone_number.we_vote_id.lower():
-                        # If already the primary sms, leave it but make sure to heal the data
-                        try:
-                            voter.primary_sms_we_vote_id = sms_phone_number.we_vote_id
-                            voter.sms_ownership_is_verified = True
-                            voter.normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
-                            voter.save()
-                            sms_phone_number_already_owned_by_this_voter = True
-                            status += "SAVED_SMS_PHONE_NUMBER_AS_PRIMARY-HEALING_DATA "
-                            success = True
-                        except Exception as e:
-                            status += "UNABLE_TO_SAVE_SMS_PHONE_NUMBER_AS_PRIMARY-HEALING_DATA "
-                            remove_cached_results = \
-                                voter_manager.remove_voter_cached_sms_entries_from_sms_phone_number(
-                                    sms_phone_number)
-                            status += remove_cached_results['status']
-                            try:
-                                voter.primary_sms_we_vote_id = sms_phone_number.we_vote_id
-                                voter.sms_ownership_is_verified = True
-                                voter.normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
-                                voter.save()
-                                sms_phone_number_already_owned_by_this_voter = True
-                                status += "SAVED_SMS_PHONE_NUMBER_AS_NEW_PRIMARY "
-                                success = True
-                            except Exception as e:
-                                status += "UNABLE_TO_REMOVE_VOTER_PRIMARY_SMS_PHONE_NUMBER2 "
-                                success = False
-                    else:
-                        # Set this sms address as the primary
-
-                        # First, search for any other voter records that think they are using this
-                        # normalized_sms_phone_number or primary_sms_we_vote_id. If there are other records
-                        # using these, they are bad data that don't reflect
+            break  # TODO DALE Is there ever a case where we want to delete more than one sms at a time?
+        elif make_primary_sms_phone_number and positive_value_exists(incoming_sms_we_vote_id):
+            # We know we want to make incoming_sms_we_vote_id the primary sms
+            if not sms_phone_number.sms_ownership_is_verified:
+                # Do not make an unverified sms primary
+                pass
+            elif sms_phone_number.we_vote_id.lower() == incoming_sms_we_vote_id.lower():
+                # Make sure this is the primary
+                if positive_value_exists(voter.primary_sms_we_vote_id) \
+                        and voter.primary_sms_we_vote_id.lower() == sms_phone_number.we_vote_id.lower():
+                    # If already the primary sms, leave it but make sure to heal the data
+                    try:
+                        voter.primary_sms_we_vote_id = sms_phone_number.we_vote_id
+                        voter.sms_ownership_is_verified = True
+                        voter.normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
+                        voter.save()
+                        sms_phone_number_already_owned_by_this_voter = True
+                        status += "SAVED_SMS_PHONE_NUMBER_AS_PRIMARY-HEALING_DATA "
+                        success = True
+                    except Exception as e:
+                        status += "UNABLE_TO_SAVE_SMS_PHONE_NUMBER_AS_PRIMARY-HEALING_DATA "
                         remove_cached_results = \
                             voter_manager.remove_voter_cached_sms_entries_from_sms_phone_number(
                                 sms_phone_number)
                         status += remove_cached_results['status']
-
-                        # And now, update current voter
                         try:
                             voter.primary_sms_we_vote_id = sms_phone_number.we_vote_id
                             voter.sms_ownership_is_verified = True
                             voter.normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
                             voter.save()
                             sms_phone_number_already_owned_by_this_voter = True
-                            status += "SAVED_SMS_PHONE_NUMBER_AS_PRIMARY "
+                            status += "SAVED_SMS_PHONE_NUMBER_AS_NEW_PRIMARY "
                             success = True
                         except Exception as e:
-                            status += "UNABLE_TO_SAVE_SMS_PHONE_NUMBER_AS_PRIMARY "
+                            status += "UNABLE_TO_REMOVE_VOTER_PRIMARY_SMS_PHONE_NUMBER2 "
                             success = False
-                    break  # Break out of the sms_phone_number_list loop
-                elif positive_value_exists(voter.primary_sms_we_vote_id) \
-                        and voter.primary_sms_we_vote_id.lower() == sms_phone_number.we_vote_id.lower():
-                    # If here, we know that we are not looking at the sms we want to make primary,
-                    # but we only want to wipe out a voter's primary sms when we replace it with another sms
-                    pass
-
-        send_verification_sms = False
-        if sms_phone_number_deleted:
-            # We cannot proceed with this sms address, since it was just marked deleted
-            pass
-        elif not positive_value_exists(incoming_sms_we_vote_id):
-            # Save the new sms address
-            sms_ownership_is_verified = False
-            sms_save_results = sms_manager.create_sms_phone_number(
-                normalized_sms_phone_number, voter_we_vote_id, sms_ownership_is_verified)
-
-            if sms_save_results['sms_phone_number_saved']:
-                # Send verification sms
-                send_verification_sms = True
-                new_sms_phone_number = sms_save_results['sms_phone_number']
-                sms_phone_number_we_vote_id = new_sms_phone_number.we_vote_id
-                sms_phone_number_saved_we_vote_id = new_sms_phone_number.we_vote_id
-                normalized_sms_phone_number = new_sms_phone_number.normalized_sms_phone_number
-                if positive_value_exists(new_sms_phone_number.secret_key):
-                    recipient_sms_secret_key = new_sms_phone_number.secret_key
                 else:
-                    recipient_sms_secret_key = \
-                        sms_manager.update_sms_phone_number_with_new_secret_key(sms_phone_number_we_vote_id)
-                sms_phone_number_created = True
-                sms_phone_number_found = True
-                success = True
-                status += sms_save_results['status']
+                    # Set this sms address as the primary
+
+                    # First, search for any other voter records that think they are using this
+                    # normalized_sms_phone_number or primary_sms_we_vote_id. If there are other records
+                    # using these, they are bad data that don't reflect
+                    remove_cached_results = \
+                        voter_manager.remove_voter_cached_sms_entries_from_sms_phone_number(
+                            sms_phone_number)
+                    status += remove_cached_results['status']
+
+                    # And now, update current voter
+                    try:
+                        voter.primary_sms_we_vote_id = sms_phone_number.we_vote_id
+                        voter.sms_ownership_is_verified = True
+                        voter.normalized_sms_phone_number = sms_phone_number.normalized_sms_phone_number
+                        voter.save()
+                        sms_phone_number_already_owned_by_this_voter = True
+                        status += "SAVED_SMS_PHONE_NUMBER_AS_PRIMARY "
+                        success = True
+                    except Exception as e:
+                        status += "UNABLE_TO_SAVE_SMS_PHONE_NUMBER_AS_PRIMARY "
+                        success = False
+                break  # Break out of the sms_phone_number_list loop
+            elif positive_value_exists(voter.primary_sms_we_vote_id) \
+                    and voter.primary_sms_we_vote_id.lower() == sms_phone_number.we_vote_id.lower():
+                # If here, we know that we are not looking at the sms we want to make primary,
+                # but we only want to wipe out a voter's primary sms when we replace it with another sms
+                pass
+
+    send_verification_sms = False
+    if sms_phone_number_deleted:
+        # We cannot proceed with this sms address, since it was just marked deleted
+        pass
+    elif not positive_value_exists(incoming_sms_we_vote_id):
+        # Save the new sms address
+        sms_ownership_is_verified = False
+        sms_save_results = sms_manager.create_sms_phone_number(
+            normalized_sms_phone_number, voter_we_vote_id, sms_ownership_is_verified)
+
+        if sms_save_results['sms_phone_number_saved']:
+            # Send verification sms
+            send_verification_sms = True
+            new_sms_phone_number = sms_save_results['sms_phone_number']
+            sms_phone_number_we_vote_id = new_sms_phone_number.we_vote_id
+            sms_phone_number_saved_we_vote_id = new_sms_phone_number.we_vote_id
+            normalized_sms_phone_number = new_sms_phone_number.normalized_sms_phone_number
+            if positive_value_exists(new_sms_phone_number.secret_key):
+                recipient_sms_secret_key = new_sms_phone_number.secret_key
             else:
-                send_verification_sms = False
-                success = False
-                status += "UNABLE_TO_SAVE_SMS_PHONE_NUMBER "
+                recipient_sms_secret_key = \
+                    sms_manager.update_sms_phone_number_with_new_secret_key(sms_phone_number_we_vote_id)
+            sms_phone_number_created = True
+            sms_phone_number_found = True
+            success = True
+            status += sms_save_results['status']
+        else:
+            send_verification_sms = False
+            success = False
+            status += "UNABLE_TO_SAVE_SMS_PHONE_NUMBER "
 
     secret_code_system_locked_for_this_voter_device_id = False
     voter_device_link_manager = VoterDeviceLinkManager()
