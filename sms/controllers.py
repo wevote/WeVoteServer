@@ -122,6 +122,7 @@ def augment_sms_phone_number_list(sms_phone_number_list, voter):
 
 
 def heal_primary_sms_data_for_voter(sms_phone_number_list, voter):
+    primary_sms_phone_number = None
     primary_sms_phone_number_found = False
     primary_sms_phone_number_we_vote_id = None
 
@@ -165,7 +166,7 @@ def heal_primary_sms_data_for_voter(sms_phone_number_list, voter):
             except Exception as e:
                 # We could get this exception if the SMSPhoneNumber table has sms X for voter 1
                 # and the voter table stores the same sms X for voter 2
-                status += "UNABLE_TO_SAVE_UPDATED_SMS_VALUES"
+                status += "UNABLE_TO_SAVE_UPDATED_SMS_VALUES " + str(e) + " "
                 remove_cached_results = \
                     voter_manager.remove_voter_cached_sms_entries_from_sms_phone_number(primary_sms_phone_number)
                 status += remove_cached_results['status']
@@ -177,7 +178,7 @@ def heal_primary_sms_data_for_voter(sms_phone_number_list, voter):
                     status += "SAVED_UPDATED_SMS_VALUES2 "
                     success = True
                 except Exception as e:
-                    status += "UNABLE_TO_SAVE_UPDATED_SMS_VALUES2 "
+                    status += "UNABLE_TO_SAVE_UPDATED_SMS_VALUES2 " + str(e) + " "
     else:
         # If here we need to heal data. If here we know that the voter record doesn't have any sms info that matches
         #  an sms address, so we want to make the first sms address in the list the new master
@@ -189,9 +190,9 @@ def heal_primary_sms_data_for_voter(sms_phone_number_list, voter):
                 voter.sms_ownership_is_verified = True
                 try:
                     voter.save()
-                    status += "SAVED_PRIMARY_SMS_PHONE_NUMBER_CANDIDATE"
+                    status += "SAVED_PRIMARY_SMS_PHONE_NUMBER_CANDIDATE "
                 except Exception as e:
-                    status += "UNABLE_TO_SAVE_PRIMARY_SMS_PHONE_NUMBER_CANDIDATE"
+                    status += "UNABLE_TO_SAVE_PRIMARY_SMS_PHONE_NUMBER_CANDIDATE " + str(e) + " "
                     remove_cached_results = \
                         voter_manager.remove_voter_cached_sms_entries_from_sms_phone_number(
                             primary_sms_phone_number_candidate)
@@ -204,7 +205,7 @@ def heal_primary_sms_data_for_voter(sms_phone_number_list, voter):
                         status += "SAVED_PRIMARY_SMS_PHONE_NUMBER_CANDIDATE2 "
                         success = True
                     except Exception as e:
-                        status += "UNABLE_TO_SAVE_PRIMARY_SMS_PHONE_NUMBER_CANDIDATE2 "
+                        status += "UNABLE_TO_SAVE_PRIMARY_SMS_PHONE_NUMBER_CANDIDATE2 " + str(e) + " "
                 break
 
     sms_phone_number_list_deduped = []
@@ -230,15 +231,15 @@ def heal_primary_sms_data_for_voter(sms_phone_number_list, voter):
             sms_phone_number_list_deduped.append(sms_phone_number)
 
     results = {
-        'status':                           status,
-        'success':                          success,
-        'sms_phone_number_list':               sms_phone_number_list_deduped,
+        'status':                   status,
+        'success':                  success,
+        'sms_phone_number_list':    sms_phone_number_list_deduped,
     }
     return results
 
 
-def move_sms_phone_number_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
-    status = " MOVE_SMS_PHONE_NUMBERS "
+def move_sms_phone_number_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id, from_voter, to_voter):
+    status = "MOVE_SMS_PHONE_NUMBERS "
     success = False
     sms_phone_numbers_moved = 0
     sms_phone_numbers_not_moved = 0
@@ -248,7 +249,9 @@ def move_sms_phone_number_entries_to_another_voter(from_voter_we_vote_id, to_vot
         results = {
             'status': status,
             'success': success,
+            'from_voter': from_voter,
             'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter': to_voter,
             'to_voter_we_vote_id': to_voter_we_vote_id,
             'sms_phone_numbers_moved': sms_phone_numbers_moved,
             'sms_phone_numbers_not_moved': sms_phone_numbers_not_moved,
@@ -260,7 +263,9 @@ def move_sms_phone_number_entries_to_another_voter(from_voter_we_vote_id, to_vot
         results = {
             'status': status,
             'success': success,
+            'from_voter': from_voter,
             'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter': to_voter,
             'to_voter_we_vote_id': to_voter_we_vote_id,
             'sms_phone_numbers_moved': sms_phone_numbers_moved,
             'sms_phone_numbers_not_moved': sms_phone_numbers_not_moved,
@@ -287,10 +292,35 @@ def move_sms_phone_number_entries_to_another_voter(from_voter_we_vote_id, to_vot
     else:
         status += " " + sms_phone_number_list_results['status']
 
+    # Now clean up the list of emails
+    merge_results = sms_manager.find_and_merge_all_duplicate_sms(to_voter_we_vote_id)
+    status += merge_results['status']
+
+    sms_results = sms_manager.retrieve_voter_sms_phone_number_list(to_voter_we_vote_id)
+    status += sms_results['status']
+    if sms_results['sms_phone_number_list_found']:
+        sms_phone_number_list = sms_results['sms_phone_number_list']
+
+        # Make sure the voter's primary sms matches sms table data
+        merge_results = heal_primary_sms_data_for_voter(sms_phone_number_list, to_voter)
+        status += merge_results['status']
+
+    if positive_value_exists(from_voter.primary_sms_we_vote_id):
+        # Remove the sms information so we don't have a future conflict
+        try:
+            from_voter.normalized_sms_phone_number = None
+            from_voter.primary_sms_we_vote_id = None
+            from_voter.sms_ownership_is_verified = False
+            from_voter.save()
+        except Exception as e:
+            status += "CANNOT_CLEAR_OUT_VOTER_SMS_INFO: " + str(e) + " "
+
     results = {
         'status': status,
         'success': success,
+        'from_voter': from_voter,
         'from_voter_we_vote_id': from_voter_we_vote_id,
+        'to_voter': to_voter,
         'to_voter_we_vote_id': to_voter_we_vote_id,
         'sms_phone_numbers_moved': sms_phone_numbers_moved,
         'sms_phone_numbers_not_moved': sms_phone_numbers_not_moved,
@@ -523,8 +553,8 @@ def voter_sms_phone_number_retrieve_for_api(voter_device_id):  # voterSMSPhoneNu
     voter_we_vote_id = voter.we_vote_id
 
     sms_manager = SMSManager()
-    # merge_results = email_manager.find_and_merge_all_duplicate_emails(voter_we_vote_id)
-    # status += merge_results['status']
+    merge_results = sms_manager.find_and_merge_all_duplicate_sms(voter_we_vote_id)
+    status += merge_results['status']
 
     sms_phone_number_list_augmented = []
     sms_results = sms_manager.retrieve_voter_sms_phone_number_list(voter_we_vote_id)

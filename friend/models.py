@@ -4,7 +4,7 @@
 
 from django.db import models
 from django.db.models import Q
-from email_outbound.models import EmailAddress, EmailManager
+from email_outbound.models import EmailManager
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from voter.models import VoterManager
 
@@ -599,6 +599,7 @@ class FriendManager(models.Model):
         # Find the invite from other_voter (who issued this invitation) to the voter (who is responding)
         # 1) invite found
         # 2) invite NOT found
+        status = ""
 
         friend_invitation_deleted = False
         friend_invitation_saved = False
@@ -611,16 +612,16 @@ class FriendManager(models.Model):
             )
             success = True
             friend_invitation_found = True
-            status = 'FRIEND_INVITATION_EMAIL_RETRIEVED'
+            status += 'FRIEND_INVITATION_EMAIL_RETRIEVED '
         except FriendInvitationEmailLink.DoesNotExist:
             # No data found. Not a problem.
             success = True
             friend_invitation_found = False
-            status = 'NO_FRIEND_INVITATION_EMAIL_RETRIEVED_DoesNotExist'
+            status += 'NO_FRIEND_INVITATION_EMAIL_RETRIEVED_DoesNotExist '
         except Exception as e:
             success = False
             friend_invitation_found = False
-            status = 'FAILED process_friend_invitation_email_response FriendInvitationEmailLink '
+            status += 'FAILED process_friend_invitation_email_response FriendInvitationEmailLink ' + str(e) + ' '
 
         if friend_invitation_found:
             if kind_of_invite_response == DELETE_INVITATION_EMAIL_SENT_BY_ME:
@@ -629,14 +630,15 @@ class FriendManager(models.Model):
                     friend_invitation_email_link.save()
                     friend_invitation_deleted = True
                     success = True
-                    status = 'FRIEND_INVITATION_EMAIL_DELETED'
+                    status += 'FRIEND_INVITATION_EMAIL_DELETED '
                 except Exception as e:
                     friend_invitation_deleted = False
                     success = False
-                    status = 'FAILED process_friend_invitation_email_response delete FriendInvitationEmailLink '
+                    status += 'FAILED process_friend_invitation_email_response delete FriendInvitationEmailLink ' \
+                              '' + str(e) + ' '
             else:
                 success = False
-                status = 'PROCESS_FRIEND_INVITATION_EMAIL_KIND_OF_INVITE_RESPONSE_NOT_SUPPORTED'
+                status += 'PROCESS_FRIEND_INVITATION_EMAIL_KIND_OF_INVITE_RESPONSE_NOT_SUPPORTED '
 
         results = {
             'success':                      success,
@@ -1151,13 +1153,9 @@ class FriendManager(models.Model):
                     final_filters |= item
             else:
                 viewer_voter_emails_found = False
-        except EmailAddress.DoesNotExist:
-            # No data found. Not a problem.
-            viewer_voter_emails_found = False
-            status += 'NO_FRIEND_LIST_EMAIL_RETRIEVED_DoesNotExist '
         except Exception as e:
             viewer_voter_emails_found = False
-            status += 'FAILED retrieve_friend_invitations_processed FriendInvitationEmailLink '
+            status += 'FAILED retrieve_friend_invitations_processed FriendInvitationEmailLink ' + str(e) + ' '
 
         if viewer_voter_emails_found and len(final_filters):
             try:

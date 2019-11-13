@@ -467,17 +467,17 @@ class SMSManager(models.Model):
                 sms_ownership_is_verified = sms_phone_number.sms_ownership_is_verified
                 sms_phone_number_found = True
                 success = True
-                status += "SMS_PHONE_NUMBER_SIGN_IN_BY_WE_VOTE_ID"
+                status += "SMS_PHONE_NUMBER_SIGN_IN_BY_WE_VOTE_ID "
             else:
                 sms_phone_number_found = False
                 success = False
-                status += "SMS_PHONE_NUMBER_SIGN_IN_VARIABLES_MISSING"
+                status += "SMS_PHONE_NUMBER_SIGN_IN_VARIABLES_MISSING "
         except SMSPhoneNumber.DoesNotExist:
             success = True
-            status += "SMS_PHONE_NUMBER_SIGN_IN_NOT_FOUND"
+            status += "SMS_PHONE_NUMBER_SIGN_IN_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'FAILED retrieve_sms_phone_number_from_secret_key SMSPhoneNumber '
+            status += 'FAILED retrieve_sms_phone_number_from_secret_key SMSPhoneNumber ' + str(e) + " "
 
         results = {
             'success':                      success,
@@ -651,7 +651,7 @@ class SMSManager(models.Model):
                 status += 'RETRIEVE_PRIMARY_SMS_PHONE_NUMBER_OBJECT-NO_SMS_PHONE_NUMBER_LIST_RETRIEVED '
         except SMSPhoneNumber.DoesNotExist:
             success = True
-            status += "RETRIEVE_PRIMARY_SMS_PHONE_NUMBER_NOT_FOUND"
+            status += "RETRIEVE_PRIMARY_SMS_PHONE_NUMBER_NOT_FOUND "
         except Exception as e:
             success = False
             status += 'FAILED retrieve_primary_sms_with_ownership_verified SMSPhoneNumber ' + str(e) + ' '
@@ -676,8 +676,159 @@ class SMSManager(models.Model):
 
         return ""
 
+    def find_and_merge_all_duplicate_sms(self, voter_we_vote_id):
+        success = True
+        status = ''
+        already_merged_sms_we_vote_ids = []
+
+        list_results = self.retrieve_voter_sms_phone_number_list(voter_we_vote_id)
+        if list_results['sms_phone_number_list_found']:
+            initial_sms_phone_number_list = list_results['sms_phone_number_list']
+            for sms_phone_number_object in initial_sms_phone_number_list:
+                for comparison_sms_phone_number_object in initial_sms_phone_number_list:
+                    if comparison_sms_phone_number_object.we_vote_id in already_merged_sms_we_vote_ids:
+                        # If this sms has already been merged, skip forward
+                        continue
+                    if sms_phone_number_object.normalized_sms_phone_number != \
+                            comparison_sms_phone_number_object.normalized_sms_phone_number:
+                        # If we are looking at different sms numbers, skip forward
+                        continue
+                    if sms_phone_number_object.we_vote_id == comparison_sms_phone_number_object.we_vote_id:
+                        # If we are looking at the same sms entry, skip forward
+                        continue
+                    # Merge verified sms addresses where both are verified
+                    if sms_phone_number_object.sms_ownership_is_verified \
+                            and comparison_sms_phone_number_object.sms_ownership_is_verified:
+                        # friend_results = update_friend_invitation_email_link_with_new_email(
+                        #     comparison_sms_phone_number_object.we_vote_id, sms_phone_number_object.we_vote_id)
+                        # if not friend_results['success']:
+                        #     status += friend_results['status']
+                        merge_results = self.merge_two_duplicate_sms(
+                            sms_phone_number_object, comparison_sms_phone_number_object)
+                        status += merge_results['status']
+                        already_merged_sms_we_vote_ids.append(sms_phone_number_object.we_vote_id)
+                        already_merged_sms_we_vote_ids.append(comparison_sms_phone_number_object.we_vote_id)
+                    # Merge verified sms numbers where both are not verified
+                    elif not sms_phone_number_object.sms_ownership_is_verified \
+                            and not comparison_sms_phone_number_object.sms_ownership_is_verified:
+                        # friend_results = update_friend_invitation_email_link_with_new_email(
+                        #     comparison_sms_phone_number_object.we_vote_id, sms_phone_number_object.we_vote_id)
+                        # if not friend_results['success']:
+                        #     status += friend_results['status']
+                        merge_results = self.merge_two_duplicate_sms(
+                            sms_phone_number_object, comparison_sms_phone_number_object)
+                        status += merge_results['status']
+                        already_merged_sms_we_vote_ids.append(sms_phone_number_object.we_vote_id)
+                        already_merged_sms_we_vote_ids.append(comparison_sms_phone_number_object.we_vote_id)
+
+        # Now look for the same phone number where one is verified and the other isn't
+        list_results2 = self.retrieve_voter_sms_phone_number_list(voter_we_vote_id)
+        if list_results2['sms_phone_number_list_found']:
+            initial_sms_phone_number_list = list_results2['sms_phone_number_list']
+            for sms_phone_number_object in initial_sms_phone_number_list:
+                for comparison_sms_phone_number_object in initial_sms_phone_number_list:
+                    if comparison_sms_phone_number_object.we_vote_id in already_merged_sms_we_vote_ids:
+                        # If this sms has already been merged, skip forward
+                        continue
+                    if sms_phone_number_object.normalized_sms_phone_number != \
+                            comparison_sms_phone_number_object.normalized_sms_phone_number:
+                        # If we are looking at different sms addresses, skip forward
+                        continue
+                    if sms_phone_number_object.we_vote_id == comparison_sms_phone_number_object.we_vote_id:
+                        # If we are looking at the same sms entry, skip forward
+                        continue
+                    # If here, the normalized_sms_phone_numbers match
+                    if sms_phone_number_object.sms_ownership_is_verified:
+                        # Delete the comparison_sms_phone_number
+                        try:
+                            # friend_results = update_friend_invitation_email_link_with_new_email(
+                            #     comparison_sms_phone_number_object.we_vote_id, sms_phone_number_object.we_vote_id)
+                            # if not friend_results['success']:
+                            #     status += friend_results['status']
+                            already_merged_sms_we_vote_ids.append(sms_phone_number_object.we_vote_id)
+                            already_merged_sms_we_vote_ids.append(comparison_sms_phone_number_object.we_vote_id)
+                            comparison_sms_phone_number_object.delete()
+                        except Exception as e:
+                            status += "COULD_NOT_DELETE_UNVERIFIED_PHONE_NUMBER " + str(e) + " "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    def merge_two_duplicate_sms(self, sms_phone_number_object1, sms_phone_number_object2):
+        """
+        We assume that the checking to see if these are duplicates has been done outside of this function.
+        We will keep sms_phone_number_object1 and eliminate sms_phone_number_object2.
+        :param sms_phone_number_object1:
+        :param sms_phone_number_object2:
+        :return:
+        """
+        success = True
+        status = ''
+
+        try:
+            test_we_vote_id = sms_phone_number_object1.we_vote_id
+            test_we_vote_id = sms_phone_number_object2.we_vote_id
+        except Exception as e:
+            status += 'PROBLEM_WITH_PHONE_NUMBER1_OR_PHONE_NUMBER2 ' + str(e) + ' '
+            success = False
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        if sms_phone_number_object1.voter_we_vote_id != sms_phone_number_object2.voter_we_vote_id:
+            status += 'ONLY_MERGE_PHONE_NUMBERS_FROM_SAME_VOTER '
+            success = False
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        if sms_phone_number_object1.normalized_sms_phone_number != sms_phone_number_object2.normalized_sms_phone_number:
+            status += 'ONLY_MERGE_PHONE_NUMBERS_WITH_SAME_NORMALIZED_PHONE_NUMBER_ADDRESS '
+            success = False
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        at_least_one_is_verified = sms_phone_number_object1.sms_ownership_is_verified \
+            or sms_phone_number_object2.sms_ownership_is_verified
+        both_are_bouncing = sms_phone_number_object1.sms_permanent_bounce \
+            and sms_phone_number_object2.sms_permanent_bounce
+
+        try:
+            sms_phone_number_object1.sms_ownership_is_verified = at_least_one_is_verified
+            sms_phone_number_object1.sms_permanent_bounce = both_are_bouncing
+            sms_phone_number_object1.save()
+        except Exception as e:
+            status += "COULD_NOT_SAVE_PHONE_NUMBER1 " + str(e) + " "
+
+        # We don't need to handle repairing the primary sms link here
+        # because it is done in heal_primary_sms_data_for_voter
+
+        # Are there any scheduled messages for sms_phone_number_object2 waiting to send?
+
+        try:
+            sms_phone_number_object2.delete()
+        except Exception as e:
+            status += "COULD_NOT_DELETE_PHONE_NUMBER2 " + str(e) + " "
+            success = False
+
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
     def retrieve_scheduled_sms_list_from_send_status(self, sender_voter_we_vote_id, send_status):
         scheduled_sms_list = []
+        status = ""
         try:
             sms_scheduled_queryset = SMSScheduled.objects.all()
             sms_scheduled_queryset = sms_scheduled_queryset.filter(
@@ -689,27 +840,27 @@ class SMSManager(models.Model):
             if len(scheduled_sms_list):
                 success = True
                 scheduled_sms_list_found = True
-                status = 'SCHEDULED_SMS_LIST_RETRIEVED'
+                status += 'SCHEDULED_SMS_LIST_RETRIEVED '
             else:
                 success = True
                 scheduled_sms_list_found = False
-                status = 'NO_SCHEDULED_SMS_LIST_RETRIEVED'
+                status += 'NO_SCHEDULED_SMS_LIST_RETRIEVED '
         except SMSScheduled.DoesNotExist:
             # No data found. Not a problem.
             success = True
             scheduled_sms_list_found = False
-            status = 'NO_SCHEDULED_SMS_LIST_RETRIEVED_DoesNotExist'
+            status += 'NO_SCHEDULED_SMS_LIST_RETRIEVED_DoesNotExist '
             scheduled_sms_list = []
         except Exception as e:
             success = False
             scheduled_sms_list_found = False
-            status = 'FAILED retrieve_scheduled_sms_list_from_send_status SMSPhoneNumber'
+            status += 'FAILED retrieve_scheduled_sms_list_from_send_status SMSPhoneNumber ' + str(e) + " "
 
         results = {
-            'success':                      success,
-            'status':                       status,
-            'scheduled_sms_list_found':   scheduled_sms_list_found,
-            'scheduled_sms_list':         scheduled_sms_list,
+            'success':                  success,
+            'status':                   status,
+            'scheduled_sms_list_found': scheduled_sms_list_found,
+            'scheduled_sms_list':       scheduled_sms_list,
         }
         return results
 

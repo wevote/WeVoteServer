@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.core.mail import EmailMultiAlternatives
+from django.apps import apps
 from django.db import models
 from wevote_functions.functions import extract_email_addresses_from_string, generate_random_string, \
     positive_value_exists
@@ -188,6 +189,7 @@ class EmailManager(models.Model):
     def create_email_address(self, normalized_email_address, voter_we_vote_id='', email_ownership_is_verified=False,
                              make_primary_email=True):
         secret_key = generate_random_string(12)
+        status = ""
         normalized_email_address = str(normalized_email_address)
         normalized_email_address = normalized_email_address.strip()
         normalized_email_address = normalized_email_address.lower()
@@ -195,8 +197,8 @@ class EmailManager(models.Model):
         if not positive_value_exists(normalized_email_address):
             email_address_object = EmailAddress()
             results = {
+                'status':                       "EMAIL_ADDRESS_FOR_VOTER_MISSING_RAW_EMAIL ",
                 'success':                      False,
-                'status':                       "EMAIL_ADDRESS_FOR_VOTER_MISSING_RAW_EMAIL",
                 'email_address_object_saved':   False,
                 'email_address_object':         email_address_object,
             }
@@ -211,12 +213,12 @@ class EmailManager(models.Model):
             )
             email_address_object_saved = True
             success = True
-            status = "EMAIL_ADDRESS_FOR_VOTER_CREATED"
+            status += "EMAIL_ADDRESS_FOR_VOTER_CREATED "
         except Exception as e:
             email_address_object_saved = False
             email_address_object = EmailAddress()
             success = False
-            status = "EMAIL_ADDRESS_FOR_VOTER_NOT_CREATED"
+            status += "EMAIL_ADDRESS_FOR_VOTER_NOT_CREATED "
 
         results = {
             'success':                    success,
@@ -231,6 +233,7 @@ class EmailManager(models.Model):
             recipient_voter_we_vote_id='',
             recipient_email_we_vote_id='', recipient_voter_email='', template_variables_in_json='',
             kind_of_email_template=''):
+        status = ""
         if not positive_value_exists(kind_of_email_template):
             kind_of_email_template = GENERIC_EMAIL_TEMPLATE
 
@@ -246,12 +249,12 @@ class EmailManager(models.Model):
             )
             email_outbound_description_saved = True
             success = True
-            status = "EMAIL_OUTBOUND_DESCRIPTION_CREATED "
+            status += "EMAIL_OUTBOUND_DESCRIPTION_CREATED "
         except Exception as e:
             email_outbound_description_saved = False
             email_outbound_description = EmailOutboundDescription()
             success = False
-            status = "EMAIL_OUTBOUND_DESCRIPTION_NOT_CREATED "
+            status += "EMAIL_OUTBOUND_DESCRIPTION_NOT_CREATED "
 
         results = {
             'success':                          success,
@@ -281,15 +284,60 @@ class EmailManager(models.Model):
                     if email_address_object.we_vote_id == comparison_email_address_object.we_vote_id:
                         # If we are looking at the same email entry, skip forward
                         continue
-                    # Now merge verified email addresses where both are verified
+                    # Merge verified email addresses where both are verified
                     if email_address_object.email_ownership_is_verified \
                             and comparison_email_address_object.email_ownership_is_verified:
+                        friend_results = update_friend_invitation_email_link_with_new_email(
+                            comparison_email_address_object.we_vote_id, email_address_object.we_vote_id)
+                        if not friend_results['success']:
+                            status += friend_results['status']
+                        merge_results = self.merge_two_duplicate_emails(
+                            email_address_object, comparison_email_address_object)
+                        status += merge_results['status']
+                        already_merged_email_we_vote_ids.append(email_address_object.we_vote_id)
+                        already_merged_email_we_vote_ids.append(comparison_email_address_object.we_vote_id)
+                    # Merge verified email addresses where both are not verified
+                    elif not email_address_object.email_ownership_is_verified \
+                            and not comparison_email_address_object.email_ownership_is_verified:
+                        friend_results = update_friend_invitation_email_link_with_new_email(
+                            comparison_email_address_object.we_vote_id, email_address_object.we_vote_id)
+                        if not friend_results['success']:
+                            status += friend_results['status']
                         merge_results = self.merge_two_duplicate_emails(
                             email_address_object, comparison_email_address_object)
                         status += merge_results['status']
                         already_merged_email_we_vote_ids.append(email_address_object.we_vote_id)
                         already_merged_email_we_vote_ids.append(comparison_email_address_object.we_vote_id)
 
+        # Now look for the same emails where one is verified and the other isn't
+        list_results2 = self.retrieve_voter_email_address_list(voter_we_vote_id)
+        if list_results2['email_address_list_found']:
+            initial_email_address_list = list_results2['email_address_list']
+            for email_address_object in initial_email_address_list:
+                for comparison_email_address_object in initial_email_address_list:
+                    if comparison_email_address_object.we_vote_id in already_merged_email_we_vote_ids:
+                        # If this email has already been merged, skip forward
+                        continue
+                    if email_address_object.normalized_email_address != \
+                            comparison_email_address_object.normalized_email_address:
+                        # If we are looking at different email addresses, skip forward
+                        continue
+                    if email_address_object.we_vote_id == comparison_email_address_object.we_vote_id:
+                        # If we are looking at the same email entry, skip forward
+                        continue
+                    # If here, the normalized_email_addresses match
+                    if email_address_object.email_ownership_is_verified:
+                        # Delete the comparison_email_address
+                        try:
+                            friend_results = update_friend_invitation_email_link_with_new_email(
+                                comparison_email_address_object.we_vote_id, email_address_object.we_vote_id)
+                            if not friend_results['success']:
+                                status += friend_results['status']
+                            already_merged_email_we_vote_ids.append(email_address_object.we_vote_id)
+                            already_merged_email_we_vote_ids.append(comparison_email_address_object.we_vote_id)
+                            comparison_email_address_object.delete()
+                        except Exception as e:
+                            status += "COULD_NOT_DELETE_UNVERIFIED_EMAIL " + str(e) + " "
         results = {
             'success': success,
             'status': status,
@@ -339,12 +387,12 @@ class EmailManager(models.Model):
 
         at_least_one_is_verified = email_address_object1.email_ownership_is_verified \
             or email_address_object2.email_ownership_is_verified
-        at_least_one_is_not_bouncing = not email_address_object1.email_permanent_bounce \
-            or not email_address_object2.email_permanent_bounce
+        both_are_bouncing = email_address_object1.email_permanent_bounce \
+            and email_address_object2.email_permanent_bounce
 
         try:
             email_address_object1.email_ownership_is_verified = at_least_one_is_verified
-            email_address_object1.email_permanent_bounce = at_least_one_is_not_bouncing
+            email_address_object1.email_permanent_bounce = both_are_bouncing
             email_address_object1.save()
         except Exception as e:
             status += "COULD_NOT_SAVE_EMAIL1 " + str(e) + " "
@@ -566,7 +614,9 @@ class EmailManager(models.Model):
                 email_ownership_is_verified = True
             except Exception as e:
                 success = False
-                status += 'FAILED_TO_SAVE_EMAIL_OWNERSHIP_IS_VERIFIED '
+                status += 'FAILED_TO_SAVE_EMAIL_OWNERSHIP_IS_VERIFIED ' + str(e) + " "
+        else:
+            status += 'EMAIL_ADDRESS_OBJECT_NOT_FOUND '
 
         results = {
             'success':                          success,
@@ -637,6 +687,7 @@ class EmailManager(models.Model):
         return results
 
     def retrieve_primary_email_with_ownership_verified(self, voter_we_vote_id, normalized_email_address=''):
+        status = ""
         email_address_list = []
         email_address_list_found = False
         email_address_object = EmailAddress()
@@ -665,17 +716,17 @@ class EmailManager(models.Model):
             if len(email_address_list):
                 success = True
                 email_address_list_found = True
-                status = 'RETRIEVE_PRIMARY_EMAIL_ADDRESS_OBJECT-EMAIL_ADDRESS_LIST_RETRIEVED'
+                status += 'RETRIEVE_PRIMARY_EMAIL_ADDRESS_OBJECT-EMAIL_ADDRESS_LIST_RETRIEVED '
             else:
                 success = True
                 email_address_list_found = False
-                status = 'RETRIEVE_PRIMARY_EMAIL_ADDRESS_OBJECT-NO_EMAIL_ADDRESS_LIST_RETRIEVED'
+                status += 'RETRIEVE_PRIMARY_EMAIL_ADDRESS_OBJECT-NO_EMAIL_ADDRESS_LIST_RETRIEVED '
         except EmailAddress.DoesNotExist:
             success = True
-            status = "RETRIEVE_PRIMARY_EMAIL_ADDRESS_NOT_FOUND"
+            status += "RETRIEVE_PRIMARY_EMAIL_ADDRESS_NOT_FOUND "
         except Exception as e:
             success = False
-            status = 'FAILED retrieve_primary_email_with_ownership_verified EmailAddress'
+            status += 'FAILED retrieve_primary_email_with_ownership_verified EmailAddress ' + str(e) + " "
 
         if email_address_list_found:
             email_address_object_found = True
@@ -698,6 +749,7 @@ class EmailManager(models.Model):
         return ""
 
     def retrieve_scheduled_email_list_from_send_status(self, sender_voter_we_vote_id, send_status):
+        status = ""
         scheduled_email_list = []
         try:
             email_scheduled_queryset = EmailScheduled.objects.all()
@@ -710,21 +762,21 @@ class EmailManager(models.Model):
             if len(scheduled_email_list):
                 success = True
                 scheduled_email_list_found = True
-                status = 'SCHEDULED_EMAIL_LIST_RETRIEVED'
+                status += 'SCHEDULED_EMAIL_LIST_RETRIEVED '
             else:
                 success = True
                 scheduled_email_list_found = False
-                status = 'NO_SCHEDULED_EMAIL_LIST_RETRIEVED'
+                status += 'NO_SCHEDULED_EMAIL_LIST_RETRIEVED '
         except EmailScheduled.DoesNotExist:
             # No data found. Not a problem.
             success = True
             scheduled_email_list_found = False
-            status = 'NO_SCHEDULED_EMAIL_LIST_RETRIEVED_DoesNotExist'
+            status += 'NO_SCHEDULED_EMAIL_LIST_RETRIEVED_DoesNotExist '
             scheduled_email_list = []
         except Exception as e:
             success = False
             scheduled_email_list_found = False
-            status = 'FAILED retrieve_scheduled_email_list_from_send_status EmailAddress'
+            status += 'FAILED retrieve_scheduled_email_list_from_send_status EmailAddress ' + str(e) + " "
 
         results = {
             'success':                      success,
@@ -822,7 +874,7 @@ class EmailManager(models.Model):
         success = True
         sendgrid_turned_off_for_testing = False
         if sendgrid_turned_off_for_testing:
-            status = "SENDGRID_TURNED_OFF_FOR_TESTING "
+            status += "SENDGRID_TURNED_OFF_FOR_TESTING "
             results = {
                 'success':                  success,
                 'status':                   status,
@@ -894,3 +946,24 @@ class EmailManager(models.Model):
             return email_address_object
         except Exception as e:
             return email_address_object
+
+
+def update_friend_invitation_email_link_with_new_email(deleted_email_we_vote_id, updated_email_we_vote_id):
+    success = True
+    status = ""
+    try:
+        FriendInvitationEmailLink = apps.get_model('friend', 'FriendInvitationEmailLink')
+
+        try:
+            FriendInvitationEmailLink.objects.filter(recipient_email_we_vote_id=deleted_email_we_vote_id).\
+                update(recipient_email_we_vote_id=updated_email_we_vote_id)
+        except Exception as e:
+            status += "FAILED_TO_UPDATE-FriendInvitationEmailLink " + str(e) + ' '
+
+    except Exception as e:
+        status += "FAILED_TO_LOAD-FriendInvitationEmailLink " + str(e) + ' '
+    results = {
+        'success':              success,
+        'status':               status,
+    }
+    return results

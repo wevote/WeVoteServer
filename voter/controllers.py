@@ -279,7 +279,6 @@ def merge_voter_accounts(from_voter, to_voter):
     # is_political_data_manager
     # is_political_data_viewer
     # is_verified_volunteer
-    # primary_email_we_vote_id
 
     # Is there data we should migrate?
     if positive_value_exists(from_voter.first_name) or positive_value_exists(from_voter.middle_name) \
@@ -290,8 +289,7 @@ def merge_voter_accounts(from_voter, to_voter):
             or positive_value_exists(from_voter.is_partner_organization) \
             or positive_value_exists(from_voter.is_political_data_manager) \
             or positive_value_exists(from_voter.is_political_data_viewer) \
-            or positive_value_exists(from_voter.is_verified_volunteer) \
-            or positive_value_exists(from_voter.primary_email_we_vote_id):
+            or positive_value_exists(from_voter.is_verified_volunteer):
         from_voter_data_to_migrate_exists = True
     else:
         from_voter_data_to_migrate_exists = False
@@ -323,9 +321,6 @@ def merge_voter_accounts(from_voter, to_voter):
             if positive_value_exists(from_voter.is_verified_volunteer) \
                     and not positive_value_exists(to_voter.is_verified_volunteer):
                 to_voter.is_verified_volunteer = from_voter.is_verified_volunteer
-            if positive_value_exists(from_voter.primary_email_we_vote_id) \
-                    and not positive_value_exists(to_voter.primary_email_we_vote_id):
-                to_voter.primary_email_we_vote_id = from_voter.primary_email_we_vote_id
             to_voter.save()
             status += "TO_VOTER_MERGE_SAVED "
         except Exception as e:
@@ -1630,46 +1625,32 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
 
     # Transfer the organizations the from_voter is following to the new_owner_voter
     move_follow_results = move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we_vote_id)
-    status += " " + move_follow_results['status']
+    status += move_follow_results['status']
 
     # Transfer the organizations the from_voter is a member of (with external_voter_id entry) to the new_owner_voter
     move_membership_link_results = move_membership_link_entries_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id)
-    status += " " + move_membership_link_results['status']
+    status += move_membership_link_results['status']
 
     # Transfer the issues that the voter is following
     move_follow_issue_results = move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
-    status += " " + move_follow_issue_results['status']
+    status += move_follow_issue_results['status']
 
     # Make sure we bring over all emails from the from_voter over to the to_voter
-    move_email_addresses_results = move_email_address_entries_to_another_voter(from_voter_we_vote_id,
-                                                                               to_voter_we_vote_id)
-    status += " " + move_email_addresses_results['status']
-
-    if positive_value_exists(voter.primary_email_we_vote_id):
-        # Remove the email information so we don't have a future conflict
-        try:
-            voter.email = None
-            voter.primary_email_we_vote_id = None
-            voter.email_ownership_is_verified = False
-            voter.save()
-        except Exception as e:
-            status += "CANNOT_CLEAR_OUT_VOTER_EMAIL_INFO: " + str(e) + " "
+    move_email_addresses_results = move_email_address_entries_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id, from_voter=voter, to_voter=new_owner_voter)
+    status += move_email_addresses_results['status']
+    if move_email_addresses_results['success']:
+        voter = move_email_addresses_results['from_voter']
+        new_owner_voter = move_email_addresses_results['to_voter']
 
     # Bring over all sms phone numbers from the from_voter over to the to_voter
-    move_sms_phone_number_results = move_sms_phone_number_entries_to_another_voter(from_voter_we_vote_id,
-                                                                                   to_voter_we_vote_id)
+    move_sms_phone_number_results = move_sms_phone_number_entries_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id, from_voter=voter, to_voter=new_owner_voter)
     status += " " + move_sms_phone_number_results['status']
-
-    if positive_value_exists(voter.primary_sms_we_vote_id):
-        # Remove the sms information so we don't have a future conflict
-        try:
-            voter.normalized_sms_phone_number = None
-            voter.primary_sms_we_vote_id = None
-            voter.sms_ownership_is_verified = False
-            voter.save()
-        except Exception as e:
-            status += "CANNOT_CLEAR_OUT_VOTER_SMS_INFO: " + str(e) + " "
+    if move_sms_phone_number_results['success']:
+        voter = move_sms_phone_number_results['from_voter']
+        new_owner_voter = move_sms_phone_number_results['to_voter']
 
     # Bring over Facebook information
     move_facebook_results = move_facebook_info_to_another_voter(voter, new_owner_voter)
