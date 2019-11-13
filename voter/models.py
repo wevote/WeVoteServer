@@ -1622,11 +1622,16 @@ class VoterManager(BaseUserManager):
                 voter.email = email_address_object.normalized_email_address
                 voter.email_ownership_is_verified = True
                 should_save_voter = True
+            else:
+                status += "EMAIL_OWNERSHIP_NOT_VERIFIED "
 
             if should_save_voter:
                 voter.save()
                 voter_updated = True
-            status += "UPDATED_VOTER_EMAIL_OWNERSHIP "
+                status += "UPDATED_VOTER_EMAIL_OWNERSHIP "
+            else:
+                status += "NO_SAVE_TO_VOTER "
+
             success = True
         except Exception as e:
             status += "UNABLE_TO_UPDATE_INCOMING_VOTER "

@@ -157,7 +157,7 @@ def heal_primary_email_data_for_voter(email_address_list, voter):
             except Exception as e:
                 # We could get this exception if the EmailAddress table has email X for voter 1
                 # and the voter table stores the same email X for voter 2
-                status += "UNABLE_TO_SAVE_UPDATED_EMAIL_VALUES"
+                status += "UNABLE_TO_SAVE_UPDATED_EMAIL_VALUES " + str(e) + " "
                 remove_cached_results = \
                     voter_manager.remove_voter_cached_email_entries_from_email_address_object(primary_email_address)
                 status += remove_cached_results['status']
@@ -169,10 +169,10 @@ def heal_primary_email_data_for_voter(email_address_list, voter):
                     status += "SAVED_UPDATED_EMAIL_VALUES2 "
                     success = True
                 except Exception as e:
-                    status += "UNABLE_TO_SAVE_UPDATED_EMAIL_VALUES2 "
+                    status += "UNABLE_TO_SAVE_UPDATED_EMAIL_VALUES2 " + str(e) + " "
     else:
         # If here we need to heal data. If here we know that the voter record doesn't have any email info that matches
-        #  an email address, so we want to make the first email address in the list the new master
+        #  an email address, so we want to make the first verified email address in the list the new master
         for primary_email_address_candidate in email_address_list:
             if primary_email_address_candidate.email_ownership_is_verified:
                 # Now that we have found a verified email, save it to the voter account, and break out of loop
@@ -181,9 +181,9 @@ def heal_primary_email_data_for_voter(email_address_list, voter):
                 voter.email_ownership_is_verified = True
                 try:
                     voter.save()
-                    status += "SAVED_PRIMARY_EMAIL_ADDRESS_CANDIDATE"
+                    status += "SAVED_PRIMARY_EMAIL_ADDRESS_CANDIDATE "
                 except Exception as e:
-                    status += "UNABLE_TO_SAVE_PRIMARY_EMAIL_ADDRESS_CANDIDATE"
+                    status += "UNABLE_TO_SAVE_PRIMARY_EMAIL_ADDRESS_CANDIDATE " + str(e) + " "
                     remove_cached_results = \
                         voter_manager.remove_voter_cached_email_entries_from_email_address_object(
                             primary_email_address_candidate)
@@ -196,7 +196,7 @@ def heal_primary_email_data_for_voter(email_address_list, voter):
                         status += "SAVED_PRIMARY_EMAIL_ADDRESS_CANDIDATE2 "
                         success = True
                     except Exception as e:
-                        status += "UNABLE_TO_SAVE_PRIMARY_EMAIL_ADDRESS_CANDIDATE2 "
+                        status += "UNABLE_TO_SAVE_PRIMARY_EMAIL_ADDRESS_CANDIDATE2 " + str(e) + " "
                 break
 
     email_address_list_deduped = []
@@ -221,15 +221,15 @@ def heal_primary_email_data_for_voter(email_address_list, voter):
             email_address_list_deduped.append(email_address)
 
     results = {
-        'status':                           status,
-        'success':                          success,
-        'email_address_list':               email_address_list_deduped,
+        'status':               status,
+        'success':              success,
+        'email_address_list':   email_address_list_deduped,
     }
     return results
 
 
-def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
-    status = " MOVE_EMAIL_ADDRESSES "
+def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id, from_voter, to_voter):
+    status = "MOVE_EMAIL_ADDRESSES "
     success = False
     email_addresses_moved = 0
     email_addresses_not_moved = 0
@@ -241,6 +241,8 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
             'success': success,
             'from_voter_we_vote_id': from_voter_we_vote_id,
             'to_voter_we_vote_id': to_voter_we_vote_id,
+            'from_voter': from_voter,
+            'to_voter': to_voter,
             'email_addresses_moved': email_addresses_moved,
             'email_addresses_not_moved': email_addresses_not_moved,
         }
@@ -253,6 +255,8 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
             'success': success,
             'from_voter_we_vote_id': from_voter_we_vote_id,
             'to_voter_we_vote_id': to_voter_we_vote_id,
+            'from_voter': from_voter,
+            'to_voter': to_voter,
             'email_addresses_moved': email_addresses_moved,
             'email_addresses_not_moved': email_addresses_not_moved,
         }
@@ -273,16 +277,43 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
                 email_addresses_not_moved += 1
                 status += "UNABLE_TO_SAVE_EMAIL_ADDRESS "
 
-        status += " MOVE_EMAIL_ADDRESSES, moved: " + str(email_addresses_moved) + \
-                  ", not moved: " + str(email_addresses_not_moved)
+        status += "MOVE_EMAIL_ADDRESSES-MOVED: " + str(email_addresses_moved) + \
+                  ", NOT_MOVED: " + str(email_addresses_not_moved) + " "
     else:
-        status += " " + email_address_list_results['status']
+        status += email_address_list_results['status']
+
+    # Now clean up the list of emails
+    merge_results = email_manager.find_and_merge_all_duplicate_emails(to_voter_we_vote_id)
+    status += merge_results['status']
+
+    email_results = email_manager.retrieve_voter_email_address_list(to_voter_we_vote_id)
+    status += email_results['status']
+    if email_results['email_address_list_found']:
+        email_address_list_found = True
+        email_address_list = email_results['email_address_list']
+
+        # Make sure the voter's primary email address matches email table data
+        merge_results = heal_primary_email_data_for_voter(email_address_list, to_voter)
+        email_address_list = merge_results['email_address_list']
+        status += merge_results['status']
+
+    if positive_value_exists(from_voter.primary_email_we_vote_id):
+        # Remove the email information so we don't have a future conflict
+        try:
+            from_voter.email = None
+            from_voter.primary_email_we_vote_id = None
+            from_voter.email_ownership_is_verified = False
+            from_voter.save()
+        except Exception as e:
+            status += "CANNOT_CLEAR_OUT_VOTER_EMAIL_INFO: " + str(e) + " "
 
     results = {
         'status': status,
         'success': success,
+        'from_voter': from_voter,
         'from_voter_we_vote_id': from_voter_we_vote_id,
         'to_voter_we_vote_id': to_voter_we_vote_id,
+        'to_voter': to_voter,
         'email_addresses_moved': email_addresses_moved,
         'email_addresses_not_moved': email_addresses_not_moved,
     }
@@ -913,12 +944,13 @@ def voter_email_address_save_for_api(voter_device_id='',
     verification_email_sent = False
     link_to_sign_in_email_sent = False
     sign_in_code_email_sent = False
+    sign_in_code_email_already_valid = False
     send_verification_email = False
     email_address_found = False
     email_address_list_found = False
     recipient_email_address_secret_key = ""
     messages_to_send = []
-    status = ""
+    status = "VOTER_EMAIL_ADDRESS_SAVE-START "
     success = False
 
     # If a voter_device_id is passed in that isn't valid, we want to throw an error
@@ -1098,8 +1130,47 @@ def voter_email_address_save_for_api(voter_device_id='',
         # This email was used by more than one person
         email_address_list = email_results['email_address_list']
 
-    # Cycle through all EmailAddress entries with "text_for_email_address" or "incoming_email_we_vote_id"
+    # Clean up our email list
+    # 1) Remove duplicates
+    excess_email_objects = []
+    filtered_email_address_list = []
+    ownership_verified_email_object = None
+    ownership_verified_emails = []
+    ownership_not_verified_email_object = None
+    ownership_not_verified_emails = []
     for email_address_object in email_address_list:
+        if email_address_object.email_ownership_is_verified:
+            if email_address_object.normalized_email_address not in ownership_verified_emails:
+                ownership_verified_email_object = email_address_object
+                ownership_verified_emails.append(email_address_object.normalized_email_address)
+            else:
+                excess_email_objects.append(email_address_object)
+        else:
+            if email_address_object.normalized_email_address not in ownership_not_verified_emails:
+                ownership_not_verified_email_object = email_address_object
+                ownership_not_verified_emails.append(email_address_object.normalized_email_address)
+            else:
+                excess_email_objects.append(email_address_object)
+
+    if ownership_verified_email_object is not None:
+        status += "VERIFIED_EMAIL_FOUND "
+        filtered_email_address_list.append(ownership_verified_email_object)
+        excess_email_objects.append(ownership_not_verified_email_object)
+        if send_sign_in_code_email:
+            sign_in_code_email_already_valid = True
+    elif ownership_not_verified_email_object is not None:
+        status += "UNVERIFIED_EMAIL_FOUND "
+        filtered_email_address_list.append(ownership_not_verified_email_object)
+
+    # Delete the duplicates from the database
+    for email_address_object in excess_email_objects:
+        try:
+            email_address_object.delete()
+        except Exception as e:
+            status += "CANNOT_DELETE_EXCESS_EMAIL: " + str(e) + " "
+
+    # Cycle through all EmailAddress entries with "text_for_email_address" or "incoming_email_we_vote_id"
+    for email_address_object in filtered_email_address_list:
         email_address_already_owned_by_this_voter = True
         email_address_we_vote_id = email_address_object.we_vote_id
         email_address_saved_we_vote_id = ""
@@ -1143,7 +1214,7 @@ def voter_email_address_save_for_api(voter_device_id='',
                 success = False
 
             if email_address_deleted:
-                # Delete all other emails associated with this account that are not be verified
+                # Delete all other emails associated with this account that are not verified
                 if positive_value_exists(text_for_email_address):
                     duplicate_results = email_manager.retrieve_email_address_object(
                         text_for_email_address, voter_we_vote_id=voter_we_vote_id)
@@ -1152,19 +1223,18 @@ def voter_email_address_save_for_api(voter_device_id='',
                         if not positive_value_exists(email_address_object_to_delete.email_ownership_is_verified):
                             try:
                                 email_address_object_to_delete.delete()
-                                status += "DELETED_DUP_EMAIL_ADDRESS "
+                                status += "DELETED_ONE_DUP_EMAIL_ADDRESS "
                             except Exception as e:
-                                status += "UNABLE_TO_DELETE_DUP_EMAIL_ADDRESS "
+                                status += "UNABLE_TO_DELETE_ONE_DUP_EMAIL_ADDRESS "
                     elif duplicate_results['email_address_list_found']:
                         email_address_list_for_delete = duplicate_results['email_address_list']
                         for email_address_object_to_delete in email_address_list_for_delete:
-                            if not positive_value_exists(
-                                    email_address_object_to_delete.email_ownership_is_verified):
+                            if not positive_value_exists(email_address_object_to_delete.email_ownership_is_verified):
                                 try:
                                     email_address_object_to_delete.delete()
-                                    status += "DELETED_DUP_EMAIL_ADDRESS "
+                                    status += "DELETED_DUP_EMAIL_ADDRESS_IN_LIST "
                                 except Exception as e:
-                                    status += "UNABLE_TO_DELETE_DUP_EMAIL_ADDRESS "
+                                    status += "UNABLE_TO_DELETE_DUP_EMAIL_ADDRESS_IN_LIST "
 
                 # If there are any other verified emails, promote the first one to be the voter's verified email
                 if positive_value_exists(primary_email_address_deleted):
@@ -1208,6 +1278,7 @@ def voter_email_address_save_for_api(voter_device_id='',
 
             break  # TODO DALE Is there ever a case where we want to delete more than one email at a time?
         elif make_primary_email and positive_value_exists(incoming_email_we_vote_id):
+            status += "STARTING_MAKE_PRIMARY_EMAIL "
             # We know we want to make incoming_email_we_vote_id the primary email
             if not email_address_object.email_ownership_is_verified:
                 # Do not make an unverified email primary
@@ -1320,7 +1391,7 @@ def voter_email_address_save_for_api(voter_device_id='',
         if email_scheduled_saved:
             link_to_sign_in_email_sent = True
             success = True
-    elif send_sign_in_code_email:
+    elif send_sign_in_code_email and not sign_in_code_email_already_valid:
         # Run the code to send email with sign in verification code (6 digit)
         email_address_we_vote_id = email_address_we_vote_id if positive_value_exists(email_address_we_vote_id) \
             else incoming_email_we_vote_id

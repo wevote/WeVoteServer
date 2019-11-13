@@ -48,14 +48,14 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 URLS_TO_NEVER_HIGHLIGHT = [
     '*.google.com',
     '*.newrelic.com',
+    '*.slack.com',
     '*.wevote.us',
+    '*.zendesk.com',
     'api.wevoteusa.org',
     'dashlane.com',
     'github.com'
     'localhost',
     'sketchviewer.com',
-    'slack.com',
-    'zendesk.com',
 ]
 
 
