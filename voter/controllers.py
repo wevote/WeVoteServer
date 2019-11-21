@@ -679,7 +679,7 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
                     "sender_network_details":       sender_network_details,
                     "recipient_name":               recipient_name,
                     "recipient_voter_email":        recipient_voter_email,
-                    "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/more/network",  # In WebApp 2019, -> /friends
+                    "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/friends",
                     "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/key/" + invitation_secret_key,
                     "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
                     "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
@@ -744,7 +744,7 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
         "sender_network_details":       sender_network_details,
         "recipient_name":               recipient_name,
         "recipient_voter_email":        recipient_voter_email,
-        "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/more/network",  # In WebApp 2019, redirects to /friends
+        "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/friends",
         "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/key/" + invitation_secret_key,
         "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
         "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
@@ -1595,6 +1595,8 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
     status += " " + move_positions_results['status']
 
+    is_organization = False
+    organization_full_name = ''
     if positive_value_exists(from_voter_linked_organization_we_vote_id) and \
             positive_value_exists(to_voter_linked_organization_we_vote_id) and \
             from_voter_linked_organization_we_vote_id != to_voter_linked_organization_we_vote_id:
@@ -1603,6 +1605,12 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
             to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id,
             to_voter_id, to_voter_we_vote_id
         )
+        if positive_value_exists(move_organization_to_another_complete_results['to_organization_found']):
+            to_organization = move_organization_to_another_complete_results['to_organization']
+            if to_organization.is_organization():
+                is_organization = True
+                organization_full_name = to_organization.organization_name
+
         status += " " + move_organization_to_another_complete_results['status']
 
     # Transfer friends from voter to new_owner_voter
@@ -1688,6 +1696,26 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         position_list_manager.delete_all_position_network_scores_for_voter(
             new_owner_voter.id, new_owner_voter.we_vote_id)
     status += " " + delete_score_results['status']
+
+    # Send any friend invitations set up before sign in
+    email_manager = EmailManager()
+    real_name_only = True
+    if is_organization:
+        if positive_value_exists(organization_full_name) and 'Voter-' not in organization_full_name:
+            # Only send if the organization name exists
+            send_results = email_manager.send_scheduled_emails_waiting_for_verification(
+                from_voter_we_vote_id, organization_full_name)
+            status += send_results['status']
+        else:
+            status += "CANNOT_SEND_SCHEDULED_EMAILS_WITHOUT_ORGANIZATION_NAME-VOTER_CONTROLLER "
+    elif positive_value_exists(voter.get_full_name(real_name_only)):
+        # Only send if the sender's full name exists
+        send_results = email_manager.send_scheduled_emails_waiting_for_verification(
+            from_voter_we_vote_id, voter.get_full_name(real_name_only))
+        status += send_results['status']
+    else:
+        status += "CANNOT_SEND_SCHEDULED_EMAILS_WITHOUT_NAME-VOTER_CONTROLLER "
+    # TODO Do similar send for SMS
 
     # TODO Keep a record of voter_we_vote_id's associated with this voter, so we can find the
     #  latest we_vote_id

@@ -623,6 +623,7 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
     success = False
     from_organization = None
     to_organization = None
+    to_organization_found = False
     data_transfer_complete = False
 
     if not positive_value_exists(from_organization_we_vote_id):
@@ -631,6 +632,7 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
             'success': False,
             'from_organization': from_organization,
             'to_organization': to_organization,
+            'to_organization_found': to_organization_found,
             'data_transfer_complete': data_transfer_complete,
         }
         return results
@@ -641,6 +643,7 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
             'success': False,
             'from_organization': from_organization,
             'to_organization': to_organization,
+            'to_organization_found': to_organization_found,
             'data_transfer_complete': data_transfer_complete,
         }
         return results
@@ -657,12 +660,14 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
             'success': False,
             'from_organization': from_organization,
             'to_organization': to_organization,
+            'to_organization_found': to_organization_found,
             'data_transfer_complete': False,
         }
         return results
 
     to_organization_results = organization_manager.retrieve_organization_from_we_vote_id(to_organization_we_vote_id)
     if to_organization_results['organization_found']:
+        to_organization_found = True
         to_organization = to_organization_results['organization']
     else:
         status += 'MOVE_ORGANIZATION_DATA_COULD_NOT_RETRIEVE_TO_ORGANIZATION: ' \
@@ -672,6 +677,7 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
             'success': False,
             'from_organization': from_organization,
             'to_organization': to_organization,
+            'to_organization_found': to_organization_found,
             'data_transfer_complete': False,
         }
         return results
@@ -759,6 +765,7 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
     if save_to_organization:
         try:
             to_organization.save()
+            to_organization_found = True
             data_transfer_complete = True
         except Exception as e:
             status += "COULD_NOT_SAVE_TO_ORGANIZATION: " + str(e) + " "
@@ -770,6 +777,7 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
         'success': success,
         'from_organization': from_organization,
         'to_organization': to_organization,
+        'to_organization_found': to_organization_found,
         'data_transfer_complete': data_transfer_complete,
     }
     return results
@@ -780,6 +788,8 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
                                           to_voter_id, to_voter_we_vote_id):
     status = ""
     success = True
+    to_organization_found = False
+    to_organization = None
 
     # Make sure we have both from_organization values
     organization_manager = OrganizationManager()
@@ -812,8 +822,10 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
 
     if identical_variables:
         results = {
-            'status': status,
-            'success': success,
+            'status':                   status,
+            'success':                  success,
+            'to_organization_found':    to_organization_found,
+            'to_organization':          to_organization,
         }
         return results
 
@@ -843,6 +855,9 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
     # There might be some useful information in the from_voter's organization that needs to be moved
     move_organization_results = move_organization_data_to_another_organization(
         from_organization_we_vote_id, to_organization_we_vote_id)
+    if positive_value_exists(move_organization_results['to_organization_found']):
+        to_organization_found = True
+        to_organization = move_organization_results['to_organization']
     status += " " + move_organization_results['status']
 
     # Finally, delete the from_voter's organization
@@ -856,8 +871,10 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
     # We need to make sure to update voter.linked_organization_we_vote_id outside of this routine
 
     results = {
-        'status': status,
-        'success': success,
+        'status':                   status,
+        'success':                  success,
+        'to_organization_found':    to_organization_found,
+        'to_organization':          to_organization,
     }
     return results
 

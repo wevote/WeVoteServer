@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from .functions import merge_message_content_with_template
-from .models import EmailAddress, EmailManager, EmailScheduled, GENERIC_EMAIL_TEMPLATE, LINK_TO_SIGN_IN_TEMPLATE, \
+from .models import EmailAddress, EmailManager, EmailOutboundDescription, EmailScheduled,\
+    GENERIC_EMAIL_TEMPLATE, LINK_TO_SIGN_IN_TEMPLATE, \
     SENT, SIGN_IN_CODE_EMAIL_TEMPLATE, TO_BE_PROCESSED, VERIFY_EMAIL_ADDRESS_TEMPLATE, WAITING_FOR_VERIFICATION
 from config.base import get_environment_variable
 import json
@@ -306,6 +307,44 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
             from_voter.save()
         except Exception as e:
             status += "CANNOT_CLEAR_OUT_VOTER_EMAIL_INFO: " + str(e) + " "
+
+    # Update EmailOutboundDescription entries: Sender
+    try:
+        email_scheduled_queryset = EmailOutboundDescription.objects.all()
+        email_scheduled_queryset.filter(sender_voter_we_vote_id=from_voter_we_vote_id).\
+            update(sender_voter_we_vote_id=to_voter_we_vote_id)
+        status += 'UPDATED_EMAIL_OUTBOUND-SENDER '
+    except Exception as e:
+        success = False
+        status += 'FAILED_UPDATE_EMAIL_OUTBOUND-SENDER ' + str(e) + " "
+    # Recipient
+    try:
+        email_scheduled_queryset = EmailOutboundDescription.objects.all()
+        email_scheduled_queryset.filter(recipient_voter_we_vote_id=from_voter_we_vote_id).\
+            update(recipient_voter_we_vote_id=to_voter_we_vote_id)
+        status += 'UPDATED_EMAIL_OUTBOUND-RECIPIENT '
+    except Exception as e:
+        success = False
+        status += 'FAILED_UPDATE_EMAIL_OUTBOUND-RECIPIENT ' + str(e) + " "
+
+    # Update EmailScheduled entries: Sender
+    try:
+        email_scheduled_queryset = EmailScheduled.objects.all()
+        email_scheduled_queryset.filter(sender_voter_we_vote_id=from_voter_we_vote_id).\
+            update(sender_voter_we_vote_id=to_voter_we_vote_id)
+        status += 'UPDATED_EMAIL_SCHEDULED-SENDER '
+    except Exception as e:
+        success = False
+        status += 'FAILED_UPDATE_EMAIL_SCHEDULED-SENDER ' + str(e) + " "
+    # Recipient
+    try:
+        email_scheduled_queryset = EmailScheduled.objects.all()
+        email_scheduled_queryset.filter(recipient_voter_we_vote_id=from_voter_we_vote_id).\
+            update(recipient_voter_we_vote_id=to_voter_we_vote_id)
+        status += 'UPDATED_EMAIL_SCHEDULED-RECIPIENT '
+    except Exception as e:
+        success = False
+        status += 'FAILED_UPDATE_EMAIL_SCHEDULED-RECIPIENT ' + str(e) + " "
 
     results = {
         'status': status,
@@ -857,23 +896,7 @@ def voter_email_address_verify_for_api(voter_device_id, email_secret_key):  # vo
             }
             return error_results
 
-    # send previous scheduled emails
-    email_manager = EmailManager()
-    send_status = WAITING_FOR_VERIFICATION
-    scheduled_email_results = email_manager.retrieve_scheduled_email_list_from_send_status(
-        email_address_object.voter_we_vote_id, send_status)
-    if scheduled_email_results['scheduled_email_list_found']:
-        scheduled_email_list = scheduled_email_results['scheduled_email_list']
-        for scheduled_email in scheduled_email_list:
-            send_results = email_manager.send_scheduled_email(scheduled_email)
-            email_scheduled_sent = send_results['email_scheduled_sent']
-            status += send_results['status']
-            if email_scheduled_sent:
-                # If scheduled email sent successfully then change their status from WAITING_FOR_VERIFICATION to SENT
-                send_status = SENT
-                update_scheduled_email_results = email_manager.update_scheduled_email_with_new_send_status(
-                    scheduled_email, send_status)
-
+    organization_manager = OrganizationManager()
     if voter_ownership_saved:
         if not positive_value_exists(voter.linked_organization_we_vote_id):
             # Create new organization
@@ -885,7 +908,6 @@ def voter_email_address_verify_for_api(voter_device_id, email_secret_key):  # vo
             organization_facebook = ""
             organization_image = voter.voter_photo_url()
             organization_type = INDIVIDUAL
-            organization_manager = OrganizationManager()
             create_results = organization_manager.create_organization(
                 organization_name, organization_website, organization_twitter_handle,
                 organization_email, organization_facebook, organization_image, organization_twitter_id,
@@ -900,6 +922,36 @@ def voter_email_address_verify_for_api(voter_device_id, email_secret_key):  # vo
                     status += "UNABLE_TO_LINK_NEW_ORGANIZATION_TO_VOTER "
 
         # TODO DALE We want to invalidate the email_secret key used
+
+    is_organization = False
+    organization_full_name = ""
+    if positive_value_exists(voter.linked_organization_we_vote_id):
+        organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+            voter.linked_organization_we_vote_id)
+        if organization_results['organization_found']:
+            organization = organization_results['organization']
+            if organization.is_organization():
+                is_organization = True
+                organization_full_name = organization.organization_name
+
+    # send previous scheduled emails
+    real_name_only = True
+    from_voter_we_vote_id = email_address_object.voter_we_vote_id
+    if is_organization:
+        if positive_value_exists(organization_full_name) and 'Voter-' not in organization_full_name:
+            # Only send if the organization name exists
+            send_results = email_manager.send_scheduled_emails_waiting_for_verification(
+                from_voter_we_vote_id, organization_full_name)
+            status += send_results['status']
+        else:
+            status += "CANNOT_SEND_SCHEDULED_EMAILS_WITHOUT_ORGANIZATION_NAME-EMAIL_CONTROLLER "
+    elif positive_value_exists(voter.get_full_name(real_name_only)):
+        # Only send if the sender's full name exists
+        send_results = email_manager.send_scheduled_emails_waiting_for_verification(
+            from_voter_we_vote_id, voter.get_full_name(real_name_only))
+        status += send_results['status']
+    else:
+        status += "CANNOT_SEND_SCHEDULED_EMAILS_WITHOUT_NAME-EMAIL_CONTROLLER "
 
     json_data = {
         'status':                                   status,

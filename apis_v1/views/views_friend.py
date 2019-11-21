@@ -8,7 +8,7 @@ from friend.controllers import friend_invitation_by_email_send_for_api, friend_i
     friend_invitation_by_facebook_send_for_api, friend_invitation_by_facebook_verify_for_api
 from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, \
     FRIEND_INVITATIONS_PROCESSED, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, \
-    SUGGESTED_FRIEND_LIST, \
+    FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION, SUGGESTED_FRIEND_LIST, \
     FRIENDS_IN_COMMON, IGNORED_FRIEND_INVITATIONS, ACCEPT_INVITATION, IGNORE_INVITATION, \
     UNFRIEND_CURRENT_FRIEND
 import json
@@ -41,6 +41,7 @@ def friend_invitation_by_email_send_view(request):  # friendInvitationByEmailSen
         'status':                               results['status'],
         'success':                              results['success'],
         'voter_device_id':                      voter_device_id,
+        'error_message_to_show_voter':          results['error_message_to_show_voter'],
         'sender_voter_email_address_missing':   results['sender_voter_email_address_missing'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -166,7 +167,8 @@ def friend_list_view(request):  # friendList
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_list = request.GET.get('kind_of_list', CURRENT_FRIENDS)
     if kind_of_list in(CURRENT_FRIENDS, FRIEND_INVITATIONS_PROCESSED,
-                       FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, FRIENDS_IN_COMMON,
+                       FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME,
+                       FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION, FRIENDS_IN_COMMON,
                        IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIEND_LIST):
         kind_of_list_we_are_looking_for = kind_of_list
     else:

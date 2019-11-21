@@ -31,6 +31,7 @@ CURRENT_FRIENDS = 'CURRENT_FRIENDS'
 FRIEND_INVITATIONS_PROCESSED = 'FRIEND_INVITATIONS_PROCESSED'
 FRIEND_INVITATIONS_SENT_TO_ME = 'FRIEND_INVITATIONS_SENT_TO_ME'
 FRIEND_INVITATIONS_SENT_BY_ME = 'FRIEND_INVITATIONS_SENT_BY_ME'
+FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION = 'FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION'
 FRIENDS_IN_COMMON = 'FRIENDS_IN_COMMON'
 IGNORED_FRIEND_INVITATIONS = 'IGNORED_FRIEND_INVITATIONS'
 SUGGESTED_FRIEND_LIST = 'SUGGESTED_FRIEND_LIST'
@@ -147,6 +148,7 @@ class FriendManager(models.Model):
                                                       invitation_message='',
                                                       sender_email_ownership_is_verified=False,
                                                       invitation_secret_key=''):
+        status = ""
         defaults = {
             "sender_voter_we_vote_id":          sender_voter_we_vote_id,
             "recipient_email_we_vote_id":       recipient_email_we_vote_id,
@@ -172,13 +174,13 @@ class FriendManager(models.Model):
             # recipient_email_we_vote_id__iexact = recipient_email_we_vote_id,
             friend_invitation_saved = True
             success = True
-            status = "FRIEND_INVITATION_EMAIL_LINK_UPDATED_OR_CREATED"
+            status += "FRIEND_INVITATION_EMAIL_LINK_UPDATED_OR_CREATED "
         except Exception as e:
             friend_invitation_saved = False
             friend_invitation = FriendInvitationEmailLink()
             success = False
             created = False
-            status = "FRIEND_INVITATION_EMAIL_LINK_NOT_UPDATED_OR_CREATED"
+            status += "FRIEND_INVITATION_EMAIL_LINK_NOT_UPDATED_OR_CREATED " + str(e) + " "
 
         results = {
             'success':                      success,
@@ -192,6 +194,7 @@ class FriendManager(models.Model):
     def create_or_update_friend_invitation_voter_link(self, sender_voter_we_vote_id, recipient_voter_we_vote_id='',
                                                       invitation_message='', sender_email_ownership_is_verified=False,
                                                       invitation_secret_key=''):
+        status = ""
         defaults = {
             "sender_voter_we_vote_id":              sender_voter_we_vote_id,
             "recipient_voter_we_vote_id":           recipient_voter_we_vote_id,
@@ -211,13 +214,13 @@ class FriendManager(models.Model):
             )
             friend_invitation_saved = True
             success = True
-            status = "FRIEND_INVITATION_VOTER_LINK_UPDATED_OR_CREATED"
+            status += "FRIEND_INVITATION_VOTER_LINK_UPDATED_OR_CREATED "
         except Exception as e:
             friend_invitation_saved = False
             friend_invitation = FriendInvitationVoterLink()
             success = False
             created = False
-            status = "FRIEND_INVITATION_VOTER_LINK_NOT_UPDATED_OR_CREATED"
+            status += "FRIEND_INVITATION_VOTER_LINK_NOT_UPDATED_OR_CREATED " + str(e) + " "
 
         results = {
             'success':                      success,
@@ -230,6 +233,7 @@ class FriendManager(models.Model):
 
     def create_or_update_friend_invitation_facebook_link(self, facebook_request_id, sender_facebook_id,
                                                          recipient_facebook_id, recipient_facebook_name='',):
+        status = ""
         defaults = {
             "facebook_request_id": facebook_request_id,
             "sender_facebook_id": sender_facebook_id,
@@ -245,13 +249,13 @@ class FriendManager(models.Model):
             )
             friend_invitation_saved = True
             success = True
-            status = "FRIEND_INVITATION_FACEBOOK_LINK_UPDATED_OR_CREATED"
+            status += "FRIEND_INVITATION_FACEBOOK_LINK_UPDATED_OR_CREATED "
         except Exception as e:
             friend_invitation_saved = False
             friend_invitation = FriendInvitationFacebookLink()
             success = False
             created = False
-            status = "FRIEND_INVITATION_FACEBOOK_LINK_NOT_UPDATED_OR_CREATED"
+            status += "FRIEND_INVITATION_FACEBOOK_LINK_NOT_UPDATED_OR_CREATED " + str(e) + " "
 
         results = {
             'success': success,
@@ -263,6 +267,7 @@ class FriendManager(models.Model):
         return results
 
     def retrieve_current_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id, for_editing=False):
+        status = ""
         current_friend = CurrentFriend()
         # Note that the direction of the friendship does not matter
         try:
@@ -278,17 +283,17 @@ class FriendManager(models.Model):
                 )
             current_friend_found = True
             success = True
-            status = "CURRENT_FRIEND_UPDATED_OR_CREATED"
+            status += "CURRENT_FRIEND_UPDATED_OR_CREATED "
         except CurrentFriend.DoesNotExist:
             # No data found. Try again below
             success = True
             current_friend_found = False
-            status = 'NO_CURRENT_FRIEND_RETRIEVED_DoesNotExist'
+            status += 'NO_CURRENT_FRIEND_RETRIEVED_DoesNotExist '
         except Exception as e:
             current_friend_found = False
             current_friend = CurrentFriend()
             success = False
-            status = "CURRENT_FRIEND_NOT_UPDATED_OR_CREATED"
+            status += "CURRENT_FRIEND_NOT_UPDATED_OR_CREATED " + str(e) + " "
 
         if not current_friend_found and success:
             try:
@@ -304,17 +309,17 @@ class FriendManager(models.Model):
                     )
                 current_friend_found = True
                 success = True
-                status = "CURRENT_FRIEND_UPDATED_OR_CREATED"
+                status += "CURRENT_FRIEND_UPDATED_OR_CREATED "
             except CurrentFriend.DoesNotExist:
                 # No data found. Try again below
                 success = True
                 current_friend_found = False
-                status = 'NO_CURRENT_FRIEND_RETRIEVED2_DoesNotExist'
+                status += 'NO_CURRENT_FRIEND_RETRIEVED2_DoesNotExist '
             except Exception as e:
                 current_friend_found = False
                 current_friend = CurrentFriend()
                 success = False
-                status = "CURRENT_FRIEND_NOT_UPDATED_OR_CREATED"
+                status += "CURRENT_FRIEND_NOT_UPDATED_OR_CREATED " + str(e) + " "
 
         results = {
             'success': success,
@@ -325,6 +330,7 @@ class FriendManager(models.Model):
         return results
 
     def retrieve_suggested_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id, for_editing=False):
+        status = ""
         suggested_friend = CurrentFriend()
         # Note that the direction of the friendship does not matter
         try:
@@ -340,17 +346,17 @@ class FriendManager(models.Model):
                 )
             suggested_friend_found = True
             success = True
-            status = "SUGGESTED_FRIEND_UPDATED_OR_CREATED"
+            status += "SUGGESTED_FRIEND_UPDATED_OR_CREATED "
         except SuggestedFriend.DoesNotExist:
             # No data found. Try again below
             success = True
             suggested_friend_found = False
-            status = 'NO_SUGGESTED_FRIEND_RETRIEVED_DoesNotExist'
+            status += 'NO_SUGGESTED_FRIEND_RETRIEVED_DoesNotExist '
         except Exception as e:
             suggested_friend_found = False
             suggested_friend = SuggestedFriend()
             success = False
-            status = "SUGGESTED_FRIEND_NOT_UPDATED_OR_CREATED"
+            status += "SUGGESTED_FRIEND_NOT_UPDATED_OR_CREATED " + str(e) + " "
 
         if not suggested_friend_found and success:
             try:
@@ -366,17 +372,17 @@ class FriendManager(models.Model):
                     )
                 suggested_friend_found = True
                 success = True
-                status = "SUGGESTED_FRIEND_UPDATED_OR_CREATED"
+                status += "SUGGESTED_FRIEND_UPDATED_OR_CREATED "
             except SuggestedFriend.DoesNotExist:
                 # No data found. Try again below
                 success = True
                 suggested_friend_found = False
-                status = 'NO_SUGGESTED_FRIEND_RETRIEVED2_DoesNotExist'
+                status += 'NO_SUGGESTED_FRIEND_RETRIEVED2_DoesNotExist '
             except Exception as e:
                 suggested_friend_found = False
                 suggested_friend = CurrentFriend()
                 success = False
-                status = "SUGGESTED_FRIEND_NOT_UPDATED_OR_CREATED"
+                status += "SUGGESTED_FRIEND_NOT_UPDATED_OR_CREATED " + str(e) + " "
 
         results = {
             'success': success,
@@ -387,7 +393,7 @@ class FriendManager(models.Model):
         return results
 
     def create_or_update_current_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id):
-
+        status = ""
         if not positive_value_exists(sender_voter_we_vote_id) or not positive_value_exists(recipient_voter_we_vote_id):
             current_friend = CurrentFriend()
             results = {
@@ -416,7 +422,7 @@ class FriendManager(models.Model):
         current_friend_found = results['current_friend_found']
         current_friend = results['current_friend']
         success = results['success']
-        status = results['status']
+        status += results['status']
 
         if current_friend_found:
             # We don't need to actually do anything
@@ -429,12 +435,12 @@ class FriendManager(models.Model):
                 )
                 current_friend_created = True
                 success = True
-                status = "CURRENT_FRIEND_CREATED"
+                status += "CURRENT_FRIEND_CREATED "
             except Exception as e:
                 current_friend_created = False
                 current_friend = CurrentFriend()
                 success = False
-                status = "CURRENT_FRIEND_NOT_CREATED"
+                status += "CURRENT_FRIEND_NOT_CREATED " + str(e) + " "
 
         results = {
             'success':                  success,
@@ -446,7 +452,7 @@ class FriendManager(models.Model):
         return results
 
     def create_or_update_suggested_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id):
-
+        status = ""
         if not positive_value_exists(sender_voter_we_vote_id) or not positive_value_exists(recipient_voter_we_vote_id):
             suggested_friend = SuggestedFriend()
             results = {
@@ -475,7 +481,7 @@ class FriendManager(models.Model):
         suggested_friend_found = results['suggested_friend_found']
         suggested_friend = results['suggested_friend']
         success = results['success']
-        status = results['status']
+        status += results['status']
 
         if suggested_friend_found:
             # We don't need to actually do anything
@@ -488,12 +494,12 @@ class FriendManager(models.Model):
                 )
                 suggested_friend_created = True
                 success = True
-                status = "SUGGESTED_FRIEND_CREATED"
+                status += "SUGGESTED_FRIEND_CREATED "
             except Exception as e:
                 suggested_friend_created = False
                 suggested_friend = SuggestedFriend()
                 success = False
-                status = "SUGGESTED_FRIEND_NOT_CREATED"
+                status += "SUGGESTED_FRIEND_NOT_CREATED " + str(e) + " "
 
         results = {
             'success':                  success,
@@ -512,6 +518,7 @@ class FriendManager(models.Model):
         # TODO: If 2, check to see if these two are already friends so we can return success if
         #  kind_of_invite_response == ACCEPT_INVITATION
 
+        status = ""
         friend_invitation_accepted = False
         friend_invitation_deleted = False
         friend_invitation_saved = False
@@ -524,16 +531,16 @@ class FriendManager(models.Model):
             )
             success = True
             friend_invitation_found = True
-            status = 'FRIEND_INVITATION_RETRIEVED'
+            status += 'FRIEND_INVITATION_RETRIEVED '
         except FriendInvitationVoterLink.DoesNotExist:
             # No data found. Not a problem.
             success = True
             friend_invitation_found = False
-            status = 'NO_FRIEND_INVITATION_RETRIEVED_DoesNotExist'
+            status += 'NO_FRIEND_INVITATION_RETRIEVED_DoesNotExist '
         except Exception as e:
             success = False
             friend_invitation_found = False
-            status = 'FAILED process_friend_invitation_voter_response FriendInvitationVoterLink '
+            status += 'FAILED process_friend_invitation_voter_response FriendInvitationVoterLink ' + str(e) + " "
 
         if friend_invitation_found:
             if kind_of_invite_response == ACCEPT_INVITATION:
@@ -541,7 +548,7 @@ class FriendManager(models.Model):
                 friend_manager = FriendManager()
                 results = friend_manager.create_or_update_current_friend(sender_voter.we_vote_id, voter.we_vote_id)
                 success = results['success']
-                status = results['status']
+                status += results['status']
 
                 friend_manager.update_suggested_friends_starting_with_one_voter(sender_voter.we_vote_id)
                 friend_manager.update_suggested_friends_starting_with_one_voter(voter.we_vote_id)
@@ -557,31 +564,34 @@ class FriendManager(models.Model):
                     except Exception as e:
                         friend_invitation_deleted = False
                         success = False
-                        status = 'FAILED process_friend_invitation_voter_response delete FriendInvitationVoterLink '
+                        status += 'FAILED process_friend_invitation_voter_response delete FriendInvitationVoterLink ' \
+                                  '' + str(e) + " "
             elif kind_of_invite_response == IGNORE_INVITATION:
                 try:
                     friend_invitation_voter_link.invitation_status = IGNORED
                     friend_invitation_voter_link.save()
                     friend_invitation_saved = True
                     success = True
-                    status = 'CURRENT_FRIEND_INVITATION_VOTER_LINK_STATUS_UPDATED_TO_IGNORE'
+                    status += 'CURRENT_FRIEND_INVITATION_VOTER_LINK_STATUS_UPDATED_TO_IGNORE '
                 except Exception as e:
                     friend_invitation_saved = False
                     success = False
-                    status = 'FAILED process_friend_invitation_voter_response delete FriendInvitationVoterLink '
+                    status += 'FAILED process_friend_invitation_voter_response delete FriendInvitationVoterLink ' \
+                              '' + str(e) + " "
             elif kind_of_invite_response == DELETE_INVITATION_VOTER_SENT_BY_ME:
                 try:
                     friend_invitation_voter_link.delete()
                     friend_invitation_saved = True
                     success = True
-                    status = 'CURRENT_FRIEND_INVITATION_VOTER_LINK_DELETED'
+                    status += 'CURRENT_FRIEND_INVITATION_VOTER_LINK_DELETED '
                 except Exception as e:
                     friend_invitation_saved = False
                     success = False
-                    status = 'FAILED process_friend_invitation_voter_response delete FriendInvitationVoterLink '
+                    status += 'FAILED process_friend_invitation_voter_response delete FriendInvitationVoterLink ' \
+                              '' + str(e) + " "
             else:
                 success = False
-                status = 'CURRENT_FRIEND_INVITATION_KIND_OF_INVITE_RESPONSE_NOT_SUPPORTED'
+                status += 'CURRENT_FRIEND_INVITATION_KIND_OF_INVITE_RESPONSE_NOT_SUPPORTED '
 
         results = {
             'success':                      success,
@@ -684,12 +694,13 @@ class FriendManager(models.Model):
         return suggested_friends_count
 
     def retrieve_current_friends(self, voter_we_vote_id, for_editing=False):
+        status = ""
         current_friend_list = []  # The entries from CurrentFriend table
         current_friend_list_found = False
 
         if not positive_value_exists(voter_we_vote_id):
             success = False
-            status = 'VALID_VOTER_WE_VOTE_ID_MISSING'
+            status += 'VALID_VOTER_WE_VOTE_ID_MISSING'
             results = {
                 'success':                      success,
                 'status':                       status,
@@ -713,21 +724,21 @@ class FriendManager(models.Model):
             if len(current_friend_list):
                 success = True
                 current_friend_list_found = True
-                status = 'CURRENT_FRIEND_LIST_RETRIEVED'
+                status += 'CURRENT_FRIEND_LIST_RETRIEVED '
             else:
                 success = True
                 current_friend_list_found = False
-                status = 'NO_CURRENT_FRIEND_LIST_RETRIEVED'
+                status += 'NO_CURRENT_FRIEND_LIST_RETRIEVED '
         except CurrentFriend.DoesNotExist:
             # No data found. Not a problem.
             success = True
             current_friend_list_found = False
-            status = 'NO_CURRENT_FRIEND_LIST_RETRIEVED_DoesNotExist'
+            status += 'NO_CURRENT_FRIEND_LIST_RETRIEVED_DoesNotExist '
             current_friend_list = []
         except Exception as e:
             success = False
             current_friend_list_found = False
-            status = 'FAILED retrieve_current_friends '
+            status += 'FAILED retrieve_current_friends ' + str(e) + " "
             current_friend_list = []
 
         results = {
@@ -745,13 +756,14 @@ class FriendManager(models.Model):
         :param voter_we_vote_id:
         :return:
         """
+        status = ""
         current_friend_list = []  # The entries from CurrentFriend table
         friend_list_found = False
         friend_list = []  # A list of friends, returned as voter entries
 
         if not positive_value_exists(voter_we_vote_id):
             success = False
-            status = 'VALID_VOTER_WE_VOTE_ID_MISSING'
+            status += 'VALID_VOTER_WE_VOTE_ID_MISSING '
             results = {
                 'success':              success,
                 'status':               status,
@@ -775,21 +787,21 @@ class FriendManager(models.Model):
             if len(current_friend_list):
                 success = True
                 current_friend_list_found = True
-                status = 'FRIEND_LIST_RETRIEVED'
+                status += 'FRIEND_LIST_RETRIEVED '
             else:
                 success = True
                 current_friend_list_found = False
-                status = 'NO_FRIEND_LIST_RETRIEVED'
+                status += 'NO_FRIEND_LIST_RETRIEVED '
         except CurrentFriend.DoesNotExist:
             # No data found. Not a problem.
             success = True
             current_friend_list_found = False
-            status = 'NO_FRIEND_LIST_RETRIEVED_DoesNotExist'
+            status += 'NO_FRIEND_LIST_RETRIEVED_DoesNotExist '
             friend_list = []
         except Exception as e:
             success = False
             current_friend_list_found = False
-            status = 'FAILED retrieve_current_friends_as_voters '
+            status += 'FAILED retrieve_current_friends_as_voters ' + str(e) + " "
 
         if current_friend_list_found:
             voter_manager = VoterManager()
@@ -818,6 +830,7 @@ class FriendManager(models.Model):
         :param read_only:
         :return:
         """
+        status = ""
         current_friend_list_found = False
         current_friend_list = []  # The entries from CurrentFriend table
         friends_we_vote_id_list_found = False
@@ -825,7 +838,7 @@ class FriendManager(models.Model):
 
         if not positive_value_exists(voter_we_vote_id):
             success = False
-            status = 'VALID_VOTER_WE_VOTE_ID_MISSING'
+            status += 'VALID_VOTER_WE_VOTE_ID_MISSING '
             results = {
                 'success':                          success,
                 'status':                           status,
@@ -846,21 +859,21 @@ class FriendManager(models.Model):
             if len(current_friend_list):
                 success = True
                 current_friend_list_found = True
-                status = 'FRIEND_LIST_RETRIEVED'
+                status += 'FRIEND_LIST_RETRIEVED '
             else:
                 success = True
                 current_friend_list_found = False
-                status = 'NO_FRIEND_LIST_RETRIEVED'
+                status += 'NO_FRIEND_LIST_RETRIEVED '
         except CurrentFriend.DoesNotExist:
             # No data found. Not a problem.
             success = True
             current_friend_list_found = False
-            status = 'NO_FRIEND_LIST_RETRIEVED_DoesNotExist'
+            status += 'NO_FRIEND_LIST_RETRIEVED_DoesNotExist '
             friends_we_vote_id_list = []
         except Exception as e:
             success = False
             current_friend_list_found = False
-            status = 'FAILED retrieve_friends_we_vote_id_list '
+            status += 'FAILED retrieve_friends_we_vote_id_list ' + str(e) + " "
 
         if current_friend_list_found:
             for current_friend_entry in current_friend_list:
@@ -886,7 +899,7 @@ class FriendManager(models.Model):
 
         if not positive_value_exists(sender_voter_we_vote_id):
             success = False
-            status = 'RETRIEVE_FRIEND_INVITATION_EMAIL_LINK-MISSING_SENDER '
+            status += 'RETRIEVE_FRIEND_INVITATION_EMAIL_LINK-MISSING_SENDER '
             results = {
                 'success':                      success,
                 'status':                       status,
@@ -921,7 +934,7 @@ class FriendManager(models.Model):
         except Exception as e:
             success = False
             friend_invitation_email_link_list_found = False
-            status += ' FAILED retrieve_friend_invitation_email_link_list FriendInvitationVoterLink '
+            status += ' FAILED retrieve_friend_invitation_email_link_list FriendInvitationVoterLink ' + str(e) + " "
 
         results = {
             'success':                      success,
@@ -937,7 +950,7 @@ class FriendManager(models.Model):
 
         if not positive_value_exists(sender_voter_we_vote_id) and not positive_value_exists(recipient_voter_we_vote_id):
             success = False
-            status = 'RETRIEVE_FRIEND_INVITATION_VOTER_LINK-MISSING_BOTH_SENDER_AND_RECIPIENT '
+            status += 'RETRIEVE_FRIEND_INVITATION_VOTER_LINK-MISSING_BOTH_SENDER_AND_RECIPIENT '
             results = {
                 'success':                      success,
                 'status':                       status,
@@ -963,21 +976,21 @@ class FriendManager(models.Model):
             if len(friend_invitation_from_voter_list):
                 success = True
                 friend_invitation_from_voter_list_found = True
-                status += ' FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED '
+                status += 'FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED '
             else:
                 success = True
                 friend_invitation_from_voter_list_found = False
-                status += ' NO_FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED '
+                status += 'NO_FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED '
         except FriendInvitationVoterLink.DoesNotExist:
             # No data found. Not a problem.
             success = True
             friend_invitation_from_voter_list_found = False
-            status += ' NO_FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED_DoesNotExist '
+            status += 'NO_FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED_DoesNotExist '
             friend_invitation_from_voter_list = []
         except Exception as e:
             success = False
             friend_invitation_from_voter_list_found = False
-            status += ' FAILED retrieve_friend_invitation_voter_link_list FriendInvitationVoterLink '
+            status += 'FAILED retrieve_friend_invitation_voter_link_list FriendInvitationVoterLink ' + str(e) + " "
 
         results = {
             'success': success,
@@ -1001,7 +1014,7 @@ class FriendManager(models.Model):
 
         if not positive_value_exists(viewer_voter_we_vote_id):
             success = False
-            status = 'VALID_VOTER_WE_VOTE_ID_MISSING '
+            status += 'VALID_VOTER_WE_VOTE_ID_MISSING '
             results = {
                 'success':                  success,
                 'status':                   status,
@@ -1045,7 +1058,7 @@ class FriendManager(models.Model):
         except Exception as e:
             success = False
             friend_invitation_from_voter_list_found = False
-            status += 'FAILED retrieve_friend_invitations_processed FriendInvitationVoterLink '
+            status += 'FAILED retrieve_friend_invitations_processed FriendInvitationVoterLink ' + str(e) + " "
 
         friend_invitation_from_email_list = []
         try:
@@ -1071,7 +1084,7 @@ class FriendManager(models.Model):
             status += 'NO_FRIEND_LIST_EMAIL_RETRIEVED_DoesNotExist '
         except Exception as e:
             friend_invitation_from_email_list_found = False
-            status += 'FAILED retrieve_friend_invitations_processed FriendInvitationEmailLink '
+            status += 'FAILED retrieve_friend_invitations_processed FriendInvitationEmailLink ' + str(e) + " "
 
         if friend_invitation_from_voter_list_found and friend_invitation_from_email_list_found:
             friend_invitation_from_list_found = True
@@ -1123,7 +1136,7 @@ class FriendManager(models.Model):
         except Exception as e:
             success = False
             friend_invitation_to_voter_list_found = False
-            status += 'FAILED retrieve_friend_invitations_processed FriendInvitationVoterLink '
+            status += 'FAILED retrieve_friend_invitations_processed FriendInvitationVoterLink ' + str(e) + " "
 
         friend_invitation_to_email_list = []
         friend_invitation_to_email_list_found = False
@@ -1182,7 +1195,7 @@ class FriendManager(models.Model):
                 status += 'NO_FRIEND_LIST_EMAIL_RETRIEVED_DoesNotExist '
             except Exception as e:
                 friend_invitation_to_email_list_found = False
-                status += 'FAILED retrieve_friend_invitations_processed FriendInvitationEmailLink '
+                status += 'FAILED retrieve_friend_invitations_processed FriendInvitationEmailLink ' + str(e) + " "
 
         if friend_invitation_to_voter_list_found and friend_invitation_to_email_list_found:
             friend_invitation_to_list_found = True
@@ -1239,12 +1252,13 @@ class FriendManager(models.Model):
         return we_vote_id_list
 
     def retrieve_friend_invitations_sent_by_me(self, sender_voter_we_vote_id):
+        status = ""
         friend_list_found = False
         friend_list = []
 
         if not positive_value_exists(sender_voter_we_vote_id):
             success = False
-            status = 'VALID_VOTER_WE_VOTE_ID_MISSING'
+            status += 'VALID_VOTER_WE_VOTE_ID_MISSING '
             results = {
                 'success':                  success,
                 'status':                   status,
@@ -1268,21 +1282,21 @@ class FriendManager(models.Model):
             if len(friend_list):
                 success = True
                 friend_list_found = True
-                status = 'FRIEND_LIST_RETRIEVED'
+                status += 'FRIEND_LIST_RETRIEVED '
             else:
                 success = True
                 friend_list_found = False
-                status = 'NO_FRIEND_LIST_RETRIEVED'
+                status += 'NO_FRIEND_LIST_RETRIEVED '
         except FriendInvitationVoterLink.DoesNotExist:
             # No data found. Not a problem.
             success = True
             friend_list_found = False
-            status = 'NO_FRIEND_LIST_RETRIEVED_DoesNotExist'
+            status += 'NO_FRIEND_LIST_RETRIEVED_DoesNotExist '
             friend_list = []
         except Exception as e:
             success = False
             friend_list_found = False
-            status = 'FAILED retrieve_friend_invitations_processed FriendInvitationVoterLink'
+            status += 'FAILED retrieve_friend_invitations_processed FriendInvitationVoterLink ' + str(e) + ' '
 
         friend_list_email = []
         try:
@@ -1331,10 +1345,10 @@ class FriendManager(models.Model):
         except FriendInvitationEmailLink.DoesNotExist:
             # No data found. Not a problem.
             friend_list_email_found = False
-            status = 'NO_FRIEND_LIST_EMAIL_RETRIEVED_DoesNotExist'
+            status += 'NO_FRIEND_LIST_EMAIL_RETRIEVED_DoesNotExist '
         except Exception as e:
             friend_list_email_found = False
-            status = 'FAILED retrieve_friend_invitations_sent_by_me FriendInvitationEmailLink'
+            status += 'FAILED retrieve_friend_invitations_sent_by_me FriendInvitationEmailLink ' + str(e) + ' '
 
         if friend_list_found and friend_list_email_found:
             friend_list = list(friend_list) + list(friend_list_email)
@@ -1368,12 +1382,13 @@ class FriendManager(models.Model):
         return we_vote_id_list
 
     def retrieve_friend_invitations_sent_to_me(self, recipient_voter_we_vote_id):
+        status = ''
         friend_list_found = False
         friend_list = []
 
         if not positive_value_exists(recipient_voter_we_vote_id):
             success = False
-            status = 'VALID_RECIPIENT_VOTER_WE_VOTE_ID_MISSING'
+            status += 'VALID_RECIPIENT_VOTER_WE_VOTE_ID_MISSING '
             results = {
                 'success':                      success,
                 'status':                       status,
@@ -1396,21 +1411,21 @@ class FriendManager(models.Model):
             if len(friend_list):
                 success = True
                 friend_list_found = True
-                status = 'FRIEND_LIST_RETRIEVED'
+                status += 'FRIEND_LIST_RETRIEVED '
             else:
                 success = True
                 friend_list_found = False
-                status = 'NO_FRIEND_LIST_RETRIEVED'
+                status += 'NO_FRIEND_LIST_RETRIEVED '
         except FriendInvitationVoterLink.DoesNotExist:
             # No data found. Not a problem.
             success = True
             friend_list_found = False
-            status = 'NO_FRIEND_LIST_RETRIEVED_DoesNotExist'
+            status += 'NO_FRIEND_LIST_RETRIEVED_DoesNotExist '
             friend_list = []
         except Exception as e:
             success = False
             friend_list_found = False
-            status = 'FAILED retrieve_friend_invitations_sent_to_me '
+            status += 'FAILED retrieve_friend_invitations_sent_to_me ' + str(e) + ' '
 
         results = {
             'success':                      success,
@@ -1420,7 +1435,6 @@ class FriendManager(models.Model):
             'friend_list':                  friend_list,
         }
         return results
-
 
     def retrieve_friend_invitation_from_secret_key(self, invitation_secret_key, for_merge_accounts=False):
         """
@@ -1463,7 +1477,7 @@ class FriendManager(models.Model):
             status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_NOT_FOUND1 "
         except Exception as e:
             success = False
-            status += 'FAILED retrieve_friend_invitation_from_secret_key FriendInvitationVoterLink '
+            status += 'FAILED retrieve_friend_invitation_from_secret_key FriendInvitationVoterLink ' + str(e) + " "
 
         if friend_invitation_voter_link_found:
 
@@ -1495,17 +1509,17 @@ class FriendManager(models.Model):
                 )
                 friend_invitation_email_link_found = True
                 success = True
-                status += "RETRIEVE_FRIEND_INVITATION_FOUND_BY_SECRET_KEY2"
+                status += "RETRIEVE_FRIEND_INVITATION_FOUND_BY_SECRET_KEY2 "
             else:
                 friend_invitation_email_link_found = False
                 success = False
-                status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_VARIABLES_MISSING2"
+                status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_VARIABLES_MISSING2 "
         except FriendInvitationEmailLink.DoesNotExist:
             success = True
-            status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_NOT_FOUND2"
+            status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_NOT_FOUND2 "
         except Exception as e:
             success = False
-            status += 'FAILED retrieve_friend_invitation_from_secret_key FriendInvitationEmailLink'
+            status += 'FAILED retrieve_friend_invitation_from_secret_key FriendInvitationEmailLink ' + str(e) + ' '
 
         results = {
             'success':                              success,
@@ -1547,7 +1561,7 @@ class FriendManager(models.Model):
             status += "RETRIEVE_FRIEND_INVITATION_FROM_FACEBOOK_NOT_FOUND1 "
         except Exception as e:
             success = False
-            status += 'FAILED retrieve_friend_invitation_from_facebook FriendInvitationFacebookLink '
+            status += 'FAILED retrieve_friend_invitation_from_facebook FriendInvitationFacebookLink ' + str(e) + ' '
 
         results = {
             'success':                                  success,
@@ -1563,7 +1577,7 @@ class FriendManager(models.Model):
         results = self.retrieve_current_friend(acting_voter_we_vote_id, other_voter_we_vote_id, for_editing)
 
         success = False
-        status = 'PREPARING_TO_DELETE_CURRENT_FRIEND'
+        status = 'PREPARING_TO_DELETE_CURRENT_FRIEND '
         current_friend_deleted = False
 
         if results['current_friend_found']:
@@ -1572,11 +1586,11 @@ class FriendManager(models.Model):
                 current_friend.delete()
                 current_friend_deleted = True
                 success = True
-                status = 'CURRENT_FRIEND_DELETED'
+                status += 'CURRENT_FRIEND_DELETED '
             except Exception as e:
                 success = False
                 current_friend_deleted = False
-                status = 'FAILED unfriend_current_friend '
+                status += 'FAILED unfriend_current_friend ' + str(e) + ' '
 
         results = {
             'success':                      success,
@@ -1593,12 +1607,13 @@ class FriendManager(models.Model):
         :param voter_we_vote_id:
         :return:
         """
+        status = ''
         suggested_friend_list = []  # The entries from SuggestedFriend table
         suggested_friend_list_found = False
 
         if not positive_value_exists(voter_we_vote_id):
             success = False
-            status = 'VALID_VOTER_WE_VOTE_ID_MISSING'
+            status += 'VALID_VOTER_WE_VOTE_ID_MISSING '
             results = {
                 'success':                      success,
                 'status':                       status,
@@ -1619,21 +1634,21 @@ class FriendManager(models.Model):
             if len(suggested_friend_list):
                 success = True
                 suggested_friend_list_found = True
-                status = 'SUGGESTED_FRIEND_LIST_RETRIEVED'
+                status += 'SUGGESTED_FRIEND_LIST_RETRIEVED '
             else:
                 success = True
                 suggested_friend_list_found = False
-                status = 'NO_SUGGESTED_FRIEND_LIST_RETRIEVED'
+                status += 'NO_SUGGESTED_FRIEND_LIST_RETRIEVED '
         except SuggestedFriend.DoesNotExist:
             # No data found. Not a problem.
             success = True
             suggested_friend_list_found = False
-            status = 'NO_SUGGESTED_FRIEND_LIST_RETRIEVED_DoesNotExist'
+            status += 'NO_SUGGESTED_FRIEND_LIST_RETRIEVED_DoesNotExist '
             suggested_friend_list = []
         except Exception as e:
             success = False
             suggested_friend_list_found = False
-            status = 'FAILED retrieve_suggested_friend_list '
+            status += 'FAILED retrieve_suggested_friend_list ' + str(e) + ' '
             suggested_friend_list = []
 
         results = {
@@ -1651,13 +1666,14 @@ class FriendManager(models.Model):
         :param voter_we_vote_id:
         :return:
         """
+        status = ''
         suggested_friend_list = []  # The entries from SuggestedFriend table
         friend_list_found = False
         friend_list = []  # A list of friends, returned as voter entries
 
         if not positive_value_exists(voter_we_vote_id):
             success = False
-            status = 'VALID_VOTER_WE_VOTE_ID_MISSING'
+            status += 'VALID_VOTER_WE_VOTE_ID_MISSING '
             results = {
                 'success': success,
                 'status': status,
@@ -1678,21 +1694,21 @@ class FriendManager(models.Model):
             if len(suggested_friend_list):
                 success = True
                 suggested_friend_list_found = True
-                status = 'SUGGESTED_FRIEND_LIST_AS_VOTERS_RETRIEVED'
+                status += 'SUGGESTED_FRIEND_LIST_AS_VOTERS_RETRIEVED '
             else:
                 success = True
                 suggested_friend_list_found = False
-                status = 'NO_SUGGESTED_FRIEND_LIST_AS_VOTERS_RETRIEVED'
+                status += 'NO_SUGGESTED_FRIEND_LIST_AS_VOTERS_RETRIEVED '
         except SuggestedFriend.DoesNotExist:
             # No data found. Not a problem.
             success = True
             suggested_friend_list_found = False
-            status = 'NO_SUGGESTED_FRIEND_LIST_AS_VOTERS_RETRIEVED_DoesNotExist'
+            status += 'NO_SUGGESTED_FRIEND_LIST_AS_VOTERS_RETRIEVED_DoesNotExist '
             friend_list = []
         except Exception as e:
             success = False
             suggested_friend_list_found = False
-            status = 'FAILED retrieve_suggested_friend_list_as_voters '
+            status += 'FAILED retrieve_suggested_friend_list_as_voters ' + str(e) + ' '
 
         friend_results = self.retrieve_friends_we_vote_id_list(voter_we_vote_id)
         friends_we_vote_id_list = []

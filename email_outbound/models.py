@@ -254,7 +254,7 @@ class EmailManager(models.Model):
             email_outbound_description_saved = False
             email_outbound_description = EmailOutboundDescription()
             success = False
-            status += "EMAIL_OUTBOUND_DESCRIPTION_NOT_CREATED "
+            status += "EMAIL_OUTBOUND_DESCRIPTION_NOT_CREATED " + str(e) + " "
 
         results = {
             'success':                          success,
@@ -923,6 +923,66 @@ class EmailManager(models.Model):
             'success':                  success,
             'status':                   status,
             'at_least_one_email_found': True,
+        }
+        return results
+
+    def send_scheduled_emails_waiting_for_verification(self, sender_we_vote_id, sender_name=''):
+        """
+        Searched the scheduled email for the text "Your   friend" (with three spaces) and replace with sender_name
+        :param sender_we_vote_id:
+        :param sender_name:
+        :return:
+        """
+        at_least_one_email_found = False
+        save_scheduled_email = False
+        send_status = WAITING_FOR_VERIFICATION
+        success = True
+        status = ""
+        scheduled_email_results = self.retrieve_scheduled_email_list_from_send_status(
+            sender_we_vote_id, send_status)
+        status += scheduled_email_results['status']
+        if scheduled_email_results['scheduled_email_list_found']:
+            scheduled_email_list = scheduled_email_results['scheduled_email_list']
+            for scheduled_email in scheduled_email_list:
+                at_least_one_email_found = True
+                if positive_value_exists(sender_name):
+                    # Check scheduled_email.message_text and scheduled_email.message_html
+                    # if there is a variable that hasn't been filled in yet.
+                    try:
+                        if scheduled_email.message_text:
+                            save_scheduled_email = True
+                            scheduled_email.message_text = \
+                                scheduled_email.message_text.replace('Your   friend', sender_name)
+                    except Exception as e:
+                        status += "COULD_NOT_REPLACE_NAME_IN_MESSAGE_TEXT " + str(e) + " "
+                try:
+                    if scheduled_email.message_html:
+                        save_scheduled_email = True
+                        scheduled_email.message_html = \
+                            scheduled_email.message_html.replace('Your   friend', sender_name)
+                except Exception as e:
+                    status += "COULD_NOT_REPLACE_NAME_IN_HTML " + str(e) + " "
+                if save_scheduled_email:
+                    try:
+                        scheduled_email.save()
+                        status += "SCHEDULED_EMAIL_SAVED "
+                    except Exception as e:
+                        status += "COULD_NOT_SAVE_SCHEDULED_EMAIL " + str(e) + " "
+                send_results = self.send_scheduled_email(scheduled_email)
+                email_scheduled_sent = send_results['email_scheduled_sent']
+                status += send_results['status']
+                if email_scheduled_sent:
+                    # If scheduled email sent successfully change their status from WAITING_FOR_VERIFICATION to SENT
+                    send_status = SENT
+                    try:
+                        scheduled_email.send_status = send_status
+                        scheduled_email.save()
+                    except Exception as e:
+                        status += "FAILED_TO_UPDATE_SEND_STATUS: " + str(e) + ' '
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'at_least_one_email_found': at_least_one_email_found,
         }
         return results
 

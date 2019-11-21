@@ -2771,10 +2771,14 @@ class Organization(models.Model):
     def is_news_organization(self):
         return self.organization_type in NEWS_ORGANIZATION
 
-    def is_organization_type_specified(self):
+    def is_organization(self):
+        """
+        Parallel to isSpeakerTypeOrganization in WebApp
+        :return:
+        """
         return self.organization_type in (
-            NONPROFIT_501C3, NONPROFIT_501C4, POLITICAL_ACTION_COMMITTEE,
-            CORPORATION, NEWS_ORGANIZATION)
+            CORPORATION, GROUP, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, NEWS_ORGANIZATION,
+            ORGANIZATION, POLITICAL_ACTION_COMMITTEE)
 
     def is_private_citizen(self):
         # Return True if this person or organization is not in the public sphere
