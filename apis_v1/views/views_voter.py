@@ -2058,10 +2058,11 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
             voter_must_request_new_code = True
 
         if voter_found:
+            email_manager = EmailManager()
+            sms_manager = SMSManager()
             if positive_value_exists(code_sent_to_sms_phone_number):
                 existing_verified_sms_found = False
                 new_owner_voter = None
-                sms_manager = SMSManager()
                 # Check to see if this sms is already owned by an existing account
                 # We get the new sms being verified, so we can find the normalized_sms_phone_number and check to see
                 # if that is in use by someone else.

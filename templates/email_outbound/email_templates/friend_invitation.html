@@ -1,5 +1,5 @@
 {# email_outbound/email_templates/friend_invitation.html #}<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional //EN">
-<html>
+<html>{# Later we replace "Your   friend" with the sender name. #}
   <head>
     <title>We Vote</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -45,7 +45,7 @@
                     <td height="28" style="line-height:28px;">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;color:#141823;"><a href="{{ see_all_friend_requests_url }}" style="color:#3b5998;text-decoration:none;">{% if sender_name %}{{ sender_name }}{% else %}{{ sender_email_address }}{% endif %}</a> wants to be friends with you on We Vote. Each of you will see what the other supports or opposes. If the Confirm Request button does not work, please copy and paste this link into a browser: {{ confirm_friend_request_url }} If the See All Requests button does not work, please use this link: {{ see_all_friend_requests_url }}</span></td>
+                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;color:#141823;"><a href="{{ see_all_friend_requests_url }}" style="color:#3b5998;text-decoration:none;">{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}</a>{% if sender_email_address %} ({{ sender_email_address }}){% elif sms_phone_number %} ({{ sms_phone_number }}){% endif %} wants to be friends with you on We Vote. If you confirm, each of you will see what the other supports or opposes.</span></td>
                   </tr>
                   <tr style="">
                     <td height="14" style="line-height:14px;">&nbsp;</td>
@@ -70,7 +70,7 @@
                                     {% endif %}
                                     {% if sender_description or sender_network_details %}
                                         <tr>
-                                          <td style=""><a href="{{ see_all_friend_requests_url }}" style="color:#141823;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;font-weight:bold;">{% if sender_name %}{{ sender_name }}{% else %}{{ sender_email_address }}{% endif %}</a></td>
+                                          <td style=""><a href="{{ see_all_friend_requests_url }}" style="color:#141823;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;font-weight:bold;">{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}</a></td>
                                         </tr>
                                         {% if sender_description %}
                                         <tr>
@@ -136,6 +136,23 @@
                   </tr>
                   <tr style="">
                     <td height="32" style="line-height:32px;" colspan="3">&nbsp;</td>
+                  </tr>
+                </table>
+              </td>
+              <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>
+            </tr>
+            <tr>
+              <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>
+              <td style="">
+                <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
+                  <tr style="">
+                    <td height="14" style="line-height:14px;">&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;color:#141823;">If the Confirm Request button does not work, please copy and paste this link into a browser: {{ confirm_friend_request_url }}</span></td>
+                  </tr>
+                  <tr>
+                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;color:#141823;">If the See All Requests button does not work, please use this link: {{ see_all_friend_requests_url }}</span></td>
                   </tr>
                 </table>
               </td>
