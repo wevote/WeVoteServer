@@ -5,7 +5,7 @@ Hello {{ recipient_name }},
 Hello,
 {% endif %}
 
-{% if sender_name %}{{ sender_name }}{% else %}{{ sender_email_address }}{% endif %} has accepted your invitation to be friends on We Vote.
+{% if sender_name %}{{ sender_name }}{% else %}Your friend{% endif %}{% if sender_email_address %} ({{ sender_email_address }}){% endif %} has accepted your invitation to be friends on We Vote.
 {% if invitation_message %}
 "{{ invitation_message }}"{% endif %}
 

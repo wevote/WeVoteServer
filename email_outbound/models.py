@@ -955,19 +955,19 @@ class EmailManager(models.Model):
                                 scheduled_email.message_text.replace('Your   friend', sender_name)
                     except Exception as e:
                         status += "COULD_NOT_REPLACE_NAME_IN_MESSAGE_TEXT " + str(e) + " "
-                try:
-                    if scheduled_email.message_html:
-                        save_scheduled_email = True
-                        scheduled_email.message_html = \
-                            scheduled_email.message_html.replace('Your   friend', sender_name)
-                except Exception as e:
-                    status += "COULD_NOT_REPLACE_NAME_IN_HTML " + str(e) + " "
-                if save_scheduled_email:
                     try:
-                        scheduled_email.save()
-                        status += "SCHEDULED_EMAIL_SAVED "
+                        if scheduled_email.message_html:
+                            save_scheduled_email = True
+                            scheduled_email.message_html = \
+                                scheduled_email.message_html.replace('Your   friend', sender_name)
                     except Exception as e:
-                        status += "COULD_NOT_SAVE_SCHEDULED_EMAIL " + str(e) + " "
+                        status += "COULD_NOT_REPLACE_NAME_IN_HTML " + str(e) + " "
+                    if save_scheduled_email:
+                        try:
+                            scheduled_email.save()
+                            status += "SCHEDULED_EMAIL_SAVED "
+                        except Exception as e:
+                            status += "COULD_NOT_SAVE_SCHEDULED_EMAIL " + str(e) + " "
                 send_results = self.send_scheduled_email(scheduled_email)
                 email_scheduled_sent = send_results['email_scheduled_sent']
                 status += send_results['status']

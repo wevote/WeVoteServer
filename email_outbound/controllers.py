@@ -943,6 +943,8 @@ def voter_email_address_verify_for_api(voter_device_id, email_secret_key):  # vo
             send_results = email_manager.send_scheduled_emails_waiting_for_verification(
                 from_voter_we_vote_id, organization_full_name)
             status += send_results['status']
+            # invitation_update_results = friend_manager.update_friend_data_with_name(
+            #     from_voter_we_vote_id, organization_full_name)
         else:
             status += "CANNOT_SEND_SCHEDULED_EMAILS_WITHOUT_ORGANIZATION_NAME-EMAIL_CONTROLLER "
     elif positive_value_exists(voter.get_full_name(real_name_only)):
