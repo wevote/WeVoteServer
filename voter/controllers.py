@@ -1461,7 +1461,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         # We want to send an email letting the original inviter know that the person accepted
         accepting_voter_we_vote_id = invitation_owner_voter.we_vote_id
         original_sender_we_vote_id = sender_voter_we_vote_id
-        friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id)
+        results = friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id)
+        status += results['status']
 
         # Now we have voter (from voter_device_id) and invitation_owner_voter (from invitation_secret_key)
         # We are going to make the email_owner_voter the new master

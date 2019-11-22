@@ -75,51 +75,58 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
 
     email_manager = EmailManager()
 
-    # We only care if the original_sender (which is the person we are sending this notification to) has an email address
-    if not original_sender_voter.has_email_with_verified_ownership():
-        error_results = {
-            'status':                               "ORIGINAL_SENDER_VOTER_DOES_NOT_HAVE_VALID_EMAIL",
-            'success':                              False,
-        }
-        return error_results
+    # Retrieve the email address of the original_sender (which is the person we are sending this notification to)
+    original_sender_email_we_vote_id = ""
+    original_sender_email = ""
+    if original_sender_voter.has_email_with_verified_ownership():
+        results = email_manager.retrieve_primary_email_with_ownership_verified(original_sender_we_vote_id)
+        if results['email_address_object_found']:
+            original_sender_email_object = results['email_address_object']
+            original_sender_email_we_vote_id = original_sender_email_object.we_vote_id
+            original_sender_email = original_sender_email_object.normalized_email_address
+    else:
+        # Not having an email is ok now, since the original_sender could have signed in with SMS or Twitter
+        status += "ORIGINAL_SENDER_VOTER_DOES_NOT_HAVE_VALID_EMAIL "
 
-    results = email_manager.retrieve_primary_email_with_ownership_verified(original_sender_we_vote_id)
-    if results['email_address_object_found']:
-        recipient_email_address_object = results['email_address_object']
+    # Retrieve the email address of the accepting_voter (the person who received the friendship invitation)
+    accepting_voter_email = ""
+    accepting_voter_we_vote_id = accepting_voter.we_vote_id
+    if accepting_voter.has_email_with_verified_ownership():
+        results = email_manager.retrieve_primary_email_with_ownership_verified(accepting_voter_we_vote_id)
+        if results['email_address_object_found']:
+            accepting_voter_email_object = results['email_address_object']
+            accepting_voter_email = accepting_voter_email_object.normalized_email_address
+    else:
+        # Not having an email is ok now, since the accepting_voter could have signed in with SMS or Twitter
+        status += "ACCEPTING_VOTER_DOES_NOT_HAVE_VALID_EMAIL "
 
-        sender_voter_we_vote_id = accepting_voter.we_vote_id
-        recipient_voter_we_vote_id = original_sender_voter.we_vote_id
-        recipient_email_we_vote_id = recipient_email_address_object.we_vote_id
-        recipient_voter_email = recipient_email_address_object.normalized_email_address
+    if positive_value_exists(original_sender_email_we_vote_id):
+        original_sender_voter_we_vote_id = original_sender_voter.we_vote_id
 
         # Template variables
         real_name_only = True
-        recipient_name = original_sender_voter.get_full_name(real_name_only)
-
-        real_name_only = True
-        sender_name = accepting_voter.get_full_name(real_name_only)
-        sender_photo = accepting_voter.voter_photo_url()
-        sender_description = ""
-        sender_network_details = ""
+        original_sender_name = original_sender_voter.get_full_name(real_name_only)
+        accepting_voter_name = accepting_voter.get_full_name(real_name_only)
+        accepting_voter_photo = accepting_voter.voter_photo_url()
+        accepting_voter_description = ""
+        accepting_voter_network_details = ""
 
         # Variables used by templates/email_outbound/email_templates/friend_accepted_invitation.txt and .html
-        if positive_value_exists(sender_name):
-            subject = sender_name + " has accepted your invitation on We Vote"
+        if positive_value_exists(accepting_voter_name):
+            subject = accepting_voter_name + " has accepted your invitation on We Vote"
         else:
             subject = "Friend accepted your invitation on We Vote"
-
-        system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
 
         template_variables_for_json = {
             "subject":                      subject,
             "invitation_message":           invitation_message,
-            "sender_name":                  sender_name,
-            "sender_photo":                 sender_photo,
-            "sender_email_address":         system_sender_email_address,  # TODO DALE WAS sender_email_address,
-            "sender_description":           sender_description,
-            "sender_network_details":       sender_network_details,
-            "recipient_name":               recipient_name,
-            "recipient_voter_email":        recipient_voter_email,
+            "sender_name":                  accepting_voter_name,
+            "sender_photo":                 accepting_voter_photo,
+            "sender_email_address":         accepting_voter_email,
+            "sender_description":           accepting_voter_description,
+            "sender_network_details":       accepting_voter_network_details,
+            "recipient_name":               original_sender_name,
+            "recipient_voter_email":        original_sender_email,
             "see_your_friend_list_url":     WEB_APP_ROOT_URL + "/friends",
             "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
             "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
@@ -128,11 +135,15 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
 
         # Create the outbound email description, then schedule it
         kind_of_email_template = FRIEND_ACCEPTED_INVITATION_TEMPLATE
-        sender_normalized_email = ""
+        sender_voter_email = ""
         outbound_results = email_manager.create_email_outbound_description(
-            sender_voter_we_vote_id, sender_normalized_email, recipient_voter_we_vote_id,
-            recipient_email_we_vote_id, recipient_voter_email,
-            template_variables_in_json, kind_of_email_template)
+            sender_voter_we_vote_id=accepting_voter_we_vote_id,
+            sender_voter_email=sender_voter_email,
+            recipient_voter_we_vote_id=original_sender_voter_we_vote_id,
+            recipient_email_we_vote_id=original_sender_email_we_vote_id,
+            recipient_voter_email=original_sender_email,
+            template_variables_in_json=template_variables_in_json,
+            kind_of_email_template=kind_of_email_template)
         status += outbound_results['status'] + " "
         if outbound_results['email_outbound_description_saved']:
             email_outbound_description = outbound_results['email_outbound_description']
@@ -144,10 +155,6 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
                 send_results = email_manager.send_scheduled_email(email_scheduled)
                 email_scheduled_sent = send_results['email_scheduled_sent']
                 status += send_results['status']
-
-    # When we are done scheduling all email, send it with a single connection to the smtp server
-    # if send_now:
-    #     send_results = email_manager.send_scheduled_email_list(messages_to_send)
 
     results = {
         'success':                              True,
@@ -550,8 +557,9 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
     # If a voter_device_id is passed in that isn't valid, we want to throw an error
     device_id_results = is_voter_device_id_valid(voter_device_id)
     if not device_id_results['success']:
+        status += device_id_results['status']
         json_data = {
-            'status':                                       device_id_results['status'],
+            'status':                                       status,
             'success':                                      False,
             'voter_device_id':                              voter_device_id,
             'voter_has_data_to_preserve':                   False,
@@ -563,9 +571,10 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
         return json_data
 
     if not positive_value_exists(invitation_secret_key):
+        status += "VOTER_EMAIL_ADDRESS_VERIFY_MISSING_SECRET_KEY "
         error_results = {
-            'status':                                       "VOTER_EMAIL_ADDRESS_VERIFY_MISSING_SECRET_KEY",
-            'success':                                      False,
+            'status':                                       status,
+            'success':                                      True,
             'voter_device_id':                              voter_device_id,
             'voter_has_data_to_preserve':                   False,
             'invitation_found':                             False,
@@ -579,8 +588,9 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
+        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
         error_results = {
-            'status':                                       "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'status':                                       status,
             'success':                                      False,
             'voter_device_id':                              voter_device_id,
             'voter_has_data_to_preserve':                   False,
@@ -597,9 +607,10 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
     friend_manager = FriendManager()
     friend_invitation_results = friend_manager.retrieve_friend_invitation_from_secret_key(invitation_secret_key)
     if not friend_invitation_results['friend_invitation_found']:
+        status += "INVITATION_NOT_FOUND_FROM_SECRET_KEY "
         error_results = {
-            'status':                                       "INVITATION_NOT_FOUND_FROM_SECRET_KEY",
-            'success':                                      False,
+            'status':                                       status,
+            'success':                                      True,
             'voter_device_id':                              voter_device_id,
             'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
             'invitation_found':                             False,
@@ -617,9 +628,10 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
         friend_invitation_voter_link = friend_invitation_results['friend_invitation_voter_link']
 
         if friend_invitation_voter_link.sender_voter_we_vote_id == voter_we_vote_id:
+            status += "SENDER_AND_RECIPIENT_ARE_IDENTICAL_FAILED "
             error_results = {
-                'status':                                       "SENDER_AND_RECIPIENT_ARE_IDENTICAL_FAILED",
-                'success':                                      False,
+                'status':                                       status,
+                'success':                                      True,
                 'voter_device_id':                              voter_device_id,
                 'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
                 'invitation_found':                             True,
@@ -666,8 +678,8 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
         # We don't need to do anything with the email because this was an invitation to a known voter
     elif friend_invitation_results['friend_invitation_email_link_found']:
         friend_invitation_email_link = friend_invitation_results['friend_invitation_email_link']
-        status += "SENDER_AND_RECIPIENT_ARE_IDENTICAL_FAILED "
         if friend_invitation_email_link.sender_voter_we_vote_id == voter_we_vote_id:
+            status += "SENDER_AND_RECIPIENT_ARE_IDENTICAL_FAILED "
             error_results = {
                 'status':                                       status,
                 'success':                                      False,
