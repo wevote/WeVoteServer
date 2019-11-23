@@ -519,6 +519,8 @@ class OrganizationManager(models.Manager):
             elif positive_value_exists(incoming_hostname):
                 status = "ERROR_RETRIEVING_ORGANIZATION_WITH_INCOMING_HOSTNAME "
                 incoming_hostname = incoming_hostname.strip().lower()
+                incoming_hostname = incoming_hostname.replace('http://', '')
+                incoming_hostname = incoming_hostname.replace('https://', '')
                 incoming_subdomain = incoming_hostname.replace('.wevote.us', '')
                 if read_only:
                     organization_on_stage = Organization.objects.using('readonly')\
@@ -537,7 +539,7 @@ class OrganizationManager(models.Manager):
             status = "ERROR_MORE_THAN_ONE_ORGANIZATION_FOUND "
             # logger.warning("Organization.MultipleObjectsReturned")
         except Organization.DoesNotExist as e:
-            status += ", ORGANIZATION_NOT_FOUND "
+            status += ", ORGANIZATION_NOT_FOUND " + str(e) + " "
             # handle_exception(e, logger=logger, exception_message=status)
             error_result = True
             exception_does_not_exist = True
@@ -556,6 +558,56 @@ class OrganizationManager(models.Manager):
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,
             'MultipleObjectsReturned':      exception_multiple_object_returned,
+        }
+        return results
+
+    def retrieve_organization_reserved_hostname(self, incoming_hostname, read_only=False):
+        status = ""
+        success = False
+        hostname_is_reserved = False
+        reserved_domain_found = False
+        reserved_domain = None
+        if not positive_value_exists(incoming_hostname):
+            status += "MISSING_INCOMING_HOSTNAME "
+            results = {
+                'success': success,
+                'status': status,
+                'hostname_is_reserved': hostname_is_reserved,
+                'reserved_domain':          reserved_domain,
+                'reserved_domain_found':    reserved_domain_found,
+            }
+            return results
+
+        incoming_hostname = incoming_hostname.strip().lower()
+        incoming_hostname = incoming_hostname.replace('http://', '')
+        incoming_hostname = incoming_hostname.replace('https://', '')
+        incoming_subdomain = incoming_hostname.replace('.wevote.us', '')
+
+        try:
+            if read_only:
+                reserved_domain = OrganizationReservedDomain.objects.using('readonly') \
+                    .get(Q(full_domain_string__iexact=incoming_hostname) |
+                         Q(subdomain_string__iexact=incoming_subdomain))
+                reserved_domain_found = True
+                hostname_is_reserved = True
+            else:
+                reserved_domain = OrganizationReservedDomain.objects \
+                    .get(Q(full_domain_string__iexact=incoming_hostname) |
+                         Q(subdomain_string__iexact=incoming_subdomain))
+                reserved_domain_found = True
+                hostname_is_reserved = True
+        except OrganizationReservedDomain.MultipleObjectsReturned as e:
+            hostname_is_reserved = True
+            status += "RETRIEVE_ISSUE_MULTIPLE_OBJECTS_RETURNED " + str(e) + " "
+        except Exception as e:
+            success = False
+            status += "COULD_NOT_FIND_SINGLE_ENTRY " + str(e) + " "
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'hostname_is_reserved':     hostname_is_reserved,
+            'reserved_domain':          reserved_domain,
+            'reserved_domain_found':    reserved_domain_found,
         }
         return results
 
