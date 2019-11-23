@@ -7,6 +7,7 @@ from .models import GENERIC_SMS_TEMPLATE, SMSPhoneNumber, SMSManager, SMSSchedul
     SENT, SIGN_IN_CODE_SMS_TEMPLATE, TO_BE_PROCESSED, WAITING_FOR_VERIFICATION
 from config.base import get_environment_variable
 import json
+from organization.controllers import transform_web_app_url
 import phonenumbers
 from voter.models import VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
@@ -15,7 +16,6 @@ from wevote_functions.functions import is_voter_device_id_valid, positive_value_
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
-WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 
 def validate_sms_phone_number(sms_phone_number, region="US"):
@@ -367,7 +367,7 @@ def schedule_sms_with_sms_description(sms_description, send_status=TO_BE_PROCESS
 
 def schedule_verification_sms(sender_voter_we_vote_id, recipient_voter_we_vote_id,
                               recipient_sms_we_vote_id, recipient_voter_sms,
-                              recipient_sms_phone_number_secret_key):
+                              recipient_sms_phone_number_secret_key, web_app_root_url=''):
     """
     TODO: This needs to be reworked
     When a voter adds a new sms address for self, create and send an outbound sms with a link
@@ -377,6 +377,7 @@ def schedule_verification_sms(sender_voter_we_vote_id, recipient_voter_we_vote_i
     :param recipient_sms_we_vote_id:
     :param recipient_voter_sms:
     :param recipient_sms_phone_number_secret_key:
+    :param web_app_root_url:
     :return:
     """
     sms_scheduled_saved = False
@@ -386,6 +387,7 @@ def schedule_verification_sms(sender_voter_we_vote_id, recipient_voter_we_vote_i
     sms_manager = SMSManager()
     status = ""
     kind_of_sms_template = 'VERIFY_SMS_PHONE_NUMBER_TEMPLATE'
+    web_app_root_url_verified = transform_web_app_url(web_app_root_url)  # Change to client URL if needed
 
     # Generate secret key if needed
     if not positive_value_exists(recipient_sms_phone_number_secret_key):
@@ -406,11 +408,11 @@ def schedule_verification_sms(sender_voter_we_vote_id, recipient_voter_we_vote_i
 
     template_variables_for_json = {
         "subject":                      subject,
-        "recipient_voter_sms":        recipient_voter_sms,
-        "we_vote_url":                  WEB_APP_ROOT_URL,
-        "verify_sms_link":            WEB_APP_ROOT_URL + "/verify_sms/" + recipient_sms_phone_number_secret_key,
-        "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?sms_key=1234",
-        "sms_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/smsOpen?sms_key=1234",
+        "recipient_voter_sms":          recipient_voter_sms,
+        "we_vote_url":                  web_app_root_url_verified,
+        "verify_sms_link":              web_app_root_url_verified + "/verify_sms/" + recipient_sms_phone_number_secret_key,
+        "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?sms_key=1234",
+        "sms_open_url":                 WE_VOTE_SERVER_ROOT_URL + "/apis/v1/smsOpen?sms_key=1234",
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
     verification_from_sms = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
@@ -445,7 +447,7 @@ def schedule_verification_sms(sender_voter_we_vote_id, recipient_voter_we_vote_i
 
 def schedule_sign_in_code_sms(sender_voter_we_vote_id, recipient_voter_we_vote_id,
                               recipient_sms_we_vote_id, recipient_voter_sms,
-                              secret_numerical_code):
+                              secret_numerical_code, web_app_root_url=''):
     """
     When a voter wants to sign in with a pre-existing sms, create and send an outbound sms with a secret
     code that can be entered into the interface where the code was requested.
@@ -454,6 +456,7 @@ def schedule_sign_in_code_sms(sender_voter_we_vote_id, recipient_voter_we_vote_i
     :param recipient_sms_we_vote_id:
     :param recipient_voter_sms:
     :param secret_numerical_code:
+    :param web_app_root_url:
     :return:
     """
     sms_scheduled_saved = False
@@ -463,6 +466,7 @@ def schedule_sign_in_code_sms(sender_voter_we_vote_id, recipient_voter_we_vote_i
     sms_manager = SMSManager()
     status = ""
     kind_of_sms_template = SIGN_IN_CODE_SMS_TEMPLATE
+    web_app_root_url_verified = transform_web_app_url(web_app_root_url)  # Change to client URL if needed
 
     if not positive_value_exists(secret_numerical_code):
         status += "SCHEDULE_SIGN_IN_CODE_SMS-MISSING_SMS_SECRET_NUMERICAL_CODE "
@@ -477,7 +481,7 @@ def schedule_sign_in_code_sms(sender_voter_we_vote_id, recipient_voter_we_vote_i
 
     template_variables_for_json = {
         "recipient_voter_sms":      recipient_voter_sms,
-        "we_vote_url":              WEB_APP_ROOT_URL,
+        "we_vote_url":              web_app_root_url_verified,
         "secret_numerical_code":    secret_numerical_code,
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -678,7 +682,8 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
         send_sign_in_code_sms=False,
         resend_verification_sms=False,
         make_primary_sms_phone_number=False,
-        delete_sms=False):
+        delete_sms=False,
+        web_app_root_url=''):
     """
     voterSMSPhoneNumberSave
     :param voter_device_id:
@@ -688,6 +693,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
     :param resend_verification_sms:
     :param make_primary_sms_phone_number:
     :param delete_sms:
+    :param web_app_root_url:
     :return:
     """
     sms_phone_number_we_vote_id = ""
@@ -1112,7 +1118,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
             link_send_results = schedule_sign_in_code_sms(
                 voter_we_vote_id, voter_we_vote_id,
                 sms_phone_number_we_vote_id, normalized_sms_phone_number,
-                secret_code)
+                secret_code, web_app_root_url=web_app_root_url)
             status += link_send_results['status']
             sms_scheduled_sent = link_send_results['sms_scheduled_sent']
             if sms_scheduled_sent:
@@ -1134,7 +1140,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
             else incoming_sms_we_vote_id
         verifications_send_results = schedule_verification_sms(
             voter_we_vote_id, voter_we_vote_id, sms_phone_number_we_vote_id, normalized_sms_phone_number,
-            results['secret_code'])
+            results['secret_code'], web_app_root_url=web_app_root_url)
         status += verifications_send_results['status']
         sms_scheduled_saved = verifications_send_results['sms_scheduled_saved']
         if sms_scheduled_saved:

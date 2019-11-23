@@ -42,6 +42,7 @@ import re
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")  # organizationsSyncOut
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
@@ -2537,7 +2538,7 @@ def retrieve_organization_list_for_all_upcoming_elections(limit_to_this_state_co
     return results
 
 
-def site_configuration_retrieve_for_api(hostname):
+def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
     """
     Called from siteConfigurationRetrieve api
     :param hostname:
@@ -2545,10 +2546,16 @@ def site_configuration_retrieve_for_api(hostname):
     """
     status = ""
     success = True
+    reserved_by_we_vote = False
     organization = None
     organization_found = False
     if positive_value_exists(hostname):
         hostname = hostname.strip().lower()
+        try:
+            hostname = hostname.replace('http://', '')
+            hostname = hostname.replace('https://', '')
+        except Exception as e:
+            status += "COULD_NOT_REPLACE_HTTP " + str(e) + " "
         organization_manager = OrganizationManager()
         results = organization_manager.retrieve_organization_from_incoming_hostname(hostname, read_only=True)
         organization_found = results['organization_found']
@@ -2566,7 +2573,7 @@ def site_configuration_retrieve_for_api(hostname):
         features_provided_bitmap = 0
         organization_we_vote_id = ''
 
-    json_data = {
+    results = {
         'success':                  success,
         'status':                   status,
         'chosen_hide_we_vote_logo': chosen_hide_we_vote_logo,
@@ -2574,8 +2581,20 @@ def site_configuration_retrieve_for_api(hostname):
         'features_provided_bitmap': features_provided_bitmap,
         'hostname':                 hostname,
         'organization_we_vote_id':  organization_we_vote_id,
+        'reserved_by_we_vote':      reserved_by_we_vote,
     }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    return results
+
+
+def transform_web_app_url(web_app_root_url):
+    web_app_root_url_verified = WEB_APP_ROOT_URL
+    if positive_value_exists(web_app_root_url):
+        configuration_results = site_configuration_retrieve_for_api(web_app_root_url)
+        # If this hostname is either reserved by We Vote or a current organization is found, then use the custom URL
+        if positive_value_exists(configuration_results['reserved_by_we_vote']) \
+                or positive_value_exists(configuration_results['organization_we_vote_id']):
+            web_app_root_url_verified = 'https://{hostname}'.format(hostname=configuration_results['hostname'])
+    return web_app_root_url_verified
 
 
 def update_social_media_statistics_in_other_tables(organization):

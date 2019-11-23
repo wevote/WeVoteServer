@@ -753,6 +753,7 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
     make_primary_email = positive_value_exists(request.GET.get('make_primary_email', False))
     delete_email = positive_value_exists(request.GET.get('delete_email', ""))
     is_cordova = positive_value_exists(request.GET.get('is_cordova', False))
+    hostname = positive_value_exists(request.GET.get('hostname', ''))
 
     results = voter_email_address_save_for_api(voter_device_id=voter_device_id,
                                                text_for_email_address=text_for_email_address,
@@ -764,6 +765,7 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
                                                make_primary_email=make_primary_email,
                                                delete_email=delete_email,
                                                is_cordova=is_cordova,
+                                               web_app_root_url=hostname,
                                                )
 
     json_data = {
@@ -995,12 +997,14 @@ def voter_merge_two_accounts_view(request):  # voterMergeTwoAccounts
     facebook_secret_key = request.GET.get('facebook_secret_key', '')
     twitter_secret_key = request.GET.get('twitter_secret_key', '')
     invitation_secret_key = request.GET.get('invitation_secret_key', '')
+    hostname = request.GET.get('hostname', '')
 
     results = voter_merge_two_accounts_for_api(voter_device_id=voter_device_id,
                                                email_secret_key=email_secret_key,
                                                facebook_secret_key=facebook_secret_key,
                                                twitter_secret_key=twitter_secret_key,
-                                               invitation_secret_key=invitation_secret_key)
+                                               invitation_secret_key=invitation_secret_key,
+                                               web_app_root_url=hostname)
 
     json_data = {
         'status':                           results['status'],
@@ -1365,6 +1369,7 @@ def voter_sms_phone_number_save_view(request):  # voterSMSPhoneNumberSave
     send_sign_in_code_sms = positive_value_exists(request.GET.get('send_sign_in_code_sms', False))
     make_primary_sms_phone_number = positive_value_exists(request.GET.get('make_primary_sms_phone_number', False))
     delete_sms = positive_value_exists(request.GET.get('delete_sms', ""))
+    hostname = request.GET.get('hostname', '')
 
     results = voter_sms_phone_number_save_for_api(
         voter_device_id=voter_device_id,
@@ -1374,6 +1379,7 @@ def voter_sms_phone_number_save_view(request):  # voterSMSPhoneNumberSave
         resend_verification_sms=resend_verification_sms,
         make_primary_sms_phone_number=make_primary_sms_phone_number,
         delete_sms=delete_sms,
+        web_app_root_url=hostname,
         )
 
     json_data = {

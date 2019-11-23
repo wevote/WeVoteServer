@@ -26,27 +26,6 @@
     <input type="hidden" name="state_code" value="{{ state_code }}">
 </form>
 
-{% if reserved_domain_list %}
-    <h3>Reserved by We Vote</h3>
-    {% for reserved_domain in reserved_domain_list %}
-        {% if reserved_domain.full_domain_string %}
-            <strong>{{reserved_domain.full_domain_string}}</strong>
-            <a href="https://{{ reserved_domain.full_domain_string }}"
-               target="_blank"
-               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-        {% elif reserved_domain.subdomain_string %}
-            <strong>{{reserved_domain.subdomain_string}}</strong>.WeVote.US
-            <a href="https://{{ subdomain_string }}.wevote.us"
-               target="_blank"
-               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-        {% endif %}
-        <a href="{% url 'organization:reserved_domain_edit' %}?reserved_domain_id={{ reserved_domain.id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">edit</a>
-        <br />
-    {% endfor %}
-{% else %}
-    <p>(no reserved domains found)</p>
-{% endif %}
-
 {% if organization_domain_list %}
     <h3>Reserved by Organizations</h3>
     {% for organization in organization_domain_list %}
@@ -73,6 +52,27 @@
     {% endfor %}
 {% else %}
     <p>(no organization domains found)</p>
+{% endif %}
+
+{% if reserved_domain_list %}
+    <h3>Reserved by We Vote</h3>
+    {% for reserved_domain in reserved_domain_list %}
+        {% if reserved_domain.full_domain_string %}
+            <strong>{{reserved_domain.full_domain_string}}</strong>
+            <a href="https://{{ reserved_domain.full_domain_string }}"
+               target="_blank"
+               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% elif reserved_domain.subdomain_string %}
+            <strong>{{reserved_domain.subdomain_string}}</strong>.WeVote.US
+            <a href="https://{{ subdomain_string }}.wevote.us"
+               target="_blank"
+               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+        <a href="{% url 'organization:reserved_domain_edit' %}?reserved_domain_id={{ reserved_domain.id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">edit</a>
+        <br />
+    {% endfor %}
+{% else %}
+    <p>(no reserved domains found)</p>
 {% endif %}
 
     <p></p>

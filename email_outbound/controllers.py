@@ -8,6 +8,7 @@ from .models import EmailAddress, EmailManager, EmailOutboundDescription, EmailS
     SENT, SIGN_IN_CODE_EMAIL_TEMPLATE, TO_BE_PROCESSED, VERIFY_EMAIL_ADDRESS_TEMPLATE, WAITING_FOR_VERIFICATION
 from config.base import get_environment_variable
 import json
+from organization.controllers import transform_web_app_url
 from organization.models import OrganizationManager, INDIVIDUAL
 from validate_email import validate_email
 from voter.models import VoterDeviceLinkManager, VoterManager
@@ -17,7 +18,6 @@ from wevote_functions.functions import is_voter_device_id_valid, positive_value_
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
-WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 
 def augment_email_address_list(email_address_list, voter):
@@ -401,7 +401,7 @@ def schedule_email_with_email_outbound_description(email_outbound_description, s
 
 def schedule_verification_email(sender_voter_we_vote_id, recipient_voter_we_vote_id,
                                 recipient_email_we_vote_id, recipient_voter_email,
-                                recipient_email_address_secret_key):
+                                recipient_email_address_secret_key, web_app_root_url=''):
     """
     When a voter adds a new email address for self, create and send an outbound email with a link
     that the voter can click to verify the email.
@@ -410,6 +410,7 @@ def schedule_verification_email(sender_voter_we_vote_id, recipient_voter_we_vote
     :param recipient_email_we_vote_id:
     :param recipient_voter_email:
     :param recipient_email_address_secret_key:
+    :param web_app_root_url:
     :return:
     """
     email_scheduled_saved = False
@@ -419,6 +420,7 @@ def schedule_verification_email(sender_voter_we_vote_id, recipient_voter_we_vote
     email_manager = EmailManager()
     status = ""
     kind_of_email_template = VERIFY_EMAIL_ADDRESS_TEMPLATE
+    web_app_root_url_verified = transform_web_app_url(web_app_root_url)  # Change to client URL if needed
 
     # Generate secret key if needed
     if not positive_value_exists(recipient_email_address_secret_key):
@@ -440,9 +442,10 @@ def schedule_verification_email(sender_voter_we_vote_id, recipient_voter_we_vote
     template_variables_for_json = {
         "subject":                      subject,
         "recipient_voter_email":        recipient_voter_email,
-        "we_vote_url":                  WEB_APP_ROOT_URL,
-        "verify_email_link":            WEB_APP_ROOT_URL + "/verify_email/" + recipient_email_address_secret_key,
-        "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
+        "we_vote_url":                  web_app_root_url_verified,
+        "verify_email_link":
+            web_app_root_url_verified + "/verify_email/" + recipient_email_address_secret_key,
+        "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",
         "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -478,7 +481,7 @@ def schedule_verification_email(sender_voter_we_vote_id, recipient_voter_we_vote
 
 def schedule_link_to_sign_in_email(sender_voter_we_vote_id, recipient_voter_we_vote_id,
                                    recipient_email_we_vote_id, recipient_voter_email,
-                                   recipient_email_address_secret_key, is_cordova):
+                                   recipient_email_address_secret_key, is_cordova, web_app_root_url=''):
     """
     When a voter wants to sign in with a pre-existing email, create and send an outbound email with a link
     that the voter can click to sign in.
@@ -488,6 +491,7 @@ def schedule_link_to_sign_in_email(sender_voter_we_vote_id, recipient_voter_we_v
     :param recipient_voter_email:
     :param recipient_email_address_secret_key:
     :param is_cordova:
+    :param web_app_root_url:
     :return:
     """
     email_scheduled_saved = False
@@ -497,6 +501,7 @@ def schedule_link_to_sign_in_email(sender_voter_we_vote_id, recipient_voter_we_v
     email_manager = EmailManager()
     status = ""
     kind_of_email_template = LINK_TO_SIGN_IN_TEMPLATE
+    web_app_root_url_verified = transform_web_app_url(web_app_root_url)  # Change to client URL if needed
 
     # Generate secret key if needed
     if not positive_value_exists(recipient_email_address_secret_key):
@@ -514,16 +519,16 @@ def schedule_link_to_sign_in_email(sender_voter_we_vote_id, recipient_voter_we_v
         return results
 
     subject = "Sign in link you requested"
-    link_to_sign_in = WEB_APP_ROOT_URL + "/sign_in_email/" + recipient_email_address_secret_key
+    link_to_sign_in = web_app_root_url_verified + "/sign_in_email/" + recipient_email_address_secret_key
     if is_cordova:
         link_to_sign_in = "wevotetwitterscheme://sign_in_email/" + recipient_email_address_secret_key
 
     template_variables_for_json = {
         "subject":                      subject,
         "recipient_voter_email":        recipient_voter_email,
-        "we_vote_url":                  WEB_APP_ROOT_URL,
+        "we_vote_url":                  web_app_root_url_verified,
         "link_to_sign_in":              link_to_sign_in,
-        "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
+        "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",
         "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -559,7 +564,7 @@ def schedule_link_to_sign_in_email(sender_voter_we_vote_id, recipient_voter_we_v
 
 def schedule_sign_in_code_email(sender_voter_we_vote_id, recipient_voter_we_vote_id,
                                 recipient_email_we_vote_id, recipient_voter_email,
-                                secret_numerical_code):
+                                secret_numerical_code, web_app_root_url=''):
     """
     When a voter wants to sign in with a pre-existing email, create and send an outbound email with a secret
     code that can be entered into the interface where the code was requested.
@@ -568,6 +573,7 @@ def schedule_sign_in_code_email(sender_voter_we_vote_id, recipient_voter_we_vote
     :param recipient_email_we_vote_id:
     :param recipient_voter_email:
     :param secret_numerical_code:
+    :param web_app_root_url:
     :return:
     """
     email_scheduled_saved = False
@@ -577,6 +583,7 @@ def schedule_sign_in_code_email(sender_voter_we_vote_id, recipient_voter_we_vote
     email_manager = EmailManager()
     status = ""
     kind_of_email_template = SIGN_IN_CODE_EMAIL_TEMPLATE
+    web_app_root_url_verified = transform_web_app_url(web_app_root_url)  # Change to client URL if needed
 
     if not positive_value_exists(secret_numerical_code):
         results = {
@@ -593,9 +600,9 @@ def schedule_sign_in_code_email(sender_voter_we_vote_id, recipient_voter_we_vote
     template_variables_for_json = {
         "subject":                      subject,
         "recipient_voter_email":        recipient_voter_email,
-        "we_vote_url":                  WEB_APP_ROOT_URL,
+        "we_vote_url":                  web_app_root_url_verified,
         "secret_numerical_code":        secret_numerical_code,
-        "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
+        "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",
         "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -975,7 +982,8 @@ def voter_email_address_save_for_api(voter_device_id='',
                                      resend_verification_code_email=False,
                                      make_primary_email=False,
                                      delete_email=False,
-                                     is_cordova=False):
+                                     is_cordova=False,
+                                     web_app_root_url=''):
     """
     voterEmailAddressSave
     :param voter_device_id:
@@ -988,6 +996,7 @@ def voter_email_address_save_for_api(voter_device_id='',
     :param make_primary_email:
     :param delete_email:
     :param is_cordova:
+    :param web_app_root_url:
     :return:
     """
     email_address_we_vote_id = ""
@@ -1439,7 +1448,8 @@ def voter_email_address_save_for_api(voter_device_id='',
             else incoming_email_we_vote_id
         link_send_results = schedule_link_to_sign_in_email(voter_we_vote_id, voter_we_vote_id,
                                                            email_address_we_vote_id, text_for_email_address,
-                                                           recipient_email_address_secret_key, is_cordova)
+                                                           recipient_email_address_secret_key, is_cordova,
+                                                           web_app_root_url)
         status += link_send_results['status']
         email_scheduled_saved = link_send_results['email_scheduled_saved']
         if email_scheduled_saved:
@@ -1485,7 +1495,7 @@ def voter_email_address_save_for_api(voter_device_id='',
             link_send_results = schedule_sign_in_code_email(
                 voter_we_vote_id, voter_we_vote_id,
                 email_address_we_vote_id, text_for_email_address,
-                secret_code)
+                secret_code, web_app_root_url)
             status += link_send_results['status']
             email_scheduled_saved = link_send_results['email_scheduled_saved']
             if email_scheduled_saved:
@@ -1505,7 +1515,7 @@ def voter_email_address_save_for_api(voter_device_id='',
             else incoming_email_we_vote_id
         verifications_send_results = schedule_verification_email(voter_we_vote_id, voter_we_vote_id,
                                                                  email_address_we_vote_id, text_for_email_address,
-                                                                 recipient_email_address_secret_key)
+                                                                 recipient_email_address_secret_key, web_app_root_url)
         status += verifications_send_results['status']
         email_scheduled_saved = verifications_send_results['email_scheduled_saved']
         if email_scheduled_saved:
