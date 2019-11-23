@@ -10,7 +10,7 @@ from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EX
     ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
 from donate.controllers import donation_journal_history_for_a_voter, move_donation_info_to_another_voter
 from email_outbound.controllers import move_email_address_entries_to_another_voter, schedule_verification_email, \
-    WEB_APP_ROOT_URL, WE_VOTE_SERVER_ROOT_URL, schedule_email_with_email_outbound_description
+    WE_VOTE_SERVER_ROOT_URL, schedule_email_with_email_outbound_description
 from email_outbound.models import EmailManager, EmailAddress, FRIEND_INVITATION_TEMPLATE, TO_BE_PROCESSED, \
     WAITING_FOR_VERIFICATION, SEND_BALLOT_TO_FRIENDS, SEND_BALLOT_TO_SELF
 from follow.controllers import duplicate_follow_entries_to_another_voter, \
@@ -26,7 +26,7 @@ from import_export_facebook.models import FacebookManager
 from import_export_twitter.models import TwitterAuthManager
 import json
 from organization.controllers import move_membership_link_entries_to_another_voter, \
-    move_organization_to_another_complete
+    move_organization_to_another_complete, transform_web_app_url
 from organization.models import OrganizationListManager, OrganizationManager, INDIVIDUAL
 from position.controllers import duplicate_positions_to_another_voter, move_positions_to_another_voter
 from position.models import PositionListManager
@@ -44,7 +44,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_array, last_name_array,
                               email_addresses_raw, invitation_message, ballot_link,
-                              sender_email_address, verification_email_sent):  # emailBallotData
+                              sender_email_address, verification_email_sent, web_app_root_url=''):  # emailBallotData
     """
 
     :param voter_device_id:
@@ -56,6 +56,7 @@ def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_a
     :param ballot_link:
     :param sender_email_address:
     :param verification_email_sent
+    :param web_app_root_url
     :return:
     """
     success = False
@@ -168,7 +169,8 @@ def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_a
 
         verifications_send_results = schedule_verification_email(sender_voter.we_vote_id, recipient_voter_we_vote_id,
                                                                  recipient_email_we_vote_id, recipient_voter_email,
-                                                                 recipient_email_address_secret_key)
+                                                                 recipient_email_address_secret_key,
+                                                                 web_app_root_url)
         status += verifications_send_results['status']
         email_scheduled_saved = verifications_send_results['email_scheduled_saved']
         email_scheduled_id = verifications_send_results['email_scheduled_id']
@@ -203,7 +205,7 @@ def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_a
             send_results = send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_address,
                                              sender_email_with_ownership_verified,
                                              one_normalized_raw_email, first_name, last_name, invitation_message,
-                                             ballot_link)
+                                             ballot_link, web_app_root_url=web_app_root_url)
             status += send_results['status']
 
     else:
@@ -217,7 +219,7 @@ def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_a
                 send_results = send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_address,
                                                  sender_email_with_ownership_verified,
                                                  one_normalized_raw_email, first_name, last_name, invitation_message,
-                                                 ballot_link)
+                                                 ballot_link, web_app_root_url=web_app_root_url)
                 status += send_results['status']
         else:
             error_message_to_show_voter = "Please enter the email address of at least one friend."
@@ -559,7 +561,7 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
 
 def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_address,
                       sender_email_with_ownership_verified, one_normalized_raw_email, first_name, last_name,
-                      invitation_message, ballot_link):
+                      invitation_message, ballot_link, web_app_root_url=''):
     # Starting with a raw email address, find (or create) the EmailAddress entry
     # and the owner (Voter) if exists
     status = ""
@@ -570,6 +572,8 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
     sender_network_details = ""
     email_manager = EmailManager()
     error_message_to_show_voter = ''
+    web_app_root_url_verified = transform_web_app_url(web_app_root_url)  # Change to client URL if needed
+
     # Variables used by templates/email_outbound/email_templates/friend_invitation.txt and .html
     subject = "Ballot from We Vote"
     system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
@@ -679,9 +683,9 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
                     "sender_network_details":       sender_network_details,
                     "recipient_name":               recipient_name,
                     "recipient_voter_email":        recipient_voter_email,
-                    "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/friends",
-                    "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/key/" + invitation_secret_key,
-                    "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
+                    "see_all_friend_requests_url":  web_app_root_url_verified + "/friends",
+                    "confirm_friend_request_url":   web_app_root_url_verified + "/more/network/key/" + invitation_secret_key,
+                    "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",
                     "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
                 }
                 template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -744,9 +748,9 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
         "sender_network_details":       sender_network_details,
         "recipient_name":               recipient_name,
         "recipient_voter_email":        recipient_voter_email,
-        "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/friends",
-        "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/key/" + invitation_secret_key,
-        "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
+        "see_all_friend_requests_url":  web_app_root_url_verified + "/friends",
+        "confirm_friend_request_url":   web_app_root_url_verified + "/more/network/key/" + invitation_secret_key,
+        "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",
         "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -933,7 +937,8 @@ def voter_create_for_api(voter_device_id):  # voterCreate
 
 
 def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
-        voter_device_id, email_secret_key, facebook_secret_key, twitter_secret_key, invitation_secret_key):
+        voter_device_id, email_secret_key, facebook_secret_key, twitter_secret_key, invitation_secret_key,
+        web_app_root_url=''):
     current_voter_found = False
     email_owner_voter_found = False
     facebook_owner_voter_found = False
@@ -1461,7 +1466,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         # We want to send an email letting the original inviter know that the person accepted
         accepting_voter_we_vote_id = invitation_owner_voter.we_vote_id
         original_sender_we_vote_id = sender_voter_we_vote_id
-        results = friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id)
+        results = friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id,
+                                                  web_app_root_url=web_app_root_url)
         status += results['status']
 
         # Now we have voter (from voter_device_id) and invitation_owner_voter (from invitation_secret_key)

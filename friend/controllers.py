@@ -12,6 +12,7 @@ from email_outbound.models import EmailAddress, EmailManager, FRIEND_ACCEPTED_IN
     FRIEND_INVITATION_TEMPLATE, WAITING_FOR_VERIFICATION, TO_BE_PROCESSED
 from import_export_facebook.models import FacebookManager
 import json
+from organization.controllers import transform_web_app_url
 from organization.models import OrganizationManager, INDIVIDUAL
 from position.controllers import add_position_network_count_entries_for_one_friend
 from validate_email import validate_email
@@ -22,7 +23,6 @@ from wevote_functions.functions import generate_random_string, is_voter_device_i
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
-WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 
 def fetch_friend_invitation_recipient_voter_we_vote_id(friend_invitation):
@@ -40,19 +40,22 @@ def fetch_friend_invitation_recipient_voter_we_vote_id(friend_invitation):
     return ''
 
 
-def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id, invitation_message=''):
+def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id, invitation_message='',
+                                    web_app_root_url=''):
     """
     A person has accepted a friend request, so we want to email the original_sender voter who invited the
     accepting_voter
     :param accepting_voter_we_vote_id:
     :param original_sender_we_vote_id:
     :param invitation_message:
+    :param web_app_root_url:
     :return:
     """
     status = ""
 
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_by_we_vote_id(accepting_voter_we_vote_id)
+    web_app_root_url_verified = transform_web_app_url(web_app_root_url)  # Change to client URL if needed
 
     if not voter_results['voter_found']:
         error_results = {
@@ -127,8 +130,8 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
             "sender_network_details":       accepting_voter_network_details,
             "recipient_name":               original_sender_name,
             "recipient_voter_email":        original_sender_email,
-            "see_your_friend_list_url":     WEB_APP_ROOT_URL + "/friends",
-            "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
+            "see_your_friend_list_url":     web_app_root_url_verified + "/friends",
+            "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",
             "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
         }
         template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -165,7 +168,7 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
 
 def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array, first_name_array, last_name_array,
                                             email_addresses_raw, invitation_message,
-                                            sender_email_address):  # friendInvitationByEmailSend
+                                            sender_email_address, web_app_root_url=''):  # friendInvitationByEmailSend
     """
 
     :param voter_device_id:
@@ -175,6 +178,7 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array
     :param email_addresses_raw:
     :param invitation_message:
     :param sender_email_address:
+    :param web_app_root_url:
     :return:
     """
     success = True
@@ -288,7 +292,8 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array
 
         verifications_send_results = schedule_verification_email(sender_voter.we_vote_id, recipient_voter_we_vote_id,
                                                                  recipient_email_we_vote_id, recipient_voter_email,
-                                                                 recipient_email_address_secret_key)
+                                                                 recipient_email_address_secret_key,
+                                                                 web_app_root_url)
         status += verifications_send_results['status']
         email_scheduled_saved = verifications_send_results['email_scheduled_saved']
         email_scheduled_id = verifications_send_results['email_scheduled_id']
@@ -313,7 +318,8 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array
             one_normalized_raw_email = email_address_array[n]
             send_results = send_to_one_friend(voter_device_id, sender_voter, send_now,
                                               sender_email_with_ownership_verified,
-                                              one_normalized_raw_email, first_name, last_name, invitation_message)
+                                              one_normalized_raw_email, first_name, last_name, invitation_message,
+                                              web_app_root_url)
             status += send_results['status']
 
     else:
@@ -326,7 +332,8 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array
             for one_normalized_raw_email in raw_email_list_to_invite:
                 send_results = send_to_one_friend(voter_device_id, sender_voter, send_now,
                                                   sender_email_with_ownership_verified,
-                                                  one_normalized_raw_email, first_name, last_name, invitation_message)
+                                                  one_normalized_raw_email, first_name, last_name, invitation_message,
+                                                  web_app_root_url)
                 status += send_results['status']
         else:
             error_message_to_show_voter = "Please enter the email address of at least one friend."
@@ -388,7 +395,8 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array
 
 
 def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_with_ownership_verified,
-                       one_normalized_raw_email, first_name, last_name, invitation_message):
+                       one_normalized_raw_email, first_name, last_name, invitation_message,
+                       web_app_root_url=''):
     # Starting with a raw email address, find (or create) the EmailAddress entry
     # and the owner (Voter) if exists
     status = ""
@@ -399,6 +407,7 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
     sender_network_details = ""
     email_manager = EmailManager()
     error_message_to_show_voter = ''
+    web_app_root_url_verified = transform_web_app_url(web_app_root_url)  # Change to client URL if needed
 
     retrieve_results = retrieve_voter_and_email_address(one_normalized_raw_email)
     if not retrieve_results['success']:
@@ -502,9 +511,9 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
         "sender_network_details":       sender_network_details,
         "recipient_name":               recipient_name,
         "recipient_voter_email":        recipient_voter_email,
-        "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/friends",
-        "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/key/" + invitation_secret_key,
-        "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",  # TODO Implement this
+        "see_all_friend_requests_url":  web_app_root_url_verified + "/friends",
+        "confirm_friend_request_url":   web_app_root_url_verified + "/more/network/key/" + invitation_secret_key,
+        "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",  # TODO Implement this
         "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -544,11 +553,13 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
     return results
 
 
-def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret_key):  # friendInvitationByEmailVerify
+def friend_invitation_by_email_verify_for_api(
+        voter_device_id, invitation_secret_key, web_app_root_url=''):  # friendInvitationByEmailVerify
     """
 
     :param voter_device_id:
     :param invitation_secret_key:
+    :param web_app_root_url:
     :return:
     """
     status = ""
@@ -654,7 +665,8 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
 
         accepting_voter_we_vote_id = voter_we_vote_id_accepting_invitation
         original_sender_we_vote_id = friend_invitation_voter_link.sender_voter_we_vote_id
-        results = friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id)
+        results = friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id,
+                                                  web_app_root_url=web_app_root_url)
 
         # Update the PositionNetworkCount entries for both friends
         add_position_network_count_entries_for_one_friend(
@@ -777,7 +789,8 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
 
         accepting_voter_we_vote_id = voter_we_vote_id_accepting_invitation
         original_sender_we_vote_id = friend_invitation_email_link.sender_voter_we_vote_id
-        friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id)
+        friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id,
+                                        web_app_root_url=web_app_root_url)
 
         # Update the PositionNetworkCount entries for both friends
         add_position_network_count_entries_for_one_friend(
@@ -1071,16 +1084,19 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
     return json_data
 
 
-def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we_vote_id, invitation_message):
+def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we_vote_id, invitation_message,
+                                                 web_app_root_url=''):  # friendInvitationByWeVoteIdSend
     """
 
     :param voter_device_id:
     :param other_voter_we_vote_id:
     :param invitation_message:
+    :param web_app_root_url:
     :return:
     """
     status = ""
     error_message_to_show_voter = ""
+    web_app_root_url_verified = transform_web_app_url(web_app_root_url)  # Change to client URL if needed
 
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -1198,9 +1214,9 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
                 "sender_network_details":       sender_network_details,
                 "recipient_name":               recipient_name,
                 "recipient_voter_email":        recipient_voter_email,
-                "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/friends",
-                "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/key/" + invitation_secret_key,
-                "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
+                "see_all_friend_requests_url":  web_app_root_url_verified + "/friends",
+                "confirm_friend_request_url":   web_app_root_url_verified + "/more/network/key/" + invitation_secret_key,
+                "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",
                 "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
             }
             template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -1240,13 +1256,14 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
 
 
 def friend_invite_response_for_api(voter_device_id, kind_of_invite_response, other_voter_we_vote_id,
-                                   recipient_voter_email=''):
+                                   recipient_voter_email='', web_app_root_url=''):  # friendInviteResponse
     """
     friendInviteResponse
     :param voter_device_id:
     :param kind_of_invite_response:
     :param other_voter_we_vote_id:
     :param recipient_voter_email:
+    :param web_app_root_url:
     :return:
     """
     status = ""
@@ -1305,7 +1322,8 @@ def friend_invite_response_for_api(voter_device_id, kind_of_invite_response, oth
             accepting_voter_we_vote_id = voter.we_vote_id
             original_sender_id = other_voter.id
             original_sender_we_vote_id = other_voter.we_vote_id
-            friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id)
+            friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id,
+                                            web_app_root_url=web_app_root_url)
             # Update both friends
             results1 = add_position_network_count_entries_for_one_friend(accepting_voter_id, original_sender_we_vote_id)
             status += results1['status']

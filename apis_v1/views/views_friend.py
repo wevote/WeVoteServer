@@ -34,9 +34,11 @@ def friend_invitation_by_email_send_view(request):  # friendInvitationByEmailSen
     email_addresses_raw = request.GET.get('email_addresses_raw', "")
     invitation_message = request.GET.get('invitation_message', "")
     sender_email_address = request.GET.get('sender_email_address', "")
+    hostname = request.GET.get('hostname', "")
     results = friend_invitation_by_email_send_for_api(voter_device_id, email_address_array, first_name_array,
                                                       last_name_array, email_addresses_raw,
-                                                      invitation_message, sender_email_address)
+                                                      invitation_message, sender_email_address,
+                                                      web_app_root_url=hostname)
     json_data = {
         'status':                               results['status'],
         'success':                              results['success'],
@@ -55,7 +57,9 @@ def friend_invitation_by_email_verify_view(request):  # friendInvitationByEmailV
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     invitation_secret_key = request.GET.get('invitation_secret_key', "")
-    results = friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret_key)
+    hostname = request.GET.get('hostname', "")
+    results = friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret_key,
+                                                        web_app_root_url=hostname)
     json_data = {
         'status':                       results['status'],
         'success':                      results['success'],
@@ -123,7 +127,9 @@ def friend_invitation_by_we_vote_id_send_view(request):  # friendInvitationByWeV
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     invitation_message = request.GET.get('invitation_message', "")
     other_voter_we_vote_id = request.GET.get('other_voter_we_vote_id', "")
-    results = friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we_vote_id, invitation_message)
+    hostname = request.GET.get('hostname', "")
+    results = friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we_vote_id, invitation_message,
+                                                           web_app_root_url=hostname)
     json_data = {
         'status':                               results['status'],
         'success':                              results['success'],
@@ -144,10 +150,12 @@ def friend_invite_response_view(request):  # friendInviteResponse
         kind_of_invite_response = ACCEPT_INVITATION
     other_voter_we_vote_id = request.GET.get('voter_we_vote_id', "")
     recipient_voter_email = request.GET.get('recipient_voter_email', "")
+    hostname = request.GET.get('hostname', "")
     results = friend_invite_response_for_api(voter_device_id=voter_device_id,
                                              kind_of_invite_response=kind_of_invite_response,
                                              other_voter_we_vote_id=other_voter_we_vote_id,
-                                             recipient_voter_email=recipient_voter_email)
+                                             recipient_voter_email=recipient_voter_email,
+                                             web_app_root_url=hostname)
 
     json_data = {
         'status':                   results['status'],

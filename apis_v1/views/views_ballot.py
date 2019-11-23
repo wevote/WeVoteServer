@@ -95,10 +95,12 @@ def email_ballot_data_view(request):  # emailBallotData
     ballot_link = request.GET.get('ballot_link', "")
     sender_email_address = request.GET.get('sender_email_address', "")
     verification_email_sent = positive_value_exists(request.GET.get('verification_email_sent', False))
+    hostname = request.GET.get('hostname', "")
     results = email_ballot_data_for_api(voter_device_id, email_address_array, first_name_array,
                                         last_name_array, email_addresses_raw,
                                         invitation_message, ballot_link, sender_email_address,
-                                        verification_email_sent)
+                                        verification_email_sent,
+                                        web_app_root_url=hostname)
     json_data = {
         'status':                               results['status'],
         'success':                              results['success'],

@@ -599,4 +599,15 @@ def site_configuration_retrieve_view(request):  # siteConfigurationRetrieve
     :return:
     """
     hostname = request.GET.get('hostname', '')
-    return site_configuration_retrieve_for_api(hostname)
+    results = site_configuration_retrieve_for_api(hostname)
+    json_data = {
+        'success':                  results['success'],
+        'status':                   results['status'],
+        'chosen_hide_we_vote_logo': results['chosen_hide_we_vote_logo'],
+        'chosen_logo_url_https':    results['chosen_logo_url_https'],
+        'features_provided_bitmap': results['features_provided_bitmap'],
+        'hostname':                 results['hostname'],
+        'organization_we_vote_id':  results['organization_we_vote_id'],
+        'reserved_by_we_vote':      results['reserved_by_we_vote'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
