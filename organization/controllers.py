@@ -88,7 +88,7 @@ def full_domain_string_available(full_domain_string, requesting_organization_id)
             return results
     except Exception as e:
         status += 'PROBLEM_QUERYING_ORGANIZATION_TABLE {error} [type: {error_type}] ' \
-                  ''.format(error=e, error_type=type(e))
+                  ''.format(error=str(e), error_type=type(e))
         results = {
             'full_domain_string_available': False,
             'status':                       status,
@@ -2546,21 +2546,49 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
     """
     status = ""
     success = True
+    chosen_hide_we_vote_logo = False
+    chosen_logo_url_https = ''
+    features_provided_bitmap = 0
+    organization_we_vote_id = ''
     reserved_by_we_vote = False
-    organization = None
-    organization_found = False
-    if positive_value_exists(hostname):
+    if not positive_value_exists(hostname):
+        status += "HOSTNAME_MISSING "
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'chosen_hide_we_vote_logo': chosen_hide_we_vote_logo,
+            'chosen_logo_url_https':    chosen_logo_url_https,
+            'features_provided_bitmap': features_provided_bitmap,
+            'hostname':                 hostname,
+            'organization_we_vote_id':  organization_we_vote_id,
+            'reserved_by_we_vote':      reserved_by_we_vote,
+        }
+        return results
+
+    organization_manager = OrganizationManager()
+    try:
         hostname = hostname.strip().lower()
-        try:
-            hostname = hostname.replace('http://', '')
-            hostname = hostname.replace('https://', '')
-        except Exception as e:
-            status += "COULD_NOT_REPLACE_HTTP " + str(e) + " "
-        organization_manager = OrganizationManager()
-        results = organization_manager.retrieve_organization_from_incoming_hostname(hostname, read_only=True)
-        organization_found = results['organization_found']
-        organization = results['organization']
-        status += results['status']
+        hostname = hostname.replace('http://', '')
+        hostname = hostname.replace('https://', '')
+    except Exception as e:
+        status += "COULD_NOT_MODIFY_HOSTNAME " + str(e) + " "
+        success = False
+        hostname = ""
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'chosen_hide_we_vote_logo': chosen_hide_we_vote_logo,
+            'chosen_logo_url_https':    chosen_logo_url_https,
+            'features_provided_bitmap': features_provided_bitmap,
+            'hostname':                 hostname,
+            'organization_we_vote_id':  organization_we_vote_id,
+            'reserved_by_we_vote':      reserved_by_we_vote,
+        }
+        return results
+    results = organization_manager.retrieve_organization_from_incoming_hostname(hostname, read_only=True)
+    organization_found = results['organization_found']
+    organization = results['organization']
+    status += results['status']
 
     if organization_found:
         chosen_hide_we_vote_logo = organization.chosen_hide_we_vote_logo
@@ -2568,10 +2596,16 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
         features_provided_bitmap = organization.features_provided_bitmap
         organization_we_vote_id = organization.we_vote_id
     else:
-        chosen_hide_we_vote_logo = False
-        chosen_logo_url_https = ''
-        features_provided_bitmap = 0
-        organization_we_vote_id = ''
+        reserved_results = organization_manager.retrieve_organization_reserved_hostname(hostname, read_only=True)
+        if reserved_results['hostname_is_reserved']:
+            reserved_by_we_vote = True
+            status += "HOSTNAME_RESERVED_BY_WE_VOTE "
+
+    if not positive_value_exists(organization_we_vote_id) and not reserved_by_we_vote:
+        # If this hostname is not owned by organization or reserved by We Vote, return empty string so the WebApp
+        # knows to default to WeVote.US
+        hostname = ""
+        status += "HOSTNAME_NOT_OWNED_BY_ORG_OR_RESERVED_BY_WE_VOTE "
 
     results = {
         'success':                  success,
@@ -2590,10 +2624,12 @@ def transform_web_app_url(web_app_root_url):
     web_app_root_url_verified = WEB_APP_ROOT_URL
     if positive_value_exists(web_app_root_url):
         configuration_results = site_configuration_retrieve_for_api(web_app_root_url)
-        # If this hostname is either reserved by We Vote or a current organization is found, then use the custom URL
-        if positive_value_exists(configuration_results['reserved_by_we_vote']) \
-                or positive_value_exists(configuration_results['organization_we_vote_id']):
-            web_app_root_url_verified = 'https://{hostname}'.format(hostname=configuration_results['hostname'])
+        # Make sure hostname is allowed or success if False -- we clear it out if it is not allowed
+        if positive_value_exists(configuration_results['hostname']):
+            # If this hostname is either reserved by We Vote or a current organization is found, then use the custom URL
+            if positive_value_exists(configuration_results['reserved_by_we_vote']) \
+                    or positive_value_exists(configuration_results['organization_we_vote_id']):
+                web_app_root_url_verified = 'https://{hostname}'.format(hostname=configuration_results['hostname'])
     return web_app_root_url_verified
 
 

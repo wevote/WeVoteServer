@@ -368,6 +368,7 @@ class IssueManager(models.Model):
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         issue_on_stage = Issue()
+        status = ""
 
         try:
             if positive_value_exists(issue_id):
@@ -376,36 +377,36 @@ class IssueManager(models.Model):
                 issue_we_vote_id = issue_on_stage.we_vote_id
                 issue_name = issue_on_stage.issue_name
                 issue_found = True
-                status = "RETRIEVE_ISSUE_FOUND_BY_ID"
+                status += "RETRIEVE_ISSUE_FOUND_BY_ID "
             elif positive_value_exists(issue_we_vote_id):
                 issue_on_stage = Issue.objects.get(we_vote_id=issue_we_vote_id)
                 issue_id = issue_on_stage.id
                 issue_we_vote_id = issue_on_stage.we_vote_id
                 issue_name = issue_on_stage.issue_name
                 issue_found = True
-                status = "RETRIEVE_ISSUE_FOUND_BY_WE_VOTE_ID"
+                status += "RETRIEVE_ISSUE_FOUND_BY_WE_VOTE_ID "
             elif positive_value_exists(issue_name):
                 issue_on_stage = Issue.objects.get(issue_name=issue_name)
                 issue_id = issue_on_stage.id
                 issue_we_vote_id = issue_on_stage.we_vote_id
                 issue_name = issue_on_stage.issue_name
                 issue_found = True
-                status = "RETRIEVE_ISSUE_FOUND_BY_NAME"
+                status += "RETRIEVE_ISSUE_FOUND_BY_NAME "
             else:
                 issue_found = False
-                status = "RETRIEVE_ISSUE_SEARCH_INDEX_MISSING"
+                status += "RETRIEVE_ISSUE_SEARCH_INDEX_MISSING "
         except Issue.MultipleObjectsReturned as e:
             issue_found = False
             handle_record_found_more_than_one_exception(e, logger=logger)
             exception_multiple_object_returned = True
-            status = "RETRIEVE_ISSUE_MULTIPLE_OBJECTS_RETURNED"
+            status += "RETRIEVE_ISSUE_MULTIPLE_OBJECTS_RETURNED "
         except Issue.DoesNotExist:
             issue_found = False
             exception_does_not_exist = True
-            status = "RETRIEVE_ISSUE_NOT_FOUND"
+            status += "RETRIEVE_ISSUE_NOT_FOUND "
         except Exception as e:
             issue_found = False
-            status = "RETRIEVE_ISSUE_NOT_FOUND_EXCEPTION"
+            status += "RETRIEVE_ISSUE_NOT_FOUND_EXCEPTION " + str(e) + " "
 
         results = {
             'success':                  True if convert_to_int(issue_id) > 0 else False,

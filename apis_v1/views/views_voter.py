@@ -753,7 +753,7 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
     make_primary_email = positive_value_exists(request.GET.get('make_primary_email', False))
     delete_email = positive_value_exists(request.GET.get('delete_email', ""))
     is_cordova = positive_value_exists(request.GET.get('is_cordova', False))
-    hostname = positive_value_exists(request.GET.get('hostname', ''))
+    hostname = request.GET.get('hostname', '')
 
     results = voter_email_address_save_for_api(voter_device_id=voter_device_id,
                                                text_for_email_address=text_for_email_address,
