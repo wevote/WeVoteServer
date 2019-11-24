@@ -38,7 +38,7 @@ We have all our tests in the directory `apis_v1/tests`, but Django's test runner
 that subclass TestCase, like this one: `class WeVoteAPIsV1TestsOrganizationFollow(TestCase):` and includes them in the
 test run.
 
-Tests succeed silently -- No postive status goes to the log and console, but failures are well documented in the console:
+Tests succeed silently -- No positive status goes to the log and console, but failures are well documented in the console:
 
 ```
     ======================================================================

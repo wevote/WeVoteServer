@@ -1,6 +1,7 @@
 {
   "name": "WeVoteServer",
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "license": "MIT",
   "description": "We vote server backend and front end ui",
   "scripts": {
     "test": "echo \"no test\" && exit 0",
@@ -15,11 +16,10 @@
     "react": "^0.14.3",
     "react-redux": "^4.0.0",
     "redux": "^3.0.4",
-    "redux-devtools": "^2.1.5"
+    "redux-devtools": "^2.1.5",
+    "snyk": "^1.251.0"
   },
   "dependencies": {
-    "redux": "^3.0.4",
-    "snyk": "^1.231.0"
   },
   "snyk": true
 }
