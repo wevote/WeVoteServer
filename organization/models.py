@@ -468,10 +468,10 @@ class OrganizationManager(models.Manager):
         exception_multiple_object_returned = False
         organization_on_stage = Organization()
         organization_on_stage_id = 0
-        status = "ERROR_ENTERING_RETRIEVE_ORGANIZATION "
+        status = ""
         try:
             if positive_value_exists(organization_id):
-                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_ID "
+                status = "RETRIEVING_ORGANIZATION_WITH_ID "
                 if read_only:
                     organization_on_stage = Organization.objects.using('readonly').get(id=organization_id)
                 else:
@@ -479,7 +479,7 @@ class OrganizationManager(models.Manager):
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_ID "
             elif positive_value_exists(we_vote_id) and positive_value_exists(organization_api_pass_code):
-                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID_AND_PASS_CODE "
+                status = "RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID_AND_PASS_CODE "
                 if read_only:
                     organization_on_stage = Organization.objects.using('readonly').get(
                         we_vote_id=we_vote_id,
@@ -493,7 +493,7 @@ class OrganizationManager(models.Manager):
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_WE_VOTE_ID_AND_PASS_CODE "
             elif positive_value_exists(we_vote_id):
-                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID "
+                status = "RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID "
                 if read_only:
                     organization_on_stage = Organization.objects.using('readonly').get(we_vote_id=we_vote_id)
                 else:
@@ -509,7 +509,7 @@ class OrganizationManager(models.Manager):
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_VOTE_SMART_ID "
             elif positive_value_exists(twitter_user_id):
-                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_TWITTER_ID "
+                status = "RETRIEVING_ORGANIZATION_WITH_TWITTER_ID "
                 if read_only:
                     organization_on_stage = Organization.objects.using('readonly').get(twitter_user_id=twitter_user_id)
                 else:
@@ -517,7 +517,7 @@ class OrganizationManager(models.Manager):
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_TWITTER_ID "
             elif positive_value_exists(incoming_hostname):
-                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_INCOMING_HOSTNAME "
+                status = "RETRIEVING_ORGANIZATION_WITH_INCOMING_HOSTNAME "
                 incoming_hostname = incoming_hostname.strip().lower()
                 incoming_hostname = incoming_hostname.replace('http://', '')
                 incoming_hostname = incoming_hostname.replace('https://', '')
@@ -536,10 +536,10 @@ class OrganizationManager(models.Manager):
             handle_record_found_more_than_one_exception(e, logger)
             error_result = True
             exception_multiple_object_returned = True
-            status = "ERROR_MORE_THAN_ONE_ORGANIZATION_FOUND "
+            status += "ERROR_MORE_THAN_ONE_ORGANIZATION_FOUND "
             # logger.warning("Organization.MultipleObjectsReturned")
         except Organization.DoesNotExist as e:
-            status += ", ORGANIZATION_NOT_FOUND " + str(e) + " "
+            status += "ORGANIZATION_NOT_FOUND "
             # handle_exception(e, logger=logger, exception_message=status)
             error_result = True
             exception_does_not_exist = True
