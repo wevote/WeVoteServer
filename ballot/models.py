@@ -2016,8 +2016,8 @@ class BallotReturnedManager(models.Model):
         except Exception as e:
             try_without_maps_key = True
             status += 'GEOCODER_ERROR {error} [type: {error_type}] '.format(error=e, error_type=type(e))
-            logger.info(status + " @ " + text_for_map_search + "  google_civic_election_id=" +
-                        str(google_civic_election_id))
+            # logger.info(status + " @ " + text_for_map_search + "  google_civic_election_id=" +
+            #             str(google_civic_election_id))
 
         if try_without_maps_key:
             # If we have exceeded our account, try without a maps key

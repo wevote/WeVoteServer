@@ -31,10 +31,12 @@ class BallotTestCase(TestCase):
 
             result = self.ballot_manager.find_closest_ballot_returned('Oakland, CA')
             self.assertEqual(google_client.geocode.call_count, 1)
-            self.assertEqual(result, {'status': 'GEOCODER_FOUND_LOCATION NO_STORED_BALLOT_MATCHES_STATE CA. ',
-                                      'geocoder_quota_exceeded': False,
-                                      'ballot_returned_found': False,
-                                      'ballot_returned': None})
+            self.assertIn('GEOCODER_FOUND_LOCATION NO_STORED_BALLOT_MATCHES_STATE CA.', result['status'],
+                          "status: {status} (GEOCODER_FOUND_LOCATION NO_STORED_BALLOT_MATCHES_STATE CA. expected)"
+                          .format(status=result['status']))
+            self.assertFalse(result['geocoder_quota_exceeded'])
+            self.assertFalse(result['ballot_returned_found'])
+            self.assertIsNone(result['ballot_returned'])
 
     def test_address_not_found(self):
         with mock.patch('ballot.models.get_geocoder_for_service') as mock_geopy:
@@ -42,11 +44,15 @@ class BallotTestCase(TestCase):
             google_client.geocode.return_value = None
             result = self.ballot_manager.find_closest_ballot_returned('blah bal blh, OK')
             self.assertEqual(google_client.geocode.call_count, 1)
-            self.assertEqual(result, {'status': 'Geocoder could not find location matching "blah bal blh, OK". Trying '
-                                                'City, State. NO_STORED_BALLOT_MATCHES_STATE OK. ',
-                                      'geocoder_quota_exceeded': False,
-                                      'ballot_returned_found': False,
-                                      'ballot_returned': None})
+            self.assertIn(
+                'Geocoder could not find location matching "blah bal blh, OK". Trying City, State. '
+                'NO_STORED_BALLOT_MATCHES_STATE OK.',
+                result['status'],
+                "status: {status} (Geocoder could not find location matching \"blah bal blh, OK\" expected)"
+                .format(status=result['status']))
+            self.assertFalse(result['geocoder_quota_exceeded'])
+            self.assertFalse(result['ballot_returned_found'])
+            self.assertIsNone(result['ballot_returned'])
 
     def test_ballot_found(self):
         ballot_in_ms = BallotReturned.objects.get()
@@ -55,12 +61,13 @@ class BallotTestCase(TestCase):
             google_client = mock_geopy('google')()
             google_client.geocode.return_value = Location(address='Jackson, MS, USA',
                                                           latitude=32.310251, longitude=-90.3289724)
-
             result = self.ballot_manager.find_closest_ballot_returned('Jackson, MS')
-            self.assertEqual(result, {'status': 'GEOCODER_FOUND_LOCATION BALLOT_RETURNED_FOUND ',
-                                      'geocoder_quota_exceeded': False,
-                                      'ballot_returned_found': True,
-                                      'ballot_returned': ballot_in_ms})
+            self.assertIn('GEOCODER_FOUND_LOCATION BALLOT_RETURNED_FOUND', result['status'],
+                          "status: {status} (GEOCODER_FOUND_LOCATION BALLOT_RETURNED_FOUND expected)"
+                          .format(status=result['status']))
+            self.assertFalse(result['geocoder_quota_exceeded'])
+            self.assertTrue(result['ballot_returned_found'])
+            self.assertEqual(result['ballot_returned'], ballot_in_ms)
 
     def test_return_closest_ballot(self):
         """ When several ballots match the queried state, return the closest one. """
@@ -81,8 +88,9 @@ class BallotTestCase(TestCase):
                                                           latitude=32.310251, longitude=-90.3289724)
 
             result = self.ballot_manager.find_closest_ballot_returned('Jackson, MS')
-
-            self.assertEqual(result, {'status': 'GEOCODER_FOUND_LOCATION BALLOT_RETURNED_FOUND ',
-                                      'geocoder_quota_exceeded': False,
-                                      'ballot_returned_found': True,
-                                      'ballot_returned': ballot_in_jackson})
+            self.assertIn('GEOCODER_FOUND_LOCATION BALLOT_RETURNED_FOUND', result['status'],
+                          "status: {status} (GEOCODER_FOUND_LOCATION BALLOT_RETURNED_FOUND expected)"
+                          .format(status=result['status']))
+            self.assertFalse(result['geocoder_quota_exceeded'])
+            self.assertTrue(result['ballot_returned_found'])
+            self.assertEqual(result['ballot_returned'], ballot_in_jackson)

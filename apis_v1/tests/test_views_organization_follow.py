@@ -34,10 +34,9 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
                          "'organization_id' expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data01, True,
                          "'voter_device_id' expected in the json response, and not found")
-        self.assertEqual(
-            json_data01['status'], 'VALID_VOTER_DEVICE_ID_MISSING',
-            "status: {status} (VALID_VOTER_DEVICE_ID_MISSING expected), voter_device_id: {voter_device_id}".format(
-                status=json_data01['status'], voter_device_id=json_data01['voter_device_id']))
+        self.assertIn('VALID_VOTER_DEVICE_ID_MISSING', json_data01['status'],
+                      "status: {status} (VALID_VOTER_DEVICE_ID_MISSING expected), voter_device_id: {voter_device_id}"
+                      .format(status=json_data01['status'], voter_device_id=json_data01['voter_device_id']))
         self.assertEqual(json_data01['success'], False, "success 'False' expected, True returned")
         self.assertEqual(json_data01['organization_id'], 0,
                          "organization_id == 0 expected, organization_id: {organization_id} returned".format(
@@ -57,10 +56,9 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
                          "'organization_id' expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data02, True,
                          "'voter_device_id' expected in the json response, and not found")
-        self.assertEqual(
-            json_data02['status'], 'VALID_VOTER_DEVICE_ID_MISSING',
-            "status: {status} (VALID_VOTER_DEVICE_ID_MISSING expected), voter_device_id: {voter_device_id}".format(
-                status=json_data02['status'], voter_device_id=json_data02['voter_device_id']))
+        self.assertIn('VALID_VOTER_DEVICE_ID_MISSING', json_data02['status'],
+                      "status: {status} (VALID_VOTER_DEVICE_ID_MISSING expected), voter_device_id: {voter_device_id}"
+                      .format(status=json_data02['status'], voter_device_id=json_data02['voter_device_id']))
         self.assertEqual(json_data02['success'], False, "success 'False' expected, True returned")
         self.assertEqual(json_data02['organization_id'], 0,
                          "organization_id == 0 expected, organization_id: {organization_id} returned".format(
@@ -80,10 +78,9 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
                          "'organization_id' expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data03, True,
                          "'voter_device_id' expected in the json response, and not found")
-        self.assertEqual(
-            json_data03['status'], 'VALID_VOTER_DEVICE_ID_MISSING',
-            "status: {status} (VALID_VOTER_DEVICE_ID_MISSING expected), voter_device_id: {voter_device_id}".format(
-                status=json_data03['status'], voter_device_id=json_data03['voter_device_id']))
+        self.assertIn('VALID_VOTER_DEVICE_ID_MISSING', json_data03['status'],
+                      "status: {status} (VALID_VOTER_DEVICE_ID_MISSING expected), voter_device_id: {voter_device_id}"
+                      .format(status=json_data03['status'], voter_device_id=json_data03['voter_device_id']))
         self.assertEqual(json_data03['success'], False, "success 'False' expected, True returned")
         self.assertEqual(json_data03['organization_id'], 0,
                          "organization_id == 0 expected, organization_id: {organization_id} returned".format(
@@ -195,11 +192,10 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
                          "'organization_id' expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data15, True,
                          "'voter_device_id' expected in the json response, and not found")
-        self.assertEqual(
-            json_data15['status'], 'ORGANIZATION_NOT_FOUND_ON_CREATE FOLLOWING',
-            "status: {status} (ORGANIZATION_NOT_FOUND_ON_CREATE FOLLOWING expected), "
-            "voter_device_id: {voter_device_id}".format(
-                status=json_data15['status'], voter_device_id=json_data15['voter_device_id']))
+        self.assertIn(
+            'ORGANIZATION_NOT_FOUND_ON_CREATE FOLLOWING', json_data15['status'],
+            "status: {status} (ORGANIZATION_NOT_FOUND_ON_CREATE FOLLOWING expected), voter_device_id: {voter_device_id}"
+            .format(status=json_data15['status'], voter_device_id=json_data15['voter_device_id']))
         self.assertEqual(json_data15['success'], False, "success 'False' expected, True returned")
         self.assertEqual(convert_to_int(json_data15['organization_id']), 1,
                          "organization_id == 1 expected, organization_id: {organization_id} returned".format(
@@ -217,11 +213,11 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
                          "'organization_id' expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data16, True,
                          "'voter_device_id' expected in the json response, and not found")
-        self.assertEqual(
-            json_data16['status'], 'ORGANIZATION_NOT_FOUND_ON_CREATE FOLLOW_IGNORE',
+        self.assertIn(
+            'ORGANIZATION_NOT_FOUND_ON_CREATE FOLLOW_IGNORE', json_data16['status'],
             "status: {status} (ORGANIZATION_NOT_FOUND_ON_CREATE FOLLOW_IGNORE expected), "
-            "voter_device_id: {voter_device_id}".format(
-                status=json_data16['status'], voter_device_id=json_data16['voter_device_id']))
+            "voter_device_id: {voter_device_id}"
+            .format(status=json_data16['status'], voter_device_id=json_data16['voter_device_id']))
         self.assertEqual(json_data16['success'], False, "success 'False' expected, True returned")
         self.assertEqual(convert_to_int(json_data16['organization_id']), 1,
                          "organization_id == 1 expected, organization_id: {organization_id} returned".format(
@@ -239,11 +235,11 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
                          "'organization_id' expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data17, True,
                          "'voter_device_id' expected in the json response, and not found")
-        self.assertEqual(
-            json_data17['status'], 'ORGANIZATION_NOT_FOUND_ON_CREATE STOP_FOLLOWING',
+        self.assertIn(
+            'ORGANIZATION_NOT_FOUND_ON_CREATE STOP_FOLLOWING', json_data17['status'],
             "status: {status} (ORGANIZATION_NOT_FOUND_ON_CREATE STOP_FOLLOWING expected), "
-            "voter_device_id: {voter_device_id}".format(
-                status=json_data17['status'], voter_device_id=json_data17['voter_device_id']))
+            "voter_device_id: {voter_device_id}"
+            .format(status=json_data17['status'], voter_device_id=json_data17['voter_device_id']))
         self.assertEqual(json_data17['success'], False, "success 'False' expected, True returned")
         self.assertEqual(convert_to_int(json_data17['organization_id']), 1,
                          "organization_id == 1 expected, organization_id: {organization_id} returned".format(

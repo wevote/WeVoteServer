@@ -83,8 +83,8 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
             json_data3['success'], False,
             "success: {success} (False expected)".format(
                 success=json_data3['success']))
-        self.assertEqual(
-            json_data3['status'], 'ORGANIZATION_RETRIEVE_BOTH_IDS_MISSING',
+        self.assertIn(
+            'ORGANIZATION_RETRIEVE_BOTH_IDS_MISSING', json_data3['status'],
             "success: {success} (status 'ORGANIZATION_RETRIEVE_BOTH_IDS_MISSING' expected, status={status})".format(
                 success=json_data3['success'], status=json_data3['status']))
 
@@ -105,11 +105,10 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
             json_data4['success'], True,
             "success: {success} (True expected)".format(
                 success=json_data4['success']))
-        self.assertEqual(
-            json_data4['status'], 'ORGANIZATION_FOUND_WITH_ID',
+        self.assertIn(
+            'ORGANIZATION_FOUND_WITH_ID', json_data4['status'],
             "success: {success} (status 'ORGANIZATION_FOUND_WITH_ID' expected, status={status})".format(
                 success=json_data4['success'], status=json_data4['status']))
-
         #######################################
         # Retrieve 1 organization with required organization_we_vote_id
         response5 = self.client.get(self.organization_retrieve_url, {'organization_we_vote_id': organization1.we_vote_id})
@@ -127,8 +126,8 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
             json_data5['success'], True,
             "success: {success} (True expected)".format(
                 success=json_data5['success']))
-        self.assertEqual(
-            json_data5['status'], 'ORGANIZATION_FOUND_WITH_WE_VOTE_ID',
+        self.assertIn(
+            'ORGANIZATION_FOUND_WITH_WE_VOTE_ID', json_data5['status'],
             "success: {success} (status 'ORGANIZATION_FOUND_WITH_WE_VOTE_ID' expected, status={status})".format(
                 success=json_data5['success'], status=json_data5['status']))
 
@@ -150,8 +149,8 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
             json_data6['success'], True,
             "success: {success} (True expected)".format(
                 success=json_data6['success']))
-        self.assertEqual(
-            json_data6['status'], 'ORGANIZATION_FOUND_WITH_ID',
+        self.assertIn(
+            'ORGANIZATION_FOUND_WITH_ID', json_data6['status'],
             "success: {success} (status 'ORGANIZATION_FOUND_WITH_ID' expected, status={status})".format(
                 success=json_data6['success'], status=json_data6['status']))
 
@@ -172,8 +171,8 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
             json_data7['success'], False,
             "success: {success} (False expected)".format(
                 success=json_data7['success']))
-        self.assertEqual(
-            json_data7['status'], 'ERROR_RETRIEVING_ORGANIZATION_WITH_ID, ORGANIZATION_NOT_FOUND',
+        self.assertIn(
+            'ERROR_RETRIEVING_ORGANIZATION_WITH_ID, ORGANIZATION_NOT_FOUND', json_data7['status'].replace(' , ', ', '),
             "success: {success} (status 'ERROR_RETRIEVING_ORGANIZATION_WITH_ID, ORGANIZATION_NOT_FOUND' expected, "
             "status={status})".format(
                 success=json_data7['success'], status=json_data7['status']))
@@ -195,8 +194,9 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
             json_data8['success'], False,
             "success: {success} (False expected)".format(
                 success=json_data8['success']))
-        self.assertEqual(
-            json_data8['status'], 'ERROR_RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID, ORGANIZATION_NOT_FOUND',
+        self.assertIn(
+            'ERROR_RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID, ORGANIZATION_NOT_FOUND',
+            json_data8['status'].replace(' , ', ', '),
             "success: {success} (status 'ERROR_RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID, ORGANIZATION_NOT_FOUND' "
             "expected, status={status})".format(
                 success=json_data8['success'], status=json_data8['status']))
