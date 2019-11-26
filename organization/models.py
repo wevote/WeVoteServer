@@ -539,7 +539,7 @@ class OrganizationManager(models.Manager):
             status += "ERROR_MORE_THAN_ONE_ORGANIZATION_FOUND "
             # logger.warning("Organization.MultipleObjectsReturned")
         except Organization.DoesNotExist as e:
-            status += "ORGANIZATION_NOT_FOUND "
+            status += "DOES_NOT_EXIST-ORGANIZATION_NOT_FOUND "
             # handle_exception(e, logger=logger, exception_message=status)
             error_result = True
             exception_does_not_exist = True
