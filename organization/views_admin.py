@@ -913,7 +913,7 @@ def organization_edit_account_process_view(request):
         organization_on_stage_found = True
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Account settings can only be edited on existing organization.')
-        status += "ORGANIZATION_NOT_FOUND "
+        status += "EDIT_ACCOUNT_PROCESS_ORGANIZATION_NOT_FOUND "
 
     try:
         if organization_on_stage_found:

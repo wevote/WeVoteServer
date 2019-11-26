@@ -111,7 +111,8 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
                 success=json_data4['success'], status=json_data4['status']))
         #######################################
         # Retrieve 1 organization with required organization_we_vote_id
-        response5 = self.client.get(self.organization_retrieve_url, {'organization_we_vote_id': organization1.we_vote_id})
+        response5 = self.client.get(self.organization_retrieve_url,
+                                    {'organization_we_vote_id': organization1.we_vote_id})
         json_data5 = json.loads(response5.content.decode())
 
         self.assertEqual('success' in json_data5, True,
@@ -133,8 +134,9 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
 
         #######################################
         # Retrieve 1 organization with required organization_id even if organization_we_vote_id passed in
-        response6 = self.client.get(self.organization_retrieve_url, {'organization_id': organization1.id,
-                                                                     'organization_we_vote_id': organization1.we_vote_id})
+        response6 = self.client.get(self.organization_retrieve_url,
+                                    {'organization_id': organization1.id,
+                                     'organization_we_vote_id': organization1.we_vote_id})
         json_data6 = json.loads(response6.content.decode())
 
         self.assertEqual('success' in json_data6, True,
@@ -172,8 +174,10 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
             "success: {success} (False expected)".format(
                 success=json_data7['success']))
         self.assertIn(
-            'ERROR_RETRIEVING_ORGANIZATION_WITH_ID, ORGANIZATION_NOT_FOUND', json_data7['status'].replace(' , ', ', '),
-            "success: {success} (status 'ERROR_RETRIEVING_ORGANIZATION_WITH_ID, ORGANIZATION_NOT_FOUND' expected, "
+            'RETRIEVING_ORGANIZATION_WITH_ID DOES_NOT_EXIST-ORGANIZATION_NOT_FOUND',
+            json_data7['status'].replace(' , ', ', '),
+            "success: {success} (status "
+            "'RETRIEVING_ORGANIZATION_WITH_ID DOES_NOT_EXIST-ORGANIZATION_NOT_FOUND' expected, "
             "status={status})".format(
                 success=json_data7['success'], status=json_data7['status']))
 
@@ -195,9 +199,10 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
             "success: {success} (False expected)".format(
                 success=json_data8['success']))
         self.assertIn(
-            'ERROR_RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID, ORGANIZATION_NOT_FOUND',
+            'RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID DOES_NOT_EXIST-ORGANIZATION_NOT_FOUND',
             json_data8['status'].replace(' , ', ', '),
-            "success: {success} (status 'ERROR_RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID, ORGANIZATION_NOT_FOUND' "
+            "success: {success} (status "
+            "'RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID DOES_NOT_EXIST-ORGANIZATION_NOT_FOUND' "
             "expected, status={status})".format(
                 success=json_data8['success'], status=json_data8['status']))
 
