@@ -70,6 +70,11 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
                 status += '[' + one_error['message'] + '] '
         handle_exception(error_instance, logger=logger, exception_message=status)
 
+    if positive_value_exists(twitter_json.get('profile_banner_url')):
+        # Dec 2019, https://developer.twitter.com/en/docs/accounts-and-users/user-profile-images-and-banners
+        banner = twitter_json.get('profile_banner_url') + '/1500x500'
+        twitter_json['profile_banner_url'] = banner
+
     results = {
         'status':               status,
         'success':              success,
