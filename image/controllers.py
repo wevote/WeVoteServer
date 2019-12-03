@@ -1332,6 +1332,77 @@ def delete_cached_images_for_voter(voter):
     return results
 
 
+def delete_stored_images_for_voter(voter):
+    """
+    This method actually removes all image data from the Voter, Facebook, and Twitter tables for this voter
+    Call delete_cached_images_for_voter() before calling this one, to remove all the cached images from AWS, otherwise
+    the cached images will stay in AWS as unreferenced wasted storage
+    """
+    success = False
+
+    # Delete Voter images
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_by_we_vote_id(voter.we_vote_id)
+    voter = voter_results['voter']
+    if voter_results['voter_found']:
+        voter.twitter_profile_image_url_https = ''
+        voter.we_vote_hosted_profile_image_url_large = ''
+        voter.we_vote_hosted_profile_image_url_medium = ''
+        voter.we_vote_hosted_profile_image_url_tiny = ''
+        voter.facebook_profile_image_url_https = ''
+        voter.save()
+        success = True
+
+    # Delete Twitter User Table images
+    if positive_value_exists(voter.twitter_id):
+        twitter_user_manager = TwitterUserManager()
+        twitter_results = twitter_user_manager.retrieve_twitter_user(voter.twitter_id)
+        twitter_user_found = twitter_results['twitter_user_found']
+        twitter_user = twitter_results['twitter_user']
+        if twitter_user_found:
+            twitter_user.twitter_profile_image_url_https = ''
+            twitter_user.twitter_profile_background_image_url_https = ''
+            twitter_user.twitter_profile_banner_url_https = ''
+            twitter_user.we_vote_hosted_profile_image_url_large = ''
+            twitter_user.we_vote_hosted_profile_image_url_medium = ''
+            twitter_user.we_vote_hosted_profile_image_url_tiny = ''
+            twitter_user.save()
+            success = True
+
+    # Delete Organization images, Dec 2019, not for now, don't want to cause exceptions
+
+    # Delete Position Table images, Dec 2019, not for now, don't want to cause exceptions
+
+    # Delete Facebook User Table images
+    if positive_value_exists(voter.facebook_id):
+        facebook_manager = FacebookManager()
+        facebook_user_results = facebook_manager.retrieve_facebook_user_by_facebook_user_id(voter.facebook_id)
+        facebook_user = facebook_user_results['facebook_user']
+        if facebook_user_results['facebook_user_found']:
+            facebook_user.facebook_profile_image_url_https = ''
+            facebook_user.facebook_background_image_url_https = ''
+            facebook_user.we_vote_hosted_profile_image_url_large = ''
+            facebook_user.we_vote_hosted_profile_image_url_medium = ''
+            facebook_user.we_vote_hosted_profile_image_url_tiny = ''
+            facebook_user.save()
+            success = True
+
+    # Delete FacebookAuthResponse Table images, Dec 2019, not for now, as a result image will display when voter signsin
+
+    # Delete TwitterAuthResponse Table images, Dec 2019, not for now, as a result image will display when voter signs in
+
+    if success:
+        status = "DELETED_STORED_IMAGES_FOR_VOTER"
+    else:
+        status = "NO_IMAGE_FOUND_FOR_VOTER"
+
+    results = {
+        'success':                  success,
+        'status':                   status,
+    }
+    return results
+
+
 def retrieve_all_images_for_one_candidate(candidate_we_vote_id):
     """
     Retrieve all cached images for one candidate
