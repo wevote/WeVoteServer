@@ -16,7 +16,7 @@ import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaignManager
 from image.controllers import delete_cached_images_for_voter, delete_cached_images_for_candidate, \
-    delete_cached_images_for_organization
+    delete_cached_images_for_organization, delete_stored_images_for_voter
 from organization.controllers import update_social_media_statistics_in_other_tables
 from organization.models import OrganizationManager
 from twitter.functions import retrieve_twitter_user_info
@@ -64,6 +64,7 @@ def delete_images_view(request):
                                         '?google_civic_election_id=' + str(google_civic_election_id))
         voter = results['voter']
         delete_image_results = delete_cached_images_for_voter(voter)
+        hard_delete_image_results = delete_stored_images_for_voter(voter)
 
     delete_image_count = delete_image_results['delete_image_count']
     not_deleted_image_count = delete_image_results['not_deleted_image_count']
