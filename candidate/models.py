@@ -1351,6 +1351,8 @@ class CandidateCampaign(models.Model):
     # Candidacy Declared, (and others for withdrawing, etc.)
     candidate_participation_status = models.CharField(verbose_name="candidate participation status",
                                                       max_length=255, null=True, blank=True)
+    withdrawn_from_election = models.BooleanField(verbose_name='Candidate has withdrawn from election', default=False)
+    withdrawal_date = models.DateField(verbose_name='Withdrawal date from election', null=True, auto_now=False)
 
     def election(self):
         try:

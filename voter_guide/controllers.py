@@ -570,6 +570,9 @@ def augment_candidate_possible_position_data(
     possible_endorsement_matched = False
     possible_endorsement_return_list = []
     possible_endorsement_count = 0
+    possible_endorsement['withdrawn_from_election'] = False
+    possible_endorsement['withdrawal_date'] = ''
+
     if 'candidate_we_vote_id' in possible_endorsement \
             and positive_value_exists(possible_endorsement['candidate_we_vote_id']):
         possible_endorsement_matched = True
@@ -593,6 +596,9 @@ def augment_candidate_possible_position_data(
                 possible_endorsement['google_civic_election_id'] = \
                     contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
                         candidate.contest_office_we_vote_id)
+            possible_endorsement['withdrawn_from_election'] = candidate.withdrawn_from_election
+            possible_endorsement['withdrawal_date'] = candidate.withdrawal_date
+
         possible_endorsement_count += 1
         possible_endorsement_return_list.append(possible_endorsement)
     elif 'ballot_item_name' in possible_endorsement and \
@@ -623,6 +629,8 @@ def augment_candidate_possible_position_data(
                 possible_endorsement['google_civic_election_id'] = \
                     contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
                         candidate.contest_office_we_vote_id)
+            possible_endorsement['withdrawn_from_election'] = candidate.withdrawn_from_election
+            possible_endorsement['withdrawal_date'] = candidate.withdrawal_date
             possible_endorsement_count += 1
             possible_endorsement_return_list.append(possible_endorsement)
         elif matching_results['candidate_list_found']:
@@ -655,6 +663,8 @@ def augment_candidate_possible_position_data(
                     possible_endorsement_copy['google_civic_election_id'] = \
                         contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
                             candidate.contest_office_we_vote_id)
+                possible_endorsement_copy['withdrawn_from_election'] = candidate.withdrawn_from_election
+                possible_endorsement_copy['withdrawal_date'] = candidate.withdrawal_date
                 possible_endorsement_count += 1
                 possible_endorsement_return_list.append(possible_endorsement_copy)
         elif not positive_value_exists(matching_results['success']):
@@ -698,6 +708,8 @@ def augment_candidate_possible_position_data(
                             possible_endorsement['google_civic_election_id'] = \
                                 contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
                                     candidate.contest_office_we_vote_id)
+                        possible_endorsement['withdrawn_from_election'] = candidate.withdrawn_from_election
+                        possible_endorsement['withdrawal_date'] = candidate.withdrawal_date
                     possible_endorsement_matched = True
                     possible_endorsement_count += 1
                     possible_endorsement_return_list.append(possible_endorsement)
@@ -746,6 +758,9 @@ def augment_candidate_possible_position_data(
                                 candidate.we_vote_hosted_profile_image_url_large
                             possible_endorsement_copy['ballot_item_image_url_https_medium'] = \
                                 candidate.we_vote_hosted_profile_image_url_medium
+                            possible_endorsement_copy['withdrawn_from_election'] = candidate.withdrawn_from_election
+                            possible_endorsement_copy['withdrawal_date'] = candidate.withdrawal_date
+
                         synonym_found = True
                         possible_endorsement_count += 1
                         possible_endorsement_return_list.append(possible_endorsement_copy)

@@ -58,35 +58,37 @@ def all_ballot_items_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "google_civic_election_id": integer,\n' \
+                   '  "ballot_found": integer,\n' \
                    '  "ballot_item_list": list\n' \
                    '   [\n' \
-                   '     "id": integer,\n' \
-                   '     "we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string,\n' \
-                   '     "google_civic_election_id": integer,\n' \
-                   '     "google_ballot_placement": integer,\n' \
-                   '     "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
-                   '     "measure_subtitle": string (if kind_of_ballot_item is MEASURE)\n' \
-                   '     "measure_text": string (if kind_of_ballot_item is MEASURE)\n' \
-                   '     "measure_url": string (if kind_of_ballot_item is MEASURE)\n' \
-                   '     "yes_vote_description": string (if kind_of_ballot_item is MEASURE)\n' \
-                   '     "no_vote_description": string (if kind_of_ballot_item is MEASURE)\n' \
                    '     "candidate_list": list (if kind_of_ballot_item is CANDIDATE)\n' \
                    '      [\n' \
-                   '        "id": integer,\n' \
                    '        "we_vote_id": string,\n' \
                    '        "ballot_item_display_name": string,\n' \
-                   '        "candidate_photo_url_large": string,\n' \
+                   '        "ballotpedia_candidate_summary": string,\n' \
+                   '        "ballotpedia_candidate_url": string,\n' \
                    '        "candidate_photo_url_medium": string,\n' \
                    '        "candidate_photo_url_tiny": string,\n' \
-                   '        "party": string,\n' \
-                   '        "order_on_ballot": integer,\n' \
                    '        "kind_of_ballot_item": string,\n' \
+                   '        "party": string,\n' \
+                   '        "state_code": string,\n' \
                    '        "twitter_handle": string,\n' \
                    '        "twitter_description": string,\n' \
                    '        "twitter_followers_count": integer,\n' \
+                   '        "withdrawn_from_election": boolean,\n' \
+                   '        "withdrawal_date": string,\n' \
                    '      ],\n' \
+                   '     "election_name": string,\n' \
+                   '     "election_day_text": string,\n' \
+                   '     "google_civic_election_id": integer,\n' \
+                   '     "kind_of_ballot_item": string (if kind_of_ballot_item is MEASURE),\n' \
+                   '     "measure_subtitle": string (if kind_of_ballot_item is MEASURE)\n' \
+                   '     "measure_text": string (if kind_of_ballot_item is MEASURE)\n' \
+                   '     "measure_url": string (if kind_of_ballot_item is MEASURE)\n' \
+                   '     "no_vote_description": string (if kind_of_ballot_item is MEASURE)\n' \
+                   '     "state_code": string,\n' \
+                   '     "yes_vote_description": string (if kind_of_ballot_item is MEASURE)\n' \
                    '   ],\n' \
                    '}'
 

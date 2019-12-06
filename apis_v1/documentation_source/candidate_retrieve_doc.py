@@ -54,7 +54,6 @@ def candidate_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
                    '  "kind_of_ballot_item": string (CANDIDATE),\n' \
                    '  "id": integer,\n' \
                    '  "we_vote_id": string,\n' \
@@ -82,10 +81,13 @@ def candidate_retrieve_doc_template_values(url_root):
                    '  "facebook_url": string,\n' \
                    '  "twitter_url": string,\n' \
                    '  "twitter_handle": string,\n' \
-                   '  "google_plus_url": string,\n' \
+                   '  "twitter_description": string,\n' \
+                   '  "twitter_followers_count": integer,\n' \
                    '  "youtube_url": string,\n' \
                    '  "candidate_email": string,\n' \
                    '  "candidate_phone": string,\n' \
+                   '  "withdrawn_from_election": boolean,\n' \
+                   '  "withdrawal_date": date,\n' \
                    '}'
 
     template_values = {
