@@ -112,6 +112,7 @@ def voter_guide_possibility_positions_retrieve_view(request):  # voterGuidePossi
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_guide_possibility_id = request.GET.get('voter_guide_possibility_id', 0)
+    # print("voter_guide_possibility_id: " + voter_guide_possibility_id)
     voter_guide_possibility_position_id = request.GET.get('voter_guide_possibility_position_id', 0)
     json_data = voter_guide_possibility_positions_retrieve_for_api(
         voter_device_id=voter_device_id,

@@ -7,6 +7,7 @@ from .models import CandidateCampaignListManager, CandidateCampaign, CandidateCa
 from ballot.models import CANDIDATE
 from bookmark.models import BookmarkItemList
 from config.base import get_environment_variable
+import datetime as the_other_datetime
 from django.http import HttpResponse
 from election.models import ElectionManager
 from exception.models import handle_exception
@@ -707,8 +708,6 @@ def candidates_import_from_structured_json(structured_json):
             if 'google_civic_candidate_name3' in one_candidate:
                 updated_candidate_values['google_civic_candidate_name3'] = \
                     one_candidate['google_civic_candidate_name3']
-            if 'google_plus_url' in one_candidate:
-                updated_candidate_values['google_plus_url'] = one_candidate['google_plus_url']
             if 'maplight_id' in one_candidate:
                 updated_candidate_values['maplight_id'] = one_candidate['maplight_id']
             if 'order_on_ballot' in one_candidate:
@@ -837,6 +836,9 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
 
     if success:
         candidate_campaign = results['candidate_campaign']
+        wdate = ''
+        if isinstance(candidate_campaign.withdrawal_date, the_other_datetime.date):
+            wdate = candidate_campaign.withdrawal_date.strftime("%Y-%m-%d")
         if not positive_value_exists(candidate_campaign.contest_office_name):
             candidate_campaign = candidate_manager.refresh_cached_candidate_office_info(candidate_campaign)
         json_data = {
@@ -874,10 +876,11 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
             'twitter_handle':               candidate_campaign.fetch_twitter_handle(),
             'twitter_description':          candidate_campaign.twitter_description,
             'twitter_followers_count':      candidate_campaign.twitter_followers_count,
-            'google_plus_url':              candidate_campaign.google_plus_url,
             'youtube_url':                  candidate_campaign.youtube_url,
             'candidate_email':              candidate_campaign.candidate_email,
             'candidate_phone':              candidate_campaign.candidate_phone,
+            'withdrawn_from_election':      candidate_campaign.withdrawn_from_election,
+            'withdrawal_date':              wdate,
         }
     else:
         json_data = {
@@ -937,6 +940,10 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):  # candidatesRetr
             if not positive_value_exists(candidate_campaign.contest_office_name):
                 candidate_manager = CandidateCampaignManager()
                 candidate_campaign = candidate_manager.refresh_cached_candidate_office_info(candidate_campaign)
+            wdate = ''
+            if isinstance(candidate_campaign.withdrawal_date, the_other_datetime.date):
+                wdate = candidate_campaign.withdrawal_date.strftime("%Y-%m-%d")
+
             # This should match voter_ballot_items_retrieve_for_one_election_for_api (voterBallotItemsRetrieve)
             one_candidate = {
                 'status':                       status,
@@ -962,7 +969,6 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):  # candidatesRetr
                 'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
                 'facebook_url':                 candidate_campaign.facebook_url,
                 'google_civic_election_id':     candidate_campaign.google_civic_election_id,
-                'google_plus_url':              candidate_campaign.google_plus_url,
                 'kind_of_ballot_item':          CANDIDATE,
                 'maplight_id':                  candidate_campaign.maplight_id,
                 'ocd_division_id':              candidate_campaign.ocd_division_id,
@@ -976,6 +982,8 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):  # candidatesRetr
                 'twitter_description':          candidate_campaign.twitter_description,
                 'twitter_followers_count':      candidate_campaign.twitter_followers_count,
                 'youtube_url':                  candidate_campaign.youtube_url,
+                'withdrawn_from_election':      candidate_campaign.withdrawn_from_election,
+                'withdrawal_date':              wdate,
             }
             candidates_to_display.append(one_candidate.copy())
             # Capture the office_we_vote_id and google_civic_election_id so we can return

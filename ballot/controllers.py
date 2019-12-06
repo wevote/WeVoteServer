@@ -8,6 +8,7 @@ from .models import BallotItemListManager, BallotItemManager, BallotReturnedList
 from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
 from datetime import datetime, timedelta
+import datetime as the_other_datetime
 from election.models import ElectionManager, fetch_next_election_for_state
 from exception.models import handle_exception
 from import_export_ballotpedia.controllers import voter_ballot_items_retrieve_from_ballotpedia_for_api
@@ -1975,6 +1976,9 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                                 candidate_state_code_lower_case = candidate_state_code.lower()
                             else:
                                 candidate_state_code_lower_case = ""
+                            wdate = ''
+                            if isinstance(candidate_campaign.withdrawal_date, the_other_datetime.date):
+                                wdate = candidate_campaign.withdrawal_date.strftime("%Y-%m-%d")
                             one_candidate = {
                                 # 'id':                           candidate_campaign.id,
                                 'we_vote_id':                   candidate_campaign.we_vote_id,
@@ -2000,8 +2004,7 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                                 # 'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
                                 # 'facebook_url':                 candidate_campaign.facebook_url,
                                 # 'google_civic_election_id':     candidate_campaign.google_civic_election_id,
-                                # 'google_plus_url':              candidate_campaign.google_plus_url,
-                                'kind_of_ballot_item':          CANDIDATE,
+                                 'kind_of_ballot_item':          CANDIDATE,
                                 # 'maplight_id':                  candidate_campaign.maplight_id,
                                 # 'ocd_division_id':              candidate_campaign.ocd_division_id,
                                 # 'order_on_ballot':              candidate_campaign.order_on_ballot,
@@ -2014,6 +2017,8 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                                 'twitter_description':          candidate_campaign.twitter_description,
                                 'twitter_followers_count':      candidate_campaign.twitter_followers_count,
                                 # 'youtube_url':                  candidate_campaign.youtube_url,
+                                'withdrawn_from_election':      candidate_campaign.withdrawn_from_election,
+                                'withdrawal_date':              wdate,
                             }
                             candidates_to_display.append(one_candidate.copy())
                 except Exception as e:
@@ -2157,6 +2162,10 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                     if results['candidate_list_found']:
                         candidate_list = results['candidate_list']
                         for candidate_campaign in candidate_list:
+                            wdate = ''
+                            if isinstance(candidate_campaign.withdrawal_date, the_other_datetime.date):
+                                wdate = candidate_campaign.withdrawal_date.strftime("%Y-%m-%d")
+
                             # This should match values returned in candidates_retrieve_for_api (candidatesRetrieve)
                             one_candidate = {
                                 'id':                           candidate_campaign.id,
@@ -2182,7 +2191,6 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                                 'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
                                 'facebook_url':                 candidate_campaign.facebook_url,
                                 'google_civic_election_id':     candidate_campaign.google_civic_election_id,
-                                'google_plus_url':              candidate_campaign.google_plus_url,
                                 'kind_of_ballot_item':          CANDIDATE,
                                 'maplight_id':                  candidate_campaign.maplight_id,
                                 'ocd_division_id':              candidate_campaign.ocd_division_id,
@@ -2196,6 +2204,8 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                                 'twitter_description':          candidate_campaign.twitter_description,
                                 'twitter_followers_count':      candidate_campaign.twitter_followers_count,
                                 'youtube_url':                  candidate_campaign.youtube_url,
+                                'withdrawn_from_election':      candidate_campaign.withdrawn_from_election,
+                                'withdrawal_date':              wdate,
                             }
                             candidates_to_display.append(one_candidate.copy())
                 except Exception as e:

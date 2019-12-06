@@ -92,8 +92,9 @@ def voter_guide_possibility_positions_retrieve_doc_template_values(url_root):
                    '     "statement_text": string,\n' \
                    '     "statement_text_stored": string,\n' \
                    '     "state_code": string,\n' \
-                   '   }' \
-                   '   ],\n' \
+                   '     "withdrawn_from_election": boolean,\n' \
+                   '     "withdrawal_date": date,\n' \
+                   '   }],\n' \
                    '}'
 
     template_values = {

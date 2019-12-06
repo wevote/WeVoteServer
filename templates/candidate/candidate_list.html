@@ -318,6 +318,10 @@
                      class="u-no-break"
                      target="_blank">{{ candidate.candidate_name }} <span class="glyphicon glyphicon-new-window"></span></a>
                 </span>
+                {% if candidate.withdrawn_from_election %}
+                    <br />
+                    <span><b>Withdrew From Election ({{ candidate.withdrawal_date }})</b></span>
+                {% endif %}
                 <br />
                     {{ candidate.we_vote_id }}
                     {% if candidate.politician_we_vote_id %}

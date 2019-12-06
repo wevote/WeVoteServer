@@ -81,6 +81,29 @@ span.wrap_word { word-break: break-word; }
 </div>
 {% endif %}
 
+
+<div class="form-group">
+    <label for="candidate_withdrawal_date_id" class="col-sm-3 control-label">Candidate Has Withdrawn From Election</label>
+    <div class="col-sm-8">
+        <span style="float: left; padding: 8px 10px 0 0;">
+            <input type="radio" name="withdrawn_from_election" value="True"
+                {% if candidate.withdrawn_from_election %} checked {% endif %}
+                onclick="document.getElementById('candidate_withdrawal_date_id').style.color='black'"> True
+        </span>
+        <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio" name="withdrawn_from_election" value="False"
+                {% if not candidate.withdrawn_from_election %} checked {% endif %}
+                onclick="document.getElementById('candidate_withdrawal_date_id').style.color='white'"> False
+        </span>
+        <input type="text" name="withdrawal_date" id="candidate_withdrawal_date_id" class="form-control"
+            value="{{ candidate.withdrawal_date|date:'Y-m-d' }}"
+            style="width: 125px; float: left; {% if not candidate.withdrawn_from_election %} color: white {% endif %} "/>
+        <span style="float: left; padding: 8px 0 0 10px;">
+            Announcement date must be in the YYYY-MM-DD format.
+        </span>
+    </div>
+</div>
+
 <div class="form-group">
     <label for="google_civic_candidate_name_id" class="col-sm-3 control-label">Candidate Name1 (for Google Civic matching)</label>
     <div class="col-sm-8">

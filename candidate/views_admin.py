@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import candidates_import_from_master_server, candidates_import_from_sample_file, \
-    candidate_politician_match, fetch_duplicate_candidate_count, figure_out_candidate_conflict_values, find_duplicate_candidate, \
+    candidate_politician_match, fetch_duplicate_candidate_count, figure_out_candidate_conflict_values, \
+    find_duplicate_candidate, \
     merge_if_duplicate_candidates, merge_these_two_candidates, \
     refresh_candidate_data_from_master_tables, retrieve_candidate_photos, \
     retrieve_candidate_politician_match_options, save_image_to_candidate_table, \
@@ -24,7 +25,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from election.models import ElectionManager
-from exception.models import handle_record_found_more_than_one_exception,\
+from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
 from google_custom_search.models import GoogleSearchUser, GoogleSearchUserManager
 from image.controllers import retrieve_and_save_ballotpedia_candidate_images
@@ -36,6 +37,7 @@ from measure.models import ContestMeasure
 from politician.models import PoliticianManager
 from position.models import PositionEntered, PositionListManager
 import pytz
+import re
 from twitter.models import TwitterLinkPossibility
 from voter.models import voter_has_authority
 from voter_guide.models import VoterGuide
@@ -110,7 +112,8 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
                                                     'photo_url', 'photo_url_from_maplight',
                                                     'photo_url_from_vote_smart', 'order_on_ballot',
                                                     'google_civic_election_id', 'ocd_division_id', 'state_code',
-                                                    'candidate_url', 'candidate_contact_form_url', 'facebook_url', 'twitter_url',
+                                                    'candidate_url', 'candidate_contact_form_url', 'facebook_url',
+                                                    'twitter_url',
                                                     'twitter_user_id', 'candidate_twitter_handle', 'twitter_name',
                                                     'twitter_location', 'twitter_followers_count',
                                                     'twitter_profile_image_url_https', 'twitter_description',
@@ -492,12 +495,14 @@ def candidate_list_view(request):
                 election.measure_count = measure_list_query.count()
 
                 # Number of Voter Guides
-                voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
+                voter_guide_query = VoterGuide.objects.filter(
+                    google_civic_election_id=election.google_civic_election_id)
                 voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
                 election.voter_guides_count = voter_guide_query.count()
 
                 # Number of Public Positions
-                position_query = PositionEntered.objects.filter(google_civic_election_id=election.google_civic_election_id)
+                position_query = PositionEntered.objects.filter(
+                    google_civic_election_id=election.google_civic_election_id)
                 # As of Aug 2018 we are no longer using PERCENT_RATING
                 position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
                 election.public_positions_count = position_query.count()
@@ -699,6 +704,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
     state_code = request.GET.get('state_code', "")
     show_all_google_search_users = request.GET.get('show_all_google_search_users', False)
     show_all_twitter_search_results = request.GET.get('show_all_twitter_search_results', False)
+    withdrawal_date = request.GET.get('withdrawal_date', False)
+    withdrawn_from_election = request.GET.get('withdrawn_from_election', False)
 
     messages_on_stage = get_messages(request)
     candidate_id = convert_to_int(candidate_id)
@@ -884,6 +891,39 @@ def candidate_edit_process_view(request):
     google_search_image_file = request.POST.get('google_search_image_file', False)
     google_search_link = request.POST.get('google_search_link', False)
     twitter_url = request.POST.get('twitter_url', False)
+    withdrawal_date = request.POST.get('withdrawal_date', False)
+    withdrawn_from_election = request.POST.get('withdrawn_from_election', False)
+
+    if withdrawn_from_election == True:
+        # If withdrawn_from_election is true AND we have an invalid withdrawal_date return with error
+        res = re.match('([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))', withdrawal_date)
+        print('withdrawal_date is invalid: ' + withdrawal_date)
+        if res == None:
+            url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+                            "&candidate_name=" + str(candidate_name) + \
+                            "&state_code=" + str(state_code) + \
+                            "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
+                            "&google_civic_candidate_name2=" + str(google_civic_candidate_name2) + \
+                            "&google_civic_candidate_name3=" + str(google_civic_candidate_name3) + \
+                            "&contest_office_id=" + str(contest_office_id) + \
+                            "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
+                            "&candidate_url=" + str(candidate_url) + \
+                            "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
+                            "&facebook_url=" + str(facebook_url) + \
+                            "&candidate_email=" + str(candidate_email) + \
+                            "&candidate_phone=" + str(candidate_phone) + \
+                            "&party=" + str(party) + \
+                            "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
+                            "&vote_smart_id=" + str(vote_smart_id) + \
+                            "&politician_we_vote_id=" + str(politician_we_vote_id) + \
+                            "&maplight_id=" + str(maplight_id)
+            messages.add_message(request, messages.ERROR, 'Could not save candidate. If the "Candidate Has Withdrawn '
+                                                          'From Election" is True, then the date in the field must be '
+                                                          'in the YYYY-MM-DD format')
+            if positive_value_exists(candidate_id):
+                return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) + url_variables)
+            else:
+                return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
 
     # Check to see if this candidate is already being used anywhere
     candidate_on_stage_found = False
@@ -910,6 +950,7 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.save()
                 pass
             except Exception as e:
+                print('Could not save candidate.', e)
                 messages.add_message(request, messages.ERROR, 'Could not save candidate.')
 
     contest_office_we_vote_id = ''
@@ -1080,6 +1121,9 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
             if twitter_url is not False:
                 candidate_on_stage.twitter_url = twitter_url
+            if withdrawn_from_election:
+                candidate_on_stage.withdrawn_from_election = withdrawn_from_election
+                candidate_on_stage.withdrawal_date = withdrawal_date
 
             if google_search_image_file:
                 # If google search image exist then cache master and resized images and save them to candidate table
@@ -1142,6 +1186,9 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
                 if twitter_url is not False:
                     candidate_on_stage.twitter_url = twitter_url
+                if withdrawn_from_election:
+                    candidate_on_stage.withdrawn_from_election = withdrawn_from_election
+                    candidate_on_stage.withdrawal_date = withdrawal_date
                 if candidate_url is not False:
                     candidate_on_stage.candidate_url = candidate_url
                 if candidate_contact_form_url is not False:
@@ -1216,6 +1263,7 @@ def candidate_edit_process_view(request):
                                                 url_variables)
 
     except Exception as e:
+        print('Could not save candidate (2).', e)
         messages.add_message(request, messages.ERROR, 'Could not save candidate.')
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
