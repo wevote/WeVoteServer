@@ -74,23 +74,6 @@ def voter_retrieve_doc_template_values(url_root):
                    '  "voter_photo_url_large": string,\n' \
                    '  "voter_photo_url_medium": string,\n' \
                    '  "voter_photo_url_tiny": string,\n' \
-                   '  "voter_donation_journal_list": list [ (List of donation journal entries for charges and ' \
-                   'subscriptions),\n' \
-                   '    "created": datetime, (Timestamp of the charge creation)\n' \
-                   '    "amount" : integer, (Amount donatated, or subscribed to, in cents)\n' \
-                   '    "currency" : integer, (International 3 letter currency code, like \'usd\'\n' \
-                   '    "record_enum" : string, (One of {PAYMENT_FROM_UI, PAYMENT_AUTO_SUBSCRIPTION, ' \
-                   'SUBSCRIPTION_SETUP_AND_INITIAL})\n' \
-                   '    "brand" : string, (Credit card brand, like Visa or MasterCard)\n' \
-                   '    "exp_month" : string, (Credit card expiration month {1...12})\n' \
-                   '    "exp_year" : string, (Credit card expiration year, like 2017)\n' \
-                   '    "last4" : string, (Last 4 digits of the credit card)\n' \
-                   '    "stripe_status" : string, (The status stripe returned for the transaction)\n' \
-                   '    "charge_id" : string, (Stripe\'s charge id)\n' \
-                   '    "subscription_id" : string, (Stripe\'s subscription id)\n' \
-                   '    "subscription_canceled_at" : datetime, (Date the subscription was canceled)\n' \
-                   '    "subscription_ended_at" : datetime, (Date the subscription was ended)\n' \
-                   '   ]\n' \
                    '  "interface_status_flags": integer,\n' \
                    '  "notification_settings_flags": integer,\n' \
                    '}'
