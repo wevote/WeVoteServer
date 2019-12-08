@@ -2235,7 +2235,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
                                           is_tablet=user_agent_object.is_tablet)
 
         facebook_profile, voter_photo_large, voter_photo_medium = get_displayable_images(voter, facebook_user)
-        donation_list = donation_journal_history_for_a_voter(voter.we_vote_id)
+        # donation_list = donation_journal_history_for_a_voter(voter.we_vote_id)
         json_data = {
             'status':                           status,
             'success':                          True,
@@ -2268,7 +2268,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             'voter_photo_large':                voter_photo_large,
             'voter_photo_url_medium':           voter_photo_medium,
             'voter_photo_url_tiny':             voter.we_vote_hosted_profile_image_url_tiny,
-            'voter_donation_history_list':      donation_list,
+            # 'voter_donation_history_list':      donation_list,
             'interface_status_flags':           voter.interface_status_flags,
             'notification_settings_flags':      voter.notification_settings_flags,
             'state_code_from_ip_address':       state_code_from_ip_address,
