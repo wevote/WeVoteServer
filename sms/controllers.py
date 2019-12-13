@@ -24,11 +24,21 @@ def validate_sms_phone_number(sms_phone_number, region="US"):
 
 
 def augment_sms_phone_number_list(sms_phone_number_list, voter):
+    status = ""
+    success = True
     sms_phone_number_list_augmented = []
     primary_sms_phone_number_found = False
 
-    status = ""
-    success = True
+    if not voter or not voter.we_vote_id:
+        status += 'AUGMENT_SMS_MISSING_VOTER_OBJECT '
+        success = False
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'sms_phone_number_list':    sms_phone_number_list_augmented,
+        }
+        return results
+
     primary_sms_phone_number = None
     for sms_phone_number in sms_phone_number_list:
         is_primary_sms_phone_number = False
@@ -114,9 +124,9 @@ def augment_sms_phone_number_list(sms_phone_number_list, voter):
                 break
 
     results = {
-        'status':                           status,
-        'success':                          success,
-        'sms_phone_number_list':               sms_phone_number_list_augmented,
+        'status':                   status,
+        'success':                  success,
+        'sms_phone_number_list':    sms_phone_number_list_augmented,
     }
     return results
 
@@ -543,10 +553,10 @@ def voter_sms_phone_number_retrieve_for_api(voter_device_id):  # voterSMSPhoneNu
 
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-    voter_id = voter_results['voter_id']
-    if not positive_value_exists(voter_id):
+    if not voter_results['voter_found']:
+        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
         error_results = {
-            'status':                       "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'status':                       status,
             'success':                      False,
             'voter_device_id':              voter_device_id,
             'sms_phone_number_list_found':  False,
@@ -784,10 +794,10 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
 
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-    voter_id = voter_results['voter_id']
-    if not positive_value_exists(voter_id):
+    if not voter_results['voter_found']:
+        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
         error_results = {
-            'status':                               "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID ",
+            'status':                               status,
             'success':                              False,
             'voter_device_id':                      voter_device_id,
             'sms_phone_number':                     sms_phone_number,
@@ -1163,8 +1173,8 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
         'voter_device_id':                      voter_device_id,
         'sms_phone_number':                     normalized_sms_phone_number,
         'sms_phone_number_we_vote_id':          sms_phone_number_we_vote_id,
-        'sms_phone_number_already_owned_by_other_voter':   sms_phone_number_already_owned_by_other_voter,
-        'sms_phone_number_already_owned_by_this_voter':   sms_phone_number_already_owned_by_this_voter,
+        'sms_phone_number_already_owned_by_other_voter':    sms_phone_number_already_owned_by_other_voter,
+        'sms_phone_number_already_owned_by_this_voter':     sms_phone_number_already_owned_by_this_voter,
         'sms_phone_number_found':               sms_phone_number_found,
         'sms_phone_number_list_found':          sms_phone_number_list_found,
         'sms_phone_number_list':                sms_phone_number_list_augmented,
