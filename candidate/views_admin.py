@@ -894,11 +894,12 @@ def candidate_edit_process_view(request):
     withdrawal_date = request.POST.get('withdrawal_date', False)
     withdrawn_from_election = request.POST.get('withdrawn_from_election', False)
 
-    if withdrawn_from_election == True:
+    # Note: A date is not required, but if provided it needs to be in a correct date format
+    if positive_value_exists(withdrawn_from_election) and positive_value_exists(withdrawal_date):
         # If withdrawn_from_election is true AND we have an invalid withdrawal_date return with error
         res = re.match('([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))', withdrawal_date)
-        print('withdrawal_date is invalid: ' + withdrawal_date)
         if res == None:
+            print('withdrawal_date is invalid: ' + withdrawal_date)
             url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
                             "&candidate_name=" + str(candidate_name) + \
                             "&state_code=" + str(state_code) + \
@@ -1123,7 +1124,10 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.twitter_url = twitter_url
             if withdrawn_from_election:
                 candidate_on_stage.withdrawn_from_election = withdrawn_from_election
-                candidate_on_stage.withdrawal_date = withdrawal_date
+                if positive_value_exists(withdrawal_date):
+                    candidate_on_stage.withdrawal_date = withdrawal_date
+                else:
+                    candidate_on_stage.withdrawal_date = None
 
             if google_search_image_file:
                 # If google search image exist then cache master and resized images and save them to candidate table
@@ -1264,7 +1268,8 @@ def candidate_edit_process_view(request):
 
     except Exception as e:
         print('Could not save candidate (2).', e)
-        messages.add_message(request, messages.ERROR, 'Could not save candidate.')
+        messages.add_message(request, messages.ERROR, 'Could not save candidate (2), error: {error}'
+                                                      ''.format(error=str(e)))
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
     if positive_value_exists(ballotpedia_image_id) and not positive_value_exists(ballotpedia_profile_image_url_https):
