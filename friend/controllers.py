@@ -1447,13 +1447,17 @@ def friend_list_for_api(voter_device_id,
                     }
                     friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_SENT_TO_ME:
+        read_only = True
         retrieve_invitations_sent_to_me_results = friend_manager.retrieve_friend_invitations_sent_to_me(
-            voter.we_vote_id)
+            voter.we_vote_id, read_only)
         success = retrieve_invitations_sent_to_me_results['success']
         status += retrieve_invitations_sent_to_me_results['status']
         if retrieve_invitations_sent_to_me_results['friend_list_found']:
             raw_friend_list = retrieve_invitations_sent_to_me_results['friend_list']
-            for one_friend_invitation in raw_friend_list:
+            heal_results = heal_friend_invitations_sent_to_me(voter.we_vote_id, raw_friend_list)
+            verified_friend_list = heal_results['friend_list']
+            status += heal_results['status']
+            for one_friend_invitation in verified_friend_list:
                 # Augment the line with voter information
                 friend_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
                     one_friend_invitation.sender_voter_we_vote_id)  # This is the voter who sent the invitation to me
@@ -1604,6 +1608,44 @@ def friend_list_for_api(voter_device_id,
         'kind_of_list':         kind_of_list_we_are_looking_for,
         'friend_list_found':    friend_list_found,
         'friend_list':          friend_list,
+    }
+    return results
+
+
+def heal_friend_invitations_sent_to_me(voter_we_vote_id, friend_invitation_list):
+    success = True
+    status = ''
+    modified_friend_list = []
+    if not positive_value_exists(voter_we_vote_id):
+        status += 'HEAL_FRIEND_INVITATIONS_MISSING_VOTER_WE_VOTE_ID '
+        results = {
+            'success': success,
+            'status': status,
+            'friend_list': friend_invitation_list,
+        }
+        return results
+
+    friend_manager = FriendManager()
+    for one_friend_invitation in friend_invitation_list:
+        if not positive_value_exists(one_friend_invitation.sender_voter_we_vote_id):
+            # Cannot heal without sender_voter_we_vote_id
+            modified_friend_list.append(one_friend_invitation)
+            continue
+        friend_results = friend_manager.retrieve_current_friend(
+            sender_voter_we_vote_id=voter_we_vote_id,
+            recipient_voter_we_vote_id=one_friend_invitation.sender_voter_we_vote_id)
+        if friend_results['current_friend_found']:
+            status += friend_results['status']
+            # Delete the friend invitation
+            invitation_results = friend_manager.delete_friend_invitation_voter_link(id=one_friend_invitation.id)
+            status += invitation_results['status']
+        else:
+            modified_friend_list.append(one_friend_invitation)
+
+    results = {
+        'success':              success,
+        'status':               status,
+        'friend_list':          modified_friend_list,
     }
     return results
 
