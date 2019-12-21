@@ -193,7 +193,7 @@ class FriendManager(models.Model):
 
     def create_or_update_friend_invitation_voter_link(self, sender_voter_we_vote_id, recipient_voter_we_vote_id='',
                                                       invitation_message='', sender_email_ownership_is_verified=False,
-                                                      invitation_secret_key=''):
+                                                      invitation_status=NO_RESPONSE, invitation_secret_key=''):
         status = ""
         defaults = {
             "sender_voter_we_vote_id":              sender_voter_we_vote_id,
@@ -205,6 +205,9 @@ class FriendManager(models.Model):
             defaults["invitation_message"] = invitation_message
         if positive_value_exists(invitation_secret_key):
             defaults["secret_key"] = invitation_secret_key
+        if positive_value_exists(invitation_status):
+            defaults['invitation_status'] = invitation_status
+        defaults["deleted"] = False
 
         try:
             friend_invitation, created = FriendInvitationVoterLink.objects.update_or_create(
@@ -510,8 +513,8 @@ class FriendManager(models.Model):
         }
         return results
 
-    def process_friend_invitation_voter_response(self, sender_voter, voter, kind_of_invite_response):
-        # Find the invite from other_voter (who issued this invitation) to the voter (who is responding)
+    def process_friend_invitation_voter_response(self, sender_voter, recipient_voter, kind_of_invite_response):
+        # Find the invite from sender_voter (who issued this invitation) to the recipient_voter (who is responding)
         # 1) invite found
         # 2) invite NOT found
         # If 2, check for an invite to this voter's email (from before the email was linked to voter)
@@ -526,8 +529,8 @@ class FriendManager(models.Model):
         friend_invitation_voter_link = FriendInvitationVoterLink()
         try:
             friend_invitation_voter_link = FriendInvitationVoterLink.objects.get(
-                recipient_voter_we_vote_id__iexact=voter.we_vote_id,
                 sender_voter_we_vote_id__iexact=sender_voter.we_vote_id,
+                recipient_voter_we_vote_id__iexact=recipient_voter.we_vote_id,
             )
             success = True
             friend_invitation_found = True
@@ -546,12 +549,13 @@ class FriendManager(models.Model):
             if kind_of_invite_response == ACCEPT_INVITATION:
                 # Create a CurrentFriend entry
                 friend_manager = FriendManager()
-                results = friend_manager.create_or_update_current_friend(sender_voter.we_vote_id, voter.we_vote_id)
+                results = friend_manager.create_or_update_current_friend(
+                    sender_voter.we_vote_id, recipient_voter.we_vote_id)
                 success = results['success']
                 status += results['status']
 
                 friend_manager.update_suggested_friends_starting_with_one_voter(sender_voter.we_vote_id)
-                friend_manager.update_suggested_friends_starting_with_one_voter(voter.we_vote_id)
+                friend_manager.update_suggested_friends_starting_with_one_voter(recipient_voter.we_vote_id)
 
                 if results['current_friend_created']:
                     friend_invitation_accepted = True
@@ -559,12 +563,14 @@ class FriendManager(models.Model):
                 # And then delete the friend_invitation_voter_link
                 if results['current_friend_found'] or results['current_friend_created']:
                     try:
-                        friend_invitation_voter_link.delete()
+                        friend_invitation_voter_link.deleted = True
+                        friend_invitation_voter_link.save()
                         friend_invitation_deleted = True
+                        status += "ACCEPT_INVITATION-DELETED"
                     except Exception as e:
                         friend_invitation_deleted = False
                         success = False
-                        status += 'FAILED process_friend_invitation_voter_response delete FriendInvitationVoterLink ' \
+                        status += 'FAILED process_friend_invitation_voter_response ACCEPT_INVITATION ' \
                                   '' + str(e) + " "
             elif kind_of_invite_response == IGNORE_INVITATION:
                 try:
@@ -572,22 +578,23 @@ class FriendManager(models.Model):
                     friend_invitation_voter_link.save()
                     friend_invitation_saved = True
                     success = True
-                    status += 'CURRENT_FRIEND_INVITATION_VOTER_LINK_STATUS_UPDATED_TO_IGNORE '
+                    status += 'IGNORE_INVITATION-CURRENT_FRIEND_INVITATION_VOTER_LINK_STATUS_UPDATED_TO_IGNORE '
                 except Exception as e:
                     friend_invitation_saved = False
                     success = False
-                    status += 'FAILED process_friend_invitation_voter_response delete FriendInvitationVoterLink ' \
+                    status += 'FAILED process_friend_invitation_voter_response IGNORE_INVITATION ' \
                               '' + str(e) + " "
             elif kind_of_invite_response == DELETE_INVITATION_VOTER_SENT_BY_ME:
                 try:
-                    friend_invitation_voter_link.delete()
+                    friend_invitation_voter_link.deleted = True
+                    friend_invitation_voter_link.save()
                     friend_invitation_saved = True
                     success = True
-                    status += 'CURRENT_FRIEND_INVITATION_VOTER_LINK_DELETED '
+                    status += 'DELETE_INVITATION_VOTER_SENT_BY_ME_DELETED '
                 except Exception as e:
                     friend_invitation_saved = False
                     success = False
-                    status += 'FAILED process_friend_invitation_voter_response delete FriendInvitationVoterLink ' \
+                    status += 'FAILED process_friend_invitation_voter_response DELETE_INVITATION_VOTER_SENT_BY_ME ' \
                               '' + str(e) + " "
             else:
                 success = False
@@ -597,7 +604,7 @@ class FriendManager(models.Model):
             'success':                      success,
             'status':                       status,
             'sender_voter_we_vote_id':      sender_voter.we_vote_id,
-            'recipient_voter_we_vote_id':   voter.we_vote_id,
+            'recipient_voter_we_vote_id':   recipient_voter.we_vote_id,
             'friend_invitation_found':      friend_invitation_found,
             'friend_invitation_deleted':    friend_invitation_deleted,
             'friend_invitation_saved':      friend_invitation_saved,
@@ -1078,7 +1085,7 @@ class FriendManager(models.Model):
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
                 recipient_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(invitation_status=ACCEPTED)
-            friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(deleted=True)
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(deleted=False)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.order_by('-date_last_changed')
             friend_invitation_from_voter_list = friend_invitation_voter_queryset
 
@@ -1108,7 +1115,7 @@ class FriendManager(models.Model):
             friend_invitation_email_queryset = friend_invitation_email_queryset.filter(
                 sender_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
             friend_invitation_email_queryset = friend_invitation_email_queryset.filter(invitation_status=ACCEPTED)
-            friend_invitation_email_queryset = friend_invitation_email_queryset.filter(deleted=True)
+            friend_invitation_email_queryset = friend_invitation_email_queryset.filter(deleted=False)
             friend_invitation_email_queryset = friend_invitation_email_queryset.order_by('-date_last_changed')
             friend_invitation_from_email_list = friend_invitation_email_queryset
             success = True
@@ -1156,7 +1163,7 @@ class FriendManager(models.Model):
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
                 Q(invitation_status=ACCEPTED) |
                 Q(invitation_status=IGNORED))
-            friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(deleted=True)
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(deleted=False)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.order_by('-date_last_changed')
             friend_invitation_to_voter_list = friend_invitation_voter_queryset
 
@@ -1219,7 +1226,7 @@ class FriendManager(models.Model):
                 friend_invitation_email_queryset = friend_invitation_email_queryset.filter(
                     Q(invitation_status=ACCEPTED) |
                     Q(invitation_status=IGNORED))
-                friend_invitation_email_queryset = friend_invitation_email_queryset.filter(deleted=True)
+                friend_invitation_email_queryset = friend_invitation_email_queryset.filter(deleted=False)
                 friend_invitation_email_queryset = friend_invitation_email_queryset.order_by('-date_last_changed')
                 friend_invitation_to_email_list = friend_invitation_email_queryset
                 success = True
@@ -1414,15 +1421,16 @@ class FriendManager(models.Model):
             return len(friend_list)
         return 0
 
-    def fetch_friend_invitations_sent_to_me_we_vote_id_list(self, sender_voter_we_vote_id):
+    def fetch_friend_invitations_sent_to_me_we_vote_id_list(self, voter_we_vote_id):
         read_only = True
-        results = self.retrieve_friend_invitations_sent_to_me(sender_voter_we_vote_id, read_only)
+        results = self.retrieve_friend_invitations_sent_to_me(recipient_voter_we_vote_id=voter_we_vote_id,
+                                                              read_only=read_only)
         we_vote_id_list = []
         if results['friend_list_found']:
             friend_list = results['friend_list']
             for friend_invitation in friend_list:
-                if hasattr(friend_invitation, "recipient_voter_we_vote_id"):
-                    we_vote_id_list.append(friend_invitation.recipient_voter_we_vote_id)
+                if hasattr(friend_invitation, "sender_voter_we_vote_id"):
+                    we_vote_id_list.append(friend_invitation.sender_voter_we_vote_id)
         return we_vote_id_list
 
     def retrieve_friend_invitations_sent_to_me(self, recipient_voter_we_vote_id, read_only=False):
@@ -1453,7 +1461,7 @@ class FriendManager(models.Model):
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
                 sender_voter_we_vote_id__iexact=recipient_voter_we_vote_id)
             # Exclude accepted invitations, ignored and deleted invitations
-            friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(deleted=True)
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(deleted=False)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
                 invitation_status__iexact=ACCEPTED)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
@@ -1627,10 +1635,14 @@ class FriendManager(models.Model):
     def unfriend_current_friend(self, acting_voter_we_vote_id, other_voter_we_vote_id):
         # Retrieve the existing friendship
         for_editing = True
-        results = self.retrieve_current_friend(acting_voter_we_vote_id, other_voter_we_vote_id, for_editing)
-
+        status = ""
         success = False
-        status = 'PREPARING_TO_DELETE_CURRENT_FRIEND '
+
+        results = self.retrieve_current_friend(acting_voter_we_vote_id, other_voter_we_vote_id, for_editing)
+        if not results['success']:
+            status += results['status']
+
+        status += 'PREPARING_TO_DELETE_CURRENT_FRIEND '
         current_friend_deleted = False
 
         if results['current_friend_found']:

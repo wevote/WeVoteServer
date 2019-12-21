@@ -145,8 +145,8 @@ def friend_invite_response_view(request):  # friendInviteResponse
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_invite_response = request.GET.get('kind_of_invite_response', ACCEPT_INVITATION)
-    if not kind_of_invite_response in(ACCEPT_INVITATION, DELETE_INVITATION_EMAIL_SENT_BY_ME,
-                                      DELETE_INVITATION_VOTER_SENT_BY_ME, IGNORE_INVITATION, UNFRIEND_CURRENT_FRIEND):
+    if kind_of_invite_response not in (ACCEPT_INVITATION, DELETE_INVITATION_EMAIL_SENT_BY_ME,
+                                       DELETE_INVITATION_VOTER_SENT_BY_ME, IGNORE_INVITATION, UNFRIEND_CURRENT_FRIEND):
         kind_of_invite_response = ACCEPT_INVITATION
     other_voter_we_vote_id = request.GET.get('voter_we_vote_id', "")
     recipient_voter_email = request.GET.get('recipient_voter_email', "")

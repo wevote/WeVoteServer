@@ -65,10 +65,16 @@ def friend_list_doc_template_values(url_root):
                    '     "voter_photo_url_large": string,\n' \
                    '     "voter_photo_url_medium": string,\n' \
                    '     "voter_photo_url_tiny": string,\n' \
+                   '     "voter_email_address": string,\n' \
                    '     "voter_twitter_handle": string,\n' \
                    '     "voter_twitter_description": string,\n' \
                    '     "voter_twitter_followers_count": number,\n' \
+                   '     "linked_organization_we_vote_id": string,\n' \
                    '     "voter_state_code": string,\n' \
+                   '     "invitation_status": string,\n' \
+                   '     "invitation_sent_to": string,\n' \
+                   '     "positions_taken": number,\n' \
+                   '     "mutual_friends": number,\n' \
                    '   ],\n' \
                    '}'
 
