@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 from .models import ACCEPTED, FriendInvitationVoterLink, FriendManager, CURRENT_FRIENDS, \
-    DELETE_INVITATION_EMAIL_SENT_BY_ME, FRIEND_INVITATIONS_PROCESSED, \
+    DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, FRIEND_INVITATIONS_PROCESSED, \
     FRIEND_INVITATIONS_SENT_BY_ME, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION, \
     SUGGESTED_FRIEND_LIST, \
     FRIENDS_IN_COMMON, UNFRIEND_CURRENT_FRIEND
@@ -513,7 +513,7 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
         "recipient_voter_email":        recipient_voter_email,
         "see_all_friend_requests_url":  web_app_root_url_verified + "/friends",
         "confirm_friend_request_url":   web_app_root_url_verified + "/more/network/key/" + invitation_secret_key,
-        "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",  # TODO Implement this
+        "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",  # TODO Implement
         "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -1307,6 +1307,7 @@ def friend_invite_response_for_api(voter_device_id, kind_of_invite_response, oth
         other_voter = Voter()
 
     friend_manager = FriendManager()
+    friend_invitation_accepted = False
     if kind_of_invite_response == UNFRIEND_CURRENT_FRIEND:
         results = friend_manager.unfriend_current_friend(voter.we_vote_id, other_voter.we_vote_id)
         status += results['status']
@@ -1314,21 +1315,29 @@ def friend_invite_response_for_api(voter_device_id, kind_of_invite_response, oth
         results = friend_manager.process_friend_invitation_email_response(voter, recipient_voter_email,
                                                                           kind_of_invite_response)
         status += results['status']
+    elif kind_of_invite_response == DELETE_INVITATION_VOTER_SENT_BY_ME:
+        results = friend_manager.process_friend_invitation_voter_response(
+            sender_voter=voter, recipient_voter=other_voter, kind_of_invite_response=kind_of_invite_response)
+        status += results['status']
     else:
-        results = friend_manager.process_friend_invitation_voter_response(other_voter, voter, kind_of_invite_response)
+        results = friend_manager.process_friend_invitation_voter_response(
+            sender_voter=other_voter, recipient_voter=voter, kind_of_invite_response=kind_of_invite_response)
         status += results['status']
         if results['friend_invitation_accepted']:
-            accepting_voter_id = voter.id
-            accepting_voter_we_vote_id = voter.we_vote_id
-            original_sender_id = other_voter.id
-            original_sender_we_vote_id = other_voter.we_vote_id
-            friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id,
-                                            web_app_root_url=web_app_root_url)
-            # Update both friends
-            results1 = add_position_network_count_entries_for_one_friend(accepting_voter_id, original_sender_we_vote_id)
-            status += results1['status']
-            results2 = add_position_network_count_entries_for_one_friend(original_sender_id, accepting_voter_we_vote_id)
-            status += results2['status']
+            friend_invitation_accepted = True
+
+    if friend_invitation_accepted:
+        accepting_voter_id = voter.id
+        accepting_voter_we_vote_id = voter.we_vote_id
+        original_sender_id = other_voter.id
+        original_sender_we_vote_id = other_voter.we_vote_id
+        friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id,
+                                        web_app_root_url=web_app_root_url)
+        # Update both friends
+        results1 = add_position_network_count_entries_for_one_friend(accepting_voter_id, original_sender_we_vote_id)
+        status += results1['status']
+        results2 = add_position_network_count_entries_for_one_friend(original_sender_id, accepting_voter_we_vote_id)
+        status += results2['status']
 
     success = results['success']
 
@@ -1394,6 +1403,8 @@ def friend_list_for_api(voter_device_id,
         if retrieve_current_friends_as_voters_results['friend_list_found']:
             current_friend_list = retrieve_current_friends_as_voters_results['friend_list']
             for friend_voter in current_friend_list:
+                mutual_friends = 11
+                positions_taken = 17
                 one_friend = {
                     "voter_we_vote_id":                 friend_voter.we_vote_id,
                     "voter_display_name":               friend_voter.get_full_name(),
@@ -1410,6 +1421,8 @@ def friend_list_for_api(voter_device_id,
                     "voter_state_code":                 "",  # To be implemented
                     "invitation_status":                "",  # Not used with CurrentFriends
                     "invitation_sent_to":               "",  # Not used with CurrentFriends
+                    "mutual_friends":                   mutual_friends,
+                    "positions_taken":                  positions_taken,
                 }
                 friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_PROCESSED:
@@ -1428,6 +1441,8 @@ def friend_list_for_api(voter_device_id,
                     recipient_voter_email = one_friend_invitation.recipient_voter_email \
                         if hasattr(one_friend_invitation, "recipient_voter_email") \
                         else ""
+                    mutual_friends = 8
+                    positions_taken = 99
                     one_friend = {
                         "voter_we_vote_id":                 friend_voter.we_vote_id,
                         "voter_display_name":               friend_voter.get_full_name(),
@@ -1444,6 +1459,8 @@ def friend_list_for_api(voter_device_id,
                         "voter_state_code":                 "",  # To be implemented
                         "invitation_status":                one_friend_invitation.invitation_status,
                         "invitation_sent_to":               recipient_voter_email,
+                        "mutual_friends":                   mutual_friends,
+                        "positions_taken":                  positions_taken,
                     }
                     friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_SENT_TO_ME:
@@ -1466,6 +1483,8 @@ def friend_list_for_api(voter_device_id,
                     recipient_voter_email = one_friend_invitation.recipient_voter_email \
                         if hasattr(one_friend_invitation, "recipient_voter_email") \
                         else ""
+                    mutual_friends = 15
+                    positions_taken = 77
                     one_friend = {
                         "voter_we_vote_id":                 friend_voter.we_vote_id,
                         "voter_display_name":               friend_voter.get_full_name(),
@@ -1482,6 +1501,8 @@ def friend_list_for_api(voter_device_id,
                         "voter_state_code":                 "",  # To be implemented
                         "invitation_status":                "",  # Not used for invitations sent to me
                         "invitation_sent_to":               recipient_voter_email,
+                        "mutual_friends":                   mutual_friends,
+                        "positions_taken":                  positions_taken,
                     }
                     friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_SENT_BY_ME:
@@ -1507,12 +1528,14 @@ def friend_list_for_api(voter_device_id,
                         recipient_voter_we_vote_id)  # This is the voter who received invitation
                     if friend_voter_results['voter_found']:
                         friend_voter = friend_voter_results['voter']
+                        positions_taken = 22
+                        mutual_friends = 5
                         one_friend = {
                             "voter_we_vote_id":                 friend_voter.we_vote_id,
                             "voter_display_name":               friend_voter.get_full_name(),
                             "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
-                                if positive_value_exists (friend_voter.we_vote_hosted_profile_image_url_large)
-                                else friend_voter.voter_photo_url(),
+                            if positive_value_exists (friend_voter.we_vote_hosted_profile_image_url_large)
+                            else friend_voter.voter_photo_url(),
                             'voter_photo_url_medium':           friend_voter.we_vote_hosted_profile_image_url_medium,
                             'voter_photo_url_tiny':             friend_voter.we_vote_hosted_profile_image_url_tiny,
                             "voter_email_address":              friend_voter.email,
@@ -1523,6 +1546,8 @@ def friend_list_for_api(voter_device_id,
                             "voter_state_code":                 "",  # To be implemented
                             "invitation_status":                one_friend_invitation.invitation_status,
                             "invitation_sent_to":               recipient_voter_email,
+                            "mutual_friends":                   mutual_friends,
+                            "positions_taken":                  positions_taken,
                         }
                         friend_list.append(one_friend)
                 else:
@@ -1541,6 +1566,8 @@ def friend_list_for_api(voter_device_id,
                                 "voter_email_address":              one_friend_invitation.recipient_voter_email,
                                 "invitation_status":                one_friend_invitation.invitation_status,
                                 "invitation_sent_to":               recipient_voter_email,
+                                "mutual_friends":                   0,
+                                "positions_taken":                  0,
                             }
                             friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION:
@@ -1567,6 +1594,8 @@ def friend_list_for_api(voter_device_id,
                     "voter_email_address": "",
                     "invitation_status": scheduled_email.send_status,
                     "invitation_sent_to": scheduled_email.recipient_voter_email,
+                    "mutual_friends": 0,
+                    "positions_taken": 0,
                 }
                 friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == SUGGESTED_FRIEND_LIST:
@@ -1577,6 +1606,8 @@ def friend_list_for_api(voter_device_id,
         if retrieve_suggested_friend_list_as_voters_results['friend_list_found']:
             suggested_friend_list = retrieve_suggested_friend_list_as_voters_results['friend_list']
             for suggested_friend in suggested_friend_list:
+                mutual_friends = 33
+                positions_taken = 12
                 one_friend = {
                     "voter_we_vote_id":                 suggested_friend.we_vote_id,
                     "voter_display_name":               suggested_friend.get_full_name(),
@@ -1593,6 +1624,8 @@ def friend_list_for_api(voter_device_id,
                     "voter_state_code":                 "",  # To be implemented
                     "invitation_status":                "",  # Not used with SuggestedFriendList
                     "invitation_sent_to":               "",  # Not used with SuggestedFriendList
+                    "mutual_friends":                   mutual_friends,
+                    "positions_taken":                  positions_taken,
                 }
                 friend_list.append(one_friend)
     else:
@@ -2003,7 +2036,7 @@ def store_internal_friend_invitation_with_two_voters(voter, invitation_message,
 
     create_results = friend_manager.create_or_update_friend_invitation_voter_link(
         sender_voter_we_vote_id, recipient_voter_we_vote_id, invitation_message, sender_email_ownership_is_verified,
-        invitation_secret_key)
+        invitation_secret_key=invitation_secret_key)
     status += create_results['status']
     results = {
         'success':                  create_results['success'],
@@ -2011,7 +2044,6 @@ def store_internal_friend_invitation_with_two_voters(voter, invitation_message,
         'friend_invitation_saved':  create_results['friend_invitation_saved'],
         'friend_invitation':        create_results['friend_invitation'],
     }
-
     return results
 
 
