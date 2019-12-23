@@ -55,7 +55,12 @@ URLS_TO_NEVER_HIGHLIGHT = [
     'dashlane.com',
     'github.com'
     'localhost',
+    'localhost:3000',
+    'localhost:8000',
+    'localhost:8001',
     'sketchviewer.com',
+    '*.travis-ci.com',
+    '*.travis-ci.org',
 ]
 
 

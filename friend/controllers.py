@@ -15,6 +15,7 @@ import json
 from organization.controllers import transform_web_app_url
 from organization.models import OrganizationManager, INDIVIDUAL
 from position.controllers import add_position_network_count_entries_for_one_friend
+from position.models import PositionMetricsManager
 from validate_email import validate_email
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
@@ -679,6 +680,7 @@ def friend_invitation_by_email_verify_for_api(
             try:
                 friend_invitation_voter_link.invitation_status = ACCEPTED
                 friend_invitation_voter_link.deleted = True
+                friend_invitation_voter_link.secret_key = None
                 friend_invitation_voter_link.save()
             except Exception as e:
                 success = False
@@ -802,6 +804,7 @@ def friend_invitation_by_email_verify_for_api(
             try:
                 friend_invitation_email_link.invitation_status = ACCEPTED
                 friend_invitation_email_link.deleted = True
+                friend_invitation_email_link.secret_key = None
                 friend_invitation_email_link.save()
                 success = True
                 status += ' friend_invitation_email_link_found FRIENDSHIP_CREATED '
@@ -1062,6 +1065,7 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
         try:
             friend_invitation_facebook_link.invitation_status = ACCEPTED
             friend_invitation_facebook_link.deleted = True
+            # Facebook doesn't use secret key
             friend_invitation_facebook_link.save()
             success = True
             status += "INVITATION_FROM_FACEBOOK_UPDATED "
@@ -1396,6 +1400,7 @@ def friend_list_for_api(voter_device_id,
     # CURRENT_FRIENDS, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, FRIENDS_IN_COMMON,
     # IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIEND_LIST):
     friend_manager = FriendManager()
+    position_metrics_manager = PositionMetricsManager()
     if kind_of_list_we_are_looking_for == CURRENT_FRIENDS:
         retrieve_current_friends_as_voters_results = friend_manager.retrieve_current_friends_as_voters(voter.we_vote_id)
         success = retrieve_current_friends_as_voters_results['success']
@@ -1403,8 +1408,8 @@ def friend_list_for_api(voter_device_id,
         if retrieve_current_friends_as_voters_results['friend_list_found']:
             current_friend_list = retrieve_current_friends_as_voters_results['friend_list']
             for friend_voter in current_friend_list:
-                mutual_friends = 11
-                positions_taken = 17
+                mutual_friends = friend_manager.fetch_mutual_friends_count(voter.we_vote_id, friend_voter.we_vote_id)
+                positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                 one_friend = {
                     "voter_we_vote_id":                 friend_voter.we_vote_id,
                     "voter_display_name":               friend_voter.get_full_name(),
@@ -1441,8 +1446,9 @@ def friend_list_for_api(voter_device_id,
                     recipient_voter_email = one_friend_invitation.recipient_voter_email \
                         if hasattr(one_friend_invitation, "recipient_voter_email") \
                         else ""
-                    mutual_friends = 8
-                    positions_taken = 99
+                    mutual_friends = friend_manager.fetch_mutual_friends_count(
+                        voter.we_vote_id, friend_voter.we_vote_id)
+                    positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                     one_friend = {
                         "voter_we_vote_id":                 friend_voter.we_vote_id,
                         "voter_display_name":               friend_voter.get_full_name(),
@@ -1483,8 +1489,9 @@ def friend_list_for_api(voter_device_id,
                     recipient_voter_email = one_friend_invitation.recipient_voter_email \
                         if hasattr(one_friend_invitation, "recipient_voter_email") \
                         else ""
-                    mutual_friends = 15
-                    positions_taken = 77
+                    mutual_friends = friend_manager.fetch_mutual_friends_count(
+                        voter.we_vote_id, friend_voter.we_vote_id)
+                    positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                     one_friend = {
                         "voter_we_vote_id":                 friend_voter.we_vote_id,
                         "voter_display_name":               friend_voter.get_full_name(),
@@ -1528,13 +1535,14 @@ def friend_list_for_api(voter_device_id,
                         recipient_voter_we_vote_id)  # This is the voter who received invitation
                     if friend_voter_results['voter_found']:
                         friend_voter = friend_voter_results['voter']
-                        positions_taken = 22
-                        mutual_friends = 5
+                        positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
+                        mutual_friends = friend_manager.fetch_mutual_friends_count(
+                            voter.we_vote_id, friend_voter.we_vote_id)
                         one_friend = {
                             "voter_we_vote_id":                 friend_voter.we_vote_id,
                             "voter_display_name":               friend_voter.get_full_name(),
                             "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
-                            if positive_value_exists (friend_voter.we_vote_hosted_profile_image_url_large)
+                            if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
                             else friend_voter.voter_photo_url(),
                             'voter_photo_url_medium':           friend_voter.we_vote_hosted_profile_image_url_medium,
                             'voter_photo_url_tiny':             friend_voter.we_vote_hosted_profile_image_url_tiny,
@@ -1606,8 +1614,9 @@ def friend_list_for_api(voter_device_id,
         if retrieve_suggested_friend_list_as_voters_results['friend_list_found']:
             suggested_friend_list = retrieve_suggested_friend_list_as_voters_results['friend_list']
             for suggested_friend in suggested_friend_list:
-                mutual_friends = 33
-                positions_taken = 12
+                mutual_friends = friend_manager.fetch_mutual_friends_count(
+                    voter.we_vote_id, suggested_friend.we_vote_id)
+                positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(suggested_friend)
                 one_friend = {
                     "voter_we_vote_id":                 suggested_friend.we_vote_id,
                     "voter_display_name":               suggested_friend.get_full_name(),
