@@ -1322,7 +1322,7 @@ class PositionListManager(models.Model):
                 position_on_stage_starter = PositionForFriends
                 position_on_stage = PositionForFriends()
 
-            position_list = position_on_stage_starter.objects.using('readonly')
+            position_list = position_on_stage_starter.objects.using('readonly').all()
             # As of Aug 2018 we are no longer using PERCENT_RATING
             position_list = position_list.exclude(stance__iexact=PERCENT_RATING)
 
@@ -1376,12 +1376,14 @@ class PositionListManager(models.Model):
             return results
 
         try:
-            score_queryset = PositionNetworkScore.objects.filter(google_civic_election_id=we_vote_election_id)
             if positive_value_exists(change_now):
+                score_queryset = PositionNetworkScore.objects.filter(google_civic_election_id=we_vote_election_id)
                 position_network_scores_migrated = score_queryset.update(
                     google_civic_election_id=google_civic_election_id)
                 status += 'ALL_POSITION_NETWORK_SCORES_MIGRATED '
             else:
+                score_queryset = PositionNetworkScore.objects.using('readonly').filter(
+                    google_civic_election_id=we_vote_election_id)
                 position_network_scores_migrated = score_queryset.count()
             status += 'ALL_POSITION_NETWORK_SCORES_COUNTED '
 
@@ -7713,9 +7715,9 @@ class PositionManager(models.Model):
         """
 
         if positive_value_exists(retrieve_public_positions):
-            position_item_queryset = PositionEntered.objects.all()
+            position_item_queryset = PositionEntered.objects.using('readonly').all()
         else:
-            position_item_queryset = PositionForFriends.objects.all()
+            position_item_queryset = PositionForFriends.objects.using('readonly').all()
 
         # As of Aug 2018 we are no longer using PERCENT_RATING
         position_item_queryset = position_item_queryset.exclude(stance__iexact=PERCENT_RATING)
