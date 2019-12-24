@@ -4019,7 +4019,8 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
         measure_we_vote_id,
         visibility_setting
         ):
-    status = "ENTERING_VOTER_POSITION_VISIBILITY "
+    status = ''
+    status += "ENTERING_VOTER_POSITION_VISIBILITY "
     is_public_position = None
 
     results = is_voter_device_id_valid(voter_device_id)

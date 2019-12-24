@@ -42,7 +42,6 @@ def augment_sms_phone_number_list(sms_phone_number_list, voter):
     primary_sms_phone_number = None
     for sms_phone_number in sms_phone_number_list:
         is_primary_sms_phone_number = False
-        primary_sms_phone_number = None
         if sms_phone_number.we_vote_id == voter.primary_sms_we_vote_id:
             is_primary_sms_phone_number = True
             primary_sms_phone_number_found = True
