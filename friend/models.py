@@ -22,6 +22,7 @@ INVITATION_STATUS_CHOICES = (
 # Processing invitations
 ACCEPT_INVITATION = 'ACCEPT_INVITATION'
 IGNORE_INVITATION = 'IGNORE_INVITATION'
+IGNORE_SUGGESTION = 'IGNORE_SUGGESTION'
 DELETE_INVITATION_VOTER_SENT_BY_ME = 'DELETE_INVITATION_VOTER_SENT_BY_ME'
 DELETE_INVITATION_EMAIL_SENT_BY_ME = 'DELETE_INVITATION_EMAIL_SENT_BY_ME'
 UNFRIEND_CURRENT_FRIEND = 'UNFRIEND_CURRENT_FRIEND'
@@ -332,20 +333,20 @@ class FriendManager(models.Model):
         }
         return results
 
-    def retrieve_suggested_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id, for_editing=False):
+    def retrieve_suggested_friend(self, voter_we_vote_id_one, voter_we_vote_id_two, for_editing=False):
         status = ""
         suggested_friend = CurrentFriend()
         # Note that the direction of the friendship does not matter
         try:
             if positive_value_exists(for_editing):
                 suggested_friend = SuggestedFriend.objects.get(
-                    viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
-                    viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                    viewer_voter_we_vote_id__iexact=voter_we_vote_id_one,
+                    viewee_voter_we_vote_id__iexact=voter_we_vote_id_two,
                 )
             else:
                 suggested_friend = SuggestedFriend.objects.using('readonly').get(
-                    viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
-                    viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                    viewer_voter_we_vote_id__iexact=voter_we_vote_id_one,
+                    viewee_voter_we_vote_id__iexact=voter_we_vote_id_two,
                 )
             suggested_friend_found = True
             success = True
@@ -365,13 +366,13 @@ class FriendManager(models.Model):
             try:
                 if positive_value_exists(for_editing):
                     suggested_friend = SuggestedFriend.objects.get(
-                        viewer_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
-                        viewee_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                        viewer_voter_we_vote_id__iexact=voter_we_vote_id_two,
+                        viewee_voter_we_vote_id__iexact=voter_we_vote_id_one,
                     )
                 else:
                     suggested_friend = SuggestedFriend.objects.using('readonly').get(
-                        viewer_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
-                        viewee_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                        viewer_voter_we_vote_id__iexact=voter_we_vote_id_two,
+                        viewee_voter_we_vote_id__iexact=voter_we_vote_id_one,
                     )
                 suggested_friend_found = True
                 success = True
@@ -388,10 +389,10 @@ class FriendManager(models.Model):
                 status += "SUGGESTED_FRIEND_NOT_UPDATED_OR_CREATED " + str(e) + " "
 
         results = {
-            'success': success,
-            'status': status,
-            'suggested_friend_found': suggested_friend_found,
-            'suggested_friend': suggested_friend,
+            'success':                  success,
+            'status':                   status,
+            'suggested_friend_found':   suggested_friend_found,
+            'suggested_friend':         suggested_friend,
         }
         return results
 
@@ -480,7 +481,8 @@ class FriendManager(models.Model):
 
         suggested_friend_created = False
 
-        results = self.retrieve_suggested_friend(sender_voter_we_vote_id, recipient_voter_we_vote_id)
+        results = self.retrieve_suggested_friend(voter_we_vote_id_one=sender_voter_we_vote_id,
+                                                 voter_we_vote_id_two=recipient_voter_we_vote_id)
         suggested_friend_found = results['suggested_friend_found']
         suggested_friend = results['suggested_friend']
         success = results['success']
@@ -568,6 +570,14 @@ class FriendManager(models.Model):
                         friend_invitation_voter_link.save()
                         friend_invitation_deleted = True
                         status += "ACCEPT_INVITATION-DELETED"
+                        # Update the SuggestedFriend entry to show that an invitation was accepted
+                        defaults = {
+                            'current_friends': True,
+                        }
+                        suggested_results = self.update_suggested_friend(
+                            voter_we_vote_id=sender_voter.we_vote_id, other_voter_we_vote_id=recipient_voter.we_vote_id,
+                            defaults=defaults)
+                        status += suggested_results['status']
                     except Exception as e:
                         friend_invitation_deleted = False
                         success = False
@@ -581,6 +591,14 @@ class FriendManager(models.Model):
                     friend_invitation_saved = True
                     success = True
                     status += 'IGNORE_INVITATION-CURRENT_FRIEND_INVITATION_VOTER_LINK_STATUS_UPDATED_TO_IGNORE '
+                    # Update the SuggestedFriend entry to show that the signed in voter doesn't want to be friends
+                    defaults = {
+                        'voter_we_vote_id_deleted': recipient_voter.we_vote_id,
+                    }
+                    suggested_results = self.update_suggested_friend(
+                        voter_we_vote_id=sender_voter.we_vote_id, other_voter_we_vote_id=recipient_voter.we_vote_id,
+                        defaults=defaults)
+                    status += suggested_results['status']
                 except Exception as e:
                     friend_invitation_saved = False
                     success = False
@@ -594,6 +612,14 @@ class FriendManager(models.Model):
                     friend_invitation_saved = True
                     success = True
                     status += 'DELETE_INVITATION_VOTER_SENT_BY_ME_DELETED '
+                    # Update the SuggestedFriend entry to show that an invitation was canceled
+                    defaults = {
+                        'friend_invite_sent': False,
+                    }
+                    suggested_results = self.update_suggested_friend(
+                        voter_we_vote_id=sender_voter.we_vote_id, other_voter_we_vote_id=recipient_voter.we_vote_id,
+                        defaults=defaults)
+                    status += suggested_results['status']
                 except Exception as e:
                     friend_invitation_saved = False
                     success = False
@@ -1711,6 +1737,17 @@ class FriendManager(models.Model):
                 current_friend_deleted = True
                 success = True
                 status += 'CURRENT_FRIEND_DELETED '
+                # Update the SuggestedFriend entry to show that the friend was unfriended, which implies the
+                # acting_voter_we_vote_id doesn't want to see this person as a SuggestedFriend
+                defaults = {
+                    'current_friends': False,
+                    'friend_invite_sent': False,
+                    'voter_we_vote_id_deleted': acting_voter_we_vote_id,
+                }
+                suggested_results = self.update_suggested_friend(
+                    voter_we_vote_id=acting_voter_we_vote_id, other_voter_we_vote_id=other_voter_we_vote_id,
+                    defaults=defaults)
+                status += suggested_results['status']
             except Exception as e:
                 success = False
                 current_friend_deleted = False
@@ -1752,6 +1789,11 @@ class FriendManager(models.Model):
             suggested_friend_queryset = suggested_friend_queryset.filter(
                 Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
                 Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+            suggested_friend_queryset = suggested_friend_queryset.exclude(
+                Q(voter_we_vote_id_deleted_first__iexact=voter_we_vote_id) |
+                Q(voter_we_vote_id_deleted_second__iexact=voter_we_vote_id))
+            suggested_friend_queryset = suggested_friend_queryset.exclude(friend_invite_sent=True)
+            suggested_friend_queryset = suggested_friend_queryset.exclude(current_friends=True)
             suggested_friend_queryset = suggested_friend_queryset.order_by('-date_last_changed')
             suggested_friend_list = suggested_friend_queryset
 
@@ -1812,6 +1854,11 @@ class FriendManager(models.Model):
             suggested_friend_queryset = suggested_friend_queryset.filter(
                 Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
                 Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+            suggested_friend_queryset = suggested_friend_queryset.exclude(
+                Q(voter_we_vote_id_deleted_first__iexact=voter_we_vote_id) |
+                Q(voter_we_vote_id_deleted_second__iexact=voter_we_vote_id))
+            suggested_friend_queryset = suggested_friend_queryset.exclude(friend_invite_sent=True)
+            suggested_friend_queryset = suggested_friend_queryset.exclude(current_friends=True)
             suggested_friend_queryset = suggested_friend_queryset.order_by('-date_last_changed')
             suggested_friend_list = suggested_friend_queryset
 
@@ -1923,6 +1970,68 @@ class FriendManager(models.Model):
         }
         return results
 
+    def update_suggested_friend(self, voter_we_vote_id, other_voter_we_vote_id,
+                                defaults=None):
+        status = ""
+        success = True
+        suggested_friend = None
+        suggested_friend_found = False
+
+        if defaults is None:
+            status += 'UPDATE_SUGGESTED_FRIEND-NO_DEFAULTS_PROVIDED '
+            results = {
+                'status':                   status,
+                'success':                  success,
+                'suggested_friend_found':   suggested_friend_found,
+                'suggested_friend':         suggested_friend,
+            }
+            return results
+
+        retrieve_results = self.retrieve_suggested_friend(voter_we_vote_id_one=voter_we_vote_id,
+                                                          voter_we_vote_id_two=other_voter_we_vote_id,
+                                                          for_editing=True)
+        if retrieve_results['suggested_friend_found']:
+            suggested_friend = retrieve_results['suggested_friend']
+            try:
+                if 'current_friends' in defaults:
+                    suggested_friend.current_friends = defaults['current_friends']
+                if 'friend_invite_sent' in defaults:
+                    suggested_friend.friend_invite_sent = defaults['friend_invite_sent']
+                if 'voter_we_vote_id_deleted_first' in defaults:
+                    suggested_friend.voter_we_vote_id_deleted_first = defaults['voter_we_vote_id_deleted_first']
+                if 'voter_we_vote_id_deleted_second' in defaults:
+                    suggested_friend.voter_we_vote_id_deleted_second = defaults['voter_we_vote_id_deleted_second']
+                # This is a case where we don't know if the we_vote_id is already stored
+                if 'voter_we_vote_id_deleted' in defaults:
+                    # Does a "first" value exist?
+                    if suggested_friend.voter_we_vote_id_deleted_first == defaults['voter_we_vote_id_deleted']:
+                        # An update isn't needed
+                        pass
+                    elif not positive_value_exists(suggested_friend.voter_we_vote_id_deleted_first):
+                        # A first "opt out" does not exist, so put the value in "first"
+                        suggested_friend.voter_we_vote_id_deleted_first = defaults['voter_we_vote_id_deleted']
+                    elif suggested_friend.voter_we_vote_id_deleted_second == defaults['voter_we_vote_id_deleted']:
+                        # An update isn't needed
+                        pass
+                    elif not positive_value_exists(suggested_friend.voter_we_vote_id_deleted_second):
+                        # A second "opt out" does not exist, so put the value in "second"
+                        suggested_friend.voter_we_vote_id_deleted_second = defaults['voter_we_vote_id_deleted']
+                suggested_friend.save()
+                suggested_friend_found = True
+                status += "SUGGESTED_FRIEND_UPDATED "
+            except Exception as e:
+                status += "UPDATE_SUGGESTED_FRIEND-ERROR: " + str(e) + " "
+        else:
+            status += "UPDATE_SUGGESTED_FRIEND-NOT_FOUND "
+
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'suggested_friend_found':   suggested_friend_found,
+            'suggested_friend':         suggested_friend,
+        }
+        return results
+
 
 class SuggestedFriend(models.Model):
     """
@@ -1932,6 +2041,14 @@ class SuggestedFriend(models.Model):
         verbose_name="voter we vote id person 1", max_length=255, null=True, blank=True, unique=False)
     viewee_voter_we_vote_id = models.CharField(
         verbose_name="voter we vote id person 2", max_length=255, null=True, blank=True, unique=False)
+    # Each voter can choose to remove this suggested friend entry for themselves. When one voter's id
+    # is in "first" that voter won't see the suggested entry. The second voter can also remove the entry.
+    voter_we_vote_id_deleted_first = models.CharField(
+        verbose_name="first voter to remove suggested friend", max_length=255, null=True, blank=True, unique=False)
+    voter_we_vote_id_deleted_second = models.CharField(
+        verbose_name="second voter to remove suggested friend", max_length=255, null=True, blank=True, unique=False)
+    friend_invite_sent = models.BooleanField(default=False)
+    current_friends = models.BooleanField(default=False)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
     def fetch_other_voter_we_vote_id(self, one_we_vote_id):

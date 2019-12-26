@@ -4,7 +4,7 @@
 from .models import ACCEPTED, FriendInvitationVoterLink, FriendManager, CURRENT_FRIENDS, \
     DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, FRIEND_INVITATIONS_PROCESSED, \
     FRIEND_INVITATIONS_SENT_BY_ME, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION, \
-    SUGGESTED_FRIEND_LIST, \
+    IGNORE_SUGGESTION, SUGGESTED_FRIEND_LIST, \
     FRIENDS_IN_COMMON, UNFRIEND_CURRENT_FRIEND
 from config.base import get_environment_variable
 from email_outbound.controllers import schedule_email_with_email_outbound_description, schedule_verification_email
@@ -1149,6 +1149,7 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
 
     sender_voter = voter_results['voter']
     email_manager = EmailManager()
+    friend_manager = FriendManager()
 
     if sender_voter.has_email_with_verified_ownership():
         send_now = True
@@ -1165,12 +1166,14 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
         return error_results
 
     # Store the friend invitation in FriendInvitationVoterLink table
+    friend_invitation_saved = False
     friend_invitation_results = store_internal_friend_invitation_with_two_voters(
         sender_voter, invitation_message, recipient_voter)
     status += friend_invitation_results['status'] + " "
     success = friend_invitation_results['success']
     invitation_secret_key = ""
     if friend_invitation_results['friend_invitation_saved']:
+        friend_invitation_saved = True
         friend_invitation = friend_invitation_results['friend_invitation']
         invitation_secret_key = friend_invitation.secret_key
 
@@ -1245,9 +1248,14 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
                         email_scheduled_sent = send_results['email_scheduled_sent']
                         status += send_results['status']
 
-    # When we are done scheduling all email, send it with a single connection to the smtp server
-    # if send_now:
-    #     send_results = email_manager.send_scheduled_email_list(messages_to_send)
+    if friend_invitation_saved:
+        # Update the SuggestedFriend entry to show that an invitation was sent
+        defaults = {
+            'friend_invite_sent': True,
+        }
+        suggested_results = friend_manager.update_suggested_friend(
+            voter_we_vote_id=sender_voter.we_vote_id, other_voter_we_vote_id=other_voter_we_vote_id, defaults=defaults)
+        status += suggested_results['status']
 
     results = {
         'success':                              success,
@@ -1323,7 +1331,19 @@ def friend_invite_response_for_api(voter_device_id, kind_of_invite_response, oth
         results = friend_manager.process_friend_invitation_voter_response(
             sender_voter=voter, recipient_voter=other_voter, kind_of_invite_response=kind_of_invite_response)
         status += results['status']
+    elif kind_of_invite_response == IGNORE_SUGGESTION:
+        # Update the SuggestedFriend entry to show that the acting_voter_we_vote_id
+        # doesn't want to see this person as a SuggestedFriend
+        defaults = {
+            'voter_we_vote_id_deleted': voter.we_vote_id,
+        }
+        suggested_results = friend_manager.update_suggested_friend(
+            voter_we_vote_id=voter.we_vote_id, other_voter_we_vote_id=other_voter.we_vote_id,
+            defaults=defaults)
+        status += suggested_results['status']
     else:
+        # Conditions where we want the recipient_voter to be the voter viewing the page
+        # IGNORE_INVITATION
         results = friend_manager.process_friend_invitation_voter_response(
             sender_voter=other_voter, recipient_voter=voter, kind_of_invite_response=kind_of_invite_response)
         status += results['status']
