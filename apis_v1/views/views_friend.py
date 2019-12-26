@@ -6,11 +6,12 @@ from django.http import HttpResponse
 from friend.controllers import friend_invitation_by_email_send_for_api, friend_invitation_by_email_verify_for_api, \
     friend_invitation_by_we_vote_id_send_for_api, friend_invite_response_for_api, friend_list_for_api, \
     friend_invitation_by_facebook_send_for_api, friend_invitation_by_facebook_verify_for_api
-from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, \
-    FRIEND_INVITATIONS_PROCESSED, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, \
-    FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION, SUGGESTED_FRIEND_LIST, \
-    FRIENDS_IN_COMMON, IGNORED_FRIEND_INVITATIONS, ACCEPT_INVITATION, IGNORE_INVITATION, \
-    UNFRIEND_CURRENT_FRIEND
+from friend.models import ACCEPT_INVITATION, CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, \
+    DELETE_INVITATION_VOTER_SENT_BY_ME, \
+    FRIENDS_IN_COMMON, FRIEND_INVITATIONS_PROCESSED, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, \
+    FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION, \
+    IGNORED_FRIEND_INVITATIONS, IGNORE_INVITATION, IGNORE_SUGGESTION, \
+    SUGGESTED_FRIEND_LIST, UNFRIEND_CURRENT_FRIEND
 import json
 import wevote_functions.admin
 from wevote_functions.functions import get_voter_device_id
@@ -146,7 +147,8 @@ def friend_invite_response_view(request):  # friendInviteResponse
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_invite_response = request.GET.get('kind_of_invite_response', ACCEPT_INVITATION)
     if kind_of_invite_response not in (ACCEPT_INVITATION, DELETE_INVITATION_EMAIL_SENT_BY_ME,
-                                       DELETE_INVITATION_VOTER_SENT_BY_ME, IGNORE_INVITATION, UNFRIEND_CURRENT_FRIEND):
+                                       DELETE_INVITATION_VOTER_SENT_BY_ME, IGNORE_INVITATION, IGNORE_SUGGESTION,
+                                       UNFRIEND_CURRENT_FRIEND):
         kind_of_invite_response = ACCEPT_INVITATION
     other_voter_we_vote_id = request.GET.get('voter_we_vote_id', "")
     recipient_voter_email = request.GET.get('recipient_voter_email', "")
