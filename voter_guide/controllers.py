@@ -7,10 +7,14 @@ from candidate.controllers import retrieve_candidate_list_for_all_upcoming_elect
 from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
 import copy
+from datetime import datetime, timedelta
 from django.http import HttpResponse
 from election.controllers import retrieve_upcoming_election_id_list
 from election.models import ElectionManager
+from exception.models import handle_record_not_found_exception
 from follow.models import FollowOrganizationList, FollowIssueList, FOLLOWING
+from friend.controllers import heal_current_friend
+from friend.models import FriendManager
 from itertools import chain
 from issue.models import OrganizationLinkToIssueList
 import json
@@ -25,8 +29,9 @@ from organization.models import OrganizationManager, OrganizationListManager, IN
 from pledge_to_vote.models import PledgeToVoteManager
 from position.controllers import retrieve_ballot_item_we_vote_ids_for_organizations_to_follow, \
     retrieve_ballot_item_we_vote_ids_for_organization_static
-from position.models import ANY_STANCE, INFORMATION_ONLY, OPPOSE, \
-    PositionEntered, PositionManager, PositionListManager, SUPPORT
+from position.models import ANY_STANCE, FRIENDS_AND_PUBLIC, FRIENDS_ONLY, INFORMATION_ONLY, OPPOSE, \
+    PositionEntered, PositionManager, PositionListManager, PUBLIC_ONLY, SUPPORT
+import pytz
 from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
     fetch_voter_we_vote_id_from_voter_id, VoterManager
@@ -3193,7 +3198,8 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
     return results
 
 
-def voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=[]):  # voterGuidesUpcomingRetrieve
+def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && voterGuidesFromFriendsUpcomingRetrieve
+        google_civic_election_id_list=[], friends_vs_public=PUBLIC_ONLY, voter_we_vote_id=''):
     status = ""
 
     voter_guides = []
@@ -3211,9 +3217,15 @@ def voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=[]):  #
                 google_civic_election_id_list.append(one_election.google_civic_election_id)
 
     voter_guide_list_manager = VoterGuideListManager()
-    voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_generic(
-        maximum_number_to_retrieve=500, sort_by='twitter_followers_count', sort_order='desc',
-        google_civic_election_id_list=google_civic_election_id_list, read_only=True)
+    if positive_value_exists(voter_we_vote_id):
+        voter_guide_results = retrieve_voter_guides_from_friends(
+            voter_we_vote_id=voter_we_vote_id, maximum_number_to_retrieve=500,
+            sort_by='twitter_followers_count', sort_order='desc',
+            google_civic_election_id_list=google_civic_election_id_list, read_only=True)
+    else:
+        voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_generic(
+            maximum_number_to_retrieve=500, sort_by='twitter_followers_count', sort_order='desc',
+            google_civic_election_id_list=google_civic_election_id_list, read_only=True)
 
     if voter_guide_results['voter_guide_list_found']:
         voter_guide_list = voter_guide_results['voter_guide_list']
@@ -3243,7 +3255,7 @@ def voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=[]):  #
         # Augment the voter guide with a list of ballot_item we_vote_id's that this org supports
         stance_we_are_looking_for = SUPPORT
         ballot_item_support_results = retrieve_ballot_item_we_vote_ids_for_organization_static(
-            organization, google_civic_election_id, stance_we_are_looking_for)  # Already read_only
+            organization, google_civic_election_id, stance_we_are_looking_for, friends_vs_public=friends_vs_public)
         if ballot_item_support_results['count']:
             ballot_item_we_vote_ids_this_org_supports = ballot_item_support_results[
                 'ballot_item_we_vote_ids_list']
@@ -3254,7 +3266,7 @@ def voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=[]):  #
         # Augment the voter guide with a list of ballot_item we_vote_id's that this org has info about
         stance_we_are_looking_for = INFORMATION_ONLY
         ballot_item_info_only_results = retrieve_ballot_item_we_vote_ids_for_organization_static(
-            organization, google_civic_election_id, stance_we_are_looking_for)  # Already read_only
+            organization, google_civic_election_id, stance_we_are_looking_for, friends_vs_public=friends_vs_public)
         if ballot_item_info_only_results['count']:
             ballot_item_we_vote_ids_this_org_info_only = \
                 ballot_item_info_only_results['ballot_item_we_vote_ids_list']
@@ -3265,7 +3277,7 @@ def voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=[]):  #
         # Augment the voter guide with a list of ballot_item we_vote_id's that this org opposes
         stance_we_are_looking_for = OPPOSE
         ballot_item_oppose_results = retrieve_ballot_item_we_vote_ids_for_organization_static(
-            organization, google_civic_election_id, stance_we_are_looking_for)  # Already read_only
+            organization, google_civic_election_id, stance_we_are_looking_for, friends_vs_public=friends_vs_public)
         if ballot_item_oppose_results['count']:
             ballot_item_we_vote_ids_this_org_opposes = ballot_item_oppose_results[
                 'ballot_item_we_vote_ids_list']
@@ -4340,8 +4352,8 @@ def retrieve_voter_guides_followed(voter_id):
     follow_organization_list_manager = FollowOrganizationList()
     return_we_vote_id = True
     organization_we_vote_ids_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id,
-                                                                                                  return_we_vote_id)
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
+            voter_id, return_we_vote_id)
 
     voter_guide_list_object = VoterGuideListManager()
     results = voter_guide_list_object.retrieve_voter_guides_by_organization_list(
@@ -4437,6 +4449,126 @@ def retrieve_voter_guide_followers_by_organization_we_vote_id(organization_we_vo
         'status':                       status,
         'organization_list_found':      organization_list_found,
         'organization_list':            organization_list,
+    }
+    return results
+
+
+def retrieve_voter_guides_from_friends(
+        voter_we_vote_id='', maximum_number_to_retrieve=0, sort_by='', sort_order='',
+        google_civic_election_id_list=[],
+        read_only=False):
+    """
+    Get the voter guides for orgs that we found by looking at the positions for an org found based on time span
+    """
+    status = ""
+    voter_guide_list = []
+    voter_guide_list_found = False
+    if not positive_value_exists(maximum_number_to_retrieve):
+        maximum_number_to_retrieve = 30
+
+    friend_manager = FriendManager()
+    friend_results = friend_manager.retrieve_current_friends(voter_we_vote_id, for_editing=False)
+    organization_we_vote_ids_from_friends = []
+    if friend_results['current_friend_list_found']:
+        current_friend_list = friend_results['current_friend_list']
+        for one_friend in current_friend_list:
+            if one_friend.viewer_voter_we_vote_id == voter_we_vote_id:
+                # If viewer is the voter, the friend is the viewee
+                if not positive_value_exists(one_friend.viewee_organization_we_vote_id):
+                    one_friend = heal_current_friend(one_friend)
+                try:
+                    organization_we_vote_ids_from_friends.append(one_friend.viewee_organization_we_vote_id)
+                except Exception as e:
+                    pass
+            else:
+                # If viewer is NOT the voter, the friend is the viewer
+                if not positive_value_exists(one_friend.viewer_organization_we_vote_id):
+                    one_friend = heal_current_friend(one_friend)
+                try:
+                    organization_we_vote_ids_from_friends.append(one_friend.viewer_organization_we_vote_id)
+                except Exception as e:
+                    pass
+
+    if len(organization_we_vote_ids_from_friends) == 0:
+        success = True
+        status += "NO_FRIENDS_FOUND_SO_NO_VOTER_GUIDES "
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+    try:
+        if read_only:
+            voter_guide_query = VoterGuide.objects.using('readonly').all()
+        else:
+            voter_guide_query = VoterGuide.objects.all()
+        # As of August 2018, we no longer want to support Vote Smart ratings voter guides
+        voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
+        voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+
+        voter_guide_query = voter_guide_query.filter(
+            organization_we_vote_id__in=organization_we_vote_ids_from_friends)
+
+        if positive_value_exists(len(google_civic_election_id_list)):
+            status += "CONVERTING_GOOGLE_CIVIC_ELECTION_ID_LIST_TO_INTEGER "
+            google_civic_election_id_integer_list = []
+            for google_civic_election_id in google_civic_election_id_list:
+                google_civic_election_id_integer_list.append(convert_to_int(google_civic_election_id))
+            voter_guide_query = voter_guide_query.filter(
+                google_civic_election_id__in=google_civic_election_id_integer_list)
+
+        # We retrieve anyone you are friends with, even if they are public figures
+
+        if not positive_value_exists(len(google_civic_election_id_list)):
+            # We also want to exclude voter guides with election_day_text smaller than today's date
+            status += "EXCLUDE_PAST_ELECTION_DAYS "
+            timezone = pytz.timezone("America/Los_Angeles")
+            datetime_now = timezone.localize(datetime.now())
+            two_days = timedelta(days=2)
+            datetime_two_days_ago = datetime_now - two_days
+            earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
+            voter_guide_query = voter_guide_query.exclude(election_day_text__lt=earliest_date_to_show)
+            voter_guide_query = voter_guide_query.exclude(election_day_text__isnull=True)
+
+        if sort_order == 'desc':
+            voter_guide_query = voter_guide_query.order_by('-' + sort_by)[:maximum_number_to_retrieve]
+        elif positive_value_exists(sort_by):
+            voter_guide_query = voter_guide_query.order_by(sort_by)[:maximum_number_to_retrieve]
+        else:
+            voter_guide_query = voter_guide_query[:maximum_number_to_retrieve]
+
+        voter_guide_list = list(voter_guide_query)
+        if len(voter_guide_list):
+            voter_guide_list_found = True
+            status = 'VOTER_GUIDE_FOUND_GENERIC_VOTER_GUIDES_TO_FOLLOW'
+        else:
+            status = 'NO_VOTER_GUIDES_FOUND_GENERIC_VOTER_GUIDES_TO_FOLLOW'
+        success = True
+    except Exception as e:
+        handle_record_not_found_exception(e, logger=logger)
+        status = 'retrieve_voter_guides_to_follow_generic: Unable to retrieve voter guides from db. ' \
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    # If we have multiple voter guides for one org, we only want to show the most recent
+    if voter_guide_list_found:
+        if not positive_value_exists(len(google_civic_election_id_list)):
+            # If we haven't specified multiple elections, then remove old voter guides
+            voter_guide_list_manager = VoterGuideListManager()
+            voter_guide_list_filtered = \
+                voter_guide_list_manager.remove_older_voter_guides_for_each_org(voter_guide_list)
+        else:
+            voter_guide_list_filtered = voter_guide_list
+    else:
+        voter_guide_list_filtered = []
+
+    results = {
+        'success':                      success,
+        'status':                       status,
+        'voter_guide_list_found':       voter_guide_list_found,
+        'voter_guide_list':             voter_guide_list_filtered,
     }
     return results
 

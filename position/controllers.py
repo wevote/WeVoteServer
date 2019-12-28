@@ -4511,7 +4511,7 @@ def retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(voter_id,
 def retrieve_ballot_item_we_vote_ids_for_organization_static(
         organization, google_civic_election_id,
         stance_we_are_looking_for=SUPPORT,
-        state_code=''):
+        state_code='', friends_vs_public=PUBLIC_ONLY):
     """
     For this organization, we want to return a list of ballot_items that this organization has
     an opinion about for one election.
@@ -4554,7 +4554,6 @@ def retrieve_ballot_item_we_vote_ids_for_organization_static(
 
     organization_id = organization.id
     organization_we_vote_id = organization.we_vote_id
-    friends_vs_public = PUBLIC_ONLY
 
     position_list_raw = position_list_manager.retrieve_all_positions_for_organization(
         organization_id, organization_we_vote_id, stance_we_are_looking_for, friends_vs_public,

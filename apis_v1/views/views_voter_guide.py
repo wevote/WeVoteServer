@@ -5,7 +5,8 @@
 from ballot.controllers import choose_election_from_existing_data
 from django.http import HttpResponse
 import json
-from voter.models import VoterAddress, VoterAddressManager, VoterDeviceLinkManager
+from position.models import FRIENDS_AND_PUBLIC, FRIENDS_ONLY, PUBLIC_ONLY
+from voter.models import VoterAddress, VoterAddressManager, VoterDeviceLinkManager, VoterManager
 from voter_guide.controllers import voter_guide_possibility_highlights_retrieve_for_api, \
     voter_guide_possibility_retrieve_for_api, \
     voter_guide_possibility_position_save_for_api, \
@@ -280,6 +281,45 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
                                                       start_retrieve_at_this_number, maximum_number_to_retrieve,
                                                       filter_voter_guides_by_issue,
                                                       add_voter_guides_not_from_election)
+    return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+
+
+def voter_guides_from_friends_upcoming_retrieve_view(request):  # voterGuidesFromFriendsUpcomingRetrieve
+    """
+    Retrieve a list of voter_guides from voter's friends
+    :param request:
+    :return:
+    """
+    status = ""
+    voter_we_vote_id = ''
+    google_civic_election_id_list = request.GET.getlist('google_civic_election_id_list[]')
+
+    if positive_value_exists(google_civic_election_id_list):
+        if not positive_value_exists(len(google_civic_election_id_list)):
+            google_civic_election_id_list = []
+    else:
+        google_civic_election_id_list = []
+
+    voter_device_id = get_voter_device_id(request)
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if positive_value_exists(voter_results['voter_found']):
+        voter_we_vote_id = voter_results['voter'].we_vote_id
+    else:
+        status += "VOTER_GUIDES_FROM_FRIENDS-MISSING_VOTER_WE_VOTE_ID "
+        results = {
+            'status':           status,
+            'success':          False,
+            'voter_guides':     [],
+            'number_retrieved': 0,
+        }
+        return HttpResponse(json.dumps(results), content_type='application/json')
+
+    results = voter_guides_upcoming_retrieve_for_api(
+        google_civic_election_id_list=google_civic_election_id_list, friends_vs_public=FRIENDS_AND_PUBLIC,
+        voter_we_vote_id=voter_we_vote_id)
+    status += results['status']
+
     return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
 

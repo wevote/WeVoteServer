@@ -1656,7 +1656,7 @@ class VoterGuideListManager(models.Model):
                     voter_guide_query = voter_guide_query.filter(Q(display_name__icontains=search_string_part) |
                                                                  Q(twitter_handle__icontains=search_string_part))
             else:
-                # If not searching, make sure we do not include individuals
+                # If not searching, make sure we do not include individuals. We *do* retrieve PUBLIC_FIGURES
                 status += "NOT_SEARCHING-EXCLUDING_INDIVIDUALS "
                 voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
 

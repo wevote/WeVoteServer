@@ -655,9 +655,17 @@ def friend_invitation_by_email_verify_for_api(
 
         voter_we_vote_id_accepting_invitation = friend_invitation_voter_link.recipient_voter_we_vote_id
         # Now we want to make sure we have a current_friend entry
+        recipient_organization_we_vote_id = ''
+        voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+            friend_invitation_voter_link.recipient_voter_we_vote_id)
+        if voter_results['voter_found']:
+            recipient_organization_we_vote_id = voter_results['voter'].linked_organization_we_vote_id
         friend_results = friend_manager.create_or_update_current_friend(
             friend_invitation_voter_link.sender_voter_we_vote_id,
-            friend_invitation_voter_link.recipient_voter_we_vote_id)
+            friend_invitation_voter_link.recipient_voter_we_vote_id,
+            voter.linked_organization_we_vote_id,
+            recipient_organization_we_vote_id
+        )
 
         friend_manager.update_suggested_friends_starting_with_one_voter(
             friend_invitation_voter_link.sender_voter_we_vote_id)
@@ -781,9 +789,17 @@ def friend_invitation_by_email_verify_for_api(
                 voter = results['voter']
 
         # Now that we know who owns the recipient_email_address, update invitation status
+        sender_organization_we_vote_id = ''
+        voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+            friend_invitation_email_link.sender_voter_we_vote_id)
+        if voter_results['voter_found']:
+            sender_organization_we_vote_id = voter_results['voter'].linked_organization_we_vote_id
         friend_results = friend_manager.create_or_update_current_friend(
             friend_invitation_email_link.sender_voter_we_vote_id,
-            voter_we_vote_id_accepting_invitation)
+            voter_we_vote_id_accepting_invitation,
+            sender_organization_we_vote_id,
+            voter.linked_organization_we_vote_id
+        )
 
         friend_manager.update_suggested_friends_starting_with_one_voter(
             friend_invitation_email_link.sender_voter_we_vote_id)
@@ -942,7 +958,7 @@ def friend_invitation_by_facebook_send_for_api(voter_device_id, recipients_faceb
 
 
 def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_request_id, recipient_facebook_id,
-                                                sender_facebook_id):  # friendInvitationByFacebookVerify
+                                                 sender_facebook_id):  # friendInvitationByFacebookVerify
     """
 
     :param voter_device_id:
@@ -1049,8 +1065,17 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
         return error_results
 
     # Now we want to make sure we have a current_friend entry
+    sender_organization_we_vote_id = ''
+    voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+        sender_voter_we_vote_id)
+    if voter_results['voter_found']:
+        sender_organization_we_vote_id = voter_results['voter'].linked_organization_we_vote_id
     friend_results = friend_manager.create_or_update_current_friend(
-        sender_voter_we_vote_id, voter_we_vote_id_accepting_invitation)
+        sender_voter_we_vote_id,
+        voter_we_vote_id_accepting_invitation,
+        sender_organization_we_vote_id,
+        voter.linked_organization_we_vote_id,
+    )
 
     friend_manager.update_suggested_friends_starting_with_one_voter(sender_voter_we_vote_id)
     friend_manager.update_suggested_friends_starting_with_one_voter(voter_we_vote_id_accepting_invitation)
@@ -1672,6 +1697,35 @@ def friend_list_for_api(voter_device_id,
         'friend_list':          friend_list,
     }
     return results
+
+
+def heal_current_friend(current_friend, force_update=False):
+    change_needed = False
+    if not positive_value_exists(current_friend.viewee_organization_we_vote_id) \
+            or not positive_value_exists(current_friend.viewer_organization_we_vote_id) or force_update:
+        # We need to retrieve a copy of current friend which is editable
+        friend_manager = FriendManager()
+        results = friend_manager.retrieve_current_friend(
+            current_friend.viewer_voter_we_vote_id, current_friend.viewee_voter_we_vote_id, for_editing=True)
+        if results['current_friend_found']:
+            current_friend = results['current_friend']
+    try:
+        voter_manager = VoterManager()
+        if not positive_value_exists(current_friend.viewee_organization_we_vote_id) or force_update:
+            current_friend.viewee_organization_we_vote_id = \
+                voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(
+                    current_friend.viewee_voter_we_vote_id)
+            change_needed = True
+        if not positive_value_exists(current_friend.viewer_organization_we_vote_id) or force_update:
+            current_friend.viewer_organization_we_vote_id = \
+                voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(
+                    current_friend.viewer_voter_we_vote_id)
+            change_needed = True
+        if change_needed:
+            current_friend.save()
+    except Exception as e:
+        pass
+    return current_friend
 
 
 def heal_friend_invitations_sent_to_me(voter_we_vote_id, friend_invitation_list):
