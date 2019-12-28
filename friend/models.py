@@ -45,9 +45,22 @@ class CurrentFriend(models.Model):
     """
     viewer_voter_we_vote_id = models.CharField(
         verbose_name="voter we vote id person 1", max_length=255, null=True, blank=True, unique=False, db_index=True)
+    viewer_organization_we_vote_id = models.CharField(
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
     viewee_voter_we_vote_id = models.CharField(
         verbose_name="voter we vote id person 2", max_length=255, null=True, blank=True, unique=False, db_index=True)
+    viewee_organization_we_vote_id = models.CharField(
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+
+    def fetch_other_organization_we_vote_id(self, one_we_vote_id):
+        if one_we_vote_id == self.viewer_voter_we_vote_id:
+            return self.viewee_voter_we_vote_id
+        elif one_we_vote_id == self.viewee_voter_we_vote_id:
+            return self.viewer_voter_we_vote_id
+        else:
+            # If the we_vote_id passed in wasn't found, don't return another we_vote_id
+            return ""
 
     def fetch_other_voter_we_vote_id(self, one_we_vote_id):
         if one_we_vote_id == self.viewer_voter_we_vote_id:
@@ -335,7 +348,7 @@ class FriendManager(models.Model):
 
     def retrieve_suggested_friend(self, voter_we_vote_id_one, voter_we_vote_id_two, for_editing=False):
         status = ""
-        suggested_friend = CurrentFriend()
+        suggested_friend = SuggestedFriend()
         # Note that the direction of the friendship does not matter
         try:
             if positive_value_exists(for_editing):
@@ -384,7 +397,7 @@ class FriendManager(models.Model):
                 status += 'NO_SUGGESTED_FRIEND_RETRIEVED2_DoesNotExist '
             except Exception as e:
                 suggested_friend_found = False
-                suggested_friend = CurrentFriend()
+                suggested_friend = SuggestedFriend()
                 success = False
                 status += "SUGGESTED_FRIEND_NOT_UPDATED_OR_CREATED " + str(e) + " "
 
@@ -396,7 +409,8 @@ class FriendManager(models.Model):
         }
         return results
 
-    def create_or_update_current_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id):
+    def create_or_update_current_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id,
+                                        sender_organization_we_vote_id=None, recipient_organization_we_vote_id=None):
         status = ""
         if not positive_value_exists(sender_voter_we_vote_id) or not positive_value_exists(recipient_voter_we_vote_id):
             current_friend = CurrentFriend()
@@ -422,20 +436,35 @@ class FriendManager(models.Model):
 
         current_friend_created = False
 
-        results = self.retrieve_current_friend(sender_voter_we_vote_id, recipient_voter_we_vote_id)
+        results = self.retrieve_current_friend(sender_voter_we_vote_id, recipient_voter_we_vote_id, for_editing=True)
         current_friend_found = results['current_friend_found']
         current_friend = results['current_friend']
         success = results['success']
         status += results['status']
 
         if current_friend_found:
-            # We don't need to actually do anything
-            pass
+            if positive_value_exists(sender_organization_we_vote_id) \
+                    or positive_value_exists(recipient_organization_we_vote_id):
+                # Update current friend
+                try:
+                    current_friend.viewer_organization_we_vote_id = sender_organization_we_vote_id
+                    current_friend.viewee_organization_we_vote_id = recipient_organization_we_vote_id
+                    current_friend.save()
+                    current_friend_created = True
+                    success = True
+                    status += "CURRENT_FRIEND_UPDATED "
+                except Exception as e:
+                    current_friend_created = False
+                    current_friend = CurrentFriend()
+                    success = False
+                    status += "CURRENT_FRIEND_NOT_UPDATED " + str(e) + " "
         else:
             try:
                 current_friend = CurrentFriend.objects.create(
                     viewer_voter_we_vote_id=sender_voter_we_vote_id,
                     viewee_voter_we_vote_id=recipient_voter_we_vote_id,
+                    viewer_organization_we_vote_id=sender_organization_we_vote_id,
+                    viewee_organization_we_vote_id=recipient_organization_we_vote_id,
                 )
                 current_friend_created = True
                 success = True
@@ -552,7 +581,10 @@ class FriendManager(models.Model):
                 # Create a CurrentFriend entry
                 friend_manager = FriendManager()
                 results = friend_manager.create_or_update_current_friend(
-                    sender_voter.we_vote_id, recipient_voter.we_vote_id)
+                    sender_voter.we_vote_id,
+                    recipient_voter.we_vote_id,
+                    sender_voter.linked_organization_we_vote_id,
+                    recipient_voter.linked_organization_we_vote_id)
                 success = results['success']
                 status += results['status']
 
