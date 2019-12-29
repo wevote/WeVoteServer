@@ -1562,11 +1562,6 @@ def voter_guides_import_from_structured_json(structured_json):
                     voter_guide_we_vote_id, organization_we_vote_id, vote_smart_time_span, pledge_goal,
                     we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
                     we_vote_hosted_profile_image_url_tiny)
-            elif positive_value_exists(public_figure_we_vote_id) and positive_value_exists(google_civic_election_id):
-                results = voter_guide_manager.update_or_create_public_figure_voter_guide(
-                    voter_guide_we_vote_id, google_civic_election_id, public_figure_we_vote_id, pledge_goal,
-                    we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
-                    we_vote_hosted_profile_image_url_tiny)
             else:
                 results = {
                     'success': False,
@@ -3308,6 +3303,7 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
             'issue_we_vote_ids_linked':     issue_we_vote_ids_linked,
             'last_updated':                 last_updated,
             'organization_we_vote_id':      voter_guide.organization_we_vote_id,
+            'voter_we_vote_id':             voter_guide.voter_we_vote_id,
             'owner_voter_id':               voter_guide.owner_voter_id,
             'pledge_goal':                  voter_guide.pledge_goal,
             'pledge_count':                 voter_guide.pledge_count,
@@ -3486,9 +3482,11 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
     voter_id = 0
     voter_full_name = ""
     linked_organization_we_vote_id = ""
+    voter_we_vote_id = ''
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
         voter_full_name = voter.get_full_name()
         linked_organization_we_vote_id = voter.linked_organization_we_vote_id
     if not positive_value_exists(voter_id):
@@ -3666,9 +3664,11 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
 
     if voter_guide_found and positive_value_exists(linked_organization_we_vote_id) and organization_exists:
         refresh_results = voter_guide_manager.refresh_one_voter_guide_from_organization(voter_guide, organization)
-        if refresh_results['values_changed']:
+        if refresh_results['values_changed'] or not positive_value_exists(voter_guide.voter_we_vote_id):
             status += "VOTER_GUIDE_VALUES_CHANGED "
             voter_guide = refresh_results['voter_guide']
+            if not positive_value_exists(voter_guide.voter_we_vote_id) and positive_value_exists(voter_we_vote_id):
+                voter_guide.voter_we_vote_id = voter_we_vote_id
             try:
                 voter_guide.save()
                 success = True
@@ -4551,6 +4551,27 @@ def retrieve_voter_guides_from_friends(
         status = 'retrieve_voter_guides_to_follow_generic: Unable to retrieve voter guides from db. ' \
                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
         success = False
+
+    # Since we are in the function that retrieves voter guides for voterGuidesFromFriendsUpcomingRetrieve
+    # heal the data if we haven't moved the voter_we_vote_id into the voter_guide
+    if voter_guide_list_found:
+        voter_manager = VoterManager()
+        for one_voter_guide in voter_guide_list:
+            if not positive_value_exists(one_voter_guide.voter_we_vote_id):
+                if read_only:
+                    # Retrieve fresh object that will allow us to save
+                    voter_guide_manager = VoterGuideManager()
+                    voter_guide_results = voter_guide_manager.retrieve_voter_guide(voter_guide_id=one_voter_guide.id)
+                    if voter_guide_results['voter_guide_found']:
+                        one_voter_guide = voter_guide_results['voter_guide']
+                results = voter_manager.retrieve_voter_by_organization_we_vote_id(
+                    one_voter_guide.organization_we_vote_id)
+                if results['voter_found']:
+                    try:
+                        one_voter_guide.voter_we_vote_id = results['voter'].we_vote_id
+                        one_voter_guide.save()
+                    except Exception as e:
+                        status += 'COULD_NOT_UPDATE_VOTER_WE_VOTE_ID ' + str(e) + ' '
 
     # If we have multiple voter guides for one org, we only want to show the most recent
     if voter_guide_list_found:

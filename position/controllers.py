@@ -2320,6 +2320,7 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
                 'speaker_type':                     one_position.speaker_type,
                 'speaker_id':                       speaker_id,
                 'speaker_we_vote_id':               speaker_we_vote_id,
+                'voter_we_vote_id':                 one_position.voter_we_vote_id,
                 'is_support':                       one_position.is_support(),
                 'is_positive_rating':               one_position.is_positive_rating(),
                 'is_support_or_positive_rating':    one_position.is_support_or_positive_rating(),
