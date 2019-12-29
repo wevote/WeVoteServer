@@ -14,6 +14,7 @@ from organization.models import Organization, OrganizationManager, \
     POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, UNKNOWN, ORGANIZATION_TYPE_CHOICES
 from pledge_to_vote.models import PledgeToVoteManager
 import pytz
+from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_to_str, positive_value_exists
 from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vote_id_voter_guide_integer
@@ -131,6 +132,7 @@ class VoterGuideManager(models.Manager):
         organization = Organization()
         organization_found = False
         new_voter_guide_created = False
+        voter_we_vote_id = None
         status = ''
         success = False
         if not google_civic_election_id or not organization_we_vote_id:
@@ -143,8 +145,16 @@ class VoterGuideManager(models.Manager):
             organization_manager = OrganizationManager()
             results = organization_manager.retrieve_organization(0, organization_we_vote_id)
             if results['organization_found']:
+                voter_manager = VoterManager()
                 organization_found = True
                 organization = results['organization']
+                voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(
+                    organization_we_vote_id)
+                if voter_results['voter_found']:
+                    try:
+                        voter_we_vote_id = voter_results['voter'].we_vote_id
+                    except Exception as e:
+                        status += 'COULD_NOT_RETRIEVE_VOTER_WE_VOTE_ID ' + str(e) + ' '
 
             # Retrieve the election so we can bring over the state_code if needed
             if positive_value_exists(state_code):
@@ -193,6 +203,8 @@ class VoterGuideManager(models.Manager):
                 }
                 if positive_value_exists(voter_guide_we_vote_id):
                     updated_values['we_vote_id'] = voter_guide_we_vote_id
+                if positive_value_exists(voter_we_vote_id):
+                    updated_values['voter_we_vote_id'] = voter_we_vote_id
                 if positive_value_exists(pledge_goal):
                     updated_values['pledge_goal'] = pledge_goal
                 if positive_value_exists(we_vote_hosted_profile_image_url_large):
@@ -357,73 +369,6 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def update_or_create_public_figure_voter_guide(self, voter_guide_we_vote_id,
-                                                   google_civic_election_id, public_figure_we_vote_id,
-                                                   pledge_goal,
-                                                   we_vote_hosted_profile_image_url_large='',
-                                                   we_vote_hosted_profile_image_url_medium='',
-                                                   we_vote_hosted_profile_image_url_tiny=''
-                                                   ):
-        new_voter_guide = VoterGuide()
-        voter_guide_owner_type = new_voter_guide.PUBLIC_FIGURE
-        exception_multiple_object_returned = False
-        status = ''
-        if not google_civic_election_id or not public_figure_we_vote_id:
-            status = 'ERROR_VARIABLES_MISSING_FOR_PUBLIC_FIGURE_VOTER_GUIDE'
-            new_voter_guide_created = False
-            success = False
-        else:
-            try:
-                updated_values = {
-                    # Values we search against below
-                    'google_civic_election_id': google_civic_election_id,
-                    'voter_guide_owner_type': voter_guide_owner_type,
-                    'public_figure_we_vote_id': public_figure_we_vote_id,
-                    # The rest of the values
-                }
-                if positive_value_exists(voter_guide_we_vote_id):
-                    updated_values['we_vote_id'] = voter_guide_we_vote_id
-                if positive_value_exists(pledge_goal):
-                    updated_values['pledge_goal'] = pledge_goal
-                if positive_value_exists(we_vote_hosted_profile_image_url_large):
-                    updated_values['we_vote_hosted_profile_image_url_large'] = \
-                        we_vote_hosted_profile_image_url_large
-                if positive_value_exists(we_vote_hosted_profile_image_url_medium):
-                    updated_values['we_vote_hosted_profile_image_url_medium'] = \
-                        we_vote_hosted_profile_image_url_medium
-                if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
-                    updated_values['we_vote_hosted_profile_image_url_tiny'] = we_vote_hosted_profile_image_url_tiny
-                voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
-                    google_civic_election_id__exact=google_civic_election_id,
-                    voter_guide_owner_type__iexact=voter_guide_owner_type,
-                    public_figure_we_vote_id__iexact=public_figure_we_vote_id,
-                    defaults=updated_values)
-                success = True
-                if new_voter_guide_created:
-                    status += 'VOTER_GUIDE_CREATED_FOR_PUBLIC_FIGURE '
-                else:
-                    status += 'VOTER_GUIDE_UPDATED_FOR_PUBLIC_FIGURE '
-            except VoterGuide.MultipleObjectsReturned as e:
-                handle_record_found_more_than_one_exception(e, logger=logger)
-                success = False
-                status += 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_PUBLIC_FIGURE'
-                exception_multiple_object_returned = True
-                new_voter_guide_created = False
-            except Exception as e:
-                handle_exception(e, logger=logger)
-                success = False
-                status += 'UPDATE_OR_CREATE_PUBLIC_FIGURE_VOTER_GUIDE: ' + str(e) + ' '
-                new_voter_guide_created = False
-
-        results = {
-            'success':                  success,
-            'status':                   status,
-            'MultipleObjectsReturned':  exception_multiple_object_returned,
-            'voter_guide_saved':        success,
-            'new_voter_guide_created':  new_voter_guide_created,
-        }
-        return results
-
     def update_or_create_voter_voter_guide(self, google_civic_election_id, voter):
         """
 
@@ -473,6 +418,7 @@ class VoterGuideManager(models.Manager):
                     'voter_guide_owner_type': organization.organization_type,
                     'owner_voter_id': voter.id,
                     'owner_we_vote_id': voter.we_vote_id,
+                    'voter_we_vote_id': voter.we_vote_id,
                 }
                 voter_guide, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     google_civic_election_id__exact=google_civic_election_id,
@@ -752,6 +698,7 @@ class VoterGuideManager(models.Manager):
 
         if organization:
             voter_guide_list_manager = VoterGuideListManager()
+            voter_manager = VoterManager()
             results = voter_guide_list_manager.retrieve_all_voter_guides_by_organization_we_vote_id(
                 organization.we_vote_id)
             if positive_value_exists(results['voter_guide_list_found']):
@@ -759,8 +706,18 @@ class VoterGuideManager(models.Manager):
                 for voter_guide in voter_guide_list:
                     # Note that "refresh_one_voter_guide_from_organization" doesn't save changes
                     refresh_results = self.refresh_one_voter_guide_from_organization(voter_guide, organization)
-                    if positive_value_exists(refresh_results['values_changed']):
+                    if positive_value_exists(refresh_results['values_changed']) \
+                            or not positive_value_exists(voter_guide.voter_we_vote_id):
                         voter_guide = refresh_results['voter_guide']
+                        if not positive_value_exists(voter_guide.voter_we_vote_id):
+                            voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(
+                                organization.we_vote_id)
+                            if voter_results['voter_found']:
+                                try:
+                                    voter_we_vote_id = voter_results['voter'].we_vote_id
+                                    voter_guide.voter_we_vote_id = voter_we_vote_id
+                                except Exception as e:
+                                    status += 'COULD_NOT_RETRIEVE_VOTER_WE_VOTE_ID ' + str(e) + ' '
                         voter_guide.save()
                         success = True
                         voter_guides_updated += 1
@@ -1003,90 +960,6 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def refresh_cached_voter_guide_info(self, voter_guide):
-        """
-        Make sure that the voter guide information has been updated with the latest information in the organization
-        table. NOTE: Dale started building this routine, and then discovered
-        that update_or_create_organization_voter_guide_by_election_id does this "refresh" function
-        """
-        voter_guide_change = False
-
-        # Start with "speaker" information (Organization, Voter, or Public Figure)
-        if positive_value_exists(voter_guide.organization_we_vote_id):
-            if not positive_value_exists(voter_guide.display_name) \
-                    or not positive_value_exists(voter_guide.image_url) \
-                    or not positive_value_exists(voter_guide.twitter_handle) \
-                    or not positive_value_exists(voter_guide.twitter_description):
-                try:
-                    # We need to look in the organization table for display_name & image_url
-                    organization_manager = OrganizationManager()
-                    organization_id = 0
-                    results = organization_manager.retrieve_organization(organization_id,
-                                                                         voter_guide.organization_we_vote_id)
-                    if results['organization_found']:
-                        organization = results['organization']
-                        if not positive_value_exists(voter_guide.display_name):
-                            # speaker_display_name is missing so look it up from source
-                            voter_guide.display_name = organization.organization_name
-                            voter_guide_change = True
-                        if not positive_value_exists(voter_guide.image_url):
-                            # image_url is missing so look it up from source
-                            voter_guide.image_url = organization.organization_photo_url()
-                            voter_guide_change = True
-                        if not positive_value_exists(voter_guide.twitter_handle):
-                            # twitter_url is missing so look it up from source
-                            voter_guide.twitter_handle = organization.organization_twitter_handle
-                            voter_guide_change = True
-                        if not positive_value_exists(voter_guide.twitter_description):
-                            # twitter_description is missing so look it up from source
-                            voter_guide.twitter_description = organization.twitter_description
-                            voter_guide_change = True
-                except Exception as e:
-                    pass
-        elif positive_value_exists(voter_guide.voter_id):
-            pass  # The following to be updated
-            # if not positive_value_exists(voter_guide.speaker_display_name) or \
-            #         not positive_value_exists(voter_guide.voter_we_vote_id) or \
-            #         not positive_value_exists(voter_guide.speaker_image_url_https):
-            #     try:
-            #         # We need to look in the voter table for speaker_display_name
-            #         voter_manager = VoterManager()
-            #         results = voter_manager.retrieve_voter_by_id(voter_guide.voter_id)
-            #         if results['voter_found']:
-            #             voter = results['voter']
-            #             if not positive_value_exists(voter_guide.speaker_display_name):
-            #                 # speaker_display_name is missing so look it up from source
-            #                 voter_guide.speaker_display_name = voter.get_full_name()
-            #                 voter_guide_change = True
-            #             if not positive_value_exists(voter_guide.voter_we_vote_id):
-            #                 # speaker_we_vote_id is missing so look it up from source
-            #                 voter_guide.voter_we_vote_id = voter.we_vote_id
-            #                 voter_guide_change = True
-            #             if not positive_value_exists(voter_guide.speaker_image_url_https):
-            #                 # speaker_image_url_https is missing so look it up from source
-            #                 voter_guide.speaker_image_url_https = voter.voter_photo_url()
-            #                 voter_guide_change = True
-            #     except Exception as e:
-            #         pass
-
-        elif positive_value_exists(voter_guide.public_figure_we_vote_id):
-            pass
-
-        # TODO Add code to refresh pledge_goal and pledge_count from PledgeToVote
-
-        if positive_value_exists(voter_guide.google_civic_election_id) and not positive_value_exists(voter_guide.election_day_text):
-            election_manager = ElectionManager()
-            election_results = election_manager.retrieve_election(voter_guide.google_civic_election_id)
-            if election_results['election_found']:
-                election = election_results['election']
-                voter_guide.election_day_text = election.election_day_text
-                voter_guide_change = True
-
-        if voter_guide_change:
-            voter_guide.save()
-
-        return voter_guide
-
     def save_voter_guide_object(self, voter_guide):
         """
         """
@@ -1113,6 +986,8 @@ class VoterGuide(models.Model):
     # The unique id of the organization. May be null if voter_guide owned by a public figure or voter instead of org.
     organization_we_vote_id = models.CharField(
         verbose_name="organization we vote id", max_length=255, null=True, blank=True, unique=False, db_index=True)
+    voter_we_vote_id = models.CharField(
+        verbose_name="voter who owns the organization", max_length=255, null=True, blank=True, unique=False)
 
     # The unique id of the public figure. May be null if voter_guide owned by org or voter instead of public figure.
     public_figure_we_vote_id = models.CharField(

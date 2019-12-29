@@ -7318,6 +7318,9 @@ class PositionManager(models.Model):
 
         # Start with "speaker" information (Organization, Voter, or Public Figure)
         organization_found = False
+        missing_vote_we_vote_id = (position_object.speaker_type == PUBLIC_FIGURE
+                                   or position_object.speaker_type == INDIVIDUAL) \
+            and not positive_value_exists(position_object.voter_we_vote_id)
         if not positive_value_exists(position_object.speaker_display_name) \
                 or not positive_value_exists(position_object.speaker_image_url_https) \
                 or not positive_value_exists(position_object.speaker_twitter_handle) \
@@ -7325,10 +7328,12 @@ class PositionManager(models.Model):
                 or not positive_value_exists(position_object.speaker_image_url_https_medium) \
                 or not positive_value_exists(position_object.speaker_image_url_https_tiny) \
                 or position_object.speaker_type == UNKNOWN \
+                or missing_vote_we_vote_id \
                 or force_update:
             try:
                 # We need to look in the organization table for speaker_display_name & speaker images
                 organization_manager = OrganizationManager()
+                voter_manager = VoterManager()
                 if positive_value_exists(position_object.organization_we_vote_id) \
                         and position_object.organization_we_vote_id in organizations_dict:
                     organization = organizations_dict[position_object.organization_we_vote_id]
@@ -7399,6 +7404,19 @@ class PositionManager(models.Model):
                     if position_object.speaker_type == UNKNOWN or force_update:
                         position_object.speaker_type = organization.organization_type
                         position_change = True
+                    if position_object.speaker_type == PUBLIC_FIGURE or position_object.speaker_type == INDIVIDUAL \
+                            or force_update:
+                        if not positive_value_exists(position_object.voter_we_vote_id) or force_update:
+                            voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(
+                                organization.we_vote_id)
+                            if voter_results['voter_found']:
+                                try:
+                                    voter = voter_results['voter']
+                                    position_object.voter_we_vote_id = voter.we_vote_id
+                                    position_change = True
+                                    voters_dict[voter.we_vote_id] = voter
+                                except Exception as e:
+                                    status += 'COULD_NOT_UPDATE_VOTER_WE_VOTE_ID ' + str(e) + ' '
                     if position_object.is_private_citizen is None or force_update:
                         position_object.is_private_citizen = organization.is_private_citizen()
                         position_change = True

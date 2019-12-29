@@ -84,6 +84,7 @@ def position_list_for_ballot_item_view(request):  # positionListForBallotItem
 
 def position_list_for_ballot_item_for_one_voter_view(request):  # positionListForBallotItem
     """
+    TODO: This doesn't look like it is currently in use
     :param request:
     :return:
     """
