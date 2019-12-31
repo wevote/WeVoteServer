@@ -115,9 +115,8 @@ def ballot_returned_delete_process_view(request, ballot_returned_id):
     ballot_items_delete_failed_count = 0
     if positive_value_exists(ballot_returned.polling_location_we_vote_id) and \
             positive_value_exists(ballot_returned.google_civic_election_id):
-        for_editing = True
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
-            ballot_returned.polling_location_we_vote_id, ballot_returned.google_civic_election_id, for_editing)
+            ballot_returned.polling_location_we_vote_id, ballot_returned.google_civic_election_id, read_only=False)
         if results['ballot_item_list_found']:
             ballot_item_list = results['ballot_item_list']
             for one_ballot_item in ballot_item_list:
@@ -757,9 +756,8 @@ def ballot_item_list_edit_process_view(request):
 
         # Update the ballot item order
         if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
-            for_editing = True
             ballot_item_list_results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
-                polling_location_we_vote_id, google_civic_election_id, for_editing)
+                polling_location_we_vote_id, google_civic_election_id, read_only=False)
             if ballot_item_list_results['ballot_item_list_found']:
                 ballot_item_list = ballot_item_list_results['ballot_item_list']
                 local_ballot_order_count = 0

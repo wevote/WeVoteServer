@@ -18,7 +18,8 @@ from follow.controllers import duplicate_follow_entries_to_another_voter, \
     move_follow_issue_entries_to_another_voter, move_follow_entries_to_another_voter, \
     duplicate_organization_followers_to_another_organization
 from friend.controllers import fetch_friend_invitation_recipient_voter_we_vote_id, friend_accepted_invitation_send, \
-    move_friend_invitations_to_another_voter, move_friends_to_another_voter, retrieve_voter_and_email_address, \
+    move_friend_invitations_to_another_voter, move_friends_to_another_voter, move_suggested_friends_to_another_voter, \
+    retrieve_voter_and_email_address, \
     store_internal_friend_invitation_with_two_voters, store_internal_friend_invitation_with_unknown_email
 from friend.models import FriendManager
 from image.controllers import cache_master_and_resized_image, TWITTER, FACEBOOK
@@ -1621,8 +1622,14 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         status += " " + move_organization_to_another_complete_results['status']
 
     # Transfer friends from voter to new_owner_voter
-    move_friends_results = move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
+    move_friends_results = move_friends_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id, to_voter_linked_organization_we_vote_id)
     status += " " + move_friends_results['status']
+
+    # Transfer suggested friends from voter to new_owner_voter
+    move_suggested_friends_results = move_suggested_friends_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id, to_voter_linked_organization_we_vote_id)
+    status += " " + move_suggested_friends_results['status']
 
     # Transfer friend invitations from voter to email_owner_voter
     move_friend_invitations_results = move_friend_invitations_to_another_voter(
