@@ -664,7 +664,7 @@ class VoterGuideManager(models.Manager):
         if organization:
             voter_guide_list_manager = VoterGuideListManager()
             results = voter_guide_list_manager.retrieve_all_voter_guides_by_organization_we_vote_id(
-                organization.we_vote_id)
+                organization.we_vote_id, read_only=False)
             voter_guide_list = results['voter_guide_list']
             if positive_value_exists(results['voter_guide_list_found']):
                 for voter_guide in voter_guide_list:
@@ -700,7 +700,7 @@ class VoterGuideManager(models.Manager):
             voter_guide_list_manager = VoterGuideListManager()
             voter_manager = VoterManager()
             results = voter_guide_list_manager.retrieve_all_voter_guides_by_organization_we_vote_id(
-                organization.we_vote_id)
+                organization.we_vote_id, read_only=False)
             if positive_value_exists(results['voter_guide_list_found']):
                 voter_guide_list = results['voter_guide_list']
                 for voter_guide in voter_guide_list:
@@ -758,7 +758,7 @@ class VoterGuideManager(models.Manager):
 
                 voter_guide_list_manager = VoterGuideListManager()
                 results = voter_guide_list_manager.retrieve_all_voter_guides_by_organization_we_vote_id(
-                    organization.we_vote_id)
+                    organization.we_vote_id, read_only=False)
                 if positive_value_exists(results['voter_guide_list_found']):
                     voter_guide_list = results['voter_guide_list']
                     for voter_guide in voter_guide_list:
@@ -1291,21 +1291,21 @@ class VoterGuideListManager(models.Model):
         }
         return results
 
-    def retrieve_all_voter_guides_by_organization_we_vote_id(self, organization_we_vote_id, for_editing=True):
-        return self.retrieve_all_voter_guides(organization_we_vote_id, for_editing=for_editing)
+    def retrieve_all_voter_guides_by_organization_we_vote_id(self, organization_we_vote_id, read_only=True):
+        return self.retrieve_all_voter_guides(organization_we_vote_id, read_only=read_only)
 
-    def retrieve_all_voter_guides_by_voter_id(self, owner_voter_id):
+    def retrieve_all_voter_guides_by_voter_id(self, owner_voter_id, read_only=True):
         organization_we_vote_id = ""
-        return self.retrieve_all_voter_guides(organization_we_vote_id, owner_voter_id)
+        return self.retrieve_all_voter_guides(organization_we_vote_id, owner_voter_id, read_only=read_only)
 
-    def retrieve_all_voter_guides_by_voter_we_vote_id(self, owner_voter_we_vote_id, for_editing=True):
+    def retrieve_all_voter_guides_by_voter_we_vote_id(self, owner_voter_we_vote_id, read_only=True):
         organization_we_vote_id = ""
         owner_voter_id = 0
         return self.retrieve_all_voter_guides(organization_we_vote_id, owner_voter_id, owner_voter_we_vote_id,
-                                              for_editing)
+                                              read_only)
 
     def retrieve_all_voter_guides(self, organization_we_vote_id, owner_voter_id=0, owner_voter_we_vote_id="",
-                                  for_editing=True):
+                                  read_only=True):
         voter_guide_list = []
         voter_guide_list_found = False
 
@@ -1322,10 +1322,10 @@ class VoterGuideListManager(models.Model):
             return results
 
         try:
-            if positive_value_exists(for_editing):
-                voter_guide_query = VoterGuide.objects.all()
-            else:
+            if positive_value_exists(read_only):
                 voter_guide_query = VoterGuide.objects.using('readonly').all()
+            else:
+                voter_guide_query = VoterGuide.objects.all()
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             if positive_value_exists(organization_we_vote_id):
                 voter_guide_query = voter_guide_query.filter(

@@ -575,21 +575,22 @@ class ContestMeasureManager(models.Model):
 
         return state_code
 
-    def retrieve_measures_are_not_duplicates_list(self, contest_measure_we_vote_id, for_editing=False):
+    def retrieve_measures_are_not_duplicates_list(self, contest_measure_we_vote_id, read_only=True):
         """
-        Get a list of other office_we_vote_id's that are not duplicates
+        Get a list of other measure_we_vote_id's that are not duplicates
         :param contest_measure_we_vote_id:
-        :param for_editing:
+        :param read_only:
         :return:
         """
         # Note that the direction of the linkage does not matter
         contest_measures_are_not_duplicates_list1 = []
         contest_measures_are_not_duplicates_list2 = []
         try:
-            if positive_value_exists(for_editing):
-                contest_measures_are_not_duplicates_list_query = ContestMeasuresAreNotDuplicates.objects.filter(
-                    contest_measure1_we_vote_id__iexact=contest_measure_we_vote_id,
-                )
+            if positive_value_exists(read_only):
+                contest_measures_are_not_duplicates_list_query = \
+                    ContestMeasuresAreNotDuplicates.objects.using('readonly').filter(
+                        contest_measure1_we_vote_id__iexact=contest_measure_we_vote_id,
+                    )
             else:
                 contest_measures_are_not_duplicates_list_query = \
                     ContestMeasuresAreNotDuplicates.objects.using('readonly').filter(
@@ -604,17 +605,18 @@ class ContestMeasureManager(models.Model):
             status = 'NO_CONTEST_MEASURES_NOT_DUPLICATES_LIST_RETRIEVED_DoesNotExist1 '
         except Exception as e:
             success = False
-            status = "CONTEST_MEASURES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED1 "
+            status = "CONTEST_MEASURES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED1 " + str(e) + ' '
 
         if success:
             try:
-                if positive_value_exists(for_editing):
-                    contest_measures_are_not_duplicates_list_query = ContestMeasuresAreNotDuplicates.objects.filter(
-                        contest_measure2_we_vote_id__iexact=contest_measure_we_vote_id,
-                    )
-                else:
+                if positive_value_exists(read_only):
                     contest_measures_are_not_duplicates_list_query = \
                         ContestMeasuresAreNotDuplicates.objects.using('readonly').filter(
+                            contest_measure2_we_vote_id__iexact=contest_measure_we_vote_id,
+                        )
+                else:
+                    contest_measures_are_not_duplicates_list_query = \
+                        ContestMeasuresAreNotDuplicates.objects.filter(
                             contest_measure2_we_vote_id__iexact=contest_measure_we_vote_id,
                         )
                 contest_measures_are_not_duplicates_list2 = list(contest_measures_are_not_duplicates_list_query)
@@ -625,7 +627,7 @@ class ContestMeasureManager(models.Model):
                 status = 'NO_CONTEST_MEASURES_NOT_DUPLICATES_LIST_RETRIEVED2_DoesNotExist2 '
             except Exception as e:
                 success = False
-                status = "CONTEST_MEASURES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED2 "
+                status = "CONTEST_MEASURES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED2 " + str(e) + ' '
 
         contest_measures_are_not_duplicates_list = \
             contest_measures_are_not_duplicates_list1 + contest_measures_are_not_duplicates_list2

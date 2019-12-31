@@ -1765,17 +1765,17 @@ class CandidateCampaignManager(models.Model):
         }
         return results
 
-    def retrieve_candidates_are_not_duplicates(self, candidate1_we_vote_id, candidate2_we_vote_id, for_editing=False):
+    def retrieve_candidates_are_not_duplicates(self, candidate1_we_vote_id, candidate2_we_vote_id, read_only=True):
         candidates_are_not_duplicates = CandidatesAreNotDuplicates()
         # Note that the direction of the friendship does not matter
         try:
-            if positive_value_exists(for_editing):
-                candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.get(
+            if positive_value_exists(read_only):
+                candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.using('readonly').get(
                     candidate1_we_vote_id__iexact=candidate1_we_vote_id,
                     candidate2_we_vote_id__iexact=candidate2_we_vote_id,
                 )
             else:
-                candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.using('readonly').get(
+                candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.get(
                     candidate1_we_vote_id__iexact=candidate1_we_vote_id,
                     candidate2_we_vote_id__iexact=candidate2_we_vote_id,
                 )
@@ -1791,17 +1791,17 @@ class CandidateCampaignManager(models.Model):
             candidates_are_not_duplicates_found = False
             candidates_are_not_duplicates = CandidatesAreNotDuplicates()
             success = False
-            status = "CANDIDATES_NOT_DUPLICATES_NOT_UPDATED_OR_CREATED1 "
+            status = "CANDIDATES_NOT_DUPLICATES_NOT_UPDATED_OR_CREATED1 " + str(e) + ' '
 
         if not candidates_are_not_duplicates_found and success:
             try:
-                if positive_value_exists(for_editing):
-                    candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.get(
+                if positive_value_exists(read_only):
+                    candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.using('readonly').get(
                         candidate1_we_vote_id__iexact=candidate2_we_vote_id,
                         candidate2_we_vote_id__iexact=candidate1_we_vote_id,
                     )
                 else:
-                    candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.using('readonly').get(
+                    candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.get(
                         candidate1_we_vote_id__iexact=candidate2_we_vote_id,
                         candidate2_we_vote_id__iexact=candidate1_we_vote_id,
                     )
@@ -1817,7 +1817,7 @@ class CandidateCampaignManager(models.Model):
                 candidates_are_not_duplicates_found = False
                 candidates_are_not_duplicates = CandidatesAreNotDuplicates()
                 success = False
-                status = "CANDIDATES_NOT_DUPLICATES_NOT_UPDATED_OR_CREATED2 "
+                status = "CANDIDATES_NOT_DUPLICATES_NOT_UPDATED_OR_CREATED2 " + str(e) + ' '
 
         results = {
             'success':                              success,
@@ -1827,23 +1827,23 @@ class CandidateCampaignManager(models.Model):
         }
         return results
 
-    def retrieve_candidates_are_not_duplicates_list(self, candidate_we_vote_id, for_editing=False):
+    def retrieve_candidates_are_not_duplicates_list(self, candidate_we_vote_id, read_only=True):
         """
         Get a list of other candidate_we_vote_id's that are not duplicates
         :param candidate_we_vote_id:
-        :param for_editing:
+        :param read_only:
         :return:
         """
         # Note that the direction of the linkage does not matter
         candidates_are_not_duplicates_list1 = []
         candidates_are_not_duplicates_list2 = []
         try:
-            if positive_value_exists(for_editing):
-                candidates_are_not_duplicates_list_query = CandidatesAreNotDuplicates.objects.filter(
+            if positive_value_exists(read_only):
+                candidates_are_not_duplicates_list_query = CandidatesAreNotDuplicates.objects.using('readonly').filter(
                     candidate1_we_vote_id__iexact=candidate_we_vote_id,
                 )
             else:
-                candidates_are_not_duplicates_list_query = CandidatesAreNotDuplicates.objects.using('readonly').filter(
+                candidates_are_not_duplicates_list_query = CandidatesAreNotDuplicates.objects.filter(
                     candidate1_we_vote_id__iexact=candidate_we_vote_id,
                 )
             candidates_are_not_duplicates_list1 = list(candidates_are_not_duplicates_list_query)
@@ -1855,19 +1855,20 @@ class CandidateCampaignManager(models.Model):
             status = 'NO_CANDIDATES_NOT_DUPLICATES_LIST_RETRIEVED_DoesNotExist1 '
         except Exception as e:
             success = False
-            status = "CANDIDATES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED1 "
+            status = "CANDIDATES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED1 " + str(e) + ' '
 
         if success:
             try:
-                if positive_value_exists(for_editing):
-                    candidates_are_not_duplicates_list_query = CandidatesAreNotDuplicates.objects.filter(
-                        candidate2_we_vote_id__iexact=candidate_we_vote_id,
-                    )
-                else:
+                if positive_value_exists(read_only):
                     candidates_are_not_duplicates_list_query = \
                         CandidatesAreNotDuplicates.objects.using('readonly').filter(
                             candidate2_we_vote_id__iexact=candidate_we_vote_id,
-                    )
+                        )
+                else:
+                    candidates_are_not_duplicates_list_query = \
+                        CandidatesAreNotDuplicates.objects.filter(
+                            candidate2_we_vote_id__iexact=candidate_we_vote_id,
+                        )
                 candidates_are_not_duplicates_list2 = list(candidates_are_not_duplicates_list_query)
                 success = True
                 status = "CANDIDATES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED2 "
@@ -1876,7 +1877,7 @@ class CandidateCampaignManager(models.Model):
                 status = 'NO_CANDIDATES_NOT_DUPLICATES_LIST_RETRIEVED2_DoesNotExist2 '
             except Exception as e:
                 success = False
-                status = "CANDIDATES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED2 "
+                status = "CANDIDATES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED2 " + str(e) + ' '
 
         candidates_are_not_duplicates_list = candidates_are_not_duplicates_list1 + candidates_are_not_duplicates_list2
         candidates_are_not_duplicates_list_found = positive_value_exists(len(candidates_are_not_duplicates_list))

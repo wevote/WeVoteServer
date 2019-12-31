@@ -1217,7 +1217,7 @@ def duplicate_voter_guides(from_voter_id, from_voter_we_vote_id, from_organizati
     organization_manager = OrganizationManager()
     voter_guide_list_manager = VoterGuideListManager()
     voter_guide_manager = VoterGuideManager()
-    voter_guide_list = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_id(from_voter_id)
+    voter_guide_list = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_id(from_voter_id, read_only=False)
 
     for from_voter_guide in voter_guide_list:
         # TODO When we want to heal the data
@@ -1252,7 +1252,7 @@ def duplicate_voter_guides(from_voter_id, from_voter_we_vote_id, from_organizati
 
     # Now retrieve by organization_we_vote_id in case there is damaged data
     voter_guide_list = voter_guide_list_manager.retrieve_all_voter_guides_by_organization_we_vote_id(
-        from_organization_we_vote_id)
+        from_organization_we_vote_id, read_only=False)
 
     for from_voter_guide in voter_guide_list:
         # TODO When we want to heal the data
@@ -1334,10 +1334,8 @@ def move_voter_guides_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
         status += "MOVE_VOTER_GUIDES-MISSING_EITHER_FROM_OR_TO_ORGANIZATION_WE_VOTE_ID "
 
     voter_guide_list_manager = VoterGuideListManager()
-    for_editing = True
-
     from_voter_guide_results = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_we_vote_id(
-        from_voter_we_vote_id, for_editing)
+        from_voter_we_vote_id, read_only=False)
     if from_voter_guide_results['voter_guide_list_found']:
         from_voter_guide_list = from_voter_guide_results['voter_guide_list']
     else:
@@ -1358,7 +1356,7 @@ def move_voter_guides_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
         return results
 
     to_voter_guide_results = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_we_vote_id(
-        to_voter_we_vote_id, for_editing)
+        to_voter_we_vote_id, read_only=False)
     if to_voter_guide_results['voter_guide_list_found']:
         to_voter_guide_list = to_voter_guide_results['voter_guide_list']
     else:
@@ -1394,7 +1392,7 @@ def move_voter_guides_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
 
     # Now remove the voter_guides where there were duplicates
     from_voter_guide_remaining_results = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_we_vote_id(
-        from_voter_we_vote_id, for_editing)
+        from_voter_we_vote_id, read_only=False)
     if from_voter_guide_remaining_results['voter_guide_list_found']:
         from_voter_guide_list_remaining = to_voter_guide_results['voter_guide_list']
         for from_voter_guide in from_voter_guide_list_remaining:
@@ -4467,7 +4465,7 @@ def retrieve_voter_guides_from_friends(
         maximum_number_to_retrieve = 30
 
     friend_manager = FriendManager()
-    friend_results = friend_manager.retrieve_current_friends(voter_we_vote_id, for_editing=False)
+    friend_results = friend_manager.retrieve_current_friends(voter_we_vote_id)
     organization_we_vote_ids_from_friends = []
     if friend_results['current_friend_list_found']:
         current_friend_list = friend_results['current_friend_list']

@@ -261,24 +261,25 @@ class ContestOfficeManager(models.Model):
             return results['contest_office_we_vote_id']
         return 0
 
-    def retrieve_offices_are_not_duplicates_list(self, contest_office_we_vote_id, for_editing=False):
+    def retrieve_offices_are_not_duplicates_list(self, contest_office_we_vote_id, read_only=True):
         """
         Get a list of other office_we_vote_id's that are not duplicates
         :param contest_office_we_vote_id:
-        :param for_editing:
+        :param read_only:
         :return:
         """
         # Note that the direction of the linkage does not matter
         contest_offices_are_not_duplicates_list1 = []
         contest_offices_are_not_duplicates_list2 = []
         try:
-            if positive_value_exists(for_editing):
-                contest_offices_are_not_duplicates_list_query = ContestOfficesAreNotDuplicates.objects.filter(
-                    contest_office1_we_vote_id__iexact=contest_office_we_vote_id,
-                )
-            else:
+            if positive_value_exists(read_only):
                 contest_offices_are_not_duplicates_list_query = \
                     ContestOfficesAreNotDuplicates.objects.using('readonly').filter(
+                        contest_office1_we_vote_id__iexact=contest_office_we_vote_id,
+                    )
+            else:
+                contest_offices_are_not_duplicates_list_query = \
+                    ContestOfficesAreNotDuplicates.objects.filter(
                         contest_office1_we_vote_id__iexact=contest_office_we_vote_id,
                     )
             contest_offices_are_not_duplicates_list1 = list(contest_offices_are_not_duplicates_list_query)
@@ -294,13 +295,14 @@ class ContestOfficeManager(models.Model):
 
         if success:
             try:
-                if positive_value_exists(for_editing):
-                    contest_offices_are_not_duplicates_list_query = ContestOfficesAreNotDuplicates.objects.filter(
-                        contest_office2_we_vote_id__iexact=contest_office_we_vote_id,
-                    )
-                else:
+                if positive_value_exists(read_only):
                     contest_offices_are_not_duplicates_list_query = \
                         ContestOfficesAreNotDuplicates.objects.using('readonly').filter(
+                            contest_office2_we_vote_id__iexact=contest_office_we_vote_id,
+                        )
+                else:
+                    contest_offices_are_not_duplicates_list_query = \
+                        ContestOfficesAreNotDuplicates.objects.filter(
                             contest_office2_we_vote_id__iexact=contest_office_we_vote_id,
                         )
                 contest_offices_are_not_duplicates_list2 = list(contest_offices_are_not_duplicates_list_query)

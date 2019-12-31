@@ -1124,17 +1124,17 @@ class ElectedOfficialManager(models.Model):
         return results
 
     def retrieve_elected_officials_are_not_duplicates(self, elected_official1_we_vote_id, elected_official2_we_vote_id,
-                                                      for_editing=False):
+                                                      read_only=True):
         elected_officials_are_not_duplicates = ElectedOfficialsAreNotDuplicates()
         # Note that the direction of the friendship does not matter
         try:
-            if positive_value_exists(for_editing):
-                elected_officials_are_not_duplicates = ElectedOfficialsAreNotDuplicates.objects.get(
+            if positive_value_exists(read_only):
+                elected_officials_are_not_duplicates = ElectedOfficialsAreNotDuplicates.objects.using('readonly').get(
                     elected_official1_we_vote_id__iexact=elected_official1_we_vote_id,
                     elected_official2_we_vote_id__iexact=elected_official2_we_vote_id,
                 )
             else:
-                elected_officials_are_not_duplicates = ElectedOfficialsAreNotDuplicates.objects.using('readonly').get(
+                elected_officials_are_not_duplicates = ElectedOfficialsAreNotDuplicates.objects.get(
                     elected_official1_we_vote_id__iexact=elected_official1_we_vote_id,
                     elected_official2_we_vote_id__iexact=elected_official2_we_vote_id,
                 )
@@ -1154,15 +1154,18 @@ class ElectedOfficialManager(models.Model):
 
         if not elected_officials_are_not_duplicates_found and success:
             try:
-                if positive_value_exists(for_editing):
-                    elected_officials_are_not_duplicates = ElectedOfficialsAreNotDuplicates.objects.get(
-                        elected_official1_we_vote_id__iexact=elected_official2_we_vote_id,
-                        elected_official2_we_vote_id__iexact=elected_official1_we_vote_id,
-                    )
+                if positive_value_exists(read_only):
+                    elected_officials_are_not_duplicates = \
+                        ElectedOfficialsAreNotDuplicates.objects.using('readonly').get(
+                            elected_official1_we_vote_id__iexact=elected_official2_we_vote_id,
+                            elected_official2_we_vote_id__iexact=elected_official1_we_vote_id,
+                        )
                 else:
-                    elected_officials_are_not_duplicates = ElectedOfficialsAreNotDuplicates.objects.using('readonly').\
-                        get(elected_official1_we_vote_id__iexact=elected_official2_we_vote_id,
-                            elected_official2_we_vote_id__iexact=elected_official1_we_vote_id)
+                    elected_officials_are_not_duplicates = \
+                        ElectedOfficialsAreNotDuplicates.objects.get(
+                            elected_official1_we_vote_id__iexact=elected_official2_we_vote_id,
+                            elected_official2_we_vote_id__iexact=elected_official1_we_vote_id
+                        )
                 elected_officials_are_not_duplicates_found = True
                 success = True
                 status = "ELECTED_OFFICIALS_NOT_DUPLICATES_UPDATED_OR_CREATED2 "
@@ -1185,24 +1188,26 @@ class ElectedOfficialManager(models.Model):
         }
         return results
 
-    def retrieve_elected_officials_are_not_duplicates_list(self, elected_official_we_vote_id, for_editing=False):
+    def retrieve_elected_officials_are_not_duplicates_list(self, elected_official_we_vote_id, read_only=True):
         """
         Get a list of other elected_official_we_vote_id's that are not duplicates
         :param elected_official_we_vote_id:
-        :param for_editing:
+        :param read_only:
         :return:
         """
         # Note that the direction of the linkage does not matter
         elected_officials_are_not_duplicates_list1 = []
         elected_officials_are_not_duplicates_list2 = []
         try:
-            if positive_value_exists(for_editing):
-                elected_officials_are_not_duplicates_list_query = ElectedOfficialsAreNotDuplicates.objects.filter(
-                    elected_official1_we_vote_id__iexact=elected_official_we_vote_id,
-                )
+            if positive_value_exists(read_only):
+                elected_officials_are_not_duplicates_list_query = \
+                    ElectedOfficialsAreNotDuplicates.objects.using('readonly').filter(
+                        elected_official1_we_vote_id__iexact=elected_official_we_vote_id,
+                    )
             else:
-                elected_officials_are_not_duplicates_list_query = ElectedOfficialsAreNotDuplicates.objects.\
-                    using('readonly').filter(elected_official1_we_vote_id__iexact=elected_official_we_vote_id)
+                elected_officials_are_not_duplicates_list_query = \
+                    ElectedOfficialsAreNotDuplicates.objects.filter(
+                        elected_official1_we_vote_id__iexact=elected_official_we_vote_id)
             elected_officials_are_not_duplicates_list1 = list(elected_officials_are_not_duplicates_list_query)
             success = True
             status = "ELECTED_OFFICIALS_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED1 "
@@ -1216,13 +1221,14 @@ class ElectedOfficialManager(models.Model):
 
         if success:
             try:
-                if positive_value_exists(for_editing):
-                    elected_officials_are_not_duplicates_list_query = ElectedOfficialsAreNotDuplicates.objects.filter(
-                        elected_official2_we_vote_id__iexact=elected_official_we_vote_id,
-                    )
-                else:
+                if positive_value_exists(read_only):
                     elected_officials_are_not_duplicates_list_query = \
                         ElectedOfficialsAreNotDuplicates.objects.using('readonly').filter(
+                            elected_official2_we_vote_id__iexact=elected_official_we_vote_id,
+                        )
+                else:
+                    elected_officials_are_not_duplicates_list_query = \
+                        ElectedOfficialsAreNotDuplicates.objects.filter(
                             elected_official2_we_vote_id__iexact=elected_official_we_vote_id)
                 elected_officials_are_not_duplicates_list2 = list(elected_officials_are_not_duplicates_list_query)
                 success = True
