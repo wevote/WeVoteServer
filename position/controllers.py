@@ -2351,12 +2351,13 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def position_list_for_ballot_item_for_one_voter_for_api(voter_device_id, friends_vs_public,  # positionListForBallotItem
-                                          office_id, office_we_vote_id,
-                                          candidate_id, candidate_we_vote_id,
-                                          measure_id, measure_we_vote_id,
-                                          stance_we_are_looking_for=ANY_STANCE,
-                                          show_positions_this_voter_follows=False):
+def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallotItem
+        voter_device_id, friends_vs_public,
+        office_id, office_we_vote_id,
+        candidate_id, candidate_we_vote_id,
+        measure_id, measure_we_vote_id,
+        stance_we_are_looking_for=ANY_STANCE,
+        show_positions_this_voter_follows=False):
     """
     We want to return a JSON file with the position identifiers from orgs and public figures
     This list of information is used to retrieve the detailed information
@@ -4512,7 +4513,8 @@ def retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(voter_id,
 def retrieve_ballot_item_we_vote_ids_for_organization_static(
         organization, google_civic_election_id,
         stance_we_are_looking_for=SUPPORT,
-        state_code='', friends_vs_public=PUBLIC_ONLY):
+        state_code='', friends_vs_public=PUBLIC_ONLY,
+        voter_we_vote_id=''):
     """
     For this organization, we want to return a list of ballot_items that this organization has
     an opinion about for one election.
@@ -4558,6 +4560,7 @@ def retrieve_ballot_item_we_vote_ids_for_organization_static(
 
     position_list_raw = position_list_manager.retrieve_all_positions_for_organization(
         organization_id, organization_we_vote_id, stance_we_are_looking_for, friends_vs_public,
+        voter_we_vote_id=voter_we_vote_id,
         google_civic_election_id=google_civic_election_id, read_only=True)
 
     ballot_item_we_vote_ids_list = []

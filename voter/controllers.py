@@ -1628,7 +1628,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
 
     # Transfer suggested friends from voter to new_owner_voter
     move_suggested_friends_results = move_suggested_friends_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id, to_voter_linked_organization_we_vote_id)
+        from_voter_we_vote_id, to_voter_we_vote_id)
     status += " " + move_suggested_friends_results['status']
 
     # Transfer friend invitations from voter to email_owner_voter
