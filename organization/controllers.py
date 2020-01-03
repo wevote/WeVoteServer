@@ -1735,6 +1735,7 @@ def organization_retrieve_for_api(
             'organization_website':             '',
             'twitter_description':              '',
             'twitter_followers_count':          '',
+            'linked_voter_we_vote_id':          '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1769,6 +1770,9 @@ def organization_retrieve_for_api(
         elif isinstance(organization_banner_url, tuple):
             # If a tuple, just return the first one
             organization_banner_url = organization_banner_url[0]
+        voter_manager = VoterManager()
+        linked_voter_we_vote_id = voter_manager.fetch_voter_we_vote_id_by_linked_organization_we_vote_id(
+            organization.we_vote_id)
 
         json_data = {
             'success': True,
@@ -1821,6 +1825,7 @@ def organization_retrieve_for_api(
             'twitter_followers_count':
                 organization.twitter_followers_count if positive_value_exists(
                     organization.twitter_followers_count) else 0,
+            'linked_voter_we_vote_id':      linked_voter_we_vote_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
@@ -1859,6 +1864,7 @@ def organization_retrieve_for_api(
             'organization_we_vote_id':          organization_we_vote_id,
             'twitter_description':              '',
             'twitter_followers_count':          '',
+            'linked_voter_we_vote_id':          '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 

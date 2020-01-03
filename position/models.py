@@ -5,7 +5,8 @@
 
 from analytics.models import ACTION_POSITION_TAKEN, AnalyticsManager
 from candidate.models import CandidateCampaign, CandidateCampaignManager
-from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
+from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching, \
+    figure_out_google_civic_election_id_voter_is_watching_by_voter_we_vote_id
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import models
 from django.db.models import Q
@@ -2310,7 +2311,9 @@ class PositionListManager(models.Model):
     def retrieve_all_positions_for_organization(self, organization_id, organization_we_vote_id,
                                                 stance_we_are_looking_for, friends_vs_public,
                                                 show_positions_current_voter_election=False,
-                                                exclude_positions_current_voter_election=False, voter_device_id='',
+                                                exclude_positions_current_voter_election=False,
+                                                voter_device_id='',
+                                                voter_we_vote_id='',
                                                 google_civic_election_id=0,
                                                 state_code='', read_only=False):
         """
@@ -2325,6 +2328,7 @@ class PositionListManager(models.Model):
           currently looking at
         :param exclude_positions_current_voter_election: Show positions for all elections the voter is NOT looking at
         :param voter_device_id:
+        :param voter_we_vote_id:
         :param google_civic_election_id:
         :param state_code:
         :param read_only:
@@ -2332,7 +2336,7 @@ class PositionListManager(models.Model):
         """
         status = ""
         if stance_we_are_looking_for not \
-                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
             message = "[retrieve_all_positions_for_organization, missing stance: " \
                       "" + str(stance_we_are_looking_for) + "]"
@@ -2398,9 +2402,13 @@ class PositionListManager(models.Model):
                 google_civic_election_id_local_scope = 0
                 if positive_value_exists(show_positions_current_voter_election) \
                         or positive_value_exists(exclude_positions_current_voter_election):
-                    results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
-                    google_civic_election_id_local_scope = results['google_civic_election_id']
-
+                    if positive_value_exists(voter_device_id):
+                        results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
+                        google_civic_election_id_local_scope = results['google_civic_election_id']
+                    else:
+                        results = figure_out_google_civic_election_id_voter_is_watching_by_voter_we_vote_id(
+                            voter_we_vote_id)
+                        google_civic_election_id_local_scope = results['google_civic_election_id']
                 # We can filter by only one of these
                 if positive_value_exists(show_positions_current_voter_election):  # This is the default option
                     if positive_value_exists(google_civic_election_id):
@@ -2457,10 +2465,16 @@ class PositionListManager(models.Model):
                 # Current voter visiting the site
                 current_voter_we_vote_id = ""
                 voter_manager = VoterManager()
-                results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
-                if results['voter_found']:
-                    voter = results['voter']
-                    current_voter_we_vote_id = voter.we_vote_id
+                if positive_value_exists(voter_device_id):
+                    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
+                    if results['voter_found']:
+                        voter = results['voter']
+                        current_voter_we_vote_id = voter.we_vote_id
+                else:
+                    results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id, read_only=True)
+                    if results['voter_found']:
+                        voter = results['voter']
+                        current_voter_we_vote_id = voter.we_vote_id
 
                 # We need organization_we_vote_id, so look it up if only organization_id was passed in
                 if not organization_we_vote_id:
@@ -2536,8 +2550,13 @@ class PositionListManager(models.Model):
                     google_civic_election_id_local_scope = 0
                     if positive_value_exists(show_positions_current_voter_election) \
                             or positive_value_exists(exclude_positions_current_voter_election):
-                        results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
-                        google_civic_election_id_local_scope = results['google_civic_election_id']
+                        if positive_value_exists(voter_device_id):
+                            results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
+                            google_civic_election_id_local_scope = results['google_civic_election_id']
+                        else:
+                            results = figure_out_google_civic_election_id_voter_is_watching_by_voter_we_vote_id(
+                                voter_we_vote_id)
+                            google_civic_election_id_local_scope = results['google_civic_election_id']
 
                     # We can filter by only one of these
                     if positive_value_exists(show_positions_current_voter_election):  # This is the default option

@@ -359,6 +359,14 @@ class VoterManager(BaseUserManager):
         else:
             return None
 
+    def fetch_voter_we_vote_id_by_linked_organization_we_vote_id(self, linked_organization_we_vote_id):
+        results = self.retrieve_voter_by_organization_we_vote_id(linked_organization_we_vote_id, read_only=True)
+        if results['voter_found']:
+            voter = results['voter']
+            return voter.we_vote_id
+        else:
+            return None
+
     def this_voter_has_first_or_last_name_saved(self, voter):
         try:
             if positive_value_exists(voter.first_name) or positive_value_exists(voter.last_name):
@@ -2390,6 +2398,9 @@ class VoterDeviceLinkManager(models.Model):
                         secret_code_is_stale_duration
                     if secret_code_is_stale_date > datetime_now:
                         secret_code = voter_device_link.secret_code
+                else:
+                    # Either date_secret_code_generated or secret_code are missing -- generate new ones
+                    pass
                 if not positive_value_exists(secret_code):
                     # If our secret code has expired or doesn't exist, create a new secret code
                     results = self.update_voter_device_link_with_new_secret_code(voter_device_link)
@@ -2554,7 +2565,8 @@ class VoterDeviceLinkManager(models.Model):
                             voter_device_link.secret_code_number_of_failed_tries_for_this_code
                     number_of_tries_remaining_for_this_code = NUMBER_OF_FAILED_TRIES_ALLOWED_PER_SECRET_CODE - \
                         secret_code_number_of_failed_tries_for_this_code
-
+                    status += "NUMBER_OF_FAILED_TRIES_FOR_THIS_CODE: " + \
+                              str(secret_code_number_of_failed_tries_for_this_code) + " "
                     if not positive_value_exists(number_of_tries_remaining_for_this_code):
                         voter_must_request_new_code = True
                         status += "VOTER_DEVICE_LINK_NO_MORE_TRIES_REMAINING_FOR_THIS_CODE "

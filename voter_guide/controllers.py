@@ -3196,7 +3196,7 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
     status = ""
 
     voter_guides = []
-    status += "RETRIEVING_VOTER_GUIDES_UPCOMING "
+    status += "RETRIEVING_VOTER_GUIDES_UPCOMING " + friends_vs_public + " "
 
     if not positive_value_exists(google_civic_election_id_list) or \
             not positive_value_exists(len(google_civic_election_id_list)):
@@ -3248,7 +3248,8 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
         # Augment the voter guide with a list of ballot_item we_vote_id's that this org supports
         stance_we_are_looking_for = SUPPORT
         ballot_item_support_results = retrieve_ballot_item_we_vote_ids_for_organization_static(
-            organization, google_civic_election_id, stance_we_are_looking_for, friends_vs_public=friends_vs_public)
+            organization, google_civic_election_id, stance_we_are_looking_for, friends_vs_public=friends_vs_public,
+            voter_we_vote_id=voter_we_vote_id)
         if ballot_item_support_results['count']:
             ballot_item_we_vote_ids_this_org_supports = ballot_item_support_results[
                 'ballot_item_we_vote_ids_list']
@@ -3259,7 +3260,8 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
         # Augment the voter guide with a list of ballot_item we_vote_id's that this org has info about
         stance_we_are_looking_for = INFORMATION_ONLY
         ballot_item_info_only_results = retrieve_ballot_item_we_vote_ids_for_organization_static(
-            organization, google_civic_election_id, stance_we_are_looking_for, friends_vs_public=friends_vs_public)
+            organization, google_civic_election_id, stance_we_are_looking_for, friends_vs_public=friends_vs_public,
+            voter_we_vote_id=voter_we_vote_id)
         if ballot_item_info_only_results['count']:
             ballot_item_we_vote_ids_this_org_info_only = \
                 ballot_item_info_only_results['ballot_item_we_vote_ids_list']
@@ -3270,7 +3272,8 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
         # Augment the voter guide with a list of ballot_item we_vote_id's that this org opposes
         stance_we_are_looking_for = OPPOSE
         ballot_item_oppose_results = retrieve_ballot_item_we_vote_ids_for_organization_static(
-            organization, google_civic_election_id, stance_we_are_looking_for, friends_vs_public=friends_vs_public)
+            organization, google_civic_election_id, stance_we_are_looking_for, friends_vs_public=friends_vs_public,
+            voter_we_vote_id=voter_we_vote_id)
         if ballot_item_oppose_results['count']:
             ballot_item_we_vote_ids_this_org_opposes = ballot_item_oppose_results[
                 'ballot_item_we_vote_ids_list']
@@ -3301,7 +3304,7 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
             'issue_we_vote_ids_linked':     issue_we_vote_ids_linked,
             'last_updated':                 last_updated,
             'organization_we_vote_id':      voter_guide.organization_we_vote_id,
-            'voter_we_vote_id':             voter_guide.voter_we_vote_id,
+            'linked_voter_we_vote_id':      voter_guide.voter_we_vote_id,
             'owner_voter_id':               voter_guide.owner_voter_id,
             'pledge_goal':                  voter_guide.pledge_goal,
             'pledge_count':                 voter_guide.pledge_count,

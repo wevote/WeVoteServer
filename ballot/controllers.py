@@ -19,7 +19,7 @@ from measure.models import ContestMeasureList, ContestMeasureManager
 from office.models import ContestOfficeManager, ContestOfficeListManager
 from polling_location.models import PollingLocationManager
 import pytz
-from voter.models import BALLOT_ADDRESS, VoterAddress, VoterAddressManager, VoterDeviceLinkManager
+from voter.models import BALLOT_ADDRESS, VoterAddress, VoterAddressManager, VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_state_code_from_address_string, positive_value_exists, \
     process_request_from_master, strip_html_tags
@@ -622,6 +622,16 @@ def figure_out_google_civic_election_id_voter_is_watching(voter_device_id):
         'google_civic_election_id': choose_election_results['google_civic_election_id'],
     }
     return results
+
+
+def figure_out_google_civic_election_id_voter_is_watching_by_voter_we_vote_id(voter_we_vote_id):
+    voter_id = 0
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id)
+    if results['voter_found']:
+        voter = results['voter']
+        voter_id = voter.id
+    return figure_out_google_civic_election_id_voter_is_watching_by_voter_id(voter_id)
 
 
 def figure_out_google_civic_election_id_voter_is_watching_by_voter_id(voter_id):
