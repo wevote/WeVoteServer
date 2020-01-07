@@ -1447,6 +1447,7 @@ def friend_list_for_api(voter_device_id,
     friend_manager = FriendManager()
     position_metrics_manager = PositionMetricsManager()
     if kind_of_list_we_are_looking_for == CURRENT_FRIENDS:
+        status += "KIND_OF_LIST-CURRENT_FRIENDS "
         retrieve_current_friends_as_voters_results = friend_manager.retrieve_current_friends_as_voters(voter.we_vote_id)
         success = retrieve_current_friends_as_voters_results['success']
         status += retrieve_current_friends_as_voters_results['status']
@@ -1499,6 +1500,7 @@ def friend_list_for_api(voter_device_id,
                 }
                 friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_PROCESSED:
+        status += "KIND_OF_LIST-FRIEND_INVITATIONS_PROCESSED "
         retrieve_invitations_processed_results = friend_manager.retrieve_friend_invitations_processed(
             voter.we_vote_id)
         success = retrieve_invitations_processed_results['success']
@@ -1538,6 +1540,7 @@ def friend_list_for_api(voter_device_id,
                     }
                     friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_SENT_TO_ME:
+        status += "KIND_OF_LIST-FRIEND_INVITATIONS_SENT_TO_ME "
         read_only = True
         retrieve_invitations_sent_to_me_results = friend_manager.retrieve_friend_invitations_sent_to_me(
             voter.we_vote_id, read_only)
@@ -1581,6 +1584,7 @@ def friend_list_for_api(voter_device_id,
                     }
                     friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_SENT_BY_ME:
+        status += "KIND_OF_LIST-FRIEND_INVITATIONS_SENT_BY_ME "
         retrieve_invitations_sent_by_me_results = friend_manager.retrieve_friend_invitations_sent_by_me(
             voter.we_vote_id)
         success = retrieve_invitations_sent_by_me_results['success']
@@ -1647,6 +1651,7 @@ def friend_list_for_api(voter_device_id,
                             }
                             friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION:
+        status += "KIND_OF_LIST-FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION "
         send_status = WAITING_FOR_VERIFICATION
         success = True
         status = ""
@@ -1675,6 +1680,7 @@ def friend_list_for_api(voter_device_id,
                 }
                 friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == SUGGESTED_FRIEND_LIST:
+        status += "KIND_OF_LIST-SUGGESTED_FRIEND_LIST "
         retrieve_suggested_friend_list_as_voters_results = friend_manager.retrieve_suggested_friend_list_as_voters(
             voter.we_vote_id)
         success = retrieve_suggested_friend_list_as_voters_results['success']
@@ -1682,8 +1688,23 @@ def friend_list_for_api(voter_device_id,
         if retrieve_suggested_friend_list_as_voters_results['friend_list_found']:
             suggested_friend_list = retrieve_suggested_friend_list_as_voters_results['friend_list']
             for suggested_friend in suggested_friend_list:
-                mutual_friends = friend_manager.fetch_mutual_friends_count(
-                    voter.we_vote_id, suggested_friend.we_vote_id)
+                if not positive_value_exists(suggested_friend.linked_organization_we_vote_id):
+                    # We need to retrieve another voter object that can be saved
+                    organization_manager = OrganizationManager()
+                    voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                        suggested_friend.we_vote_id, read_only=False)
+                    if voter_results['voter_found']:
+                        suggested_friend = voter_results['voter']
+                        heal_results = \
+                            organization_manager.heal_voter_missing_linked_organization_we_vote_id(suggested_friend)
+                        if heal_results['voter_healed']:
+                            suggested_friend = heal_results['voter']
+                        else:
+                            status += "SUGGESTED_FRIEND_VOTER_COULD_NOT_BE_HEALED " + heal_results['status']
+                    else:
+                        status += "SUGGESTED-COULD_NOT_RETRIEVE_VOTER_THAT_CAN_BE_SAVED " + voter_results['status']
+                mutual_friends = \
+                    friend_manager.fetch_mutual_friends_count(voter.we_vote_id, suggested_friend.we_vote_id)
                 positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(suggested_friend)
                 one_friend = {
                     "voter_we_vote_id":                 suggested_friend.we_vote_id,
