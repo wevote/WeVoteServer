@@ -1453,6 +1453,29 @@ def friend_list_for_api(voter_device_id,
         if retrieve_current_friends_as_voters_results['friend_list_found']:
             current_friend_list = retrieve_current_friends_as_voters_results['friend_list']
             for friend_voter in current_friend_list:
+                if not positive_value_exists(friend_voter.linked_organization_we_vote_id):
+                    # We need to retrieve another voter object that can be saved
+                    organization_manager = OrganizationManager()
+                    voter_results = voter_manager.retrieve_voter_by_we_vote_id(friend_voter.we_vote_id, read_only=False)
+                    if voter_results['voter_found']:
+                        friend_voter = voter_results['voter']
+                        heal_results = \
+                            organization_manager.heal_voter_missing_linked_organization_we_vote_id(friend_voter)
+                        if heal_results['voter_healed']:
+                            friend_voter = heal_results['voter']
+                            # Now we need to make sure the friend entry gets updated
+                            friend_results = friend_manager.retrieve_current_friend(
+                                voter.we_vote_id, friend_voter.we_vote_id, read_only=False)
+                            if friend_results['current_friend_found']:
+                                status += "HEAL_CURRENT_FRIEND-FOUND "
+                                current_friend = friend_results['current_friend']
+                                heal_current_friend(current_friend)
+                            else:
+                                status += "COULD_NOT_RETRIEVE_CURRENT_FRIEND_FOR_HEALING "
+                        else:
+                            status += "VOTER_COULD_NOT_BE_HEALED " + heal_results['status']
+                    else:
+                        status += "COULD_NOT_RETRIEVE_VOTER_THAT_CAN_BE_SAVED " + voter_results['status']
                 mutual_friends = friend_manager.fetch_mutual_friends_count(voter.we_vote_id, friend_voter.we_vote_id)
                 positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                 one_friend = {

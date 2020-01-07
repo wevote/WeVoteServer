@@ -362,6 +362,45 @@ class OrganizationManager(models.Manager):
         }
         return results
 
+    def heal_voter_missing_linked_organization_we_vote_id(self, voter_on_stage):
+        success = True
+        status = ''
+        voter_healed = False
+        organization_name = voter_on_stage.get_full_name()
+        organization_website = ""
+        organization_twitter_handle = ""
+        organization_twitter_id = ""
+        organization_email = ""
+        organization_facebook = ""
+        organization_image = voter_on_stage.voter_photo_url()
+        organization_type = INDIVIDUAL
+        organization_manager = OrganizationManager()
+        create_results = organization_manager.create_organization(
+            organization_name, organization_website, organization_twitter_handle,
+            organization_email, organization_facebook, organization_image, organization_twitter_id,
+            organization_type)
+        if create_results['organization_created']:
+            organization = create_results['organization']
+            try:
+                voter_on_stage.linked_organization_we_vote_id = organization.we_vote_id
+                voter_on_stage.save()
+                voter_healed = True
+                status += "LINKED_ORGANIZATION_WE_VOTE_ID_CREATED "
+            except Exception as e:
+                status += "COULD_NOT_SAVE_VOTER: " + str(e) + " "
+                success = False
+        else:
+            status += "CREATE_ORGANIZATION_FUNCTION_FAILED "
+            success = False
+
+        results = {
+            'success': success,
+            'status': status,
+            'voter_healed': voter_healed,
+            'voter': voter_on_stage,
+        }
+        return results
+
     def retrieve_organization_from_id(self, organization_id, read_only=False):
         return self.retrieve_organization(organization_id, read_only=read_only)
 
