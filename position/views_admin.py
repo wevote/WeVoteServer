@@ -8,7 +8,7 @@ from .controllers import positions_import_from_master_server, refresh_cached_pos
     refresh_positions_with_contest_measure_details_for_election
 from .models import ANY_STANCE, PositionEntered, PositionForFriends, PositionListManager, PERCENT_RATING
 from admin_tools.views import redirect_to_sign_in_page
-from candidate.models import CandidateCampaign
+from candidate.models import CandidateCampaign, CandidateCampaignManager
 from config.base import get_environment_variable
 from django.urls import reverse
 from django.contrib import messages
@@ -16,7 +16,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.db import (IntegrityError)
 from django.db.models import Q
 from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
@@ -24,6 +23,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
 from measure.controllers import push_contest_measure_data_to_other_table_caches
 from office.controllers import push_contest_office_data_to_other_table_caches
 from organization.models import OrganizationManager
+from politician.models import PoliticianManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
@@ -163,6 +163,69 @@ def update_position_list_with_speaker_type(position_list):
     return True
 
 
+def update_position_list_with_contest_office_info(position_list):
+    candidate_manager = CandidateCampaignManager()
+    candidate_dict = {}
+    politician_manager = PoliticianManager()
+    politician_dict = {}
+    for one_position in position_list:
+        candidate_campaign_id = 0
+        contest_office_we_vote_id = ''
+        contest_office_id = 0
+        politician_we_vote_id = ''
+        politician_id = 0
+        position_change = False
+        if one_position.candidate_campaign_we_vote_id in candidate_dict:
+            candidate = candidate_dict[one_position.candidate_campaign_we_vote_id]
+            candidate_campaign_id = candidate.id
+            contest_office_we_vote_id = candidate.contest_office_we_vote_id
+            contest_office_id = candidate.contest_office_id
+            politician_we_vote_id = candidate.politician_we_vote_id
+            politician_id = candidate.politician_id
+        else:
+            results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(
+                one_position.candidate_campaign_we_vote_id)
+            if results['candidate_campaign_found']:
+                candidate = results['candidate_campaign']
+                candidate_dict[one_position.candidate_campaign_we_vote_id] = candidate
+                candidate_campaign_id = candidate.id
+                contest_office_we_vote_id = candidate.contest_office_we_vote_id
+                contest_office_id = candidate.contest_office_id
+                politician_we_vote_id = candidate.politician_we_vote_id
+                politician_id = candidate.politician_id
+        if positive_value_exists(candidate_campaign_id):
+            one_position.candidate_campaign_id = candidate_campaign_id
+            position_change = True
+        if positive_value_exists(contest_office_we_vote_id):
+            one_position.contest_office_we_vote_id = contest_office_we_vote_id
+            position_change = True
+        if positive_value_exists(contest_office_id):
+            one_position.contest_office_id = contest_office_id
+            position_change = True
+        if positive_value_exists(politician_we_vote_id):
+            one_position.politician_we_vote_id = politician_we_vote_id
+            position_change = True
+        if positive_value_exists(politician_id):
+            one_position.politician_id = politician_id
+            position_change = True
+        elif positive_value_exists(politician_we_vote_id):
+            # Look up the politician_id
+            if politician_we_vote_id in politician_dict:
+                politician = politician_dict[politician_we_vote_id]
+                one_position.politician_id = politician.id
+                position_change = True
+            else:
+                results = politician_manager.retrieve_politician(0, politician_we_vote_id)
+                if results['politician_found']:
+                    politician = results['politician']
+                    politician_dict[politician_we_vote_id] = politician
+                    one_position.politician_id = politician.id
+                    position_change = True
+        if position_change:
+            one_position.save()
+    return True
+
+
 @login_required
 def position_list_view(request):
     """
@@ -229,6 +292,36 @@ def position_list_view(request):
         friend_position_list_clean_count = friend_position_list_clean_count_query.count()
         friend_position_list_clean = list(friend_position_list_clean_count_query)
         update_position_list_with_speaker_type(friend_position_list_clean)
+
+    # Make sure all candidate-related positions in this election have a contest_office information and politician info
+    public_position_list_candidate_clean_count = 0
+    friend_position_list_candidate_clean_count = 0
+    if positive_value_exists(google_civic_election_id):
+        public_position_list_candidate_clean_query = PositionEntered.objects.all()
+        public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.filter(
+            google_civic_election_id=google_civic_election_id,
+        )
+        public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.exclude(
+            Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
+        public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.filter(
+            Q(contest_office_we_vote_id__isnull=True) | Q(contest_office_we_vote_id=""))
+        public_position_list_candidate_clean_count_query = public_position_list_candidate_clean_query
+        public_position_list_candidate_clean_count = public_position_list_candidate_clean_count_query.count()
+        public_position_list_candidate_clean = list(public_position_list_candidate_clean_count_query)
+        update_position_list_with_contest_office_info(public_position_list_candidate_clean)
+
+        friend_position_list_candidate_clean_query = PositionForFriends.objects.all()
+        friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.filter(
+            google_civic_election_id=google_civic_election_id,
+        )
+        friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.exclude(
+            Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
+        friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.filter(
+            Q(contest_office_we_vote_id__isnull=True) | Q(contest_office_we_vote_id=""))
+        friend_position_list_candidate_clean_count_query = friend_position_list_candidate_clean_query
+        friend_position_list_candidate_clean_count = friend_position_list_candidate_clean_count_query.count()
+        friend_position_list_candidate_clean = list(friend_position_list_candidate_clean_count_query)
+        update_position_list_with_contest_office_info(friend_position_list_candidate_clean)
 
     # Publicly visible positions
     public_position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
@@ -383,36 +476,16 @@ def position_list_view(request):
     if public_position_list_clean_count or friend_position_list_clean_count:
         messages.add_message(
             request, messages.INFO,
-            str(public_position_list_clean_count) + ' public positions to be updated with speaker_type. ' +
-            str(friend_position_list_clean_count) + ' friends-only positions to be updated with speaker_type. '
+            str(public_position_list_clean_count) + ' public positions updated with speaker_type. ' +
+            str(friend_position_list_clean_count) + ' friends-only positions updated with speaker_type. '
         )
 
-    # Heal some data
-    # As of Aug 2018 we are no longer using PERCENT_RATING
-    # if positive_value_exists(google_civic_election_id):
-    #     public_position_list_query = PositionEntered.objects.order_by('-id')
-    #     public_position_list_query = public_position_list_query.filter(
-    # google_civic_election_id=google_civic_election_id)
-    #     public_position_list_query = public_position_list_query.filter(vote_smart_rating_integer__isnull=True)
-    #     public_position_list_query = public_position_list_query.filter(stance=PERCENT_RATING)
-    #     public_position_list_query = public_position_list_query[:5000]
-    #     public_position_list_heal = list(public_position_list_query)
-    #     integrity_error_count = 0
-    #     for one_position in public_position_list_heal:
-    #         one_position.vote_smart_rating_integer = convert_to_int(one_position.vote_smart_rating)
-    #         try:
-    #             one_position.save()
-    #         except IntegrityError as e:
-    #             integrity_error_count += 1
-    #
-    #     if len(public_position_list_heal):
-    #         positions_updated = len(public_position_list_heal) - integrity_error_count
-    #         if positive_value_exists(positions_updated):
-    #             messages.add_message(request, messages.INFO, str(positions_updated) +
-    #                                  ' positions updated with vote_smart_rating_integer.')
-    #     if positive_value_exists(integrity_error_count) and positive_value_exists(positions_updated):
-    #         messages.add_message(request, messages.ERROR, str(integrity_error_count) +
-    #                              ' integrity errors.')
+    if public_position_list_candidate_clean_count or friend_position_list_candidate_clean_count:
+        messages.add_message(
+            request, messages.INFO,
+            str(public_position_list_candidate_clean_count) + ' public positions updated with office info. ' +
+            str(friend_position_list_candidate_clean_count) + ' friends-only positions updated with office info. '
+        )
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
