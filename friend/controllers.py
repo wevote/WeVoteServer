@@ -1463,6 +1463,8 @@ def friend_list_for_api(voter_device_id,
                         heal_results = \
                             organization_manager.heal_voter_missing_linked_organization_we_vote_id(friend_voter)
                         if heal_results['voter_healed']:
+                            status += "FRIEND_HEALED-MISSING_LINKED_ORGANIZATION_WE_VOTE_ID: " \
+                                      "" + friend_voter.we_vote_id + " "
                             friend_voter = heal_results['voter']
                             # Now we need to make sure the friend entry gets updated
                             friend_results = friend_manager.retrieve_current_friend(
@@ -1699,6 +1701,8 @@ def friend_list_for_api(voter_device_id,
                             organization_manager.heal_voter_missing_linked_organization_we_vote_id(suggested_friend)
                         if heal_results['voter_healed']:
                             suggested_friend = heal_results['voter']
+                            status += "SUGGESTED_FRIEND_HEALED-MISSING_LINKED_ORGANIZATION_WE_VOTE_ID: " \
+                                      "" + suggested_friend.we_vote_id + " "
                         else:
                             status += "SUGGESTED_FRIEND_VOTER_COULD_NOT_BE_HEALED " + heal_results['status']
                     else:

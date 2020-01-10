@@ -1407,7 +1407,7 @@ def voter_sms_phone_number_save_view(request):  # voterSMSPhoneNumberSave
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_stop_opposing_save_view(request):
+def voter_stop_opposing_save_view(request):  # voterStopOpposingSave
     """
     Save support for a single measure or candidate for one voter (voterStopOpposingSave)
     :param request:
@@ -1440,7 +1440,7 @@ def voter_stop_opposing_save_view(request):
                                     user_agent_string=user_agent_string, user_agent_object=user_agent_object)
 
 
-def voter_stop_supporting_save_view(request):
+def voter_stop_supporting_save_view(request):  # voterStopSupportingSave
     """
     Save support for a single measure or candidate for one voter (voterStopSupportingSave)
     Default to set this as a position for your friends only.
@@ -1474,7 +1474,7 @@ def voter_stop_supporting_save_view(request):
                                       user_agent_string=user_agent_string, user_agent_object=user_agent_object)
 
 
-def voter_supporting_save_view(request):
+def voter_supporting_save_view(request):  # voterSupportingSave
     """
     Save support for a single measure or candidate for one voter (voterSupportingSave)
     Default to set this as a position for your friends only.
