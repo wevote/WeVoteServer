@@ -2247,8 +2247,6 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    positions_count = len(position_objects)
-
     position_list = []
     offices_dict = {}
     candidates_dict = {}
@@ -2338,6 +2336,8 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
             }
             position_list.append(one_position_dict_for_api)
 
+    positions_count = len(position_list)
+
     json_data = {
         'status':                   status,
         'success':                  success,
@@ -2351,18 +2351,17 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallotItem
+def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallotItemFromFriends
         voter_device_id, friends_vs_public,
         office_id, office_we_vote_id,
         candidate_id, candidate_we_vote_id,
         measure_id, measure_we_vote_id,
-        stance_we_are_looking_for=ANY_STANCE,
-        show_positions_this_voter_follows=False):
+        stance_we_are_looking_for=ANY_STANCE):
     """
     We want to return a JSON file with the position identifiers from orgs and public figures
     This list of information is used to retrieve the detailed information
     """
-    status = "POSITION_LIST_FOR_BALLOT_ITEM "
+    status = "POSITION_LIST_FOR_BALLOT_ITEM_FROM_FRIENDS "
     success = True
 
     position_manager = PositionManager()
@@ -2377,7 +2376,6 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
             'kind_of_ballot_item':  "UNKNOWN",
             'ballot_item_id':       0,
             'position_list':        position_list,
-            'show_positions_this_voter_follows': show_positions_this_voter_follows,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -2399,14 +2397,12 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
             'kind_of_ballot_item':  "UNKNOWN",
             'ballot_item_id':       0,
             'position_list':        position_list,
-            'show_positions_this_voter_follows': show_positions_this_voter_follows,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     # If we are looking for positions that the voter is following, we can also show friend's opinions
     # If show_positions_this_voter_follows = False, then we are looking for positions we can follow
-    retrieve_friends_positions = friends_vs_public in (FRIENDS_ONLY, FRIENDS_AND_PUBLIC) \
-        and show_positions_this_voter_follows
+    retrieve_friends_positions = friends_vs_public in (FRIENDS_ONLY, FRIENDS_AND_PUBLIC)
     retrieve_public_positions = friends_vs_public in (PUBLIC_ONLY, FRIENDS_AND_PUBLIC)
 
     friends_we_vote_id_list = []
@@ -2427,13 +2423,14 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
         status += "KIND_OF_BALLOT_ITEM_CANDIDATE "
 
         ############################
-        # Retrieve public positions
+        # Retrieve positions from your friends that are publicly visible
         if retrieve_public_positions:
             retrieve_public_positions_now = True  # The alternate is positions for friends-only
             return_only_latest_position_per_speaker = True
             public_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
                 retrieve_public_positions_now, candidate_id, candidate_we_vote_id, stance_we_are_looking_for,
-                return_only_latest_position_per_speaker)
+                return_only_latest_position_per_speaker, friends_we_vote_id_list=friends_we_vote_id_list,
+                read_only=True)
             # is_public_position_setting = True
             # public_positions_list = position_list_manager.add_is_public_position(public_positions_list,
             #                                                                      is_public_position_setting)
@@ -2441,13 +2438,14 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
             public_positions_list = []
 
         ##################################
-        # Now retrieve friend's positions
+        # Now retrieve positions from your friends that are friend's-only visible
         if retrieve_friends_positions:
             retrieve_public_positions_now = False  # This being False means: "Positions from friends-only"
             return_only_latest_position_per_speaker = True
             friends_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
                 retrieve_public_positions_now, candidate_id, candidate_we_vote_id, stance_we_are_looking_for,
-                return_only_latest_position_per_speaker, friends_we_vote_id_list=friends_we_vote_id_list)
+                return_only_latest_position_per_speaker, friends_we_vote_id_list=friends_we_vote_id_list,
+                read_only=True)
             # Now add is_public_position to each value
             # is_public_position_setting = False
             # friends_positions_list = position_list_manager.add_is_public_position(friends_positions_list,
@@ -2485,7 +2483,8 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
             public_positions_list = position_list_manager.retrieve_all_positions_for_contest_measure(
                 retrieve_public_positions_now,
                 measure_id, measure_we_vote_id, stance_we_are_looking_for,
-                return_only_latest_position_per_speaker)
+                return_only_latest_position_per_speaker, friends_we_vote_id_list=friends_we_vote_id_list,
+                read_only=True)
             # is_public_position_setting = True
             # public_positions_list = position_list_manager.add_is_public_position(public_positions_list,
             #                                                                      is_public_position_setting)
@@ -2500,7 +2499,8 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
             friends_positions_list = position_list_manager.retrieve_all_positions_for_contest_measure(
                 retrieve_public_positions_now,
                 measure_id, measure_we_vote_id, stance_we_are_looking_for,
-                return_only_latest_position_per_speaker, friends_we_vote_id_list)
+                return_only_latest_position_per_speaker, friends_we_vote_id_list=friends_we_vote_id_list,
+                read_only=True)
             # is_public_position_setting = False
             # friends_positions_list = position_list_manager.add_is_public_position(friends_positions_list,
             #                                                                       is_public_position_setting)
@@ -2534,7 +2534,8 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
             return_only_latest_position_per_speaker = True
             public_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
                 retrieve_public_positions_now, office_id, office_we_vote_id, stance_we_are_looking_for,
-                return_only_latest_position_per_speaker)
+                return_only_latest_position_per_speaker, friends_we_vote_id_list=friends_we_vote_id_list,
+                read_only=True)
             # is_public_position_setting = True
             # public_positions_list = position_list_manager.add_is_public_position(public_positions_list,
             #                                                                      is_public_position_setting)
@@ -2548,7 +2549,8 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
             return_only_latest_position_per_speaker = True
             friends_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
                 retrieve_public_positions_now, office_id, office_we_vote_id, stance_we_are_looking_for,
-                return_only_latest_position_per_speaker, friends_we_vote_id_list)
+                return_only_latest_position_per_speaker, friends_we_vote_id_list=friends_we_vote_id_list,
+                read_only=True)
             # Now add is_public_position to each value
             # is_public_position_setting = False
             # friends_positions_list = position_list_manager.add_is_public_position(friends_positions_list,
@@ -2584,7 +2586,6 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
             'position_list':            position_list,
-            'show_positions_this_voter_follows': show_positions_this_voter_follows,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -2598,53 +2599,16 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
             'ballot_item_id':           ballot_item_id,
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
             'position_list':            position_list,
-            'show_positions_this_voter_follows': show_positions_this_voter_follows,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    if len(public_positions_list):
-        follow_organization_list_manager = FollowOrganizationList()
-        organizations_followed_by_voter = \
-            follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
-
-        if show_positions_this_voter_follows:
-            position_objects = position_list_manager.calculate_positions_followed_by_voter(
-                voter_id, public_positions_list, organizations_followed_by_voter)
-            status += 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_FOLLOWED'
-            success = True
-        else:
-            position_objects = position_list_manager.calculate_positions_not_followed_by_voter(
-                public_positions_list, organizations_followed_by_voter)
-            status += 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED'
-            success = True
-    else:
-        position_objects = []
-
-    if len(friends_positions_list):
-        position_objects = friends_positions_list + position_objects
-
-    positions_count = len(position_objects)
-
-    # We need the linked_organization_we_vote_id so we can remove the viewer's positions from the list.
-    linked_organization_we_vote_id = ""
-    if positive_value_exists(positions_count):
-        voter_manager = VoterManager()
-        results = voter_manager.retrieve_voter_by_id(voter_id)
-        if results['voter_found']:
-            voter = results['voter']
-            linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+    position_objects = friends_positions_list + public_positions_list
 
     position_list = []
-    offices_dict = {}
-    candidates_dict = {}
-    measures_dict = {}
-    organizations_dict = {}
-    voters_by_linked_org_dict = {}
-    voters_dict = {}
     for one_position in position_objects:
         # Is there sufficient information in the position to display it?
-        some_data_exists = True if one_position.is_support() \
-                           or one_position.is_oppose() \
+        some_data_exists = True if one_position.is_support_or_positive_rating() \
+                           or one_position.is_oppose_or_negative_rating() \
                            or one_position.is_information_only() \
                            or positive_value_exists(one_position.vote_smart_rating) \
                            or positive_value_exists(one_position.statement_text) \
@@ -2655,34 +2619,9 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
 
         # Whose position is it?
         if positive_value_exists(one_position.organization_we_vote_id):
-            if linked_organization_we_vote_id == one_position.organization_we_vote_id:
-                # Do not show your own position on the position list, since it will be in the edit spot already
-                continue
             speaker_id = one_position.organization_id
             speaker_we_vote_id = one_position.organization_we_vote_id
             one_position_success = True
-            # Make sure we have this data to display
-            if not positive_value_exists(one_position.speaker_display_name) \
-                    or not positive_value_exists(one_position.speaker_image_url_https_large) \
-                    or not positive_value_exists(one_position.speaker_image_url_https_medium) \
-                    or not positive_value_exists(one_position.speaker_image_url_https_tiny) \
-                    or not positive_value_exists(one_position.speaker_twitter_handle) \
-                    or one_position.speaker_type == UNKNOWN:
-                results = position_manager.refresh_cached_position_info(
-                    one_position,
-                    offices_dict=offices_dict,
-                    candidates_dict=candidates_dict,
-                    measures_dict=measures_dict,
-                    organizations_dict=organizations_dict,
-                    voters_by_linked_org_dict=voters_by_linked_org_dict,
-                    voters_dict=voters_dict)
-                one_position = results['position']
-                offices_dict = results['offices_dict']
-                candidates_dict = results['candidates_dict']
-                measures_dict = results['measures_dict']
-                organizations_dict = results['organizations_dict']
-                voters_by_linked_org_dict = results['voters_by_linked_org_dict']
-                voters_dict = results['voters_dict']
             speaker_display_name = one_position.speaker_display_name
         elif positive_value_exists(one_position.voter_id):
             if voter_id == one_position.voter_id:
@@ -2691,28 +2630,6 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
             speaker_id = one_position.voter_id
             speaker_we_vote_id = one_position.voter_we_vote_id
             one_position_success = True
-            # Make sure we have this data to display
-            if not positive_value_exists(one_position.speaker_display_name) \
-                    or not positive_value_exists(one_position.voter_we_vote_id) \
-                    or not positive_value_exists(one_position.speaker_image_url_https_large) \
-                    or not positive_value_exists(one_position.speaker_image_url_https_medium) \
-                    or not positive_value_exists(one_position.speaker_image_url_https_tiny) \
-                    or one_position.speaker_type == UNKNOWN:
-                results = position_manager.refresh_cached_position_info(
-                    one_position,
-                    offices_dict=offices_dict,
-                    candidates_dict=candidates_dict,
-                    measures_dict=measures_dict,
-                    organizations_dict=organizations_dict,
-                    voters_by_linked_org_dict=voters_by_linked_org_dict,
-                    voters_dict=voters_dict)
-                one_position = results['position']
-                offices_dict = results['offices_dict']
-                candidates_dict = results['candidates_dict']
-                measures_dict = results['measures_dict']
-                organizations_dict = results['organizations_dict']
-                voters_by_linked_org_dict = results['voters_by_linked_org_dict']
-                voters_dict = results['voters_dict']
             if positive_value_exists(one_position.speaker_display_name):
                 speaker_display_name = one_position.speaker_display_name
             else:
@@ -2721,28 +2638,6 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
             speaker_id = one_position.public_figure_id
             speaker_we_vote_id = one_position.public_figure_we_vote_id
             one_position_success = True
-            # Make sure we have this data to display
-            if not positive_value_exists(one_position.speaker_display_name) \
-                    or not positive_value_exists(one_position.speaker_image_url_https_large) \
-                    or not positive_value_exists(one_position.speaker_image_url_https_medium) \
-                    or not positive_value_exists(one_position.speaker_image_url_https_tiny) \
-                    or not positive_value_exists(one_position.speaker_twitter_handle) \
-                    or one_position.speaker_type == UNKNOWN:
-                results = position_manager.refresh_cached_position_info(
-                    one_position,
-                    offices_dict=offices_dict,
-                    candidates_dict=candidates_dict,
-                    measures_dict=measures_dict,
-                    organizations_dict=organizations_dict,
-                    voters_by_linked_org_dict=voters_by_linked_org_dict,
-                    voters_dict=voters_dict)
-                one_position = results['position']
-                offices_dict = results['offices_dict']
-                candidates_dict = results['candidates_dict']
-                measures_dict = results['measures_dict']
-                organizations_dict = results['organizations_dict']
-                voters_by_linked_org_dict = results['voters_by_linked_org_dict']
-                voters_dict = results['voters_dict']
             speaker_display_name = one_position.speaker_display_name
         else:
             speaker_display_name = "Unknown"
@@ -2785,6 +2680,8 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
             }
             position_list.append(one_position_dict_for_api)
 
+    positions_count = len(position_list)
+
     json_data = {
         'status':                   status,
         'success':                  success,
@@ -2793,7 +2690,6 @@ def position_list_for_ballot_item_for_one_voter_for_api(  # positionListForBallo
         'ballot_item_id':           ballot_item_id,
         'ballot_item_we_vote_id':   ballot_item_we_vote_id,
         'position_list':            position_list,
-        'show_positions_this_voter_follows': show_positions_this_voter_follows,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

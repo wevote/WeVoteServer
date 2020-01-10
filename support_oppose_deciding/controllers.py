@@ -1190,6 +1190,7 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
     :param user_agent_object:
     :return:
     """
+    status = ""
     # Get voter_id from the voter_device_id so we can know who is supporting/opposing
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -1224,7 +1225,7 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
 
         results = position_manager.toggle_on_voter_support_for_candidate_campaign(voter_id, candidate_id,
                                                                                   user_agent_string, user_agent_object)
-        status = "SUPPORTING_CANDIDATE " + results['status']
+        status += "SUPPORTING_CANDIDATE " + results['status'] + " "
         success = results['success']
 
         json_data = {
@@ -1245,7 +1246,7 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
 
         results = position_manager.toggle_on_voter_support_for_contest_measure(voter_id, measure_id,
                                                                                user_agent_string, user_agent_object)
-        status = "SUPPORTING_MEASURE " + results['status']
+        status += "SUPPORTING_MEASURE " + results['status'] + " "
         success = results['success']
 
         json_data = {

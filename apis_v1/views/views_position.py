@@ -8,7 +8,7 @@ from ballot.controllers import figure_out_google_civic_election_id_voter_is_watc
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 from position.controllers import calculate_positions_count_for_all_ballot_items_for_api, \
     count_for_all_ballot_items_from_position_network_score_for_api, \
-    position_list_for_ballot_item_for_api, position_list_for_ballot_item_for_one_voter_for_api, \
+    position_list_for_ballot_item_for_api, position_list_for_ballot_item_from_friends_for_api, \
     position_list_for_opinion_maker_for_api, \
     position_list_for_voter_for_api, \
     position_retrieve_for_api, position_save_for_api
@@ -82,9 +82,8 @@ def position_list_for_ballot_item_view(request):  # positionListForBallotItem
                                                  private_citizens_only=private_citizens_only)
 
 
-def position_list_for_ballot_item_for_one_voter_view(request):  # positionListForBallotItem
+def position_list_for_ballot_item_from_friends_view(request):  # positionListForBallotItemFromFriends
     """
-    TODO: This doesn't look like it is currently in use
     :param request:
     :return:
     """
@@ -101,8 +100,6 @@ def position_list_for_ballot_item_for_one_voter_view(request):  # positionListFo
     else:
         friends_vs_public = FRIENDS_AND_PUBLIC
 
-    show_positions_this_voter_follows = \
-        positive_value_exists(request.GET.get('show_positions_this_voter_follows', True))
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', "")
@@ -134,7 +131,7 @@ def position_list_for_ballot_item_for_one_voter_view(request):  # positionListFo
         candidate_we_vote_id = ''
         measure_id = 0
         measure_we_vote_id = ''
-    return position_list_for_ballot_item_for_one_voter_for_api(
+    return position_list_for_ballot_item_from_friends_for_api(
         voter_device_id=voter_device_id,
         friends_vs_public=friends_vs_public,
         office_id=office_id,
@@ -143,8 +140,7 @@ def position_list_for_ballot_item_for_one_voter_view(request):  # positionListFo
         candidate_we_vote_id=candidate_we_vote_id,
         measure_id=measure_id,
         measure_we_vote_id=measure_we_vote_id,
-        stance_we_are_looking_for=stance_we_are_looking_for,
-        show_positions_this_voter_follows=show_positions_this_voter_follows)
+        stance_we_are_looking_for=stance_we_are_looking_for)
 
 
 def position_list_for_opinion_maker_view(request):  # positionListForOpinionMaker

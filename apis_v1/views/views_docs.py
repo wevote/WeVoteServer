@@ -22,7 +22,8 @@ from apis_v1.documentation_source import all_ballot_items_retrieve_doc, ballot_i
     organization_retrieve_doc, organization_save_doc, organization_search_doc, organizations_sync_out_doc, \
     organization_suggestion_tasks_doc, \
     pledge_to_vote_with_voter_guide_doc, politicians_sync_out_doc, polling_locations_sync_out_doc, \
-    position_like_count_doc, position_list_for_ballot_item_doc, position_list_for_opinion_maker_doc, \
+    position_like_count_doc, position_list_for_ballot_item_doc, position_list_for_ballot_item_from_friends_doc, \
+    position_list_for_opinion_maker_doc, \
     position_list_for_voter_doc, position_oppose_count_for_ballot_item_doc, \
     position_public_oppose_count_for_ballot_item_doc, position_retrieve_doc, position_save_doc, \
     positions_sync_out_doc, \
@@ -602,6 +603,18 @@ def position_list_for_ballot_item_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = position_list_for_ballot_item_doc.position_list_for_ballot_item_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def position_list_for_ballot_item_from_friends_doc_view(request):
+    """
+    Show documentation about positionListForBallotItemFromFriends
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = \
+        position_list_for_ballot_item_from_friends_doc.position_list_for_ballot_item_from_friends_doc_template_values(
+            url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
