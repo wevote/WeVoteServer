@@ -1911,7 +1911,7 @@ class PositionListManager(models.Model):
                 pass
 
             # Only one of these blocks will be used at a time
-            if retrieve_friends_positions and friends_we_vote_id_list:
+            if friends_we_vote_id_list is not False:
                 if type(friends_we_vote_id_list) is list and len(friends_we_vote_id_list) > 0:
                     # Find positions from friends. Look for we_vote_id case insensitive.
                     we_vote_id_filter = Q()
@@ -3222,7 +3222,7 @@ class PositionListManager(models.Model):
                 position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
 
             # Only one of these blocks will be used at a time
-            if retrieve_friends_positions and friends_we_vote_id_list is not False:
+            if friends_we_vote_id_list is not False:
                 # Find positions from friends. Look for we_vote_id case insensitive.
                 we_vote_id_filter = Q()
                 for we_vote_id in friends_we_vote_id_list:
@@ -3830,7 +3830,7 @@ class PositionManager(models.Model):
         except Exception as e:
             problem_with_duplicate = True
             success = False
-            status += 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-EXISTING_POSITION_CHECK_FAILED '
+            status += 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-EXISTING_POSITION_CHECK_FAILED ' + str(e) + ' '
 
         if problem_with_duplicate:
             results = {
