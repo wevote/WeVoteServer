@@ -938,6 +938,19 @@ class OrganizationManager(models.Manager):
 
                 except Exception as e:
                     pass
+        elif self.organization_name_needs_repair(organization):
+            voter_manager = VoterManager()
+            results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization.we_vote_id, read_only=True)
+            if results['voter_found']:
+                voter = results['voter']
+                try:
+                    real_name_only = True
+                    replacement_organization_name = voter.get_full_name(real_name_only)
+                    if positive_value_exists(replacement_organization_name):
+                        organization.organization_name = replacement_organization_name
+                        organization.save()
+                except Exception as e:
+                    pass
         return organization
 
     # We can use any of these four unique identifiers:
