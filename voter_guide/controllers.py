@@ -4031,7 +4031,7 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
     status = ""
     if not positive_value_exists(voter_device_id):
         json_data = {
-            'status':                       'VALID_VOTER_DEVICE_ID_MISSING',
+            'status':                       'VALID_VOTER_DEVICE_ID_MISSING ',
             'success':                      False,
             'voter_device_id':              voter_device_id,
             'maximum_number_to_retrieve':   maximum_number_to_retrieve,
@@ -4044,7 +4044,7 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         json_data = {
-            'status':                       'VALID_VOTER_ID_MISSING',
+            'status':                       'VALID_VOTER_ID_MISSING ',
             'success':                      False,
             'voter_device_id':              voter_device_id,
             'maximum_number_to_retrieve':   maximum_number_to_retrieve,
@@ -4056,8 +4056,8 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
 
     voter_manager = VoterManager()
     results = voter_manager.retrieve_voter_by_id(voter_id)
-    status += results['status'] + 'VOTER_NOT_FOUND'
     if not results['voter_found']:
+        status += results['status'] + 'VOTER_NOT_FOUND '
         json_data = {
             'status':                       status,
             'success':                      False,
@@ -4126,7 +4126,7 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
             status += 'NO_VOTER_GUIDES_FOLLOWED_BY_ORGANIZATION_FOUND '
             success = True
     else:
-        success = False
+        success = results['success']
 
     json_data = {
         'status':                       status,
