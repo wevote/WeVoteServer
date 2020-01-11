@@ -218,7 +218,7 @@ class EmailManager(models.Model):
             email_address_object_saved = False
             email_address_object = EmailAddress()
             success = False
-            status += "EMAIL_ADDRESS_FOR_VOTER_NOT_CREATED "
+            status += "EMAIL_ADDRESS_FOR_VOTER_NOT_CREATED " + str(e) + ' '
 
         results = {
             'success':                    success,

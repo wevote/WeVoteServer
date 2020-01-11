@@ -167,9 +167,10 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
     return results
 
 
-def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array, first_name_array, last_name_array,
+def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitationByEmailSend
+                                            email_address_array, first_name_array, last_name_array,
                                             email_addresses_raw, invitation_message,
-                                            sender_email_address, web_app_root_url=''):  # friendInvitationByEmailSend
+                                            sender_email_address, web_app_root_url=''):
     """
 
     :param voter_device_id:
@@ -202,8 +203,9 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     sender_voter_id = voter_results['voter_id']
     if not positive_value_exists(sender_voter_id):
+        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
         error_results = {
-            'status':                               "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'status':                               status,
             'success':                              False,
             'voter_device_id':                      voter_device_id,
             'sender_voter_email_address_missing':   sender_voter_email_address_missing,
@@ -2161,6 +2163,7 @@ def retrieve_voter_and_email_address(one_normalized_raw_email):
     voter_friend_found = False
     voter_friend = Voter()
     status = ""
+    status += "RETRIEVE_VOTER_AND_EMAIL_ADDRESS "
 
     voter_manager = VoterManager()
     email_manager = EmailManager()
@@ -2173,12 +2176,16 @@ def retrieve_voter_and_email_address(one_normalized_raw_email):
         # We have an EmailAddress entry for this raw email
         email_address_object = email_results['email_address_object']
         email_address_object_found = True
+        status += "EMAIL_ADDRESS_FOUND "
     elif email_results['email_address_list_found']:
         # This email was used by more than one voter account. Use the first one returned.
         email_address_list = email_results['email_address_list']
         email_address_object = email_address_list[0]
         email_address_object_found = True
+        status += "EMAIL_ADDRESS_LIST_FOUND "
     else:
+        status += email_results['status']
+        status += "CREATE_EMAIL_ADDRESS_FOR_NEW_VOTER "
         # We need to create an EmailAddress entry for this raw email
         voter_by_email_results = voter_manager.retrieve_voter_by_email(one_normalized_raw_email)
         if voter_by_email_results['voter_found']:
