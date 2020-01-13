@@ -689,8 +689,9 @@ def friend_invitation_by_email_verify_for_api(
         if friend_results['success']:
             try:
                 friend_invitation_voter_link.invitation_status = ACCEPTED
-                friend_invitation_voter_link.deleted = True
-                friend_invitation_voter_link.secret_key = None
+                # DALE NOTE 2020-1-13 Cannot delete here since the secret_key is needed for voter merge accounts
+                # friend_invitation_voter_link.deleted = True
+                # friend_invitation_voter_link.secret_key = None
                 friend_invitation_voter_link.save()
             except Exception as e:
                 success = False
@@ -821,8 +822,9 @@ def friend_invitation_by_email_verify_for_api(
         if friend_results['success']:
             try:
                 friend_invitation_email_link.invitation_status = ACCEPTED
-                friend_invitation_email_link.deleted = True
-                friend_invitation_email_link.secret_key = None
+                # DALE NOTE 2020-1-13 Cannot delete here since the secret_key is needed for voter merge accounts
+                # friend_invitation_email_link.deleted = True
+                # friend_invitation_email_link.secret_key = None
                 friend_invitation_email_link.save()
                 success = True
                 status += ' friend_invitation_email_link_found FRIENDSHIP_CREATED '
