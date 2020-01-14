@@ -619,7 +619,8 @@ def friend_invitation_by_email_verify_for_api(
     voter_has_data_to_preserve = voter.has_data_to_preserve()
 
     friend_manager = FriendManager()
-    friend_invitation_results = friend_manager.retrieve_friend_invitation_from_secret_key(invitation_secret_key)
+    friend_invitation_results = friend_manager.retrieve_friend_invitation_from_secret_key(
+        invitation_secret_key, for_accepting_friendship=True)
     if not friend_invitation_results['friend_invitation_found']:
         status += "INVITATION_NOT_FOUND_FROM_SECRET_KEY "
         error_results = {
@@ -689,8 +690,6 @@ def friend_invitation_by_email_verify_for_api(
         if friend_results['success']:
             try:
                 friend_invitation_voter_link.invitation_status = ACCEPTED
-                friend_invitation_voter_link.deleted = True
-                friend_invitation_voter_link.secret_key = None
                 friend_invitation_voter_link.save()
             except Exception as e:
                 success = False
@@ -821,8 +820,6 @@ def friend_invitation_by_email_verify_for_api(
         if friend_results['success']:
             try:
                 friend_invitation_email_link.invitation_status = ACCEPTED
-                friend_invitation_email_link.deleted = True
-                friend_invitation_email_link.secret_key = None
                 friend_invitation_email_link.save()
                 success = True
                 status += ' friend_invitation_email_link_found FRIENDSHIP_CREATED '

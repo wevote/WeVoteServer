@@ -1613,11 +1613,14 @@ class FriendManager(models.Model):
         }
         return results
 
-    def retrieve_friend_invitation_from_secret_key(self, invitation_secret_key, for_merge_accounts=False):
+    def retrieve_friend_invitation_from_secret_key(
+            self, invitation_secret_key, for_accepting_friendship=False, for_merge_accounts=False, read_only=True):
         """
 
         :param invitation_secret_key:
+        :param for_accepting_friendship:
         :param for_merge_accounts:
+        :param read_only:
         :return:
         """
         # Start by looking in FriendInvitationVoterLink table
@@ -1629,35 +1632,37 @@ class FriendManager(models.Model):
         status = ""
 
         try:
-            if positive_value_exists(invitation_secret_key) and for_merge_accounts:
-                friend_invitation_voter_link = FriendInvitationVoterLink.objects.get(
-                    secret_key=invitation_secret_key,
-                    merge_by_secret_key_allowed=True,
-                )
-                friend_invitation_voter_link_found = True
+            if positive_value_exists(invitation_secret_key):
+                if positive_value_exists(read_only):
+                    voter_link_query = FriendInvitationVoterLink.objects.using('readonly').all()
+                else:
+                    voter_link_query = FriendInvitationVoterLink.objects.all()
+                voter_link_query = voter_link_query.filter(secret_key=invitation_secret_key)
+                voter_link_query = voter_link_query.filter(deleted=False)
+                if positive_value_exists(for_accepting_friendship):
+                    voter_link_query = voter_link_query.exclude(invitation_status__iexact=ACCEPTED)
+                    status += "FOR_ACCEPTING_FRIENDSHIP "
+                elif positive_value_exists(for_merge_accounts):
+                    voter_link_query = voter_link_query.filter(merge_by_secret_key_allowed=True)
+                    status += "FOR_MERGE_ACCOUNTS "
+                voter_link_list = list(voter_link_query)
+                if len(voter_link_list) > 0:
+                    friend_invitation_voter_link = voter_link_list[0]
+                    friend_invitation_voter_link_found = True
+                    status += "RETRIEVE_FRIEND_INVITATION_VOTER_LINK_FOUND_BY_SECRET_KEY1 "
+                else:
+                    friend_invitation_voter_link = None
+                    status += "RETRIEVE_FRIEND_INVITATION_VOTER_LINK_BY_SECRET_KEY_NOT_FOUND1 "
                 success = True
-                status += "RETRIEVE_FRIEND_INVITATION_FOUND_BY_SECRET_KEY_FOR_MERGE "
-            elif positive_value_exists(invitation_secret_key):
-                friend_invitation_voter_link = FriendInvitationVoterLink.objects.get(
-                    secret_key=invitation_secret_key,
-                    deleted=False,
-                )
-                friend_invitation_voter_link_found = True
-                success = True
-                status += "RETRIEVE_FRIEND_INVITATION_FOUND_BY_SECRET_KEY1 "
             else:
                 friend_invitation_voter_link_found = False
                 success = False
-                status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_VARIABLES_MISSING1 "
-        except FriendInvitationVoterLink.DoesNotExist:
-            success = True
-            status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_NOT_FOUND1 "
+                status += "RETRIEVE_FRIEND_INVITATION_VOTER_LINK_BY_SECRET_KEY_VARIABLES_MISSING1 "
         except Exception as e:
             success = False
             status += 'FAILED retrieve_friend_invitation_from_secret_key FriendInvitationVoterLink ' + str(e) + " "
 
         if friend_invitation_voter_link_found:
-
             results = {
                 'success':                              success,
                 'status':                               status,
@@ -1671,29 +1676,32 @@ class FriendManager(models.Model):
             return results
 
         try:
-            if positive_value_exists(invitation_secret_key) and for_merge_accounts:
-                friend_invitation_email_link = FriendInvitationEmailLink.objects.get(
-                    secret_key=invitation_secret_key,
-                    merge_by_secret_key_allowed=True,
-                )
-                friend_invitation_email_link_found = True
+            if positive_value_exists(invitation_secret_key):
+                if positive_value_exists(read_only):
+                    email_link_query = FriendInvitationEmailLink.objects.using('readonly').all()
+                else:
+                    email_link_query = FriendInvitationEmailLink.objects.all()
+                email_link_query = email_link_query.filter(secret_key=invitation_secret_key)
+                email_link_query = email_link_query.filter(deleted=False)
+                if positive_value_exists(for_accepting_friendship):
+                    email_link_query = email_link_query.exclude(invitation_status__iexact=ACCEPTED)
+                    status += "FOR_ACCEPTING_FRIENDSHIP "
+                elif positive_value_exists(for_merge_accounts):
+                    email_link_query = email_link_query.filter(merge_by_secret_key_allowed=True)
+                    status += "FOR_MERGE_ACCOUNTS "
+                email_link_list = list(email_link_query)
+                if len(email_link_list):
+                    friend_invitation_email_link = email_link_list[0]
+                    friend_invitation_email_link_found = True
+                    status += "RETRIEVE_FRIEND_INVITATION_EMAIL_LINK_FOUND_BY_INVITATION_SECRET_KEY2 "
+                else:
+                    friend_invitation_email_link = None
+                    status += "RETRIEVE_FRIEND_INVITATION_EMAIL_LINK_BY_SECRET_KEY_NOT_FOUND2 "
                 success = True
-                status += "RETRIEVE_FRIEND_INVITATION_FOUND_BY_INVITATION_SECRET_KEY_FOR_MERGE2 "
-            elif positive_value_exists(invitation_secret_key):
-                friend_invitation_email_link = FriendInvitationEmailLink.objects.get(
-                    secret_key=invitation_secret_key,
-                    deleted=False,
-                )
-                friend_invitation_email_link_found = True
-                success = True
-                status += "RETRIEVE_FRIEND_INVITATION_FOUND_BY_SECRET_KEY2 "
             else:
                 friend_invitation_email_link_found = False
                 success = False
-                status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_VARIABLES_MISSING2 "
-        except FriendInvitationEmailLink.DoesNotExist:
-            success = True
-            status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_NOT_FOUND2 "
+                status += "RETRIEVE_FRIEND_INVITATION_EMAIL_LINK_BY_SECRET_KEY_VARIABLES_MISSING2 "
         except Exception as e:
             success = False
             status += 'FAILED retrieve_friend_invitation_from_secret_key FriendInvitationEmailLink ' + str(e) + ' '

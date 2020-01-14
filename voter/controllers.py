@@ -1005,6 +1005,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     to_voter_id = 0
     to_voter_we_vote_id = ""
     email_manager = EmailManager()
+    friend_manager = FriendManager()
 
     # ############# EMAIL SIGN IN #####################################
     if positive_value_exists(email_secret_key):
@@ -1417,13 +1418,11 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     # ############# INVITATION SIGN IN #####################################
     elif positive_value_exists(invitation_secret_key):
         status += "INVITATION_SECRET_KEY "
-        friend_manager = FriendManager()
         invitation_owner_voter = Voter()
-        for_merge_accounts = True
         recipient_voter_we_vote_id = ""
         sender_voter_we_vote_id = ""
         friend_invitation_results = friend_manager.retrieve_friend_invitation_from_secret_key(
-            invitation_secret_key, for_merge_accounts)
+            invitation_secret_key, for_merge_accounts=True)
         if friend_invitation_results['friend_invitation_found']:
             if friend_invitation_results['friend_invitation_voter_link_found']:
                 friend_invitation = friend_invitation_results['friend_invitation_voter_link']
@@ -1480,9 +1479,33 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         new_owner_voter = invitation_owner_voter
         status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
 
-    return voter_merge_two_accounts_action(
+    results = voter_merge_two_accounts_action(
         voter, new_owner_voter, voter_device_link, status,
         email_owner_voter_found, facebook_owner_voter_found, invitation_owner_voter_found)
+
+    # Now update the friend invitation entry -- we only want to allow a voter merge once per invitation
+    if positive_value_exists(invitation_secret_key):
+        status += "INVITATION_SECRET_KEY "
+        friend_invitation_results = friend_manager.retrieve_friend_invitation_from_secret_key(
+            invitation_secret_key, for_merge_accounts=True, read_only=False)
+        if friend_invitation_results['friend_invitation_found']:
+            try:
+                if friend_invitation_results['friend_invitation_voter_link_found']:
+                    friend_invitation_voter_link = friend_invitation_results['friend_invitation_voter_link']
+                    friend_invitation_voter_link.merge_by_secret_key_allowed = False
+                    friend_invitation_voter_link.save()
+                    new_status = "VOTER_LINK-MERGE_BY_SECRET_KEY_ALLOWED-SET_TO_FALSE "
+                    results['status'] += new_status
+                elif friend_invitation_results['friend_invitation_email_link_found']:
+                    friend_invitation_email_link = friend_invitation_results['friend_invitation_email_link']
+                    friend_invitation_email_link.merge_by_secret_key_allowed = False
+                    friend_invitation_email_link.save()
+                    new_status = "EMAIL_LINK-MERGE_BY_SECRET_KEY_ALLOWED-SET_TO_FALSE "
+                    results['status'] += new_status
+            except Exception as e:
+                new_status = "COULD_NOT_UPDATE-merge_by_secret_key_allowed " + str(e) + " "
+                results['status'] += new_status
+    return results
 
 
 def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
