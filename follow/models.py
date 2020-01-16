@@ -483,11 +483,12 @@ class FollowIssueList(models.Model):
 
         return follow_issue_list_length
 
-    def retrieve_follow_issue_list_by_voter_we_vote_id(self, voter_we_vote_id, following_status=None):
+    def retrieve_follow_issue_list_by_voter_we_vote_id(self, voter_we_vote_id, following_status=None, read_only=True):
         """
         Retrieve a list of follow_issue entries for this voter
         :param voter_we_vote_id: 
         :param following_status:
+        :param read_only:
         :return: a list of follow_issue objects for the voter_we_vote_id
         """
         follow_issue_list_found = False
@@ -495,7 +496,10 @@ class FollowIssueList(models.Model):
             following_status = FOLLOWING
         follow_issue_list = {}
         try:
-            follow_issue_list_query = FollowIssue.objects.using('readonly').all()
+            if positive_value_exists(read_only):
+                follow_issue_list_query = FollowIssue.objects.using('readonly').all()
+            else:
+                follow_issue_list_query = FollowIssue.objects.all()
             follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             if positive_value_exists(following_status):
                 follow_issue_list = follow_issue_list_query.filter(following_status=following_status)
