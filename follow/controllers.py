@@ -209,8 +209,10 @@ def move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_w
         }
         return results
 
-    from_follow_issue_list = follow_issue_list.retrieve_follow_issue_list_by_voter_we_vote_id(from_voter_we_vote_id)
-    to_follow_issue_list = follow_issue_list.retrieve_follow_issue_list_by_voter_we_vote_id(to_voter_we_vote_id)
+    from_follow_issue_list = follow_issue_list.retrieve_follow_issue_list_by_voter_we_vote_id(
+        from_voter_we_vote_id, read_only=False)
+    to_follow_issue_list = follow_issue_list.retrieve_follow_issue_list_by_voter_we_vote_id(
+        to_voter_we_vote_id, read_only=False)
     to_follow_issue_we_vote_id_list = \
         follow_issue_list.retrieve_follow_issue_we_vote_id_list_by_voter_we_vote_id(to_voter_we_vote_id)
 
@@ -232,6 +234,7 @@ def move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_w
                             follow_issue_entries_moved += 1
                         except Exception as e:
                             follow_issue_entries_not_moved += 1
+                            status += "FAILED_TO_FOLLOW_ISSUE_SAVE: " + str(e) + " "
                         continue
 
         else:
@@ -244,6 +247,7 @@ def move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_w
                 follow_issue_entries_moved += 1
             except Exception as e:
                 follow_issue_entries_not_moved += 1
+                status += "FAILED_FROM_FOLLOW_ISSUE_SAVE: " + str(e) + " "
 
     results = {
         'status':                           status,

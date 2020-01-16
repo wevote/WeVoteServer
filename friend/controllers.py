@@ -1291,8 +1291,9 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
     return results
 
 
-def friend_invite_response_for_api(voter_device_id, kind_of_invite_response, other_voter_we_vote_id,
-                                   recipient_voter_email='', web_app_root_url=''):  # friendInviteResponse
+def friend_invite_response_for_api(  # friendInviteResponse
+        voter_device_id, kind_of_invite_response, other_voter_we_vote_id,
+        recipient_voter_email='', web_app_root_url=''):
     """
     friendInviteResponse
     :param voter_device_id:
