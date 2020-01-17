@@ -620,7 +620,7 @@ def friend_invitation_by_email_verify_for_api(
 
     friend_manager = FriendManager()
     friend_invitation_results = friend_manager.retrieve_friend_invitation_from_secret_key(
-        invitation_secret_key, for_accepting_friendship=True)
+        invitation_secret_key, for_accepting_friendship=True, read_only=False)
     if not friend_invitation_results['friend_invitation_found']:
         status += "INVITATION_NOT_FOUND_FROM_SECRET_KEY "
         error_results = {

@@ -490,7 +490,7 @@ class FriendManager(models.Model):
             suggested_friend = SuggestedFriend()
             results = {
                 'success':                  False,
-                'status':                   "ONE_OR_MORE_SUGGESTED_FRIEND_NOT_A_VALID_VALUE",
+                'status':                   "ONE_OR_MORE_SUGGESTED_FRIEND_NOT_A_VALID_VALUE ",
                 'suggested_friend_found':   False,
                 'suggested_friend_created': False,
                 'suggested_friend':         suggested_friend,
@@ -501,7 +501,7 @@ class FriendManager(models.Model):
             suggested_friend = SuggestedFriend()
             results = {
                 'success':                  False,
-                'status':                   "BOTH_SUGGESTED_FRIEND_ENTRIES_ARE_THE_SAME",
+                'status':                   "BOTH_SUGGESTED_FRIEND_ENTRIES_ARE_THE_SAME ",
                 'suggested_friend_found':   False,
                 'suggested_friend_created': False,
                 'suggested_friend':         suggested_friend,
@@ -1978,17 +1978,24 @@ class FriendManager(models.Model):
         }
         return results
 
-    def update_suggested_friends_starting_with_one_voter(self, starting_voter_we_vote_id):
+    def update_suggested_friends_starting_with_one_voter(self, starting_voter_we_vote_id, read_only=False):
         """
+        Note that we default to "read_only=False" (that is, the live db) since usually we are doing this update
+        right after adding a friend, and we want the new friend to be returned in "retrieve_current_friends".
+        We use the live database ("read_only=False") because we don't want to create a race condition with
+        the replicated read_only not being caught up with the master fast enough (since a friend
+        was just created above.)
 
         :param starting_voter_we_vote_id:
+        :param read_only:
         :return:
         """
-        all_friends_one_person_results = self.retrieve_current_friends(starting_voter_we_vote_id)
+        all_friends_one_person_results = self.retrieve_current_friends(starting_voter_we_vote_id, read_only=read_only)
         suggested_friend_created_count = 0
         if all_friends_one_person_results['current_friend_list_found']:
             current_friend_list = all_friends_one_person_results['current_friend_list']
             # For each friend on this list, suggest every other friend as a possible friend
+            # Ex/ You have the friends Jo and Pat. This routine makes sure they both see each other as suggested friends
             for one_current_friend_to_suggest in current_friend_list:
                 first_voter_we_vote_id = one_current_friend_to_suggest.fetch_other_voter_we_vote_id(
                     starting_voter_we_vote_id)
@@ -2004,7 +2011,8 @@ class FriendManager(models.Model):
                         if not already_friend_results['current_friend_found']:
                             suggested_friend_results = self.create_or_update_suggested_friend(first_voter_we_vote_id,
                                                                                               second_voter_we_vote_id)
-                            if suggested_friend_results['suggested_friend_created']:
+                            if suggested_friend_results['suggested_friend_created'] or \
+                                    suggested_friend_results['suggested_friend_found']:
                                 suggested_friend_created_count += 1
 
         results = {
