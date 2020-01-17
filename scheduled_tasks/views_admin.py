@@ -12,7 +12,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from apis_v1.views.views_task import get_repeat_string
 from exception.models import print_to_log
 from scheduled_tasks.task_models import WeTask
-from scheduled_tasks.task_models_completed import WeTaskCompleted
+# from scheduled_tasks.task_models_completed import WeTaskCompleted  # DALE 2020-01-17 To prevent ModuleNotFoundError
 from voter.models import voter_has_authority
 import wevote_functions.admin
 
@@ -36,7 +36,8 @@ def scheduled_tasks_list_view(request):
         if task_list_type is 'task_list_future':
             task_list = WeTask().raw_list()
         else:
-            task_list = WeTaskCompleted().raw_list(limit=limit)
+            # task_list = WeTaskCompleted().raw_list(limit=limit)  # DALE 2020-01-17 To prevent ModuleNotFoundError
+            task_list = []
 
         for task in task_list:
             try:
