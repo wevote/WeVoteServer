@@ -695,9 +695,14 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
                 # Create the outbound email description, then schedule it
                 kind_of_email_template = FRIEND_INVITATION_TEMPLATE
                 outbound_results = email_manager.create_email_outbound_description(
-                    sender_voter_we_vote_id, sender_email_address, recipient_voter_we_vote_id,
-                    recipient_email_we_vote_id, recipient_voter_email,
-                    template_variables_in_json, kind_of_email_template)
+                    sender_voter_we_vote_id=sender_voter_we_vote_id,
+                    sender_voter_email=sender_email_address,
+                    sender_voter_name=sender_name,
+                    recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+                    recipient_email_we_vote_id=recipient_email_we_vote_id,
+                    recipient_voter_email=recipient_voter_email,
+                    template_variables_in_json=template_variables_in_json,
+                    kind_of_email_template=kind_of_email_template)
                 status += outbound_results['status'] + " "
                 email_outbound_description = outbound_results['email_outbound_description']
                 # If send_now is true then send email immediately else schedule email for later with
@@ -759,9 +764,14 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
     # TODO DALE - What kind of policy do we want re: sending a second email to a person?
     # Create the outbound email description, then schedule it
     outbound_results = email_manager.create_email_outbound_description(
-        sender_voter_we_vote_id, sender_email_address, recipient_voter_we_vote_id,
-        recipient_email_we_vote_id, recipient_voter_email,
-        template_variables_in_json, kind_of_email_template)
+        sender_voter_we_vote_id=sender_voter_we_vote_id,
+        sender_voter_email=sender_email_address,
+        sender_voter_name=sender_name,
+        recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+        recipient_email_we_vote_id=recipient_email_we_vote_id,
+        recipient_voter_email=recipient_voter_email,
+        template_variables_in_json=template_variables_in_json,
+        kind_of_email_template=kind_of_email_template)
     status += outbound_results['status'] + " "
     email_outbound_description = outbound_results['email_outbound_description']
     if outbound_results['email_outbound_description_saved']:

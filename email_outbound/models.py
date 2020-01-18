@@ -98,6 +98,8 @@ class EmailOutboundDescription(models.Model):
     """
     kind_of_email_template = models.CharField(max_length=50, choices=KIND_OF_EMAIL_TEMPLATE_CHOICES,
                                               default=GENERIC_EMAIL_TEMPLATE)
+    sender_voter_name = models.CharField(
+        verbose_name='sender full name', max_length=255, null=True, blank=True, unique=False)
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
     sender_voter_email = models.EmailField(
@@ -121,6 +123,8 @@ class EmailScheduled(models.Model):
     subject = models.CharField(verbose_name="email subject", max_length=255, null=True, blank=True, unique=False)
     message_text = models.TextField(null=True, blank=True)
     message_html = models.TextField(null=True, blank=True)
+    sender_voter_name = models.CharField(
+        verbose_name='sender full name', max_length=255, null=True, blank=True, unique=False)
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
     sender_voter_email = models.EmailField(
@@ -229,7 +233,7 @@ class EmailManager(models.Model):
         return results
 
     def create_email_outbound_description(
-            self, sender_voter_we_vote_id, sender_voter_email,
+            self, sender_voter_we_vote_id, sender_voter_email, sender_voter_name='',
             recipient_voter_we_vote_id='',
             recipient_email_we_vote_id='', recipient_voter_email='', template_variables_in_json='',
             kind_of_email_template=''):
@@ -241,6 +245,7 @@ class EmailManager(models.Model):
             email_outbound_description = EmailOutboundDescription.objects.create(
                 sender_voter_we_vote_id=sender_voter_we_vote_id,
                 sender_voter_email=sender_voter_email,
+                sender_voter_name=sender_voter_name,
                 recipient_voter_we_vote_id=recipient_voter_we_vote_id,
                 recipient_email_we_vote_id=recipient_email_we_vote_id,
                 recipient_voter_email=recipient_voter_email,
@@ -799,6 +804,7 @@ class EmailManager(models.Model):
         status = ''
         try:
             email_scheduled = EmailScheduled.objects.create(
+                sender_voter_name=email_outbound_description.sender_voter_name,
                 sender_voter_we_vote_id=email_outbound_description.sender_voter_we_vote_id,
                 sender_voter_email=email_outbound_description.sender_voter_email,
                 recipient_voter_we_vote_id=email_outbound_description.recipient_voter_we_vote_id,
@@ -882,7 +888,12 @@ class EmailManager(models.Model):
             }
             return results
 
-        system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
+        if positive_value_exists(email_scheduled.sender_voter_name):
+            # TODO DALE Make system variable
+            system_sender_email_address = "{sender_voter_name} via We Vote <info@WeVote.US>" \
+                                          "".format(sender_voter_name=email_scheduled.sender_voter_name)
+        else:
+            system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
 
         mail = EmailMultiAlternatives(
             subject=email_scheduled.subject,

@@ -1017,10 +1017,14 @@ class VoterManager(BaseUserManager):
                                   we_vote_hosted_profile_image_url_medium=None,
                                   we_vote_hosted_profile_image_url_tiny=None):
         try:
-            voter.facebook_id = facebook_auth_response.facebook_user_id
-            voter.first_name = facebook_auth_response.facebook_first_name
-            voter.middle_name = facebook_auth_response.facebook_middle_name
-            voter.last_name = facebook_auth_response.facebook_last_name
+            if positive_value_exists(facebook_auth_response.facebook_user_id):
+                voter.facebook_id = facebook_auth_response.facebook_user_id
+            if positive_value_exists(facebook_auth_response.facebook_first_name):
+                voter.first_name = facebook_auth_response.facebook_first_name
+            if positive_value_exists(facebook_auth_response.facebook_middle_name):
+                voter.middle_name = facebook_auth_response.facebook_middle_name
+            if positive_value_exists(facebook_auth_response.facebook_last_name):
+                voter.last_name = facebook_auth_response.facebook_last_name
             if positive_value_exists(cached_facebook_profile_image_url_https):
                 voter.facebook_profile_image_url_https = cached_facebook_profile_image_url_https
             else:
