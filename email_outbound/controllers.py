@@ -452,9 +452,14 @@ def schedule_verification_email(sender_voter_we_vote_id, recipient_voter_we_vote
     verification_from_email = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
 
     outbound_results = email_manager.create_email_outbound_description(
-        sender_voter_we_vote_id, verification_from_email, recipient_voter_we_vote_id,
-        recipient_email_we_vote_id, recipient_voter_email,
-        template_variables_in_json, kind_of_email_template)
+        sender_voter_we_vote_id=sender_voter_we_vote_id,
+        sender_voter_email=verification_from_email,
+        sender_voter_name='',
+        recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+        recipient_email_we_vote_id=recipient_email_we_vote_id,
+        recipient_voter_email=recipient_voter_email,
+        template_variables_in_json=template_variables_in_json,
+        kind_of_email_template=kind_of_email_template)
     status += outbound_results['status'] + " "
     if outbound_results['email_outbound_description_saved']:
         email_outbound_description = outbound_results['email_outbound_description']
@@ -535,9 +540,13 @@ def schedule_link_to_sign_in_email(sender_voter_we_vote_id, recipient_voter_we_v
     verification_from_email = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
 
     outbound_results = email_manager.create_email_outbound_description(
-        sender_voter_we_vote_id, verification_from_email, recipient_voter_we_vote_id,
-        recipient_email_we_vote_id, recipient_voter_email,
-        template_variables_in_json, kind_of_email_template)
+        sender_voter_we_vote_id=sender_voter_we_vote_id,
+        sender_voter_email=verification_from_email,
+        recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+        recipient_email_we_vote_id=recipient_email_we_vote_id,
+        recipient_voter_email=recipient_voter_email,
+        template_variables_in_json=template_variables_in_json,
+        kind_of_email_template=kind_of_email_template)
     status += outbound_results['status'] + " "
     if outbound_results['email_outbound_description_saved']:
         email_outbound_description = outbound_results['email_outbound_description']
@@ -609,9 +618,13 @@ def schedule_sign_in_code_email(sender_voter_we_vote_id, recipient_voter_we_vote
     verification_from_email = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
 
     outbound_results = email_manager.create_email_outbound_description(
-        sender_voter_we_vote_id, verification_from_email, recipient_voter_we_vote_id,
-        recipient_email_we_vote_id, recipient_voter_email,
-        template_variables_in_json, kind_of_email_template)
+        sender_voter_we_vote_id=sender_voter_we_vote_id,
+        sender_voter_email=verification_from_email,
+        recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+        recipient_email_we_vote_id=recipient_email_we_vote_id,
+        recipient_voter_email=recipient_voter_email,
+        template_variables_in_json=template_variables_in_json,
+        kind_of_email_template=kind_of_email_template)
     status += outbound_results['status']
     if outbound_results['email_outbound_description_saved']:
         email_outbound_description = outbound_results['email_outbound_description']

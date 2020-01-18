@@ -143,6 +143,7 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
         outbound_results = email_manager.create_email_outbound_description(
             sender_voter_we_vote_id=accepting_voter_we_vote_id,
             sender_voter_email=sender_voter_email,
+            # sender_voter_name=original_sender_name,  # Not needed in notification that friend request was accepted
             recipient_voter_we_vote_id=original_sender_voter_we_vote_id,
             recipient_email_we_vote_id=original_sender_email_we_vote_id,
             recipient_voter_email=original_sender_email,
@@ -526,9 +527,14 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
     if friend_invitation_results['friend_invitation_saved']:
         kind_of_email_template = FRIEND_INVITATION_TEMPLATE
         outbound_results = email_manager.create_email_outbound_description(
-            sender_voter_we_vote_id, sender_email_with_ownership_verified, recipient_voter_we_vote_id,
-            recipient_email_we_vote_id, recipient_voter_email,
-            template_variables_in_json, kind_of_email_template)
+            sender_voter_we_vote_id=sender_voter_we_vote_id,
+            sender_voter_email=sender_email_with_ownership_verified,
+            sender_voter_name=sender_name,
+            recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+            recipient_email_we_vote_id=recipient_email_we_vote_id,
+            recipient_voter_email=recipient_voter_email,
+            template_variables_in_json=template_variables_in_json,
+            kind_of_email_template=kind_of_email_template)
         status += outbound_results['status'] + " "
         email_outbound_description = outbound_results['email_outbound_description']
         if outbound_results['email_outbound_description_saved'] and send_now:
@@ -1257,9 +1263,14 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
             if friend_invitation_results['friend_invitation_saved'] and send_now:
                 kind_of_email_template = FRIEND_INVITATION_TEMPLATE
                 outbound_results = email_manager.create_email_outbound_description(
-                    sender_voter_we_vote_id, sender_email_with_ownership_verified, recipient_voter_we_vote_id,
-                    recipient_email_we_vote_id, recipient_voter_email,
-                    template_variables_in_json, kind_of_email_template)
+                    sender_voter_we_vote_id=sender_voter_we_vote_id,
+                    sender_voter_email=sender_email_with_ownership_verified,
+                    sender_voter_name=sender_name,
+                    recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+                    recipient_email_we_vote_id=recipient_email_we_vote_id,
+                    recipient_voter_email=recipient_voter_email,
+                    template_variables_in_json=template_variables_in_json,
+                    kind_of_email_template=kind_of_email_template)
                 status += outbound_results['status'] + " "
                 if outbound_results['email_outbound_description_saved']:
                     email_outbound_description = outbound_results['email_outbound_description']
