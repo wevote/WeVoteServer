@@ -126,7 +126,7 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
             "invitation_message":           invitation_message,
             "sender_name":                  accepting_voter_name,
             "sender_photo":                 accepting_voter_photo,
-            "sender_email_address":         accepting_voter_email,
+            "sender_email_address":         accepting_voter_email,  # Does not affect the "From" email header
             "sender_description":           accepting_voter_description,
             "sender_network_details":       accepting_voter_network_details,
             "recipient_name":               original_sender_name,
@@ -224,6 +224,7 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
         send_now = True
         sender_email_with_ownership_verified = \
             email_manager.fetch_primary_email_with_ownership_verified(sender_voter.we_vote_id)
+        sender_voter_email_address_missing = False
         status += "SENDER_HAS_EMAIL_WITH_OWNERSHIP_VERIFIED "
     elif positive_value_exists(sender_email_address) and validate_email(sender_email_address):
         # If here, check to see if a sender_email_address was passed in
@@ -277,7 +278,7 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
                 'success':                              False,
                 'status':                               status,
                 'voter_device_id':                      voter_device_id,
-                'sender_voter_email_address_missing':   True,
+                'sender_voter_email_address_missing':   sender_voter_email_address_missing,
                 'error_message_to_show_voter':          error_message_to_show_voter
             }
             return error_results
@@ -320,6 +321,19 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
             first_name = first_name_array[n]
             last_name = last_name_array[n]
             one_normalized_raw_email = email_address_array[n]
+
+            # Make sure the current voter isn't already friends with owner of this email address
+            is_friend_results = retrieve_current_friend_by_email(
+                viewing_voter=sender_voter, one_normalized_raw_email=one_normalized_raw_email)
+            if is_friend_results['current_friend_found']:
+                # Do not send an invitation
+                status += is_friend_results['status']
+                status += "ALREADY_FRIENDS_WITH_SENDER_VOTER_EMAIL_ADDRESS_ARRAY "
+                error_message_to_show_voter += "You are already friends with the owner of " \
+                                               "'{one_normalized_raw_email}'. " \
+                                               "".format(one_normalized_raw_email=one_normalized_raw_email)
+                continue
+
             send_results = send_to_one_friend(voter_device_id, sender_voter, send_now,
                                               sender_email_with_ownership_verified,
                                               one_normalized_raw_email, first_name, last_name, invitation_message,
@@ -334,6 +348,18 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
             first_name = ""
             last_name = ""
             for one_normalized_raw_email in raw_email_list_to_invite:
+                # Make sure the current voter isn't already friends with owner of this email address
+                is_friend_results = retrieve_current_friend_by_email(
+                    viewing_voter=sender_voter, one_normalized_raw_email=one_normalized_raw_email)
+                if is_friend_results['current_friend_found']:
+                    # Do not send an invitation
+                    status += is_friend_results['status']
+                    status += "ALREADY_FRIENDS_WITH_SENDER_VOTER_RAW_EMAILS "
+                    error_message_to_show_voter += "You are already friends with the owner of " \
+                                                   "'{one_normalized_raw_email}'. " \
+                                                   "".format(one_normalized_raw_email=one_normalized_raw_email)
+                    continue
+
                 send_results = send_to_one_friend(voter_device_id, sender_voter, send_now,
                                                   sender_email_with_ownership_verified,
                                                   one_normalized_raw_email, first_name, last_name, invitation_message,
@@ -495,8 +521,6 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
     else:
         subject = "Invitation to be friends on We Vote"
 
-    system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
-
     if positive_value_exists(sender_email_with_ownership_verified):
         sender_email_address = sender_email_with_ownership_verified
     else:
@@ -510,7 +534,7 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
         "invitation_message":           invitation_message,
         "sender_name":                  sender_name,
         "sender_photo":                 sender_photo,
-        "sender_email_address":         sender_email_address,  # Does not seem to affect the sent from email
+        "sender_email_address":         sender_email_address,  # Does not affect the "From" email header
         "sender_description":           sender_description,
         "sender_network_details":       sender_network_details,
         "recipient_name":               recipient_name,
@@ -1235,18 +1259,18 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
 
             if positive_value_exists(sender_email_with_ownership_verified):
                 sender_email_address = sender_email_with_ownership_verified
+            else:
+                sender_email_address = ""
 
             if invitation_secret_key is None:
                 invitation_secret_key = ""
-
-            system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
 
             template_variables_for_json = {
                 "subject":                      subject,
                 "invitation_message":           invitation_message,
                 "sender_name":                  sender_name,
                 "sender_photo":                 sender_photo,
-                "sender_email_address":         system_sender_email_address,  # TODO DALE WAS sender_email_address,
+                "sender_email_address":         sender_email_address,  # Does not affect the "From" email header
                 "sender_description":           sender_description,
                 "sender_network_details":       sender_network_details,
                 "recipient_name":               recipient_name,
@@ -1360,8 +1384,9 @@ def friend_invite_response_for_api(  # friendInviteResponse
         results = friend_manager.unfriend_current_friend(voter.we_vote_id, other_voter.we_vote_id)
         status += results['status']
     elif kind_of_invite_response == DELETE_INVITATION_EMAIL_SENT_BY_ME:
-        results = friend_manager.process_friend_invitation_email_response(voter, recipient_voter_email,
-                                                                          kind_of_invite_response)
+        results = friend_manager.process_friend_invitation_email_response(
+            sender_voter=voter, recipient_voter_email=recipient_voter_email,
+            kind_of_invite_response=kind_of_invite_response)
         status += results['status']
     elif kind_of_invite_response == DELETE_INVITATION_VOTER_SENT_BY_ME:
         results = friend_manager.process_friend_invitation_voter_response(
@@ -1409,7 +1434,7 @@ def friend_invite_response_for_api(  # friendInviteResponse
     return results
 
 
-def friend_list_for_api(voter_device_id,
+def friend_list_for_api(voter_device_id,  # friendList
                         kind_of_list_we_are_looking_for=CURRENT_FRIENDS,
                         state_code=''):
     """
@@ -1554,9 +1579,8 @@ def friend_list_for_api(voter_device_id,
                     friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_SENT_TO_ME:
         status += "KIND_OF_LIST-FRIEND_INVITATIONS_SENT_TO_ME "
-        read_only = True
         retrieve_invitations_sent_to_me_results = friend_manager.retrieve_friend_invitations_sent_to_me(
-            voter.we_vote_id, read_only)
+            voter.we_vote_id, read_only=True)
         success = retrieve_invitations_sent_to_me_results['success']
         status += retrieve_invitations_sent_to_me_results['status']
         if retrieve_invitations_sent_to_me_results['friend_list_found']:
@@ -1592,6 +1616,7 @@ def friend_list_for_api(voter_device_id,
                         "voter_state_code":                 "",  # To be implemented
                         "invitation_status":                "",  # Not used for invitations sent to me
                         "invitation_sent_to":               recipient_voter_email,
+                        "invitation_table":                 one_friend_invitation.invitation_table,
                         "mutual_friends":                   mutual_friends,
                         "positions_taken":                  positions_taken,
                     }
@@ -1638,6 +1663,7 @@ def friend_list_for_api(voter_device_id,
                             "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
                             "voter_state_code":                 "",  # To be implemented
                             "invitation_status":                one_friend_invitation.invitation_status,
+                            "invitation_table":                 one_friend_invitation.invitation_table,
                             "invitation_sent_to":               recipient_voter_email,
                             "mutual_friends":                   mutual_friends,
                             "positions_taken":                  positions_taken,
@@ -1658,6 +1684,7 @@ def friend_list_for_api(voter_device_id,
                                 "voter_state_code":                 "",  # To be implemented
                                 "voter_email_address":              one_friend_invitation.recipient_voter_email,
                                 "invitation_status":                one_friend_invitation.invitation_status,
+                                "invitation_table":                 one_friend_invitation.invitation_table,
                                 "invitation_sent_to":               recipient_voter_email,
                                 "mutual_friends":                   0,
                                 "positions_taken":                  0,
@@ -2251,6 +2278,38 @@ def retrieve_voter_and_email_address(one_normalized_raw_email):
         'voter_found':          voter_friend_found,
         'voter':                voter_friend,
         'email_address_object': email_address_object,
+    }
+    return results
+
+
+def retrieve_current_friend_by_email(viewing_voter, one_normalized_raw_email):
+    success = True
+    status = ''
+    voter_friend = None
+    email_address_object = None
+    current_friend_found = False
+    current_friend = None
+
+    results = retrieve_voter_and_email_address(one_normalized_raw_email)
+    voter_friend_found = results['voter_found']
+    if voter_friend_found:
+        voter_friend = results['voter']
+        email_address_object = results['email_address_object']
+
+        friend_manager = FriendManager()
+        friend_results = friend_manager.retrieve_current_friend(
+            sender_voter_we_vote_id=viewing_voter.we_vote_id, recipient_voter_we_vote_id=voter_friend.we_vote_id)
+        current_friend_found = friend_results['current_friend_found']
+        current_friend = friend_results['current_friend']
+
+    results = {
+        'success':              success,
+        'status':               status,
+        'voter_found':          voter_friend_found,
+        'voter':                voter_friend,
+        'email_address_object': email_address_object,
+        'current_friend_found': current_friend_found,
+        'current_friend':       current_friend,
     }
     return results
 

@@ -900,9 +900,9 @@ class EmailManager(models.Model):
             body=email_scheduled.message_text,
             from_email=system_sender_email_address,
             to=[email_scheduled.recipient_voter_email],
-            headers={"Reply-To": email_scheduled.sender_voter_email}
+            # headers={"Reply-To": email_scheduled.sender_voter_email}
         )
-        # TODO DALE ADD: reply_to = email_scheduled.sender_voter_email,
+        # 2020-01-19 Dale commented out Reply-To header because with it, Gmail gives phishing warning
         if positive_value_exists(email_scheduled.message_html):
             mail.attach_alternative(email_scheduled.message_html, "text/html")
 

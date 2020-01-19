@@ -577,7 +577,6 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
 
     # Variables used by templates/email_outbound/email_templates/friend_invitation.txt and .html
     subject = "Ballot from We Vote"
-    system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
     if positive_value_exists(sender_email_with_ownership_verified):
         sender_email_address = sender_email_with_ownership_verified
 
@@ -679,7 +678,7 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
                     "invitation_message":           friend_invitation_message,
                     "sender_name":                  sender_name,
                     "sender_photo":                 sender_photo,
-                    "sender_email_address":         sender_email_address,  # TODO DALE WAS sender_email_address,
+                    "sender_email_address":         sender_email_address,  # Does not affect the "From" email header
                     "sender_description":           sender_description,
                     "sender_network_details":       sender_network_details,
                     "recipient_name":               recipient_name,
@@ -749,7 +748,7 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
         "ballot_link":                  ballot_link,
         "sender_name":                  sender_name,
         "sender_photo":                 sender_photo,
-        "sender_email_address":         sender_email_address,  # TODO DALE WAS sender_email_address,
+        "sender_email_address":         sender_email_address,  # Does not affect the "From" email header
         "sender_description":           sender_description,
         "sender_network_details":       sender_network_details,
         "recipient_name":               recipient_name,

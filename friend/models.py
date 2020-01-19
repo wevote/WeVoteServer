@@ -19,6 +19,12 @@ INVITATION_STATUS_CHOICES = (
     (IGNORED, 'Voter invited chose to ignore the invitation'),
 )
 
+# Which database table is the invitation from?
+FRIEND_INVITATION_EMAIL_LINK = 'EMAIL'
+FRIEND_INVITATION_FACEBOOK_LINK = 'FACEBOOK'
+FRIEND_INVITATION_TWITTER_LINK = 'TWITTER'
+FRIEND_INVITATION_VOTER_LINK = 'VOTER'
+
 # Processing invitations
 ACCEPT_INVITATION = 'ACCEPT_INVITATION'
 IGNORE_INVITATION = 'IGNORE_INVITATION'
@@ -94,6 +100,7 @@ class FriendInvitationEmailLink(models.Model):
     invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
     merge_by_secret_key_allowed = models.BooleanField(default=True)  # To allow merges after delete
+    invitation_table = models.CharField(max_length=8, default=FRIEND_INVITATION_EMAIL_LINK)
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
 
@@ -113,6 +120,7 @@ class FriendInvitationTwitterLink(models.Model):
     invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
     merge_by_secret_key_allowed = models.BooleanField(default=True)  # To allow merges after delete
+    invitation_table = models.CharField(max_length=8, default=FRIEND_INVITATION_TWITTER_LINK)
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
 
@@ -128,6 +136,7 @@ class FriendInvitationFacebookLink(models.Model):
         verbose_name="facebook app request id", max_length=255, null=True, blank=True, unique=False)
     invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    invitation_table = models.CharField(max_length=8, default=FRIEND_INVITATION_FACEBOOK_LINK)
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
 
@@ -148,6 +157,7 @@ class FriendInvitationVoterLink(models.Model):
     invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
     merge_by_secret_key_allowed = models.BooleanField(default=True)  # To allow merges after delete
+    invitation_table = models.CharField(max_length=8, default=FRIEND_INVITATION_VOTER_LINK)
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
 
@@ -1229,15 +1239,15 @@ class FriendManager(models.Model):
             success = True
 
             if len(friend_invitation_from_email_list):
-                status += 'FRIEND_INVITATIONS_PROCESSED-FRIEND_LIST_EMAIL_RETRIEVED '
+                status += 'FRIEND_INVITATIONS_PROCESSED-FRIEND_INVITATION_EMAIL_LINK_LIST_RETRIEVED '
                 friend_invitation_from_email_list_found = True
             else:
-                status += 'FRIEND_INVITATIONS_PROCESSED-NO_FRIEND_LIST_EMAIL_RETRIEVED '
+                status += 'FRIEND_INVITATIONS_PROCESSED-NO_FRIEND_INVITATION_EMAIL_LINK_LIST_RETRIEVED '
                 friend_invitation_from_email_list_found = False
         except FriendInvitationEmailLink.DoesNotExist:
             # No data found. Not a problem.
             friend_invitation_from_email_list_found = False
-            status += 'FRIEND_INVITATIONS_PROCESSED-NO_FRIEND_LIST_EMAIL_RETRIEVED_DoesNotExist '
+            status += 'FRIEND_INVITATIONS_PROCESSED-NO_FRIEND_INVITATION_EMAIL_LINK_LIST_RETRIEVED_DoesNotExist '
         except Exception as e:
             friend_invitation_from_email_list_found = False
             status += 'FRIEND_INVITATIONS_PROCESSED-FAILED retrieve_friend_invitations_processed FriendInvitationEmailLink ' + str(e) + " "
@@ -1340,15 +1350,15 @@ class FriendManager(models.Model):
                 success = True
 
                 if len(friend_invitation_to_email_list):
-                    status += ' FRIEND_LIST_EMAIL_RETRIEVED '
+                    status += ' FRIEND_INVITATION_EMAIL_LINK_LIST_RETRIEVED '
                     friend_invitation_to_email_list_found = True
                 else:
-                    status += ' NO_FRIEND_LIST_EMAIL_RETRIEVED '
+                    status += ' NO_FRIEND_INVITATION_EMAIL_LINK_LIST_RETRIEVED '
                     friend_invitation_to_email_list_found = False
             except FriendInvitationEmailLink.DoesNotExist:
                 # No data found. Not a problem.
                 friend_invitation_to_email_list_found = False
-                status += 'NO_FRIEND_LIST_EMAIL_RETRIEVED_DoesNotExist '
+                status += 'NO_FRIEND_INVITATION_EMAIL_LINK_LIST_RETRIEVED_DoesNotExist '
             except Exception as e:
                 friend_invitation_to_email_list_found = False
                 status += 'FAILED retrieve_friend_invitations_processed FriendInvitationEmailLink ' + str(e) + " "
@@ -1442,16 +1452,16 @@ class FriendManager(models.Model):
             if len(friend_list):
                 success = True
                 friend_list_found = True
-                status += 'FRIEND_LIST_RETRIEVED-SENT_BY_ME '
+                status += 'FRIEND_INVITATION_VOTER_LINK-SENT_BY_ME '
             else:
                 success = True
                 friend_list_found = False
-                status += 'NO_FRIEND_LIST_RETRIEVED-SENT_BY_ME '
+                status += 'NO_FRIEND_INVITATION_VOTER_LINK-SENT_BY_ME '
         except FriendInvitationVoterLink.DoesNotExist:
             # No data found. Not a problem.
             success = True
             friend_list_found = False
-            status += 'NO_FRIEND_LIST_RETRIEVED_DoesNotExist-SENT_BY_ME '
+            status += 'NO_FRIEND_INVITATION_VOTER_LINK_DoesNotExist-SENT_BY_ME '
             friend_list = []
         except Exception as e:
             success = False
@@ -1474,7 +1484,7 @@ class FriendManager(models.Model):
             success = True
 
             if len(friend_list_email):
-                status += ' FRIEND_LIST_EMAIL_RETRIEVED-SENT_BY_ME'
+                status += ' FRIEND_INVITATION_EMAIL_LINK_LIST_RETRIEVED-SENT_BY_ME'
                 friend_list_email_found = True
 
                 # Filter out invitations to the same voter (assuming the other voter signed in). These are invitations
@@ -1505,15 +1515,16 @@ class FriendManager(models.Model):
                         updated_friend_list_email.append(friend_invitation_email_link_object)
                 friend_list_email = updated_friend_list_email
             else:
-                status += ' NO_FRIEND_LIST_EMAIL_RETRIEVED-SENT_BY_ME'
+                status += ' NO_FRIEND_INVITATION_EMAIL_LINK_LIST_RETRIEVED-SENT_BY_ME'
                 friend_list_email_found = False
         except FriendInvitationEmailLink.DoesNotExist:
             # No data found. Not a problem.
             friend_list_email_found = False
-            status += 'NO_FRIEND_LIST_EMAIL_RETRIEVED-SENT_BY_ME_DoesNotExist '
+            status += 'NO_FRIEND_INVITATION_EMAIL_LINK_LIST_RETRIEVED-SENT_BY_ME_DoesNotExist '
         except Exception as e:
             friend_list_email_found = False
-            status += 'FAILED-SENT_BY_ME retrieve_friend_invitations_sent_by_me FriendInvitationEmailLink ' + str(e) + ' '
+            status += 'FAILED-SENT_BY_ME retrieve_friend_invitations_sent_by_me FriendInvitationEmailLink: ' \
+                      '' + str(e) + ' '
 
         if friend_list_found and friend_list_email_found:
             friend_list = list(friend_list) + list(friend_list_email)
@@ -1588,16 +1599,16 @@ class FriendManager(models.Model):
             if len(friend_list):
                 success = True
                 friend_list_found = True
-                status += 'FRIEND_LIST_RETRIEVED-SENT_TO_ME '
+                status += 'FRIEND_INVITATION_VOTER_LINK-SENT_TO_ME '
             else:
                 success = True
                 friend_list_found = False
-                status += 'NO_FRIEND_LIST_RETRIEVED-SENT_TO_ME '
+                status += 'NO_FRIEND_INVITATION_VOTER_LINK-SENT_TO_ME '
         except FriendInvitationVoterLink.DoesNotExist:
             # No data found. Not a problem.
             success = True
             friend_list_found = False
-            status += 'NO_FRIEND_LIST_RETRIEVED_DoesNotExist-SENT_TO_ME '
+            status += 'NO_FRIEND_INVITATION_VOTER_LINK_DoesNotExist-SENT_TO_ME '
             friend_list = []
         except Exception as e:
             success = False
