@@ -14,7 +14,7 @@ from background_task import background
 from config.base import get_environment_variable, get_environment_variable_default
 from scheduled_tasks.models import BackgroundTaskOutputManager
 from scheduled_tasks.task_models import WeTask
-# from scheduled_tasks.task_models_completed import WeTaskCompleted  # DALE 2020-01-17 To prevent ModuleNotFoundError
+from scheduled_tasks.task_models_completed import WeTaskCompleted
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -44,7 +44,7 @@ def limit_task_history():           # taskUpdateOne
         # print("task_retention_days: " + str(task_retention_days))
 
         BackgroundTaskOutputManager().delete_older_tasks(limit_dt=limit_dt)
-        # WeTaskCompleted().delete_older_tasks(limit_dt=limit_dt)  # DALE 2020-01-17 To prevent ModuleNotFoundError
+        WeTaskCompleted().delete_older_tasks(limit_dt=limit_dt)
 
         success = True
     except Exception as e:
@@ -108,11 +108,10 @@ def get_repeat_string(repeat):
 
 
 def insert_output_record(task_parameters, nowdt, output_text):
-    # DALE 2020-01-17 To prevent ModuleNotFoundError
-    # tlist = WeTaskCompleted().raw_list(limit=1)
-    # # print("WeTaskCompleted.raw_list: " + str(tlist[0].id))
-    #
-    # BackgroundTaskOutputManager.create_output_entry(tlist[0].id, date_output_completed=nowdt, output_text=output_text)
+    tlist = WeTaskCompleted().raw_list(limit=1)
+    # print("WeTaskCompleted.raw_list: " + str(tlist[0].id))
+
+    BackgroundTaskOutputManager.create_output_entry(tlist[0].id, date_output_completed=nowdt, output_text=output_text)
 
     success = False
     return success
