@@ -1709,8 +1709,9 @@ def election_migration_view(request):
     # Candidates
     state_code = ""
     return_list_of_objects = True
+    google_civic_election_id_list = [we_vote_election_id]
     candidate_results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
-        we_vote_election_id, state_code, return_list_of_objects)
+        google_civic_election_id_list, state_code, return_list_of_objects)
     if candidate_results['candidate_list_found']:
         we_vote_election_candidate_list = candidate_results['candidate_list_objects']
         we_vote_election_candidate_count = len(we_vote_election_candidate_list)
@@ -1788,7 +1789,8 @@ def election_migration_view(request):
     state_code = ''
     return_list_of_objects = True
     limit = 0
-    measure_results = measure_manager.retrieve_all_measures_for_upcoming_election(we_vote_election_id,
+    google_civic_election_id_list = [we_vote_election_id]
+    measure_results = measure_manager.retrieve_all_measures_for_upcoming_election(google_civic_election_id_list,
                                                                                   state_code,
                                                                                   return_list_of_objects, limit)
     we_vote_election_measure_count = 0

@@ -2061,8 +2061,10 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
     return_list_of_objects = True
     measure_limit = 0
     measure_list = []
+    google_civic_election_id_list = [google_civic_election_id]
     measure_results = contest_measure_list_manager.retrieve_all_measures_for_upcoming_election(
-        google_civic_election_id, state_code_to_find, return_list_of_objects, limit=measure_limit, read_only=read_only)
+        google_civic_election_id_list, state_code_to_find, return_list_of_objects,
+        limit=measure_limit, read_only=read_only)
     measure_success = measure_results['success']
     status += measure_results['status']
     if measure_results['measure_list_found']:

@@ -145,46 +145,47 @@ class CandidateCampaignListManager(models.Model):
         }
         return results
 
-    def retrieve_all_candidates_for_upcoming_election(self, google_civic_election_id=0, state_code='',
+    def retrieve_all_candidates_for_upcoming_election(self, google_civic_election_id_list=[], state_code='',
                                                       return_list_of_objects=False):
         candidate_list_objects = []
         candidate_list_light = []
         candidate_list_found = False
         ballotpedia_election_id = 0
+        status = ""
 
         try:
             candidate_queryset = CandidateCampaign.objects.all()
-            if positive_value_exists(google_civic_election_id):
-                candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(google_civic_election_id_list) and len(google_civic_election_id_list):
+                candidate_queryset = candidate_queryset.filter(
+                    google_civic_election_id__in=google_civic_election_id_list)
             elif positive_value_exists(ballotpedia_election_id):
                 candidate_queryset = candidate_queryset.filter(ballotpedia_election_id=ballotpedia_election_id)
             else:
-                # TODO Limit this search to upcoming_elections only
                 pass
             if positive_value_exists(state_code):
                 candidate_queryset = candidate_queryset.filter(state_code__iexact=state_code)
             candidate_queryset = candidate_queryset.order_by("candidate_name")
-            if positive_value_exists(google_civic_election_id):
+            if positive_value_exists(google_civic_election_id_list) and len(google_civic_election_id_list):
                 candidate_list_objects = candidate_queryset
             else:
                 candidate_list_objects = candidate_queryset[:300]
 
             if len(candidate_list_objects):
                 candidate_list_found = True
-                status = 'CANDIDATES_RETRIEVED'
+                status += 'CANDIDATES_RETRIEVED '
                 success = True
             else:
-                status = 'NO_CANDIDATES_RETRIEVED'
+                status += 'NO_CANDIDATES_RETRIEVED '
                 success = True
         except CandidateCampaign.DoesNotExist:
             # No candidates found. Not a problem.
-            status = 'NO_CANDIDATES_FOUND_DoesNotExist'
+            status += 'NO_CANDIDATES_FOUND_DoesNotExist '
             candidate_list_objects = []
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_all_candidates_for_upcoming_election ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED retrieve_all_candidates_for_upcoming_election ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
             success = False
 
         if candidate_list_found:
@@ -198,12 +199,12 @@ class CandidateCampaignListManager(models.Model):
                 candidate_list_light.append(one_candidate.copy())
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'google_civic_election_id': google_civic_election_id,
-            'candidate_list_found':     candidate_list_found,
-            'candidate_list_objects':   candidate_list_objects if return_list_of_objects else [],
-            'candidate_list_light':     candidate_list_light,
+            'success':                          success,
+            'status':                           status,
+            'google_civic_election_id_list':    google_civic_election_id_list,
+            'candidate_list_found':             candidate_list_found,
+            'candidate_list_objects':           candidate_list_objects if return_list_of_objects else [],
+            'candidate_list_light':             candidate_list_light,
         }
         return results
 

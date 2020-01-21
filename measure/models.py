@@ -900,7 +900,7 @@ class ContestMeasureList(models.Model):
         }
         return results
 
-    def retrieve_all_measures_for_upcoming_election(self, google_civic_election_id=0, state_code='',
+    def retrieve_all_measures_for_upcoming_election(self, google_civic_election_id_list=[], state_code='',
                                                     return_list_of_objects=False, limit=300, read_only=False):
         measure_list_objects = []
         measure_list_light = []
@@ -912,15 +912,15 @@ class ContestMeasureList(models.Model):
                 measure_queryset = ContestMeasure.objects.using('readonly').all()
             else:
                 measure_queryset = ContestMeasure.objects.all()
-            if positive_value_exists(google_civic_election_id):
-                measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(google_civic_election_id_list) and len(google_civic_election_id_list):
+                measure_queryset = measure_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
             else:
                 success = False
                 status += "RETRIEVE_ALL_MEASURES_FOR_UPCOMING_ELECTION-MISSING_ELECTION_ID "
                 results = {
                     'success': success,
                     'status': status,
-                    'google_civic_election_id': google_civic_election_id,
+                    'google_civic_election_id_list':    google_civic_election_id_list,
                     'measure_list_found': measure_list_found,
                     'measure_list_objects': measure_list_objects if return_list_of_objects else [],
                     'measure_list_light': measure_list_light,
@@ -966,7 +966,7 @@ class ContestMeasureList(models.Model):
         results = {
             'success':                  success,
             'status':                   status,
-            'google_civic_election_id': google_civic_election_id,
+            'google_civic_election_id_list':    google_civic_election_id_list,
             'measure_list_found':       measure_list_found,
             'measure_list_objects':     measure_list_objects if return_list_of_objects else [],
             'measure_list_light':       measure_list_light,

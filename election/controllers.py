@@ -274,6 +274,7 @@ def elections_sync_out_list_for_api(voter_device_id):
 
 
 def retrieve_upcoming_election_id_list(limit_to_this_state_code=''):
+    # There is a parallel function in election_manager.retrieve_upcoming_google_civic_election_id_list(
     # Figure out the elections we care about
     google_civic_election_id_list = []
     election_manager = ElectionManager()

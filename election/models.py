@@ -422,6 +422,42 @@ class ElectionManager(models.Model):
         }
         return results
 
+    def retrieve_upcoming_google_civic_election_id_list(self, limit_to_this_state_code=''):
+        # There is a parallel function in controllers retrieve_upcoming_election_id_list(
+        status = ""
+        success = True
+        upcoming_google_civic_election_id_list = []
+        results = self.retrieve_upcoming_elections(state_code=limit_to_this_state_code)
+        if results['election_list_found']:
+            election_list = results['election_list']
+            for one_election in election_list:
+                if positive_value_exists(one_election.google_civic_election_id):
+                    upcoming_google_civic_election_id_list.append(one_election.google_civic_election_id)
+        else:
+            status += results['status']
+            # success = results['success']
+
+        # If a state code IS included, then the above retrieve_upcoming_elections will have missed the national election
+        if positive_value_exists(limit_to_this_state_code):
+            results = self.retrieve_next_national_election()
+            if results['election_found']:
+                one_election = results['election']
+                if positive_value_exists(one_election.google_civic_election_id) \
+                        and one_election.google_civic_election_id not in upcoming_google_civic_election_id_list:
+                    upcoming_google_civic_election_id_list.append(one_election.google_civic_election_id)
+            else:
+                status += results['status']
+
+        upcoming_google_civic_election_id_list_found = len(upcoming_google_civic_election_id_list)
+
+        results = {
+            'success':                                      success,
+            'status':                                       status,
+            'upcoming_google_civic_election_id_list':       upcoming_google_civic_election_id_list,
+            'upcoming_google_civic_election_id_list_found': upcoming_google_civic_election_id_list_found,
+        }
+        return results
+
     def retrieve_next_election_for_state(self, state_code):
         """
         We want either the next election in this state, or the next national election, whichever comes first
