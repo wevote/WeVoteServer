@@ -18,6 +18,7 @@ from django.shortcuts import render
 from donate.models import MasterFeaturePackage
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception
+from election.controllers import retrieve_upcoming_election_id_list
 from election.models import Election, ElectionManager
 from import_export_twitter.controllers import refresh_twitter_organization_details
 from import_export_vote_smart.models import VoteSmartSpecialInterestGroupManager
@@ -998,8 +999,20 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    candidate_campaign_id = request.GET.get('candidate_campaign_id', 0)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
     show_all_elections = request.GET.get('show_all_elections', False)
+
+    # We pass candidate_we_vote_id to this page to pre-populate the form
+    candidate_campaign_manager = CandidateCampaignManager()
+    if positive_value_exists(candidate_we_vote_id):
+        candidate_campaign_id = 0
+        results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+        if results['candidate_campaign_found']:
+            candidate_campaign = results['candidate_campaign']
+            candidate_campaign_id = candidate_campaign.id
+    elif positive_value_exists(candidate_campaign_id):
+        pass
 
     organization_on_stage = Organization()
     organization_on_stage_found = False
@@ -1102,6 +1115,18 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         else:
             results = election_manager.retrieve_upcoming_elections()
             election_list = results['election_list']
+            # Make sure we always include the current election in the election_list, even if it is older
+            if positive_value_exists(google_civic_election_id):
+                this_election_found = False
+                for one_election in election_list:
+                    if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                        this_election_found = True
+                        break
+                if not this_election_found:
+                    results = election_manager.retrieve_election(google_civic_election_id)
+                    if results['election_found']:
+                        one_election = results['election']
+                        election_list.append(one_election)
 
         organization_type_display_text = ORGANIZATION_TYPE_MAP.get(organization_on_stage.organization_type,
                                                                    ORGANIZATION_TYPE_MAP[UNKNOWN])
@@ -1113,6 +1138,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             'organization_type_display_text':   organization_type_display_text,
             'election_list':                    election_list,
             'google_civic_election_id':         google_civic_election_id,
+            'candidate_campaign_id':            candidate_campaign_id,
             'candidate_we_vote_id':             candidate_we_vote_id,
             'show_all_elections':               show_all_elections,
             'voter':                            voter,
@@ -1131,6 +1157,7 @@ def organization_position_new_view(request, organization_id):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    candidate_campaign_id = request.GET.get('candidate_campaign_id', 0)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', False)
     measure_we_vote_id = request.GET.get('measure_we_vote_id', False)
     state_code = request.GET.get('state_code', '')
@@ -1143,13 +1170,15 @@ def organization_position_new_view(request, organization_id):
     more_info_url = request.GET.get('more_info_url', '')
 
     # We pass candidate_we_vote_id to this page to pre-populate the form
-    candidate_campaign_id = 0
+    candidate_campaign_manager = CandidateCampaignManager()
     if positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_campaign_id = 0
         results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
         if results['candidate_campaign_found']:
             candidate_campaign = results['candidate_campaign']
             candidate_campaign_id = candidate_campaign.id
+    elif positive_value_exists(candidate_campaign_id):
+        pass
 
     # We pass candidate_we_vote_id to this page to pre-populate the form
     contest_measure_id = 0
@@ -1179,10 +1208,17 @@ def organization_position_new_view(request, organization_id):
                              'Could not find organization when trying to create a new position.')
         return HttpResponseRedirect(reverse('organization:organization_position_list', args=([organization_id])))
 
+    if positive_value_exists(google_civic_election_id):
+        google_civic_election_id_list = [google_civic_election_id]
+    elif not show_all_elections:
+        google_civic_election_id_list = retrieve_upcoming_election_id_list(limit_to_this_state_code=state_code)
+    else:
+        google_civic_election_id_list = []
+
     # Prepare a drop down of candidates competing in this election
     candidate_campaign_list = CandidateCampaignListManager()
     candidate_campaigns_for_this_election_list = []
-    results = candidate_campaign_list.retrieve_all_candidates_for_upcoming_election(google_civic_election_id,
+    results = candidate_campaign_list.retrieve_all_candidates_for_upcoming_election(google_civic_election_id_list,
                                                                                     state_code, True)
     if results['candidate_list_found']:
         candidate_campaigns_for_this_election_list = results['candidate_list_objects']
@@ -1190,7 +1226,7 @@ def organization_position_new_view(request, organization_id):
     # Prepare a drop down of measures in this election
     contest_measure_list = ContestMeasureList()
     contest_measures_for_this_election_list = []
-    results = contest_measure_list.retrieve_all_measures_for_upcoming_election(google_civic_election_id,
+    results = contest_measure_list.retrieve_all_measures_for_upcoming_election(google_civic_election_id_list,
                                                                                state_code, True)
     if results['measure_list_found']:
         contest_measures_for_this_election_list = results['measure_list_objects']
@@ -1218,6 +1254,18 @@ def organization_position_new_view(request, organization_id):
         else:
             results = election_manager.retrieve_upcoming_elections()
             election_list = results['election_list']
+            # Make sure we always include the current election in the election_list, even if it is older
+            if positive_value_exists(google_civic_election_id):
+                this_election_found = False
+                for one_election in election_list:
+                    if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                        this_election_found = True
+                        break
+                if not this_election_found:
+                    results = election_manager.retrieve_election(google_civic_election_id)
+                    if results['election_found']:
+                        one_election = results['election']
+                        election_list.append(one_election)
 
         template_values = {
             'candidate_campaigns_for_this_election_list':   candidate_campaigns_for_this_election_list,
@@ -1350,6 +1398,18 @@ def organization_position_edit_view(request, organization_id=0, organization_we_
     else:
         results = election_manager.retrieve_upcoming_elections()
         election_list = results['election_list']
+        # Make sure we always include the current election in the election_list, even if it is older
+        if positive_value_exists(google_civic_election_id):
+            this_election_found = False
+            for one_election in election_list:
+                if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                    this_election_found = True
+                    break
+            if not this_election_found:
+                results = election_manager.retrieve_election(google_civic_election_id)
+                if results['election_found']:
+                    one_election = results['election']
+                    election_list.append(one_election)
 
     if organization_position_on_stage_found:
         template_values = {

@@ -433,7 +433,6 @@ def measure_list_view(request):
     else:
         results = election_manager.retrieve_upcoming_elections()
         election_list = results['election_list']
-
         # Make sure we always include the current election in the election_list, even if it is older
         if positive_value_exists(google_civic_election_id):
             this_election_found = False

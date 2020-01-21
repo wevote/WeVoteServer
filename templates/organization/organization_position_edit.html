@@ -5,6 +5,7 @@
 {% block title %}{% if organization_position %}Edit Position{% else %}Add Position{% endif %}{% endblock %}
 
 {%  block content %}
+{% load template_filters %}
 <!-- START organization/templates/organization/organization_position_edit.html //-->
 
 <style>
@@ -30,10 +31,10 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 {# Candidate Campaign #}
 {% if is_in_edit_mode %}
     {# EDIT EXISTING: There is no need to display anything here #}
-    {% if organization_position.candidate_campaign %}
-    <input type="hidden" name="candidate_campaign_id" value="{{ organization_position.candidate_campaign.id }}">
-    {% elif organization_position.contest_measure %}
-    <input type="hidden" name="contest_measure_id" value="{{ organization_position.contest_measure.id }}">
+    {% if organization_position.candidate_campaign and organization_position.candidate_campaign.id %}
+      <input type="hidden" name="candidate_campaign_id" value="{{ organization_position.candidate_campaign.id }}">
+    {% elif organization_position.contest_measure and organization_position.contest_measure.id %}
+      <input type="hidden" name="contest_measure_id" value="{{ organization_position.contest_measure.id }}">
     {% endif %}
     (<a href="{% url 'position:position_delete_process' %}?position_we_vote_id={{ organization_position.we_vote_id }}&google_civic_election_id={% if organization_position %}{{ organization_position.google_civic_election_id }}{% endif %}">delete position</a>)
 
@@ -66,6 +67,8 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
     <label for="google_civic_election_id" class="col-sm-2 control-label">Election</label>
     <div class="col-sm-9">
         <select id="google_civic_election_id" name="google_civic_election_id" class="form-control">
+        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
+            -- Choose Election --</option>
         {% for election in election_list %}
         <option value="{{ election.google_civic_election_id }}"
                 {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>

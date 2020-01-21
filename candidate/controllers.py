@@ -1328,28 +1328,12 @@ def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_ele
 
     if not upcoming_google_civic_election_id_list \
             or not positive_value_exists(len(upcoming_google_civic_election_id_list)):
-        upcoming_google_civic_election_id_list = []
         election_manager = ElectionManager()
-        results = election_manager.retrieve_upcoming_elections(state_code=limit_to_this_state_code)
-        if results['election_list_found']:
-            election_list = results['election_list']
-            for one_election in election_list:
-                if positive_value_exists(one_election.google_civic_election_id):
-                    upcoming_google_civic_election_id_list.append(one_election.google_civic_election_id)
-        else:
-            status += results['status']
-            # success = results['success']
+        election_list_results = \
+            election_manager.retrieve_upcoming_google_civic_election_id_list(limit_to_this_state_code)
 
-        # If a state code IS included, then the above retrieve_upcoming_elections will have missed the national election
-        if positive_value_exists(limit_to_this_state_code):
-            results = election_manager.retrieve_next_national_election()
-            if results['election_found']:
-                one_election = results['election']
-                if positive_value_exists(one_election.google_civic_election_id) \
-                        and one_election.google_civic_election_id not in upcoming_google_civic_election_id_list:
-                    upcoming_google_civic_election_id_list.append(one_election.google_civic_election_id)
-            else:
-                status += results['status']
+        upcoming_google_civic_election_id_list = election_list_results['upcoming_google_civic_election_id_list']
+        status += election_list_results['status']
 
     if len(upcoming_google_civic_election_id_list):
         candidate_list_manager = CandidateCampaignListManager()
