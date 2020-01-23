@@ -43,7 +43,7 @@ If you need to test donations and have not updated your openssl and pyopenssl du
 
 See [Instructions for Scheduled Tasks](docs/README_SCHEDULED_TASKS.md)
 
-[How to run the WeVoteServer tests](README_DJANGO_TESTS.md)
+[How to run the WeVoteServer tests](docs/README_DJANGO_TESTS.md)
 
 ## Join Us
 
