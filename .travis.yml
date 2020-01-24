@@ -1,3 +1,18 @@
-language: node_js
-node_js:
-    - 12
+language: python
+python:
+    - "3.7"
+services:
+    - postgresql
+before_install:
+    - cp config/environment_variables-template.json config/environment_variables.json
+install:
+    - pip3 install -r requirements.txt
+before_script:
+    - sudo mkdir -p /var/log/wevote/
+    - sudo touch /var/log/wevote/wevoteserver.log
+    - sudo chmod -R 0777 /var/log/wevote/
+    - sudo -u postgres createdb WeVoteServerDB
+    - python3 manage.py makemigrations
+    - python3 manage.py migrate
+script:
+    - python3 manage.py test
