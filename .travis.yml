@@ -3,6 +3,8 @@ python:
     - "3.7"
 services:
     - postgresql
+before_install:
+    - cp config/environment_variables-template.json config/environment_variables.json
 install:
     - pip3 install -r requirements.txt
 script:
