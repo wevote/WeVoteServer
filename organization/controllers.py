@@ -1683,8 +1683,8 @@ def organization_photos_save_for_api(  # organizationPhotosSave
     return results
 
 
-def organization_retrieve_for_api(
-        organization_id, organization_we_vote_id, voter_device_id, prior_status=''):  # organizationRetrieve
+def organization_retrieve_for_api(  # organizationRetrieve
+        organization_id, organization_we_vote_id, voter_device_id, prior_status=''):
     """
     Called from organizationRetrieve api
     :param organization_id:

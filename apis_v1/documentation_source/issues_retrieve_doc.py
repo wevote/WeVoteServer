@@ -23,7 +23,7 @@ def issues_retrieve_doc_template_values(url_root):
         {
             'name':         'voter_issues_only',
             'value':        'boolean',  # boolean, integer, long, string
-            'description':  'When this is true, then the resulting issue list contains only issues followed '
+            'description':  'DEPRECATED When this is true, then the resulting issue list contains only issues followed '
                             'by this voter\'s we vote id',
         },
         {
@@ -44,7 +44,7 @@ def issues_retrieve_doc_template_values(url_root):
     api_response = '[{\n' \
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \
-                   '  "voter_issues_only": boolean, \n' \
+                   '  "voter_issues_only": boolean DEPRECATED, \n' \
                    '  "include_voter_follow_status": boolean, \n' \
                    '  "issue_list": list\n' \
                    '   [\n' \
@@ -59,7 +59,7 @@ def issues_retrieve_doc_template_values(url_root):
                    '     "is_issue_followed": boolean,\n' \
                    '     "is_issue_ignored": boolean,\n' \
                    '   ],\n' \
-                   '  "issue_score_list": list\n' \
+                   '  "issue_score_list": list DEPRECATED\n' \
                    '   [\n' \
                    '     "ballot_item_we_vote_id": string,\n' \
                    '     "issue_support_score": integer,\n' \
