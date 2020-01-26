@@ -760,14 +760,30 @@
           <td>Provide another We Vote Server a complete listing of all public organization information.</td>
         </tr>
         <tr>
+          <td><a href="{% url 'apis_v1:issueDescriptionsRetrieveDocs' %}">issueDescriptionsRetrieve</a></td>
+          <td>c3</td>
+          <td>Retrieve complete listing of the descriptions for all issues.</td>
+        </tr>
+        <tr>
           <td><a href="{% url 'apis_v1:issueFollowDocs' %}">issueFollow</a></td>
           <td></td>
           <td>Allow a voter to follow one issue.</td>
         </tr>
         <tr>
+          <td><a href="{% url 'apis_v1:issuesFollowedRetrieveDocs' %}">issuesFollowedRetrieve</a></td>
+          <td></td>
+          <td>Retrieve listing of the issues one voter is following.</td>
+        </tr>
+        <tr>
           <td><a href="{% url 'apis_v1:issuesRetrieveDocs' %}">issuesRetrieve</a></td>
           <td>c3</td>
-          <td>Retrieve complete listing of all issues.</td>
+          <td>Retrieve complete listing of all issues. DEPRECATED -
+            Broken into: issueDescriptionsRetrieve, issuesFollowedRetrieve, issuesUnderBallotItemsRetrieve</td>
+        </tr>
+        <tr>
+          <td><a href="{% url 'apis_v1:issuesUnderBallotItemsRetrieveDocs' %}">issuesUnderBallotItemsRetrieve</a></td>
+          <td>c3</td>
+          <td>Retrieve listing of all ballot items for one election with the issues that connected to each Organization.</td>
         </tr>
         <tr>
           <td><a href="{% url 'apis_v1:issuesSyncOutDocs' %}">issuesSyncOut</a></td>

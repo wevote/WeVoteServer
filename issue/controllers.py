@@ -206,9 +206,62 @@ def issue_retrieve_for_api(issue_id, issue_we_vote_id):  # issueRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election_id=0,
-                            voter_issues_only=None, include_voter_follow_status=None,
-                            ballot_location_shortcut=None, ballot_returned_we_vote_id=None):  # issuesRetrieve
+def issue_descriptions_retrieve_for_api():  # issuesDescriptionsRetrieve
+    issue_list = []
+    issues_to_display = []
+
+    try:
+        issue_list_object = IssueListManager()
+        results = issue_list_object.retrieve_issues()
+        success = results['success']
+        status = results['status']
+        issue_list = results['issue_list']
+    except Exception as e:
+        status = 'FAILED issues_retrieve. ' \
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        handle_exception(e, logger=logger, exception_message=status)
+        success = False
+
+    if not success:
+        json_data = {
+            'status': status,
+            'success': False,
+            'issue_list': [],
+        }
+
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    for issue in issue_list:
+        one_issue = {
+            'considered_left':          issue.considered_left,
+            'considered_right':         issue.considered_right,
+            'issue_we_vote_id':         issue.we_vote_id,
+            'issue_name':               issue.issue_name,
+            'issue_description':        issue.issue_description,
+            'issue_icon_local_path':    issue.issue_icon_local_path,
+            'issue_image_url':          issue.we_vote_hosted_image_url_medium
+            if positive_value_exists(issue.we_vote_hosted_image_url_medium)
+            else issue.we_vote_hosted_image_url_large,
+            'issue_photo_url_large':    issue.we_vote_hosted_image_url_large,
+            'issue_photo_url_medium':   issue.we_vote_hosted_image_url_medium,
+            'issue_photo_url_tiny':     issue.we_vote_hosted_image_url_tiny,
+        }
+        issues_to_display.append(one_issue)
+
+    json_data = {
+        'status':                       status,
+        'success':                      True,
+        'issue_list':                   issues_to_display,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def issues_retrieve_for_api(  # issuesRetrieve
+        voter_device_id, sort_formula, google_civic_election_id=0,
+        voter_issues_only=None,  # Deprecated
+        include_voter_follow_status=None,
+        ballot_location_shortcut=None, ballot_returned_we_vote_id=None,
+        hide_ballot_item_list=False):
     """
     Used by the api
     :return:
@@ -218,12 +271,12 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election
     all_issue_we_vote_ids = []
     issues_to_display = []
     issues_under_ballot_items_list = []
-    issue_score_list = []
+    issue_score_list = []  # Deprecated
     follow_issue_we_vote_id_list_for_voter = []
     ignore_issue_we_vote_id_list_for_voter = []
 
-    if voter_issues_only is None:
-        voter_issues_only = False
+    if voter_issues_only is None:  # Deprecated
+        voter_issues_only = False  # Deprecated
     if include_voter_follow_status is None:
         include_voter_follow_status = False
 
@@ -237,10 +290,10 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election
                 'google_civic_election_id': google_civic_election_id,
                 'ballot_location_shortcut': ballot_location_shortcut,
                 'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
-                'voter_issues_only': voter_issues_only,
+                'voter_issues_only': voter_issues_only,  # Deprecated
                 'include_voter_follow_status': include_voter_follow_status,
                 'issue_list': [],
-                'issue_score_list': [],
+                'issue_score_list': [],  # Deprecated
             }
             return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -254,7 +307,7 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election
 
     try:
         issue_list_object = IssueListManager()
-        if positive_value_exists(voter_issues_only):
+        if positive_value_exists(voter_issues_only):  # Deprecated
             results = issue_list_object.retrieve_issues(sort_formula, follow_issue_we_vote_id_list_for_voter)
         else:
             results = issue_list_object.retrieve_issues(sort_formula)
@@ -274,10 +327,11 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election
             'google_civic_election_id': google_civic_election_id,
             'ballot_location_shortcut': ballot_location_shortcut,
             'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
-            'voter_issues_only': voter_issues_only,
+            'voter_issues_only': voter_issues_only,  # Deprecated
             'include_voter_follow_status': include_voter_follow_status,
             'issue_list': [],
-            'issue_score_list': [],
+            'issue_score_list': [],  # Deprecated
+            'issues_under_ballot_items_list': [],  # Deprecated
         }
 
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -327,9 +381,165 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election
     if positive_value_exists(follow_issue_we_vote_id_list_for_voter) \
             and positive_value_exists(google_civic_election_id):
         # Retrieve the issue_score_list for issues that the voter is following
-        issue_score_list_results = retrieve_issue_score_list(follow_issue_we_vote_id_list_for_voter,
+        issue_score_list_results = retrieve_issue_score_list(follow_issue_we_vote_id_list_for_voter,  # Deprecated
                                                              google_civic_election_id)
-        issue_score_list = issue_score_list_results['issue_score_list']
+        issue_score_list = issue_score_list_results['issue_score_list']  # Deprecated
+
+    if positive_value_exists(all_issue_we_vote_ids) and positive_value_exists(google_civic_election_id):
+        if not hide_ballot_item_list:
+            # Retrieve the issue_score_list for issues that the voter is following
+            issue_list_results = retrieve_issues_under_ballot_items_list(
+                all_issue_we_vote_ids, google_civic_election_id)
+            issues_under_ballot_items_list = issue_list_results['issues_under_ballot_items_list']
+
+    json_data = {
+        'status':                       status,
+        'success':                      True,
+        'google_civic_election_id':     google_civic_election_id,
+        'ballot_location_shortcut':     ballot_location_shortcut,
+        'ballot_returned_we_vote_id':   ballot_returned_we_vote_id,
+        'voter_issues_only':            voter_issues_only,  # Deprecated
+        'include_voter_follow_status':  include_voter_follow_status,
+        'issue_list':                   issues_to_display,
+        'issue_score_list':             issue_score_list,  # Deprecated
+        'issues_under_ballot_items_list': issues_under_ballot_items_list,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def issues_followed_retrieve_for_api(voter_device_id):  # issuesFollowedRetrieve
+    issues_followed_list = []
+    all_issue_we_vote_ids = []
+
+    voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_we_vote_id):
+        status = 'FAILED issues_retrieve VOTER_WE_VOTE_ID_COULD_NOT_BE_FETCHED'
+        json_data = {
+            'status': status,
+            'success': False,
+            'issues_followed_list': [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    follow_issue_list_manager = FollowIssueList()
+    follow_issue_we_vote_id_list_for_voter = follow_issue_list_manager. \
+        retrieve_follow_issue_following_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
+
+    # Not currently used in WebApp
+    # ignore_issue_we_vote_id_list_for_voter = follow_issue_list_manager. \
+    #     retrieve_follow_issue_ignore_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
+
+    try:
+        issue_list_object = IssueListManager()
+        results = issue_list_object.retrieve_issues()
+        success = results['success']
+        status = results['status']
+        issue_list = results['issue_list']
+    except Exception as e:
+        status = 'FAILED issues_retrieve. ' \
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        handle_exception(e, logger=logger, exception_message=status)
+        success = False
+
+    if not success:
+        json_data = {
+            'status': status,
+            'success': False,
+            'issues_followed_list': [],
+        }
+
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    for issue in issue_list:
+        all_issue_we_vote_ids.append(issue.we_vote_id)
+        is_issue_followed = issue.we_vote_id in follow_issue_we_vote_id_list_for_voter
+        # is_issue_ignored = issue.we_vote_id in ignore_issue_we_vote_id_list_for_voter
+        one_issue = {
+            'issue_we_vote_id':         issue.we_vote_id,
+            'issue_name':               issue.issue_name,
+            'is_issue_followed':        is_issue_followed,
+            # 'is_issue_ignored':         is_issue_ignored,  # Not currently used in WebApp
+        }
+        issues_followed_list.append(one_issue)
+
+    json_data = {
+        'status':                   status,
+        'success':                  True,
+        'issues_followed_list':     issues_followed_list,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def issues_under_ballot_items_retrieve_for_api(  # issuesUnderBallotItemsRetrieve
+        google_civic_election_id=0,
+        ballot_location_shortcut=None, ballot_returned_we_vote_id=None):
+    """
+    Used by the api
+    :return:
+    """
+
+    issue_list = []
+    all_issue_we_vote_ids = []
+    issues_under_ballot_items_list = []
+    status = ""
+
+    required_variable_exists = \
+        positive_value_exists(google_civic_election_id) or positive_value_exists(ballot_location_shortcut) or \
+        positive_value_exists(ballot_returned_we_vote_id)
+    if not required_variable_exists:
+        status += "MISSING_REQUIRED_VARIABLE "
+        json_data = {
+            'status': status,
+            'success': False,
+            'google_civic_election_id': google_civic_election_id,
+            'ballot_location_shortcut': ballot_location_shortcut,
+            'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
+            'issues_under_ballot_items_list': [],
+        }
+
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    try:
+        issue_list_object = IssueListManager()
+        results = issue_list_object.retrieve_issues()
+        success = results['success']
+        status += results['status']
+        issue_list = results['issue_list']
+    except Exception as e:
+        status += 'FAILED issues_retrieve. ' \
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        handle_exception(e, logger=logger, exception_message=status)
+        success = False
+
+    if not success:
+        json_data = {
+            'status': status,
+            'success': False,
+            'google_civic_election_id': google_civic_election_id,
+            'ballot_location_shortcut': ballot_location_shortcut,
+            'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
+            'issues_under_ballot_items_list': [],
+        }
+
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    for issue in issue_list:
+        all_issue_we_vote_ids.append(issue.we_vote_id)
+
+    if not positive_value_exists(google_civic_election_id):
+        ballot_returned_manager = BallotReturnedManager()
+        if positive_value_exists(ballot_location_shortcut):
+            results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_location_shortcut(
+                ballot_location_shortcut)
+            if results['ballot_returned_found']:
+                ballot_returned = results['ballot_returned']
+                google_civic_election_id = ballot_returned.google_civic_election_id
+        elif positive_value_exists(ballot_returned_we_vote_id):
+            results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_returned_we_vote_id(
+                ballot_returned_we_vote_id)
+            if results['ballot_returned_found']:
+                ballot_returned = results['ballot_returned']
+                google_civic_election_id = ballot_returned.google_civic_election_id
 
     if positive_value_exists(all_issue_we_vote_ids) \
             and positive_value_exists(google_civic_election_id):
@@ -343,17 +553,13 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election
         'google_civic_election_id':     google_civic_election_id,
         'ballot_location_shortcut':     ballot_location_shortcut,
         'ballot_returned_we_vote_id':   ballot_returned_we_vote_id,
-        'voter_issues_only':            voter_issues_only,
-        'include_voter_follow_status':  include_voter_follow_status,
-        'issue_list':                   issues_to_display,
-        'issue_score_list':             issue_score_list,
         'issues_under_ballot_items_list': issues_under_ballot_items_list,
     }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def retrieve_issue_score_list(voters_issue_we_vote_ids, google_civic_election_id):
+def retrieve_issue_score_list(voters_issue_we_vote_ids, google_civic_election_id):  # Deprecated
     """
 
     :param voters_issue_we_vote_ids: This should be issues the voter is following
@@ -362,7 +568,7 @@ def retrieve_issue_score_list(voters_issue_we_vote_ids, google_civic_election_id
     """
     success = True
     status = ""
-    issue_score_list = []
+    issue_score_list = []  # Deprecated
     ballot_item_we_vote_ids_list = []
     organization_we_vote_ids_for_all_voter_issues = []
 
@@ -489,12 +695,12 @@ def retrieve_issue_score_list(voters_issue_we_vote_ids, google_civic_election_id
             "organization_we_vote_id_oppose_list":  organization_we_vote_id_oppose_list,
             "organization_name_oppose_list":        organization_name_oppose_list,
         }
-        issue_score_list.append(one_ballot_item)
+        issue_score_list.append(one_ballot_item)  # Deprecated
 
     results = {
         'success':          success,
         'status':           status,
-        'issue_score_list': issue_score_list,
+        'issue_score_list': issue_score_list,  # Deprecated
     }
     return results
 

@@ -83,7 +83,7 @@ class IssueListManager(models.Model):
 
     def retrieve_issues(self, sort_formula=None, issue_we_vote_id_list_to_filter=None,
                         issue_we_vote_id_list_to_exclude=None, require_filter_or_exclude=False,
-                        show_hidden_issues=False):
+                        show_hidden_issues=False, read_only=True):
         issue_list = []
         issue_list_found = False
         success = False
@@ -100,7 +100,10 @@ class IssueListManager(models.Model):
             return results
 
         try:
-            issue_queryset = Issue.objects.using('readonly').all()
+            if read_only:
+                issue_queryset = Issue.objects.using('readonly').all()
+            else:
+                issue_queryset = Issue.objects.all()
             # By default, we only show the issues marked "hide_issue=False"
             if not show_hidden_issues:
                 issue_queryset = issue_queryset.filter(hide_issue=False)

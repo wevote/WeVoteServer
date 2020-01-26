@@ -79,7 +79,18 @@ def issues_sync_out_view(request):  # issuesSyncOut
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def issues_retrieve_view(request):  # issuesRetrieve
+def issue_descriptions_retrieve_view(request):  # issueDescriptionsRetrieve
+    http_response = issue_descriptions_retrieve_for_api()
+    return http_response
+
+
+def issues_followed_retrieve_view(request):  # issuesFollowedRetrieve
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    http_response = issues_followed_retrieve_for_api(voter_device_id)
+    return http_response
+
+
+def issues_retrieve_view(request):  # issuesRetrieve  # Deprecated
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     sort_formula = request.GET.get('sort_formula', ALPHABETICAL_ASCENDING)  # Alternate: MOST_LINKED_ORGANIZATIONS
     ballot_location_shortcut = request.GET.get('ballot_location_shortcut', False)
@@ -87,9 +98,19 @@ def issues_retrieve_view(request):  # issuesRetrieve
     google_civic_election_id = request.GET.get('google_civic_election_id', False)
     voter_issues_only = request.GET.get('voter_issues_only', False)
     include_voter_follow_status = request.GET.get('include_voter_follow_status', False)
-    http_response = issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election_id,
-                                            voter_issues_only, include_voter_follow_status,
-                                            ballot_location_shortcut, ballot_returned_we_vote_id)
+    http_response = issues_retrieve_for_api(
+        voter_device_id, sort_formula, google_civic_election_id,
+        voter_issues_only, include_voter_follow_status,
+        ballot_location_shortcut, ballot_returned_we_vote_id)
+    return http_response
+
+
+def issues_under_ballot_items_retrieve_view(request):  # issuesUnderBallotItemsRetrieve
+    ballot_location_shortcut = request.GET.get('ballot_location_shortcut', False)
+    ballot_returned_we_vote_id = request.GET.get('ballot_returned_we_vote_id', False)
+    google_civic_election_id = request.GET.get('google_civic_election_id', False)
+    http_response = issues_under_ballot_items_retrieve_for_api(
+        google_civic_election_id, ballot_location_shortcut, ballot_returned_we_vote_id)
     return http_response
 
 
