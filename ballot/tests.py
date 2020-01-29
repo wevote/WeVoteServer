@@ -10,6 +10,7 @@ Location = namedtuple('Location', ['address', 'latitude', 'longitude'])
 
 
 class BallotTestCase(TestCase):
+    databases = ["default", "readonly"]
 
     def setUp(self):
         BallotReturned.objects.create(**{'google_civic_election_id': 4184,

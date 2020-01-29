@@ -9,6 +9,7 @@ from organization.models import Organization
 
 
 class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
+    databases = ["default", "readonly"]
 
     def setUp(self):
         self.generate_voter_device_id_url = reverse("apis_v1:deviceIdGenerateView")

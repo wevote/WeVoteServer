@@ -788,9 +788,9 @@ def retrieve_issues_under_ballot_items_list(all_issue_we_vote_ids, google_civic_
     return results
 
 
-def retrieve_issues_to_follow_for_api(voter_device_id, sort_formula):  # retrieveIssuesToFollow
+def retrieve_issues_to_follow_for_api(voter_device_id, sort_formula):  # retrieveIssuesToFollow # DEPRECATED
     """
-
+    Instead of this function, please use issuesFollowedRetrieve
     :param voter_device_id:
     :param sort_formula:
     :return:

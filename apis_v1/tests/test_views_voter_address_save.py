@@ -8,6 +8,8 @@ from django.test import TestCase
 
 
 class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
+    databases = ["default", "readonly"]
+
     def setUp(self):
         self.generate_voter_device_id_url = reverse("apis_v1:deviceIdGenerateView")
         self.voter_create_url = reverse("apis_v1:voterCreateView")
