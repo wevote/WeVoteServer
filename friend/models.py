@@ -1625,12 +1625,14 @@ class FriendManager(models.Model):
         return results
 
     def retrieve_friend_invitation_from_secret_key(
-            self, invitation_secret_key, for_accepting_friendship=False, for_merge_accounts=False, read_only=True):
+            self, invitation_secret_key, for_accepting_friendship=False, for_merge_accounts=False,
+            for_retrieving_information=False, read_only=True):
         """
 
         :param invitation_secret_key:
         :param for_accepting_friendship:
         :param for_merge_accounts:
+        :param for_retrieving_information:
         :param read_only:
         :return:
         """
@@ -1656,6 +1658,9 @@ class FriendManager(models.Model):
                 elif positive_value_exists(for_merge_accounts):
                     voter_link_query = voter_link_query.filter(merge_by_secret_key_allowed=True)
                     status += "FOR_MERGE_ACCOUNTS "
+                elif positive_value_exists(for_retrieving_information):
+                    voter_link_query = voter_link_query.filter(invitation_status__iexact=ACCEPTED)
+                    status += "FOR_RETRIEVING_INFORMATION "
                 voter_link_list = list(voter_link_query)
                 if len(voter_link_list) > 0:
                     friend_invitation_voter_link = voter_link_list[0]
@@ -1700,6 +1705,9 @@ class FriendManager(models.Model):
                 elif positive_value_exists(for_merge_accounts):
                     email_link_query = email_link_query.filter(merge_by_secret_key_allowed=True)
                     status += "FOR_MERGE_ACCOUNTS "
+                elif positive_value_exists(for_retrieving_information):
+                    email_link_query = email_link_query.filter(invitation_status__iexact=ACCEPTED)
+                    status += "FOR_RETRIEVING_INFORMATION "
                 email_link_list = list(email_link_query)
                 if len(email_link_list):
                     friend_invitation_email_link = email_link_list[0]

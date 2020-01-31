@@ -10,6 +10,7 @@ from config.base import get_environment_variable
 from email_outbound.controllers import schedule_email_with_email_outbound_description, schedule_verification_email
 from email_outbound.models import EmailAddress, EmailManager, FRIEND_ACCEPTED_INVITATION_TEMPLATE, \
     FRIEND_INVITATION_TEMPLATE, WAITING_FOR_VERIFICATION, TO_BE_PROCESSED
+from follow.models import FollowIssueList
 from import_export_facebook.models import FacebookManager
 import json
 from organization.controllers import transform_web_app_url
@@ -586,8 +587,232 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
     return results
 
 
-def friend_invitation_by_email_verify_for_api(
-        voter_device_id, invitation_secret_key, web_app_root_url=''):  # friendInvitationByEmailVerify
+def friend_invitation_information_for_api(voter_device_id, invitation_secret_key):  # friendInvitationInformation
+    """
+
+    :param voter_device_id:
+    :param invitation_secret_key:
+    :return:
+    """
+    status = ""
+    success = False
+    sender_voter_we_vote_id = ''
+    friend_first_name = ''
+    friend_last_name = ''
+    friend_image_url_https_tiny = ''
+    friend_issue_we_vote_id_list = []
+    friend_we_vote_id = ''
+    friend_organization_we_vote_id = ''
+    invitation_message = ''
+
+    # If a voter_device_id is passed in that isn't valid, we want to throw an error
+    device_id_results = is_voter_device_id_valid(voter_device_id)
+    if not device_id_results['success']:
+        status += device_id_results['status']
+        json_data = {
+            'status':                   status,
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'friend_first_name':        '',
+            'friend_last_name':         '',
+            'friend_image_url_https_tiny': '',
+            'friend_issue_we_vote_id_list': [],
+            'friend_we_vote_id':        '',
+            'friend_organization_we_vote_id':   '',
+            'invitation_found':         False,
+            'invitation_message':       '',
+            'invitation_secret_key':    invitation_secret_key,
+        }
+        return json_data
+
+    if not positive_value_exists(invitation_secret_key):
+        status += "VOTER_EMAIL_ADDRESS_VERIFY_MISSING_SECRET_KEY "
+        error_results = {
+            'status':                                       status,
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'friend_first_name':        '',
+            'friend_last_name':         '',
+            'friend_image_url_https_tiny': '',
+            'friend_issue_we_vote_id_list': [],
+            'friend_we_vote_id':        '',
+            'friend_organization_we_vote_id':   '',
+            'invitation_found':         False,
+            'invitation_message':       '',
+            'invitation_secret_key':                        invitation_secret_key,
+        }
+        return error_results
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = voter_results['voter_id']
+    if not positive_value_exists(voter_id):
+        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
+        error_results = {
+            'status':                                       status,
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'friend_first_name':        '',
+            'friend_last_name':         '',
+            'friend_image_url_https_tiny': '',
+            'friend_issue_we_vote_id_list': [],
+            'friend_we_vote_id':        '',
+            'friend_organization_we_vote_id':   '',
+            'invitation_found':         False,
+            'invitation_message':       '',
+            'invitation_secret_key':                        invitation_secret_key,
+        }
+        return error_results
+    voter = voter_results['voter']
+    voter_we_vote_id = voter.we_vote_id
+
+    friend_manager = FriendManager()
+    friend_invitation_results = friend_manager.retrieve_friend_invitation_from_secret_key(
+        invitation_secret_key, for_retrieving_information=True, read_only=True)
+    if not friend_invitation_results['friend_invitation_found']:
+        status += "INVITATION_NOT_FOUND_FROM_SECRET_KEY "
+        error_results = {
+            'status':                   status,
+            'success':                  True,
+            'voter_device_id':          voter_device_id,
+            'friend_first_name':        '',
+            'friend_last_name':         '',
+            'friend_image_url_https_tiny': '',
+            'friend_issue_we_vote_id_list': [],
+            'friend_we_vote_id':        '',
+            'friend_organization_we_vote_id':   '',
+            'invitation_found':         False,
+            'invitation_message':       '',
+            'invitation_secret_key':    invitation_secret_key,
+        }
+        return error_results
+
+    # Now that we have the friend_invitation data, look more closely at it
+    invitation_found = True
+    if friend_invitation_results['friend_invitation_voter_link_found']:
+        friend_invitation_voter_link = friend_invitation_results['friend_invitation_voter_link']
+        status += "FRIEND_INVITATION_VOTER_LINK_FOUND "
+
+        if friend_invitation_voter_link.sender_voter_we_vote_id == voter_we_vote_id:
+            status += "SENDER_AND_RECIPIENT_ARE_IDENTICAL_FAILED-VOTER_LINK "
+            error_results = {
+                'status':                   status,
+                'success':                  False,
+                'voter_device_id':          voter_device_id,
+                'friend_first_name':        '',
+                'friend_last_name':         '',
+                'friend_image_url_https_tiny': '',
+                'friend_issue_we_vote_id_list': [],
+                'friend_we_vote_id':        '',
+                'friend_organization_we_vote_id': '',
+                'invitation_found':         invitation_found,
+                'invitation_message':       '',
+                'invitation_secret_key':    invitation_secret_key,
+            }
+            return error_results
+
+        if friend_invitation_voter_link.recipient_voter_we_vote_id != voter_we_vote_id:
+            status += "RECIPIENT_DOES_NOT_MATCH_CURRENT_VOTER-VOTER_LINK "
+            error_results = {
+                'status':                   status,
+                'success':                  False,
+                'voter_device_id':          voter_device_id,
+                'friend_first_name':        '',
+                'friend_last_name':         '',
+                'friend_image_url_https_tiny': '',
+                'friend_issue_we_vote_id_list': [],
+                'friend_we_vote_id':        '',
+                'friend_organization_we_vote_id': '',
+                'invitation_found':         invitation_found,
+                'invitation_message':       '',
+                'invitation_secret_key':    invitation_secret_key,
+            }
+            return error_results
+
+        sender_voter_we_vote_id = friend_invitation_voter_link.sender_voter_we_vote_id
+        invitation_message = friend_invitation_voter_link.invitation_message
+    elif friend_invitation_results['friend_invitation_email_link_found']:
+        friend_invitation_email_link = friend_invitation_results['friend_invitation_email_link']
+        status += "FRIEND_INVITATION_EMAIL_LINK_FOUND "
+
+        if friend_invitation_email_link.sender_voter_we_vote_id == voter_we_vote_id:
+            status += "SENDER_AND_RECIPIENT_ARE_IDENTICAL_FAILED-EMAIL_LINK "
+            error_results = {
+                'status': status,
+                'success': False,
+                'voter_device_id': voter_device_id,
+                'friend_first_name': '',
+                'friend_last_name': '',
+                'friend_image_url_https_tiny': '',
+                'friend_issue_we_vote_id_list': [],
+                'friend_we_vote_id': '',
+                'friend_organization_we_vote_id': '',
+                'invitation_found': invitation_found,
+                'invitation_message': '',
+                'invitation_secret_key': invitation_secret_key,
+            }
+            return error_results
+
+        if friend_invitation_email_link.recipient_voter_we_vote_id is not voter_we_vote_id:
+            status += "RECIPIENT_DOES_NOT_MATCH_CURRENT_VOTER-EMAIL_LINK "
+            error_results = {
+                'status':                   status,
+                'success':                  False,
+                'voter_device_id':          voter_device_id,
+                'friend_first_name':        '',
+                'friend_last_name':         '',
+                'friend_image_url_https_tiny': '',
+                'friend_issue_we_vote_id_list': [],
+                'friend_we_vote_id':        '',
+                'friend_organization_we_vote_id': '',
+                'invitation_found':         invitation_found,
+                'invitation_message':       '',
+                'invitation_secret_key':    invitation_secret_key,
+            }
+            return error_results
+
+        sender_voter_we_vote_id = friend_invitation_email_link.sender_voter_we_vote_id
+        invitation_message = friend_invitation_email_link.invitation_message
+
+    if positive_value_exists(sender_voter_we_vote_id):
+        voter_results = voter_manager.retrieve_voter_by_we_vote_id(sender_voter_we_vote_id)
+        if voter_results['voter_found']:
+            friend_we_vote_id = sender_voter_we_vote_id
+            voter = voter_results['voter']
+            friend_first_name = voter.first_name
+            friend_last_name = voter.last_name
+            friend_image_url_https_tiny = voter.we_vote_hosted_profile_image_url_tiny
+            friend_organization_we_vote_id = voter.linked_organization_we_vote_id
+
+            follow_issue_list_manager = FollowIssueList()
+            friend_issue_we_vote_id_list = \
+                follow_issue_list_manager.retrieve_follow_issue_following_we_vote_id_list_by_voter_we_vote_id(
+                    friend_we_vote_id)
+            success = True
+        else:
+            status += "SENDER_VOTER_NOT_FOUND_WITH_VOTER_WE_VOTE_ID: " + sender_voter_we_vote_id + " "
+    else:
+        status += "MISSING_SENDER_VOTER_WE_VOTE_ID "
+
+    json_data = {
+        'status':                           status,
+        'success':                          success,
+        'voter_device_id':                  voter_device_id,
+        'friend_first_name':                friend_first_name,
+        'friend_last_name':                 friend_last_name,
+        'friend_image_url_https_tiny':      friend_image_url_https_tiny,
+        'friend_issue_we_vote_id_list':     friend_issue_we_vote_id_list,
+        'friend_we_vote_id':                friend_we_vote_id,
+        'friend_organization_we_vote_id':   friend_organization_we_vote_id,
+        'invitation_found':                 invitation_found,
+        'invitation_message':               invitation_message,
+        'invitation_secret_key':            invitation_secret_key,
+    }
+    return json_data
+
+
+def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
+        voter_device_id, invitation_secret_key, web_app_root_url=''):
     """
 
     :param voter_device_id:

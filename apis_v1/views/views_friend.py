@@ -5,7 +5,8 @@ from config.base import get_environment_variable
 from django.http import HttpResponse
 from friend.controllers import friend_invitation_by_email_send_for_api, friend_invitation_by_email_verify_for_api, \
     friend_invitation_by_we_vote_id_send_for_api, friend_invite_response_for_api, friend_list_for_api, \
-    friend_invitation_by_facebook_send_for_api, friend_invitation_by_facebook_verify_for_api
+    friend_invitation_by_facebook_send_for_api, friend_invitation_by_facebook_verify_for_api, \
+    friend_invitation_information_for_api
 from friend.models import ACCEPT_INVITATION, CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, \
     DELETE_INVITATION_VOTER_SENT_BY_ME, \
     FRIENDS_IN_COMMON, FRIEND_INVITATIONS_PROCESSED, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, \
@@ -135,6 +136,32 @@ def friend_invitation_by_we_vote_id_send_view(request):  # friendInvitationByWeV
         'status':                               results['status'],
         'success':                              results['success'],
         'voter_device_id':                      voter_device_id,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def friend_invitation_information_view(request):  # friendInvitationInformation
+    """
+
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    invitation_secret_key = request.GET.get('invitation_secret_key', "")
+    results = friend_invitation_information_for_api(voter_device_id, invitation_secret_key)
+    json_data = {
+        'status':                           results['status'],
+        'success':                          results['success'],
+        'voter_device_id':                  voter_device_id,
+        'friend_first_name':                results['friend_first_name'],
+        'friend_last_name':                 results['friend_last_name'],
+        'friend_image_url_https_tiny':      results['friend_image_url_https_tiny'],
+        'friend_issue_we_vote_id_list':     results['friend_issue_we_vote_id_list'],
+        'friend_we_vote_id':                results['friend_we_vote_id'],
+        'friend_organization_we_vote_id':   results['friend_organization_we_vote_id'],
+        'invitation_found':                 results['invitation_found'],
+        'invitation_message':               results['invitation_message'],
+        'invitation_secret_key':            invitation_secret_key,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
