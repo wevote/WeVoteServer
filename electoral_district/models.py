@@ -4,7 +4,7 @@
 
 from django.db import models
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_electoral_district_integer, fetch_site_unique_id_prefix
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -90,6 +90,8 @@ class ElectoralDistrict(models.Model):
     ballotpedia_district_ocd_id = models.CharField(verbose_name="ocd id identifier", max_length=255, blank=True,
                                                    null=True)
 
+    geo_id = models.CharField(verbose_name="us census geo id", max_length=50, blank=True, null=True)
+    nces_id = models.CharField(verbose_name="school nces id", max_length=50, blank=True, null=True)
     state_code = models.CharField(verbose_name="state code", max_length=3, blank=True, null=True)
 
     # for now we are only handling ocd_id from the various ExternalIdentifier nodes. Refer to this link for details
@@ -224,6 +226,47 @@ class ElectoralDistrictManager(models.Model):
             'status':               status,
             'success':              success,
             'electoral_district_link_deleted': electoral_district_link_deleted,
+        }
+        return results
+
+    def retrieve_electoral_district(self, ballotpedia_district_id=0, read_only=True):
+        status = ""
+        ballotpedia_district_id = convert_to_int(ballotpedia_district_id)
+
+        electoral_district = ElectoralDistrict()
+        try:
+            if positive_value_exists(ballotpedia_district_id):
+                if positive_value_exists(read_only):
+                    electoral_district = ElectoralDistrict.objects.using('readonly').get(
+                        ballotpedia_district_id=ballotpedia_district_id)
+                else:
+                    electoral_district = ElectoralDistrict.objects.get(ballotpedia_district_id=ballotpedia_district_id)
+                if positive_value_exists(electoral_district.ballotpedia_district_id):
+                    electoral_district_found = True
+                    status += "ELECTORAL_DISTRICT_FOUND_WITH_BALLOTPEDIA_DISTRICT_ID "
+                else:
+                    electoral_district_found = False
+                    status += "ELECTORAL_DISTRICT_NOT_FOUND_WITH_BALLOTPEDIA_DISTRICT_ID "
+                success = True
+            else:
+                electoral_district_found = False
+                status += "Insufficient variables included to retrieve one electoral_district. "
+                success = False
+        except ElectoralDistrict.MultipleObjectsReturned as e:
+            electoral_district_found = False
+            status += "ERROR_MORE_THAN_ONE_ELECTORAL_DISTRICT_FOUND " + str(e) + " "
+            success = False
+        except ElectoralDistrict.DoesNotExist:
+            electoral_district_found = False
+            status += "ELECTORAL_DISTRICT_NOT_FOUND "
+            success = True
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'electoral_district_found': electoral_district_found,
+            'ballotpedia_district_id':  ballotpedia_district_id,
+            'electoral_district':       electoral_district,
         }
         return results
 

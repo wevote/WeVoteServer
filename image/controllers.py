@@ -11,11 +11,9 @@ from .models import WeVoteImageManager, WeVoteImage, \
     TWITTER_PROFILE_IMAGE_NAME, TWITTER_BACKGROUND_IMAGE_NAME, TWITTER_BANNER_IMAGE_NAME, MAPLIGHT_IMAGE_NAME, \
     VOTE_SMART_IMAGE_NAME, MASTER_IMAGE, ISSUE_IMAGE_NAME, BALLOTPEDIA_IMAGE_NAME, LINKEDIN_IMAGE_NAME, \
     WIKIPEDIA_IMAGE_NAME
-from ballot.controllers import choose_election_from_existing_data
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from django.db.models import Q
-from import_export_ballotpedia.controllers import retrieve_ballotpedia_candidate_image_from_api
 from import_export_facebook.models import FacebookManager
 from issue.models import IssueManager
 from organization.models import OrganizationManager
@@ -400,6 +398,7 @@ def cache_voter_master_images(voter_id):
         else:
             voter_address = VoterAddress()
 
+        from ballot.controllers import choose_election_from_existing_data
         results = choose_election_from_existing_data(voter_device_link, 0, voter_address)
         google_civic_election_id = results['google_civic_election_id']
     else:
@@ -821,6 +820,7 @@ def retrieve_facebook_image_url(facebook_user_id):
 
 
 def retrieve_and_save_ballotpedia_candidate_images(candidate_campaign):
+    from import_export_ballotpedia.controllers import retrieve_ballotpedia_candidate_image_from_api
     status = ""
     candidate_campaign_manager = CandidateCampaignManager()
     politician_manager = PoliticianManager()

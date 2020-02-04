@@ -5,7 +5,7 @@
 from .models import BallotpediaApiCounterManager
 from ballot.models import BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager, \
     VoterBallotSavedManager
-from candidate.models import CandidateCampaignListManager, fetch_candidate_count_for_office
+from candidate.models import CandidateCampaignManager, CandidateCampaignListManager, fetch_candidate_count_for_office
 from config.base import get_environment_variable
 from electoral_district.models import ElectoralDistrict, ElectoralDistrictManager
 from election.models import BallotpediaElection, ElectionManager
@@ -15,11 +15,12 @@ from import_export_batches.controllers_ballotpedia import store_ballotpedia_json
 import json
 from measure.models import ContestMeasureList, ContestMeasureManager
 from office.models import ContestOfficeListManager, ContestOfficeManager
+from politician.models import PoliticianManager
 from polling_location.models import PollingLocationManager
 import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager
 import wevote_functions.admin
-from wevote_functions.functions import extract_state_code_from_address_string, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_state_code_from_address_string, positive_value_exists
 
 BALLOTPEDIA_API_KEY = get_environment_variable("BALLOTPEDIA_API_KEY")
 BALLOTPEDIA_API_CANDIDATES_URL = get_environment_variable("BALLOTPEDIA_API_CANDIDATES_URL")
@@ -28,14 +29,20 @@ BALLOTPEDIA_API_ELECTIONS_URL = get_environment_variable("BALLOTPEDIA_API_ELECTI
 BALLOTPEDIA_API_FILES_URL = get_environment_variable("BALLOTPEDIA_API_FILES_URL")
 BALLOTPEDIA_API_MEASURES_URL = get_environment_variable("BALLOTPEDIA_API_MEASURES_URL")
 BALLOTPEDIA_API_RACES_URL = get_environment_variable("BALLOTPEDIA_API_RACES_URL")
+BALLOTPEDIA_API_SAMPLE_BALLOT_ELECTIONS_URL = "https://api4.ballotpedia.org/sample_ballot_elections"
+BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL = "https://api4.ballotpedia.org/sample_ballot_results"
 BALLOTPEDIA_API_CANDIDATES_TYPE = "candidates"
 BALLOTPEDIA_API_CONTAINS_TYPE = "contains"
 BALLOTPEDIA_API_ELECTIONS_TYPE = "elections"
 BALLOTPEDIA_API_FILES_TYPE = "files"
 BALLOTPEDIA_API_MEASURES_TYPE = "measures"
 BALLOTPEDIA_API_RACES_TYPE = "races"
+BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_TYPE = "sample_ballot_results"
 GEOCODE_TIMEOUT = 10
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
+
+IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -622,7 +629,8 @@ def retrieve_ballot_items_from_polling_location(
                 ballot_item_dict_list = ballot_items_results['ballot_item_dict_list']
 
                 results = store_ballotpedia_json_response_to_import_batch_system(
-                    ballot_item_dict_list, google_civic_election_id, kind_of_batch, batch_set_id, state_code=state_code)
+                    modified_json_list=ballot_item_dict_list, google_civic_election_id=google_civic_election_id,
+                    kind_of_batch=kind_of_batch, batch_set_id=batch_set_id, state_code=state_code)
                 status += results['status']
                 if 'batch_header_id' in results:
                     batch_header_id = results['batch_header_id']
@@ -636,6 +644,199 @@ def retrieve_ballot_items_from_polling_location(
         'success': success,
         'status': status,
         'batch_header_id': batch_header_id,
+    }
+    return results
+
+
+def retrieve_ballot_items_from_polling_location_api_v4(
+        google_civic_election_id, election_day_text="", polling_location_we_vote_id="", polling_location=None,
+        state_code="", batch_set_id=0,
+        existing_office_objects_dict={},
+        existing_candidate_objects_dict={},
+        existing_measure_objects_dict={},
+        new_office_we_vote_ids_list=[],
+        new_candidate_we_vote_ids_list=[],
+        new_measure_we_vote_ids_list=[]):
+    success = True
+    status = ""
+    polling_location_found = False
+    headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Connection': 'keep-alive',
+        'Host': 'api4.ballotpedia.org',
+        'Upgrade-Insecure-Requests': '1',
+        'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:72.0) Gecko/20100101 Firefox/72.0',
+    }
+
+    if not positive_value_exists(google_civic_election_id):
+        results = {
+            'success': False,
+            'status': "Error: Missing election id",
+            'existing_office_objects_dict': existing_office_objects_dict,
+            'existing_candidate_objects_dict': existing_candidate_objects_dict,
+            'existing_measure_objects_dict': existing_measure_objects_dict,
+            'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
+            'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
+            'new_measure_we_vote_ids_list': new_measure_we_vote_ids_list,
+        }
+        return results
+
+    if not positive_value_exists(polling_location_we_vote_id) and not polling_location:
+        results = {
+            'success': False,
+            'status': "Error: Missing polling location we vote id and polling_location_object",
+            'existing_office_objects_dict': existing_office_objects_dict,
+            'existing_candidate_objects_dict': existing_candidate_objects_dict,
+            'existing_measure_objects_dict': existing_measure_objects_dict,
+            'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
+            'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
+            'new_measure_we_vote_ids_list': new_measure_we_vote_ids_list,
+        }
+        return results
+
+    batch_header_id = 0
+
+    if polling_location:
+        polling_location_found = True
+        polling_location_we_vote_id = polling_location.we_vote_id
+    elif positive_value_exists(polling_location_we_vote_id):
+        polling_location_manager = PollingLocationManager()
+        results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
+        if results['polling_location_found']:
+            polling_location = results['polling_location']
+            polling_location_found = True
+
+    if polling_location_found:
+        if not polling_location.latitude or not polling_location.longitude:
+            success = False
+            status += "RETRIEVE_DISTRICTS-MISSING_LATITUDE_LONGITUDE "
+            results = {
+                'success': success,
+                'status': status,
+                'existing_office_objects_dict': existing_office_objects_dict,
+                'existing_candidate_objects_dict': existing_candidate_objects_dict,
+                'existing_measure_objects_dict': existing_measure_objects_dict,
+                'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
+                'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
+                'new_measure_we_vote_ids_list': new_measure_we_vote_ids_list,
+            }
+            return results
+
+        try:
+            # Get the electoral_districts at this lat/long
+            response = requests.get(
+                BALLOTPEDIA_API_SAMPLE_BALLOT_ELECTIONS_URL,
+                headers=headers,
+                params={
+                    "lat": polling_location.longitude,
+                    "long": polling_location.latitude,
+                    # NOTE: Ballotpedia appears to have swapped latitude and longitude
+                    # "lat": polling_location.latitude,
+                    # "long": polling_location.longitude,
+                })
+            structured_json = json.loads(response.text)
+
+            # Use Ballotpedia API call counter to track the number of queries we are doing each day
+            ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+            ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_ELECTIONS_TYPE,
+                                                                 google_civic_election_id=google_civic_election_id,
+                                                                 ballotpedia_election_id=0)
+
+            groom_results = groom_and_store_sample_ballot_elections_api_v4(structured_json, google_civic_election_id)
+            ballotpedia_district_id_list = groom_results['ballotpedia_district_id_list']
+            if not ballotpedia_district_id_list or len(ballotpedia_district_id_list) == 0:
+                status += "NO_BALLOTPEDIA_DISTRICTS_RETURNED "
+                results = {
+                    'success': success,
+                    'status': status,
+                    'batch_header_id': batch_header_id,
+                    'existing_office_objects_dict': existing_office_objects_dict,
+                    'existing_candidate_objects_dict': existing_candidate_objects_dict,
+                    'existing_measure_objects_dict': existing_measure_objects_dict,
+                    'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
+                    'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
+                    'new_measure_we_vote_ids_list': new_measure_we_vote_ids_list,
+                }
+                return results
+
+            office_district_string = ""
+            office_district_count = 0
+            ballotpedia_district_id_not_used_list = []
+            for one_district in ballotpedia_district_id_list:
+                # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
+                #  office_district_string, but capture the districts not used
+                # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+                if len(office_district_string) < 3796:
+                    office_district_string += str(one_district) + ","
+                    office_district_count += 1
+                else:
+                    # In the future we might want to set up a second query to get the races for these districts
+                    ballotpedia_district_id_not_used_list.append(one_district)
+
+            # Remove last comma
+            if office_district_count > 1:
+                office_district_string = office_district_string[:-1]
+            # chunks_of_district_strings.append(office_district_string)
+
+            # Get the electoral_districts at this lat/long
+            response = requests.get(BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL, headers=headers, params={
+                "districts": office_district_string,
+                "election_date": election_day_text,
+            })
+            structured_json = json.loads(response.text)
+
+            # Use Ballotpedia API call counter to track the number of queries we are doing each day
+            ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+            ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_TYPE,
+                                                                 google_civic_election_id=google_civic_election_id,
+                                                                 ballotpedia_election_id=0)
+
+            groom_results = groom_and_store_sample_ballot_results_api_v4(
+                structured_json, google_civic_election_id=google_civic_election_id,
+                state_code=state_code, polling_location_we_vote_id=polling_location_we_vote_id,
+                election_day_text=election_day_text,
+                existing_office_objects_dict=existing_office_objects_dict,
+                existing_candidate_objects_dict=existing_candidate_objects_dict,
+                existing_measure_objects_dict=existing_measure_objects_dict,
+                new_office_we_vote_ids_list=new_office_we_vote_ids_list,
+                new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
+                new_measure_we_vote_ids_list=new_measure_we_vote_ids_list,
+                )
+            status += groom_results['status']
+            ballot_item_dict_list = groom_results['ballot_item_dict_list']
+            existing_office_objects_dict = groom_results['existing_office_objects_dict']
+            existing_candidate_objects_dict = groom_results['existing_candidate_objects_dict']
+            existing_measure_objects_dict = groom_results['existing_measure_objects_dict']
+            new_office_we_vote_ids_list = groom_results['new_office_we_vote_ids_list']
+            new_candidate_we_vote_ids_list = groom_results['new_candidate_we_vote_ids_list']
+            new_measure_we_vote_ids_list = groom_results['new_measure_we_vote_ids_list']
+
+            if ballot_item_dict_list and len(ballot_item_dict_list) > 0:
+                results = store_ballotpedia_json_response_to_import_batch_system(
+                    modified_json_list=ballot_item_dict_list, google_civic_election_id=google_civic_election_id,
+                    kind_of_batch=IMPORT_BALLOT_ITEM, batch_set_id=batch_set_id,
+                    state_code=state_code)
+                status += results['status']
+                if 'batch_header_id' in results:
+                    batch_header_id = results['batch_header_id']
+        except Exception as e:
+            success = False
+            status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            handle_exception(e, logger=logger, exception_message=status)
+
+    results = {
+        'success': success,
+        'status': status,
+        'existing_office_objects_dict': existing_office_objects_dict,
+        'existing_candidate_objects_dict': existing_candidate_objects_dict,
+        'existing_measure_objects_dict': existing_measure_objects_dict,
+        'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
+        'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
+        'new_measure_we_vote_ids_list': new_measure_we_vote_ids_list,
     }
     return results
 
@@ -1237,6 +1438,522 @@ def retrieve_ballotpedia_candidate_image_from_api(ballotpedia_image_id, google_c
         'success': success,
         'status': status,
         'profile_image_url_https': profile_image_url_https,
+    }
+    return results
+
+
+def groom_and_store_sample_ballot_elections_api_v4(structured_json, google_civic_election_id):
+    status = ""
+    success = False
+    ballotpedia_district_id_list = []
+
+    if 'data' in structured_json and 'districts' in structured_json['data'] and \
+            positive_value_exists(structured_json['data']['districts']):
+        # electoral_district_manager = ElectoralDistrictManager()
+        districts_json_list = structured_json['data']['districts']
+        for one_district_json in districts_json_list:
+            if 'id' in one_district_json and positive_value_exists(one_district_json['id']):
+                ballotpedia_district_id = one_district_json['id']
+                ballotpedia_district_id_list.append(ballotpedia_district_id)
+
+                # See if this district (get_or_create) is already in the database
+                # results = electoral_district_manager.retrieve_electoral_district(
+                #     ballotpedia_district_id=ballotpedia_district_id)
+                # if not results['electoral_district_found']:
+                #     # Create new district entry
+                #     pass
+                # else:
+                #     # Check to see if we need to update district
+                #     pass
+                # try:
+                #     if not positive_value_exists(state_code):
+                #         state_code = one_district_json['state_code']
+                #     if positive_value_exists(one_district_json['latitude']):
+                #         ballotpedia_district_latitude = one_district_json['latitude']
+                #     else:
+                #         ballotpedia_district_latitude = polling_location_latitude
+                #     if positive_value_exists(one_district_json['longitude']):
+                #         ballotpedia_district_longitude = one_district_json['longitude']
+                #     else:
+                #         ballotpedia_district_longitude = polling_location_longitude
+                #
+                #     defaults = {
+                #         'ballotpedia_district_id': one_district_json['ballotpedia_district_id'],
+                #         'ballotpedia_district_kml': one_district_json['kml'],
+                #         'ballotpedia_district_latitude': ballotpedia_district_latitude,
+                #         'ballotpedia_district_longitude': ballotpedia_district_longitude,
+                #         'ballotpedia_district_type': one_district_json['type'],
+                #         'ballotpedia_district_url': one_district_json['url'],
+                #         'ballotpedia_district_ocd_id': one_district_json['ocdid'],
+                #         'electoral_district_name': one_district_json['ballotpedia_district_name'],
+                #         'state_code': state_code,
+                #     }
+                #     electoral_district, new_electoral_district_created = ElectoralDistrict.objects.get_or_create(
+                #         ballotpedia_district_id=one_district_json['ballotpedia_district_id'],
+                #         defaults=defaults)
+                #     if not positive_value_exists(electoral_district.we_vote_id) \
+                #             or not positive_value_exists(new_electoral_district_created):
+                #         # Trigger the creation of an electoral_district_we_vote_id, or save if this was a "get"
+                #         electoral_district.save()
+                #     electoral_district_we_vote_id = electoral_district.we_vote_id
+                #
+                #     # Now create a link between this district and this polling location
+                #     results = \
+                #         electoral_district_manager.update_or_create_electoral_district_link_to_polling_location(
+                #             polling_location_we_vote_id, electoral_district_we_vote_id, ballotpedia_district_id,
+                #             state_code)
+                #     if not results['success']:
+                #         status += results['status']
+                # except Exception as e:
+                #     could_not_get_or_create_count += 1
+
+    results = {
+        'success':                      success,
+        'status':                       status,
+        'google_civic_election_id':     google_civic_election_id,
+        'ballotpedia_district_id_list': ballotpedia_district_id_list,
+    }
+    return results
+
+
+def groom_and_store_sample_ballot_results_api_v4(structured_json, google_civic_election_id,
+                                                 state_code='', polling_location_we_vote_id='',
+                                                 election_day_text='',
+                                                 existing_office_objects_dict={},
+                                                 existing_candidate_objects_dict={},
+                                                 existing_measure_objects_dict={},
+                                                 new_office_we_vote_ids_list=[],
+                                                 new_candidate_we_vote_ids_list=[],
+                                                 new_measure_we_vote_ids_list=[],
+                                                 ):
+    from image.controllers import cache_master_and_resized_image, BALLOTPEDIA_IMAGE_SOURCE
+    status = ""
+    success = False
+    generated_ballot_order = 0
+    ballot_item_dict_list = []
+
+    contest_office_manager = ContestOfficeManager()
+    candidate_manager = CandidateCampaignManager()
+    measure_manager = ContestMeasureManager()
+    politician_manager = PoliticianManager()
+
+    if 'data' in structured_json and 'districts' in structured_json['data']:
+        districts_json_list = structured_json['data']['districts']
+        for one_district_json in districts_json_list:
+            district_name = ''
+            if 'name' in one_district_json and positive_value_exists(one_district_json['name']):
+                district_name = one_district_json['name']
+            if 'races' in one_district_json and positive_value_exists(one_district_json['races']):
+                races_json_list = one_district_json['races']
+                for one_race_json in races_json_list:
+                    # We only want to deal with the office if candidate data exists
+                    candidate_data_exists = 'candidates' in one_race_json and \
+                                            positive_value_exists(one_race_json['candidates'])
+                    office_data_exists = 'office' in one_race_json and positive_value_exists(one_race_json['office'])
+
+                    # Clear out prior values
+                    ballotpedia_office_id = 0
+                    ballotpedia_office_name = ""
+                    ballotpedia_office_url = ""
+                    ballotpedia_race_id = 0
+                    ballotpedia_race_office_level = ""
+                    ballotpedia_race_url = ""
+                    candidates_json_list = []
+                    contest_office = None
+                    contest_office_id = 0
+                    contest_office_we_vote_id = ""
+                    district_id = 0
+                    number_of_seats = 1
+                    ocd_division_id = ""
+                    office_name = ""
+                    if candidate_data_exists and office_data_exists:
+                        candidates_json_list = one_race_json['candidates']
+                        office_dict = one_race_json['office']
+
+                        # Office dict
+                        if 'id' in office_dict and positive_value_exists(office_dict['id']):
+                            ballotpedia_office_id = office_dict['id']
+                        if 'level' in office_dict and positive_value_exists(office_dict['level']):
+                            ballotpedia_race_office_level = office_dict['level']
+                        if 'name' in office_dict and positive_value_exists(office_dict['name']):
+                            ballotpedia_office_name = office_dict['name']
+                            office_name = office_dict['name']
+                        if 'office_district' in office_dict and positive_value_exists(office_dict['office_district']):
+                            district_id = office_dict['office_district']
+                        if 'url' in office_dict and positive_value_exists(office_dict['url']):
+                            ballotpedia_office_url = office_dict['url']
+
+                        # Race dict
+                        if 'id' in one_race_json and positive_value_exists(one_race_json['id']):
+                            ballotpedia_race_id = convert_to_int(one_race_json['id'])
+                        if 'url' in one_race_json and positive_value_exists(one_race_json['url']):
+                            ballotpedia_race_url = one_race_json['url']
+                        if 'number_of_seats' in one_race_json and \
+                                positive_value_exists(one_race_json['number_of_seats']):
+                            number_of_seats = one_race_json['number_of_seats']
+
+                    # Check to see if this is a new office or if we have any new data
+                    if positive_value_exists(ballotpedia_race_id):
+                        if ballotpedia_race_id in existing_office_objects_dict:
+                            contest_office = existing_office_objects_dict[ballotpedia_race_id]
+                            contest_office_we_vote_id = contest_office.we_vote_id
+                            contest_office_id = contest_office.id
+                            office_name = contest_office.office_name
+                        else:
+                            office_results = contest_office_manager.retrieve_contest_office_from_ballotpedia_race_id(
+                                ballotpedia_race_id=ballotpedia_race_id,
+                                google_civic_election_id=google_civic_election_id,
+                                read_only=True)
+                            if office_results['contest_office_found']:
+                                contest_office = office_results['contest_office']
+                                contest_office_we_vote_id = contest_office.we_vote_id
+                                contest_office_id = contest_office.id
+                                office_name = contest_office.office_name
+                                existing_office_objects_dict[ballotpedia_race_id] = contest_office
+                                # In the future, we will want to look for updated data to save
+                            elif office_results['MultipleObjectsReturned']:
+                                status += "MORE_THAN_ONE_OFFICE_WITH_SAME_BALLOTPEDIA_RACE_ID: " \
+                                          "" + str(ballotpedia_race_id) + " "
+                                continue
+                            elif not office_results['success']:
+                                status += "RETRIEVE_BY_BALLOTPEDIA_RACE_ID_FAILED "
+                                status += office_results['status']
+                                continue
+                        if positive_value_exists(contest_office_we_vote_id):
+                            generated_ballot_order += 1
+                            office_json = {
+                                'contest_office_we_vote_id': contest_office.we_vote_id,
+                                'contest_office_id': contest_office.id,
+                                'contest_office_name': contest_office.office_name,
+                                'local_ballot_order': generated_ballot_order,
+                                'election_day_text': election_day_text,
+                                'state_code': state_code,
+                                'polling_location_we_vote_id': polling_location_we_vote_id,
+                            }
+                            ballot_item_dict_list.append(office_json)
+                        else:
+                            # Create an office entry
+                            updated_contest_office_values = {
+                                'ballotpedia_race_id': ballotpedia_race_id,
+                                'google_civic_election_id': google_civic_election_id,
+                            }
+                            if positive_value_exists(ballotpedia_office_id):
+                                updated_contest_office_values["ballotpedia_office_id"] = ballotpedia_office_id
+                            if positive_value_exists(ballotpedia_office_url):
+                                updated_contest_office_values["ballotpedia_office_url"] = ballotpedia_office_url
+                            if positive_value_exists(ballotpedia_race_office_level):
+                                updated_contest_office_values["ballotpedia_race_office_level"] = \
+                                    ballotpedia_race_office_level
+                            if positive_value_exists(ballotpedia_race_url):
+                                updated_contest_office_values["ballotpedia_race_url"] = ballotpedia_race_url
+                            if positive_value_exists(district_id):
+                                updated_contest_office_values["district_id"] = district_id
+                            if positive_value_exists(district_name):
+                                updated_contest_office_values["district_name"] = district_name
+                            if positive_value_exists(number_of_seats):
+                                updated_contest_office_values["number_elected"] = number_of_seats
+                            if positive_value_exists(ocd_division_id):
+                                updated_contest_office_values["ocd_division_id"] = ocd_division_id
+                            if positive_value_exists(office_name):
+                                updated_contest_office_values["office_name"] = office_name
+                                # We store the literal spelling here so we can match in the future
+                                updated_contest_office_values["ballotpedia_office_name"] = ballotpedia_office_name
+                            if positive_value_exists(state_code):
+                                updated_contest_office_values["state_code"] = state_code
+                            create_results = contest_office_manager.update_or_create_contest_office(
+                                ballotpedia_race_id=ballotpedia_race_id,
+                                google_civic_election_id=google_civic_election_id,
+                                office_name=office_name,
+                                updated_contest_office_values=updated_contest_office_values)
+                            if create_results['new_office_created']:
+                                new_office_created = True
+                                contest_office = create_results['contest_office']
+                                contest_office_id = contest_office.id
+                                contest_office_we_vote_id = contest_office.we_vote_id
+                                generated_ballot_order += 1
+                                office_json = {
+                                    'contest_office_we_vote_id': contest_office.we_vote_id,
+                                    'contest_office_id': contest_office.id,
+                                    'contest_office_name': contest_office.office_name,
+                                    'local_ballot_order': generated_ballot_order,
+                                    'election_day_text': election_day_text,
+                                    'state_code': state_code,
+                                    'polling_location_we_vote_id': polling_location_we_vote_id,
+                                }
+                                ballot_item_dict_list.append(office_json)
+                                if contest_office_we_vote_id not in new_office_we_vote_ids_list:
+                                    new_office_we_vote_ids_list.append(contest_office_we_vote_id)
+                    # Now move onto dealing with candidates
+                    if positive_value_exists(contest_office_we_vote_id):
+                        for candidate_dict in candidates_json_list:
+                            image_dict = {}
+                            person_dict = {}
+                            party_affiliation_dict = {}
+                            if 'person' in candidate_dict:
+                                if candidate_dict['person']:
+                                    person_dict = candidate_dict['person']
+                                    if 'image' in person_dict:
+                                        if person_dict['image']:
+                                            image_dict = person_dict['image']
+                            if 'party_affiliation' in candidate_dict:
+                                party_affiliation_list = candidate_dict['party_affiliation']
+                                if len(party_affiliation_list):
+                                    party_affiliation_dict = party_affiliation_list[0]
+
+                            # Clear out previous variables
+                            ballotpedia_candidate_id = 0
+                            ballotpedia_candidate_name = ""
+                            ballotpedia_profile_image_url_https = ''
+                            candidate_campaign = None
+                            candidate_campaign_we_vote_id = ''
+                            new_candidate_created = False
+                            save_ballotpedia_image = False
+
+                            # candidate_dict
+                            if 'id' in candidate_dict and positive_value_exists(candidate_dict['id']):
+                                ballotpedia_candidate_id = convert_to_int(candidate_dict['id'])
+
+                            if positive_value_exists(ballotpedia_candidate_id):
+                                if ballotpedia_candidate_id in existing_candidate_objects_dict:
+                                    candidate_campaign = existing_candidate_objects_dict[ballotpedia_candidate_id]
+                                    candidate_campaign_we_vote_id = candidate_campaign.we_vote_id
+                                else:
+                                    # Does candidate already exist?
+                                    candidate_results = \
+                                        candidate_manager.retrieve_candidate_campaign_from_ballotpedia_candidate_id(
+                                            ballotpedia_candidate_id=ballotpedia_candidate_id,
+                                            google_civic_election_id=google_civic_election_id,
+                                            read_only=True
+                                        )
+                                    if candidate_results['candidate_campaign_found']:
+                                        candidate_campaign = candidate_results['candidate_campaign']
+                                        candidate_campaign_we_vote_id = candidate_campaign.we_vote_id
+                                        if ballotpedia_candidate_id not in existing_candidate_objects_dict:
+                                            existing_candidate_objects_dict[ballotpedia_candidate_id] = \
+                                                candidate_campaign
+                                        # In the future, we will want to look for updated data to save
+                                    elif candidate_results['MultipleObjectsReturned']:
+                                        status += "MORE_THAN_ONE_CANDIDATE_WITH_SAME_BALLOTPEDIA_CANDIDATE_ID "
+                                        continue
+                                    elif not candidate_results['success']:
+                                        status += "RETRIEVE_BY_BALLOTPEDIA_CANDIDATE_ID_FAILED "
+                                        status += candidate_results['status']
+                                        continue
+                                if positive_value_exists(candidate_campaign_we_vote_id):
+                                    pass
+                                else:
+                                    # Create new candidate
+                                    update_values = {
+                                        'ballotpedia_candidate_id': ballotpedia_candidate_id,
+                                        'google_civic_election_id': google_civic_election_id,
+                                    }
+
+                                    # From outer loop
+                                    if positive_value_exists(ballotpedia_office_id):
+                                        update_values['ballotpedia_office_id'] = ballotpedia_office_id
+                                    if positive_value_exists(contest_office_we_vote_id):
+                                        update_values['contest_office_we_vote_id'] = contest_office_we_vote_id
+                                    if positive_value_exists(contest_office_id):
+                                        update_values['contest_office_id'] = contest_office_id
+                                    if positive_value_exists(office_name):
+                                        update_values['contest_office_name'] = office_name
+                                    if positive_value_exists(state_code):
+                                        update_values['state_code'] = state_code
+
+                                    # candidate_dict
+                                    if 'race' in candidate_dict and positive_value_exists(candidate_dict['race']):
+                                        update_values['ballotpedia_race_id'] = convert_to_int(candidate_dict['race'])
+                                    if 'is_incumbent' in candidate_dict:
+                                        update_values['candidate_is_incumbent'] = candidate_dict['is_incumbent']
+                                    else:
+                                        update_values['candidate_is_incumbent'] = False
+                                    # There are four incoming values, but isn't clear which one to use:
+                                    #  primary_status, primary_runoff_status, general_status and general_runoff_status
+                                    update_values['candidate_participation_status'] = "On the Ballot"
+                                    if 'candidate_website_url' in candidate_dict:
+                                        update_values['candidate_url'] = candidate_dict['candidate_website_url']
+                                    if 'campaign_facebook_url' in candidate_dict:
+                                        update_values['facebook_url'] = candidate_dict['campaign_facebook_url']
+
+                                    # party_affiliation_dict
+                                    if 'name' in party_affiliation_dict:
+                                        update_values['party'] = party_affiliation_dict['name']
+
+                                    # image_dict
+                                    if image_dict and 'url' in image_dict:
+                                        ballotpedia_profile_image_url_https = image_dict['url']
+                                        update_values['photo_url'] = image_dict['url']
+                                        save_ballotpedia_image = True
+
+                                    # person_dict
+                                    if 'name' in person_dict:
+                                        update_values['candidate_name'] = person_dict['name']
+                                        update_values['ballotpedia_candidate_name'] = person_dict['name']
+                                        ballotpedia_candidate_name = person_dict['name']
+                                    if 'summary' in person_dict:
+                                        update_values['ballotpedia_candidate_summary'] = person_dict['summary']
+                                    if 'url' in person_dict:
+                                        update_values['ballotpedia_candidate_url'] = person_dict['url']
+                                    if 'id' in person_dict:
+                                        update_values['ballotpedia_person_id'] = person_dict['id']
+                                    if 'contact_twitter' in person_dict:
+                                        update_values['candidate_twitter_handle'] = person_dict['contact_twitter']
+                                    if 'contact_website' in person_dict:
+                                        update_values['candidate_contact_form_url'] = person_dict['contact_website']
+
+                                    # These parameters are required to create a CandidateCampaign entry
+                                    if positive_value_exists(ballotpedia_candidate_id) and \
+                                            positive_value_exists(ballotpedia_candidate_name) \
+                                            and positive_value_exists(google_civic_election_id):
+                                        results = candidate_manager.create_candidate_row_entry(update_values)
+                                        new_candidate_created = results['new_candidate_created']
+                                        candidate_campaign = results['new_candidate']
+                                        candidate_campaign_we_vote_id = candidate_campaign.we_vote_id
+                                        if candidate_campaign_we_vote_id not in new_candidate_we_vote_ids_list:
+                                            new_candidate_we_vote_ids_list.append(candidate_campaign_we_vote_id)
+
+                                    if new_candidate_created and save_ballotpedia_image:
+                                        cache_results = cache_master_and_resized_image(
+                                            candidate_id=candidate_campaign.id,
+                                            candidate_we_vote_id=candidate_campaign.we_vote_id,
+                                            ballotpedia_candidate_id=candidate_campaign.ballotpedia_candidate_id,
+                                            ballotpedia_image_id=candidate_campaign.ballotpedia_image_id,
+                                            ballotpedia_profile_image_url=ballotpedia_profile_image_url_https,
+                                            image_source=BALLOTPEDIA_IMAGE_SOURCE)
+                                        cached_ballotpedia_image_url_https = cache_results[
+                                            'cached_ballotpedia_image_url_https']
+                                        we_vote_hosted_profile_image_url_large = cache_results[
+                                            'we_vote_hosted_profile_image_url_large']
+                                        we_vote_hosted_profile_image_url_medium = cache_results[
+                                            'we_vote_hosted_profile_image_url_medium']
+                                        we_vote_hosted_profile_image_url_tiny = cache_results[
+                                            'we_vote_hosted_profile_image_url_tiny']
+
+                                        save_candidate_campaign_results = \
+                                            candidate_manager.update_candidate_ballotpedia_image_details(
+                                                candidate_campaign,
+                                                cached_ballotpedia_image_url_https,
+                                                we_vote_hosted_profile_image_url_large,
+                                                we_vote_hosted_profile_image_url_medium,
+                                                we_vote_hosted_profile_image_url_tiny)
+                                        candidate_campaign = save_candidate_campaign_results['candidate']
+                                    # if new_candidate_created:
+                                    #     # Need to update voter ballotpedia details for the candidate in future
+                                    #     save_politician_details_results = \
+                                    #         politician_manager.update_politician_details_from_candidate(
+                                    #             candidate_campaign)
+
+            if 'ballot_measures' in one_district_json and positive_value_exists(one_district_json['ballot_measures']):
+                ballot_measures_json_list = one_district_json['ballot_measures']
+                for measure_dict in ballot_measures_json_list:
+                    ballotpedia_measure_id = 0
+                    contest_measure = None
+                    contest_measure_we_vote_id = ''
+                    if 'id' in measure_dict and positive_value_exists(measure_dict['id']):
+                        ballotpedia_measure_id = measure_dict['id']
+
+                    if positive_value_exists(ballotpedia_measure_id):
+                        if ballotpedia_measure_id in existing_measure_objects_dict:
+                            contest_measure = existing_measure_objects_dict[ballotpedia_measure_id]
+                            contest_measure_we_vote_id = contest_measure.we_vote_id
+                        else:
+                            # Does measure already exist?
+                            measure_results = measure_manager.retrieve_contest_measure_from_ballotpedia_measure_id(
+                                ballotpedia_measure_id=ballotpedia_measure_id,
+                                read_only=True
+                            )
+                            if measure_results['contest_measure_found']:
+                                contest_measure = measure_results['contest_measure']
+                                contest_measure_we_vote_id = contest_measure.we_vote_id
+                                if ballotpedia_measure_id not in existing_measure_objects_dict:
+                                    existing_measure_objects_dict[ballotpedia_measure_id] = contest_measure
+                                # In the future, we will want to look for updated data to save
+                            elif measure_results['MultipleObjectsReturned']:
+                                status += "MORE_THAN_ONE_MEASURE_WITH_SAME_BALLOTPEDIA_MEASURE_ID "
+                                continue
+                            elif not measure_results['success']:
+                                status += "RETRIEVE_BY_BALLOTPEDIA_MEASURE_ID_FAILED "
+                                status += measure_results['status']
+                                continue
+                        if positive_value_exists(contest_measure_we_vote_id):
+                            generated_ballot_order += 1
+                            measure_json = {
+                                'contest_measure_we_vote_id': contest_measure.we_vote_id,
+                                'contest_measure_id': contest_measure.id,
+                                'contest_measure_name': contest_measure.measure_title,
+                                'local_ballot_order': generated_ballot_order,
+                                'election_day_text': election_day_text,
+                                'state_code': state_code,
+                                'polling_location_we_vote_id': polling_location_we_vote_id,
+                            }
+                            ballot_item_dict_list.append(measure_json)
+                        else:
+                            # Create new measure
+                            update_values = {
+                                'ballotpedia_measure_id': ballotpedia_measure_id,
+                                'google_civic_election_id': google_civic_election_id,
+                            }
+
+                            # From outer loop
+                            if positive_value_exists(district_name):
+                                update_values['district_name'] = district_name
+                            if positive_value_exists(election_day_text):
+                                update_values['election_day_text'] = election_day_text
+                            if positive_value_exists(google_civic_election_id):
+                                update_values['google_civic_election_id'] = google_civic_election_id
+                            if positive_value_exists(state_code):
+                                update_values['state_code'] = state_code
+                            generated_ballot_order += 1
+                            update_values['google_ballot_placement'] = generated_ballot_order
+
+                            # measure_dict
+                            if 'name' in measure_dict and positive_value_exists(measure_dict['name']):
+                                update_values['ballotpedia_measure_name'] = measure_dict['name']
+                                update_values['measure_title'] = measure_dict['name']
+                            if 'district' in measure_dict and positive_value_exists(measure_dict['district']):
+                                update_values['ballotpedia_district_id'] = measure_dict['district']
+                            if 'url' in measure_dict and positive_value_exists(measure_dict['url']):
+                                update_values['ballotpedia_measure_url'] = measure_dict['url']
+                            if 'summary' in measure_dict and positive_value_exists(measure_dict['summary']):
+                                update_values['measure_text'] = measure_dict['summary']
+                                update_values['ballotpedia_measure_summary'] = measure_dict['summary']
+                            if 'yes_vote' in measure_dict and positive_value_exists(measure_dict['yes_vote']):
+                                update_values['ballotpedia_yes_vote_description'] = measure_dict['yes_vote']
+                            if 'no_vote' in measure_dict and positive_value_exists(measure_dict['no_vote']):
+                                update_values['ballotpedia_no_vote_description'] = measure_dict['no_vote']
+                            if 'status' in measure_dict and positive_value_exists(measure_dict['status']):
+                                update_values['ballotpedia_measure_status'] = measure_dict['status']
+                            create_results = measure_manager.update_or_create_contest_measure(
+                                ballotpedia_measure_id=ballotpedia_measure_id,
+                                google_civic_election_id=google_civic_election_id,
+                                updated_contest_measure_values=update_values)
+                            if create_results['new_measure_created']:
+                                contest_measure = create_results['contest_measure']
+                                contest_measure_we_vote_id = contest_measure.we_vote_id
+                                measure_json = {
+                                    'contest_measure_we_vote_id': contest_measure.we_vote_id,
+                                    'contest_measure_id': contest_measure.id,
+                                    'contest_measure_name': contest_measure.measure_title,
+                                    'local_ballot_order': generated_ballot_order,
+                                    'election_day_text': election_day_text,
+                                    'state_code': state_code,
+                                    'polling_location_we_vote_id': polling_location_we_vote_id,
+                                }
+                                ballot_item_dict_list.append(measure_json)
+                                if contest_measure_we_vote_id not in new_measure_we_vote_ids_list:
+                                    new_measure_we_vote_ids_list.append(contest_measure_we_vote_id)
+
+    results = {
+        'success':                              success,
+        'status':                               status,
+        'google_civic_election_id':             google_civic_election_id,
+        'ballot_item_dict_list':                ballot_item_dict_list,
+        'existing_office_objects_dict':         existing_office_objects_dict,
+        'existing_candidate_objects_dict':      existing_candidate_objects_dict,
+        'existing_measure_objects_dict':        existing_measure_objects_dict,
+        'new_office_we_vote_ids_list':          new_office_we_vote_ids_list,
+        'new_candidate_we_vote_ids_list':       new_candidate_we_vote_ids_list,
+        'new_measure_we_vote_ids_list':         new_measure_we_vote_ids_list,
     }
     return results
 

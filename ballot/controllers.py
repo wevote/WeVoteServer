@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 import datetime as the_other_datetime
 from election.models import ElectionManager, fetch_next_election_for_state
 from exception.models import handle_exception
-from import_export_ballotpedia.controllers import voter_ballot_items_retrieve_from_ballotpedia_for_api
 from import_export_google_civic.controllers import \
     refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved, \
     voter_ballot_items_retrieve_from_google_civic_for_api
@@ -1272,6 +1271,7 @@ def choose_election_and_prepare_ballot_data(voter_device_link, google_civic_elec
 
 def generate_ballot_data(voter_device_link, google_civic_election_id, voter_address,
                          ballot_returned_we_vote_id='', ballot_location_shortcut=''):
+    from import_export_ballotpedia.controllers import voter_ballot_items_retrieve_from_ballotpedia_for_api
     voter_device_id = voter_device_link.voter_device_id
     voter_id = voter_device_link.voter_id
     voter_ballot_saved_manager = VoterBallotSavedManager()

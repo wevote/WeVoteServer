@@ -20,8 +20,9 @@ MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
 
 
-def store_ballotpedia_json_response_to_import_batch_system(modified_json_list, google_civic_election_id, kind_of_batch,
-                                                           batch_set_id=0, state_code=""):
+def store_ballotpedia_json_response_to_import_batch_system(
+        modified_json_list=[], google_civic_election_id='', kind_of_batch='',
+        batch_set_id=0, state_code=""):
     success = False
     status = ""
     batch_header_id = 0

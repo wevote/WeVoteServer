@@ -349,7 +349,7 @@ class PoliticianManager(models.Model):
         politician_details = self.retrieve_politician(0, candidate.politician_we_vote_id)
         politician = politician_details['politician']
         if politician_details['success']:
-            # Politician found so update politicina details with candidate details
+            # Politician found so update politician details with candidate details
             first_name = extract_first_name_from_full_name(candidate.candidate_name)
             middle_name = extract_middle_name_from_full_name(candidate.candidate_name)
             last_name = extract_last_name_from_full_name(candidate.candidate_name)

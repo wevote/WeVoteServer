@@ -106,6 +106,8 @@ class ContestOffice(models.Model):
                                                max_length=255, null=True, blank=True)
     ballotpedia_office_url = models.URLField(
         verbose_name='url of office on ballotpedia', max_length=255, blank=True, null=True)
+    ballotpedia_race_url = models.URLField(
+        verbose_name='url of race on ballotpedia', max_length=255, blank=True, null=True)
     ballotpedia_district_id = models.PositiveIntegerField(verbose_name="ballotpedia district id", null=True, blank=True)
     # Equivalent to contest_office
     ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
@@ -227,12 +229,14 @@ class ContestOfficeManager(models.Model):
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id, maplight_id)
 
-    def retrieve_contest_office_from_ballotpedia_race_id(self, ballotpedia_race_id, google_civic_election_id):
+    def retrieve_contest_office_from_ballotpedia_race_id(self, ballotpedia_race_id, google_civic_election_id,
+                                                         read_only=False):
         contest_office_id = 0
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id,
                                                               ballotpedia_race_id=ballotpedia_race_id,
-                                                              google_civic_election_id=google_civic_election_id)
+                                                              google_civic_election_id=google_civic_election_id,
+                                                              read_only=read_only)
 
     def retrieve_contest_office_from_ballotpedia_office_id(self, ballotpedia_office_id, google_civic_election_id):
         contest_office_id = 0
@@ -338,8 +342,9 @@ class ContestOfficeManager(models.Model):
         results = self.retrieve_offices_are_not_duplicates_list(office_we_vote_id)
         return results['contest_offices_are_not_duplicates_list_we_vote_ids']
 
-    def update_or_create_contest_office(self, office_we_vote_id, maplight_id, google_civic_election_id,
-                                        office_name, district_id, updated_contest_office_values):
+    def update_or_create_contest_office(
+            self, office_we_vote_id='', maplight_id='', google_civic_election_id='',
+            office_name='', district_id='', ballotpedia_race_id='', updated_contest_office_values={}):
         """
         Either update or create an office entry.
         """
@@ -400,6 +405,24 @@ class ContestOfficeManager(models.Model):
             except Exception as e:
                 status += 'FAILED_TO_RETRIEVE_OFFICE_BY_MAPLIGHT_ID ' \
                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
+        elif positive_value_exists(ballotpedia_race_id) and positive_value_exists(google_civic_election_id):
+            try:
+                ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
+                contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
+                    google_civic_election_id__exact=google_civic_election_id,
+                    ballotpedia_race_id=ballotpedia_race_id,
+                    defaults=updated_contest_office_values)
+                office_updated = not new_office_created
+                success = True
+                status += 'CONTEST_OFFICE_SAVED_BY_BALLOTPEDIA_RACE_ID '
+            except ContestOffice.MultipleObjectsReturned as e:
+                success = False
+                status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND-BALLOTPEDIA_RACE_ID '
+                exception_multiple_object_returned = True
+            except Exception as e:
+                status += 'FAILED_TO_CREATE_OFFICE_BY_BALLOTPEDIA_RACE_ID ' \
+                          '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
                 success = False
         else:
             # Given we might have the office listed by google_civic_office_name
@@ -623,13 +646,18 @@ class ContestOfficeManager(models.Model):
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         contest_office_on_stage = ContestOffice()
+        status = ""
+        success = True
 
         try:
             if positive_value_exists(contest_office_id):
-                contest_office_on_stage = ContestOffice.objects.get(id=contest_office_id)
+                if positive_value_exists(read_only):
+                    contest_office_on_stage = ContestOffice.objects.using('readonly').get(id=contest_office_id)
+                else:
+                    contest_office_on_stage = ContestOffice.objects.get(id=contest_office_id)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
-                status = "RETRIEVE_OFFICE_FOUND_BY_ID "
+                status += "RETRIEVE_OFFICE_FOUND_BY_ID "
             elif positive_value_exists(contest_office_we_vote_id):
                 if positive_value_exists(read_only):
                     contest_office_on_stage = ContestOffice.objects.using('readonly').get(
@@ -638,45 +666,63 @@ class ContestOfficeManager(models.Model):
                     contest_office_on_stage = ContestOffice.objects.get(we_vote_id__iexact=contest_office_we_vote_id)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
-                status = "RETRIEVE_OFFICE_FOUND_BY_WE_VOTE_ID "
+                status += "RETRIEVE_OFFICE_FOUND_BY_WE_VOTE_ID "
             elif positive_value_exists(ctcl_uuid):
-                contest_office_on_stage = ContestOffice.objects.get(ctcl_uuid=ctcl_uuid)
+                if positive_value_exists(read_only):
+                    contest_office_on_stage = ContestOffice.objects.using('readonly').get(ctcl_uuid=ctcl_uuid)
+                else:
+                    contest_office_on_stage = ContestOffice.objects.get(ctcl_uuid=ctcl_uuid)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
-                status = "RETRIEVE_OFFICE_FOUND_BY_CTCL_UUID "
+                status += "RETRIEVE_OFFICE_FOUND_BY_CTCL_UUID "
             elif positive_value_exists(maplight_id):
-                contest_office_on_stage = ContestOffice.objects.get(maplight_id=maplight_id)
+                if positive_value_exists(read_only):
+                    contest_office_on_stage = ContestOffice.objects.using('readonly').get(maplight_id=maplight_id)
+                else:
+                    contest_office_on_stage = ContestOffice.objects.get(maplight_id=maplight_id)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
-                status = "RETRIEVE_OFFICE_FOUND_BY_MAPLIGHT_ID "
+                status += "RETRIEVE_OFFICE_FOUND_BY_MAPLIGHT_ID "
             elif positive_value_exists(ballotpedia_race_id) and positive_value_exists(google_civic_election_id):
                 ballotpedia_race_id_integer = convert_to_int(ballotpedia_race_id)
-                contest_office_on_stage = ContestOffice.objects.get(
-                    ballotpedia_race_id=ballotpedia_race_id_integer,
-                    google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(read_only):
+                    contest_office_on_stage = ContestOffice.objects.using('readonly').get(
+                        ballotpedia_race_id=ballotpedia_race_id_integer,
+                        google_civic_election_id=google_civic_election_id)
+                else:
+                    contest_office_on_stage = ContestOffice.objects.get(
+                        ballotpedia_race_id=ballotpedia_race_id_integer,
+                        google_civic_election_id=google_civic_election_id)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
-                status = "RETRIEVE_OFFICE_FOUND_BY_BALLOTPEDIA_RACE_ID "
+                status += "RETRIEVE_OFFICE_FOUND_BY_BALLOTPEDIA_RACE_ID "
             elif positive_value_exists(ballotpedia_office_id) and positive_value_exists(google_civic_election_id):
                 ballotpedia_office_id_integer = convert_to_int(ballotpedia_office_id)
-                contest_office_on_stage = ContestOffice.objects.get(
-                    ballotpedia_office_id=ballotpedia_office_id_integer,
-                    google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(read_only):
+                    contest_office_on_stage = ContestOffice.objects.using('readonly').get(
+                        ballotpedia_office_id=ballotpedia_office_id_integer,
+                        google_civic_election_id=google_civic_election_id)
+                else:
+                    contest_office_on_stage = ContestOffice.objects.get(
+                        ballotpedia_office_id=ballotpedia_office_id_integer,
+                        google_civic_election_id=google_civic_election_id)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
-                status = "RETRIEVE_OFFICE_FOUND_BY_BALLOTPEDIA_OFFICE_ID "
+                status += "RETRIEVE_OFFICE_FOUND_BY_BALLOTPEDIA_OFFICE_ID "
             else:
-                status = "RETRIEVE_OFFICE_SEARCH_INDEX_MISSING "
+                status += "RETRIEVE_OFFICE_SEARCH_INDEX_MISSING "
+                success = False
         except ContestOffice.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             exception_multiple_object_returned = True
-            status = "RETRIEVE_OFFICE_MULTIPLE_OBJECTS_RETURNED "
+            status += "RETRIEVE_OFFICE_MULTIPLE_OBJECTS_RETURNED " + str(e) + " "
+            success = False
         except ContestOffice.DoesNotExist:
             exception_does_not_exist = True
-            status = "RETRIEVE_OFFICE_NOT_FOUND "
+            status += "RETRIEVE_OFFICE_NOT_FOUND "
 
         results = {
-            'success':                      True if convert_to_int(contest_office_id) > 0 else False,
+            'success':                      success,
             'status':                       status,
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,
