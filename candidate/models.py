@@ -253,13 +253,13 @@ class CandidateCampaignListManager(models.Model):
                 success = True
         except CandidateCampaign.DoesNotExist:
             # No candidates found. Not a problem.
-            status = 'NO_CANDIDATES_FOUND_DoesNotExist '
+            status += 'NO_CANDIDATES_FOUND_DoesNotExist '
             candidate_list_objects = []
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_candidates_for_specific_elections ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED retrieve_candidates_for_specific_elections ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
             success = False
 
         if candidate_list_found:
@@ -296,8 +296,9 @@ class CandidateCampaignListManager(models.Model):
         return results
 
     def retrieve_candidate_count_for_office(self, office_id, office_we_vote_id):
+        status = ""
         if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
-            status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING'
+            status += 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING '
             results = {
                 'success':              False,
                 'status':               status,
@@ -317,15 +318,15 @@ class CandidateCampaignListManager(models.Model):
 
             candidate_count = candidate_list.count()
             success = True
-            status = "CANDIDATE_COUNT_FOUND"
+            status += "CANDIDATE_COUNT_FOUND "
         except CandidateCampaign.DoesNotExist:
             # No candidates found. Not a problem.
-            status = 'NO_CANDIDATES_FOUND_DoesNotExist'
+            status += 'NO_CANDIDATES_FOUND_DoesNotExist '
             candidate_count = 0
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_all_candidates_for_office ' \
+            status += 'FAILED retrieve_all_candidates_for_office ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
             candidate_count = 0
@@ -370,8 +371,8 @@ class CandidateCampaignListManager(models.Model):
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED RETRIEVE_CANDIDATE_COUNT ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED RETRIEVE_CANDIDATE_COUNT ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
             success = False
             candidate_count = 0
 
@@ -403,7 +404,7 @@ class CandidateCampaignListManager(models.Model):
             status += " candidate_contact_form_url:"
 
         if not automatic_merge_ok:
-            status = "Different: " + status
+            status += "Different: " + status
 
         results = {
             "status":               status,
@@ -471,6 +472,7 @@ class CandidateCampaignListManager(models.Model):
         filters = []
         candidate_list_found = False
         ballotpedia_candidate_id = convert_to_int(ballotpedia_candidate_id)
+        status = ""
 
         try:
             candidate_queryset = CandidateCampaign.objects.all()
@@ -707,20 +709,20 @@ class CandidateCampaignListManager(models.Model):
 
             if len(candidate_list_objects):
                 candidate_list_found = True
-                status = 'DUPLICATE_CANDIDATES_RETRIEVED'
+                status += 'DUPLICATE_CANDIDATES_RETRIEVED '
                 success = True
             else:
-                status = 'NO_DUPLICATE_CANDIDATES_RETRIEVED'
+                status += 'NO_DUPLICATE_CANDIDATES_RETRIEVED '
                 success = True
         except CandidateCampaign.DoesNotExist:
             # No candidates found. Not a problem.
-            status = 'NO_DUPLICATE_CANDIDATES_FOUND_DoesNotExist'
+            status += 'NO_DUPLICATE_CANDIDATES_FOUND_DoesNotExist '
             candidate_list_objects = []
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_possible_duplicate_candidates ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED retrieve_possible_duplicate_candidates ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
             success = False
 
         results = {
@@ -1131,12 +1133,12 @@ class CandidateCampaignListManager(models.Model):
                 status += 'SEARCH_CANDIDATES_FOR_UPCOMING_ELECTION_FOUND '
                 success = True
             else:
-                status += 'SEARCH_CANDIDATES_FOR_UPCOMING_ELECTION_NOT_FOUND'
+                status += 'SEARCH_CANDIDATES_FOR_UPCOMING_ELECTION_NOT_FOUND '
                 success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED search_candidates_for_upcoming_election ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED search_candidates_for_upcoming_election ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
             success = False
 
         if candidate_list_found:
@@ -1647,7 +1649,7 @@ class CandidateCampaignManager(models.Model):
             candidate_campaign_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id)
 
     def retrieve_candidate_campaign_from_ballotpedia_candidate_id(
-            self, ballotpedia_candidate_id, google_civic_election_id):
+            self, ballotpedia_candidate_id, google_civic_election_id, read_only=False):
         candidate_campaign_id = 0
         we_vote_id = ''
         candidate_maplight_id = ''
@@ -1655,7 +1657,7 @@ class CandidateCampaignManager(models.Model):
         candidate_vote_smart_id = 0
         return self.retrieve_candidate_campaign(
             candidate_campaign_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id,
-            ballotpedia_candidate_id, google_civic_election_id=google_civic_election_id)
+            ballotpedia_candidate_id, google_civic_election_id=google_civic_election_id, read_only=read_only)
 
     def retrieve_candidate_campaign_from_candidate_name(self, candidate_name):
         candidate_campaign_id = 0
@@ -1691,70 +1693,101 @@ class CandidateCampaignManager(models.Model):
     def retrieve_candidate_campaign(
             self, candidate_campaign_id, candidate_campaign_we_vote_id=None, candidate_maplight_id=None,
             candidate_name=None, candidate_vote_smart_id=None,
-            ballotpedia_candidate_id=None, google_civic_election_id=None):
+            ballotpedia_candidate_id=None, google_civic_election_id=None, read_only=False):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         candidate_campaign_on_stage = CandidateCampaign()
+        status = ""
+        success = True
 
         try:
             if positive_value_exists(candidate_campaign_id):
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(id=candidate_campaign_id)
+                if positive_value_exists(read_only):
+                    candidate_campaign_on_stage = CandidateCampaign.objects.using('readonly').get(
+                        id=candidate_campaign_id)
+                else:
+                    candidate_campaign_on_stage = CandidateCampaign.objects.get(id=candidate_campaign_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
                 candidate_campaign_found = True
-                status = "RETRIEVE_CANDIDATE_FOUND_BY_ID"
+                status += "RETRIEVE_CANDIDATE_FOUND_BY_ID "
             elif positive_value_exists(candidate_campaign_we_vote_id):
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(we_vote_id=candidate_campaign_we_vote_id)
+                if positive_value_exists(read_only):
+                    candidate_campaign_on_stage = CandidateCampaign.objects.using('readonly').get(
+                        we_vote_id=candidate_campaign_we_vote_id)
+                else:
+                    candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                        we_vote_id=candidate_campaign_we_vote_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
                 candidate_campaign_found = True
-                status = "RETRIEVE_CANDIDATE_FOUND_BY_WE_VOTE_ID"
+                status += "RETRIEVE_CANDIDATE_FOUND_BY_WE_VOTE_ID "
             elif positive_value_exists(candidate_maplight_id):
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(maplight_id=candidate_maplight_id)
+                if positive_value_exists(read_only):
+                    candidate_campaign_on_stage = CandidateCampaign.objects.using('readonly').get(
+                        maplight_id=candidate_maplight_id)
+                else:
+                    candidate_campaign_on_stage = CandidateCampaign.objects.get(maplight_id=candidate_maplight_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
                 candidate_campaign_found = True
-                status = "RETRIEVE_CANDIDATE_FOUND_BY_MAPLIGHT_ID"
+                status += "RETRIEVE_CANDIDATE_FOUND_BY_MAPLIGHT_ID "
             elif positive_value_exists(candidate_vote_smart_id):
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(vote_smart_id=candidate_vote_smart_id)
+                if positive_value_exists(read_only):
+                    candidate_campaign_on_stage = CandidateCampaign.objects.using('readonly').get(
+                        vote_smart_id=candidate_vote_smart_id)
+                else:
+                    candidate_campaign_on_stage = CandidateCampaign.objects.get(vote_smart_id=candidate_vote_smart_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
                 candidate_campaign_found = True
-                status = "RETRIEVE_CANDIDATE_FOUND_BY_VOTE_SMART_ID"
+                status += "RETRIEVE_CANDIDATE_FOUND_BY_VOTE_SMART_ID "
             elif positive_value_exists(candidate_name):
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(candidate_name=candidate_name)
+                if positive_value_exists(read_only):
+                    candidate_campaign_on_stage = CandidateCampaign.objects.using('readonly').get(
+                        candidate_name=candidate_name)
+                else:
+                    candidate_campaign_on_stage = CandidateCampaign.objects.get(candidate_name=candidate_name)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
                 candidate_campaign_found = True
-                status = "RETRIEVE_CANDIDATE_FOUND_BY_NAME"
+                status += "RETRIEVE_CANDIDATE_FOUND_BY_NAME "
             elif positive_value_exists(ballotpedia_candidate_id) and positive_value_exists(google_civic_election_id):
                 ballotpedia_candidate_id_integer = convert_to_int(ballotpedia_candidate_id)
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(
-                    ballotpedia_candidate_id=ballotpedia_candidate_id_integer,
-                    google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(read_only):
+                    candidate_campaign_on_stage = CandidateCampaign.objects.using('readonly').get(
+                        ballotpedia_candidate_id=ballotpedia_candidate_id_integer,
+                        google_civic_election_id=google_civic_election_id)
+                else:
+                    candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                        ballotpedia_candidate_id=ballotpedia_candidate_id_integer,
+                        google_civic_election_id=google_civic_election_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
                 candidate_campaign_found = True
-                status = "RETRIEVE_CANDIDATE_FOUND_BY_BALLOTPEDIA_CANDIDATE_ID"
+                status += "RETRIEVE_CANDIDATE_FOUND_BY_BALLOTPEDIA_CANDIDATE_ID "
             else:
                 candidate_campaign_found = False
-                status = "RETRIEVE_CANDIDATE_SEARCH_INDEX_MISSING"
+                status += "RETRIEVE_CANDIDATE_SEARCH_INDEX_MISSING "
+                success = False
         except CandidateCampaign.MultipleObjectsReturned as e:
             candidate_campaign_found = False
             handle_record_found_more_than_one_exception(e, logger=logger)
             exception_multiple_object_returned = True
-            status = "RETRIEVE_CANDIDATE_MULTIPLE_OBJECTS_RETURNED"
+            status += "RETRIEVE_CANDIDATE_MULTIPLE_OBJECTS_RETURNED "
+            success = False
         except CandidateCampaign.DoesNotExist:
             candidate_campaign_found = False
             exception_does_not_exist = True
-            status = "RETRIEVE_CANDIDATE_NOT_FOUND"
+            status += "RETRIEVE_CANDIDATE_NOT_FOUND "
         except Exception as e:
             candidate_campaign_found = False
-            status = "RETRIEVE_CANDIDATE_NOT_FOUND_EXCEPTION"
+            status += "RETRIEVE_CANDIDATE_NOT_FOUND_EXCEPTION " + str(e) + " "
+            success = False
 
         results = {
-            'success':                  True if convert_to_int(candidate_campaign_id) > 0 else False,
+            'success':                  success,
             'status':                   status,
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
@@ -1768,6 +1801,7 @@ class CandidateCampaignManager(models.Model):
 
     def retrieve_candidates_are_not_duplicates(self, candidate1_we_vote_id, candidate2_we_vote_id, read_only=True):
         candidates_are_not_duplicates = CandidatesAreNotDuplicates()
+        status = ""
         # Note that the direction of the friendship does not matter
         try:
             if positive_value_exists(read_only):
@@ -1782,17 +1816,17 @@ class CandidateCampaignManager(models.Model):
                 )
             candidates_are_not_duplicates_found = True
             success = True
-            status = "CANDIDATES_NOT_DUPLICATES_UPDATED_OR_CREATED1 "
+            status += "CANDIDATES_NOT_DUPLICATES_UPDATED_OR_CREATED1 "
         except CandidatesAreNotDuplicates.DoesNotExist:
             # No data found. Try again below
             success = True
             candidates_are_not_duplicates_found = False
-            status = 'NO_CANDIDATES_NOT_DUPLICATES_RETRIEVED_DoesNotExist1 '
+            status += 'NO_CANDIDATES_NOT_DUPLICATES_RETRIEVED_DoesNotExist1 '
         except Exception as e:
             candidates_are_not_duplicates_found = False
             candidates_are_not_duplicates = CandidatesAreNotDuplicates()
             success = False
-            status = "CANDIDATES_NOT_DUPLICATES_NOT_UPDATED_OR_CREATED1 " + str(e) + ' '
+            status += "CANDIDATES_NOT_DUPLICATES_NOT_UPDATED_OR_CREATED1 " + str(e) + ' '
 
         if not candidates_are_not_duplicates_found and success:
             try:
@@ -1808,17 +1842,17 @@ class CandidateCampaignManager(models.Model):
                     )
                 candidates_are_not_duplicates_found = True
                 success = True
-                status = "CANDIDATES_NOT_DUPLICATES_UPDATED_OR_CREATED2 "
+                status += "CANDIDATES_NOT_DUPLICATES_UPDATED_OR_CREATED2 "
             except CandidatesAreNotDuplicates.DoesNotExist:
                 # No data found. Try again below
                 success = True
                 candidates_are_not_duplicates_found = False
-                status = 'NO_CANDIDATES_NOT_DUPLICATES_RETRIEVED2_DoesNotExist2 '
+                status += 'NO_CANDIDATES_NOT_DUPLICATES_RETRIEVED2_DoesNotExist2 '
             except Exception as e:
                 candidates_are_not_duplicates_found = False
                 candidates_are_not_duplicates = CandidatesAreNotDuplicates()
                 success = False
-                status = "CANDIDATES_NOT_DUPLICATES_NOT_UPDATED_OR_CREATED2 " + str(e) + ' '
+                status += "CANDIDATES_NOT_DUPLICATES_NOT_UPDATED_OR_CREATED2 " + str(e) + ' '
 
         results = {
             'success':                              success,
@@ -1838,6 +1872,7 @@ class CandidateCampaignManager(models.Model):
         # Note that the direction of the linkage does not matter
         candidates_are_not_duplicates_list1 = []
         candidates_are_not_duplicates_list2 = []
+        status = ""
         try:
             if positive_value_exists(read_only):
                 candidates_are_not_duplicates_list_query = CandidatesAreNotDuplicates.objects.using('readonly').filter(
@@ -1849,14 +1884,14 @@ class CandidateCampaignManager(models.Model):
                 )
             candidates_are_not_duplicates_list1 = list(candidates_are_not_duplicates_list_query)
             success = True
-            status = "CANDIDATES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED1 "
+            status += "CANDIDATES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED1 "
         except CandidatesAreNotDuplicates.DoesNotExist:
             # No data found. Try again below
             success = True
-            status = 'NO_CANDIDATES_NOT_DUPLICATES_LIST_RETRIEVED_DoesNotExist1 '
+            status += 'NO_CANDIDATES_NOT_DUPLICATES_LIST_RETRIEVED_DoesNotExist1 '
         except Exception as e:
             success = False
-            status = "CANDIDATES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED1 " + str(e) + ' '
+            status += "CANDIDATES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED1 " + str(e) + ' '
 
         if success:
             try:
@@ -1872,13 +1907,13 @@ class CandidateCampaignManager(models.Model):
                         )
                 candidates_are_not_duplicates_list2 = list(candidates_are_not_duplicates_list_query)
                 success = True
-                status = "CANDIDATES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED2 "
+                status += "CANDIDATES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED2 "
             except CandidatesAreNotDuplicates.DoesNotExist:
                 success = True
-                status = 'NO_CANDIDATES_NOT_DUPLICATES_LIST_RETRIEVED2_DoesNotExist2 '
+                status += 'NO_CANDIDATES_NOT_DUPLICATES_LIST_RETRIEVED2_DoesNotExist2 '
             except Exception as e:
                 success = False
-                status = "CANDIDATES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED2 " + str(e) + ' '
+                status += "CANDIDATES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED2 " + str(e) + ' '
 
         candidates_are_not_duplicates_list = candidates_are_not_duplicates_list1 + candidates_are_not_duplicates_list2
         candidates_are_not_duplicates_list_found = positive_value_exists(len(candidates_are_not_duplicates_list))
@@ -1923,11 +1958,11 @@ class CandidateCampaignManager(models.Model):
         # We are avoiding requiring ocd_division_id
         # elif not positive_value_exists(ocd_division_id):
         #     success = False
-        #     status = 'MISSING_OCD_DIVISION_ID'
+        #     status += 'MISSING_OCD_DIVISION_ID '
         # DALE 2016-02-20 We are not requiring contest_office_id or contest_office_we_vote_id to match a candidate
         # elif not positive_value_exists(contest_office_we_vote_id): # and not positive_value_exists(contest_office_id):
         #     success = False
-        #     status = 'MISSING_CONTEST_OFFICE_ID'
+        #     status += 'MISSING_CONTEST_OFFICE_ID '
         elif not positive_value_exists(google_civic_candidate_name):
             success = False
             status += 'MISSING_GOOGLE_CIVIC_CANDIDATE_NAME '
@@ -2324,10 +2359,10 @@ class CandidateCampaignManager(models.Model):
             if values_changed:
                 candidate.save()
                 success = True
-                status = "SAVED_CANDIDATE_SOCIAL_MEDIA"
+                status += "SAVED_CANDIDATE_SOCIAL_MEDIA "
             else:
                 success = True
-                status = "NO_CHANGES_SAVED_TO_CANDIDATE_SOCIAL_MEDIA"
+                status += "NO_CHANGES_SAVED_TO_CANDIDATE_SOCIAL_MEDIA "
 
         results = {
             'success':                  success,
@@ -2368,10 +2403,10 @@ class CandidateCampaignManager(models.Model):
             if values_changed:
                 candidate.save()
                 success = True
-                status = "SAVED_BALLOTPEDIA_IMAGES "
+                status += "SAVED_BALLOTPEDIA_IMAGES "
             else:
                 success = True
-                status = "NO_CHANGES_SAVED_TO_BALLOTPEDIA_IMAGES "
+                status += "NO_CHANGES_SAVED_TO_BALLOTPEDIA_IMAGES "
 
         results = {
             'success':      success,
@@ -2471,10 +2506,10 @@ class CandidateCampaignManager(models.Model):
             if values_changed:
                 candidate.save()
                 success = True
-                status = "SAVED_CANDIDATE_TWITTER_DETAILS"
+                status += "SAVED_CANDIDATE_TWITTER_DETAILS "
             else:
                 success = True
-                status = "NO_CHANGES_SAVED_TO_CANDIDATE_TWITTER_DETAILS"
+                status += "NO_CHANGES_SAVED_TO_CANDIDATE_TWITTER_DETAILS "
 
         results = {
             'success':      success,
@@ -2504,7 +2539,7 @@ class CandidateCampaignManager(models.Model):
             candidate.we_vote_hosted_profile_image_url_tiny = ''
             candidate.save()
             success = True
-            status = "RESET_CANDIDATE_IMAGE_DETAILS"
+            status += "RESET_CANDIDATE_IMAGE_DETAILS "
 
         results = {
             'success':      success,
@@ -2534,7 +2569,7 @@ class CandidateCampaignManager(models.Model):
             candidate.twitter_location = ''
             candidate.save()
             success = True
-            status = "CLEARED_CANDIDATE_TWITTER_DETAILS"
+            status += "CLEARED_CANDIDATE_TWITTER_DETAILS "
 
         results = {
             'success':      success,
@@ -2881,15 +2916,15 @@ class CandidateCampaignManager(models.Model):
                     existing_candidate_entry.save()
                     candidate_updated = True
                     success = True
-                    status = "CANDIDATE_UPDATED"
+                    status += "CANDIDATE_UPDATED "
                 else:
                     candidate_updated = False
                     success = True
-                    status = "CANDIDATE_NOT_UPDATED-NO_CHANGES "
+                    status += "CANDIDATE_NOT_UPDATED-NO_CHANGES "
         except Exception as e:
             success = False
             candidate_updated = False
-            status = "CANDIDATE_RETRIEVE_ERROR"
+            status += "CANDIDATE_RETRIEVE_ERROR "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
@@ -2968,6 +3003,7 @@ class CandidateCampaignManager(models.Model):
         """
         candidates_count = 0
         success = False
+        status = ""
         if positive_value_exists(google_civic_election_id):
             try:
                 candidate_item_queryset = CandidateCampaign.objects.all()
@@ -2975,18 +3011,18 @@ class CandidateCampaignManager(models.Model):
                     google_civic_election_id=google_civic_election_id)
                 candidates_count = candidate_item_queryset.count()
 
-                status = 'CANDIDATES_ITEMS_FOUND '
+                status += 'CANDIDATES_ITEMS_FOUND '
                 success = True
             except CandidateCampaign.DoesNotExist:
                 # No candidate items found. Not a problem.
-                status = 'NO_CANDIDATE_ITEMS_FOUND '
+                status += 'NO_CANDIDATE_ITEMS_FOUND '
                 success = True
             except Exception as e:
                 handle_exception(e, logger=logger)
-                status = 'FAILED retrieve_candidate_items_for_election ' \
-                         '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                status += 'FAILED retrieve_candidate_items_for_election ' \
+                          '{error} [type: {error_type}] '.format(error=e.message, error_type=type(e))
         else:
-            status = 'INVALID_GOOGLE_CIVIC_ELECTION_ID'
+            status += 'INVALID_GOOGLE_CIVIC_ELECTION_ID '
         results = {
             'success':          success,
             'status':           status,

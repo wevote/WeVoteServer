@@ -338,8 +338,12 @@ def process_contest_office_from_structured_json(
         # Presidential races don't have either district_id or district_name, so we can't require one.
         # Perhaps have a special case for "district" -> "scope": "stateUpper"/"stateLower" vs. "scope": "statewide"
         update_or_create_contest_office_results = contest_office_manager.update_or_create_contest_office(
-            we_vote_id, maplight_id, google_civic_election_id, office_name, district_id,
-            updated_contest_office_values)
+            office_we_vote_id=we_vote_id,
+            maplight_id=maplight_id,
+            google_civic_election_id=google_civic_election_id,
+            office_name=office_name,
+            district_id=district_id,
+            updated_contest_office_values=updated_contest_office_values)
     else:
         update_or_create_contest_office_results = {
             'success': False,

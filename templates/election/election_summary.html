@@ -345,53 +345,66 @@
 <ol>
 {% if not is_national_election or is_national_election and state_code %}
   <li>
-    <a href="{% url 'ballotpedia:attach_ballotpedia_election' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}"
-       target="_blank">
-        Attach Ballotpedia Elections{% if state_code %} (for {{ state_code|upper }}){% endif %}</a> (in new window)<br />
-        Reach out to Ballotpedia API and figure out the matching ballotpedia_election_ids.
+    <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+        Ballotpedia: Retrieve Ballots for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}
+    </a> (in new window)<br />
+    Start with all of the polling locations in this state. For each polling location,
+    reach out to Ballotpedia "sample_ballot_elections" API with lat/long and retrieve the districts covered by one polling location.<br />
+    Then reach out to Ballotpedia "sample_ballot_results" API with the districts and election date. Store the offices,
+    candidates and measures returned.<br />
+    IFF this script times
+    out, <a href="{% url 'import_export_batches:batch_set_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+    go here after ~5 minutes to see the results.</a>
   </li>
 
-  <li>
-    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&retrieve_races=1" target="_blank">
-        Ballotpedia: Retrieve Races for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}</a> (in new window)<br />
-        Reach out to Ballotpedia API and retrieve the races for all districts covered by this election.
-        This needs to be run before trying to retrieve ballot items. It is also a good idea to merge/groom the races
-        data before "Retrieve Ballots".<br />
-        IFF this script times
-        out, <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
-        go here after ~5 minutes to see the results.</a>
-  </li>
-
-  <li>
-    <a href="{% url 'ballotpedia:retrieve_candidates' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
-        Ballotpedia: Retrieve Candidates for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}</a> (in new window)<br />
-        Reach out to Ballotpedia API and retrieve the candidates for all offices in this election.<br />
-        IFF this script times
-        out, <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
-        go here after ~5 minutes to see the results.</a>
-  </li>
-
-  <li>
-    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&retrieve_measures=1" target="_blank">
-        Ballotpedia: Retrieve Measures for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}</a> (in new window)<br />
-        Reach out to Ballotpedia API and retrieve the measures for all districts covered by this election.
-        This needs to be run before trying to retrieve ballot items. It is also a good idea to merge/groom the measures
-        data before "Retrieve Ballots".<br />
-        IFF this script times
-        out, <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
-        go here after ~5 minutes to see the results.</a>
-  </li>
-
-  <li>
-    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
-        Ballotpedia: Retrieve Ballots (based on Polling Locations) for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}</a> (in new window)<br />
-        Reach out to Ballotpedia API and ask for ballots from many polling locations so we can stitch
-        together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
-        polling locations to retrieve ballots from.<br />
-        IFF this script times
-        out, <a href="{% url 'import_export_batches:batch_set_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
-        go here after ~5 minutes to see the results.</a>
-  </li>
+{#  <li>#}
+{#    <a href="{% url 'ballotpedia:attach_ballotpedia_election' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}"#}
+{#       target="_blank">#}
+{#        Attach Ballotpedia Elections{% if state_code %} (for {{ state_code|upper }}){% endif %}</a> (in new window)<br />#}
+{#        Reach out to Ballotpedia API and figure out the matching ballotpedia_election_ids.#}
+{#  </li>#}
+{##}
+{#  <li>#}
+{#    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&retrieve_races=1" target="_blank">#}
+{#        Ballotpedia: Retrieve Races for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}</a> (in new window)<br />#}
+{#        Reach out to Ballotpedia API and retrieve the races for all districts covered by this election.#}
+{#        This needs to be run before trying to retrieve ballot items. It is also a good idea to merge/groom the races#}
+{#        data before "Retrieve Ballots".<br />#}
+{#        IFF this script times#}
+{#        out, <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">#}
+{#        go here after ~5 minutes to see the results.</a>#}
+{#  </li>#}
+{##}
+{#  <li>#}
+{#    <a href="{% url 'ballotpedia:retrieve_candidates' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">#}
+{#        Ballotpedia: Retrieve Candidates for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}</a> (in new window)<br />#}
+{#        Reach out to Ballotpedia API and retrieve the candidates for all offices in this election.<br />#}
+{#        IFF this script times#}
+{#        out, <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">#}
+{#        go here after ~5 minutes to see the results.</a>#}
+{#  </li>#}
+{##}
+{#  <li>#}
+{#    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&retrieve_measures=1" target="_blank">#}
+{#        Ballotpedia: Retrieve Measures for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}</a> (in new window)<br />#}
+{#        Reach out to Ballotpedia API and retrieve the measures for all districts covered by this election.#}
+{#        This needs to be run before trying to retrieve ballot items. It is also a good idea to merge/groom the measures#}
+{#        data before "Retrieve Ballots".<br />#}
+{#        IFF this script times#}
+{#        out, <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">#}
+{#        go here after ~5 minutes to see the results.</a>#}
+{#  </li>#}
+{##}
+{#  <li>#}
+{#    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">#}
+{#        Ballotpedia: Retrieve Ballots (based on Polling Locations) for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}</a> (in new window)<br />#}
+{#        Reach out to Ballotpedia API and ask for ballots from many polling locations so we can stitch#}
+{#        together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of#}
+{#        polling locations to retrieve ballots from.<br />#}
+{#        IFF this script times#}
+{#        out, <a href="{% url 'import_export_batches:batch_set_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">#}
+{#        go here after ~5 minutes to see the results.</a>#}
+{#  </li>#}
 {% else %}
   <li>
     (To retrieve Ballot Data from Ballotpedia for this National Election, please specify a state.)<br />
