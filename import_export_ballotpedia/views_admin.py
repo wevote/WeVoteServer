@@ -523,9 +523,9 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
             polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
             # Ordering by "line1" creates a bit of (locational) random order
             # polling_location_list = polling_location_query.order_by('line1')[:import_limit]
-            # polling_location_list = list(polling_location_query)
+            polling_location_list = list(polling_location_query)
             # For testing
-            polling_location_list = polling_location_query.order_by('line1')[:10]
+            # polling_location_list = polling_location_query.order_by('line1')[:10]
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve ballot data for the {election_name}. '
