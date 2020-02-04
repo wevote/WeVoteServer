@@ -215,6 +215,9 @@ def office_list_view(request):
                 new_filter = Q(wikipedia_id__icontains=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(ballotpedia_office_id__iexact=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(ballotpedia_race_id__iexact=one_word)
                 filters.append(new_filter)
 
@@ -571,7 +574,7 @@ def office_edit_process_view(request):
                                         "&state_code=" + str(state_code))
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
-        messages.add_message(request, messages.ERROR, 'Could not save office.')
+        messages.add_message(request, messages.ERROR, 'Could not save office: ' + str(e))
 
     if redirect_to_contest_office_list:
         return HttpResponseRedirect(reverse('office:office_list', args=()) +

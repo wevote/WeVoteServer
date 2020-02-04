@@ -1649,7 +1649,7 @@ class CandidateCampaignManager(models.Model):
             candidate_campaign_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id)
 
     def retrieve_candidate_campaign_from_ballotpedia_candidate_id(
-            self, ballotpedia_candidate_id, google_civic_election_id, read_only=False):
+            self, ballotpedia_candidate_id, read_only=False):
         candidate_campaign_id = 0
         we_vote_id = ''
         candidate_maplight_id = ''
@@ -1657,7 +1657,7 @@ class CandidateCampaignManager(models.Model):
         candidate_vote_smart_id = 0
         return self.retrieve_candidate_campaign(
             candidate_campaign_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id,
-            ballotpedia_candidate_id, google_civic_election_id=google_civic_election_id, read_only=read_only)
+            ballotpedia_candidate_id, read_only=read_only)
 
     def retrieve_candidate_campaign_from_candidate_name(self, candidate_name):
         candidate_campaign_id = 0
@@ -1753,16 +1753,14 @@ class CandidateCampaignManager(models.Model):
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
                 candidate_campaign_found = True
                 status += "RETRIEVE_CANDIDATE_FOUND_BY_NAME "
-            elif positive_value_exists(ballotpedia_candidate_id) and positive_value_exists(google_civic_election_id):
+            elif positive_value_exists(ballotpedia_candidate_id):
                 ballotpedia_candidate_id_integer = convert_to_int(ballotpedia_candidate_id)
                 if positive_value_exists(read_only):
                     candidate_campaign_on_stage = CandidateCampaign.objects.using('readonly').get(
-                        ballotpedia_candidate_id=ballotpedia_candidate_id_integer,
-                        google_civic_election_id=google_civic_election_id)
+                        ballotpedia_candidate_id=ballotpedia_candidate_id_integer)
                 else:
                     candidate_campaign_on_stage = CandidateCampaign.objects.get(
-                        ballotpedia_candidate_id=ballotpedia_candidate_id_integer,
-                        google_civic_election_id=google_civic_election_id)
+                        ballotpedia_candidate_id=ballotpedia_candidate_id_integer)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
                 candidate_campaign_found = True

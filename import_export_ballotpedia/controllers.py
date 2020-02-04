@@ -1536,6 +1536,7 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json, google_civic_e
     candidate_manager = CandidateCampaignManager()
     measure_manager = ContestMeasureManager()
     politician_manager = PoliticianManager()
+    office_names_with_no_state = ["President of the United States"]
 
     if 'data' in structured_json and 'districts' in structured_json['data']:
         districts_json_list = structured_json['data']['districts']
@@ -1602,7 +1603,6 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json, google_civic_e
                         else:
                             office_results = contest_office_manager.retrieve_contest_office_from_ballotpedia_race_id(
                                 ballotpedia_race_id=ballotpedia_race_id,
-                                google_civic_election_id=google_civic_election_id,
                                 read_only=True)
                             if office_results['contest_office_found']:
                                 contest_office = office_results['contest_office']
@@ -1616,7 +1616,7 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json, google_civic_e
                                           "" + str(ballotpedia_race_id) + " "
                                 continue
                             elif not office_results['success']:
-                                status += "RETRIEVE_BY_BALLOTPEDIA_RACE_ID_FAILED "
+                                status += "RETRIEVE_BY_BALLOTPEDIA_RACE_ID_FAILED: "
                                 status += office_results['status']
                                 continue
                         if positive_value_exists(contest_office_we_vote_id):
@@ -1658,8 +1658,10 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json, google_civic_e
                                 updated_contest_office_values["office_name"] = office_name
                                 # We store the literal spelling here so we can match in the future
                                 updated_contest_office_values["ballotpedia_office_name"] = ballotpedia_office_name
-                            if positive_value_exists(state_code):
+                            if positive_value_exists(state_code) and office_name not in office_names_with_no_state:
                                 updated_contest_office_values["state_code"] = state_code
+                            elif office_name in office_names_with_no_state:
+                                updated_contest_office_values["state_code"] = 'NA'
                             create_results = contest_office_manager.update_or_create_contest_office(
                                 ballotpedia_race_id=ballotpedia_race_id,
                                 google_civic_election_id=google_civic_election_id,
@@ -1722,7 +1724,6 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json, google_civic_e
                                     candidate_results = \
                                         candidate_manager.retrieve_candidate_campaign_from_ballotpedia_candidate_id(
                                             ballotpedia_candidate_id=ballotpedia_candidate_id,
-                                            google_civic_election_id=google_civic_election_id,
                                             read_only=True
                                         )
                                     if candidate_results['candidate_campaign_found']:
@@ -1757,8 +1758,11 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json, google_civic_e
                                         update_values['contest_office_id'] = contest_office_id
                                     if positive_value_exists(office_name):
                                         update_values['contest_office_name'] = office_name
-                                    if positive_value_exists(state_code):
+                                    if positive_value_exists(state_code) and \
+                                            office_name not in office_names_with_no_state:
                                         update_values['state_code'] = state_code
+                                    elif office_name in office_names_with_no_state:
+                                        update_values['state_code'] = 'NA'
 
                                     # candidate_dict
                                     if 'race' in candidate_dict and positive_value_exists(candidate_dict['race']):

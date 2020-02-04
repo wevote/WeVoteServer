@@ -336,6 +336,18 @@ def candidate_list_view(request):
                 new_filter = Q(ballotpedia_candidate_summary__icontains=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(ballotpedia_candidate_id__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballotpedia_office_id__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballotpedia_person_id__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballotpedia_race_id__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(candidate_name__icontains=one_word)
                 filters.append(new_filter)
 

@@ -20,6 +20,7 @@ TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SEC
 
 
 def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
+    status = ""
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
 
@@ -42,27 +43,27 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
             twitter_user = api.get_user(user_id=twitter_user_id)
             twitter_json = twitter_user._json
             success = True
-            status = 'TWITTER_RETRIEVE_SUCCESSFUL-TWITTER_USER_ID ' + str(twitter_user_id)
+            status += 'TWITTER_RETRIEVE_SUCCESSFUL-TWITTER_USER_ID ' + str(twitter_user_id) + " "
             twitter_handle_found = True
         elif positive_value_exists(twitter_handle):
             twitter_user = api.get_user(screen_name=twitter_handle)
             twitter_json = twitter_user._json
             success = True
-            status = 'TWITTER_RETRIEVE_SUCCESSFUL-TWITTER_HANDLE ' + str(twitter_handle)
+            status += 'TWITTER_RETRIEVE_SUCCESSFUL-TWITTER_HANDLE ' + str(twitter_handle) + " "
             twitter_handle_found = True
             twitter_user_id = twitter_user.id  # Integer value. id_str would be the String value
         else:
             twitter_json = {}
             success = False
-            status = 'TWITTER_RETRIEVE_NOT_SUCCESSFUL-MISSING_VARIABLE'
+            status += 'TWITTER_RETRIEVE_NOT_SUCCESSFUL-MISSING_VARIABLE '
             twitter_handle_found = False
     except tweepy.RateLimitError as rate_limit_error:
         success = False
-        status = 'TWITTER_RATE_LIMIT_ERROR'
+        status += 'TWITTER_RATE_LIMIT_ERROR '
         handle_exception(rate_limit_error, logger=logger, exception_message=status)
     except tweepy.error.TweepError as error_instance:
         success = False
-        status = twitter_handle + " " if positive_value_exists(twitter_handle) else ""
+        status += twitter_handle + " " if positive_value_exists(twitter_handle) else ""
         status += str(twitter_user_id) + " " if positive_value_exists(twitter_user_id) else " "
         error_tuple = error_instance.args
         for error_dict in error_tuple:
@@ -70,10 +71,13 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
                 status += '[' + one_error['message'] + '] '
         handle_exception(error_instance, logger=logger, exception_message=status)
 
-    if positive_value_exists(twitter_json.get('profile_banner_url')):
-        # Dec 2019, https://developer.twitter.com/en/docs/accounts-and-users/user-profile-images-and-banners
-        banner = twitter_json.get('profile_banner_url') + '/1500x500'
-        twitter_json['profile_banner_url'] = banner
+    try:
+        if positive_value_exists(twitter_json.get('profile_banner_url')):
+            # Dec 2019, https://developer.twitter.com/en/docs/accounts-and-users/user-profile-images-and-banners
+            banner = twitter_json.get('profile_banner_url') + '/1500x500'
+            twitter_json['profile_banner_url'] = banner
+    except Exception as e:
+        status += "FAILED_PROFILE_BANNER_URL " + str(e) + " "
 
     results = {
         'status':               status,
