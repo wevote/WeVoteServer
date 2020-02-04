@@ -397,7 +397,7 @@ def elected_office_edit_process_view(request):
                                         "&state_code=" + str(state_code))
     except Exception as e:
         exception.models.handle_record_not_saved_exception(e, logger=logger)
-        messages.add_message(request, messages.ERROR, 'Could not save office.')
+        messages.add_message(request, messages.ERROR, 'Could not save elected office:' + str(e))
 
     if redirect_to_elected_office_list:
         return HttpResponseRedirect(reverse('elected_office:elected_office_list', args=()) +
