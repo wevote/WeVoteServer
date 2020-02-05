@@ -1609,6 +1609,18 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json, google_civic_e
                                 contest_office_we_vote_id = contest_office.we_vote_id
                                 contest_office_id = contest_office.id
                                 office_name = contest_office.office_name
+                                if contest_office.google_civic_election_id != google_civic_election_id:
+                                    # We need to record that his office (and all positions under it) came from
+                                    #  another election
+                                    visiting_results = contest_office_manager.update_or_create_visiting_link(
+                                        contest_office_we_vote_id=contest_office_we_vote_id,
+                                        ballotpedia_race_id=ballotpedia_race_id,
+                                        host_google_civic_election_id=google_civic_election_id,
+                                        origin_google_civic_election_id=contest_office.google_civic_election_id,
+                                    )
+                                    if not visiting_results['success']:
+                                        status += visiting_results['status']
+
                                 existing_office_objects_dict[ballotpedia_race_id] = contest_office
                                 # In the future, we will want to look for updated data to save
                             elif office_results['MultipleObjectsReturned']:
@@ -1869,6 +1881,10 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json, google_civic_e
                             if measure_results['contest_measure_found']:
                                 contest_measure = measure_results['contest_measure']
                                 contest_measure_we_vote_id = contest_measure.we_vote_id
+                                if contest_measure.google_civic_election_id != google_civic_election_id:
+                                    # We need to record that his measure (and all positions under it) came from
+                                    #  another election
+                                    pass
                                 if ballotpedia_measure_id not in existing_measure_objects_dict:
                                     existing_measure_objects_dict[ballotpedia_measure_id] = contest_measure
                                 # In the future, we will want to look for updated data to save

@@ -22,6 +22,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from measure.controllers import push_contest_measure_data_to_other_table_caches
 from office.controllers import push_contest_office_data_to_other_table_caches
+from office.models import ContestOfficeManager
 from organization.models import OrganizationManager
 from politician.models import PoliticianManager
 from voter.models import voter_has_authority
@@ -246,6 +247,7 @@ def position_list_view(request):
     position_search = request.GET.get('position_search', '')
 
     election_manager = ElectionManager()
+    office_manager = ContestOfficeManager()
     google_civic_election_id_list = []
     if positive_value_exists(show_all_elections):
         results = election_manager.retrieve_elections()
@@ -330,15 +332,21 @@ def position_list_view(request):
     public_position_list_query = public_position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
     if positive_value_exists(google_civic_election_id):
+        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+            host_google_civic_election_id_list=[google_civic_election_id])
         public_position_list_query = public_position_list_query.filter(
-            google_civic_election_id=google_civic_election_id)
+            Q(google_civic_election_id=google_civic_election_id) |
+            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
     elif positive_value_exists(show_all_elections):
         # Return offices from all elections
         pass
     else:
         # Limit this search to upcoming_elections only
+        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+            host_google_civic_election_id_list=google_civic_election_id_list)
         public_position_list_query = public_position_list_query.filter(
-            google_civic_election_id__in=google_civic_election_id_list)
+            Q(google_civic_election_id__in=google_civic_election_id_list) |
+            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
 
     if positive_value_exists(position_search):
         search_words = position_search.split()
@@ -399,15 +407,21 @@ def position_list_view(request):
     # As of Aug 2018 we are no longer using PERCENT_RATING
     friends_only_position_list_query = friends_only_position_list_query.exclude(stance__iexact=PERCENT_RATING)
     if positive_value_exists(google_civic_election_id):
+        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+            host_google_civic_election_id_list=[google_civic_election_id])
         friends_only_position_list_query = friends_only_position_list_query.filter(
-            google_civic_election_id=google_civic_election_id)
+            Q(google_civic_election_id=google_civic_election_id) |
+            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
     elif positive_value_exists(show_all_elections):
         # Return offices from all elections
         pass
     else:
         # Limit this search to upcoming_elections only
+        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+            host_google_civic_election_id_list=google_civic_election_id_list)
         friends_only_position_list_query = friends_only_position_list_query.filter(
-            google_civic_election_id__in=google_civic_election_id_list)
+            Q(google_civic_election_id__in=google_civic_election_id_list) |
+            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
 
     if positive_value_exists(position_search):
         search_words = position_search.split()
@@ -423,6 +437,9 @@ def position_list_view(request):
             filters.append(new_filter)
 
             new_filter = Q(contest_measure_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(contest_office_name__icontains=one_word)
             filters.append(new_filter)
 
             new_filter = Q(contest_office_we_vote_id__iexact=one_word)

@@ -2853,7 +2853,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
         number_retrieved = len(voter_guides)
         if positive_value_exists(number_retrieved):
             json_data = {
-                'status': status + ' VOTER_GUIDES_TO_FOLLOW_FOR_API_RETRIEVED',
+                'status': status + ' VOTER_GUIDES_TO_FOLLOW_FOR_API_RETRIEVED-POSITIVE_NUMBER_RETRIEVED ',
                 'success': True,
                 'voter_device_id': voter_device_id,
                 'voter_guides': voter_guides,
@@ -3331,7 +3331,7 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
 
     number_retrieved = len(voter_guides)
     json_data = {
-        'status': 'VOTER_GUIDES_TO_FOLLOW_FOR_API_RETRIEVED: ' + status,
+        'status': 'VOTER_GUIDES_TO_FOLLOW_FOR_API_RETRIEVED-JSON_DATA: ' + status,
         'success': True,
         'voter_guides': voter_guides,
         'number_retrieved': number_retrieved,
@@ -3339,7 +3339,7 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
 
     results = {
         'success': success,
-        'status': 'VOTER_GUIDES_TO_FOLLOW_FOR_API_RETRIEVED: ' + status,
+        'status': 'VOTER_GUIDES_TO_FOLLOW_FOR_API_RETRIEVED-FINAL: ' + status,
         'json_data': json_data,
     }
     return results
@@ -4543,14 +4543,14 @@ def retrieve_voter_guides_from_friends(
         voter_guide_list = list(voter_guide_query)
         if len(voter_guide_list):
             voter_guide_list_found = True
-            status = 'VOTER_GUIDE_FOUND_GENERIC_VOTER_GUIDES_TO_FOLLOW'
+            status += 'VOTER_GUIDE_FOUND_VOTER_GUIDES_TO_FOLLOW_FROM_FRIENDS '
         else:
-            status = 'NO_VOTER_GUIDES_FOUND_GENERIC_VOTER_GUIDES_TO_FOLLOW'
+            status += 'NO_VOTER_GUIDES_FOUND_VOTER_GUIDES_TO_FOLLOW_FROM_FRIENDS '
         success = True
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
-        status = 'retrieve_voter_guides_to_follow_generic: Unable to retrieve voter guides from db. ' \
-                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        status += 'retrieve_voter_guides_to_follow_generic: Unable to retrieve voter guides from db. ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
         success = False
 
     # Since we are in the function that retrieves voter guides for voterGuidesFromFriendsUpcomingRetrieve

@@ -176,6 +176,7 @@ def office_list_view(request):
     office_list_count = 0
 
     election_manager = ElectionManager()
+    office_manager = ContestOfficeManager()
     if positive_value_exists(show_all_elections):
         results = election_manager.retrieve_elections()
         election_list = results['election_list']
@@ -185,8 +186,13 @@ def office_list_view(request):
 
     try:
         office_queryset = ContestOffice.objects.all()
+
         if positive_value_exists(google_civic_election_id):
-            office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
+            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                host_google_civic_election_id_list=[google_civic_election_id])
+            office_queryset = office_queryset.filter(
+                Q(google_civic_election_id=google_civic_election_id) |
+                Q(we_vote_id__in=office_visiting_list_we_vote_ids))
         elif positive_value_exists(show_all_elections):
             # Return offices from all elections
             pass
@@ -195,7 +201,11 @@ def office_list_view(request):
             google_civic_election_id_list = []
             for one_election in election_list:
                 google_civic_election_id_list.append(one_election.google_civic_election_id)
-            office_queryset = office_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                host_google_civic_election_id_list=google_civic_election_id_list)
+            office_queryset = office_queryset.filter(
+                Q(google_civic_election_id__in=google_civic_election_id_list) |
+                Q(we_vote_id__in=office_visiting_list_we_vote_ids))
         if positive_value_exists(state_code):
             office_queryset = office_queryset.filter(state_code__iexact=state_code)
         if positive_value_exists(show_marquee_or_battleground):
