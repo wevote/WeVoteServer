@@ -20,6 +20,7 @@ from django.shortcuts import redirect, render
 from election.models import Election, ElectionManager
 from import_export_batches.models import BatchSet, BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS
 from polling_location.models import PollingLocation
+import random
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_valid_state_code, positive_value_exists
@@ -521,9 +522,18 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
                                                Q(zip_long__exact=''))
             polling_location_query = polling_location_query.filter(state__iexact=state_code)
             polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
-            # Ordering by "line1" creates a bit of (locational) random order
-            # polling_location_list = polling_location_query.order_by('line1')[:import_limit]
-            polling_location_list = list(polling_location_query)
+
+            # Randomly change the sort order so we over time load different polling locations (before timeout)
+            random_sorting = random.randint(1, 5)
+            if random_sorting == 1:
+                # Ordering by "line1" creates a bit of (locational) random order
+                polling_location_list = polling_location_query.order_by('line1')
+            elif random_sorting == 2:
+                polling_location_list = polling_location_query.order_by('-line1')
+            elif random_sorting == 3:
+                polling_location_list = polling_location_query.order_by('zip_long')
+            else:
+                polling_location_list = polling_location_query.order_by('-zip_long')
             # For testing
             # polling_location_list = polling_location_query.order_by('line1')[:10]
     except PollingLocation.DoesNotExist:

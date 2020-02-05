@@ -270,6 +270,7 @@ def candidate_list_view(request):
     candidate_count_start = 0
 
     election_manager = ElectionManager()
+    office_manager = ContestOfficeManager()
     if positive_value_exists(show_all_elections):
         results = election_manager.retrieve_elections()
         election_list = results['election_list']
@@ -284,7 +285,11 @@ def candidate_list_view(request):
         try:
             office_queryset = ContestOffice.objects.all()
             if positive_value_exists(google_civic_election_id):
-                office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
+                office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                    host_google_civic_election_id_list=[google_civic_election_id])
+                office_queryset = office_queryset.filter(
+                    Q(google_civic_election_id=google_civic_election_id) |
+                    Q(we_vote_id__in=office_visiting_list_we_vote_ids))
             elif positive_value_exists(show_all_elections):
                 # Return offices from all elections
                 pass
@@ -293,7 +298,11 @@ def candidate_list_view(request):
                 google_civic_election_id_list = []
                 for one_election in election_list:
                     google_civic_election_id_list.append(one_election.google_civic_election_id)
-                office_queryset = office_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+                office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                    host_google_civic_election_id_list=google_civic_election_id_list)
+                office_queryset = office_queryset.filter(
+                    Q(google_civic_election_id__in=google_civic_election_id_list) |
+                    Q(we_vote_id__in=office_visiting_list_we_vote_ids))
             if positive_value_exists(state_code):
                 office_queryset = office_queryset.filter(state_code__iexact=state_code)
             if positive_value_exists(show_marquee_or_battleground):
@@ -312,9 +321,13 @@ def candidate_list_view(request):
         except Exception as e:
             office_list_count = 0
     try:
-        candidate_list = CandidateCampaign.objects.all()
+        candidate_queryset = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id):
-            candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                host_google_civic_election_id_list=[google_civic_election_id])
+            candidate_queryset = candidate_queryset.filter(
+                Q(google_civic_election_id=google_civic_election_id) |
+                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
         elif positive_value_exists(show_all_elections):
             # Return candidates from all elections
             pass
@@ -323,11 +336,16 @@ def candidate_list_view(request):
             google_civic_election_id_list = []
             for one_election in election_list:
                 google_civic_election_id_list.append(one_election.google_civic_election_id)
-            candidate_list = candidate_list.filter(google_civic_election_id__in=google_civic_election_id_list)
+            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                host_google_civic_election_id_list=google_civic_election_id_list)
+            candidate_queryset = candidate_queryset.filter(
+                Q(google_civic_election_id__in=google_civic_election_id_list) |
+                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
         if positive_value_exists(state_code):
-            candidate_list = candidate_list.filter(state_code__iexact=state_code)
+            candidate_queryset = candidate_queryset.filter(state_code__iexact=state_code)
         if positive_value_exists(show_marquee_or_battleground):
-            candidate_list = candidate_list.filter(contest_office_we_vote_id__in=battleground_office_we_vote_ids)
+            candidate_queryset = candidate_queryset.filter(
+                contest_office_we_vote_id__in=battleground_office_we_vote_ids)
         if positive_value_exists(candidate_search):
             search_words = candidate_search.split()
             for one_word in search_words:
@@ -380,9 +398,9 @@ def candidate_list_view(request):
                     for item in filters:
                         final_filters |= item
 
-                    candidate_list = candidate_list.filter(final_filters)
-        candidate_list = candidate_list.order_by('candidate_name')
-        candidate_list_count = candidate_list.count()
+                    candidate_queryset = candidate_queryset.filter(final_filters)
+        candidate_queryset = candidate_queryset.order_by('candidate_name')
+        candidate_list_count = candidate_queryset.count()
 
         candidate_count_start = 0
         if positive_value_exists(show_all):
@@ -391,11 +409,11 @@ def candidate_list_view(request):
             number_to_show_per_page = 25
             if candidate_list_count <= number_to_show_per_page:
                 # Ignore pagination
-                pass
+                candidate_list = list(candidate_queryset)
             else:
                 candidate_count_start = number_to_show_per_page * page
                 candidate_count_end = candidate_count_start + number_to_show_per_page
-                candidate_list = candidate_list[candidate_count_start:candidate_count_end]
+                candidate_list = candidate_queryset[candidate_count_start:candidate_count_end]
     except CandidateCampaign.DoesNotExist:
         # This is fine, create new
         pass

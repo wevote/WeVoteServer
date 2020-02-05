@@ -37,6 +37,7 @@ from import_export_twitter.controllers import refresh_twitter_organization_detai
 from issue.models import IssueListManager
 from measure.controllers import add_measure_name_alternatives_to_measure_list_light, \
     retrieve_measure_list_for_all_upcoming_elections
+from office.models import ContestOfficeManager
 from organization.controllers import retrieve_organization_list_for_all_upcoming_elections
 from organization.models import GROUP, Organization, OrganizationListManager, OrganizationManager, ORGANIZATION_TYPE_MAP
 from organization.views_admin import organization_edit_process_view
@@ -1494,7 +1495,13 @@ def generate_voter_guides_view(request):
     voter_guide_updated_count = 0
 
     # What elections do we want to generate voter_guides for?
-    election_list = Election.objects.all()
+    election_list = []
+    election_manager = ElectionManager()
+    election_results = election_manager.retrieve_upcoming_elections()
+    if election_results['election_list_found']:
+        election_list = election_results['election_list']
+
+    office_manager = ContestOfficeManager()
     voter_guide_manager = VoterGuideManager()
 
     # Cycle through organizations
@@ -1514,10 +1521,14 @@ def generate_voter_guides_view(request):
             # Search for positions with this organization_id and google_civic_election_id
             google_civic_election_id = str(election.google_civic_election_id)  # Convert to VarChar
 
+            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                host_google_civic_election_id_list=[election.google_civic_election_id])
+
+            positions_exist_query = PositionEntered.objects.filter(organization_id=organization.id)
+            positions_exist_query = positions_exist_query.filter(
+                Q(google_civic_election_id=google_civic_election_id) |
+                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
             # As of August 2018 exclude Vote Smart ratings (vote_smart_rating__isnull)
-            positions_exist_query = PositionEntered.objects.filter(
-                organization_id=organization.id,
-                google_civic_election_id=google_civic_election_id)
             positions_exist_query = positions_exist_query.filter(
                 Q(vote_smart_rating__isnull=True) | Q(vote_smart_rating=""))
             positions_count = positions_exist_query.count()
@@ -1609,6 +1620,9 @@ def generate_voter_guides_for_one_election_view(request):
 
     # What elections do we want to generate voter_guides for?
     election_list = Election.objects.all()
+    office_manager = ContestOfficeManager()
+    office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+        host_google_civic_election_id_list=[google_civic_election_id])
 
     # Cycle through organizations
     organization_list = Organization.objects.all()
@@ -1620,9 +1634,10 @@ def generate_voter_guides_for_one_election_view(request):
             # Search for positions with this organization_id and google_civic_election_id
 
             # As of August 2018 exclude Vote Smart ratings (vote_smart_rating__isnull)
-            positions_exist_query = PositionEntered.objects.filter(
-                organization_we_vote_id=organization.we_vote_id,
-                google_civic_election_id=google_civic_election_id)
+            positions_exist_query = PositionEntered.objects.filter(organization_we_vote_id=organization.we_vote_id)
+            positions_exist_query = positions_exist_query.filter(
+                Q(google_civic_election_id=google_civic_election_id) |
+                Q(we_vote_id__in=office_visiting_list_we_vote_ids))
             positions_exist_query = positions_exist_query.filter(
                 Q(vote_smart_rating__isnull=True) | Q(vote_smart_rating=""))
             positions_count = positions_exist_query.count()

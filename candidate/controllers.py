@@ -664,12 +664,16 @@ def candidates_import_from_structured_json(structured_json):
                 updated_candidate_values['ballotpedia_election_id'] = one_candidate['ballotpedia_election_id']
             if 'ballotpedia_image_id' in one_candidate:
                 updated_candidate_values['ballotpedia_image_id'] = one_candidate['ballotpedia_image_id']
+            if 'ballotpedia_office_id' in one_candidate:
+                updated_candidate_values['ballotpedia_office_id'] = one_candidate['ballotpedia_office_id']
             if 'ballotpedia_page_title' in one_candidate:
                 updated_candidate_values['ballotpedia_page_title'] = one_candidate['ballotpedia_page_title']
             if 'ballotpedia_photo_url' in one_candidate:
                 updated_candidate_values['ballotpedia_photo_url'] = one_candidate['ballotpedia_photo_url']
             if 'ballotpedia_person_id' in one_candidate:
                 updated_candidate_values['ballotpedia_person_id'] = one_candidate['ballotpedia_person_id']
+            if 'ballotpedia_race_id' in one_candidate:
+                updated_candidate_values['ballotpedia_race_id'] = one_candidate['ballotpedia_race_id']
             if 'ballot_guide_official_statement' in one_candidate:
                 updated_candidate_values['ballot_guide_official_statement'] = \
                     one_candidate['ballot_guide_official_statement']

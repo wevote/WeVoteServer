@@ -1557,14 +1557,14 @@ class VoterGuideListManager(models.Model):
             voter_guide_list = list(voter_guide_query)
             if len(voter_guide_list):
                 voter_guide_list_found = True
-                status = 'VOTER_GUIDE_FOUND_GENERIC_VOTER_GUIDES_TO_FOLLOW'
+                status += 'VOTER_GUIDE_FOUND_GENERIC_VOTER_GUIDES_TO_FOLLOW '
             else:
-                status = 'NO_VOTER_GUIDES_FOUND_GENERIC_VOTER_GUIDES_TO_FOLLOW'
+                status += 'NO_VOTER_GUIDES_FOUND_GENERIC_VOTER_GUIDES_TO_FOLLOW '
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
-            status = 'retrieve_voter_guides_to_follow_generic: Unable to retrieve voter guides from db. ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'retrieve_voter_guides_to_follow_generic: Unable to retrieve voter guides from db. ' \
+                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
         # If we have multiple voter guides for one org, we only want to show the most recent
