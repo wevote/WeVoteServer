@@ -647,15 +647,18 @@ class ContestOfficeManager(models.Model):
 
     def update_or_create_visiting_link(self,
                                        contest_office_we_vote_id='',
-                                       ballotpedia_race_id='',
-                                       host_google_civic_election_id='',
-                                       origin_google_civic_election_id=''):
+                                       ballotpedia_race_id=0,
+                                       host_google_civic_election_id=0,
+                                       origin_google_civic_election_id=0):
         exception_multiple_object_returned = False
         success = True
         new_contest_office_visiting_created = False
         contest_office_visiting = ContestOfficeVisitingOtherElection()
         status = ""
 
+        ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
+        host_google_civic_election_id = convert_to_int(host_google_civic_election_id)
+        origin_google_civic_election_id = convert_to_int(origin_google_civic_election_id)
         try:
             updated_values = {
                 'contest_office_we_vote_id':        contest_office_we_vote_id,
@@ -665,8 +668,8 @@ class ContestOfficeManager(models.Model):
             }
             contest_office_visiting, new_contest_office_visiting_created = \
                 ContestOfficeVisitingOtherElection.objects.update_or_create(
-                    contest_office_we_vote_id__exact=contest_office_we_vote_id,
-                    host_google_civic_election_id__iexact=host_google_civic_election_id,
+                    contest_office_we_vote_id=contest_office_we_vote_id,
+                    host_google_civic_election_id=host_google_civic_election_id,
                     defaults=updated_values)
             status += "CONTEST_OFFICE_VISITING_UPDATED_OR_CREATED "
         except ContestOfficeVisitingOtherElection.MultipleObjectsReturned as e:

@@ -1609,14 +1609,19 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json, google_civic_e
                                 contest_office_we_vote_id = contest_office.we_vote_id
                                 contest_office_id = contest_office.id
                                 office_name = contest_office.office_name
-                                if contest_office.google_civic_election_id != google_civic_election_id:
+                                if convert_to_int(contest_office.google_civic_election_id) != google_civic_election_id:
                                     # We need to record that his office (and all positions under it) came from
                                     #  another election
+                                    origin_google_civic_election_id = 0
+                                    try:
+                                        origin_google_civic_election_id = convert_to_int(contest_office.google_civic_election_id)
+                                    except Exception as e:
+                                        pass
                                     visiting_results = contest_office_manager.update_or_create_visiting_link(
                                         contest_office_we_vote_id=contest_office_we_vote_id,
                                         ballotpedia_race_id=ballotpedia_race_id,
                                         host_google_civic_election_id=google_civic_election_id,
-                                        origin_google_civic_election_id=contest_office.google_civic_election_id,
+                                        origin_google_civic_election_id=origin_google_civic_election_id,
                                     )
                                     if not visiting_results['success']:
                                         status += visiting_results['status']
