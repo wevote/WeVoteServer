@@ -901,13 +901,17 @@ class ContestMeasureList(models.Model):
 
         return 0
 
-    def retrieve_measures(self, google_civic_election_id=0, ballotpedia_district_id=0, state_code="", limit=0):
+    def retrieve_measures(self, google_civic_election_id=0, ballotpedia_district_id=0, state_code="", limit=0,
+                          read_only=False):
         measure_list_objects = []
         measure_list_light = []
         measure_list_found = False
 
         try:
-            measure_queryset = ContestMeasure.objects.all()
+            if positive_value_exists(read_only):
+                measure_queryset = ContestMeasure.objects.using('readonly').all()
+            else:
+                measure_queryset = ContestMeasure.objects.all()
             if positive_value_exists(google_civic_election_id):
                 measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(ballotpedia_district_id):

@@ -618,6 +618,63 @@ class BallotItemManager(models.Model):
             }
         return results
 
+    def refresh_all_ballot_item_measure_entries(self, contest_measure):
+        """
+        Bulk update all ballot_item entries for this measure
+        """
+        success = False
+        status = ""
+        try:
+            number_of_ballot_items_updated = BallotItem.objects.filter(
+                contest_measure_we_vote_id=contest_measure.we_vote_id,
+            ).update(
+                ballot_item_display_name=contest_measure.measure_title,
+                contest_measure_id=contest_measure.id,
+                measure_subtitle=contest_measure.measure_subtitle,
+                measure_text=contest_measure.measure_text,
+                measure_url=contest_measure.measure_url,
+                no_vote_description=contest_measure.no_vote_description,
+                state_code=contest_measure.state_code,
+                yes_vote_description=contest_measure.yes_vote_description,
+            )
+        except Exception as e:
+            success = False
+            number_of_ballot_items_updated = 0
+            status += "REFRESH_ALL_BALLOT_ITEM_MEASURE_ENTRIES_ERROR " + str(e) + " "
+
+        results = {
+                'success':                          success,
+                'status':                           status,
+                'number_of_ballot_items_updated':   number_of_ballot_items_updated,
+            }
+        return results
+
+    def refresh_all_ballot_item_office_entries(self, contest_office):
+        """
+        Bulk update all ballot_item entries for this office
+        """
+        success = True
+        status = ""
+        try:
+            number_of_ballot_items_updated = BallotItem.objects.filter(
+                contest_office_we_vote_id=contest_office.we_vote_id,
+            ).update(
+                ballot_item_display_name=contest_office.office_name,
+                contest_office_id=contest_office.id,
+                state_code=contest_office.state_code,
+            )
+        except Exception as e:
+            success = False
+            number_of_ballot_items_updated = 0
+            status += "REFRESH_ALL_BALLOT_ITEM_OFFICE_ENTRIES_ERROR " + str(e) + " "
+
+        results = {
+                'success':                          success,
+                'status':                           status,
+                'number_of_ballot_items_updated':   number_of_ballot_items_updated,
+            }
+        return results
+
     def update_ballot_item_row_entry(self, ballot_item_display_name, local_ballot_order, state_code,
                                      google_civic_election_id, defaults):
         """
