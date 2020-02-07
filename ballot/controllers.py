@@ -740,6 +740,52 @@ def refresh_voter_ballots_from_polling_location(ballot_returned_from_polling_loc
     return results
 
 
+def refresh_voter_ballots_copied_from_polling_location(google_civic_election_id):
+    status = ""
+    success = True
+    voter_ballots_copied = 0
+
+    ballot_saved_manager = VoterBallotSavedManager()
+    # When voters provide partial addresses, we copy their ballots from nearby polling locations
+    # We want to find all voter_ballot_saved entries that came from polling_location_we_vote_id_source
+    polling_location_we_vote_id_source = ballot_returned_from_polling_location.polling_location_we_vote_id
+
+    if not positive_value_exists(polling_location_we_vote_id_source) \
+            or not positive_value_exists(google_civic_election_id):
+        status += "REFRESH_VOTER_BALLOTS_FROM_POLLING_LOCATION-MISSING_REQUIRED_VARIABLE(S) "
+        success = False
+        results = {
+            'status': status,
+            'success': success,
+        }
+        return results
+
+    retrieve_results = ballot_saved_manager.retrieve_voter_ballot_saved_list_for_election(
+        google_civic_election_id, polling_location_we_vote_id_source)
+    ballots_refreshed = 0
+    if retrieve_results['voter_ballot_saved_list_found']:
+        voter_ballot_saved_list = retrieve_results['voter_ballot_saved_list']
+        for voter_ballot_saved in voter_ballot_saved_list:
+            # Neither BallotReturned nor VoterBallotSaved change when we get refreshed data from Google Civic
+            if positive_value_exists(voter_ballot_saved.voter_id) \
+                    and positive_value_exists(voter_ballot_saved.ballot_returned_we_vote_id):
+                refresh_results = refresh_ballot_items_for_voter_copied_from_one_polling_location(
+                    voter_ballot_saved.voter_id, ballot_returned_from_polling_location)
+
+                if refresh_results['ballot_returned_copied']:
+                    ballots_refreshed += 1
+                else:
+                    status += refresh_results['status']
+
+    results = {
+        'status':               status,
+        'success':              success,
+        'ballots_refreshed':    ballots_refreshed,
+        'voter_ballots_copied': voter_ballots_copied,
+    }
+    return results
+
+
 def refresh_voter_ballots_not_copied_from_polling_location(google_civic_election_id, refresh_from_google=False):
     status = ""
     success = True
@@ -813,13 +859,8 @@ def refresh_voter_ballots_not_copied_from_polling_location(google_civic_election
 
 
 def repair_ballot_items_for_election(google_civic_election_id, refresh_from_google=False):
-    saved_count = 0
-    state_code_not_found_count = 0
-    error_count = 0
     success = True
-    office_manager = ContestOfficeManager()
-    measure_manager = ContestMeasureManager()
-    state_code_from_election = ""
+    number_of_ballot_items_updated = 0
     status = ""
 
     if not positive_value_exists(google_civic_election_id):
@@ -831,9 +872,11 @@ def repair_ballot_items_for_election(google_civic_election_id, refresh_from_goog
         }
         return results
 
+    ballot_item_manager = BallotItemManager()
     ballot_item_list_manager = BallotItemListManager()
     candidate_campaign_list = CandidateCampaignListManager()
     office_list_manager = ContestOfficeListManager()
+    measure_list_manager = ContestMeasureList()
     results = office_list_manager.retrieve_offices(google_civic_election_id=google_civic_election_id)
     offices_in_this_election_list = results['office_list_light']
     ballot_items_deleted_count = 0
@@ -849,50 +892,29 @@ def repair_ballot_items_for_election(google_civic_election_id, refresh_from_goog
     if positive_value_exists(ballot_items_deleted_count):
         status += "BALLOT_ITEMS_DELETED:" + str(ballot_items_deleted_count) + " "
 
-    results = ballot_item_list_manager.retrieve_ballot_items_for_election_lacking_state(google_civic_election_id)
+    results = office_list_manager.retrieve_offices(
+        google_civic_election_id=google_civic_election_id,
+        return_list_of_objects=True,
+        read_only=True,
+    )
+    offices_in_this_election_list = results['office_list_objects']
+    for contest_office in offices_in_this_election_list:
+        results = ballot_item_manager.refresh_all_ballot_item_office_entries(contest_office=contest_office)
+        number_of_ballot_items_updated += results['number_of_ballot_items_updated']
 
-    if results['ballot_item_list_found']:
-        ballot_item_list = results['ballot_item_list']
+    results = measure_list_manager.retrieve_measures(
+        google_civic_election_id=google_civic_election_id,
+        read_only=True,
+    )
+    measures_in_this_election_list = results['measure_list_objects']
+    for contest_measure in measures_in_this_election_list:
+        results = ballot_item_manager.refresh_all_ballot_item_measure_entries(contest_measure=contest_measure)
+        number_of_ballot_items_updated += results['number_of_ballot_items_updated']
 
-        election_manager = ElectionManager()
-        election_results = election_manager.retrieve_election(google_civic_election_id)
-        if election_results['election_found']:
-            election = election_results['election']
-            state_code_from_election = election.get_election_state()
-
-        for one_ballot_item in ballot_item_list:
-            state_code_from_office_or_measure = ""
-            save_ballot_item = False
-            if not positive_value_exists(state_code_from_election):
-                # If here, look up the state code by from the office or measure
-                if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
-                    state_code_from_office_or_measure = office_manager.fetch_state_code_from_we_vote_id(
-                        one_ballot_item.contest_office_we_vote_id)
-                elif positive_value_exists(one_ballot_item.contest_measure_we_vote_id):
-                    state_code_from_office_or_measure = measure_manager.fetch_state_code_from_we_vote_id(
-                        one_ballot_item.contest_measure_we_vote_id)
-            try:
-                # Heal the data
-                if positive_value_exists(state_code_from_office_or_measure):
-                    one_ballot_item.state_code = state_code_from_office_or_measure
-                    save_ballot_item = True
-                elif positive_value_exists(state_code_from_election):
-                    one_ballot_item.state_code = state_code_from_election
-                    save_ballot_item = True
-
-                if save_ballot_item:
-                    one_ballot_item.save()
-                    saved_count += 1
-                else:
-                    state_code_not_found_count += 1
-            except Exception as e:
-                error_count += 1
-
-    if positive_value_exists(saved_count):
-        success = True
-
-    count_results = ballot_item_list_manager.count_ballot_items_for_election_lacking_state(google_civic_election_id)
-    ballot_item_list_count = count_results['ballot_item_list_count']
+    # TODO
+    # results = refresh_voter_ballots_copied_from_polling_location(google_civic_election_id)
+    # voter_ballots_copied_count = results['voter_ballots_copied']
+    voter_ballots_copied_count = 0
 
     # Now check for VoterBallotSaved entries for voter ballots that were not copied from polling locations
     #  so we can refresh the data
@@ -900,19 +922,16 @@ def repair_ballot_items_for_election(google_civic_election_id, refresh_from_goog
                                                                                     refresh_from_google)
     ballots_refreshed = refresh_ballot_results['ballots_refreshed']
 
-    status = "REPAIR_BALLOT_ITEMS, total count that need repair: {ballot_item_list_count}, " \
+    status = "REPAIR_BALLOT_ITEMS, total count updated: {number_of_ballot_items_updated}, " \
              "ballot_items_deleted_count: {ballot_items_deleted_count}, " \
-             "saved_count: {saved_count}, " \
-             "state_code_not_found_count: {state_code_not_found_count}, " \
-             "error_count: {error_count}\n" \
-             ", REFRESH: ballots_refreshed: {ballots_refreshed} refresh_ballot_status: {refresh_ballot_status}" \
-             "".format(ballot_item_list_count=ballot_item_list_count,
+             ", REFRESH: " \
+             "voter_ballots_copied_count: {voter_ballots_copied_count}, " \
+             "unique_ballots_refreshed: {ballots_refreshed} refresh_ballot_status: {refresh_ballot_status}" \
+             "".format(number_of_ballot_items_updated=number_of_ballot_items_updated,
                        ballot_items_deleted_count=ballot_items_deleted_count,
                        ballots_refreshed=ballots_refreshed,
                        refresh_ballot_status=refresh_ballot_results['status'],
-                       saved_count=saved_count,
-                       state_code_not_found_count=state_code_not_found_count,
-                       error_count=error_count)
+                       voter_ballots_copied_count=voter_ballots_copied_count)
     results = {
         'status': status,
         'success': success,

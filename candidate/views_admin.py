@@ -271,6 +271,8 @@ def candidate_list_view(request):
 
     election_manager = ElectionManager()
     office_manager = ContestOfficeManager()
+    office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+        host_google_civic_election_id_list=[google_civic_election_id])
     if positive_value_exists(show_all_elections):
         results = election_manager.retrieve_elections()
         election_list = results['election_list']
@@ -285,8 +287,6 @@ def candidate_list_view(request):
         try:
             office_queryset = ContestOffice.objects.all()
             if positive_value_exists(google_civic_election_id):
-                office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                    host_google_civic_election_id_list=[google_civic_election_id])
                 office_queryset = office_queryset.filter(
                     Q(google_civic_election_id=google_civic_election_id) |
                     Q(we_vote_id__in=office_visiting_list_we_vote_ids))
@@ -421,12 +421,15 @@ def candidate_list_view(request):
     # How many facebook_url's don't have facebook_profile_image_url_https
     # SELECT * FROM public.candidate_candidatecampaign where google_civic_election_id = '1000052' and facebook_url
     #     is not null and facebook_profile_image_url_https is null
-    facebook_urls_without_picture_urls = 0;
+    facebook_urls_without_picture_urls = 0
     try:
         candidate_facebook_missing_query = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id):
-            candidate_facebook_missing_query = \
-                candidate_facebook_missing_query.filter(google_civic_election_id=google_civic_election_id)
+            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                host_google_civic_election_id_list=[google_civic_election_id])
+            candidate_facebook_missing_query = candidate_facebook_missing_query.filter(
+                Q(google_civic_election_id=google_civic_election_id) |
+                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
 
         # include profile images that are null or ''
         candidate_facebook_missing_query = candidate_facebook_missing_query.\
@@ -466,8 +469,11 @@ def candidate_list_view(request):
 
             # How many offices?
             office_list_query = ContestOffice.objects.all()
+            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                host_google_civic_election_id_list=[election.google_civic_election_id])
             office_list_query = office_list_query.filter(
-                google_civic_election_id=election.google_civic_election_id)
+                Q(google_civic_election_id=election.google_civic_election_id) |
+                Q(we_vote_id__in=office_visiting_list_we_vote_ids))
             office_list = list(office_list_query)
             election.office_count = len(office_list)
 
@@ -503,13 +509,15 @@ def candidate_list_view(request):
                 # How many candidates?
                 candidate_list_query = CandidateCampaign.objects.all()
                 candidate_list_query = candidate_list_query.filter(
-                    google_civic_election_id=election.google_civic_election_id)
+                    Q(google_civic_election_id=election.google_civic_election_id) |
+                    Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
                 election.candidate_count = candidate_list_query.count()
 
                 # How many without photos?
                 candidate_list_query = CandidateCampaign.objects.all()
                 candidate_list_query = candidate_list_query.filter(
-                    google_civic_election_id=election.google_civic_election_id)
+                    Q(google_civic_election_id=election.google_civic_election_id) |
+                    Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
                 candidate_list_query = candidate_list_query.filter(
                     Q(we_vote_hosted_profile_image_url_tiny__isnull=True) | Q(we_vote_hosted_profile_image_url_tiny='')
                 )
@@ -531,8 +539,10 @@ def candidate_list_view(request):
                 election.voter_guides_count = voter_guide_query.count()
 
                 # Number of Public Positions
-                position_query = PositionEntered.objects.filter(
-                    google_civic_election_id=election.google_civic_election_id)
+                position_query = PositionEntered.objects.all()
+                position_query = position_query.filter(
+                    Q(google_civic_election_id=election.google_civic_election_id) |
+                    Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
                 # As of Aug 2018 we are no longer using PERCENT_RATING
                 position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
                 election.public_positions_count = position_query.count()
@@ -649,10 +659,17 @@ def candidate_new_view(request):
     page = request.GET.get('page', 0)
     politician_we_vote_id = request.GET.get('politician_we_vote_id', "")
 
+    office_manager = ContestOfficeManager()
+    office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+        host_google_civic_election_id_list=[google_civic_election_id])
     # These are the Offices already entered for this election
     try:
-        contest_office_list = ContestOffice.objects.order_by('office_name')
-        contest_office_list = contest_office_list.filter(google_civic_election_id=google_civic_election_id)
+        office_queryset = ContestOffice.objects.order_by('office_name')
+        office_queryset = office_queryset.filter(
+            Q(google_civic_election_id=google_civic_election_id) |
+            Q(we_vote_id__in=office_visiting_list_we_vote_ids))
+        contest_office_list = list(office_queryset)
+
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
         contest_office_list = []
@@ -660,12 +677,14 @@ def candidate_new_view(request):
     # Its helpful to see existing candidates when entering a new candidate
     candidate_list = []
     try:
-        candidate_list = CandidateCampaign.objects.all()
+        candidate_queryset = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id):
-            candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+            candidate_queryset = candidate_queryset.filter(
+                Q(google_civic_election_id=google_civic_election_id) |
+                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
         if positive_value_exists(contest_office_id):
-            candidate_list = candidate_list.filter(contest_office_id=contest_office_id)
-        candidate_list = candidate_list.order_by('candidate_name')[:500]
+            candidate_queryset = candidate_queryset.filter(contest_office_id=contest_office_id)
+        candidate_list = candidate_queryset.order_by('candidate_name')[:500]
     except CandidateCampaign.DoesNotExist:
         # This is fine, create new
         pass
@@ -788,9 +807,14 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
 
         # Working with Offices for this election
         try:
-            contest_office_list = ContestOffice.objects.order_by('office_name')
-            contest_office_list = contest_office_list.filter(
-                google_civic_election_id=candidate_on_stage.google_civic_election_id)
+            office_manager = ContestOfficeManager()
+            office_list_query = ContestOffice.objects.order_by('office_name')
+            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                host_google_civic_election_id_list=[candidate_on_stage.google_civic_election_id])
+            office_list_query = office_list_query.filter(
+                Q(google_civic_election_id=candidate_on_stage.google_civic_election_id) |
+                Q(we_vote_id__in=office_visiting_list_we_vote_ids))
+            contest_office_list = list(office_list_query)
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
             contest_office_list = []
@@ -986,9 +1010,9 @@ def candidate_edit_process_view(request):
 
     contest_office_we_vote_id = ''
     contest_office_name = ''
+    office_manager = ContestOfficeManager()
     if positive_value_exists(contest_office_id):
-        contest_office_manager = ContestOfficeManager()
-        results = contest_office_manager.retrieve_contest_office_from_id(contest_office_id)
+        results = office_manager.retrieve_contest_office_from_id(contest_office_id)
         if results['contest_office_found']:
             contest_office = results['contest_office']
             contest_office_we_vote_id = contest_office.we_vote_id
@@ -1063,17 +1087,23 @@ def candidate_edit_process_view(request):
             filter_list = Q()
 
             at_least_one_filter = False
-            if positive_value_exists(vote_smart_id):
+            if positive_value_exists(ballotpedia_candidate_id):
                 at_least_one_filter = True
-                filter_list |= Q(vote_smart_id=vote_smart_id)
+                filter_list |= Q(ballotpedia_candidate_id=ballotpedia_candidate_id)
             if positive_value_exists(maplight_id):
                 at_least_one_filter = True
                 filter_list |= Q(maplight_id=maplight_id)
+            if positive_value_exists(vote_smart_id):
+                at_least_one_filter = True
+                filter_list |= Q(vote_smart_id=vote_smart_id)
 
             if at_least_one_filter:
                 candidate_duplicates_query = CandidateCampaign.objects.filter(filter_list)
+                office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                    host_google_civic_election_id_list=[google_civic_election_id])
                 candidate_duplicates_query = candidate_duplicates_query.filter(
-                    google_civic_election_id=google_civic_election_id)
+                    Q(google_civic_election_id=google_civic_election_id) |
+                    Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
 
                 if len(candidate_duplicates_query):
                     existing_candidate_found = True
@@ -1382,8 +1412,14 @@ def candidate_politician_match_for_this_election_view(request):
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
 
     try:
-        candidate_list = CandidateCampaign.objects.order_by('candidate_name')
-        candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+        office_manager = ContestOfficeManager()
+        candidate_queryset = CandidateCampaign.objects.order_by('candidate_name')
+        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+            host_google_civic_election_id_list=[google_civic_election_id])
+        candidate_queryset = candidate_queryset.filter(
+            Q(google_civic_election_id=google_civic_election_id) |
+            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+        candidate_list = list(candidate_queryset)
     except CandidateCampaign.DoesNotExist:
         messages.add_message(request, messages.INFO, "No candidates found for this election: {id}.".format(
             id=google_civic_election_id))
@@ -1826,9 +1862,15 @@ def retrieve_candidate_photos_for_election_view(request, election_id):
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
 
     try:
-        candidate_list = CandidateCampaign.objects.order_by('candidate_name')
+        office_manager = ContestOfficeManager()
+        candidate_queryset = CandidateCampaign.objects.order_by('candidate_name')
         if positive_value_exists(google_civic_election_id):
-            candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                host_google_civic_election_id_list=[google_civic_election_id])
+            candidate_queryset = candidate_queryset.filter(
+                Q(google_civic_election_id=google_civic_election_id) |
+                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+        candidate_list = list(candidate_queryset)
     except CandidateCampaign.DoesNotExist:
         pass
 
@@ -1933,9 +1975,14 @@ def candidate_summary_view(request, candidate_id):
         candidate_on_stage.bookmarks_count = candidate_bookmark_count
 
     candidate_search_results_list = []
+    office_manager = ContestOfficeManager()
     if positive_value_exists(candidate_search) and positive_value_exists(candidate_we_vote_id):
         candidate_queryset = CandidateCampaign.objects.all()
-        candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
+        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+            host_google_civic_election_id_list=[google_civic_election_id])
+        candidate_queryset = candidate_queryset.filter(
+            Q(google_civic_election_id=google_civic_election_id) |
+            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
         candidate_queryset = candidate_queryset.exclude(we_vote_id__iexact=candidate_we_vote_id)
 
         if positive_value_exists(state_code):
