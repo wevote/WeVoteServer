@@ -96,7 +96,8 @@ def retrieve_representatives_for_many_addresses_view(request):  # THIS FUNCTION 
     if polling_location_count == 0:
         messages.add_message(request, messages.ERROR,
                              'Could not retrieve ballot data for the {election_name}. '
-                             'No polling locations returned for the state \'{state}\'. (error 2)'.format(
+                             'No polling locations returned for the state \'{state}\'. '
+                             '(error 2 - retrieve_representatives_for_many_addresses_view)'.format(
                                  election_name=election_on_stage.election_name,
                                  state=state_code))
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
