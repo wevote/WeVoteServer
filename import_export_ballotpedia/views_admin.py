@@ -8,6 +8,7 @@ from .controllers import attach_ballotpedia_election_by_district_from_api, \
     retrieve_ballotpedia_district_id_list_for_polling_location, retrieve_ballotpedia_offices_by_district_from_api
 #    retrieve_ballotpedia_offices_by_election_from_api
 from admin_tools.views import redirect_to_sign_in_page
+from ballot.models import BallotReturnedListManager
 from config.base import get_environment_variable
 from datetime import date
 from django.contrib import messages
@@ -197,7 +198,8 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
     if polling_location_count == 0:
         messages.add_message(request, messages.ERROR,
                              'Could not retrieve ballot data for the {election_name}. '
-                             'No polling locations returned for the state \'{state}\'. (error 2)'.format(
+                             'No polling locations returned for the state \'{state}\'. '
+                             '(error 2 - attach_ballotpedia_election_view)'.format(
                                  election_name=election_name,
                                  state=state_code))
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)) +
@@ -335,7 +337,8 @@ def refresh_ballotpedia_districts_for_polling_locations_view(request):
     if polling_location_count == 0:
         messages.add_message(request, messages.ERROR,
                              'Could not retrieve ballot data. '
-                             'No polling locations returned for the state \'{state}\'. (error 2)'.format(
+                             'No polling locations returned for the state \'{state}\'. '
+                             '(error 2 - refresh_ballotpedia_districts_for_polling_locations_view)'.format(
                                  state=state_code))
         return HttpResponseRedirect(reverse('electoral_district:electoral_district_list', args=()))
 
@@ -462,6 +465,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
+    refresh_ballot_returned = request.GET.get('refresh_ballot_returned', False)
     # import_limit = convert_to_int(request.GET.get('import_limit', 1000))  # If > 1000, we get error 414 (url too long)
 
     election_day_text = ""
@@ -503,17 +507,25 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
     try:
-        polling_location_count_query = PollingLocation.objects.using('readonly').all()
-        polling_location_count_query = \
-            polling_location_count_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
-        polling_location_count_query = \
-            polling_location_count_query.exclude(Q(zip_long__isnull=True) | Q(zip_long__exact='0') |
-                                                 Q(zip_long__exact=''))
-        polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
-        polling_location_count_query = polling_location_count_query.exclude(polling_location_deleted=True)
-        polling_location_count = polling_location_count_query.count()
+        if positive_value_exists(refresh_ballot_returned):
+            # Retrieve polling locations already in ballot_returned table
+            ballot_returned_list_manager = BallotReturnedListManager()
+            if positive_value_exists(is_national_election) and positive_value_exists(state_code):
+                results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
+                    google_civic_election_id=google_civic_election_id, state_code=state_code)
+            else:
+                results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
+                    google_civic_election_id=google_civic_election_id)
+            if results['polling_location_we_vote_id_list_found']:
+                polling_location_we_vote_id_list = results['polling_location_we_vote_id_list']
+                polling_location_query = PollingLocation.objects.using('readonly').all()
+                polling_location_query = polling_location_query.filter(
+                    we_vote_id__in=polling_location_we_vote_id_list)
+                polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
+                polling_location_list = list(polling_location_query)
+                polling_location_count = len(polling_location_list)
 
-        if positive_value_exists(polling_location_count):
+        else:
             polling_location_query = PollingLocation.objects.using('readonly').all()
             polling_location_query = \
                 polling_location_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
@@ -536,6 +548,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
                 polling_location_list = polling_location_query.order_by('-zip_long')
             # For testing
             # polling_location_list = polling_location_query.order_by('line1')[:10]
+            polling_location_count = len(polling_location_list)
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve ballot data for the {election_name}. '
@@ -548,7 +561,8 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
     if polling_location_count == 0:
         messages.add_message(request, messages.ERROR,
                              'Could not retrieve ballot ballots for the {election_name}. '
-                             'No polling locations returned for the state \'{state}\'. (error 2)'.format(
+                             'No polling locations returned for the state \'{state}\'. '
+                             '(error 2 - retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view)'.format(
                                  election_name=election_name,
                                  state=state_code))
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
@@ -587,7 +601,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
                 status += " BATCH_SET_SAVED"
         except Exception as e:
             # Stop trying to save rows -- break out of the for loop
-            status += " EXCEPTION_BATCH_SET "
+            status += " EXCEPTION_BATCH_SET " + str(e) + " "
 
     for polling_location in polling_location_list:
         one_ballot_results = retrieve_ballot_items_from_polling_location_api_v4(
@@ -757,7 +771,8 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
     if polling_location_count == 0:
         messages.add_message(request, messages.ERROR,
                              'Could not retrieve ballot data for the {election_name}. '
-                             'No polling locations returned for the state \'{state}\'. (error 2)'.format(
+                             'No polling locations returned for the state \'{state}\'. '
+                             '(error 2 - retrieve_ballotpedia_data_for_polling_locations_view)'.format(
                                  election_name=election_name,
                                  state=state_code))
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))

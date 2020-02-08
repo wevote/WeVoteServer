@@ -446,7 +446,12 @@
 
   <li>
   <a href="{% url 'ballot:ballot_items_repair' %}?local_election_id={{ election.id }}&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
-      Repair Ballot Items for this Election (Update Voter Ballot Items with Latest Cached Office/Measure info)</a>
+      Repair Ballot Item Text for this Election (Update Voter Ballot Items with Latest Cached Office/Measure info)</a>
+  </li>
+
+  <li>
+    <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1" target="_blank">
+      Check Ballotpedia for new Ballot Items for existing BallotReturned entries</a>
   </li>
 
   <li>

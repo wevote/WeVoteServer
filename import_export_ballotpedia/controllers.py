@@ -814,14 +814,36 @@ def retrieve_ballot_items_from_polling_location_api_v4(
             new_candidate_we_vote_ids_list = groom_results['new_candidate_we_vote_ids_list']
             new_measure_we_vote_ids_list = groom_results['new_measure_we_vote_ids_list']
 
+            # If we successfully save a ballot, create/update a BallotReturned entry
             if ballot_item_dict_list and len(ballot_item_dict_list) > 0:
+                ballot_returned_manager = BallotReturnedManager()
+                results = ballot_returned_manager.update_or_create_ballot_returned(
+                    polling_location_we_vote_id=polling_location_we_vote_id,
+                    voter_id=0,
+                    google_civic_election_id=google_civic_election_id,
+                    latitude=polling_location.latitude,
+                    longitude=polling_location.longitude,
+                    text_for_map_search=polling_location.get_text_for_map_search_results(),
+                    normalized_city=polling_location.city,
+                    normalized_state=polling_location.state,
+                    normalized_zip=polling_location.zip_long,
+                )
+                status += results['status']
+                if results['ballot_returned_found']:
+                    status += "UPDATE_OR_CREATE_BALLOT_RETURNED-SUCCESS "
+                    # ballot_returned = results['ballot_returned']
+                    # ballot_returned_found = True
+                else:
+                    status += "UPDATE_OR_CREATE_BALLOT_RETURNED-BALLOT_RETURNED_FOUND-FALSE "
                 results = store_ballotpedia_json_response_to_import_batch_system(
-                    modified_json_list=ballot_item_dict_list, google_civic_election_id=google_civic_election_id,
-                    kind_of_batch=IMPORT_BALLOT_ITEM, batch_set_id=batch_set_id,
+                    modified_json_list=ballot_item_dict_list,
+                    google_civic_election_id=google_civic_election_id,
+                    kind_of_batch=IMPORT_BALLOT_ITEM,
+                    batch_set_id=batch_set_id,
                     state_code=state_code)
                 status += results['status']
-                if 'batch_header_id' in results:
-                    batch_header_id = results['batch_header_id']
+                # if 'batch_header_id' in results:
+                #     batch_header_id = results['batch_header_id']
         except Exception as e:
             success = False
             status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \
@@ -1614,9 +1636,10 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json, google_civic_e
                                     #  another election
                                     origin_google_civic_election_id = 0
                                     try:
-                                        origin_google_civic_election_id = convert_to_int(contest_office.google_civic_election_id)
+                                        origin_google_civic_election_id = \
+                                            convert_to_int(contest_office.google_civic_election_id)
                                     except Exception as e:
-                                        pass
+                                        status += "ORIGIN_GOOGLE_CIVIC_ELECTION_ID: " + str(e) + " "
                                     visiting_results = contest_office_manager.update_or_create_visiting_link(
                                         contest_office_we_vote_id=contest_office_we_vote_id,
                                         ballotpedia_race_id=ballotpedia_race_id,

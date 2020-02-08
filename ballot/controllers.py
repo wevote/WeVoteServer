@@ -740,52 +740,6 @@ def refresh_voter_ballots_from_polling_location(ballot_returned_from_polling_loc
     return results
 
 
-def refresh_voter_ballots_copied_from_polling_location(google_civic_election_id):
-    status = ""
-    success = True
-    voter_ballots_copied = 0
-
-    ballot_saved_manager = VoterBallotSavedManager()
-    # When voters provide partial addresses, we copy their ballots from nearby polling locations
-    # We want to find all voter_ballot_saved entries that came from polling_location_we_vote_id_source
-    polling_location_we_vote_id_source = ballot_returned_from_polling_location.polling_location_we_vote_id
-
-    if not positive_value_exists(polling_location_we_vote_id_source) \
-            or not positive_value_exists(google_civic_election_id):
-        status += "REFRESH_VOTER_BALLOTS_FROM_POLLING_LOCATION-MISSING_REQUIRED_VARIABLE(S) "
-        success = False
-        results = {
-            'status': status,
-            'success': success,
-        }
-        return results
-
-    retrieve_results = ballot_saved_manager.retrieve_voter_ballot_saved_list_for_election(
-        google_civic_election_id, polling_location_we_vote_id_source)
-    ballots_refreshed = 0
-    if retrieve_results['voter_ballot_saved_list_found']:
-        voter_ballot_saved_list = retrieve_results['voter_ballot_saved_list']
-        for voter_ballot_saved in voter_ballot_saved_list:
-            # Neither BallotReturned nor VoterBallotSaved change when we get refreshed data from Google Civic
-            if positive_value_exists(voter_ballot_saved.voter_id) \
-                    and positive_value_exists(voter_ballot_saved.ballot_returned_we_vote_id):
-                refresh_results = refresh_ballot_items_for_voter_copied_from_one_polling_location(
-                    voter_ballot_saved.voter_id, ballot_returned_from_polling_location)
-
-                if refresh_results['ballot_returned_copied']:
-                    ballots_refreshed += 1
-                else:
-                    status += refresh_results['status']
-
-    results = {
-        'status':               status,
-        'success':              success,
-        'ballots_refreshed':    ballots_refreshed,
-        'voter_ballots_copied': voter_ballots_copied,
-    }
-    return results
-
-
 def refresh_voter_ballots_not_copied_from_polling_location(google_civic_election_id, refresh_from_google=False):
     status = ""
     success = True
@@ -911,27 +865,32 @@ def repair_ballot_items_for_election(google_civic_election_id, refresh_from_goog
         results = ballot_item_manager.refresh_all_ballot_item_measure_entries(contest_measure=contest_measure)
         number_of_ballot_items_updated += results['number_of_ballot_items_updated']
 
-    # TODO
-    # results = refresh_voter_ballots_copied_from_polling_location(google_civic_election_id)
+    # Separately from this function, we need to go through the ballot_returned entries that we already retrieved
+    # data for, and make sure we have all of the needed ballot item data
+    # results = refresh_voter_ballots_copied_from_any_polling_location(google_civic_election_id)
     # voter_ballots_copied_count = results['voter_ballots_copied']
-    voter_ballots_copied_count = 0
+    # voter_ballots_copied_count = 0
 
     # Now check for VoterBallotSaved entries for voter ballots that were not copied from polling locations
     #  so we can refresh the data
-    refresh_ballot_results = refresh_voter_ballots_not_copied_from_polling_location(google_civic_election_id,
-                                                                                    refresh_from_google)
-    ballots_refreshed = refresh_ballot_results['ballots_refreshed']
+    # This tries to reach out to Google Civic
+    retrieve_from_google_civic = False
+    ballots_refreshed = 0
+    refresh_ballot_status = ''
+    if retrieve_from_google_civic:
+        refresh_ballot_results = refresh_voter_ballots_not_copied_from_polling_location(
+            google_civic_election_id, refresh_from_google)
+        ballots_refreshed = refresh_ballot_results['ballots_refreshed']
+        refresh_ballot_status = refresh_ballot_results['status']
 
     status = "REPAIR_BALLOT_ITEMS, total count updated: {number_of_ballot_items_updated}, " \
              "ballot_items_deleted_count: {ballot_items_deleted_count}, " \
              ", REFRESH: " \
-             "voter_ballots_copied_count: {voter_ballots_copied_count}, " \
              "unique_ballots_refreshed: {ballots_refreshed} refresh_ballot_status: {refresh_ballot_status}" \
              "".format(number_of_ballot_items_updated=number_of_ballot_items_updated,
                        ballot_items_deleted_count=ballot_items_deleted_count,
                        ballots_refreshed=ballots_refreshed,
-                       refresh_ballot_status=refresh_ballot_results['status'],
-                       voter_ballots_copied_count=voter_ballots_copied_count)
+                       refresh_ballot_status=refresh_ballot_status)
     results = {
         'status': status,
         'success': success,

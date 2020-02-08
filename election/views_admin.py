@@ -199,7 +199,8 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     if polling_location_count == 0:
         messages.add_message(request, messages.ERROR,
                              'Could not retrieve ballot data for the {election_name}. '
-                             'No polling locations returned for the state \'{state}\'. (error 2)'.format(
+                             'No polling locations returned for the state \'{state}\'. '
+                             '(error 2 - election_all_ballots_retrieve_view)'.format(
                                  election_name=election_on_stage.election_name,
                                  state=state_code))
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
