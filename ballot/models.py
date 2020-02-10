@@ -1220,66 +1220,66 @@ class BallotItemListManager(models.Model):
 
         return 0
 
-    def copy_ballot_items(self, ballot_returned, to_voter_id):
-        status = ""
-        ballot_item_list = []
-        ballot_item_list_found = False
-        # Get all ballot items from the reference ballot_returned
-        if positive_value_exists(ballot_returned.polling_location_we_vote_id):
-            retrieve_results = self.retrieve_all_ballot_items_for_polling_location(
-                ballot_returned.polling_location_we_vote_id,
-                ballot_returned.google_civic_election_id)
-            status += retrieve_results['status']
-            ballot_item_list_found = retrieve_results['ballot_item_list_found']
-            ballot_item_list = retrieve_results['ballot_item_list']
-        elif positive_value_exists(ballot_returned.voter_id):
-            retrieve_results = self.retrieve_all_ballot_items_for_voter(
-                ballot_returned.voter_id,
-                ballot_returned.google_civic_election_id)
-            status += retrieve_results['status']
-            ballot_item_list_found = retrieve_results['ballot_item_list_found']
-            ballot_item_list = retrieve_results['ballot_item_list']
-
-        if not ballot_item_list_found:
-            error_results = {
-                'ballot_returned_copied':   False,
-                'success':                  False,
-                'status':                   status,
-            }
-            return error_results
-
-        ballot_item_manager = BallotItemManager()
-
-        # This is a list of ballot items, usually from a polling location, that we are copying over to a voter
-        for one_ballot_item in ballot_item_list:
-            defaults = {}
-            defaults['measure_url'] = one_ballot_item.measure_url
-            defaults['yes_vote_description'] = one_ballot_item.yes_vote_description
-            defaults['no_vote_description'] = one_ballot_item.no_vote_description
-
-            create_results = ballot_item_manager.update_or_create_ballot_item_for_voter(
-                to_voter_id,
-                ballot_returned.google_civic_election_id,
-                one_ballot_item.google_ballot_placement,
-                one_ballot_item.ballot_item_display_name,
-                one_ballot_item.measure_subtitle,
-                one_ballot_item.measure_text,
-                one_ballot_item.local_ballot_order,
-                one_ballot_item.contest_office_id,
-                one_ballot_item.contest_office_we_vote_id,
-                one_ballot_item.contest_measure_id,
-                one_ballot_item.contest_measure_we_vote_id,
-                one_ballot_item.state_code,
-                defaults)
-            if not create_results['success']:
-                status += create_results['status']
-
-        results = {
-            'ballot_returned_copied':   True,
-            'success':                  True,
-            'status':                   status,
-        }
-        return results
+    # def copy_ballot_items(self, ballot_returned, to_voter_id):
+    #     status = ""
+    #     ballot_item_list = []
+    #     ballot_item_list_found = False
+    #     # Get all ballot items from the reference ballot_returned
+    #     if positive_value_exists(ballot_returned.polling_location_we_vote_id):
+    #         retrieve_results = self.retrieve_all_ballot_items_for_polling_location(
+    #             ballot_returned.polling_location_we_vote_id,
+    #             ballot_returned.google_civic_election_id)
+    #         status += retrieve_results['status']
+    #         ballot_item_list_found = retrieve_results['ballot_item_list_found']
+    #         ballot_item_list = retrieve_results['ballot_item_list']
+    #     elif positive_value_exists(ballot_returned.voter_id):
+    #         retrieve_results = self.retrieve_all_ballot_items_for_voter(
+    #             ballot_returned.voter_id,
+    #             ballot_returned.google_civic_election_id)
+    #         status += retrieve_results['status']
+    #         ballot_item_list_found = retrieve_results['ballot_item_list_found']
+    #         ballot_item_list = retrieve_results['ballot_item_list']
+    #
+    #     if not ballot_item_list_found:
+    #         error_results = {
+    #             'ballot_returned_copied':   False,
+    #             'success':                  False,
+    #             'status':                   status,
+    #         }
+    #         return error_results
+    #
+    #     ballot_item_manager = BallotItemManager()
+    #
+    #     # This is a list of ballot items, usually from a polling location, that we are copying over to a voter
+    #     for one_ballot_item in ballot_item_list:
+    #         defaults = {}
+    #         defaults['measure_url'] = one_ballot_item.measure_url
+    #         defaults['yes_vote_description'] = one_ballot_item.yes_vote_description
+    #         defaults['no_vote_description'] = one_ballot_item.no_vote_description
+    #
+    #         create_results = ballot_item_manager.update_or_create_ballot_item_for_voter(
+    #             to_voter_id,
+    #             ballot_returned.google_civic_election_id,
+    #             one_ballot_item.google_ballot_placement,
+    #             one_ballot_item.ballot_item_display_name,
+    #             one_ballot_item.measure_subtitle,
+    #             one_ballot_item.measure_text,
+    #             one_ballot_item.local_ballot_order,
+    #             one_ballot_item.contest_office_id,
+    #             one_ballot_item.contest_office_we_vote_id,
+    #             one_ballot_item.contest_measure_id,
+    #             one_ballot_item.contest_measure_we_vote_id,
+    #             one_ballot_item.state_code,
+    #             defaults)
+    #         if not create_results['success']:
+    #             status += create_results['status']
+    #
+    #     results = {
+    #         'ballot_returned_copied':   True,
+    #         'success':                  True,
+    #         'status':                   status,
+    #     }
+    #     return results
 
     def refresh_ballot_items_from_master_tables(self, voter_id, google_civic_election_id,
                                                 offices_dict={}, measures_dict={}):
@@ -3334,8 +3334,8 @@ class VoterBallotSavedManager(models.Model):
         return results
 
 
-def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search, google_civic_election_id=0,
-                                                  ballot_returned_we_vote_id='', ballot_location_shortcut=''):
+def find_best_previously_stored_ballot_returned(voter_id, text_for_map_search, google_civic_election_id=0,
+                                                ballot_returned_we_vote_id='', ballot_location_shortcut=''):
     """
     We are looking for the most recent ballot near this voter. We may or may not have a google_civic_election_id
     :param voter_id:
@@ -3362,7 +3362,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
 
         if not find_results['ballot_returned_found']:
             error_results = {
-                'ballot_returned_copied':               False,
+                'ballot_returned_found':               False,
                 'ballot_location_display_name':        '',
                 'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
                 'ballot_location_shortcut':             ballot_location_shortcut,
@@ -3395,7 +3395,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
 
         if not find_results['ballot_returned_found']:
             error_results = {
-                'ballot_returned_copied':               False,
+                'ballot_returned_found':               False,
                 'ballot_location_display_name':        '',
                 'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
                 'ballot_location_shortcut':             ballot_location_shortcut,
@@ -3428,7 +3428,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
 
         if not find_results['ballot_returned_found']:
             error_results = {
-                'ballot_returned_copied':               False,
+                'ballot_returned_found':               False,
                 'ballot_location_display_name':        '',
                 'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
                 'ballot_location_shortcut':             ballot_location_shortcut,
@@ -3461,7 +3461,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
 
         if not find_results['ballot_returned_found']:
             error_results = {
-                'ballot_returned_copied':               False,
+                'ballot_returned_found':               False,
                 'ballot_location_display_name':        '',
                 'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
                 'ballot_location_shortcut':             ballot_location_shortcut,
@@ -3486,48 +3486,49 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
         # A ballot at a nearby address was found.
         ballot_returned_to_copy = find_results['ballot_returned']
 
-    # Remove all prior ballot items, so we make room for copy_ballot_items to save ballot items
-    # 2017-11-03 We only want to delete if the ballot_returned in question has a polling_location_we_vote_id
-    if positive_value_exists(ballot_returned_to_copy.google_civic_election_id) and \
-            positive_value_exists(ballot_returned_to_copy.polling_location_we_vote_id):
-        voter_ballot_saved_id = 0
-        voter_ballot_saved_results = voter_ballot_saved_manager.delete_voter_ballot_saved(
-            voter_ballot_saved_id, voter_id, ballot_returned_to_copy.google_civic_election_id)
-
-        # We include a google_civic_election_id, so only the ballot info for this election is removed
-        ballot_item_list_manager.delete_all_ballot_items_for_voter(
-            voter_id, ballot_returned_to_copy.google_civic_election_id)
-    else:
-        status += "NOT_DELETED-voter_ballot_saved-AND-VOTER_BALLOT_ITEMS "
-
-    # ...and then copy it for the voter as long as it doesn't already belong to the voter
-    if ballot_returned_to_copy.voter_id != voter_id:
-        copy_item_results = ballot_item_list_manager.copy_ballot_items(ballot_returned_to_copy, voter_id)
-        status += copy_item_results['status']
-
-        if not copy_item_results['ballot_returned_copied']:
-            error_results = {
-                'ballot_returned_copied':               False,
-                'ballot_location_display_name':        '',
-                'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
-                'ballot_location_shortcut':             ballot_location_shortcut,
-                'election_day_text':                   '',
-                'election_description_text':            '',
-                'google_civic_election_id':             google_civic_election_id,
-                'polling_location_we_vote_id_source':   '',
-                'state_code':                           '',
-                'status':                               status,
-                'substituted_address_nearby':           '',
-                'substituted_address_city':             '',
-                'substituted_address_state':            '',
-                'substituted_address_zip':              '',
-                'text_for_map_search':                  text_for_map_search,
-                'original_text_city':                   '',
-                'original_text_state':                  '',
-                'original_text_zip':                    '',
-                'voter_id':                             voter_id,
-            }
-            return error_results
+    # DALE NOTE: I don't think this is correct, but I'm not ready to delete
+    # # Remove all prior ballot items, so we make room for copy_ballot_items to save ballot items
+    # # 2017-11-03 We only want to delete if the ballot_returned in question has a polling_location_we_vote_id
+    # if positive_value_exists(ballot_returned_to_copy.google_civic_election_id) and \
+    #         positive_value_exists(ballot_returned_to_copy.polling_location_we_vote_id):
+    #     voter_ballot_saved_id = 0
+    #     voter_ballot_saved_results = voter_ballot_saved_manager.delete_voter_ballot_saved(
+    #         voter_ballot_saved_id, voter_id, ballot_returned_to_copy.google_civic_election_id)
+    #
+    #     # We include a google_civic_election_id, so only the ballot info for this election is removed
+    #     ballot_item_list_manager.delete_all_ballot_items_for_voter(
+    #         voter_id, ballot_returned_to_copy.google_civic_election_id)
+    # else:
+    #     status += "NOT_DELETED-voter_ballot_saved-AND-VOTER_BALLOT_ITEMS "
+    #
+    # # ...and then copy it for the voter as long as it doesn't already belong to the voter
+    # if ballot_returned_to_copy.voter_id != voter_id:
+    #     copy_item_results = ballot_item_list_manager.copy_ballot_items(ballot_returned_to_copy, voter_id)
+    #     status += copy_item_results['status']
+    #
+    #     if not copy_item_results['ballot_returned_copied']:
+    #         error_results = {
+    #             'ballot_returned_found':               False,
+    #             'ballot_location_display_name':        '',
+    #             'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
+    #             'ballot_location_shortcut':             ballot_location_shortcut,
+    #             'election_day_text':                   '',
+    #             'election_description_text':            '',
+    #             'google_civic_election_id':             google_civic_election_id,
+    #             'polling_location_we_vote_id_source':   '',
+    #             'state_code':                           '',
+    #             'status':                               status,
+    #             'substituted_address_nearby':           '',
+    #             'substituted_address_city':             '',
+    #             'substituted_address_state':            '',
+    #             'substituted_address_zip':              '',
+    #             'text_for_map_search':                  text_for_map_search,
+    #             'original_text_city':                   '',
+    #             'original_text_state':                  '',
+    #             'original_text_zip':                    '',
+    #             'voter_id':                             voter_id,
+    #         }
+    #         return error_results
 
     # VoterBallotSaved is updated outside of this function
 
@@ -3545,7 +3546,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
         'substituted_address_city':             ballot_returned_to_copy.normalized_city,
         'substituted_address_state':            ballot_returned_to_copy.normalized_state,
         'substituted_address_zip':              ballot_returned_to_copy.normalized_zip,
-        'ballot_returned_copied':               True,
+        'ballot_returned_found':               True,
         'ballot_location_display_name':         ballot_returned_to_copy.ballot_location_display_name,
         'ballot_returned_we_vote_id':           ballot_returned_to_copy.we_vote_id,
         'ballot_location_shortcut':             ballot_returned_to_copy.ballot_location_shortcut if
@@ -3556,75 +3557,75 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
     return results
 
 
-def refresh_ballot_items_for_voter_copied_from_one_polling_location(voter_id, ballot_returned_from_polling_location):
-    """
-    :param voter_id:
-    :param ballot_returned_from_polling_location:
-    :return:
-    """
-    success = True
-    status = ""
-    ballot_item_list_manager = BallotItemListManager()
-
-    google_civic_election_id = ballot_returned_from_polling_location.google_civic_election_id
-
-    if not positive_value_exists(voter_id):
-        success = False
-        status += "REFRESH_EXISTING_BALLOT_ITEMS_FOR_VOTER-NO_VOTER_ID "
-        error_results = {
-            'success':                              success,
-            'status':                               status,
-            'voter_id':                             voter_id,
-            'google_civic_election_id':             google_civic_election_id,
-            'ballot_returned_copied':               False,
-            'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
-        }
-        return error_results
-
-    if not positive_value_exists(google_civic_election_id):
-        success = False
-        status += "REFRESH_EXISTING_BALLOT_ITEMS_FOR_VOTER-NO_GOOGLE_CIVIC_ELECTION_ID "
-        error_results = {
-            'success':                              success,
-            'status':                               status,
-            'voter_id':                             voter_id,
-            'google_civic_election_id':             google_civic_election_id,
-            'ballot_returned_copied':               False,
-            'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
-        }
-        return error_results
-
-    # Remove all prior ballot items for this voter for this election, so we make room for
-    # copy_ballot_items to save ballot items
-    ballot_item_list_manager.delete_all_ballot_items_for_voter(
-        voter_id, ballot_returned_from_polling_location.google_civic_election_id)
-
-    # Copy the ballot items from the polling location over for the voter
-    copy_item_results = ballot_item_list_manager.copy_ballot_items(ballot_returned_from_polling_location, voter_id)
-    status += copy_item_results['status']
-
-    if not copy_item_results['ballot_returned_copied']:
-        success = False
-        status += "REFRESH_EXISTING_BALLOT_ITEMS_FOR_VOTER-FAILED_TO_COPY "
-        error_results = {
-            'success':                              success,
-            'status':                               status,
-            'voter_id':                             voter_id,
-            'google_civic_election_id':             google_civic_election_id,
-            'ballot_returned_copied':               False,
-            'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
-        }
-        return error_results
-
-    results = {
-        'success':                              success,
-        'status':                               status,
-        'voter_id':                             voter_id,
-        'google_civic_election_id':             google_civic_election_id,
-        'ballot_returned_copied':               True,
-        'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
-    }
-    return results
+# def refresh_ballot_items_for_voter_copied_from_one_polling_location(voter_id, ballot_returned_from_polling_location):
+#     """
+#     :param voter_id:
+#     :param ballot_returned_from_polling_location:
+#     :return:
+#     """
+#     success = True
+#     status = ""
+#     ballot_item_list_manager = BallotItemListManager()
+#
+#     google_civic_election_id = ballot_returned_from_polling_location.google_civic_election_id
+#
+#     if not positive_value_exists(voter_id):
+#         success = False
+#         status += "REFRESH_EXISTING_BALLOT_ITEMS_FOR_VOTER-NO_VOTER_ID "
+#         error_results = {
+#             'success':                              success,
+#             'status':                               status,
+#             'voter_id':                             voter_id,
+#             'google_civic_election_id':             google_civic_election_id,
+#             'ballot_returned_copied':               False,
+#             'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
+#         }
+#         return error_results
+#
+#     if not positive_value_exists(google_civic_election_id):
+#         success = False
+#         status += "REFRESH_EXISTING_BALLOT_ITEMS_FOR_VOTER-NO_GOOGLE_CIVIC_ELECTION_ID "
+#         error_results = {
+#             'success':                              success,
+#             'status':                               status,
+#             'voter_id':                             voter_id,
+#             'google_civic_election_id':             google_civic_election_id,
+#             'ballot_returned_copied':               False,
+#             'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
+#         }
+#         return error_results
+#
+#     # Remove all prior ballot items for this voter for this election, so we make room for
+#     # copy_ballot_items to save ballot items
+#     ballot_item_list_manager.delete_all_ballot_items_for_voter(
+#         voter_id, ballot_returned_from_polling_location.google_civic_election_id)
+#
+#     # Copy the ballot items from the polling location over for the voter
+#     copy_item_results = ballot_item_list_manager.copy_ballot_items(ballot_returned_from_polling_location, voter_id)
+#     status += copy_item_results['status']
+#
+#     if not copy_item_results['ballot_returned_copied']:
+#         success = False
+#         status += "REFRESH_EXISTING_BALLOT_ITEMS_FOR_VOTER-FAILED_TO_COPY "
+#         error_results = {
+#             'success':                              success,
+#             'status':                               status,
+#             'voter_id':                             voter_id,
+#             'google_civic_election_id':             google_civic_election_id,
+#             'ballot_returned_copied':               False,
+#             'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
+#         }
+#         return error_results
+#
+#     results = {
+#         'success':                              success,
+#         'status':                               status,
+#         'voter_id':                             voter_id,
+#         'google_civic_election_id':             google_civic_election_id,
+#         'ballot_returned_copied':               True,
+#         'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
+#     }
+#     return results
 
 
 def retrieve_address_fields_from_geocoder(text_for_map_search):

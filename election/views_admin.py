@@ -447,14 +447,15 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
                 ballot_returned = store_one_ballot_results['ballot_returned']
                 ballot_returned_id = ballot_returned.id
                 # Now refresh all of the other copies of this ballot
-                if positive_value_exists(polling_location_we_vote_id) \
-                        and positive_value_exists(google_civic_election_id):
-                    refresh_ballot_results = refresh_voter_ballots_from_polling_location(
-                        ballot_returned, google_civic_election_id)
-                    ballots_refreshed = refresh_ballot_results['ballots_refreshed']
-                elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
-                    # Nothing else to be done
-                    pass
+                # DALE NOTE Feb 2020 I don't think this is correct
+                # if positive_value_exists(polling_location_we_vote_id) \
+                #         and positive_value_exists(google_civic_election_id):
+                #     refresh_ballot_results = refresh_voter_ballots_from_polling_location(
+                #         ballot_returned, google_civic_election_id)
+                #     ballots_refreshed = refresh_ballot_results['ballots_refreshed']
+                # elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
+                #     # Nothing else to be done
+                #     pass
             # NOTE: We don't support retrieving ballots for polling locations AND geocoding simultaneously
             # if store_one_ballot_results['ballot_returned_found']:
             #     ballot_returned = store_one_ballot_results['ballot_returned']

@@ -44,174 +44,169 @@ def retrieve_representatives_for_many_addresses_view(request):  # THIS FUNCTION 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     import_limit = convert_to_int(request.GET.get('import_limit', 500))
+    election_local_id = 0
 
-    try:
-        if positive_value_exists(election_local_id):
-            election_on_stage = Election.objects.get(id=election_local_id)
-            google_civic_election_id = election_on_stage.google_civic_election_id
-        else:
-            election_on_stage = Election.objects.get(google_civic_election_id=google_civic_election_id)
-            election_local_id = election_on_stage.id
-    except Election.MultipleObjectsReturned as e:
-        handle_record_found_more_than_one_exception(e, logger=logger)
-        messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. More than one election found.')
-        return HttpResponseRedirect(reverse('election:election_list', args=()))
-    except Election.DoesNotExist:
-        messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. Election could not be found.')
-        return HttpResponseRedirect(reverse('election:election_list', args=()))
-
-    # Check to see if we have polling location data related to the region(s) covered by this election
-    # We request the ballot data for each polling location as a way to build up our local data
-    if not positive_value_exists(state_code):
-        state_code = election_on_stage.get_election_state()
-        # if not positive_value_exists(state_code):
-        #     state_code = "CA"  # TODO DALE Temp for 2016
-
-    try:
-        polling_location_count_query = PollingLocation.objects.all()
-        polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
-        polling_location_count_query = polling_location_count_query.exclude(polling_location_deleted=True)
-        # If Google wasn't able to return ballot data in the past ignore that polling location
-        polling_location_count_query = polling_location_count_query.filter(
-            google_response_address_not_found__isnull=True)
-        polling_location_count = polling_location_count_query.count()
-
-        polling_location_query = PollingLocation.objects.all()
-        polling_location_query = polling_location_query.filter(state__iexact=state_code)
-        polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
-        polling_location_query = polling_location_query.filter(
-            google_response_address_not_found__isnull=True)
-        # We used to have a limit of 500 ballots to pull per election, but now retrieve all
-        # Ordering by "location_name" creates a bit of (locational) random order
-        polling_location_list = polling_location_query.order_by('location_name')[:import_limit]
-    except PollingLocation.DoesNotExist:
-        messages.add_message(request, messages.INFO,
-                             'Could not retrieve ballot data for the {election_name}. '
-                             'No polling locations exist for the state \'{state}\'. '
-                             'Data needed from VIP.'.format(
-                                 election_name=election_on_stage.election_name,
-                                 state=state_code))
-        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
-
-    if polling_location_count == 0:
-        messages.add_message(request, messages.ERROR,
-                             'Could not retrieve ballot data for the {election_name}. '
-                             'No polling locations returned for the state \'{state}\'. '
-                             '(error 2 - retrieve_representatives_for_many_addresses_view)'.format(
-                                 election_name=election_on_stage.election_name,
-                                 state=state_code))
-        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
-
-    locations_retrieved = 0
-    locations_not_retrieved = 0
-    ballots_with_contests_retrieved = 0
-    polling_locations_retrieved = 0
-    ballots_with_election_administration_data = 0
-    ballots_refreshed = 0
-    # We used to only retrieve up to 500 locations from each state, but we don't limit now
-    # # We retrieve 10% of the total polling locations, which should give us coverage of the entire election
-    # number_of_polling_locations_to_retrieve = int(.1 * polling_location_count)
-    ballot_returned_manager = BallotReturnedManager()
-    rate_limit_count = 0
-    # Step though our set of polling locations, until we find one that contains a ballot.  Some won't contain ballots
-    # due to data quality issues.
-    for polling_location in polling_location_list:
-        success = False
-        # Get the address for this polling place, and then retrieve the ballot from Google Civic API
-        results = polling_location.get_text_for_map_search_results()
-        text_for_map_search = results['text_for_map_search']
-        representatives_results = retrieve_representatives_from_google_civic_api(
-            text_for_map_search, election_on_stage.google_civic_election_id)
-        if representatives_results['success']:
-            one_ballot_json = representatives_results['structured_json']
-            store_representatives_results = store_representatives_from_google_civic_api(one_ballot_json, 0,
-                                                                              polling_location.we_vote_id)
-            if store_representatives_results['success']:
-                success = True
-                if store_representatives_results['ballot_returned_found']:
-                    ballot_returned = store_representatives_results['ballot_returned']
-                    ballot_returned_id = ballot_returned.id
-                    # Now refresh all of the other copies of this ballot
-                    if positive_value_exists(polling_location.we_vote_id) \
-                            and positive_value_exists(google_civic_election_id):
-                        refresh_ballot_results = refresh_voter_ballots_from_polling_location(
-                            ballot_returned, google_civic_election_id)
-                        ballots_refreshed += refresh_ballot_results['ballots_refreshed']
-                # NOTE: We don't support retrieving ballots for polling locations AND geocoding simultaneously
-                # if store_representatives_results['ballot_returned_found']:
-                #     ballot_returned = store_representatives_results['ballot_returned']
-                #     ballot_returned_results = \
-                #         ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(ballot_returned)
-                #     if ballot_returned_results['success']:
-                #         rate_limit_count += 1
-                #         if rate_limit_count >= 10:  # Avoid problems with the geocoder rate limiting
-                #             time.sleep(1)
-                #             # After pause, reset the limit count
-                #             rate_limit_count = 0
-        else:
-            if 'google_response_address_not_found' in representatives_results:
-                if positive_value_exists(representatives_results['google_response_address_not_found']):
-                    try:
-                        if not polling_location.google_response_address_not_found:
-                            polling_location.google_response_address_not_found = 1
-                        else:
-                            polling_location.google_response_address_not_found += 1
-                        polling_location.save()
-                        print("Updated PollingLocation google_response_address_not_found: " + str(text_for_map_search))
-                    except Exception as e:
-                        print("Cannot update PollingLocation: " + str(text_for_map_search))
-
-        if success:
-            locations_saved += 1
-        else:
-            locations_not_retrieved += 1
-
-        if representatives_results['contests_retrieved']:
-            ballots_with_contests_retrieved += 1
-
-        # We used to only retrieve up to 500 locations from each state, but we don't limit now
-        # # Break out of this loop, assuming we have a minimum number of ballots with contests retrieved
-        # #  If we don't achieve the minimum number of ballots_with_contests_retrieved, break out at the emergency level
-        # emergency = (locations_retrieved + locations_not_retrieved) >= (3 * number_of_polling_locations_to_retrieve)
-        # if ((locations_retrieved + locations_not_retrieved) >= number_of_polling_locations_to_retrieve and
-        #         ballots_with_contests_retrieved > 20) or emergency:
-        #     break
-
-    total_retrieved = locations_retrieved + locations_not_retrieved
-    if locations_retrieved > 0:
-        messages.add_message(request, messages.INFO,
-                             'Ballot data retrieved from Google Civic for the {election_name}. '
-                             '(polling_locations_retrieved: {polling_locations_retrieved}, '
-                             'ballots_with_election_administration_data: {ballots_with_election_administration_data}, '
-                             'ballots retrieved: {locations_retrieved}, '
-                             '(with contests: {ballots_with_contests_retrieved}), '
-                             'not retrieved: {locations_not_retrieved}, '
-                             'total: {total}), '
-                             'ballots refreshed: {ballots_refreshed}'.format(
-                                 polling_locations_retrieved=polling_locations_retrieved,
-                                 ballots_with_election_administration_data=ballots_with_election_administration_data,
-                                 ballots_refreshed=ballots_refreshed,
-                                 locations_retrieved=locations_retrieved,
-                                 locations_not_retrieved=locations_not_retrieved,
-                                 ballots_with_contests_retrieved=ballots_with_contests_retrieved,
-                                 election_name=election_on_stage.election_name,
-                                 total=total_retrieved))
-    else:
-        messages.add_message(request, messages.ERROR,
-                             'Ballot data NOT retrieved from Google Civic for the {election_name}. '
-                             '(polling_locations_retrieved: {polling_locations_retrieved}, '
-                             'ballots_with_election_administration_data: {ballots_with_election_administration_data}, '
-                             'ballots retrieved: {locations_retrieved}, '
-                             '(with contests: {ballots_with_contests_retrieved}), '
-                             'not retrieved: {locations_not_retrieved}, '
-                             'total: {total})'.format(
-                                 polling_locations_retrieved=polling_locations_retrieved,
-                                 ballots_with_election_administration_data=ballots_with_election_administration_data,
-                                 locations_retrieved=locations_retrieved,
-                                 locations_not_retrieved=locations_not_retrieved,
-                                 ballots_with_contests_retrieved=ballots_with_contests_retrieved,
-                                 election_name=election_on_stage.election_name,
-                                 total=total_retrieved))
+    # try:
+    #     if positive_value_exists(election_local_id):
+    #         election_on_stage = Election.objects.get(id=election_local_id)
+    #         google_civic_election_id = election_on_stage.google_civic_election_id
+    #     else:
+    #         election_on_stage = Election.objects.get(google_civic_election_id=google_civic_election_id)
+    #         election_local_id = election_on_stage.id
+    # except Election.MultipleObjectsReturned as e:
+    #     handle_record_found_more_than_one_exception(e, logger=logger)
+    #     messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. More than one election found.')
+    #     return HttpResponseRedirect(reverse('election:election_list', args=()))
+    # except Election.DoesNotExist:
+    #     messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. Election could not be found.')
+    #     return HttpResponseRedirect(reverse('election:election_list', args=()))
+    #
+    # # Check to see if we have polling location data related to the region(s) covered by this election
+    # # We request the ballot data for each polling location as a way to build up our local data
+    # if not positive_value_exists(state_code):
+    #     state_code = election_on_stage.get_election_state()
+    #     # if not positive_value_exists(state_code):
+    #     #     state_code = "CA"  # TODO DALE Temp for 2016
+    #
+    # try:
+    #     polling_location_count_query = PollingLocation.objects.all()
+    #     polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
+    #     polling_location_count_query = polling_location_count_query.exclude(polling_location_deleted=True)
+    #     # If Google wasn't able to return ballot data in the past ignore that polling location
+    #     polling_location_count_query = polling_location_count_query.filter(
+    #         google_response_address_not_found__isnull=True)
+    #     polling_location_count = polling_location_count_query.count()
+    #
+    #     polling_location_query = PollingLocation.objects.all()
+    #     polling_location_query = polling_location_query.filter(state__iexact=state_code)
+    #     polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
+    #     polling_location_query = polling_location_query.filter(
+    #         google_response_address_not_found__isnull=True)
+    #     # We used to have a limit of 500 ballots to pull per election, but now retrieve all
+    #     # Ordering by "location_name" creates a bit of (locational) random order
+    #     polling_location_list = polling_location_query.order_by('location_name')[:import_limit]
+    # except PollingLocation.DoesNotExist:
+    #     messages.add_message(request, messages.INFO,
+    #                          'Could not retrieve ballot data for the {election_name}. '
+    #                          'No polling locations exist for the state \'{state}\'. '
+    #                          'Data needed from VIP.'.format(
+    #                              election_name=election_on_stage.election_name,
+    #                              state=state_code))
+    #     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+    #
+    # if polling_location_count == 0:
+    #     messages.add_message(request, messages.ERROR,
+    #                          'Could not retrieve ballot data for the {election_name}. '
+    #                          'No polling locations returned for the state \'{state}\'. '
+    #                          '(error 2 - retrieve_representatives_for_many_addresses_view)'.format(
+    #                              election_name=election_on_stage.election_name,
+    #                              state=state_code))
+    #     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+    #
+    # locations_retrieved = 0
+    # locations_not_retrieved = 0
+    # ballots_with_contests_retrieved = 0
+    # polling_locations_retrieved = 0
+    # ballots_with_election_administration_data = 0
+    # ballots_refreshed = 0
+    # # We used to only retrieve up to 500 locations from each state, but we don't limit now
+    # # # We retrieve 10% of the total polling locations, which should give us coverage of the entire election
+    # # number_of_polling_locations_to_retrieve = int(.1 * polling_location_count)
+    # ballot_returned_manager = BallotReturnedManager()
+    # rate_limit_count = 0
+    # # Step though our set of polling locations, until we find one that contains a ballot.  Some won't contain ballots
+    # # due to data quality issues.
+    # for polling_location in polling_location_list:
+    #     success = False
+    #     # Get the address for this polling place, and then retrieve the ballot from Google Civic API
+    #     results = polling_location.get_text_for_map_search_results()
+    #     text_for_map_search = results['text_for_map_search']
+    #     representatives_results = retrieve_representatives_from_google_civic_api(
+    #         text_for_map_search, election_on_stage.google_civic_election_id)
+    #     if representatives_results['success']:
+    #         one_ballot_json = representatives_results['structured_json']
+    #         store_representatives_results = store_representatives_from_google_civic_api(one_ballot_json, 0,
+    #                                                                           polling_location.we_vote_id)
+    #         if store_representatives_results['success']:
+    #             success = True
+    #             if store_representatives_results['ballot_returned_found']:
+    #                 ballot_returned = store_representatives_results['ballot_returned']
+    #                 ballot_returned_id = ballot_returned.id
+    #             # NOTE: We don't support retrieving ballots for polling locations AND geocoding simultaneously
+    #             # if store_representatives_results['ballot_returned_found']:
+    #             #     ballot_returned = store_representatives_results['ballot_returned']
+    #             #     ballot_returned_results = \
+    #             #         ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(ballot_returned)
+    #             #     if ballot_returned_results['success']:
+    #             #         rate_limit_count += 1
+    #             #         if rate_limit_count >= 10:  # Avoid problems with the geocoder rate limiting
+    #             #             time.sleep(1)
+    #             #             # After pause, reset the limit count
+    #             #             rate_limit_count = 0
+    #     else:
+    #         if 'google_response_address_not_found' in representatives_results:
+    #             if positive_value_exists(representatives_results['google_response_address_not_found']):
+    #                 try:
+    #                     if not polling_location.google_response_address_not_found:
+    #                         polling_location.google_response_address_not_found = 1
+    #                     else:
+    #                         polling_location.google_response_address_not_found += 1
+    #                     polling_location.save()
+    #                     print("Updated PollingLocation google_response_address_not_found: " + str(text_for_map_search))
+    #                 except Exception as e:
+    #                     print("Cannot update PollingLocation: " + str(text_for_map_search))
+    #
+    #     if success:
+    #         locations_saved += 1
+    #     else:
+    #         locations_not_retrieved += 1
+    #
+    #     if representatives_results['contests_retrieved']:
+    #         ballots_with_contests_retrieved += 1
+    #
+    #     # We used to only retrieve up to 500 locations from each state, but we don't limit now
+    #     # # Break out of this loop, assuming we have a minimum number of ballots with contests retrieved
+    #     # #  If we don't achieve the minimum number of ballots_with_contests_retrieved, break out at the emergency level
+    #     # emergency = (locations_retrieved + locations_not_retrieved) >= (3 * number_of_polling_locations_to_retrieve)
+    #     # if ((locations_retrieved + locations_not_retrieved) >= number_of_polling_locations_to_retrieve and
+    #     #         ballots_with_contests_retrieved > 20) or emergency:
+    #     #     break
+    #
+    # total_retrieved = locations_retrieved + locations_not_retrieved
+    # if locations_retrieved > 0:
+    #     messages.add_message(request, messages.INFO,
+    #                          'Ballot data retrieved from Google Civic for the {election_name}. '
+    #                          '(polling_locations_retrieved: {polling_locations_retrieved}, '
+    #                          'ballots_with_election_administration_data: {ballots_with_election_administration_data}, '
+    #                          'ballots retrieved: {locations_retrieved}, '
+    #                          '(with contests: {ballots_with_contests_retrieved}), '
+    #                          'not retrieved: {locations_not_retrieved}, '
+    #                          'total: {total}), '
+    #                          'ballots refreshed: {ballots_refreshed}'.format(
+    #                              polling_locations_retrieved=polling_locations_retrieved,
+    #                              ballots_with_election_administration_data=ballots_with_election_administration_data,
+    #                              ballots_refreshed=ballots_refreshed,
+    #                              locations_retrieved=locations_retrieved,
+    #                              locations_not_retrieved=locations_not_retrieved,
+    #                              ballots_with_contests_retrieved=ballots_with_contests_retrieved,
+    #                              election_name=election_on_stage.election_name,
+    #                              total=total_retrieved))
+    # else:
+    #     messages.add_message(request, messages.ERROR,
+    #                          'Ballot data NOT retrieved from Google Civic for the {election_name}. '
+    #                          '(polling_locations_retrieved: {polling_locations_retrieved}, '
+    #                          'ballots_with_election_administration_data: {ballots_with_election_administration_data}, '
+    #                          'ballots retrieved: {locations_retrieved}, '
+    #                          '(with contests: {ballots_with_contests_retrieved}), '
+    #                          'not retrieved: {locations_not_retrieved}, '
+    #                          'total: {total})'.format(
+    #                              polling_locations_retrieved=polling_locations_retrieved,
+    #                              ballots_with_election_administration_data=ballots_with_election_administration_data,
+    #                              locations_retrieved=locations_retrieved,
+    #                              locations_not_retrieved=locations_not_retrieved,
+    #                              ballots_with_contests_retrieved=ballots_with_contests_retrieved,
+    #                              election_name=election_on_stage.election_name,
+    #                              total=total_retrieved))
     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
 
