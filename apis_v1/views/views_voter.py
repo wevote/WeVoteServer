@@ -4,7 +4,7 @@
 
 from apis_v1.controllers import voter_count
 from ballot.controllers import voter_ballot_items_retrieve_for_api
-from ballot.models import copy_existing_ballot_items_from_stored_ballot
+from ballot.models import find_best_previously_stored_ballot_returned
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from django_user_agents.utils import get_user_agent
@@ -476,16 +476,16 @@ def voter_address_save_view(request):  # voterAddressSave
                 status += "NOT_REACHING_OUT_TO_BALLOTPEDIA "
 
             if not was_refreshed_from_ballotpedia_just_now:
-                # 2) Copy ballot data from a nearby address, previously retrieved and cached within We Vote
-                copy_results = copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search)
-                status += copy_results['status']
-                if copy_results['ballot_returned_copied']:
+                # 2) Find ballot data previously stored from a nearby address
+                ballot_returned_results = find_best_previously_stored_ballot_returned(voter_id, text_for_map_search)
+                status += ballot_returned_results['status']
+                if ballot_returned_results['ballot_returned_found']:
                     # If this ballot_returned entry is the result of searching based on an address, as opposed to
                     # a specific_ballot_requested, we want to update the VoterAddress
                     if positive_value_exists(voter_address.text_for_map_search):
                         try:
-                            voter_address.ballot_location_display_name = copy_results['ballot_location_display_name']
-                            voter_address.ballot_returned_we_vote_id = copy_results['ballot_returned_we_vote_id']
+                            voter_address.ballot_location_display_name = ballot_returned_results['ballot_location_display_name']
+                            voter_address.ballot_returned_we_vote_id = ballot_returned_results['ballot_returned_we_vote_id']
                             voter_address.save()
                         except Exception as e:
                             pass
@@ -495,21 +495,21 @@ def voter_address_save_view(request):  # voterAddressSave
                     is_from_test_address = False
                     save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
                         voter_id,
-                        copy_results['google_civic_election_id'],
-                        copy_results['state_code'],
-                        copy_results['election_day_text'],
-                        copy_results['election_description_text'],
+                        ballot_returned_results['google_civic_election_id'],
+                        ballot_returned_results['state_code'],
+                        ballot_returned_results['election_day_text'],
+                        ballot_returned_results['election_description_text'],
                         text_for_map_search,
-                        copy_results['substituted_address_nearby'],
+                        ballot_returned_results['substituted_address_nearby'],
                         is_from_substituted_address,
                         is_from_test_address,
-                        copy_results['polling_location_we_vote_id_source'],
-                        copy_results['ballot_location_display_name'],
-                        copy_results['ballot_returned_we_vote_id'],
-                        copy_results['ballot_location_shortcut'],
-                        substituted_address_city=copy_results['original_text_city'],
-                        substituted_address_state=copy_results['original_text_state'],
-                        substituted_address_zip=copy_results['original_text_zip'],
+                        ballot_returned_results['polling_location_we_vote_id_source'],
+                        ballot_returned_results['ballot_location_display_name'],
+                        ballot_returned_results['ballot_returned_we_vote_id'],
+                        ballot_returned_results['ballot_location_shortcut'],
+                        substituted_address_city=ballot_returned_results['original_text_city'],
+                        substituted_address_state=ballot_returned_results['original_text_state'],
+                        substituted_address_zip=ballot_returned_results['original_text_zip'],
                     )
                     status += save_results['status']
 
