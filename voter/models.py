@@ -3079,22 +3079,23 @@ class VoterAddressManager(models.Model):
         return results
 
     def update_existing_voter_address_object(self, voter_address_object):
+        status = ""
         results = self.retrieve_address(voter_address_object.id)
 
         if results['success']:
             try:
                 voter_address_object.save()  # Save the incoming object
-                status = "UPDATED_EXISTING_VOTER_ADDRESS"
+                status += "UPDATED_EXISTING_VOTER_ADDRESS "
                 success = True
                 voter_address_found = True
             except Exception as e:
-                status = "UNABLE_TO_UPDATE_EXISTING_VOTER_ADDRESS"
+                status += "UNABLE_TO_UPDATE_EXISTING_VOTER_ADDRESS "
                 success = False
                 voter_address_found = False
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         else:
             # If here, we were unable to find pre-existing VoterAddress
-            status = "UNABLE_TO_FIND_AND_UPDATE_VOTER_ADDRESS"
+            status += "UNABLE_TO_FIND_AND_UPDATE_VOTER_ADDRESS "
             voter_address_object = None
             success = False
             voter_address_found = False

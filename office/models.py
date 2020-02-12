@@ -659,6 +659,18 @@ class ContestOfficeManager(models.Model):
         ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
         host_google_civic_election_id = convert_to_int(host_google_civic_election_id)
         origin_google_civic_election_id = convert_to_int(origin_google_civic_election_id)
+
+        if host_google_civic_election_id == origin_google_civic_election_id:
+            status += "GOOGLE_CIVIC_ELECTION_IDS_MATCH_ALREADY "
+            results = {
+                'success': success,
+                'status': status,
+                'MultipleObjectsReturned': exception_multiple_object_returned,
+                'new_contest_office_visiting_created': new_contest_office_visiting_created,
+                'contest_office_visiting': contest_office_visiting,
+            }
+            return results
+
         try:
             updated_values = {
                 'contest_office_we_vote_id':        contest_office_we_vote_id,

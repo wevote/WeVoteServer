@@ -959,9 +959,9 @@ def all_ballot_items_retrieve_for_api(google_civic_election_id, state_code=''): 
     return json_data
 
 
-def voter_ballot_items_retrieve_for_api(
+def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         voter_device_id, google_civic_election_id,
-        ballot_returned_we_vote_id='', ballot_location_shortcut=''):  # voterBallotItemsRetrieve
+        ballot_returned_we_vote_id='', ballot_location_shortcut=''):
     status = ''
 
     specific_ballot_requested = positive_value_exists(ballot_returned_we_vote_id) or \
@@ -1073,6 +1073,7 @@ def voter_ballot_items_retrieve_for_api(
 
     google_civic_election_id = results['google_civic_election_id']
     voter_ballot_saved = results['voter_ballot_saved']
+    ballot_returned_we_vote_id = voter_ballot_saved.ballot_returned_we_vote_id
 
     # Update voter_device_link
     if voter_device_link.google_civic_election_id != google_civic_election_id:
@@ -1089,18 +1090,20 @@ def voter_ballot_items_retrieve_for_api(
                 voter_address_manager.update_existing_voter_address_object(voter_address)
 
         # Get and return the ballot_item_list
-        results = voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_id,
-                                                                       google_civic_election_id)
+        results = voter_ballot_items_retrieve_for_one_election_for_api(
+            voter_device_id, voter_id=voter_id, google_civic_election_id=google_civic_election_id,
+            ballot_returned_we_vote_id=ballot_returned_we_vote_id)
 
+        election_day_text = voter_ballot_saved.election_day_text()
         if len(results['ballot_item_list']) == 0:
             try:
                 # Heal the data
                 voter_ballot_saved.delete()
                 status += "DELETED_VOTER_BALLOT_SAVED_WITH_EMPTY_BALLOT_ITEM_LIST "
             except Exception as e:
-                status += "UNABLE_TO_DELETE_VOTER_BALLOT_SAVED "
+                status += "UNABLE_TO_DELETE_VOTER_BALLOT_SAVED " + str(e) + " "
         elif not positive_value_exists(voter_ballot_saved.election_description_text) \
-                or not positive_value_exists(voter_ballot_saved.election_day_text()):
+                or not positive_value_exists(election_day_text):
             try:
                 voter_ballot_saved_changed = False
                 election_manager = ElectionManager()
@@ -1110,7 +1113,7 @@ def voter_ballot_items_retrieve_for_api(
                     if not positive_value_exists(voter_ballot_saved.election_description_text):
                         voter_ballot_saved.election_description_text = election.election_name
                         voter_ballot_saved_changed = True
-                    if not positive_value_exists(voter_ballot_saved.election_day_text()):
+                    if not positive_value_exists(election_day_text):
                         if positive_value_exists(election.election_day_text):
                             voter_ballot_saved.election_date = \
                                 datetime.strptime(election.election_day_text, "%Y-%m-%d").date()
@@ -1125,7 +1128,7 @@ def voter_ballot_items_retrieve_for_api(
                 if voter_ballot_saved_changed:
                     voter_ballot_saved.save()
             except Exception as e:
-                status += "Failed to update election_name or original_text_for_map_search "
+                status += "Failed to update election_name or original_text_for_map_search " + str(e) + " "
         elif voter_ballot_saved.original_text_for_map_search != voter_address.text_for_map_search and \
                 not specific_ballot_requested:
             # We don't want to change the voter_ballot_saved.original_text_for_map_search to be the voter's address
@@ -1134,7 +1137,7 @@ def voter_ballot_items_retrieve_for_api(
                 voter_ballot_saved.original_text_for_map_search = voter_address.text_for_map_search
                 voter_ballot_saved.save()
             except Exception as e:
-                status += "Failed to update original_text_for_map_search"
+                status += "Failed to update original_text_for_map_search " + str(e) + " "
 
         status += " " + results['status']
         json_data = {
@@ -1224,9 +1227,9 @@ def choose_election_and_prepare_ballot_data(voter_device_link, google_civic_elec
             return results
 
     # If here, then we need to either:
-    # 1) Copy ballot data from a specific location (using either ballot_returned_we_vote_id or ballot_location_shortcut)
+    # 1) Find ballot data from a specific location (using either ballot_returned_we_vote_id or ballot_location_shortcut)
     # 2) Get ballot data from Ballotpedia or Google Civic for the actual VoterAddress
-    # 3) Copy ballot data from a nearby address, previously retrieved from Google Civic and cached within We Vote, or
+    # 3) Find ballot data from a nearby address, previously retrieved from Google Civic and cached within We Vote, or
     #    generated within We Vote (google_civic_election_id >= 1000000
     # 4) Get test ballot data from Google Civic
     results = generate_ballot_data(voter_device_link, google_civic_election_id, voter_address,
@@ -1249,7 +1252,7 @@ def choose_election_and_prepare_ballot_data(voter_device_link, google_civic_elec
 
 def generate_ballot_data(voter_device_link, google_civic_election_id, voter_address,
                          ballot_returned_we_vote_id='', ballot_location_shortcut=''):
-    from import_export_ballotpedia.controllers import voter_ballot_items_retrieve_from_ballotpedia_for_api
+    from import_export_ballotpedia.controllers import voter_ballot_items_retrieve_from_ballotpedia_for_api_v4
     voter_device_id = voter_device_link.voter_device_id
     voter_id = voter_device_link.voter_id
     voter_ballot_saved_manager = VoterBallotSavedManager()
@@ -1417,16 +1420,32 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
             if isinstance(text_for_map_search, str):
                 length_of_text_for_map_search = len(text_for_map_search)
 
+            if positive_value_exists(google_civic_election_id) and positive_value_exists(voter_id):
+                # Delete voter-specific ballot_returned for this election
+                ballot_returned_manager = BallotReturnedManager()
+                results = ballot_returned_manager.delete_ballot_returned_by_identifier(
+                    voter_id=voter_id,
+                    google_civic_election_id=google_civic_election_id)
+
+                # Delete voter_ballot_saved for this election
+                voter_ballot_saved_manager = VoterBallotSavedManager()
+                voter_ballot_saved_manager.delete_voter_ballot_saved(
+                    voter_id=voter_id, google_civic_election_id=google_civic_election_id)
+
+                # Delete all existing voter-specific ballot items for this election
+                ballot_item_list_manager = BallotItemListManager()
+                ballot_item_list_manager.delete_all_ballot_items_for_voter(voter_id, google_civic_election_id)
+
             # We don't want to call Ballotpedia when we just have "City, State ZIP". Since we don't always know
             #  whether we have a street address or not, then we use a simple string length cut-off.
             if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
                 status += "TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
                 # 1a) Get ballot data from Ballotpedia for the actual VoterAddress
-                ballotpedia_retrieve_results = voter_ballot_items_retrieve_from_ballotpedia_for_api(
+                ballotpedia_retrieve_results = voter_ballot_items_retrieve_from_ballotpedia_for_api_v4(
                     voter_device_id, text_for_map_search)
                 status += ballotpedia_retrieve_results['status']
                 if ballotpedia_retrieve_results['google_civic_election_id'] \
-                        and ballotpedia_retrieve_results['contests_retrieved']:
+                        and ballotpedia_retrieve_results['ballot_returned_found']:
                     is_from_substituted_address = False
                     substituted_address_nearby = ''
                     is_from_test_address = False
@@ -1436,19 +1455,19 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
 
                     # Save the meta information for this ballot data
                     save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
-                        voter_id,
-                        ballotpedia_retrieve_results['google_civic_election_id'],
-                        ballotpedia_retrieve_results['state_code'],
-                        ballotpedia_retrieve_results['election_day_text'],
-                        ballotpedia_retrieve_results['election_description_text'],
-                        ballotpedia_retrieve_results['text_for_map_search'],
-                        substituted_address_nearby,
-                        is_from_substituted_address,
-                        is_from_test_address,
-                        polling_location_we_vote_id_source,
-                        ballotpedia_retrieve_results['ballot_location_display_name'],
-                        ballotpedia_retrieve_results['ballot_returned_we_vote_id'],
-                        ballotpedia_retrieve_results['ballot_location_shortcut'],
+                        voter_id=voter_id,
+                        google_civic_election_id=ballotpedia_retrieve_results['google_civic_election_id'],
+                        state_code=ballotpedia_retrieve_results['state_code'],
+                        election_day_text=ballotpedia_retrieve_results['election_day_text'],
+                        election_description_text=ballotpedia_retrieve_results['election_description_text'],
+                        original_text_for_map_search=ballotpedia_retrieve_results['text_for_map_search'],
+                        substituted_address_nearby=substituted_address_nearby,
+                        is_from_substituted_address=is_from_substituted_address,
+                        is_from_test_ballot=is_from_test_address,
+                        polling_location_we_vote_id_source=polling_location_we_vote_id_source,
+                        ballot_location_display_name=ballotpedia_retrieve_results['ballot_location_display_name'],
+                        ballot_returned_we_vote_id=ballotpedia_retrieve_results['ballot_returned_we_vote_id'],
+                        ballot_location_shortcut=ballotpedia_retrieve_results['ballot_location_shortcut'],
                         original_text_city=ballotpedia_retrieve_results['original_text_city'],
                         original_text_state=ballotpedia_retrieve_results['original_text_state'],
                         original_text_zip=ballotpedia_retrieve_results['original_text_zip'],
@@ -1965,9 +1984,9 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                                 candidate_state_code_lower_case = candidate_state_code.lower()
                             else:
                                 candidate_state_code_lower_case = ""
-                            wdate = ''
+                            withdrawal_date = ''
                             if isinstance(candidate_campaign.withdrawal_date, the_other_datetime.date):
-                                wdate = candidate_campaign.withdrawal_date.strftime("%Y-%m-%d")
+                                withdrawal_date = candidate_campaign.withdrawal_date.strftime("%Y-%m-%d")
                             one_candidate = {
                                 # 'id':                           candidate_campaign.id,
                                 'we_vote_id':                   candidate_campaign.we_vote_id,
@@ -2007,12 +2026,11 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                                 'twitter_followers_count':      candidate_campaign.twitter_followers_count,
                                 # 'youtube_url':                  candidate_campaign.youtube_url,
                                 'withdrawn_from_election':      candidate_campaign.withdrawn_from_election,
-                                'withdrawal_date':              wdate,
+                                'withdrawal_date':              withdrawal_date,
                             }
                             candidates_to_display.append(one_candidate.copy())
                 except Exception as e:
-                    # status = 'FAILED candidates_retrieve. ' \
-                    #          '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                    status = "FAILED retrieve_all_candidates_for_office: " + str(e) + " "
                     candidates_to_display = []
                     if hasattr(results, 'status'):
                         status += results['status'] + " "
@@ -2100,30 +2118,49 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
     return results
 
 
-def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_id, google_civic_election_id):
+def voter_ballot_items_retrieve_for_one_election_for_api(
+        voter_device_id, voter_id=0, google_civic_election_id='', ballot_returned_we_vote_id=''):
     """
     voterBallotItemsRetrieve
     :param voter_device_id:
     :param voter_id:
     :param google_civic_election_id: This variable was passed in explicitly so we can
     get the ballot items related to that election.
+    :param ballot_returned_we_vote_id:
     :return:
     """
     status = ""
     ballot_item_list_manager = BallotItemListManager()
     contest_office_manager = ContestOfficeManager()
     candidate_list_object = CandidateCampaignListManager()
+    ballot_returned_manager = BallotReturnedManager()
+    polling_location_we_vote_id = ''
+
+    if positive_value_exists(ballot_returned_we_vote_id):
+        ballot_returned_results = \
+            ballot_returned_manager.retrieve_ballot_returned_from_ballot_returned_we_vote_id(ballot_returned_we_vote_id)
+        if ballot_returned_results['ballot_returned_found']:
+            ballot_returned = ballot_returned_results['ballot_returned']
+            polling_location_we_vote_id = ballot_returned.polling_location_we_vote_id
 
     ballot_item_list = []
     ballot_items_to_display = []
     results = {}
     try:
-        read_only = True
-        results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
-            voter_id, google_civic_election_id, read_only=read_only)
-        success = results['success']
-        status += results['status']
-        ballot_item_list = results['ballot_item_list']
+        if positive_value_exists(polling_location_we_vote_id):
+            results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
+                google_civic_election_id=google_civic_election_id,
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                read_only=True)
+            success = results['success']
+            status += results['status']
+            ballot_item_list = results['ballot_item_list']
+        else:
+            results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
+                voter_id, google_civic_election_id, read_only=True)
+            success = results['success']
+            status += results['status']
+            ballot_item_list = results['ballot_item_list']
     except Exception as e:
         status += 'FAILED voter_ballot_items_retrieve. ' \
                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
@@ -2149,13 +2186,17 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                     read_only = True
                     results = candidate_list_object.retrieve_all_candidates_for_office(
                         office_id, office_we_vote_id, read_only=read_only)
+                    # Not needed because we will override the candidate_campaign.google_civic_election_id
+                    # office_visiting_list_we_vote_ids = contest_office_manager.fetch_office_visiting_list_we_vote_ids(
+                    #     host_google_civic_election_id_list=[google_civic_election_id])
+
                     candidates_to_display = []
                     if results['candidate_list_found']:
                         candidate_list = results['candidate_list']
                         for candidate_campaign in candidate_list:
-                            wdate = ''
+                            withdrawal_date = ''
                             if isinstance(candidate_campaign.withdrawal_date, the_other_datetime.date):
-                                wdate = candidate_campaign.withdrawal_date.strftime("%Y-%m-%d")
+                                withdrawal_date = candidate_campaign.withdrawal_date.strftime("%Y-%m-%d")
 
                             # This should match values returned in candidates_retrieve_for_api (candidatesRetrieve)
                             one_candidate = {
@@ -2181,7 +2222,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                                 'contest_office_name':          candidate_campaign.contest_office_name,
                                 'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
                                 'facebook_url':                 candidate_campaign.facebook_url,
-                                'google_civic_election_id':     candidate_campaign.google_civic_election_id,
+                                'google_civic_election_id':     google_civic_election_id,
                                 'kind_of_ballot_item':          CANDIDATE,
                                 'maplight_id':                  candidate_campaign.maplight_id,
                                 'ocd_division_id':              candidate_campaign.ocd_division_id,
@@ -2196,12 +2237,11 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                                 'twitter_followers_count':      candidate_campaign.twitter_followers_count,
                                 'youtube_url':                  candidate_campaign.youtube_url,
                                 'withdrawn_from_election':      candidate_campaign.withdrawn_from_election,
-                                'withdrawal_date':              wdate,
+                                'withdrawal_date':              withdrawal_date,
                             }
                             candidates_to_display.append(one_candidate.copy())
                 except Exception as e:
-                    # status = 'FAILED candidates_retrieve. ' \
-                    #          '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                    status = 'FAILED retrieve_all_candidates_for_office. ' + str(e) + " "
                     candidates_to_display = []
                     if hasattr(results, 'status'):
                         status += results['status'] + " "
@@ -2209,7 +2249,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                 if len(candidates_to_display):
                     one_ballot_item = {
                         'ballot_item_display_name':     ballot_item.ballot_item_display_name,
-                        'google_civic_election_id':     ballot_item.google_civic_election_id,
+                        'google_civic_election_id':     google_civic_election_id,
                         'google_ballot_placement':      ballot_item.google_ballot_placement,
                         'id':                           office_id,
                         'local_ballot_order':           ballot_item.local_ballot_order,
@@ -2228,7 +2268,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                 measure_display_name_number = 100
                 one_ballot_item = {
                     'ballot_item_display_name':     ballot_item.ballot_item_display_name,
-                    'google_civic_election_id':     ballot_item.google_civic_election_id,
+                    'google_civic_election_id':     google_civic_election_id,
                     'google_ballot_placement':      ballot_item.google_ballot_placement,
                     'id':                           measure_id,
                     'kind_of_ballot_item':          kind_of_ballot_item,
