@@ -2996,9 +2996,9 @@ class VoterBallotSavedManager(models.Model):
 
         try:
             if positive_value_exists(voter_ballot_saved_id):
-                voter_ballot_saved = VoterBallotSaved.objects.get(id=voter_ballot_saved_id)
+                VoterBallotSaved.objects.get(id=voter_ballot_saved_id).delete()
                 # If still here, we found an existing voter_ballot_saved
-                voter_ballot_saved_found = True
+                voter_ballot_saved_deleted = True
                 success = True
                 status += "DELETE_VOTER_BALLOT_SAVED_FOUND_FROM_VOTER_BALLOT_SAVED_ID "
             elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
@@ -3036,6 +3036,7 @@ class VoterBallotSavedManager(models.Model):
                 status += "DELETE_VOTER_BALLOT_SAVED_FOUND_FROM_VOTER_ID_AND_BALLOT_LOCATION_SHORTCUT "
             else:
                 voter_ballot_saved_found = False
+                voter_ballot_saved_deleted = False
                 success = False
                 status += "DELETE_VOTER_BALLOT_SAVED-COULD_NOT_RETRIEVE_VOTER_BALLOT_SAVED-MISSING_VARIABLES-DELETE "
 
@@ -3045,15 +3046,6 @@ class VoterBallotSavedManager(models.Model):
         except Exception as e:
             success = False
             status += "DELETE_VOTER_BALLOT_SAVED-CANNOT_DELETE " + str(e) + " "
-
-        if voter_ballot_saved_found:
-            try:
-                voter_ballot_saved.delete()
-                status += "DELETED "
-                voter_ballot_saved_deleted = True
-            except Exception as e:
-                success = False
-                status += "NOT_DELETED " + str(e) + " "
 
         results = {
             'success':                      success,

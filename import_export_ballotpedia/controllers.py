@@ -817,13 +817,15 @@ def retrieve_ballot_items_from_polling_location_api_v4(
             # If we successfully save a ballot, create/update a BallotReturned entry
             if ballot_item_dict_list and len(ballot_item_dict_list) > 0:
                 ballot_returned_manager = BallotReturnedManager()
+                results = polling_location.get_text_for_map_search_results()
+                text_for_map_search = results['text_for_map_search']
                 results = ballot_returned_manager.update_or_create_ballot_returned(
                     polling_location_we_vote_id=polling_location_we_vote_id,
                     voter_id=0,
                     google_civic_election_id=google_civic_election_id,
                     latitude=polling_location.latitude,
                     longitude=polling_location.longitude,
-                    text_for_map_search=polling_location.get_text_for_map_search_results(),
+                    text_for_map_search=text_for_map_search,
                     normalized_city=polling_location.city,
                     normalized_state=polling_location.state,
                     normalized_zip=polling_location.zip_long,

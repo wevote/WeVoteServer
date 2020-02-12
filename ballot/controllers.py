@@ -1272,6 +1272,7 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
         }
         return results
 
+    election_manager = ElectionManager()
     if specific_ballot_requested:
         text_for_map_search = ''
         google_civic_election_id = 0
@@ -1282,12 +1283,20 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
         if ballot_returned_results['ballot_returned_found']:
             is_from_substituted_address = True
             is_from_test_address = False
+            election_day_text = ballot_returned_results['election_day_text']
+            election_description_text = ballot_returned_results['election_description_text']
+            if not positive_value_exists(election_day_text) or not positive_value_exists(election_description_text):
+                election_results = election_manager.retrieve_election(google_civic_election_id)
+                if election_results['election_found']:
+                    election = election_results['election']
+                    election_day_text = election.election_day_text
+                    election_description_text = election.election_name
             save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
                 voter_id,
                 ballot_returned_results['google_civic_election_id'],
                 ballot_returned_results['state_code'],
-                ballot_returned_results['election_day_text'],
-                ballot_returned_results['election_description_text'],
+                election_day_text,
+                election_description_text,
                 text_for_map_search,
                 ballot_returned_results['substituted_address_nearby'],
                 is_from_substituted_address,
@@ -1320,7 +1329,6 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
             state_code_from_text_for_map_search = voter_address.get_state_code_from_text_for_map_search()
             if positive_value_exists(state_code_from_text_for_map_search):
                 # If the voter address is for another state, then remove
-                election_manager = ElectionManager()
                 election_results = election_manager.retrieve_election(google_civic_election_id)
                 if election_results['election_found']:
                     election = election_results['election']
@@ -2176,16 +2184,14 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
                 office_we_vote_id = ballot_item.contest_office_we_vote_id
                 race_office_level = ""
                 if positive_value_exists(office_we_vote_id):
-                    read_only = True
                     office_results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
-                        office_we_vote_id, read_only=read_only)
+                        office_we_vote_id, read_only=True)
                     if office_results['contest_office_found']:
                         contest_office = office_results['contest_office']
                         race_office_level = contest_office.ballotpedia_race_office_level
                 try:
-                    read_only = True
                     results = candidate_list_object.retrieve_all_candidates_for_office(
-                        office_id, office_we_vote_id, read_only=read_only)
+                        office_id, office_we_vote_id, read_only=True)
                     # Not needed because we will override the candidate_campaign.google_civic_election_id
                     # office_visiting_list_we_vote_ids = contest_office_manager.fetch_office_visiting_list_we_vote_ids(
                     #     host_google_civic_election_id_list=[google_civic_election_id])

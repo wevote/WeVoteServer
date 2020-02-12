@@ -540,12 +540,16 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
             if random_sorting == 1:
                 # Ordering by "line1" creates a bit of (locational) random order
                 polling_location_list = polling_location_query.order_by('line1')
+                # polling_location_list = polling_location_query.order_by('line1')[:10]  # For testing
             elif random_sorting == 2:
                 polling_location_list = polling_location_query.order_by('-line1')
+                # polling_location_list = polling_location_query.order_by('-line1')[:10]  # For testing
             elif random_sorting == 3:
                 polling_location_list = polling_location_query.order_by('zip_long')
+                # polling_location_list = polling_location_query.order_by('zip_long')[:10]  # For testing
             else:
                 polling_location_list = polling_location_query.order_by('-zip_long')
+                # polling_location_list = polling_location_query.order_by('-zip_long')[:10]  # For testing
             # For testing
             # polling_location_list = polling_location_query.order_by('line1')[:10]
             polling_location_count = len(polling_location_list)
