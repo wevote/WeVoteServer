@@ -3,7 +3,7 @@
 boto3==1.11.5
 dj-database-url==0.5.0
 dj-static==0.0.6
-django==2.2.9
+django==2.2.10
 django-background-tasks==1.2.5
 django-bootstrap3==10.0.1
 django-cors-headers==3.2.1
