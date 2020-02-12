@@ -4427,10 +4427,10 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
             'contest_measure_we_vote_id':   one_batch_row_action.contest_measure_we_vote_id,
             'measure_subtitle':             one_batch_row_action.measure_subtitle,
             'measure_url':                  one_batch_row_action.measure_url,
-            'no_vote_description':          one_batch_row_action.no_vote_description,
+            'ballotpedia_no_vote_description': one_batch_row_action.ballotpedia_no_vote_description,
             'polling_location_we_vote_id':  one_batch_row_action.polling_location_we_vote_id,
             'state_code':                   one_batch_row_action.state_code,
-            'yes_vote_description':         one_batch_row_action.yes_vote_description,
+            'ballotpedia_yes_vote_description': one_batch_row_action.ballotpedia_yes_vote_description,
         }
 
         # Look up BallotItem to see if an entry exists

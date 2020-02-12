@@ -262,10 +262,21 @@ class BallotItemManager(models.Model):
         return results
 
     def update_or_create_ballot_item_for_voter(
-            self, voter_id, google_civic_election_id, google_ballot_placement,
-            ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,
-            contest_office_id=0, contest_office_we_vote_id='',
-            contest_measure_id=0, contest_measure_we_vote_id='', state_code='', defaults={}):
+            self,
+            voter_id,
+            google_civic_election_id='',
+            google_ballot_placement=None,
+            ballot_item_display_name='',
+            measure_subtitle='',
+            measure_text='',
+            local_ballot_order=0,
+            contest_office_id=0,
+            contest_office_we_vote_id='',
+            contest_measure_id=0,
+            contest_measure_we_vote_id='',
+            state_code='',
+            defaults={}
+    ):
         ballot_item_found = False  # At the end, does a ballot_item exist?
         ballot_item_on_stage = None
         delete_extra_ballot_item_entries = False
@@ -273,6 +284,12 @@ class BallotItemManager(models.Model):
         new_ballot_item_created = False
         status = ""
         success = True
+        if contest_measure_id is not None:
+            contest_measure_id = convert_to_int(contest_measure_id)
+        if contest_office_id is not None:
+            contest_office_id = convert_to_int(contest_office_id)
+        if google_ballot_placement is not None:
+            google_ballot_placement = convert_to_int(google_ballot_placement)
 
         # We require both contest_office_id and contest_office_we_vote_id
         #  OR both contest_measure_id and contest_measure_we_vote_id
@@ -334,6 +351,9 @@ class BallotItemManager(models.Model):
                 success = False
                 delete_extra_ballot_item_entries = True
                 exception_multiple_object_returned = True
+            except Exception as e:
+                status += "UPDATE_OR_CREATE_BALLOT_ITEM-EXCEPTION: " + str(e) + " "
+                success = False
 
             if positive_value_exists(delete_extra_ballot_item_entries):
                 success = False
@@ -377,10 +397,10 @@ class BallotItemManager(models.Model):
                         status += 'BALLOT_ITEM_UPDATED '
 
                 except Exception as e:
-                    status += "UPDATE_OR_CREATE_BALLOT_ITEM-MORE_THAN_ONE_FOUND "
+                    status += "UPDATE_OR_CREATE_BALLOT_ITEM-BALLOT_ITEM_FOUND_UPDATE_EXCEPTION " + str(e) + " "
                     handle_record_found_more_than_one_exception(e, logger, exception_message_optional=status)
                     success = False
-                    exception_multiple_object_returned = True
+                    exception_multiple_object_returned = False
 
         results = {
             'success':                  success,
@@ -633,9 +653,9 @@ class BallotItemManager(models.Model):
                 measure_subtitle=contest_measure.measure_subtitle,
                 measure_text=contest_measure.measure_text,
                 measure_url=contest_measure.measure_url,
-                no_vote_description=contest_measure.no_vote_description,
+                no_vote_description=contest_measure.ballotpedia_no_vote_description,
                 # state_code=contest_measure.state_code,
-                yes_vote_description=contest_measure.yes_vote_description,
+                yes_vote_description=contest_measure.ballotpedia_yes_vote_description,
             )
         except Exception as e:
             success = False
@@ -760,8 +780,8 @@ class BallotItemListManager(models.Model):
 
     def delete_all_ballot_items_for_voter(self, voter_id, google_civic_election_id):
         ballot_item_list_deleted = False
-        ballot_items_deleted_count = 0
         status = ''
+        success = True
         try:
             ballot_item_queryset = BallotItem.objects.filter(voter_id=voter_id)
             if positive_value_exists(google_civic_election_id):
@@ -780,9 +800,10 @@ class BallotItemListManager(models.Model):
             ballot_items_deleted_count = 0
             status += 'FAILED delete_all_ballot_items_for_voter ' \
                       '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            success = False
 
         results = {
-            'success':                  True if ballot_item_list_deleted else False,
+            'success':                  success,
             'status':                   status,
             'google_civic_election_id': google_civic_election_id,
             'voter_id':                 voter_id,
@@ -1678,7 +1699,7 @@ class BallotReturnedManager(models.Model):
             ballot_returned_we_vote_id, ballot_location_shortcut)
 
     def retrieve_existing_ballot_returned_by_identifier(
-            self, ballot_returned_id, google_civic_election_id=0, voter_id=0, polling_location_we_vote_id='',
+            self, ballot_returned_id=0, google_civic_election_id=0, voter_id=0, polling_location_we_vote_id='',
             ballot_returned_we_vote_id='', ballot_location_shortcut=''):
         """
         Search by voter_id (or polling_location_we_vote_id) + google_civic_election_id to see if have an entry
@@ -1772,6 +1793,83 @@ class BallotReturnedManager(models.Model):
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'ballot_returned_found':    ballot_returned_found,
             'ballot_returned':          ballot_returned,
+        }
+        return results
+
+    def delete_ballot_returned_by_identifier(
+            self, ballot_returned_id=0, google_civic_election_id=0, voter_id=0, polling_location_we_vote_id='',
+            ballot_returned_we_vote_id='', ballot_location_shortcut=''):
+        """
+        :param ballot_returned_id:
+        :param google_civic_election_id:
+        :param voter_id:
+        :param polling_location_we_vote_id:
+        :param ballot_returned_we_vote_id:
+        :param ballot_location_shortcut:
+        :return:
+        """
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        ballot_deleted = False
+        ballot_deleted_count = 0
+        status = ''
+        success = True
+
+        try:
+            if positive_value_exists(ballot_returned_id):
+                ballot_deleted_count, details = BallotReturned.objects.get(id=ballot_returned_id).delete()
+                ballot_deleted = positive_value_exists(ballot_deleted_count)
+                status += "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
+            elif positive_value_exists(ballot_returned_we_vote_id):
+                ballot_deleted_count, details = BallotReturned.objects.get(
+                    we_vote_id__iexact=ballot_returned_we_vote_id).delete()
+                ballot_deleted = positive_value_exists(ballot_deleted_count)
+                status += "BALLOT_RETURNED_FOUND_FROM_BALLOT_RETURNED_WE_VOTE_ID "
+            elif positive_value_exists(ballot_location_shortcut):
+                ballot_deleted_count, details = BallotReturned.objects.get(
+                    ballot_location_shortcut=ballot_location_shortcut).delete()
+                ballot_deleted = positive_value_exists(ballot_deleted_count)
+                status += "BALLOT_RETURNED_FOUND_FROM_BALLOT_RETURNED_LOCATION_SHORTCUT "
+            elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
+                ballot_deleted_count, details = BallotReturned.objects.get(
+                    voter_id=voter_id,
+                    google_civic_election_id=google_civic_election_id).delete()
+                ballot_deleted = positive_value_exists(ballot_deleted_count)
+                status += "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
+            elif positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
+                ballot_deleted_count, details = BallotReturned.objects.get(
+                    polling_location_we_vote_id=polling_location_we_vote_id,
+                    google_civic_election_id=google_civic_election_id).delete()
+                ballot_deleted = positive_value_exists(ballot_deleted_count)
+                status += "BALLOT_RETURNED_FOUND_FROM_POLLING_LOCATION_WE_VOTE_ID "
+            elif positive_value_exists(google_civic_election_id):
+                ballot_deleted_count, details = \
+                    BallotReturned.objects.filter(google_civic_election_id=google_civic_election_id).delete()
+                ballot_deleted = positive_value_exists(ballot_deleted_count)
+            else:
+                ballot_deleted = False
+                success = False
+                status += "COULD_NOT_RETRIEVE_BALLOT_RETURNED-MISSING_VARIABLES "
+
+        except BallotReturned.MultipleObjectsReturned as e:
+            exception_multiple_object_returned = True
+            success = False
+            status += "MULTIPLE_BALLOT_RETURNED-MUST_DELETE_ALL " + str(e) + " "
+        except BallotReturned.DoesNotExist:
+            exception_does_not_exist = True
+            success = True
+            status += "BALLOT_RETURNED_NOT_FOUND "
+        except Exception as e:
+            success = False
+            status += "COULD_NOT_RETRIEVE_BALLOT_RETURNED-EXCEPTION " + str(e) + " "
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'DoesNotExist':             exception_does_not_exist,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'ballot_deleted':           ballot_deleted,
+            'ballot_deleted_count':     ballot_deleted_count,
         }
         return results
 
@@ -2880,7 +2978,7 @@ class VoterBallotSavedManager(models.Model):
         voter_ballot_saved_id = 0
         return self.delete_voter_ballot_saved(voter_ballot_saved_id, voter_id, google_civic_election_id)
 
-    def delete_voter_ballot_saved(self, voter_ballot_saved_id, voter_id=0, google_civic_election_id=0,
+    def delete_voter_ballot_saved(self, voter_ballot_saved_id=0, voter_id=0, google_civic_election_id=0,
                                   ballot_returned_we_vote_id="", ballot_location_shortcut=""):
         """
 
@@ -2946,7 +3044,7 @@ class VoterBallotSavedManager(models.Model):
             status += "DELETE_VOTER_BALLOT_SAVED_NOT_FOUND "
         except Exception as e:
             success = False
-            status += "DELETE_VOTER_BALLOT_SAVED-CANNOT_DELETE "
+            status += "DELETE_VOTER_BALLOT_SAVED-CANNOT_DELETE " + str(e) + " "
 
         if voter_ballot_saved_found:
             try:
@@ -2955,7 +3053,7 @@ class VoterBallotSavedManager(models.Model):
                 voter_ballot_saved_deleted = True
             except Exception as e:
                 success = False
-                status += "NOT_DELETED "
+                status += "NOT_DELETED " + str(e) + " "
 
         results = {
             'success':                      success,
@@ -3200,12 +3298,12 @@ class VoterBallotSavedManager(models.Model):
         return results
 
     def update_or_create_voter_ballot_saved(
-            self, voter_id,
-            google_civic_election_id,
-            state_code,
-            election_day_text,
-            election_description_text,
-            original_text_for_map_search,
+            self, voter_id=0,
+            google_civic_election_id='',
+            state_code='',
+            election_day_text='',
+            election_description_text='',
+            original_text_for_map_search='',
             substituted_address_nearby='',
             is_from_substituted_address=False,
             is_from_test_ballot=False,

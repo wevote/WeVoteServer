@@ -3,8 +3,12 @@
 # -*- coding: UTF-8 -*-
 
 from apis_v1.controllers import voter_count
-from ballot.controllers import voter_ballot_items_retrieve_for_api
-from ballot.models import find_best_previously_stored_ballot_returned
+from ballot.controllers import choose_election_and_prepare_ballot_data,voter_ballot_items_retrieve_for_api, \
+    voter_ballot_list_retrieve_for_api
+from ballot.models import BallotItemListManager, BallotReturnedManager, find_best_previously_stored_ballot_returned, \
+    OFFICE, CANDIDATE, MEASURE, VoterBallotSavedManager
+from bookmark.controllers import voter_all_bookmarks_status_retrieve_for_api, voter_bookmark_off_save_for_api, \
+    voter_bookmark_on_save_for_api, voter_bookmark_status_retrieve_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from django_user_agents.utils import get_user_agent
@@ -15,7 +19,7 @@ from wevote_functions.functions import extract_first_name_from_full_name, extrac
 from follow.controllers import voter_issue_follow_for_api
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from image.controllers import TWITTER, FACEBOOK, cache_master_and_resized_image
-from import_export_ballotpedia.controllers import voter_ballot_items_retrieve_from_ballotpedia_for_api
+from import_export_ballotpedia.controllers import voter_ballot_items_retrieve_from_ballotpedia_for_api_v4
 from import_export_facebook.controllers import voter_facebook_sign_in_retrieve_for_api, \
     voter_facebook_sign_in_save_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
@@ -26,10 +30,6 @@ from position.controllers import voter_all_positions_retrieve_for_api, \
     voter_position_retrieve_for_api, voter_position_comment_save_for_api, voter_position_visibility_save_for_api
 from position_like.controllers import voter_position_like_off_save_for_api, \
     voter_position_like_on_save_for_api, voter_position_like_status_retrieve_for_api
-from ballot.controllers import choose_election_and_prepare_ballot_data, voter_ballot_list_retrieve_for_api
-from ballot.models import OFFICE, CANDIDATE, MEASURE, VoterBallotSavedManager
-from bookmark.controllers import voter_all_bookmarks_status_retrieve_for_api, voter_bookmark_off_save_for_api, \
-    voter_bookmark_on_save_for_api, voter_bookmark_status_retrieve_for_api
 from sms.controllers import voter_sms_phone_number_retrieve_for_api, voter_sms_phone_number_save_for_api
 from sms.models import SMSManager
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
@@ -439,39 +439,46 @@ def voter_address_save_view(request):  # voterAddressSave
             if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
                 status += "TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
                 # 1a) Get ballot data from Ballotpedia for the actual VoterAddress
-                ballotpedia_retrieve_results = voter_ballot_items_retrieve_from_ballotpedia_for_api(
-                    voter_device_id, text_for_map_search)
+                ballotpedia_retrieve_results = voter_ballot_items_retrieve_from_ballotpedia_for_api_v4(
+                    voter_device_id,
+                    text_for_map_search=text_for_map_search,
+                    google_civic_election_id=google_civic_election_id)
                 status += ballotpedia_retrieve_results['status']
                 if ballotpedia_retrieve_results['google_civic_election_id'] \
-                        and ballotpedia_retrieve_results['contests_retrieved']:
+                        and ballotpedia_retrieve_results['ballot_returned_found']:
                     was_refreshed_from_ballotpedia_just_now = True
                     is_from_substituted_address = False
                     substituted_address_nearby = ''
                     is_from_test_address = False
                     polling_location_we_vote_id_source = ''  # Not used when retrieving directly for the voter
 
+                    # These variables are needed below
+                    ballot_location_display_name = ballotpedia_retrieve_results['ballot_location_display_name']
+                    ballot_returned_we_vote_id = ballotpedia_retrieve_results['ballot_returned_we_vote_id']
+
                     # We update the voter_address with this google_civic_election_id outside of this function
 
                     # Save the meta information for this ballot data
                     save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
-                        voter_id,
-                        ballotpedia_retrieve_results['google_civic_election_id'],
-                        ballotpedia_retrieve_results['state_code'],
-                        ballotpedia_retrieve_results['election_day_text'],
-                        ballotpedia_retrieve_results['election_description_text'],
-                        ballotpedia_retrieve_results['text_for_map_search'],
-                        substituted_address_nearby,
-                        is_from_substituted_address,
-                        is_from_test_address,
-                        polling_location_we_vote_id_source,
-                        ballotpedia_retrieve_results['ballot_location_display_name'],
-                        ballotpedia_retrieve_results['ballot_returned_we_vote_id'],
-                        ballotpedia_retrieve_results['ballot_location_shortcut'],
+                        voter_id=voter_id,
+                        google_civic_election_id=ballotpedia_retrieve_results['google_civic_election_id'],
+                        state_code=ballotpedia_retrieve_results['state_code'],
+                        election_day_text=ballotpedia_retrieve_results['election_day_text'],
+                        election_description_text=ballotpedia_retrieve_results['election_description_text'],
+                        original_text_for_map_search=ballotpedia_retrieve_results['text_for_map_search'],
+                        substituted_address_nearby=substituted_address_nearby,
+                        is_from_substituted_address=is_from_substituted_address,
+                        is_from_test_ballot=is_from_test_address,
+                        polling_location_we_vote_id_source=polling_location_we_vote_id_source,
+                        ballot_location_display_name=ballotpedia_retrieve_results['ballot_location_display_name'],
+                        ballot_returned_we_vote_id=ballotpedia_retrieve_results['ballot_returned_we_vote_id'],
+                        ballot_location_shortcut=ballotpedia_retrieve_results['ballot_location_shortcut'],
                         original_text_city=ballotpedia_retrieve_results['original_text_city'],
                         original_text_state=ballotpedia_retrieve_results['original_text_state'],
                         original_text_zip=ballotpedia_retrieve_results['original_text_zip'],
                     )
                     status += save_results['status']
+                    google_civic_election_id = ballotpedia_retrieve_results['google_civic_election_id']
             else:
                 status += "NOT_REACHING_OUT_TO_BALLOTPEDIA "
 
@@ -484,29 +491,50 @@ def voter_address_save_view(request):  # voterAddressSave
                     # a specific_ballot_requested, we want to update the VoterAddress
                     if positive_value_exists(voter_address.text_for_map_search):
                         try:
-                            voter_address.ballot_location_display_name = ballot_returned_results['ballot_location_display_name']
-                            voter_address.ballot_returned_we_vote_id = ballot_returned_results['ballot_returned_we_vote_id']
+                            voter_address.ballot_location_display_name = \
+                                ballot_returned_results['ballot_location_display_name']
+                            voter_address.ballot_returned_we_vote_id = \
+                                ballot_returned_results['ballot_returned_we_vote_id']
                             voter_address.save()
                         except Exception as e:
-                            pass
+                            status += "COULD_NOT_SAVE_VOTER_ADDRESS: " + str(e) + " "
+
+                    ballot_returned_we_vote_id = ballot_returned_results['ballot_returned_we_vote_id']
+                    google_civic_election_id = ballot_returned_results['google_civic_election_id']
+                    if positive_value_exists(google_civic_election_id) and positive_value_exists(voter_id):
+                        # Delete voter-specific ballot_returned for this election
+                        ballot_returned_manager = BallotReturnedManager()
+                        results = ballot_returned_manager.delete_ballot_returned_by_identifier(
+                            voter_id=voter_id,
+                            google_civic_election_id=google_civic_election_id)
+
+                        # Delete voter_ballot_saved for this election
+                        voter_ballot_saved_manager = VoterBallotSavedManager()
+                        voter_ballot_saved_manager.delete_voter_ballot_saved(
+                            voter_id=voter_id, google_civic_election_id=google_civic_election_id)
+
+                        # Delete all existing voter-specific ballot items for this election
+                        ballot_item_list_manager = BallotItemListManager()
+                        ballot_item_list_manager.delete_all_ballot_items_for_voter(voter_id, google_civic_election_id)
 
                     # And now store the details of this ballot for this voter
                     is_from_substituted_address = True
                     is_from_test_address = False
                     save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
-                        voter_id,
-                        ballot_returned_results['google_civic_election_id'],
-                        ballot_returned_results['state_code'],
-                        ballot_returned_results['election_day_text'],
-                        ballot_returned_results['election_description_text'],
-                        text_for_map_search,
-                        ballot_returned_results['substituted_address_nearby'],
-                        is_from_substituted_address,
-                        is_from_test_address,
-                        ballot_returned_results['polling_location_we_vote_id_source'],
-                        ballot_returned_results['ballot_location_display_name'],
-                        ballot_returned_results['ballot_returned_we_vote_id'],
-                        ballot_returned_results['ballot_location_shortcut'],
+                        voter_id=voter_id,
+                        google_civic_election_id=ballot_returned_results['google_civic_election_id'],
+                        state_code=ballot_returned_results['state_code'],
+                        election_day_text=ballot_returned_results['election_day_text'],
+                        election_description_text=ballot_returned_results['election_description_text'],
+                        original_text_for_map_search=text_for_map_search,
+                        substituted_address_nearby=ballot_returned_results['substituted_address_nearby'],
+                        is_from_substituted_address=is_from_substituted_address,
+                        is_from_test_ballot=is_from_test_address,
+                        polling_location_we_vote_id_source=ballot_returned_results[
+                            'polling_location_we_vote_id_source'],
+                        ballot_location_display_name=ballot_returned_results['ballot_location_display_name'],
+                        ballot_returned_we_vote_id=ballot_returned_results['ballot_returned_we_vote_id'],
+                        ballot_location_shortcut=ballot_returned_results['ballot_location_shortcut'],
                         substituted_address_city=ballot_returned_results['original_text_city'],
                         substituted_address_state=ballot_returned_results['original_text_state'],
                         substituted_address_zip=ballot_returned_results['original_text_zip'],
@@ -571,6 +599,8 @@ def voter_address_save_view(request):  # voterAddressSave
             'ballot_item_list':             [],
         }
     else:
+        # This does return the data twice, since the WebApp requests
+        # voterBallotItemRetrieve when voterAddressSave completes
         json_data = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id,
                                                         ballot_returned_we_vote_id)
         json_data['simple_save'] = simple_save
