@@ -2780,7 +2780,14 @@ class BallotReturnedListManager(models.Model):
         }
         return results
 
-    def fetch_oldest_date_last_updated(self, google_civic_election_id=0, state_code=''):
+    def fetch_oldest_date_last_updated(self, google_civic_election_id=0, state_code='', for_voter=False):
+        """
+
+        :param google_civic_election_id:
+        :param state_code:
+        :param for_voter:
+        :return:
+        """
         google_civic_election_id = convert_to_int(google_civic_election_id)
         status = ''
         try:
@@ -2789,6 +2796,14 @@ class BallotReturnedListManager(models.Model):
                 google_civic_election_id=google_civic_election_id)
             if positive_value_exists(state_code):
                 ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state_code)
+            if positive_value_exists(for_voter):
+                # Find entries where the voter_id is not null or 0
+                ballot_returned_queryset = ballot_returned_queryset.exclude(
+                    Q(voter_id__isnull=True) | Q(voter_id=0))
+            else:
+                # Default is to find BallotReturned entries for polling_locations
+                ballot_returned_queryset = ballot_returned_queryset.exclude(
+                    Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
 
             ballot_returned = ballot_returned_queryset.first()
             return ballot_returned.date_last_updated
