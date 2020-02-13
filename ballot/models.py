@@ -1567,6 +1567,9 @@ class BallotReturned(models.Model):
     normalized_zip = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='normalized zip returned from Google')
 
+    date_last_updated = models.DateTimeField(
+        verbose_name='date ballot items last retrieved', auto_now=True, db_index=True)
+
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this voter_guide came from another source we still need a unique we_vote_id
@@ -2657,26 +2660,34 @@ class BallotReturnedListManager(models.Model):
         }
         return results
 
-    def retrieve_polling_location_we_vote_id_list_from_ballot_returned(self, google_civic_election_id, state_code=''):
+    def retrieve_polling_location_we_vote_id_list_from_ballot_returned(
+            self, google_civic_election_id, state_code='', limit=750):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         polling_location_we_vote_id_list = []
-        polling_location_we_vote_id_list_found = False
         status = ''
         success = True
 
         try:
             if positive_value_exists(state_code):
-                polling_location_we_vote_id_query = BallotReturned.objects.using('readonly').order_by('-id')\
+                polling_location_we_vote_id_query = BallotReturned.objects.using('readonly')\
+                    .order_by('date_last_updated')\
                     .filter(google_civic_election_id=google_civic_election_id, normalized_state__iexact=state_code)\
                     .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id="")).\
                     values_list('polling_location_we_vote_id', flat=True)
-                polling_location_we_vote_id_list = list(polling_location_we_vote_id_query)
+                if positive_value_exists(limit):
+                    polling_location_we_vote_id_list = polling_location_we_vote_id_query[:limit]
+                else:
+                    polling_location_we_vote_id_list = list(polling_location_we_vote_id_query)
             else:
-                polling_location_we_vote_id_query = BallotReturned.objects.using('readonly').order_by('-id') \
+                polling_location_we_vote_id_query = BallotReturned.objects.using('readonly')\
+                    .order_by('date_last_updated') \
                     .filter(google_civic_election_id=google_civic_election_id) \
                     .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id="")). \
                     values_list('polling_location_we_vote_id', flat=True)
-                polling_location_we_vote_id_list = list(polling_location_we_vote_id_query)
+                if positive_value_exists(limit):
+                    polling_location_we_vote_id_list = polling_location_we_vote_id_query[:limit]
+                else:
+                    polling_location_we_vote_id_list = list(polling_location_we_vote_id_query)
         except Exception as e:
             status += "COULD_NOT_RETRIEVE_POLLING_LOCATION_LIST " + str(e) + " "
         polling_location_we_vote_id_list_found = positive_value_exists(len(polling_location_we_vote_id_list))
@@ -2768,6 +2779,27 @@ class BallotReturnedListManager(models.Model):
             'ballot_returned_list':         ballot_returned_list,
         }
         return results
+
+    def fetch_oldest_date_last_updated(self, google_civic_election_id=0, state_code=''):
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        status = ''
+        try:
+            ballot_returned_queryset = BallotReturned.objects.using('readonly').order_by('date_last_updated').all()
+            ballot_returned_queryset = ballot_returned_queryset.filter(
+                google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state_code)
+
+            ballot_returned = ballot_returned_queryset.first()
+            return ballot_returned.date_last_updated
+        except BallotReturned.DoesNotExist:
+            # No ballot items found. Not a problem.
+            status += 'NO_BALLOT_RETURNED_FOUND '
+        except Exception as e:
+            status += 'FAILED fetch_oldest_last_updated_date ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+
+        return None
 
     def fetch_ballot_returned_list_count_for_election(self, google_civic_election_id, state_code=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
