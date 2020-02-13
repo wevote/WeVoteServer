@@ -346,7 +346,7 @@
 {% if not is_national_election or is_national_election and state_code %}
   <li>
     <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
-        Ballotpedia: Retrieve Ballots for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}
+        Ballotpedia: Retrieve Ballots for this Election, up to 750{% if state_code %} (for {{ state_code|upper }}){% endif %}
     </a> (in new window)<br />
     Start with all of the polling locations in this state. For each polling location,
     reach out to Ballotpedia "sample_ballot_elections" API with lat/long and retrieve the districts covered by one polling location.<br />
@@ -426,22 +426,12 @@
 {% endif %}
 </ol>
 
-  <strong>Data Grooming Tools</strong>
+<strong>Data Grooming Tools</strong>
 
-  <ul>
+<ul>
   <li>
   <a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
-  Update Lat/Long{% if state_code %} for {{ state_code|upper }}{% endif %}: {{ entries_missing_latitude_longitude }} missing</a>
-  </li>
-
-  <li>
-      <a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
-          Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)
-  </li>
-
-  <li>
-      <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
-        Import Complete Ballot at One Location (Import/Export Batches)</a>
+      Update Lat/Long{% if state_code %} for {{ state_code|upper }}{% endif %}: {{ entries_missing_latitude_longitude }} missing</a>
   </li>
 
   <li>
@@ -451,7 +441,21 @@
 
   <li>
     <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1" target="_blank">
-      Check Ballotpedia for new Ballot Items for existing BallotReturned entries</a>
+      Check Ballotpedia for new Ballot Items for existing BallotReturned entries (up to 750)</a> (Oldest: {{ ballot_returned_oldest_date }})
+  </li>
+</ul>
+
+
+<strong>Less Frequent Data Grooming Tools</strong>
+<ul>
+  <li>
+      <a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+          Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)
+  </li>
+
+  <li>
+      <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+        Import Complete Ballot at One Location (Import/Export Batches)</a>
   </li>
 
   <li>

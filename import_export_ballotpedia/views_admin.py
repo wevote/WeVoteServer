@@ -507,24 +507,33 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
     try:
-        if positive_value_exists(refresh_ballot_returned):
-            # Retrieve polling locations already in ballot_returned table
-            ballot_returned_list_manager = BallotReturnedListManager()
-            if positive_value_exists(is_national_election) and positive_value_exists(state_code):
-                results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
-                    google_civic_election_id=google_civic_election_id, state_code=state_code)
-            else:
-                results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
-                    google_civic_election_id=google_civic_election_id)
-            if results['polling_location_we_vote_id_list_found']:
-                polling_location_we_vote_id_list = results['polling_location_we_vote_id_list']
-                polling_location_query = PollingLocation.objects.using('readonly').all()
-                polling_location_query = polling_location_query.filter(
-                    we_vote_id__in=polling_location_we_vote_id_list)
-                polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
-                polling_location_list = list(polling_location_query)
-                polling_location_count = len(polling_location_list)
+        ballot_returned_list_manager = BallotReturnedListManager()
 
+        if positive_value_exists(refresh_ballot_returned):
+            limit_polling_locations_retrieved = 750
+        else:
+            limit_polling_locations_retrieved = 0
+
+        # Retrieve polling locations already in ballot_returned table
+        if positive_value_exists(is_national_election) and positive_value_exists(state_code):
+            results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
+                google_civic_election_id=google_civic_election_id, state_code=state_code,
+                limit=limit_polling_locations_retrieved)
+        else:
+            results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
+                google_civic_election_id=google_civic_election_id,
+                limit=limit_polling_locations_retrieved)
+        if results['polling_location_we_vote_id_list_found']:
+            polling_location_we_vote_id_list = results['polling_location_we_vote_id_list']
+        else:
+            polling_location_we_vote_id_list = []
+
+        if positive_value_exists(refresh_ballot_returned):
+            polling_location_query = PollingLocation.objects.using('readonly').all()
+            polling_location_query = polling_location_query.filter(we_vote_id__in=polling_location_we_vote_id_list)
+            polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
+            polling_location_list = list(polling_location_query)
+            polling_location_count = len(polling_location_list)
         else:
             polling_location_query = PollingLocation.objects.using('readonly').all()
             polling_location_query = \
@@ -533,23 +542,30 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
                 polling_location_query.exclude(Q(zip_long__isnull=True) | Q(zip_long__exact='0') |
                                                Q(zip_long__exact=''))
             polling_location_query = polling_location_query.filter(state__iexact=state_code)
+            # Exclude deleted and polling locations already retrieved
             polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
+            polling_location_query = polling_location_query.exclude(we_vote_id__in=polling_location_we_vote_id_list)
 
             # Randomly change the sort order so we over time load different polling locations (before timeout)
             random_sorting = random.randint(1, 5)
+            first_retrieve_limit = 750
             if random_sorting == 1:
                 # Ordering by "line1" creates a bit of (locational) random order
-                polling_location_list = polling_location_query.order_by('line1')
+                polling_location_list = polling_location_query.order_by('line1')[:first_retrieve_limit]
                 # polling_location_list = polling_location_query.order_by('line1')[:10]  # For testing
+                status += "RANDOM_SORTING-LINE1-ASC: " + str(random_sorting) + " "
             elif random_sorting == 2:
-                polling_location_list = polling_location_query.order_by('-line1')
+                polling_location_list = polling_location_query.order_by('-line1')[:first_retrieve_limit]
                 # polling_location_list = polling_location_query.order_by('-line1')[:10]  # For testing
+                status += "RANDOM_SORTING-LINE1-DESC: " + str(random_sorting) + " "
             elif random_sorting == 3:
-                polling_location_list = polling_location_query.order_by('zip_long')
+                polling_location_list = polling_location_query.order_by('zip_long')[:first_retrieve_limit]
                 # polling_location_list = polling_location_query.order_by('zip_long')[:10]  # For testing
+                status += "RANDOM_SORTING-ZIP_LONG-ASC: " + str(random_sorting) + " "
             else:
-                polling_location_list = polling_location_query.order_by('-zip_long')
+                polling_location_list = polling_location_query.order_by('-zip_long')[:first_retrieve_limit]
                 # polling_location_list = polling_location_query.order_by('-zip_long')[:10]  # For testing
+                status += "RANDOM_SORTIN-ZIP_LONG-DESC: " + str(random_sorting) + " "
             # For testing
             # polling_location_list = polling_location_query.order_by('line1')[:10]
             polling_location_count = len(polling_location_list)

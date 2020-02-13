@@ -1231,6 +1231,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
     status_print_list = ""
     ballot_returned_count = 0
     ballot_returned_count_entire_election = 0
+    ballot_returned_oldest_date = ''
     entries_missing_latitude_longitude = 0
     ballot_returned_list_manager = BallotReturnedListManager()
     candidate_campaign_list_manager = CandidateCampaignListManager()
@@ -1267,6 +1268,9 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
                 ballot_returned_list = ballot_returned_list[:limit]
         else:
             ballot_returned_list = []
+
+        ballot_returned_oldest_date = ballot_returned_list_manager.fetch_oldest_date_last_updated(
+            election.google_civic_election_id, state_code)
 
         if positive_value_exists(ballot_returned_count_entire_election):
             status_print_list += "ballot_returned_count: " + str(ballot_returned_count_entire_election) + ""
@@ -1444,6 +1448,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             'ballot_returned_search':                   ballot_returned_search,
             'ballot_returned_list':                     ballot_returned_list_modified,
             'ballot_returned_count_entire_election':    ballot_returned_count_entire_election,
+            'ballot_returned_oldest_date':              ballot_returned_oldest_date,
             'ballotpedia_election_list':                ballotpedia_election_list,
             'entries_missing_latitude_longitude':       entries_missing_latitude_longitude,
             'election':                                 election,
@@ -1463,6 +1468,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         template_values = {
             'ballotpedia_election_list':                ballotpedia_election_list,
             'ballot_returned_count_entire_election':    ballot_returned_count_entire_election,
+            'ballot_returned_oldest_date':              ballot_returned_oldest_date,
             'ballot_returned_search':                   ballot_returned_search,
             'entries_missing_latitude_longitude':       entries_missing_latitude_longitude,
             'google_civic_election_id':                 google_civic_election_id,
