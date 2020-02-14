@@ -1037,7 +1037,8 @@ class ContestMeasureList(models.Model):
     def retrieve_contest_measures_from_non_unique_identifiers(
             self, google_civic_election_id_list, incoming_state_code, contest_measure_title,
             district_id='', district_name='',
-            ignore_measure_we_vote_id_list=[]):
+            ignore_measure_we_vote_id_list=[],
+            read_only=False):
         keep_looking_for_duplicates = True
         success = False
         contest_measure = ContestMeasure()
@@ -1048,7 +1049,10 @@ class ContestMeasureList(models.Model):
         status = ""
 
         try:
-            contest_measure_query = ContestMeasure.objects.all()
+            if positive_value_exists(read_only):
+                contest_measure_query = ContestMeasure.objects.using('readonly').all()
+            else:
+                contest_measure_query = ContestMeasure.objects.all()
             # TODO Is there a way to filter with "dash" insensitivity? - vs --
             contest_measure_query = contest_measure_query.filter(
                 measure_title__iexact=contest_measure_title,
@@ -1090,7 +1094,10 @@ class ContestMeasureList(models.Model):
         # Strip away common words and look for direct matches
         if keep_looking_for_duplicates:
             try:
-                contest_measure_query = ContestMeasure.objects.all()
+                if positive_value_exists(read_only):
+                    contest_measure_query = ContestMeasure.objects.using('readonly').all()
+                else:
+                    contest_measure_query = ContestMeasure.objects.all()
                 contest_measure_query = contest_measure_query.filter(
                     google_civic_election_id__in=google_civic_election_id_list)
                 if positive_value_exists(incoming_state_code):
@@ -1153,7 +1160,10 @@ class ContestMeasureList(models.Model):
 
         if keep_looking_for_duplicates:
             try:
-                contest_measure_query = ContestMeasure.objects.all()
+                if positive_value_exists(read_only):
+                    contest_measure_query = ContestMeasure.objects.using('readonly').all()
+                else:
+                    contest_measure_query = ContestMeasure.objects.all()
                 contest_measure_query = contest_measure_query.filter(
                     google_civic_election_id__in=google_civic_election_id_list)
                 if positive_value_exists(incoming_state_code):

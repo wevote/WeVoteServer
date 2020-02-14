@@ -67,7 +67,7 @@ class BallotItem(models.Model):
     # The internal We Vote id for the ContestMeasure that this campaign taking a stance on
     contest_office_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for this office", max_length=255, default=None, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
     # The local database id for this measure, specific to this server.
     # TODO contest_measure_id should be positive integer as opposed to CharField
     contest_measure_id = models.CharField(
@@ -75,7 +75,7 @@ class BallotItem(models.Model):
     # The internal We Vote id for the ContestMeasure that this campaign taking a stance on
     contest_measure_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for this measure", max_length=255, default=None, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
     # This is a sortable name, either the candidate name or the measure name
     ballot_item_display_name = models.CharField(verbose_name="a label we can sort by", max_length=255, null=True,
                                                 blank=True)

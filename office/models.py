@@ -1331,7 +1331,7 @@ class ContestOfficeListManager(models.Model):
 
     def retrieve_contest_offices_from_non_unique_identifiers(
             self, contest_office_name, google_civic_election_id, incoming_state_code, district_id='', district_name='',
-            ballotpedia_race_id=0, ignore_office_we_vote_id_list=[]):
+            ballotpedia_race_id=0, ignore_office_we_vote_id_list=[], read_only=False):
         keep_looking_for_duplicates = True
         success = False
         contest_office = ContestOffice()
@@ -1342,7 +1342,10 @@ class ContestOfficeListManager(models.Model):
         status = ""
 
         try:
-            contest_office_query = ContestOffice.objects.all()
+            if positive_value_exists(read_only):
+                contest_office_query = ContestOffice.objects.using('readonly').all()
+            else:
+                contest_office_query = ContestOffice.objects.all()
             # TODO Is there a way to filter with "dash" insensitivity? - vs --
             contest_office_query = contest_office_query.filter(office_name__iexact=contest_office_name,
                                                                state_code__iexact=incoming_state_code,
@@ -1389,7 +1392,10 @@ class ContestOfficeListManager(models.Model):
         # Strip away common words and look for direct matches
         if keep_looking_for_duplicates:
             try:
-                contest_office_query = ContestOffice.objects.all()
+                if positive_value_exists(read_only):
+                    contest_office_query = ContestOffice.objects.using('readonly').all()
+                else:
+                    contest_office_query = ContestOffice.objects.all()
                 contest_office_query = contest_office_query.filter(google_civic_election_id=google_civic_election_id)
                 if positive_value_exists(incoming_state_code):
                     contest_office_query = contest_office_query.filter(state_code__iexact=incoming_state_code)
@@ -1466,7 +1472,10 @@ class ContestOfficeListManager(models.Model):
         # Factor in OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS
         if keep_looking_for_duplicates:
             try:
-                contest_office_query = ContestOffice.objects.all()
+                if positive_value_exists(read_only):
+                    contest_office_query = ContestOffice.objects.using('readonly').all()
+                else:
+                    contest_office_query = ContestOffice.objects.all()
                 contest_office_query = contest_office_query.filter(
                     google_civic_election_id=google_civic_election_id)
                 if positive_value_exists(incoming_state_code):
