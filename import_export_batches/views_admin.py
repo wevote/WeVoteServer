@@ -1399,8 +1399,8 @@ def batch_set_batch_list_view(request):
                     one_batch_description.kind_of_batch, IMPORT_CREATE, one_batch_description.batch_header_id)
                 if results['number_of_table_rows_created']:
                     batch_actions_created += 1
-                else:
-                    batch_actions_not_created += 1
+
+                if not positive_value_exists(results['success']):
                     if len(not_created_status) < 1024:
                         not_created_status += results['status']
 
@@ -1408,10 +1408,9 @@ def batch_set_batch_list_view(request):
                 messages.add_message(request, messages.INFO, "Create in All Batches, Creates: "
                                                              "" + str(batch_actions_created))
 
-            if positive_value_exists(batch_actions_not_created):
+            if positive_value_exists(not_created_status):
                 messages.add_message(request, messages.ERROR,
-                                     "Create in All Batches, FAILED Creates: {batch_actions_not_created}, "
-                                     "{not_created_status} "
+                                     "Create in All Batches, FAILED Creates: {not_created_status} "
                                      "".format(batch_actions_not_created=str(batch_actions_not_created),
                                                not_created_status=not_created_status))
 

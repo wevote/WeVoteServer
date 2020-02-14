@@ -4285,7 +4285,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
     :param update_entry_flag: set to True for IMPORT_ADD_TO_EXISTING
     :return:
     """
-    success = False
+    success = True
     status = ""
     number_of_ballot_items_created = 0
     number_of_ballot_items_updated = 0
@@ -4295,6 +4295,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
 
     if not positive_value_exists(batch_header_id):
         status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_HEADER_ID_MISSING "
+        success = False
         results = {
             'success':                          success,
             'status':                           status,
@@ -4313,6 +4314,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
 
     if not batch_description_found:
         status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_DESCRIPTION_MISSING "
+        success = False
         results = {
             'success':                          success,
             'status':                           status,
@@ -4333,6 +4335,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
 
     if not batch_header_map_found:
         status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_HEADER_MAP_MISSING "
+        success = False
         results = {
             'success':                          success,
             'status':                           status,
@@ -4357,6 +4360,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
         else:
             # error handling
             status += "IMPORT_BALLOT_ITEM_ENTRY-KIND_OF_ACTION_MISSING "
+            success = False
             results = {
                 'success':                          success,
                 'status':                           status,
@@ -4374,7 +4378,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
         pass
 
     if not batch_row_action_list_found:
-        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_ROW_ACTION_LIST_MISSING "
+        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_ROW_ACTION_LIST_NOT_FOUND "
         results = {
             'success':                          success,
             'status':                           status,
@@ -4442,7 +4446,6 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                                                                            google_civic_election_id, defaults)
                 if results['new_ballot_item_created']:
                     number_of_ballot_items_created += 1
-                    success = True
                     # now update BatchRowActionBallotItem table entry
                     try:
                         one_batch_row_action.kind_of_action = IMPORT_ADD_TO_EXISTING
@@ -4460,12 +4463,12 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                                                                            google_civic_election_id, defaults)
                 if results['ballot_item_updated']:
                     number_of_ballot_items_updated += 1
-                    success = True
                 else:
                     status += results['status']
             else:
                 # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
-                status += "IMPORT_BALLOT_ITEM_ENTRY:NO_CREATE_OR_UPDATE_ERROR"
+                status += "IMPORT_BALLOT_ITEM_ENTRY:NO_CREATE_OR_UPDATE_ERROR "
+                success = False
                 results = {
                     'success':                          success,
                     'status':                           status,
