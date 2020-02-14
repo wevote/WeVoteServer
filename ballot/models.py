@@ -627,7 +627,7 @@ class BallotItemManager(models.Model):
         except Exception as e:
             success = False
             new_ballot_item_created = False
-            status += "BALLOT_ITEM_RETRIEVE_ERROR "
+            status += "BALLOT_ITEM_RETRIEVE_ERROR " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {

@@ -65,7 +65,8 @@
             <th>Batch Name</th>
             <th>Action</th>
             <th>Election</th>
-            <th>Processed</th>
+            <th>To be Analyzed</th>
+            <th>To be Created</th>
             <th>Total Records</th>
             <th>Date Created</th>
         </tr>
@@ -82,8 +83,9 @@
                     {% endif %}
                 {% endfor %}
             </td>
-            <td>{{ one_batch_set.rows_processed }}</td>
-            <td>{{ one_batch_set.total_rows }}</td>
+            <td>{% if one_batch_set.batch_description_not_analyzed_count > 0 %}{{ one_batch_set.batch_description_not_analyzed_count }}{% endif %}</td>
+            <td>{% if one_batch_set.batch_description_not_created_count > 0 %}{{ one_batch_set.batch_description_not_created_count }}{% endif %}</td>
+            <td>{% if one_batch_set.batch_description_total_rows_count > 0 %}{{ one_batch_set.batch_description_total_rows_count }}{% endif %}</td>
             <td>{{ one_batch_set.import_date }}</td>
         </tr>
     {% endfor %}

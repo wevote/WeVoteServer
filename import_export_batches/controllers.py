@@ -4294,7 +4294,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
     google_civic_election_id = 0
 
     if not positive_value_exists(batch_header_id):
-        status = "IMPORT_BALLOT_ITEM_ENTRY-BATCH_HEADER_ID_MISSING"
+        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_HEADER_ID_MISSING "
         results = {
             'success':                          success,
             'status':                           status,
@@ -4312,7 +4312,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
         batch_description_found = False
 
     if not batch_description_found:
-        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_DESCRIPTION_MISSING"
+        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_DESCRIPTION_MISSING "
         results = {
             'success':                          success,
             'status':                           status,
@@ -4332,7 +4332,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
         batch_header_map_found = False
 
     if not batch_header_map_found:
-        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_HEADER_MAP_MISSING"
+        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_HEADER_MAP_MISSING "
         results = {
             'success':                          success,
             'status':                           status,
@@ -4356,7 +4356,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
             kind_of_action = IMPORT_ADD_TO_EXISTING
         else:
             # error handling
-            status += "IMPORT_BALLOT_ITEM_ENTRY-KIND_OF_ACTION_MISSING"
+            status += "IMPORT_BALLOT_ITEM_ENTRY-KIND_OF_ACTION_MISSING "
             results = {
                 'success':                          success,
                 'status':                           status,
@@ -4374,7 +4374,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
         pass
 
     if not batch_row_action_list_found:
-        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_ROW_ACTION_LIST_MISSING"
+        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_ROW_ACTION_LIST_MISSING "
         results = {
             'success':                          success,
             'status':                           status,
@@ -4450,7 +4450,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                         one_batch_row_action.save()
                     except Exception as e:
                         success = False
-                        status += "BALLOT_ITEM_RETRIEVE_ERROR"
+                        status += "BALLOT_ITEM_RETRIEVE_ERROR " + str(e) + " "
                         handle_exception(e, logger=logger, exception_message=status)
                 else:
                     status += results['status']
