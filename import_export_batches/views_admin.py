@@ -2,7 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager, BatchRow, BatchSet, \
+from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager, \
+    BatchRow, BatchRowActionBallotItem, \
+    BatchSet, \
     CONTEST_OFFICE, ELECTED_OFFICE, IMPORT_BALLOT_ITEM, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
@@ -1157,6 +1159,26 @@ def batch_set_list_view(request):
         batch_set_list_found = False
         pass
 
+    for one_batch_set in batch_set_list:
+        batch_description_query = BatchDescription.objects.filter(batch_set_id=one_batch_set.id)
+        batch_description = batch_description_query.first()
+
+        batch_description_query = BatchDescription.objects.filter(batch_set_id=one_batch_set.id)
+        one_batch_set.batch_description_total_rows_count = batch_description_query.count()
+
+        batch_description_query = BatchDescription.objects.filter(batch_set_id=one_batch_set.id)
+        batch_description_query = batch_description_query.exclude(batch_description_analyzed=True)
+        one_batch_set.batch_description_not_analyzed_count = batch_description_query.count()
+
+        if positive_value_exists(one_batch_set.batch_description_total_rows_count):
+            try:
+                if batch_description.kind_of_batch == IMPORT_BALLOT_ITEM:
+                    batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_set_id=one_batch_set.id)
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action=IMPORT_CREATE)
+                    one_batch_set.batch_description_not_created_count = batch_row_action_query.count()
+            except Exception as e:
+                pass
+
     election_list = Election.objects.order_by('-election_day_text')
 
     if batch_set_list_found:
@@ -1371,6 +1393,7 @@ def batch_set_batch_list_view(request):
 
             batch_actions_created = 0
             batch_actions_not_created = 0
+            not_created_status = ""
             for one_batch_description in batch_list:
                 results = import_data_from_batch_row_actions(
                     one_batch_description.kind_of_batch, IMPORT_CREATE, one_batch_description.batch_header_id)
@@ -1378,14 +1401,19 @@ def batch_set_batch_list_view(request):
                     batch_actions_created += 1
                 else:
                     batch_actions_not_created += 1
+                    if len(not_created_status) < 1024:
+                        not_created_status += results['status']
 
             if positive_value_exists(batch_actions_created):
                 messages.add_message(request, messages.INFO, "Create in All Batches, Creates: "
                                                              "" + str(batch_actions_created))
 
             if positive_value_exists(batch_actions_not_created):
-                messages.add_message(request, messages.ERROR, "Create in All Batches, FAILED Creates: "
-                                                              "" + str(batch_actions_not_created))
+                messages.add_message(request, messages.ERROR,
+                                     "Create in All Batches, FAILED Creates: {batch_actions_not_created}, "
+                                     "{not_created_status} "
+                                     "".format(batch_actions_not_created=str(batch_actions_not_created),
+                                               not_created_status=not_created_status))
 
             return HttpResponseRedirect(reverse('import_export_batches:batch_set_batch_list', args=()) +
                                         "?google_civic_election_id=" + str(google_civic_election_id) +
