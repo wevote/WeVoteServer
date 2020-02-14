@@ -750,7 +750,8 @@ class CandidateCampaignListManager(models.Model):
 
     def retrieve_candidates_from_non_unique_identifiers(self, google_civic_election_id_list, state_code,
                                                         candidate_twitter_handle, candidate_name,
-                                                        ignore_candidate_id_list=[]):
+                                                        ignore_candidate_id_list=[],
+                                                        read_only=False):
         """
         This function, retrieve_candidates_from_non_unique_identifiers, is built to find possible duplicate candidates
         with stricter parameters.
@@ -761,6 +762,7 @@ class CandidateCampaignListManager(models.Model):
         :param candidate_twitter_handle:
         :param candidate_name:
         :param ignore_candidate_id_list:
+        :param read_only:
         :return:
         """
         keep_looking_for_duplicates = True
@@ -779,7 +781,10 @@ class CandidateCampaignListManager(models.Model):
             host_google_civic_election_id_list=google_civic_election_id_list)
         if keep_looking_for_duplicates and positive_value_exists(candidate_twitter_handle):
             try:
-                candidate_query = CandidateCampaign.objects.all()
+                if positive_value_exists(read_only):
+                    candidate_query = CandidateCampaign.objects.using('readonly').all()
+                else:
+                    candidate_query = CandidateCampaign.objects.all()
                 candidate_query = candidate_query.filter(candidate_twitter_handle__iexact=candidate_twitter_handle)
                 candidate_query = candidate_query.filter(
                     Q(google_civic_election_id__in=google_civic_election_id_list) |
@@ -812,14 +817,17 @@ class CandidateCampaignListManager(models.Model):
                 success = True
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND "
             except Exception as e:
-                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED1 "
+                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED1 " + str(e) + " "
                 keep_looking_for_duplicates = False
         # twitter handle does not exist, next look up against other data that might match
 
         if keep_looking_for_duplicates and positive_value_exists(candidate_name):
             # Search by Candidate name exact match
             try:
-                candidate_query = CandidateCampaign.objects.all()
+                if positive_value_exists(read_only):
+                    candidate_query = CandidateCampaign.objects.using('readonly').all()
+                else:
+                    candidate_query = CandidateCampaign.objects.all()
                 candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name)
                 candidate_query = candidate_query.filter(
                     Q(google_civic_election_id__in=google_civic_election_id_list) |
@@ -854,12 +862,15 @@ class CandidateCampaignListManager(models.Model):
                 success = True
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND-EXACT_MATCH "
             except Exception as e:
-                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED2 "
+                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED2 " + str(e) + " "
 
         if keep_looking_for_duplicates and positive_value_exists(candidate_name):
             # Search for Candidate(s) that contains the same first and last names
             try:
-                candidate_query = CandidateCampaign.objects.all()
+                if positive_value_exists(read_only):
+                    candidate_query = CandidateCampaign.objects.using('readonly').all()
+                else:
+                    candidate_query = CandidateCampaign.objects.all()
                 candidate_query = candidate_query.filter(
                     Q(google_civic_election_id__in=google_civic_election_id_list) |
                     Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
@@ -896,14 +907,17 @@ class CandidateCampaignListManager(models.Model):
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND-FIRST_OR_LAST_NAME "
                 success = True
             except Exception as e:
-                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED3 "
+                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED3 " + str(e) + " "
 
         # 2018-07-09 This is problematic as, it considers very different candidates
         #  (ex/ "Donna Sheldon" and "Donna McBride") to be possible duplicates.
         # if keep_looking_for_duplicates and positive_value_exists(candidate_name):
         #     # Search for Candidate(s) by breaking up candidate_name into search words
         #     try:
-        #         candidate_query = CandidateCampaign.objects.all()
+        #         if positive_value_exists(read_only):
+        #             candidate_query = CandidateCampaign.objects.using('readonly').all()
+        #         else:
+        #             candidate_query = CandidateCampaign.objects.all()
         #
         #         if positive_value_exists(google_civic_election_id):
         #             candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)

@@ -2303,7 +2303,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             batch_row_action_created = False
             batch_row_action_ballot_item = BatchRowActionBallotItem()
             success = False
-            status += "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_CREATED "
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_CREATED " + str(e) + " "
 
             results = {
                 'success': success,
@@ -2356,7 +2356,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
     if positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
         # Check to see if there is a state served for the election
         election_manager = ElectionManager()
-        results = election_manager.retrieve_election(google_civic_election_id)
+        results = election_manager.retrieve_election(google_civic_election_id, read_only=True)
         if results['election_found']:
             election = results['election']
             state_code = election.state_code
@@ -2366,7 +2366,8 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
     if positive_value_exists(contest_office_we_vote_id):
         # If here, then we are updating an existing known record
         keep_looking_for_duplicates = False
-        results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id)
+        results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id,
+                                                                                 read_only=True)
         if results['contest_office_found']:
             contest_office = results['contest_office']
             contest_office_name = contest_office.office_name
@@ -2375,7 +2376,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         # See if we have an office name
         contest_office_list_manager = ContestOfficeListManager()
         matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
-            contest_office_name, google_civic_election_id, state_code)
+            contest_office_name, google_civic_election_id, state_code, read_only=True)
         if matching_results['contest_office_found']:
             contest_office = matching_results['contest_office']
             contest_office_name = contest_office.office_name
@@ -2393,7 +2394,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         candidate_campaign_list_manager = CandidateCampaignListManager()
         google_civic_election_id_list = [google_civic_election_id]
         matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name)
+            google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name, read_only=True)
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
             candidate_found = True
@@ -2406,7 +2407,8 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         # See if we have a contest_measure_we_vote_id
         if positive_value_exists(contest_measure_we_vote_id):
             # If here, then we are updating an existing known record
-            results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(contest_measure_we_vote_id)
+            results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
+                contest_measure_we_vote_id, read_only=True)
             if results['contest_measure_found']:
                 keep_looking_for_duplicates = False
                 contest_measure = results['contest_measure']
@@ -2420,7 +2422,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         keep_looking_for_duplicates = True
         google_civic_election_id_list = [google_civic_election_id]
         matching_results = contest_measure_list.retrieve_contest_measures_from_non_unique_identifiers(
-            google_civic_election_id_list, state_code, contest_measure_name)
+            google_civic_election_id_list, state_code, contest_measure_name, read_only=True)
         if matching_results['contest_measure_found']:
             contest_measure = matching_results['contest_measure']
             contest_measure_name = contest_measure.measure_title
@@ -2436,7 +2438,8 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
 
     # Now retrieve full measure data (if needed)
     if positive_value_exists(contest_measure_we_vote_id):
-        results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(contest_measure_we_vote_id)
+        results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
+            contest_measure_we_vote_id, read_only=True)
         if results['contest_measure_found']:
             contest_measure = results['contest_measure']
             contest_measure_name = contest_measure.measure_title
@@ -2448,7 +2451,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
     # check for duplicate entries in the live ballot_item data
     if positive_value_exists(contest_office_we_vote_id) or positive_value_exists(contest_measure_we_vote_id):
         try:
-            existing_ballot_item_query = BallotItem.objects.all()
+            existing_ballot_item_query = BallotItem.objects.using('readonly').all()
             existing_ballot_item_query = existing_ballot_item_query.filter(
                 google_civic_election_id=google_civic_election_id,
                 polling_location_we_vote_id__iexact=polling_location_we_vote_id
@@ -2460,16 +2463,15 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
                 existing_ballot_item_query = existing_ballot_item_query.filter(
                     contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
 
-            existing_batch_item_list = list(existing_ballot_item_query)
-            number_of_existing_entries = len(existing_batch_item_list)
+            number_of_existing_entries = existing_ballot_item_query.count()
             if number_of_existing_entries:
-                existing_ballot_item = existing_batch_item_list[0]
+                existing_ballot_item = existing_ballot_item_query.first()
                 existing_ballot_item_id = existing_ballot_item.id
                 existing_ballot_item_found = True
             else:
                 existing_ballot_item_found = False
         except Exception as e:
-            status += "CREATE_BATCH_ROW_ACTION_BALLOT_ITEM-BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR"
+            status += "CREATE_BATCH_ROW_ACTION_BALLOT_ITEM-BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR " + str(e) + " "
 
     # Do we have the minimum required variables?
     polling_location_or_voter = positive_value_exists(polling_location_we_vote_id) or positive_value_exists(voter_id)

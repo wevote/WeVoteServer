@@ -314,13 +314,16 @@ class ElectionManager(models.Model):
         }
         return results
 
-    def retrieve_election(self, google_civic_election_id=0, election_id=0):
+    def retrieve_election(self, google_civic_election_id=0, election_id=0, read_only=False):
         google_civic_election_id = convert_to_int(google_civic_election_id)
 
         election = Election()
         try:
             if positive_value_exists(google_civic_election_id):
-                election = Election.objects.get(google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(read_only):
+                    election = Election.objects.using('readonly').get(google_civic_election_id=google_civic_election_id)
+                else:
+                    election = Election.objects.get(google_civic_election_id=google_civic_election_id)
                 if election.id:
                     election_found = True
                     status = "ELECTION_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID "
@@ -329,7 +332,10 @@ class ElectionManager(models.Model):
                     status = "ELECTION_NOT_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID "
                 success = True
             elif positive_value_exists(election_id):
-                election = Election.objects.get(id=election_id)
+                if positive_value_exists(read_only):
+                    election = Election.objects.using('readonly').get(id=election_id)
+                else:
+                    election = Election.objects.get(id=election_id)
                 if election.id:
                     election_found = True
                     status = "ELECTION_FOUND_WITH_ELECTION_ID "
