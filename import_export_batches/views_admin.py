@@ -1302,6 +1302,11 @@ def batch_set_batch_list_view(request):
     batch_set_count = 0
     batch_set_kind_of_batch = ""
 
+    # Store static data in memory so we don't have to use the database
+    election_objects_dict = {}
+    office_objects_dict = {}
+    measure_objects_dict = {}
+
     try:
         if positive_value_exists(analyze_all_button):
             batch_actions_analyzed = 0
@@ -1313,7 +1318,12 @@ def batch_set_batch_list_view(request):
             batch_list = list(batch_description_query)
 
             for one_batch_description in batch_list:
-                results = create_batch_row_actions(one_batch_description.batch_header_id)
+                results = create_batch_row_actions(
+                    one_batch_description.batch_header_id,
+                    election_objects_dict=election_objects_dict,
+                    measure_objects_dict=measure_objects_dict,
+                    office_objects_dict=office_objects_dict,
+                )
                 if results['batch_actions_created']:
                     batch_actions_analyzed += 1
                     try:
@@ -1325,6 +1335,10 @@ def batch_set_batch_list_view(request):
                         pass
                 else:
                     batch_actions_not_analyzed += 1
+
+                election_objects_dict = results['election_objects_dict']
+                measure_objects_dict = results['measure_objects_dict']
+                office_objects_dict = results['office_objects_dict']
 
             batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
             if positive_value_exists(len(batch_header_id_created_list)):
