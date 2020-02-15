@@ -331,7 +331,8 @@ def polling_location_edit_process_view(request):
         if latitude and longitude:
             ballot_returned_list_manager = BallotReturnedListManager()
             results = ballot_returned_list_manager.retrieve_ballot_returned_list(
-                google_civic_election_id, polling_location_we_vote_id)
+                google_civic_election_id=google_civic_election_id,
+                polling_location_we_vote_id=polling_location_we_vote_id)
             if results['ballot_returned_list_found']:
                 ballot_returned_list = results['ballot_returned_list']
                 for one_ballot_returned in ballot_returned_list:

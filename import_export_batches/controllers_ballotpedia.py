@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import create_batch_from_json, BATCH_HEADER_MAP_BALLOT_ITEMS_TO_BALLOTPEDIA_VOTER_DISTRICTS, \
+from .models import create_batch_from_json, BATCH_HEADER_MAP_BALLOT_ITEMS_TO_BALLOTPEDIA_BALLOT_ITEMS, \
     BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES, BATCH_HEADER_MAP_CONTEST_OFFICES_TO_BALLOTPEDIA_RACES, \
     BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES
 # from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_processing
@@ -62,9 +62,10 @@ def store_ballotpedia_json_response_to_import_batch_system(
         if state_code != "":
             filename += " for " + state_code.upper()
         organization_we_vote_id = ""
+        # BATCH_HEADER_MAP_BALLOT_ITEMS_TO_BALLOTPEDIA_VOTER_DISTRICTS was used, but didn't make sense
         results = create_batch_from_json(
             filename, modified_json_list,
-            BATCH_HEADER_MAP_BALLOT_ITEMS_TO_BALLOTPEDIA_VOTER_DISTRICTS, kind_of_batch,
+            BATCH_HEADER_MAP_BALLOT_ITEMS_TO_BALLOTPEDIA_BALLOT_ITEMS, kind_of_batch,
             google_civic_election_id, organization_we_vote_id, batch_set_id=batch_set_id, state_code=state_code)
         return results
 

@@ -2552,30 +2552,38 @@ class BallotReturnedListManager(models.Model):
 
         return 0
 
-    def retrieve_ballot_returned_list(self, google_civic_election_id, polling_location_we_vote_id, limit=0):
+    def retrieve_ballot_returned_list(
+            self, google_civic_election_id, polling_location_we_vote_id='', for_voters=False,
+            state_code='', limit=0):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         ballot_returned_list = []
         ballot_returned_list_found = False
         status = ''
+        success = True
 
         if not positive_value_exists(google_civic_election_id) \
-                and not positive_value_exists(polling_location_we_vote_id):
+                and not (positive_value_exists(polling_location_we_vote_id) or positive_value_exists(for_voters)):
+            success = False
+            status += "RETRIEVE_BALLOT_RETURNED_MISSING_REQUIRED_VARIABLES "
             results = {
-                'success': False,
-                'status': "RETRIEVE_BALLOT_RETURNED_MISSING_REQUIRED_VARIABLES ",
+                'status': status,
+                'success': success,
                 'ballot_returned_list_found': ballot_returned_list_found,
                 'ballot_returned_list': ballot_returned_list,
             }
             return results
 
         try:
-            ballot_returned_queryset = BallotReturned.objects.all()
+            ballot_returned_queryset = BallotReturned.objects.all().order_by('-date_last_updated')
             if positive_value_exists(google_civic_election_id):
                 ballot_returned_queryset = \
                     ballot_returned_queryset.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(polling_location_we_vote_id):
                 ballot_returned_queryset = \
                     ballot_returned_queryset.filter(polling_location_we_vote_id=polling_location_we_vote_id)
+            elif for_voters:
+                ballot_returned_queryset = \
+                    ballot_returned_queryset.exclude(Q(voter_id__isnull=True) | Q(voter_id=0))
             if positive_value_exists(limit):
                 ballot_returned_list = ballot_returned_queryset[:limit]
             else:
@@ -2583,20 +2591,21 @@ class BallotReturnedListManager(models.Model):
 
             if len(ballot_returned_list):
                 ballot_returned_list_found = True
-                status += 'BALLOT_RETURNED_LIST_FOUND'
+                status += 'BALLOT_RETURNED_LIST_FOUND '
             else:
-                status += 'NO_BALLOT_RETURNED_LIST_FOUND'
+                status += 'NO_BALLOT_RETURNED_LIST_FOUND '
         except BallotReturned.DoesNotExist:
             # No ballot items found. Not a problem.
-            status += 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
+            status += 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST '
             ballot_returned_list = []
         except Exception as e:
+            success = False
             handle_exception(e, logger=logger)
             status += 'FAILED retrieve_ballot_returned_list ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
 
         results = {
-            'success':                      True if ballot_returned_list_found else False,
+            'success':                      success,
             'status':                       status,
             'ballot_returned_list_found':   ballot_returned_list_found,
             'ballot_returned_list':         ballot_returned_list,
@@ -2794,8 +2803,6 @@ class BallotReturnedListManager(models.Model):
             ballot_returned_queryset = BallotReturned.objects.using('readonly').order_by('date_last_updated').all()
             ballot_returned_queryset = ballot_returned_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
-            if positive_value_exists(state_code):
-                ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state_code)
             if positive_value_exists(for_voter):
                 # Find entries where the voter_id is not null or 0
                 ballot_returned_queryset = ballot_returned_queryset.exclude(
@@ -2804,6 +2811,8 @@ class BallotReturnedListManager(models.Model):
                 # Default is to find BallotReturned entries for polling_locations
                 ballot_returned_queryset = ballot_returned_queryset.exclude(
                     Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
+                if positive_value_exists(state_code):
+                    ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state_code)
 
             ballot_returned = ballot_returned_queryset.first()
             return ballot_returned.date_last_updated
@@ -3589,6 +3598,31 @@ def find_best_previously_stored_ballot_returned(voter_id, text_for_map_search, g
 
         # A specific ballot was found.
         ballot_returned_to_copy = find_results['ballot_returned']
+    elif text_for_map_search_empty:
+        status += "TEXT_FOR_MAP_SEARCH_EMPTY "
+
+        error_results = {
+            'ballot_returned_found': False,
+            'ballot_location_display_name': '',
+            'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
+            'ballot_location_shortcut': ballot_location_shortcut,
+            'election_day_text': '',
+            'election_description_text': '',
+            'google_civic_election_id': google_civic_election_id,
+            'polling_location_we_vote_id_source': '',
+            'state_code': '',
+            'status': status,
+            'substituted_address_nearby': '',
+            'substituted_address_city': '',
+            'substituted_address_state': '',
+            'substituted_address_zip': '',
+            'text_for_map_search': text_for_map_search,
+            'original_text_city': '',
+            'original_text_state': '',
+            'original_text_zip': '',
+            'voter_id': voter_id,
+        }
+        return error_results
     else:
         find_results = ballot_returned_manager.find_closest_ballot_returned(
             text_for_map_search, google_civic_election_id)
