@@ -351,7 +351,10 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS = {
     'yes_vote_description': 'yes_vote_description',
     'polling_location_we_vote_id': 'polling_location_we_vote_id',
     'state_code': 'state_code',
+    'voter_id': 'voter_id',
 }
+
+BATCH_HEADER_MAP_BALLOT_ITEMS_TO_BALLOTPEDIA_BALLOT_ITEMS = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
 
 # We Vote contest office key on the left, and Ballotpedia field name on right
 # This gives us the option of putting the same field from a remote source into two We Vote fields
@@ -1267,11 +1270,13 @@ class BatchManager(models.Model):
         return batch_row_action_count
 
     def retrieve_unprocessed_batch_set_info_by_election_and_set_source(
-            self, google_civic_election_id, batch_set_source):
+            self, google_civic_election_id, batch_set_source, state_code=''):
 
-        batch_set_query = BatchSet.objects.all()
+        batch_set_query = BatchSet.objects.using('readonly').all()
         batch_set_query = batch_set_query.filter(google_civic_election_id=google_civic_election_id)
         batch_set_query = batch_set_query.filter(batch_set_source__iexact=batch_set_source)
+        if positive_value_exists(state_code):
+            batch_set_query = batch_set_query.filter(state_code__iexact=state_code)
         batch_set_query = batch_set_query.order_by('-id')
         batch_set_list = list(batch_set_query)
 
@@ -1282,7 +1287,7 @@ class BatchManager(models.Model):
             one_batch_set = batch_set_list[0]
             batch_set_id = one_batch_set.id
 
-            batch_description_query = BatchDescription.objects.all()
+            batch_description_query = BatchDescription.objects.using('readonly').all()
             batch_description_query = batch_description_query.filter(batch_set_id=one_batch_set.id)
             total_ballot_locations_count = batch_description_query.count()
             batch_description_list = list(batch_description_query)
@@ -4178,6 +4183,7 @@ class BatchSet(models.Model):
     """
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
+    state_code = models.CharField(verbose_name="state code for this data", max_length=2, null=True, blank=True)
     batch_set_name = models.CharField(max_length=255)
     batch_set_description_text = models.CharField(max_length=255)
     batch_set_source = models.CharField(max_length=255)

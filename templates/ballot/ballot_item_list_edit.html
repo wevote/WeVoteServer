@@ -1,8 +1,8 @@
 {# templates/ballot/ballot_item_list_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if ballot_returned.id %}Ballot Location for '{{ ballot_returned.text_for_map_search|title }}'{% else %}
-    New Ballot Location{% endif %}{% endblock %}
+{% block title %}{% if ballot_returned.id %}Ballot Returned for '{{ ballot_returned.text_for_map_search|title }}'{% else %}
+    New Ballot Returned{% endif %}{% endblock %}
 
 {% block content %}
 {% load template_filters %}
@@ -15,7 +15,7 @@
     {% endif %}
 </p>
 
-<h1>{% if ballot_returned.id %}Ballot Location for '{{ ballot_returned.text_for_map_search|title }}'{% else %}New Ballot Location{% endif %}</h1>
+<h1>{% if ballot_returned.id %}Ballot Returned for '{{ ballot_returned.text_for_map_search|title }}'{% else %}New Ballot Returned{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 {% if election_list %}
@@ -135,7 +135,7 @@
 </div>
 
 <div class="form-group">
-    <label for="ballot_location_display_name_id" class="col-sm-2 control-label">Ballot Location Display Name</label>
+    <label for="ballot_location_display_name_id" class="col-sm-2 control-label">Ballot Returned Display Name</label>
     <div class="col-sm-1">
         <label for="ballot_location_display_option_on_id" class="control-label">Show:&nbsp;
             <input type="checkbox" name="ballot_location_display_option_on" id="ballot_location_display_option_on_id"
@@ -150,7 +150,7 @@
 </div>
 
 <div class="form-group">
-    <label for="ballot_location_shortcut_id" class="col-sm-3 control-label">Ballot Location Shortcut</label>
+    <label for="ballot_location_shortcut_id" class="col-sm-3 control-label">Ballot Returned Shortcut</label>
     <div class="col-sm-8">
         <input type="text" name="ballot_location_shortcut" id="ballot_location_shortcut_id" class="form-control"
                value="{{ ballot_returned.ballot_location_shortcut|default_if_none:"" }}" />
@@ -213,7 +213,7 @@
     local voter guides to candidates and measures.<br />
     <br />
     {% if polling_location_found %}
-      <h3>Creating Ballot Location at this Polling Location</h3>
+      <h3>Creating Ballot Returned at this Polling Location</h3>
         <a href="{% url 'polling_location:polling_location_summary' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
             {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}missing location name{% endif %}</a>
             - {{ polling_location.get_text_for_map_search|title }}
@@ -262,7 +262,7 @@
 <br />
    {# ################################### #}
     {% if contest_offices_to_choose_list %}
-        <h5>Add Office to This Ballot Location</h5>
+        <h5>Add Office to This Ballot Returned</h5>
         {# Office Option 1 #}
         <select id="contest_office1_id_id" name="contest_office1_id">
             <option value="0" >-- Choose Office --</option>
@@ -289,7 +289,7 @@
 
     {# ################################### #}
     {% if measure_list %}
-        <h5>Add Measure to This Ballot Location</h5>
+        <h5>Add Measure to This Ballot Returned</h5>
         {# Measure Option 1 #}
         <select id="contest_measure1_id_id" name="contest_measure1_id">
             <option value="0">-- Choose Measure --</option>
@@ -330,7 +330,7 @@
 {% if ballot_returned and ballot_returned.id %}
     <br />
     <a href="{% url 'ballot:ballot_returned_delete_process' ballot_returned.id %}">
-        Delete this Ballot Location and all Ballot Items</a><br />
+        Delete this Ballot Returned and all Ballot Items</a><br />
 {% endif %}
 <br />
 <br />
