@@ -619,7 +619,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
                                                 state_code=state_code)
             batch_set_id = batch_set.id
             if positive_value_exists(batch_set_id):
-                status += " BATCH_SET_SAVED"
+                status += " BATCH_SET_SAVED-BALLOTS_FOR_POLLING_LOCATIONS "
         except Exception as e:
             # Stop trying to save rows -- break out of the for loop
             status += " EXCEPTION_BATCH_SET " + str(e) + " "
@@ -643,6 +643,9 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
         if one_ballot_results['success']:
             success = True
 
+        if len(status) < 1024:
+            status += one_ballot_results['status']
+
         existing_office_objects_dict = one_ballot_results['existing_office_objects_dict']
         existing_candidate_objects_dict = one_ballot_results['existing_candidate_objects_dict']
         existing_measure_objects_dict = one_ballot_results['existing_measure_objects_dict']
@@ -662,7 +665,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
     new_candidates_found = len(new_candidate_we_vote_ids_list)
     new_measures_found = len(new_measure_we_vote_ids_list)
     messages.add_message(request, messages.INFO,
-                         'Ballot data retrieved from Ballotpedia for the {election_name}. '
+                         'Ballot data retrieved from Ballotpedia (Polling Locations) for the {election_name}. '
                          'ballots retrieved: {ballots_retrieved}. '
                          'new offices: {new_offices_found} (existing: {existing_offices_found}) '
                          'new candidates: {new_candidates_found} (existing: {existing_candidates_found}) '
@@ -678,6 +681,9 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
                              new_candidates_found=new_candidates_found,
                              new_measures_found=new_measures_found,
                          ))
+
+    messages.add_message(request, messages.INFO, 'status: {status}'.format(status=status))
+
     return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
                                 '?kind_of_batch=IMPORT_BALLOTPEDIA_BALLOT_ITEMS' +
                                 '&google_civic_election_id=' + str(google_civic_election_id))
@@ -789,7 +795,7 @@ def retrieve_ballotpedia_ballots_for_voters_api_v4_view(request):
                                             state_code=state_code)
         batch_set_id = batch_set.id
         if positive_value_exists(batch_set_id):
-            status += " BATCH_SET_SAVED"
+            status += " BATCH_SET_SAVED-BALLOTS_FOR_VOTERS "
     except Exception as e:
         # Stop trying to save rows -- break out of the for loop
         status += " EXCEPTION_BATCH_SET " + str(e) + " "
@@ -812,6 +818,9 @@ def retrieve_ballotpedia_ballots_for_voters_api_v4_view(request):
         if one_ballot_results['success']:
             success = True
 
+        if len(status) < 1024:
+            status += one_ballot_results['status']
+
         existing_office_objects_dict = one_ballot_results['existing_office_objects_dict']
         existing_candidate_objects_dict = one_ballot_results['existing_candidate_objects_dict']
         existing_measure_objects_dict = one_ballot_results['existing_measure_objects_dict']
@@ -831,7 +840,7 @@ def retrieve_ballotpedia_ballots_for_voters_api_v4_view(request):
     new_candidates_found = len(new_candidate_we_vote_ids_list)
     new_measures_found = len(new_measure_we_vote_ids_list)
     messages.add_message(request, messages.INFO,
-                         'Ballot data retrieved from Ballotpedia for the {election_name}. '
+                         'Ballot data retrieved from Ballotpedia (Voters) for the {election_name}. '
                          'ballots retrieved: {ballots_retrieved}. '
                          'new offices: {new_offices_found} (existing: {existing_offices_found}) '
                          'new candidates: {new_candidates_found} (existing: {existing_candidates_found}) '
@@ -847,6 +856,9 @@ def retrieve_ballotpedia_ballots_for_voters_api_v4_view(request):
                              new_candidates_found=new_candidates_found,
                              new_measures_found=new_measures_found,
                          ))
+
+    messages.add_message(request, messages.INFO, 'status: {status}'.format(status=status))
+
     return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
                                 '?kind_of_batch=IMPORT_BALLOTPEDIA_BALLOT_ITEMS' +
                                 '&google_civic_election_id=' + str(google_civic_election_id))
@@ -1100,11 +1112,11 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
                                                 state_code=state_code)
             batch_set_id = batch_set.id
             if positive_value_exists(batch_set_id):
-                status += " BATCH_SET_SAVED"
+                status += " BATCH_SET_SAVED-POLLING_OLD "
                 success = True
         except Exception as e:
             # Stop trying to save rows -- break out of the for loop
-            status += " EXCEPTION_BATCH_SET "
+            status += " EXCEPTION_BATCH_SET " + str(e) + " "
 
         # If here, we assume we have already retrieved races for this election, and now we want to
         # put ballot items for this location onto a ballot

@@ -3105,13 +3105,13 @@ class BatchManager(models.Model):
                                                     source_uri=batch_uri, import_date=import_date)
                 batch_set_id = batch_set.id
                 if positive_value_exists(batch_set_id):
-                    status += " BATCH_SET_SAVED"
+                    status += " BATCH_SET_SAVED-VIP_XML "
                     success = True
             except Exception as e:
                 # Stop trying to save rows -- break out of the for loop
                 continue_batch_set_processing = False
                 batch_set_id = 0
-                status += " EXCEPTION_BATCH_SET "
+                status += " EXCEPTION_BATCH_SET-VIP_XML "
                 handle_exception(e, logger=logger, exception_message=status)
 
             # import Electoral District
@@ -3124,7 +3124,7 @@ class BatchManager(models.Model):
                 else:
                     results = electoral_district_import_from_xml_data(electoral_district_item_list)
                     if results['success']:
-                        status += "CREATE_BATCH_SET_ELECTORAL_DISTRICT_IMPORTED "
+                        status += "CREATE_BATCH_SET_ELECTORAL_DISTRICT_IMPORTED-VIP_XML "
                         number_of_batch_rows += results['saved']
                         # TODO check this whether it should be only saved or updated Electoral districts
                         number_of_batch_rows += results['updated']
@@ -3132,7 +3132,7 @@ class BatchManager(models.Model):
                     else:
                         continue_batch_set_processing = False
                         status += results['status']
-                        status += " CREATE_BATCH_SET_ELECTORAL_DISTRICT_ERRORS "
+                        status += " CREATE_BATCH_SET_ELECTORAL_DISTRICT_ERRORS-VIP_XML "
 
             # import Party
             skip_party = False  # We can set this to True during development to save time
@@ -3145,7 +3145,7 @@ class BatchManager(models.Model):
                 else:
                     results = party_import_from_xml_data(party_item_list)
                     if results['success']:
-                        status += "CREATE_BATCH_SET_PARTY_IMPORTED"
+                        status += "CREATE_BATCH_SET_PARTY_IMPORTED-VIP_XML "
                         number_of_batch_rows += results['saved']
                         number_of_batch_rows += results['updated']
                         # TODO check this whether it should be only saved or updated Electoral districts
@@ -3165,7 +3165,7 @@ class BatchManager(models.Model):
                     else:
                         continue_batch_set_processing = False
                         status += results['status']
-                        status += " CREATE_BATCH_SET-PARTY_IMPORT_ERRORS "
+                        status += " CREATE_BATCH_SET-PARTY_IMPORT_ERRORS-VIP_XML "
 
             # look for different data sets in the XML - ElectedOffice, ContestOffice, Candidate, Politician, Measure
 
@@ -3536,12 +3536,12 @@ class BatchManager(models.Model):
                                                 source_uri=batch_set_name_url, import_date=import_date)
             batch_set_id = batch_set.id
             if positive_value_exists(batch_set_id):
-                status += " BATCH_SET_SAVED"
+                status += " BATCH_SET_SAVED-ORG_ENDORSEMENTS "
                 success = True
         except Exception as e:
             # Stop trying to save rows -- break out of the for loop
             batch_set_id = 0
-            status += " EXCEPTION_BATCH_SET "
+            status += " EXCEPTION_BATCH_SET-ORG_ENDORSEMENTS "
             handle_exception(e, logger=logger, exception_message=status)
 
         # import metadata like organization name, url, endorsement url, twitter url, org image url, email
@@ -3561,18 +3561,18 @@ class BatchManager(models.Model):
         results = self.import_offices_from_endorsement_json(batch_set_name_url, batch_set_id, organization_we_vote_id,
                                                             candidate_positions_list)
         if results['success']:
-            status += 'CREATE_BATCH_SET_OFFICE_DATA_IMPORTED'
+            status += 'CREATE_BATCH_SET_OFFICE_DATA_IMPORTED-ORG_ENDORSEMENTS '
             number_of_batch_rows += results['number_of_offices']
         else:
             continue_batch_set_processing = False
             status += results['status']
-            status += " CREATE_BATCH_SET-OFFICE_ERRORS "
+            status += " CREATE_BATCH_SET-OFFICE_ERRORS-ORG_ENDORSEMENTS "
 
         # import Candidates from json
         results = self.import_candidates_from_endorsement_json(batch_set_name_url, batch_set_id,
                                                                organization_we_vote_id, candidate_positions_list)
         if results['success']:
-            status += 'CREATE_BATCH_SET_CANDIDATE_DATA_IMPORTED'
+            status += 'CREATE_BATCH_SET_CANDIDATE_DATA_IMPORTED-ORG_ENDORSEMENTS '
             number_of_batch_rows += results['number_of_candidates']
         else:
             continue_batch_set_processing = False

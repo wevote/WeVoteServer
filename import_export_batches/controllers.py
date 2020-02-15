@@ -47,13 +47,22 @@ MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
 
 
-def create_batch_row_actions(batch_header_id, batch_row_id=0, state_code=""):
+def create_batch_row_actions(
+        batch_header_id,
+        batch_row_id=0,
+        state_code="",
+        election_objects_dict={},
+        measure_objects_dict={},
+        office_objects_dict={}):
     """
     Cycle through all BatchRow entries for this batch_header_id and move the values we can find into
     the BatchRowActionYYY table so we can review it before importing it
     :param batch_header_id:
     :param batch_row_id:
     :param state_code:
+    :param election_objects_dict:
+    :param measure_objects_dict:
+    :param office_objects_dict:
     :return:
     """
     success = False
@@ -74,7 +83,10 @@ def create_batch_row_actions(batch_header_id, batch_row_id=0, state_code=""):
             'batch_actions_created':            success,
             'number_of_batch_actions_created':  number_of_batch_actions_created,
             'batch_actions_updated':            update_success,
-            'number_of_batch_actions_updated':  number_of_batch_actions_updated
+            'number_of_batch_actions_updated':  number_of_batch_actions_updated,
+            'election_objects_dict':            election_objects_dict,
+            'measure_objects_dict':             measure_objects_dict,
+            'office_objects_dict':              office_objects_dict,
         }
         return results
 
@@ -87,6 +99,7 @@ def create_batch_row_actions(batch_header_id, batch_row_id=0, state_code=""):
         batch_description_found = False
 
     batch_header_map_found = False
+    batch_header_map = BatchHeaderMap()
     if batch_description_found:
         kind_of_batch = batch_description.kind_of_batch
 
@@ -201,7 +214,15 @@ def create_batch_row_actions(batch_header_id, batch_row_id=0, state_code=""):
                     number_of_batch_actions_created += 1
                     success = True
             elif kind_of_batch == IMPORT_BALLOT_ITEM:
-                results = create_batch_row_action_ballot_item(batch_description, batch_header_map, one_batch_row)
+                results = create_batch_row_action_ballot_item(
+                    batch_description, batch_header_map, one_batch_row,
+                    election_objects_dict=election_objects_dict,
+                    measure_objects_dict=measure_objects_dict,
+                    office_objects_dict=office_objects_dict,
+                )
+                election_objects_dict = results['election_objects_dict']
+                measure_objects_dict = results['measure_objects_dict']
+                office_objects_dict = results['office_objects_dict']
 
                 if results['batch_row_action_updated']:
                     number_of_batch_actions_updated += 1
@@ -218,7 +239,10 @@ def create_batch_row_actions(batch_header_id, batch_row_id=0, state_code=""):
         'batch_actions_created':            success,
         'number_of_batch_actions_created':  number_of_batch_actions_created,
         'batch_actions_updated':            update_success,
-        'number_of_batch_actions_updated':  number_of_batch_actions_updated
+        'number_of_batch_actions_updated':  number_of_batch_actions_updated,
+        'election_objects_dict':            election_objects_dict,
+        'measure_objects_dict':             measure_objects_dict,
+        'office_objects_dict':              office_objects_dict,
     }
     return results
 
@@ -2255,12 +2279,18 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     return results
 
 
-def create_batch_row_action_ballot_item(batch_description, batch_header_map, one_batch_row):
+def create_batch_row_action_ballot_item(batch_description, batch_header_map, one_batch_row,
+                                        election_objects_dict={},
+                                        measure_objects_dict={},
+                                        office_objects_dict={}):
     """
     Handle batch_row for ballot_item type
     :param batch_description:
     :param batch_header_map:
     :param one_batch_row:
+    :param election_objects_dict:
+    :param measure_objects_dict:
+    :param office_objects_dict:
     :return:
     """
     batch_manager = BatchManager()
@@ -2306,11 +2336,14 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             status += "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_CREATED " + str(e) + " "
 
             results = {
-                'success': success,
-                'status': status,
-                'batch_row_action_updated': batch_row_action_updated,
-                'batch_row_action_created': batch_row_action_created,
+                'success':                      success,
+                'status':                       status,
+                'batch_row_action_updated':     batch_row_action_updated,
+                'batch_row_action_created':     batch_row_action_created,
                 'batch_row_action_ballot_item': batch_row_action_ballot_item,
+                'election_objects_dict':        election_objects_dict,
+                'measure_objects_dict':         measure_objects_dict,
+                'office_objects_dict':          office_objects_dict,
             }
             return results
 
@@ -2351,26 +2384,40 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
     # Look up contest office or measure to see if an entry exists
     # These three parameters are needed to look up in ElectedOffice table for a match
     keep_looking_for_duplicates = True
+    contest_measure_found = False
+    contest_measure = None
 
     # state_code lookup from the election
     if positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
         # Check to see if there is a state served for the election
-        election_manager = ElectionManager()
-        results = election_manager.retrieve_election(google_civic_election_id, read_only=True)
-        if results['election_found']:
-            election = results['election']
-            state_code = election.state_code
+        if google_civic_election_id in election_objects_dict:
+            election = election_objects_dict[google_civic_election_id]
+            if election:
+                state_code = election.state_code
+        else:
+            election_manager = ElectionManager()
+            results = election_manager.retrieve_election(google_civic_election_id, read_only=True)
+            if results['election_found']:
+                election = results['election']
+                state_code = election.state_code
+                election_objects_dict[google_civic_election_id] = election
 
     # See if we have a contest_office_we_vote_id
     contest_office_manager = ContestOfficeManager()
     if positive_value_exists(contest_office_we_vote_id):
-        # If here, then we are updating an existing known record
         keep_looking_for_duplicates = False
-        results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id,
-                                                                                 read_only=True)
-        if results['contest_office_found']:
-            contest_office = results['contest_office']
-            contest_office_name = contest_office.office_name
+        # If here, then we are updating an existing known record
+        if contest_office_we_vote_id in office_objects_dict:
+            contest_office = office_objects_dict[contest_office_we_vote_id]
+            if contest_office:
+                contest_office_name = contest_office.office_name
+        else:
+            results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id,
+                                                                                     read_only=True)
+            if results['contest_office_found']:
+                contest_office = results['contest_office']
+                contest_office_name = contest_office.office_name
+                office_objects_dict[contest_office_we_vote_id] = contest_office
 
     if keep_looking_for_duplicates and not positive_value_exists(contest_office_name):
         # See if we have an office name
@@ -2378,10 +2425,11 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
             contest_office_name, google_civic_election_id, state_code, read_only=True)
         if matching_results['contest_office_found']:
+            keep_looking_for_duplicates = False
             contest_office = matching_results['contest_office']
             contest_office_name = contest_office.office_name
             contest_office_we_vote_id = contest_office.we_vote_id
-            keep_looking_for_duplicates = False
+            office_objects_dict[contest_office_we_vote_id] = contest_office
         elif matching_results['contest_office_list_found']:
             status += "RETRIEVE_OFFICE_FROM_NON_UNIQUE-MULTIPLE_POSSIBLE_OFFICES_FOUND "
             keep_looking_for_duplicates = False
@@ -2407,14 +2455,22 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         # See if we have a contest_measure_we_vote_id
         if positive_value_exists(contest_measure_we_vote_id):
             # If here, then we are updating an existing known record
-            results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
-                contest_measure_we_vote_id, read_only=True)
-            if results['contest_measure_found']:
-                keep_looking_for_duplicates = False
-                contest_measure = results['contest_measure']
-                contest_measure_name = contest_measure.measure_title
+            if contest_measure_we_vote_id in measure_objects_dict:
+                contest_measure = measure_objects_dict[contest_measure_we_vote_id]
+                contest_measure_found = True
+                if contest_measure:
+                    contest_measure_name = contest_measure.measure_title
             else:
-                keep_looking_for_duplicates = True
+                results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
+                    contest_measure_we_vote_id, read_only=True)
+                if results['contest_measure_found']:
+                    keep_looking_for_duplicates = False
+                    contest_measure = results['contest_measure']
+                    contest_measure_found = True
+                    contest_measure_name = contest_measure.measure_title
+                    measure_objects_dict[contest_measure_we_vote_id] = contest_measure
+                else:
+                    keep_looking_for_duplicates = True
 
     if keep_looking_for_duplicates and not positive_value_exists(contest_measure_name):
         # See if we have an measure name
@@ -2425,8 +2481,10 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             google_civic_election_id_list, state_code, contest_measure_name, read_only=True)
         if matching_results['contest_measure_found']:
             contest_measure = matching_results['contest_measure']
+            contest_measure_found = True
             contest_measure_name = contest_measure.measure_title
             contest_measure_we_vote_id = contest_measure.we_vote_id
+            measure_objects_dict[contest_measure_we_vote_id] = contest_measure
             keep_looking_for_duplicates = False
         elif matching_results['contest_measure_list_found']:
             status += "RETRIEVE_MEASURE_FROM_NON_UNIQUE-MULTIPLE_POSSIBLE_MEASURES_FOUND "
@@ -2438,10 +2496,18 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
 
     # Now retrieve full measure data (if needed)
     if positive_value_exists(contest_measure_we_vote_id):
-        results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
-            contest_measure_we_vote_id, read_only=True)
-        if results['contest_measure_found']:
-            contest_measure = results['contest_measure']
+        # If here, then we are updating an existing known record
+        if contest_measure_we_vote_id in measure_objects_dict:
+            contest_measure = measure_objects_dict[contest_measure_we_vote_id]
+            contest_measure_found = True
+        else:
+            results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
+                contest_measure_we_vote_id, read_only=True)
+            if results['contest_measure_found']:
+                contest_measure = results['contest_measure']
+                measure_objects_dict[contest_measure_we_vote_id] = contest_measure
+                contest_measure_found = True
+        if contest_measure_found:
             contest_measure_name = contest_measure.measure_title
             contest_measure_text = contest_measure.get_measure_text()
             contest_measure_url = contest_measure.get_measure_url()
@@ -2525,7 +2591,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             one_batch_row.batch_row_analyzed = True
             one_batch_row.save()
     except Exception as e:
-        pass
+        status += "COULD_NOT_SAVE_BATCH_ROW " + str(e) + " "
 
     results = {
         'success':                      success,
@@ -2533,6 +2599,9 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         'batch_row_action_created':     batch_row_action_created,
         'batch_row_action_updated':     batch_row_action_updated,
         'batch_row_action_ballot_item': batch_row_action_ballot_item,
+        'election_objects_dict':        election_objects_dict,
+        'measure_objects_dict':         measure_objects_dict,
+        'office_objects_dict':          office_objects_dict,
     }
     return results
 
