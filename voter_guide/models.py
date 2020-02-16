@@ -162,7 +162,14 @@ class VoterGuideManager(models.Manager):
             else:
                 election_state_code = ''
                 if google_civic_election_id in elections_dict:
-                    election_state_code = elections_dict[google_civic_election_id]
+                     election = elections_dict[google_civic_election_id]
+                     if election:
+                         election_state_code = election.state_code
+                     else:
+                         try:
+                             del elections_dict[google_civic_election_id]
+                         except Exception as e:
+                             pass
                 else:
                     election_manager = ElectionManager()
                     election_results = election_manager.retrieve_election(google_civic_election_id)
@@ -171,7 +178,7 @@ class VoterGuideManager(models.Manager):
                         election_state_code = election.state_code
                         if not positive_value_exists(election_state_code):
                             election_state_code = ''
-                        elections_dict[google_civic_election_id] = election_state_code
+                        elections_dict[google_civic_election_id] = election
 
             # Now update voter_guide
             if organization_found:
@@ -216,11 +223,22 @@ class VoterGuideManager(models.Manager):
                 if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
                     updated_values['we_vote_hosted_profile_image_url_tiny'] = we_vote_hosted_profile_image_url_tiny
                 if positive_value_exists(google_civic_election_id):
-                    election_manager = ElectionManager()
-                    election_results = election_manager.retrieve_election(google_civic_election_id)
-                    if election_results['election_found']:
-                        election = election_results['election']
-                        updated_values['election_day_text'] = election.election_day_text
+                    if google_civic_election_id in elections_dict:
+                        election = elections_dict[google_civic_election_id]
+                        if election:
+                            updated_values['election_day_text'] = election.election_day_text
+                        else:
+                            try:
+                                del elections_dict[google_civic_election_id]
+                            except Exception as e:
+                                pass
+                    else:
+                        election_manager = ElectionManager()
+                        election_results = election_manager.retrieve_election(google_civic_election_id)
+                        if election_results['election_found']:
+                            election = election_results['election']
+                            updated_values['election_day_text'] = election.election_day_text
+                            elections_dict[google_civic_election_id] = election
                 try:
                     voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
@@ -228,7 +246,7 @@ class VoterGuideManager(models.Manager):
                         defaults=updated_values)
                 except VoterGuide.MultipleObjectsReturned as e:
                     handle_record_found_more_than_one_exception(e, logger=logger)
-                    status += 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_ORGANIZATION'
+                    status += 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_ORGANIZATION '
                     exception_multiple_object_returned = True
                     new_voter_guide_created = False
                 except Exception as e:
@@ -260,7 +278,7 @@ class VoterGuideManager(models.Manager):
                     success = True
             else:
                 success = False
-                status += 'VOTER_GUIDE_NOT_CREATED_BECAUSE_ORGANIZATION_NOT_FOUND_LOCALLY'
+                status += 'VOTER_GUIDE_NOT_CREATED_BECAUSE_ORGANIZATION_NOT_FOUND_LOCALLY '
 
         results = {
             'success':                  success,
