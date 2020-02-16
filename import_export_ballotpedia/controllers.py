@@ -701,8 +701,6 @@ def retrieve_ballot_items_from_polling_location_api_v4(
         }
         return results
 
-    batch_header_id = 0
-
     if polling_location:
         polling_location_found = True
         polling_location_we_vote_id = polling_location.we_vote_id
@@ -756,7 +754,6 @@ def retrieve_ballot_items_from_polling_location_api_v4(
                 results = {
                     'success': success,
                     'status': status,
-                    'batch_header_id': batch_header_id,
                     'existing_office_objects_dict': existing_office_objects_dict,
                     'existing_candidate_objects_dict': existing_candidate_objects_dict,
                     'existing_measure_objects_dict': existing_measure_objects_dict,
@@ -850,8 +847,6 @@ def retrieve_ballot_items_from_polling_location_api_v4(
                     batch_set_id=batch_set_id,
                     state_code=state_code)
                 status += results['status']
-                # if 'batch_header_id' in results:
-                #     batch_header_id = results['batch_header_id']
         except Exception as e:
             success = False
             status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \

@@ -1505,7 +1505,8 @@ def generate_voter_guides_view(request):
     voter_guide_manager = VoterGuideManager()
 
     # Cycle through organizations
-    organization_list = Organization.objects.all()
+    organization_list = Organization.objects.all().order_by('-twitter_followers_count')
+    elections_dict = {}
     for organization in organization_list:
         # Cycle through elections. Find out position count for this org for each election.
         # If > 0, then create a voter_guide entry
@@ -1535,13 +1536,19 @@ def generate_voter_guides_view(request):
             if positions_count > 0:
                 voter_guide_we_vote_id = ''
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                    voter_guide_we_vote_id, organization.we_vote_id, election.google_civic_election_id)
+                    voter_guide_we_vote_id,
+                    organization.we_vote_id,
+                    election.google_civic_election_id,
+                    elections_dict=elections_dict,
+                )
                 if results['success']:
                     if results['new_voter_guide_created']:
                         voter_guide_created_count += 1
                     else:
                         voter_guide_updated_count += 1
-                voter_guide_stored_for_this_organization[organization.we_vote_id].append(google_civic_election_id)
+                elections_dict = results['elections_dict']
+
+            voter_guide_stored_for_this_organization[organization.we_vote_id].append(google_civic_election_id)
 
     messages.add_message(request, messages.INFO,
                          '{voter_guide_created_count} voter guides created, '
@@ -1611,47 +1618,46 @@ def generate_voter_guides_for_one_election_view(request):
                              'Cannot generate voter guides for one election: google_civic_election_id missing')
         return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()))
 
+    voter_guide_manager = VoterGuideManager()
     voter_guide_stored_for_this_organization = []
-    # voter_guide_stored_for_this_public_figure = []
-    # voter_guide_stored_for_this_voter = []
 
     voter_guide_created_count = 0
     voter_guide_updated_count = 0
 
-    # What elections do we want to generate voter_guides for?
-    election_list = Election.objects.all()
     office_manager = ContestOfficeManager()
     office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
         host_google_civic_election_id_list=[google_civic_election_id])
 
-    # Cycle through organizations
-    organization_list = Organization.objects.all()
+    # Cycle through organizations, starting with organizations with most twitter followers
+    organization_list = Organization.objects.all().order_by('-twitter_followers_count')
+    elections_dict = {}
     for organization in organization_list:
-        # Cycle through elections. Find out position count for this org for each election.
-        # If > 0, then create a voter_guide entry
         if organization.we_vote_id not in voter_guide_stored_for_this_organization:
             # organization hasn't had voter guides stored yet in this run through.
-            # Search for positions with this organization_id and google_civic_election_id
+            # Search for positions with this organization_we_vote_id and google_civic_election_id
 
-            # As of August 2018 exclude Vote Smart ratings (vote_smart_rating__isnull)
             positions_exist_query = PositionEntered.objects.filter(organization_we_vote_id=organization.we_vote_id)
             positions_exist_query = positions_exist_query.filter(
                 Q(google_civic_election_id=google_civic_election_id) |
-                Q(we_vote_id__in=office_visiting_list_we_vote_ids))
+                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+            # As of August 2018 exclude Vote Smart ratings (vote_smart_rating__isnull)
             positions_exist_query = positions_exist_query.filter(
                 Q(vote_smart_rating__isnull=True) | Q(vote_smart_rating=""))
             positions_count = positions_exist_query.count()
             if positions_count > 0:
                 # We have found positions (not including Vote Smart ratings)
-                voter_guide_manager = VoterGuideManager()
                 voter_guide_we_vote_id = ''
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                    voter_guide_we_vote_id, organization.we_vote_id, google_civic_election_id)
+                    voter_guide_we_vote_id,
+                    organization.we_vote_id,
+                    google_civic_election_id,
+                    elections_dict=elections_dict)
                 if results['success']:
                     if results['new_voter_guide_created']:
                         voter_guide_created_count += 1
                     else:
                         voter_guide_updated_count += 1
+                elections_dict = results['elections_dict']
 
             voter_guide_stored_for_this_organization.append(organization.we_vote_id)
 

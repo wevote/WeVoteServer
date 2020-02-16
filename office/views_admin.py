@@ -294,6 +294,9 @@ def office_list_view(request):
         if positive_value_exists(office_count):
             state_name_modified += " - " + str(office_count)
             state_list_modified[one_state_code] = state_name_modified
+        elif str(one_state_code) == str(state_code):
+            state_name_modified += " - 0"
+            state_list_modified[one_state_code] = state_name_modified
         else:
             # Do not include state in drop-down if there aren't any offices in that state
             pass

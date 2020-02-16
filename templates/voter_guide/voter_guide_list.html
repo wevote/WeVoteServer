@@ -35,6 +35,13 @@
            target="_blank">Add Organization / Voter Guide</a> (in new window).
         Data Manager tools that create organization and voter guide.</li>
 
+{% if google_civic_election_id %}
+    <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}"
+                    target="_blank" >Generate Voter Guides for this Election</a> (in new window)</li>
+{% else %}
+    <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides' %}" >Generate Voter Guides for All Elections</a></li>
+{% endif %}
+
 {% if voter_guide_list and google_civic_election_id %}
     <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}"
                     target="_blank" >Generate Voter Guides for this Election</a> (in new window)</li>
@@ -42,8 +49,6 @@
                     target="_blank">Refresh Organization Twitter Data (For Organizations in this Election)</a></li>
     <li>Prepare: <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}"
                     target="_blank">Refresh Voter Guides for this Election</a> (in new window)</li>
-{% else %}
-    <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides' %}" >Generate Voter Guides</a></li>
 {% endif %}
 </ul>
 

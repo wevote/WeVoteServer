@@ -549,25 +549,20 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
             # Randomly change the sort order so we over time load different polling locations (before timeout)
             random_sorting = random.randint(1, 5)
             first_retrieve_limit = 750
+            # first_retrieve_limit = 10  # For Testing
             if random_sorting == 1:
                 # Ordering by "line1" creates a bit of (locational) random order
                 polling_location_list = polling_location_query.order_by('line1')[:first_retrieve_limit]
-                # polling_location_list = polling_location_query.order_by('line1')[:10]  # For testing
                 status += "RANDOM_SORTING-LINE1-ASC: " + str(random_sorting) + " "
             elif random_sorting == 2:
                 polling_location_list = polling_location_query.order_by('-line1')[:first_retrieve_limit]
-                # polling_location_list = polling_location_query.order_by('-line1')[:10]  # For testing
                 status += "RANDOM_SORTING-LINE1-DESC: " + str(random_sorting) + " "
             elif random_sorting == 3:
-                polling_location_list = polling_location_query.order_by('zip_long')[:first_retrieve_limit]
-                # polling_location_list = polling_location_query.order_by('zip_long')[:10]  # For testing
-                status += "RANDOM_SORTING-ZIP_LONG-ASC: " + str(random_sorting) + " "
+                polling_location_list = polling_location_query.order_by('city')[:first_retrieve_limit]
+                status += "RANDOM_SORTING-CITY-ASC: " + str(random_sorting) + " "
             else:
-                polling_location_list = polling_location_query.order_by('-zip_long')[:first_retrieve_limit]
-                # polling_location_list = polling_location_query.order_by('-zip_long')[:10]  # For testing
-                status += "RANDOM_SORTIN-ZIP_LONG-DESC: " + str(random_sorting) + " "
-            # For testing
-            # polling_location_list = polling_location_query.order_by('line1')[:10]
+                polling_location_list = polling_location_query.order_by('-city')[:first_retrieve_limit]
+                status += "RANDOM_SORTING-CITY-DESC: " + str(random_sorting) + " "
             polling_location_count = len(polling_location_list)
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
