@@ -50,7 +50,7 @@
        <thead>
        <tr>
             <th></th>
-            <th><span class="u-no-break">Ballot Returned ID</span></th>
+            <th><span class="u-no-break">Ballot Returned ID (Election)</span></th>
             <th>Display Name</th>
             <th>Shortcut?</th>
             <th>Text for Map Search</th>
@@ -64,7 +64,10 @@
     {% endif %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td><a href="{% url 'ballot:ballot_item_list_edit' ballot_returned.id %}" target="_blank">{{ ballot_returned.we_vote_id }} <span class="glyphicon glyphicon-new-window"></span></a></td>
+            <td>
+              <a href="{% url 'ballot:ballot_item_list_edit' ballot_returned.id %}" target="_blank">{{ ballot_returned.we_vote_id }} <span class="glyphicon glyphicon-new-window"></span></a>
+              {% if ballot_returned.google_civic_election_id %}&nbsp;({{ ballot_returned.google_civic_election_id }}){% endif %}
+            </td>
             <td align="middle">{% if ballot_returned.ballot_location_display_name %}{{ ballot_returned.ballot_location_display_name }}{% endif %}</td>
             <td align="middle">{% if ballot_returned.ballot_location_shortcut %}{{ ballot_returned.ballot_location_shortcut }}{% endif %}{% if ballot_returned.ballot_location_display_option_on %} ON{% endif %}</td>
             <td>{{ ballot_returned.text_for_map_search }}</td>
