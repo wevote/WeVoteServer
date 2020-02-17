@@ -341,7 +341,8 @@ def polling_location_edit_process_view(request):
                     one_ballot_returned.save()
 
     except Exception as e:
-        messages.add_message(request, messages.ERROR, 'Could not update ballot_returned. ' + status)
+        messages.add_message(request, messages.ERROR, 'Could not update ballot_returned. ' +
+                             status + " " + str(e) + " ")
 
     url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
                     "&state_code=" + str(state_code)

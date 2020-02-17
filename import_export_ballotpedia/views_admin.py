@@ -45,6 +45,9 @@ def import_ballot_items_for_location_view(request):
     """
     Reach out to Ballotpedia API to retrieve a short list of districts the voter can vote in.
     """
+    status = ""
+    success = True
+
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
@@ -54,8 +57,24 @@ def import_ballot_items_for_location_view(request):
     polling_location_we_vote_id = request.GET.get('polling_location_we_vote_id', "")
     state_code = request.GET.get('state_code', "")
 
-    results = retrieve_ballot_items_from_polling_location(
-        google_civic_election_id, polling_location_we_vote_id, state_code=state_code)
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.ERROR,
+                             'Google Civic Election Id missing.')
+        return HttpResponseRedirect(reverse('election:election_list', args=()))
+
+    election_manager = ElectionManager()
+    election_day_text = ""
+    results = election_manager.retrieve_election(google_civic_election_id=google_civic_election_id)
+    if results['election_found']:
+        election = results['election']
+        election_day_text = election.election_day_text
+
+    results = retrieve_ballot_items_from_polling_location_api_v4(
+        google_civic_election_id,
+        election_day_text=election_day_text,
+        polling_location_we_vote_id=polling_location_we_vote_id,
+        state_code=state_code,
+    )
 
     kind_of_batch = ""
     if 'kind_of_batch' in results:
@@ -458,6 +477,8 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
     :param request:
     :return:
     """
+    status = ""
+
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
@@ -468,10 +489,14 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
     refresh_ballot_returned = request.GET.get('refresh_ballot_returned', False)
     # import_limit = convert_to_int(request.GET.get('import_limit', 1000))  # If > 1000, we get error 414 (url too long)
 
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.ERROR,
+                             'Google Civic Election Id missing.')
+        return HttpResponseRedirect(reverse('election:election_list', args=()))
+
     election_day_text = ""
     polling_location_list = []
     polling_location_count = 0
-    status = ""
 
     try:
         if positive_value_exists(google_civic_election_id):

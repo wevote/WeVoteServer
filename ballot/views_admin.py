@@ -360,6 +360,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
     polling_location = PollingLocation()
     polling_location_manager = PollingLocationManager()
     polling_location_state_code = ""
+    polling_location_deleted = False
     if positive_value_exists(polling_location_id):
         results = polling_location_manager.retrieve_polling_location_by_id(polling_location_id)
         if results['polling_location_found']:
@@ -367,6 +368,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
             polling_location_we_vote_id = polling_location.we_vote_id
             polling_location_id = polling_location.id
             polling_location_state_code = polling_location.state
+            polling_location_deleted = polling_location.polling_location_deleted
             polling_location_found = True
     if not polling_location_found and positive_value_exists(polling_location_we_vote_id):
         results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
@@ -375,6 +377,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
             polling_location_we_vote_id = polling_location.we_vote_id
             polling_location_id = polling_location.id
             polling_location_state_code = polling_location.state
+            polling_location_deleted = polling_location.polling_location_deleted
             polling_location_found = True
 
     polling_location_list = []
@@ -460,6 +463,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
         'polling_location_list':        polling_location_list,
         'polling_location_city':        polling_location_city,
         'polling_location_zip':         polling_location_zip,
+        'polling_location_deleted':     polling_location_deleted,
         'ballot_item_list':             ballot_item_list_modified,
         'google_civic_election_id':     google_civic_election_id,
         'state_code':                   state_code,

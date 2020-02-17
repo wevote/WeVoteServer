@@ -40,16 +40,6 @@
     </form>
 {% endif %}{# End of if election_list #}
 
-{% if election.id %}
-    {% if ballot_returned_id %}
-        <a href="{% url 'election:election_one_ballot_retrieve' election.id %}?ballot_returned_id={{ ballot_returned_id }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}&voter_id={{ ballot_returned.voter_id }}">
-        Refresh data from Google Civic</a><br />
-    {% elif ballot_returned.id %}
-        <a href="{% url 'election:election_one_ballot_retrieve' election.id %}?ballot_returned_id={{ ballot_returned.id }}&polling_location_we_vote_id={{ ballot_returned.polling_location_we_vote_id }}&voter_id={{ ballot_returned.voter_id }}">
-        Refresh data from Google Civic</a><br />
-    {% endif %}
-{% endif %}
-
 <form action="{% url "ballot:ballot_item_list_edit_process" %}" method="post" class="form-horizontal">
 {% csrf_token %}
     <input type="hidden" name="ballot_returned_id" value="{% if ballot_returned %}{{ ballot_returned.id }}{% else %}0{% endif %}">
@@ -66,6 +56,7 @@
     <div class="col-sm-8">
         <input type="text" name="ballot_returned_we_vote_id" id="ballot_returned_we_vote_id_id" class="form-control" disabled
                value="{{ ballot_returned.we_vote_id }}" />
+      {% if ballot_returned.date_last_updated %}Date Last Updated: {{ ballot_returned.date_last_updated }}{% endif %}
     </div>
 </div>
 
@@ -74,6 +65,7 @@
     <div class="col-sm-8">
         <input type="text" name="polling_location_we_vote_id" id="polling_location_we_vote_id_id" class="form-control"
                value="{{ ballot_returned.polling_location_we_vote_id }}" />
+      {% if polling_location_deleted %}POLLING LOCATION DELETED{% endif %}
     </div>
 </div>
 
@@ -257,6 +249,15 @@
     <li>Prepare: <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}">
         Import Complete Ballot at One Location (Import/Export Batches)</a></li>
 </ul>
+{#{% if election.id %}#}
+{#    {% if ballot_returned_id %}#}
+{#        <a href="{% url 'election:election_one_ballot_retrieve' election.id %}?ballot_returned_id={{ ballot_returned_id }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}&voter_id={{ ballot_returned.voter_id }}">#}
+{#        Refresh data from Google Civic</a><br />#}
+{#    {% elif ballot_returned.id %}#}
+{#        <a href="{% url 'election:election_one_ballot_retrieve' election.id %}?ballot_returned_id={{ ballot_returned.id }}&polling_location_we_vote_id={{ ballot_returned.polling_location_we_vote_id }}&voter_id={{ ballot_returned.voter_id }}">#}
+{#        Refresh data from Google Civic</a><br />#}
+{#    {% endif %}#}
+{#{% endif %}#}
 
 
 <br />

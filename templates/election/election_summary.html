@@ -1,7 +1,13 @@
 {# templates/election/election_summary.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if election %}{{ election.election_name }} Summary{% else %}No Election Found{% endif %}{% endblock %}
+{% block title %}{% if election %}{{ election.election_name }}
+    {% if is_national_election and state_code %}
+      - {{ state_code|upper }}
+    {% else %}
+      Summary
+    {% endif %}
+{% else %}No Election Found{% endif %}{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
