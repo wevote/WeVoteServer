@@ -15,7 +15,8 @@ from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
 from polling_location.models import PollingLocationManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
+    extract_state_code_from_address_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_ballot_returned_integer, fetch_site_unique_id_prefix
 
 OFFICE = 'OFFICE'
@@ -1556,6 +1557,8 @@ class BallotReturned(models.Model):
 
     latitude = models.FloatField(null=True, verbose_name='latitude returned from Google')
     longitude = models.FloatField(null=True, verbose_name='longitude returned from Google')
+    state_code = models.CharField(verbose_name="state code returned or calculated", max_length=2, null=True)
+
     normalized_line1 = models.CharField(max_length=255, blank=True, null=True,
                                         verbose_name='normalized address line 1 returned from Google')
     normalized_line2 = models.CharField(max_length=255, blank=True, null=True,
@@ -2424,6 +2427,18 @@ class BallotReturnedManager(models.Model):
                         ballot_returned.normalized_zip = normalized_zip
                     if text_for_map_search is not False:
                         ballot_returned.text_for_map_search = text_for_map_search
+
+                    if not positive_value_exists(ballot_returned.state_code):
+                        # Can we get state_code from normalized_state?
+                        if positive_value_exists(ballot_returned.normalized_state):
+                            ballot_returned.state_code = ballot_returned.normalized_state
+
+                    if not positive_value_exists(ballot_returned.state_code):
+                        # Can we get state_code from text_for_map_search?
+                        if positive_value_exists(ballot_returned.text_for_map_search):
+                            ballot_returned.state_code = extract_state_code_from_address_string(
+                                ballot_returned.text_for_map_search)
+
                     ballot_returned.save()
 
                     if new_ballot_returned_created:
@@ -2578,6 +2593,8 @@ class BallotReturnedListManager(models.Model):
             if positive_value_exists(google_civic_election_id):
                 ballot_returned_queryset = \
                     ballot_returned_queryset.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                ballot_returned_queryset = ballot_returned_queryset.filter(state_code=state_code)
             if positive_value_exists(polling_location_we_vote_id):
                 ballot_returned_queryset = \
                     ballot_returned_queryset.filter(polling_location_we_vote_id=polling_location_we_vote_id)

@@ -658,98 +658,98 @@ def retrieve_ballot_items_from_polling_location(
     return results
 
 
-def retrieve_ballot_items_from_polling_location(
-        google_civic_election_id, polling_location_we_vote_id="", polling_location=None, batch_set_id=0,
-        state_code=""):
-    success = True
-    status = ""
-    polling_location_found = False
-
-    if not positive_value_exists(google_civic_election_id):
-        results = {
-            'success': False,
-            'status': "Error: Missing election id",
-        }
-        return results
-
-    if not positive_value_exists(polling_location_we_vote_id) and not polling_location:
-        results = {
-            'success': False,
-            'status': "Error: Missing polling location we vote id and polling_location_object",
-        }
-        return results
-
-    batch_header_id = 0
-
-    if polling_location:
-        polling_location_found = True
-        polling_location_we_vote_id = polling_location.we_vote_id
-    elif positive_value_exists(polling_location_we_vote_id):
-        polling_location_manager = PollingLocationManager()
-        results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
-        if results['polling_location_found']:
-            polling_location = results['polling_location']
-            polling_location_found = True
-
-    if polling_location_found:
-        if not polling_location.latitude or not polling_location.longitude:
-            success = False
-            status += "RETRIEVE_DISTRICTS-MISSING_LATITUDE_LONGITUDE "
-            results = {
-                'success': success,
-                'status': status,
-                'batch_header_id': batch_header_id,
-            }
-            return results
-
-        try:
-            latitude_longitude = str(polling_location.latitude) + "," + str(polling_location.longitude)
-            response = requests.get(BALLOTPEDIA_API_CONTAINS_URL, params={
-                "access_token": BALLOTPEDIA_API_KEY,
-                "point": latitude_longitude,
-            })
-
-            structured_json = json.loads(response.text)
-
-            # Use Ballotpedia API call counter to track the number of queries we are doing each day
-            ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-            ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_CONTAINS_TYPE,
-                                                                 google_civic_election_id=google_civic_election_id,
-                                                                 ballotpedia_election_id=0)
-
-            contains_api = True
-            groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id, state_code,
-                                                                  contains_api)
-
-            modified_json_list = groom_results['modified_json_list']
-            kind_of_batch = groom_results['kind_of_batch']
-
-            # This function makes sure there are candidates attached to an office before including the office
-            #  on the ballot.
-            ballot_items_results = process_ballotpedia_voter_districts(google_civic_election_id, state_code,
-                                                                       modified_json_list, polling_location_we_vote_id)
-
-            if ballot_items_results['ballot_items_found']:
-                ballot_item_dict_list = ballot_items_results['ballot_item_dict_list']
-
-                results = store_ballotpedia_json_response_to_import_batch_system(
-                    modified_json_list=ballot_item_dict_list, google_civic_election_id=google_civic_election_id,
-                    kind_of_batch=kind_of_batch, batch_set_id=batch_set_id, state_code=state_code)
-                status += results['status']
-                if 'batch_header_id' in results:
-                    batch_header_id = results['batch_header_id']
-        except Exception as e:
-            success = False
-            status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
-            handle_exception(e, logger=logger, exception_message=status)
-
-    results = {
-        'success': success,
-        'status': status,
-        'batch_header_id': batch_header_id,
-    }
-    return results
+# def retrieve_ballot_items_from_polling_location(
+#         google_civic_election_id, polling_location_we_vote_id="", polling_location=None, batch_set_id=0,
+#         state_code=""):
+#     success = True
+#     status = ""
+#     polling_location_found = False
+#
+#     if not positive_value_exists(google_civic_election_id):
+#         results = {
+#             'success': False,
+#             'status': "Error: Missing election id",
+#         }
+#         return results
+#
+#     if not positive_value_exists(polling_location_we_vote_id) and not polling_location:
+#         results = {
+#             'success': False,
+#             'status': "Error: Missing polling location we vote id and polling_location_object",
+#         }
+#         return results
+#
+#     batch_header_id = 0
+#
+#     if polling_location:
+#         polling_location_found = True
+#         polling_location_we_vote_id = polling_location.we_vote_id
+#     elif positive_value_exists(polling_location_we_vote_id):
+#         polling_location_manager = PollingLocationManager()
+#         results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
+#         if results['polling_location_found']:
+#             polling_location = results['polling_location']
+#             polling_location_found = True
+#
+#     if polling_location_found:
+#         if not polling_location.latitude or not polling_location.longitude:
+#             success = False
+#             status += "RETRIEVE_DISTRICTS-MISSING_LATITUDE_LONGITUDE "
+#             results = {
+#                 'success': success,
+#                 'status': status,
+#                 'batch_header_id': batch_header_id,
+#             }
+#             return results
+#
+#         try:
+#             latitude_longitude = str(polling_location.latitude) + "," + str(polling_location.longitude)
+#             response = requests.get(BALLOTPEDIA_API_CONTAINS_URL, params={
+#                 "access_token": BALLOTPEDIA_API_KEY,
+#                 "point": latitude_longitude,
+#             })
+#
+#             structured_json = json.loads(response.text)
+#
+#             # Use Ballotpedia API call counter to track the number of queries we are doing each day
+#             ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+#             ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_CONTAINS_TYPE,
+#                                                                  google_civic_election_id=google_civic_election_id,
+#                                                                  ballotpedia_election_id=0)
+#
+#             contains_api = True
+#             groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id, state_code,
+#                                                                   contains_api)
+#
+#             modified_json_list = groom_results['modified_json_list']
+#             kind_of_batch = groom_results['kind_of_batch']
+#
+#             # This function makes sure there are candidates attached to an office before including the office
+#             #  on the ballot.
+#             ballot_items_results = process_ballotpedia_voter_districts(google_civic_election_id, state_code,
+#                                                                        modified_json_list, polling_location_we_vote_id)
+#
+#             if ballot_items_results['ballot_items_found']:
+#                 ballot_item_dict_list = ballot_items_results['ballot_item_dict_list']
+#
+#                 results = store_ballotpedia_json_response_to_import_batch_system(
+#                     modified_json_list=ballot_item_dict_list, google_civic_election_id=google_civic_election_id,
+#                     kind_of_batch=kind_of_batch, batch_set_id=batch_set_id, state_code=state_code)
+#                 status += results['status']
+#                 if 'batch_header_id' in results:
+#                     batch_header_id = results['batch_header_id']
+#         except Exception as e:
+#             success = False
+#             status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \
+#                       '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+#             handle_exception(e, logger=logger, exception_message=status)
+#
+#     results = {
+#         'success': success,
+#         'status': status,
+#         'batch_header_id': batch_header_id,
+#     }
+#     return results
 
 
 def retrieve_ballot_items_from_polling_location_api_v4(
@@ -824,6 +824,12 @@ def retrieve_ballot_items_from_polling_location_api_v4(
                 'new_measure_we_vote_ids_list': new_measure_we_vote_ids_list,
             }
             return results
+
+        if not positive_value_exists(state_code):
+            if positive_value_exists(polling_location.state):
+                state_code = polling_location.state
+            else:
+                state_code = "na"
 
         try:
             # Get the electoral_districts at this lat/long
@@ -1060,6 +1066,19 @@ def retrieve_ballot_items_for_one_voter_api_v4(
             'new_measure_we_vote_ids_list': new_measure_we_vote_ids_list,
         }
         return results
+
+    if not positive_value_exists(ballot_returned.state_code):
+        # Can we get state_code from normalized_state?
+        if positive_value_exists(ballot_returned.normalized_state):
+            ballot_returned.state_code = ballot_returned.normalized_state
+
+    if not positive_value_exists(ballot_returned.state_code):
+        # Can we get state_code from text_for_map_search?
+        if positive_value_exists(ballot_returned.text_for_map_search):
+            ballot_returned.state_code = extract_state_code_from_address_string(ballot_returned.text_for_map_search)
+
+    if not positive_value_exists(state_code):
+        state_code = ballot_returned.state_code
 
     try:
         # Get the electoral_districts at this lat/long
