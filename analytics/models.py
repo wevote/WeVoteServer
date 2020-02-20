@@ -540,7 +540,7 @@ class AnalyticsManager(models.Model):
             status += 'ACTION_TYPE1_SAVED '
         except Exception as e:
             success = False
-            status += 'COULD_NOT_SAVE_ACTION_TYPE1 '
+            status += 'COULD_NOT_SAVE_ACTION_TYPE1 ' + str(e) + ' '
 
         results = {
             'success':      success,

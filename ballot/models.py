@@ -2569,7 +2569,7 @@ class BallotReturnedListManager(models.Model):
 
     def retrieve_ballot_returned_list(
             self, google_civic_election_id, polling_location_we_vote_id='', for_voters=False,
-            state_code='', limit=0):
+            state_code='', date_last_updated_should_not_exceed=None, limit=0):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         ballot_returned_list = []
         ballot_returned_list_found = False
@@ -2594,13 +2594,16 @@ class BallotReturnedListManager(models.Model):
                 ballot_returned_queryset = \
                     ballot_returned_queryset.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(state_code):
-                ballot_returned_queryset = ballot_returned_queryset.filter(state_code=state_code)
+                ballot_returned_queryset = ballot_returned_queryset.filter(state_code__iexact=state_code)
             if positive_value_exists(polling_location_we_vote_id):
                 ballot_returned_queryset = \
                     ballot_returned_queryset.filter(polling_location_we_vote_id=polling_location_we_vote_id)
             elif for_voters:
                 ballot_returned_queryset = \
                     ballot_returned_queryset.exclude(Q(voter_id__isnull=True) | Q(voter_id=0))
+            if positive_value_exists(date_last_updated_should_not_exceed):
+                ballot_returned_queryset = \
+                    ballot_returned_queryset.filter(date_last_updated__lt=date_last_updated_should_not_exceed)
             if positive_value_exists(limit):
                 ballot_returned_list = ballot_returned_queryset[:limit]
             else:
@@ -2687,7 +2690,7 @@ class BallotReturnedListManager(models.Model):
         return results
 
     def retrieve_polling_location_we_vote_id_list_from_ballot_returned(
-            self, google_civic_election_id, state_code='', limit=750):
+            self, google_civic_election_id, state_code='', limit=750, date_last_updated_should_not_exceed=None):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         polling_location_we_vote_id_list = []
         status = ''
@@ -2700,6 +2703,10 @@ class BallotReturnedListManager(models.Model):
                     .filter(google_civic_election_id=google_civic_election_id, normalized_state__iexact=state_code)\
                     .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id="")).\
                     values_list('polling_location_we_vote_id', flat=True)
+                if date_last_updated_should_not_exceed:
+                    polling_location_we_vote_id_query = \
+                        polling_location_we_vote_id_query.filter(
+                            date_last_updated__lt=date_last_updated_should_not_exceed)
                 if positive_value_exists(limit):
                     polling_location_we_vote_id_list = polling_location_we_vote_id_query[:limit]
                 else:
@@ -2710,6 +2717,10 @@ class BallotReturnedListManager(models.Model):
                     .filter(google_civic_election_id=google_civic_election_id) \
                     .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id="")). \
                     values_list('polling_location_we_vote_id', flat=True)
+                if date_last_updated_should_not_exceed:
+                    polling_location_we_vote_id_query = \
+                        polling_location_we_vote_id_query.filter(
+                            date_last_updated__lt=date_last_updated_should_not_exceed)
                 if positive_value_exists(limit):
                     polling_location_we_vote_id_list = polling_location_we_vote_id_query[:limit]
                 else:

@@ -1,4 +1,4 @@
-# import_export_batches/controllers.py
+# import_export_batches/controllers_ballotpedia.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 

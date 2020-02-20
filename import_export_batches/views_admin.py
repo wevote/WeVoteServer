@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager, \
+    BatchProcess, BatchProcessBallotItemChunk, BatchProcessLogEntry, BatchProcessManager, \
     BatchRow, BatchRowActionBallotItem, \
     BatchSet, \
     CONTEST_OFFICE, ELECTED_OFFICE, IMPORT_BALLOT_ITEM, \
@@ -13,20 +14,22 @@ from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager,
     IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_VOTER
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     create_or_update_batch_header_mapping, export_voter_list_with_emails, import_data_from_batch_row_actions
-from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_processing, \
-    process_ballotpedia_voter_districts
-from import_export_batches.controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
+from .controllers_batch_process import batch_process_next_steps
+from .controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import MEASURE, CANDIDATE, POLITICIAN
 import csv
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.messages import get_messages
+from django.db.models import Q
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.utils.http import urlquote
 from election.models import Election, ElectionManager
+from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_processing, \
+    process_ballotpedia_voter_districts
 import json
 from polling_location.models import PollingLocation, PollingLocationManager
 from position.models import POSITION
@@ -1271,6 +1274,311 @@ def batch_set_list_process_view(request):
     return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
                                 "&batch_uri=" + batch_uri_encoded)
+
+
+@login_required
+def batch_process_list_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    status = ""
+    success = True
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+    show_all_elections = request.GET.get('show_all_elections', False)
+    batch_process_search = request.GET.get('batch_process_search', '')
+
+    batch_process_list_found = False
+    batch_process_list = []
+    updated_batch_process_list = []
+    batch_process_list_count = 0
+
+    election_manager = ElectionManager()
+    batch_process_manager = BatchProcessManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+
+    try:
+        batch_process_queryset = BatchProcess.objects.all()
+        if positive_value_exists(google_civic_election_id):
+            batch_process_queryset = batch_process_queryset.filter(google_civic_election_id=google_civic_election_id)
+        elif positive_value_exists(show_all_elections):
+            # Return offices from all elections
+            pass
+        else:
+            # Limit this search to upcoming_elections only
+            google_civic_election_id_list = []
+            for one_election in election_list:
+                google_civic_election_id_list.append(one_election.google_civic_election_id)
+            batch_process_queryset = batch_process_queryset.filter(
+                google_civic_election_id__in=google_civic_election_id_list)
+        if positive_value_exists(state_code):
+            batch_process_queryset = batch_process_queryset.filter(state_code__iexact=state_code)
+        batch_process_queryset = batch_process_queryset.order_by("-id")
+
+        if positive_value_exists(batch_process_search):
+            search_words = batch_process_search.split()
+            for one_word in search_words:
+                filters = []  # Reset for each search word
+                new_filter = Q(office_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(we_vote_id__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(wikipedia_id__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballotpedia_office_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballotpedia_race_id__iexact=one_word)
+                filters.append(new_filter)
+
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    batch_process_queryset = batch_process_queryset.filter(final_filters)
+
+        batch_process_list_count = batch_process_queryset.count()
+
+        batch_process_queryset = batch_process_queryset[:500]
+        batch_process_list = list(batch_process_queryset)
+
+        if len(batch_process_list):
+            batch_process_list_found = True
+            status += 'BATCH_PROCESS_LIST_RETRIEVED '
+        else:
+            status += 'BATCH_PROCESS_LIST_NOT_RETRIEVED '
+    except BatchProcess.DoesNotExist:
+        # No offices found. Not a problem.
+        status += 'NO_OFFICES_FOUND_DoesNotExist '
+        batch_process_list = []
+    except Exception as e:
+        status += 'FAILED retrieve_all_offices_for_upcoming_election ' \
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e)) + " "
+        success = False
+
+    # Add the processing "chunks" under each Batch Process
+    for batch_process in batch_process_list:
+        batch_process_ballot_item_chunk_list = []
+        batch_process_ballot_item_chunk_list_found = False
+        try:
+            batch_process_chunk_queryset = BatchProcessBallotItemChunk.objects.all()
+            batch_process_chunk_queryset = batch_process_chunk_queryset.filter(batch_process_id=batch_process.id)
+            batch_process_chunk_queryset = batch_process_chunk_queryset.order_by("-id")
+            batch_process_ballot_item_chunk_list = list(batch_process_chunk_queryset)
+            batch_process_ballot_item_chunk_list_found = \
+                positive_value_exists(len(batch_process_ballot_item_chunk_list))
+        except BatchProcessBallotItemChunk.DoesNotExist:
+            # BatchProcessBallotItemChunk not found. Not a problem.
+            status += 'NO_BatchProcessBallotItemChunk_FOUND_DoesNotExist '
+        except Exception as e:
+            status += 'FAILED BatchProcessBallotItemChunk ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+        batch_process.batch_process_ballot_item_chunk_list = batch_process_ballot_item_chunk_list
+        batch_process.batch_process_ballot_item_chunk_list_found = batch_process_ballot_item_chunk_list_found
+
+    # Make sure we always include the current election in the election_list, even if it is older
+    if positive_value_exists(google_civic_election_id):
+        this_election_found = False
+        for one_election in election_list:
+            if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                this_election_found = True
+                break
+        if not this_election_found:
+            results = election_manager.retrieve_election(google_civic_election_id)
+            if results['election_found']:
+                election = results['election']
+                election_list.append(election)
+
+    state_list = STATE_CODE_MAP
+    state_list_modified = {}
+    for one_state_code, one_state_name in state_list.items():
+        # office_count = batch_process_manager.fetch_office_count(google_civic_election_id, one_state_code)
+        batch_process_count = 0
+        state_name_modified = one_state_name
+        if positive_value_exists(batch_process_count):
+            state_name_modified += " - " + str(batch_process_count)
+            state_list_modified[one_state_code] = state_name_modified
+        else:
+            state_name_modified += ""
+            state_list_modified[one_state_code] = state_name_modified
+    sorted_state_list = sorted(state_list_modified.items())
+
+    # status_print_list = ""
+    # status_print_list += "batch_process_list_count: " + \
+    #                      str(batch_process_list_count) + " "
+    #
+    # messages.add_message(request, messages.INFO, status_print_list)
+
+    messages_on_stage = get_messages(request)
+
+    template_values = {
+        'messages_on_stage':        messages_on_stage,
+        'batch_process_list':       batch_process_list,
+        'batch_process_search':     batch_process_search,
+        'election_list':            election_list,
+        'state_code':               state_code,
+        'show_all_elections':       show_all_elections,
+        'state_list':               sorted_state_list,
+        'google_civic_election_id': google_civic_election_id,
+    }
+    return render(request, 'import_export_batches/batch_process_list.html', template_values)
+
+
+def batch_process_next_steps_view(request):
+    json_results = batch_process_next_steps()
+
+    response = HttpResponse(json.dumps(json_results), content_type='application/json')
+    return response
+
+
+@login_required
+def batch_process_log_entry_list_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    status = ""
+    success = True
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+    show_all_elections = request.GET.get('show_all_elections', False)
+    batch_process_log_entry_search = request.GET.get('batch_process_log_entry_search', '')
+
+    batch_process_log_entry_list_found = False
+    batch_process_log_entry_list = []
+
+    election_manager = ElectionManager()
+    batch_process_manager = BatchProcessManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+
+    try:
+        batch_process_queryset = BatchProcessLogEntry.objects.all()
+        if positive_value_exists(google_civic_election_id):
+            batch_process_queryset = batch_process_queryset.filter(google_civic_election_id=google_civic_election_id)
+        elif positive_value_exists(show_all_elections):
+            # Return offices from all elections
+            pass
+        else:
+            # Limit this search to upcoming_elections only
+            google_civic_election_id_list = []
+            for one_election in election_list:
+                google_civic_election_id_list.append(one_election.google_civic_election_id)
+            batch_process_queryset = batch_process_queryset.filter(
+                google_civic_election_id__in=google_civic_election_id_list)
+        if positive_value_exists(state_code):
+            batch_process_queryset = batch_process_queryset.filter(state_code__iexact=state_code)
+        batch_process_queryset = batch_process_queryset.order_by("-id")
+
+        if positive_value_exists(batch_process_log_entry_search):
+            search_words = batch_process_log_entry_search.split()
+            for one_word in search_words:
+                filters = []  # Reset for each search word
+                new_filter = Q(office_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(we_vote_id__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(wikipedia_id__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballotpedia_office_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballotpedia_race_id__iexact=one_word)
+                filters.append(new_filter)
+
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    batch_process_queryset = batch_process_queryset.filter(final_filters)
+
+        batch_process_log_entry_list_count = batch_process_queryset.count()
+
+        batch_process_queryset = batch_process_queryset[:200]
+        batch_process_log_entry_list = list(batch_process_queryset)
+
+        if len(batch_process_log_entry_list):
+            batch_process_log_entry_list_found = True
+            status += 'BATCH_PROCESS_LOG_ENTRY_LIST_RETRIEVED '
+        else:
+            status += 'BATCH_PROCESS_LOG_ENTRY_LIST_NOT_RETRIEVED '
+    except BatchProcessLogEntry.DoesNotExist:
+        # No offices found. Not a problem.
+        status += 'BATCH_PROCESS_LOG_ENTRY_DoesNotExist '
+        batch_process_log_entry_list = []
+    except Exception as e:
+        status += 'FAILED retrieve_all_offices_for_upcoming_election ' \
+                 '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+        success = False
+
+    # Make sure we always include the current election in the election_list, even if it is older
+    if positive_value_exists(google_civic_election_id):
+        this_election_found = False
+        for one_election in election_list:
+            if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                this_election_found = True
+                break
+        if not this_election_found:
+            results = election_manager.retrieve_election(google_civic_election_id)
+            if results['election_found']:
+                election = results['election']
+                election_list.append(election)
+
+    state_list = STATE_CODE_MAP
+    state_list_modified = {}
+    for one_state_code, one_state_name in state_list.items():
+        # office_count = batch_process_manager.fetch_office_count(google_civic_election_id, one_state_code)
+        batch_process_log_entry_count = 0
+        state_name_modified = one_state_name
+        if positive_value_exists(batch_process_log_entry_count):
+            state_name_modified += " - " + str(batch_process_log_entry_count)
+            state_list_modified[one_state_code] = state_name_modified
+        else:
+            state_name_modified += ""
+            state_list_modified[one_state_code] = state_name_modified
+    sorted_state_list = sorted(state_list_modified.items())
+
+    messages_on_stage = get_messages(request)
+
+    template_values = {
+        'messages_on_stage':        messages_on_stage,
+        'batch_process_log_entry_list':       batch_process_log_entry_list,
+        'batch_process_log_entry_search':     batch_process_log_entry_search,
+        'election_list':            election_list,
+        'state_code':               state_code,
+        'show_all_elections':       show_all_elections,
+        'state_list':               sorted_state_list,
+        'google_civic_election_id': google_civic_election_id,
+    }
+    return render(request, 'import_export_batches/batch_process_log_entry_list.html', template_values)
 
 
 @login_required
