@@ -1,0 +1,134 @@
+{# templates/import_export_batches/batch_process_log_entry_list.html #}
+{% extends "template_base.html" %}
+{% load tz %}
+
+{% block title %}Batch Process Log{% endblock %}
+
+{%  block content %}
+<p><a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+>< Back to Batch Processes</a></p>
+
+<h1>Batch Process Log{% if batch_process_log_entry_list %} ({{ batch_process_log_entry_list|length }}){% endif %}</h1>
+
+<form name="organization_position_choose_election" method="get" action="{% url 'import_export_batches:batch_process_log_entry_list' %}">
+    {% csrf_token %}
+    {% if election_list %}
+        <select id="google_civic_election_id" name="google_civic_election_id">
+            <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
+                -- Filter by Election --</option>
+        {% for election in election_list %}
+            <option value="{{ election.google_civic_election_id }}"
+                    {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+                {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+        {% endfor %}
+        </select>
+    {% endif %}{# End of if election_list #}
+
+    {# Default to showing only upcoming elections #}
+    <label for="show_all_elections_id">
+      <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
+             {% if show_all_elections %}checked{% endif %} /> Include Past Elections
+    </label>
+
+    {% if state_list %}
+        <select id="state_code_id" name="state_code">
+            <option value="">
+                -- Filter by State Served --</option>
+        {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                {{ state }}</option>
+        {% endfor %}
+        </select>
+        {% if state_code != "" %}
+        <a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
+            show all states</a>
+        {% endif %}
+        {% endif %}
+        <br />
+        {% if batch_process_log_entry_search %}
+            <a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                 clear search</a>&nbsp;
+        {% endif %}
+        <input type="text" name="batch_process_log_entry_search" id="batch_process_log_entry_search_id" value="{{ batch_process_log_entry_search }}" style="width: 450px" />
+        <input type="submit" value="Search Batch Log" />
+        {# End of if state_list #}
+</form>{#  End of organization_position_choose_election form #}
+
+{% if batch_process_log_entry_list %}
+<form name="batch_process_log_entry_list_markings" method="post" action="{% url 'import_export_batches:batch_process_log_entry_list' %}">
+    {% csrf_token %}
+{#    <div class="form-group pull-right">#}
+{#        <div class="col-xs-4">#}
+{#            <label for="which_marking_id" class="control-label">#}
+{#              <span class="u-no-break">Mark selected rows as:</span>#}
+{#            </label>#}
+{#        </div>#}
+{#        <div class="col-xs-6">#}
+{#            <select id="which_marking_id" name="which_marking">#}
+                {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
+{#                <option value="is_battleground_race">Battleground Race</option>#}
+{#            </select>#}
+{#        </div>#}
+{#        <div class="col-xs-1">#}
+{#            <input type="submit" value="Save" />#}
+{#        </div>#}
+{#    </div>#}
+    {# Pass along the url_variables this page is using, so we can return to the same page state #}
+    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+    <input type="hidden" name="state_code" value="{{ state_code }}">
+    <input type="hidden" name="show_all_elections" value="{{ show_all_elections }}">
+    <input type="hidden" name="batch_process_log_entry_search" value="{{ batch_process_log_entry_search }}">
+
+    <table class="table">
+    {% for batch_process_log_entry in batch_process_log_entry_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
+    {# Show the header every ~15 lines #}
+      <thead>
+        <tr>
+            <th>Date</th>
+            <th>Process ID</th>
+            <th>Chunk ID</th>
+            <th>Kind of Process</th>
+            <th>Election</th>
+            <th>State</th>
+            <th>Status</th>
+        </tr>
+      </thead>
+    {% endif %}
+        <tr>
+            <td style="white-space: nowrap">{{ batch_process_log_entry.date_added|localtime|default_if_none:"" }}</td>
+            <td>{{ batch_process_log_entry.batch_process_id|default_if_none:"" }}</td>
+            <td>{{ batch_process_log_entry.batch_process_ballot_item_chunk_id|default_if_none:"" }}</td>
+            <td>{{ batch_process_log_entry.kind_of_process }}</td>
+            <td>{{ batch_process_log_entry.google_civic_election_id|default_if_none:"" }}</td>
+            <td>{{ batch_process_log_entry.state_code|default_if_none:"" }}</td>
+            <td>{{ batch_process_log_entry.status|default_if_none:"" }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+</form>
+    <p></p>
+{% else %}
+    <p>(no log entries found)</p>
+{% endif %}
+
+    <script>
+    $(function() {
+        $('#google_civic_election_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_all_elections_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#state_code_id').change(function() {
+            this.form.submit();
+        });
+    });
+    </script>
+
+{% endblock %}

@@ -4,9 +4,11 @@
 
 import codecs
 import csv
-from datetime import date
+from datetime import date, timedelta
 from django.db import models
+from django.db.models import Q
 from django.utils.http import urlquote
+from django.utils.timezone import localtime, now
 from election.models import ElectionManager
 from electoral_district.controllers import electoral_district_import_from_xml_data
 from exception.models import handle_exception
@@ -20,7 +22,8 @@ import urllib
 from urllib.request import Request, urlopen
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists, LANGUAGE_CODE_ENGLISH, LANGUAGE_CODE_SPANISH
+from wevote_functions.functions import convert_to_int, positive_value_exists, \
+    LANGUAGE_CODE_ENGLISH, LANGUAGE_CODE_SPANISH
 import xml.etree.ElementTree as ElementTree
 
 POSITION = 'POSITION'
@@ -382,6 +385,17 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS = {
     'date_joined': 'date_joined',
     'date_last_changed': 'date_last_changed',
 }
+
+# BatchProcess constants
+RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
+REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
+REFRESH_BALLOT_ITEMS_FROM_VOTERS = "REFRESH_BALLOT_ITEMS_FROM_VOTERS"
+
+KIND_OF_PROCESS_CHOICES = (
+    (RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,  'Retrieve Ballot Items from Polling Locations'),
+    (REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, 'Refresh Ballot Items from BallotReturned Polling Locations'),
+    (REFRESH_BALLOT_ITEMS_FROM_VOTERS, 'Refresh Ballot Items from Voter Custom Addresses'),
+)
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -3322,6 +3336,21 @@ class BatchManager(models.Model):
                 number_of_batch_action_rows = 0
         return number_of_batch_action_rows
 
+    def count_number_of_batches_in_batch_set(self, batch_set_id=0, batch_row_analyzed=None, batch_row_created=None):
+        number_of_batches = 0
+        batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+        batch_description_list = list(batch_description_query)
+        for batch_description in batch_description_list:
+            batch_row_query = BatchRow.objects.filter(batch_header_id=batch_description.batch_header_id)
+            if batch_row_analyzed is not None:
+                batch_row_query = batch_row_query.filter(batch_row_analyzed=batch_row_analyzed)
+            if batch_row_created is not None:
+                batch_row_query = batch_row_query.filter(batch_row_created=batch_row_created)
+            batch_row_count = batch_row_query.count()
+            if positive_value_exists(batch_row_count):
+                number_of_batches += 1
+        return number_of_batches
+
     def fetch_batch_header_translation_suggestion(self, kind_of_batch, alternate_header_value):
         """
         We are looking at one header value from a file imported by an admin or volunteer. We want to see if
@@ -4405,6 +4434,424 @@ class BatchHeaderTranslationSuggestion(models.Model):
     kind_of_batch = models.CharField(max_length=32, choices=KIND_OF_BATCH_CHOICES, default=MEASURE)
     header_value_recognized_by_we_vote = models.TextField(null=True, blank=True)
     incoming_alternate_header_value = models.TextField(null=True, blank=True)
+
+
+class BatchProcessManager(models.Model):
+
+    def __unicode__(self):
+        return "BatchProcessManager"
+
+    def create_batch_process_ballot_item_chunk(self, batch_process_id=0):
+        status = ""
+        success = True
+        batch_process_ballot_item_chunk = None
+        batch_process_ballot_item_chunk_created = False
+
+        results = self.retrieve_batch_process(batch_process_id)
+        if not results['batch_process_found']:
+            status += results['status'] + "BATCH_PROCESS_BALLOT_ITEM_CHUNK_NOT_FOUND "
+            results = {
+                'success':                                  success,
+                'status':                                   status,
+                'batch_process_ballot_item_chunk':          batch_process_ballot_item_chunk,
+                'batch_process_ballot_item_chunk_created':  batch_process_ballot_item_chunk_created,
+            }
+            return results
+
+        batch_process = results['batch_process']
+
+        try:
+            batch_process_ballot_item_chunk = BatchProcessBallotItemChunk.objects.create(
+                batch_process_id=batch_process.id,
+                state_code=batch_process.state_code,
+            )
+            if batch_process_ballot_item_chunk:
+                status += 'BATCH_PROCESS_BALLOT_ITEM_CHUNK_SAVED '
+                batch_process_ballot_item_chunk_created = True
+            else:
+                status += 'FAILED_TO_CREATE_BATCH_PROCESS_BALLOT_ITEM_CHUNK '
+        except Exception as e:
+            success = False
+            status += 'COULD_NOT_SAVE_BATCH_PROCESS_BALLOT_ITEM_CHUNK ' + str(e) + ' '
+
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'batch_process_ballot_item_chunk':          batch_process_ballot_item_chunk,
+            'batch_process_ballot_item_chunk_created':  batch_process_ballot_item_chunk_created,
+        }
+        return results
+
+    def create_batch_process(
+            self,
+            google_civic_election_id="",
+            kind_of_process=None,
+            polling_location_we_vote_id=None,
+            state_code="",
+            voter_id=None):
+        status = ""
+        success = True
+        batch_process = None
+
+        if kind_of_process not in [REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_VOTERS,
+                                   RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS]:
+            status += "KIND_OF_PROCESS_NOT_FOUND: " + str(kind_of_process) + " "
+            success = False
+            results = {
+                'success': success,
+                'status': status,
+                'batch_process': batch_process,
+                'batch_process_saved': success,
+            }
+            return results
+
+        try:
+            batch_process = BatchProcess.objects.create(
+                google_civic_election_id=google_civic_election_id,
+                kind_of_process=kind_of_process,
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                state_code=state_code,
+                voter_id=voter_id,
+            )
+            status += 'BATCH_PROCESS_SAVED '
+        except Exception as e:
+            success = False
+            status += 'COULD_NOT_SAVE_BATCH_PROCESS ' + str(e) + ' '
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'batch_process':        batch_process,
+            'batch_process_saved':  success,
+        }
+        return results
+
+    def create_batch_process_log_entry(
+            self,
+            batch_process_id=0,
+            batch_process_ballot_item_chunk_id=0,
+            critical_failure=False,
+            google_civic_election_id=0,
+            kind_of_process="",
+            polling_location_we_vote_id=None,
+            state_code="",
+            status="",
+            voter_id=None):
+        success = True
+        batch_process_log_entry = None
+        batch_process_log_entry_saved = False
+        batch_process_id = convert_to_int(batch_process_id)
+        batch_process_ballot_item_chunk_id = convert_to_int(batch_process_ballot_item_chunk_id)
+
+        try:
+            batch_process_log_entry = BatchProcessLogEntry.objects.create(
+                batch_process_id=batch_process_id,
+                batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk_id,
+                critical_failure=critical_failure,
+                kind_of_process=kind_of_process,
+                state_code=state_code,
+                status=status,
+            )
+            save_changes = False
+            if positive_value_exists(google_civic_election_id):
+                batch_process_log_entry.google_civic_election_id = convert_to_int(google_civic_election_id)
+                save_changes = True
+            if positive_value_exists(voter_id):
+                batch_process_log_entry.voter_id = convert_to_int(voter_id)
+                save_changes = True
+            if positive_value_exists(polling_location_we_vote_id):
+                batch_process_log_entry.polling_location_we_vote_id = polling_location_we_vote_id
+                save_changes = True
+            if save_changes:
+                batch_process_log_entry.save()
+            status += 'BATCH_PROCESS_SAVED '
+            batch_process_log_entry_saved = True
+        except Exception as e:
+            success = False
+            status += 'COULD_NOT_SAVE_BATCH_PROCESS ' + str(e) + ' '
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'batch_process_log_entry':        batch_process_log_entry,
+            'batch_process_log_entry_saved':  batch_process_log_entry_saved,
+        }
+        return results
+
+    def retrieve_batch_process(self, batch_process_id):
+        status = ""
+        success = True
+        batch_process = None
+        batch_process_found = False
+
+        try:
+            batch_process = BatchProcess.objects.get(id=batch_process_id)
+            if batch_process:
+                batch_process_found = True
+                status += 'BATCH_PROCESS_RETRIEVED '
+            else:
+                status += 'BATCH_PROCESS_NOT_RETRIEVED '
+        except BatchProcess.DoesNotExist:
+            # No batch_process found. Not a problem.
+            status += 'NO_BATCH_PROCESS_FOUND_DoesNotExist '
+        except Exception as e:
+            status += 'FAILED_BATCH_PROCESS_RETRIEVE ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+            success = False
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'batch_process':        batch_process,
+            'batch_process_found':  batch_process_found,
+        }
+        return results
+
+    def count_active_batch_processes(self):
+        status = ""
+        batch_process_count = 0
+
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+        google_civic_election_id_list = []
+        for one_election in election_list:
+            google_civic_election_id_list.append(one_election.google_civic_election_id)
+
+        try:
+            batch_process_queryset = BatchProcess.objects.all()
+            batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
+            batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+            batch_process_queryset = batch_process_queryset.filter(
+                google_civic_election_id__in=google_civic_election_id_list)
+
+            batch_process_count = batch_process_queryset.count()
+        except Exception as e:
+            status += 'FAILED_COUNT_ACTIVE_BATCH_PROCESSES ' + str(e) + ' '
+        return batch_process_count
+
+    def count_checked_out_batch_processes(self):
+        status = ""
+        batch_process_count = 0
+
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+        google_civic_election_id_list = []
+        for one_election in election_list:
+            google_civic_election_id_list.append(one_election.google_civic_election_id)
+
+        try:
+            batch_process_queryset = BatchProcess.objects.all()
+            batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
+            batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+            batch_process_queryset = batch_process_queryset.filter(date_checked_out__isnull=False)
+            batch_process_queryset = batch_process_queryset.filter(
+                google_civic_election_id__in=google_civic_election_id_list)
+
+            batch_process_count = batch_process_queryset.count()
+        except Exception as e:
+            status += 'FAILED_COUNT_CHECKED_OUT_BATCH_PROCESSES ' + str(e) + ' '
+        return batch_process_count
+
+    def retrieve_batch_process_list(self, process_active=True, process_queued=False, for_upcoming_elections=True):
+        status = ""
+        success = True
+        batch_process_list_found = False
+        filtered_batch_process_list = []
+
+        election_manager = ElectionManager()
+        if positive_value_exists(for_upcoming_elections):
+            results = election_manager.retrieve_upcoming_elections()
+            election_list = results['election_list']
+        else:
+            results = election_manager.retrieve_elections()
+            election_list = results['election_list']
+
+        try:
+            batch_process_queryset = BatchProcess.objects.all()
+            if positive_value_exists(process_active):
+                batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
+                batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+            elif positive_value_exists(process_queued):
+                batch_process_queryset = batch_process_queryset.filter(date_started__isnull=True)
+                batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+
+            if positive_value_exists(for_upcoming_elections):
+                # Limit this search to upcoming_elections only
+                google_civic_election_id_list = []
+                for one_election in election_list:
+                    google_civic_election_id_list.append(one_election.google_civic_election_id)
+                batch_process_queryset = batch_process_queryset.filter(
+                    google_civic_election_id__in=google_civic_election_id_list)
+            else:
+                # Do not limit to upcoming elections
+                pass
+            # if positive_value_exists(state_code):
+            #     batch_process_queryset = batch_process_queryset.filter(state_code__iexact=state_code)
+            batch_process_queryset = batch_process_queryset.order_by("id")
+            batch_process_list = list(batch_process_queryset)
+
+            # Cycle through all processes retrieved and make sure they aren't being worked on by other processes
+            checked_out_expiration_time = 60 * 60  # 60 minutes
+            for batch_process in batch_process_list:
+                if batch_process.date_checked_out is None:
+                    filtered_batch_process_list.append(batch_process)
+                else:
+                    date_checked_out_time_out = \
+                        batch_process.date_checked_out + timedelta(seconds=checked_out_expiration_time)
+                    if now() > date_checked_out_time_out:
+                        filtered_batch_process_list.append(batch_process)
+
+            if len(filtered_batch_process_list):
+                batch_process_list_found = True
+                status += 'BATCH_PROCESS_LIST_RETRIEVED '
+            else:
+                status += 'BATCH_PROCESS_LIST_NOT_RETRIEVED '
+        except BatchProcess.DoesNotExist:
+            # No batch_process found. Not a problem.
+            status += 'NO_BATCH_PROCESS_FOUND_DoesNotExist '
+        except Exception as e:
+            status += 'FAILED_BATCH_PROCESS_LIST_RETRIEVE ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'batch_process_list':       filtered_batch_process_list,
+            'batch_process_list_found': batch_process_list_found,
+        }
+        return results
+
+    def retrieve_active_ballot_item_chunk_not_completed(self, batch_process_id=0):
+        status = ""
+        success = True
+        batch_process_ballot_item_chunk = None
+        batch_process_ballot_item_chunk_found = False
+        try:
+            batch_process_queryset = BatchProcessBallotItemChunk.objects.all()
+            batch_process_queryset = batch_process_queryset.filter(batch_process_id=batch_process_id)
+
+            # Limit to chunks that have at least one completed_date == NULL
+            filters = []  # Reset for each search word
+            new_filter = Q(retrieve_date_completed__isnull=True)
+            filters.append(new_filter)
+
+            new_filter = Q(analyze_date_completed__isnull=True)
+            filters.append(new_filter)
+
+            new_filter = Q(create_date_completed__isnull=True)
+            filters.append(new_filter)
+
+            # Add the first query
+            final_filters = filters.pop()
+            # ...and "OR" the remaining items in the list
+            for item in filters:
+                final_filters |= item
+            batch_process_queryset = batch_process_queryset.filter(final_filters)
+
+            batch_process_queryset = batch_process_queryset.order_by("id")
+            batch_process_ballot_item_chunk = batch_process_queryset.first()
+            if batch_process_ballot_item_chunk:
+                batch_process_ballot_item_chunk_found = True
+                status += 'BATCH_PROCESS_BALLOT_ITEM_CHUNK_RETRIEVED '
+            else:
+                status += 'BATCH_PROCESS_BALLOT_ITEM_CHUNK_NOT_FOUND '
+        except BatchProcessBallotItemChunk.DoesNotExist:
+            # No chunk found. Not a problem.
+            status += 'BATCH_PROCESS_BALLOT_ITEM_CHUNK_NOT_FOUND_DoesNotExist '
+        except Exception as e:
+            status += 'FAILED_BATCH_PROCESS_BALLOT_ITEM_CHUNK_RETRIEVE ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+            success = False
+
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'batch_process_ballot_item_chunk':          batch_process_ballot_item_chunk,
+            'batch_process_ballot_item_chunk_found':    batch_process_ballot_item_chunk_found,
+        }
+        return results
+
+    def system_turned_off(self):
+        return False
+
+
+class BatchProcess(models.Model):
+    """
+    """
+    kind_of_process = models.CharField(max_length=50, choices=KIND_OF_PROCESS_CHOICES,
+                                       default=RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS)
+
+    # The unique ID of this election. (Provided by Google Civic)
+    google_civic_election_id = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=0, null=False, db_index=True)
+    state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
+
+    # Either voter_id or polling_location_we_vote_id will be set, but not both.
+    # The unique id of the voter for which this ballot was retrieved.
+    voter_id = models.IntegerField(verbose_name="the voter unique id", null=True, blank=True)
+    # The polling location for which this ballot was retrieved
+    polling_location_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id of the polling location", max_length=255, default=None, null=True,
+        blank=True, unique=False)
+
+    date_added_to_queue = models.DateTimeField(verbose_name='start', null=True, auto_now_add=True)
+    date_started = models.DateTimeField(verbose_name='start', null=True)
+    # When have all of the steps completed?
+    date_completed = models.DateTimeField(verbose_name='finished', null=True)
+    # When a batch_process is running, we mark when it was "taken off the shelf" to be worked on.
+    #  When the process is complete, we should reset this to "NULL"
+    date_checked_out = models.DateTimeField(null=True)
+
+
+class BatchProcessBallotItemChunk(models.Model):
+    """
+    """
+    batch_process_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
+    batch_set_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
+    google_civic_election_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
+    state_code = models.CharField(max_length=2, null=True)
+
+    retrieve_date_started = models.DateTimeField(null=True)
+    retrieve_date_completed = models.DateTimeField(null=True)
+    retrieve_timed_out = models.NullBooleanField(default=None, null=True)
+    retrieve_row_count = models.PositiveIntegerField(default=0, null=False)
+
+    analyze_date_started = models.DateTimeField(null=True)
+    analyze_date_completed = models.DateTimeField(null=True)
+    analyze_timed_out = models.NullBooleanField(default=None, null=True)
+    analyze_row_count = models.PositiveIntegerField(default=0, null=False)
+
+    create_date_started = models.DateTimeField(null=True)
+    create_date_completed = models.DateTimeField(null=True)
+    create_timed_out = models.NullBooleanField(default=None, null=True)
+    create_row_count = models.PositiveIntegerField(default=0, null=False)
+
+
+class BatchProcessLogEntry(models.Model):
+    """
+    """
+    batch_process_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
+    batch_process_ballot_item_chunk_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
+    # The unique ID of this election. (Provided by Google Civic)
+    google_civic_election_id = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=0, null=False)
+    state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
+
+    # Either voter_id or polling_location_we_vote_id will be set, but not both.
+    # The unique id of the voter for which this ballot was retrieved.
+    voter_id = models.IntegerField(verbose_name="the voter unique id", null=True, blank=True)
+    # The polling location for which this ballot was retrieved
+    polling_location_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id of the polling location", max_length=255, default=None, null=True,
+        blank=True, unique=False)
+
+    critical_failure = models.NullBooleanField(default=None, null=True)
+    date_added = models.DateTimeField(null=True, auto_now_add=True)
+    kind_of_process = models.CharField(max_length=50, default="")
+    status = models.TextField(null=True, blank=True)
 
 
 class BatchRowTranslationMap(models.Model):
