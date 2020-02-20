@@ -103,10 +103,22 @@
       </thead>
     {% endif %}
         <tr style="
-                {% if batch_process.date_completed %}background-color: limegreen;
+                {% if batch_process.batch_process_paused %}background-color: gray;
+                {% elif batch_process.date_completed %}background-color: limegreen;
                 {% else %}background-color: yellow;
                 {% endif %}">
-            <td>{{ batch_process.id }}</td>
+            <td>
+              {{ batch_process.id }}
+              {% if batch_process.batch_process_paused %}
+              <a href="{% url 'import_export_batches:batch_process_pause_toggle' %}?batch_process_id={{ batch_process.id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                activate
+              </a>
+              {% else %}
+              <a href="{% url 'import_export_batches:batch_process_pause_toggle' %}?batch_process_id={{ batch_process.id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                pause
+              </a>
+              {% endif %}
+            </td>
             <td>{{ batch_process.kind_of_process }}</td>
             <td>{{ batch_process.google_civic_election_id|default_if_none:"" }}</td>
             <td>{{ batch_process.state_code }}</td>

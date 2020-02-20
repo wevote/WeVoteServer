@@ -768,7 +768,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
         new_candidate_we_vote_ids_list = one_ballot_results['new_candidate_we_vote_ids_list']
         new_measure_we_vote_ids_list = one_ballot_results['new_measure_we_vote_ids_list']
 
-        if success:
+        if one_ballot_results['batch_header_id']:
             ballots_retrieved += 1
         else:
             ballots_not_retrieved += 1

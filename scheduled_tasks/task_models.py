@@ -19,7 +19,7 @@ class WeTask(Task):
 
         return list(Task.objects.unlocked(now).order_by('id'))
 
-    def delete_task (self, id):
+    def delete_task(self, id):
         try:
             if positive_value_exists(id):
                 Task.objects.filter(id=id).delete()

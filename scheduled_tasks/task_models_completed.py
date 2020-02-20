@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 import logging
-from background_task.models import CompletedTask  # DALE 2020-01-17 To prevent ModuleNotFoundError
+from background_task.models import CompletedTask
 
 
 logger = logging.getLogger(__name__)
