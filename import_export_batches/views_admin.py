@@ -1447,6 +1447,39 @@ def batch_process_next_steps_view(request):
 
 
 @login_required
+def batch_process_pause_toggle_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    batch_process_id = request.GET.get('batch_process_id', 0)
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+
+    batch_process_manager = BatchProcessManager()
+    results = batch_process_manager.retrieve_batch_process(batch_process_id)
+    if results['batch_process_found']:
+        batch_process = results['batch_process']
+        try:
+            current_setting = batch_process.batch_process_paused
+            batch_process.batch_process_paused = not current_setting
+            batch_process.save()
+            message = "BATCH_PROCESS_PAUSED: " + str(batch_process.batch_process_paused) + " "
+            messages.add_message(request, messages.INFO, message)
+        except Exception as e:
+            message = "COULD_NOT_SAVE_BATCH_PROCESS-BATCH_PROCESS_PAUSED "
+            messages.add_message(request, messages.ERROR, message)
+    else:
+        message = "BATCH_PROCESS_COULD_NOT_BE_FOUND: " + str(batch_process_id)
+        messages.add_message(request, messages.ERROR, message)
+
+    return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + str(state_code))
+
+
+@login_required
 def batch_process_log_entry_list_view(request):
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
