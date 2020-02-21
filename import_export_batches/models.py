@@ -4779,7 +4779,8 @@ class BatchProcessManager(models.Model):
         return results
 
     def system_turned_off(self):
-        return False
+        from wevote_settings.models import fetch_batch_process_system_on
+        return not fetch_batch_process_system_on()
 
 
 class BatchProcess(models.Model):

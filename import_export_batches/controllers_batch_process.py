@@ -12,6 +12,7 @@ from django.utils.timezone import localtime, now
 import pytz
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_settings.models import fetch_batch_process_system_on
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -30,7 +31,7 @@ def batch_process_next_steps():
     batch_manager = BatchManager()
     batch_process_manager = BatchProcessManager()
 
-    if batch_process_manager.system_turned_off():
+    if not fetch_batch_process_system_on():
         status += "BATCH_PROCESS_SYSTEM_TURNED_OFF "
         results = {
             'success': success,
@@ -551,7 +552,6 @@ def process_one_ballot_item_batch_process(batch_process):
         if now() > date_when_analyze_has_timed_out:
             # Before seeing if we should mark analyze_date_completed, are there are still items in the
             # batch set that need to be analyzed?
-            number_of_batches = 0
             if positive_value_exists(batch_process_ballot_item_chunk.batch_set_id):
                 number_not_analyzed = batch_manager.count_number_of_batches_in_batch_set(
                     batch_set_id=batch_process_ballot_item_chunk.batch_set_id, batch_row_analyzed=False)
@@ -560,13 +560,16 @@ def process_one_ballot_item_batch_process(batch_process):
                     results = process_batch_set(
                         batch_set_id=batch_process_ballot_item_chunk.batch_set_id, analyze_all=True)
                     status += results['status']
+                # We have time for this to run before the time out check above is run again,
+                # since we have this batch checked out
             try:
-                # If a second analyze run works, set analyze_date_completed to now and set analyze_timed_out to True
+                # Set analyze_date_completed to now and set analyze_timed_out to True
+                batch_process_ballot_item_chunk.analyze_date_completed = now()
+                batch_process_ballot_item_chunk.analyze_timed_out = True
+                # Update analyze_row_count
                 batch_process_ballot_item_chunk.analyze_row_count = \
                     batch_manager.count_number_of_batches_in_batch_set(
                         batch_set_id=batch_process_ballot_item_chunk.batch_set_id, batch_row_analyzed=True)
-                batch_process_ballot_item_chunk.analyze_date_completed = now()
-                batch_process_ballot_item_chunk.analyze_timed_out = True
                 batch_process_ballot_item_chunk.save()
                 status += "ANALYZE_DATE_COMPLETED-ANALYZE_DATE_COMPLETED_SAVED "
                 batch_process_manager.create_batch_process_log_entry(

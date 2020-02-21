@@ -7,11 +7,17 @@
 {%  block content %}
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
 
-<h1>Batch Processes{% if batch_process_list %} ({{ batch_process_list|length }}){% endif %}</h1>
+<h1>
+  Batch Processes{% if batch_process_list %} ({{ batch_process_list|length }}){% endif %}
+  {% if not batch_process_system_on %} - BATCH SYSTEM OFF{% endif %}
+</h1>
 
 <ul>
+    <li><a href="{% url 'import_export_batches:batch_process_system_toggle' %}" >
+       {% if batch_process_system_on %}Turn Batch System Off{% else %}Turn Batch System On{% endif %}
+       </a></li>
     <li><a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
-    Batch Process Log <span class="glyphicon glyphicon-new-window"></span></a></li>
+      Batch Process Log <span class="glyphicon glyphicon-new-window"></span></a></li>
 </ul>
 
 <form name="organization_position_choose_election" method="get" action="{% url 'import_export_batches:batch_process_list' %}">
