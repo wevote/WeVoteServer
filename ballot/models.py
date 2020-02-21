@@ -2149,13 +2149,14 @@ class BallotReturnedManager(models.Model):
         # If we got through the elections without finding any ballot_returned entries, there is no prior election
         return 0
 
-    def find_closest_ballot_returned(self, text_for_map_search, google_civic_election_id=0):
+    def find_closest_ballot_returned(self, text_for_map_search, google_civic_election_id=0, read_only=True):
         """
         We search for the closest address for this election in the ballot_returned table. We never have to worry
         about test elections being returned with this routine, because we don't store ballot_returned entries for
         test elections.
         :param text_for_map_search:
         :param google_civic_election_id:
+        :param read_only:
         :return:
         """
         ballot_returned_found = False
@@ -2210,7 +2211,10 @@ class BallotReturnedManager(models.Model):
             # If Geocoder is not able to give us a location, look to see if their voter entered their address as
             # "city_name, state_code" eg: "Sunnyvale, CA". If so, try to parse the entry and get ballot data
             # for that location
-            ballot_returned_query = BallotReturned.objects.all()
+            if positive_value_exists(read_only):
+                ballot_returned_query = BallotReturned.objects.using('readonly').all()
+            else:
+                ballot_returned_query = BallotReturned.objects.all()
             # Limit this query to entries stored for polling locations
             ballot_returned_query = ballot_returned_query.exclude(
                 Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
@@ -2251,7 +2255,11 @@ class BallotReturnedManager(models.Model):
             status += 'GEOCODER_FOUND_LOCATION '
             address = location.address
             # address has format "line_1, state zip, USA"
-            ballot_returned_query = BallotReturned.objects.all()
+
+            if positive_value_exists(read_only):
+                ballot_returned_query = BallotReturned.objects.using('readonly').all()
+            else:
+                ballot_returned_query = BallotReturned.objects.all()
             # Limit this query to entries stored for polling locations
             ballot_returned_query = ballot_returned_query.exclude(
                 Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
@@ -2270,11 +2278,13 @@ class BallotReturnedManager(models.Model):
             ballot_returned_query = ballot_returned_query.order_by('distance')
 
             if positive_value_exists(google_civic_election_id):
+                status += "SEARCHING_BY_GOOGLE_CIVIC_ID "
                 ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
                 ballot = ballot_returned_query.first()
             else:
                 # If we have an active election coming up, including today
                 # fetch_next_upcoming_election_in_this_state returns next election with ballot items
+                status += "FETCH_NEXT_UPCOMING_ELECTION_IN_THIS_STATE "
                 upcoming_google_civic_election_id = self.fetch_next_upcoming_election_in_this_state(state_code)
                 if positive_value_exists(upcoming_google_civic_election_id):
                     ballot_returned_query_without_election_id = ballot_returned_query
@@ -2317,6 +2327,34 @@ class BallotReturnedManager(models.Model):
             status += 'BALLOT_RETURNED_FOUND '
         else:
             status += 'NO_STORED_BALLOT_MATCHES_STATE {}. '.format(state_code)
+            # Now Try the search again without the limitation of the state_code
+            if location is not None and positive_value_exists(google_civic_election_id):
+                # If here, then the geocoder successfully found the address
+                status += 'GEOCODER_FOUND_LOCATION-ATTEMPT2 '
+                address = location.address
+                # address has format "line_1, state zip, USA"
+
+                if positive_value_exists(read_only):
+                    ballot_returned_query = BallotReturned.objects.using('readonly').all()
+                else:
+                    ballot_returned_query = BallotReturned.objects.all()
+                # Limit this query to entries stored for polling locations
+                ballot_returned_query = ballot_returned_query.exclude(
+                    Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
+
+                # TODO: Update to a more modern approach? I think this will be deprecated in > Django 1.9
+                ballot_returned_query = ballot_returned_query.annotate(
+                    distance=(F('latitude') - location.latitude) ** 2 +
+                             (F('longitude') - location.longitude) ** 2)
+                ballot_returned_query = ballot_returned_query.order_by('distance')
+
+                status += "SEARCHING_BY_GOOGLE_CIVIC_ID-ATTEMPT2 "
+                ballot_returned_query = ballot_returned_query.filter(
+                    google_civic_election_id=google_civic_election_id)
+                ballot_returned = ballot_returned_query.first()
+                if ballot_returned is not None:
+                    ballot_returned_found = True
+                    status += 'BALLOT_RETURNED_FOUND-ATTEMPT2 '
 
         status += 'END_OF_FIND_CLOSEST_BALLOT_RETURNED '
 
@@ -3683,7 +3721,7 @@ def find_best_previously_stored_ballot_returned(voter_id, text_for_map_search, g
             return error_results
 
         # A ballot at a nearby address was found.
-        ballot_returned_to_copy = find_results['ballot_returned']
+        closest_ballot_returned = find_results['ballot_returned']  # Was ballot_returned_to_copy
 
     # DALE NOTE: I don't think this is correct, but I'm not ready to delete
     # # Remove all prior ballot items, so we make room for copy_ballot_items to save ballot items
@@ -3733,98 +3771,27 @@ def find_best_previously_stored_ballot_returned(voter_id, text_for_map_search, g
 
     results = {
         'voter_id':                             voter_id,
-        'google_civic_election_id':             ballot_returned_to_copy.google_civic_election_id,
-        'state_code':                           ballot_returned_to_copy.normalized_state,
-        'election_day_text':                    ballot_returned_to_copy.election_day_text(),
-        'election_description_text':            ballot_returned_to_copy.election_description_text,
-        'text_for_map_search':                  ballot_returned_to_copy.text_for_map_search,
-        'original_text_city':                   ballot_returned_to_copy.normalized_city,
-        'original_text_state':                  ballot_returned_to_copy.normalized_state,
-        'original_text_zip':                    ballot_returned_to_copy.normalized_zip,
-        'substituted_address_nearby':           ballot_returned_to_copy.text_for_map_search,
-        'substituted_address_city':             ballot_returned_to_copy.normalized_city,
-        'substituted_address_state':            ballot_returned_to_copy.normalized_state,
-        'substituted_address_zip':              ballot_returned_to_copy.normalized_zip,
+        'google_civic_election_id':             closest_ballot_returned.google_civic_election_id,
+        'state_code':                           closest_ballot_returned.normalized_state,
+        'election_day_text':                    closest_ballot_returned.election_day_text(),
+        'election_description_text':            closest_ballot_returned.election_description_text,
+        'text_for_map_search':                  closest_ballot_returned.text_for_map_search,
+        'original_text_city':                   closest_ballot_returned.normalized_city,
+        'original_text_state':                  closest_ballot_returned.normalized_state,
+        'original_text_zip':                    closest_ballot_returned.normalized_zip,
+        'substituted_address_nearby':           closest_ballot_returned.text_for_map_search,
+        'substituted_address_city':             closest_ballot_returned.normalized_city,
+        'substituted_address_state':            closest_ballot_returned.normalized_state,
+        'substituted_address_zip':              closest_ballot_returned.normalized_zip,
         'ballot_returned_found':               True,
-        'ballot_location_display_name':         ballot_returned_to_copy.ballot_location_display_name,
-        'ballot_returned_we_vote_id':           ballot_returned_to_copy.we_vote_id,
-        'ballot_location_shortcut':             ballot_returned_to_copy.ballot_location_shortcut if
-        ballot_returned_to_copy.ballot_location_shortcut else '',
-        'polling_location_we_vote_id_source':   ballot_returned_to_copy.polling_location_we_vote_id,
+        'ballot_location_display_name':         closest_ballot_returned.ballot_location_display_name,
+        'ballot_returned_we_vote_id':           closest_ballot_returned.we_vote_id,
+        'ballot_location_shortcut':             closest_ballot_returned.ballot_location_shortcut if
+        closest_ballot_returned.ballot_location_shortcut else '',
+        'polling_location_we_vote_id_source':   closest_ballot_returned.polling_location_we_vote_id,
         'status':                               status,
     }
     return results
-
-
-# def refresh_ballot_items_for_voter_copied_from_one_polling_location(voter_id, ballot_returned_from_polling_location):
-#     """
-#     :param voter_id:
-#     :param ballot_returned_from_polling_location:
-#     :return:
-#     """
-#     success = True
-#     status = ""
-#     ballot_item_list_manager = BallotItemListManager()
-#
-#     google_civic_election_id = ballot_returned_from_polling_location.google_civic_election_id
-#
-#     if not positive_value_exists(voter_id):
-#         success = False
-#         status += "REFRESH_EXISTING_BALLOT_ITEMS_FOR_VOTER-NO_VOTER_ID "
-#         error_results = {
-#             'success':                              success,
-#             'status':                               status,
-#             'voter_id':                             voter_id,
-#             'google_civic_election_id':             google_civic_election_id,
-#             'ballot_returned_copied':               False,
-#             'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
-#         }
-#         return error_results
-#
-#     if not positive_value_exists(google_civic_election_id):
-#         success = False
-#         status += "REFRESH_EXISTING_BALLOT_ITEMS_FOR_VOTER-NO_GOOGLE_CIVIC_ELECTION_ID "
-#         error_results = {
-#             'success':                              success,
-#             'status':                               status,
-#             'voter_id':                             voter_id,
-#             'google_civic_election_id':             google_civic_election_id,
-#             'ballot_returned_copied':               False,
-#             'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
-#         }
-#         return error_results
-#
-#     # Remove all prior ballot items for this voter for this election, so we make room for
-#     # copy_ballot_items to save ballot items
-#     ballot_item_list_manager.delete_all_ballot_items_for_voter(
-#         voter_id, ballot_returned_from_polling_location.google_civic_election_id)
-#
-#     # Copy the ballot items from the polling location over for the voter
-#     copy_item_results = ballot_item_list_manager.copy_ballot_items(ballot_returned_from_polling_location, voter_id)
-#     status += copy_item_results['status']
-#
-#     if not copy_item_results['ballot_returned_copied']:
-#         success = False
-#         status += "REFRESH_EXISTING_BALLOT_ITEMS_FOR_VOTER-FAILED_TO_COPY "
-#         error_results = {
-#             'success':                              success,
-#             'status':                               status,
-#             'voter_id':                             voter_id,
-#             'google_civic_election_id':             google_civic_election_id,
-#             'ballot_returned_copied':               False,
-#             'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
-#         }
-#         return error_results
-#
-#     results = {
-#         'success':                              success,
-#         'status':                               status,
-#         'voter_id':                             voter_id,
-#         'google_civic_election_id':             google_civic_election_id,
-#         'ballot_returned_copied':               True,
-#         'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
-#     }
-#     return results
 
 
 def retrieve_address_fields_from_geocoder(text_for_map_search):
