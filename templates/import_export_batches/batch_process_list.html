@@ -92,7 +92,7 @@
 
     <table class="table">
     {% for batch_process in batch_process_list %}
-    {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:4 %}
     {# Show the header every ~15 lines #}
       <thead>
         <tr>
