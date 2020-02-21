@@ -314,7 +314,7 @@ class ElectionManager(models.Model):
         }
         return results
 
-    def retrieve_election(self, google_civic_election_id=0, election_id=0, read_only=False):
+    def retrieve_election(self, google_civic_election_id=0, election_id=0, read_only=True):
         google_civic_election_id = convert_to_int(google_civic_election_id)
 
         election = Election()
@@ -660,16 +660,20 @@ class ElectionManager(models.Model):
         }
         return results
 
-    def retrieve_elections_by_election_date(self, election_day_text='', include_test_election=False):
+    def retrieve_elections_by_election_date(self, election_day_text='', include_test_election=False, read_only=True):
         """
         Retrieve elections using election_day_text
         :param election_day_text: 
         :param include_test_election: 
-        :return: 
+        :param read_only:
+        :return:
         """
 
         try:
-            election_list_query = Election.objects.all()
+            if positive_value_exists(read_only):
+                election_list_query = Election.objects.using('readonly').all()
+            else:
+                election_list_query = Election.objects.all()
             if not positive_value_exists(include_test_election):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
             if election_day_text:
@@ -728,17 +732,21 @@ class ElectionManager(models.Model):
         return results
 
     def retrieve_elections_by_state_and_election_date(self, state_code='', election_day_text='',
-                                                      include_test_election=False):
+                                                      include_test_election=False, read_only=True):
         """
           Retrieve elections using state_code and election_day_text
         :param state_code:
         :param election_day_text: 
         :param include_test_election: 
-        :return: 
+        :param read_only:
+        :return:
         """
 
         try:
-            election_list_query = Election.objects.all()
+            if positive_value_exists(read_only):
+                election_list_query = Election.objects.using('readonly').all()
+            else:
+                election_list_query = Election.objects.all()
             if not positive_value_exists(include_test_election):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
 

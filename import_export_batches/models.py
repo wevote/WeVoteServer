@@ -3454,11 +3454,12 @@ class BatchManager(models.Model):
 
         return state_code
 
-    def retrieve_election_details_from_election_day_or_state_code(self, election_day='', state_code=''):
+    def retrieve_election_details_from_election_day_or_state_code(self, election_day='', state_code='', read_only=True):
         """
         Retrieve election_name and google_civic_election_id from election_day and/or state_code
         :param election_day: 
-        :param state_code: 
+        :param state_code:
+        :param read_only:
         :return: 
         """
 
@@ -3468,7 +3469,8 @@ class BatchManager(models.Model):
 
         # election lookup using state & election day, and fetch google_civic_election_id
         election_manager = ElectionManager()
-        election_results = election_manager.retrieve_elections_by_election_date(election_day)
+        election_results = election_manager.retrieve_elections_by_election_date(
+            election_day_text=election_day, read_only=read_only)
         if election_results['success']:
             election_list = election_results['election_list']
             if len(election_list) == 1:
@@ -3479,8 +3481,8 @@ class BatchManager(models.Model):
             else:
                 # use state_code & election_date for lookup. If multiple entries found, do not set
                 # google_civic_election_id
-                election_results = election_manager.retrieve_elections_by_state_and_election_date(state_code,
-                                                                                                  election_day)
+                election_results = election_manager.retrieve_elections_by_state_and_election_date(
+                    state_code=state_code, election_day_text=election_day, read_only=read_only)
                 if election_results['success']:
                     election_list = election_results['election_list']
                     if len(election_list) == 1:
@@ -4211,8 +4213,9 @@ class BatchSet(models.Model):
     We call each imported CSV or JSON a “batch set”, and store basic information about it in this table.
     """
     google_civic_election_id = models.PositiveIntegerField(
-        verbose_name="google civic election id", default=0, null=True, blank=True)
-    state_code = models.CharField(verbose_name="state code for this data", max_length=2, null=True, blank=True)
+        verbose_name="google civic election id", default=0, null=True, blank=True, db_index=True)
+    state_code = models.CharField(
+        verbose_name="state code for this data", max_length=2, null=True, blank=True, db_index=True)
     batch_set_name = models.CharField(max_length=255)
     batch_set_description_text = models.CharField(max_length=255)
     batch_set_source = models.CharField(max_length=255)
@@ -4225,15 +4228,15 @@ class BatchDescription(models.Model):
     We call each imported CSV or JSON a “batch”, and store basic information about it in this table.
     """
     batch_header_id = models.PositiveIntegerField(
-        verbose_name="unique id of header row", unique=True, null=False)
+        verbose_name="unique id of header row", unique=True, null=False, db_index=True)
     batch_set_id = models.PositiveIntegerField(
-        verbose_name="unique id of batch set row", unique=False, null=True)
+        verbose_name="unique id of batch set row", unique=False, null=True, db_index=True)
     batch_header_map_id = models.PositiveIntegerField(
         verbose_name="unique id of header map", unique=True, null=False)
     google_civic_election_id = models.PositiveIntegerField(
-        verbose_name="google civic election id", default=0, null=True, blank=True)
+        verbose_name="google civic election id", default=0, null=True, blank=True, db_index=True)
     batch_name = models.CharField(max_length=255)
-    kind_of_batch = models.CharField(max_length=32, choices=KIND_OF_BATCH_CHOICES, default=MEASURE)
+    kind_of_batch = models.CharField(max_length=32, choices=KIND_OF_BATCH_CHOICES, default=MEASURE, db_index=True)
     organization_we_vote_id = models.CharField(
         verbose_name="if for positions, the organization's we vote id", max_length=255, null=True, blank=True)
     polling_location_we_vote_id = models.CharField(
@@ -4307,7 +4310,8 @@ class BatchHeaderMap(models.Model):
     When we get data, it will come with column headers. This table stores the replacement header that matches
     the We Vote internal field names.
     """
-    batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=True, null=False)
+    batch_header_id = models.PositiveIntegerField(
+        verbose_name="unique id of header row", unique=True, null=False, db_index=True)
     batch_header_map_000 = models.TextField(null=True, blank=True)
     batch_header_map_001 = models.TextField(null=True, blank=True)
     batch_header_map_002 = models.TextField(null=True, blank=True)
@@ -4365,13 +4369,16 @@ class BatchRow(models.Model):
     """
     Individual data rows
     """
-    batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
+    batch_header_id = models.PositiveIntegerField(
+        verbose_name="unique id of header row", unique=False, null=False, db_index=True)
     # This is used when we have one batch_set that brings in election data for a variety of elections
-    google_civic_election_id = models.PositiveIntegerField(verbose_name="election id", default=0, null=True, blank=True)
+    google_civic_election_id = models.PositiveIntegerField(
+        verbose_name="election id", default=0, null=True, blank=True, db_index=True)
     # This is useful for filtering while we are processing batch_rows
-    state_code = models.CharField(verbose_name="state code for this data", max_length=2, null=True, blank=True)
-    batch_row_analyzed = models.BooleanField(default=False)
-    batch_row_created = models.BooleanField(default=False)
+    state_code = models.CharField(
+        verbose_name="state code for this data", max_length=2, null=True, blank=True, db_index=True)
+    batch_row_analyzed = models.BooleanField(default=False, db_index=True)
+    batch_row_created = models.BooleanField(default=False, db_index=True)
 
     batch_row_000 = models.TextField(null=True, blank=True)
     batch_row_001 = models.TextField(null=True, blank=True)
