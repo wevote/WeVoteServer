@@ -837,11 +837,8 @@ def retrieve_ballot_items_from_polling_location_api_v4(
                 BALLOTPEDIA_API_SAMPLE_BALLOT_ELECTIONS_URL,
                 headers=MAIL_HEADERS,
                 params={
-                    "lat": polling_location.longitude,
-                    "long": polling_location.latitude,
-                    # NOTE: Ballotpedia appears to have swapped latitude and longitude
-                    # "lat": polling_location.latitude,
-                    # "long": polling_location.longitude,
+                    "lat": polling_location.latitude,
+                    "long": polling_location.longitude,
                 })
             structured_json = json.loads(response.text)
 
@@ -854,7 +851,7 @@ def retrieve_ballot_items_from_polling_location_api_v4(
             groom_results = groom_and_store_sample_ballot_elections_api_v4(structured_json, google_civic_election_id)
             ballotpedia_district_id_list = groom_results['ballotpedia_district_id_list']
             if not ballotpedia_district_id_list or len(ballotpedia_district_id_list) == 0:
-                status += "NO_BALLOTPEDIA_DISTRICTS_RETURNED "
+                status += "NO_BALLOTPEDIA_DISTRICTS_RETURNED-POLLING_LOCATIONS_v4 "
                 results = {
                     'success': success,
                     'status': status,
@@ -1086,11 +1083,8 @@ def retrieve_ballot_items_for_one_voter_api_v4(
             BALLOTPEDIA_API_SAMPLE_BALLOT_ELECTIONS_URL,
             headers=MAIL_HEADERS,
             params={
-                "lat": ballot_returned.longitude,
-                "long": ballot_returned.latitude,
-                # NOTE: Ballotpedia appears to have swapped latitude and longitude
-                # "lat": ballot_returned.latitude,
-                # "long": ballot_returned.longitude,
+                "lat": ballot_returned.latitude,
+                "long": ballot_returned.longitude,
             })
         structured_json = json.loads(response.text)
 
@@ -3095,11 +3089,8 @@ def retrieve_one_ballot_from_ballotpedia_api_v4(latitude, longitude, google_civi
             BALLOTPEDIA_API_SAMPLE_BALLOT_ELECTIONS_URL,
             headers=MAIL_HEADERS,
             params={
-                "lat": longitude,
-                "long": latitude,
-                # NOTE: Ballotpedia appears to have swapped latitude and longitude
-                # "lat": polling_location.latitude,
-                # "long": polling_location.longitude,
+                "lat": latitude,
+                "long": longitude,
             })
         structured_json = json.loads(response.text)
 
@@ -3112,7 +3103,7 @@ def retrieve_one_ballot_from_ballotpedia_api_v4(latitude, longitude, google_civi
         groom_results = groom_and_store_sample_ballot_elections_api_v4(structured_json, google_civic_election_id)
         ballotpedia_district_id_list = groom_results['ballotpedia_district_id_list']
         if not ballotpedia_district_id_list or len(ballotpedia_district_id_list) == 0:
-            status += "NO_BALLOTPEDIA_DISTRICTS_RETURNED "
+            status += "NO_BALLOTPEDIA_DISTRICTS_RETURNED-ONE_BALLOT-v4 "
             success = False
             results = {
                 'success': success,
