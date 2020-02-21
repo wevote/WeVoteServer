@@ -1150,15 +1150,17 @@ def batch_set_list_view(request):
     messages_on_stage = get_messages(request)
     batch_set_list_found = False
     try:
-        batch_set_list = BatchSet.objects.order_by('-import_date')
+        batch_set_query = BatchSet.objects.order_by('-import_date')
         # batch_set_list = batch_set_list.exclude(batch_set_id__isnull=True)
         if positive_value_exists(google_civic_election_id):
-            batch_set_list = batch_set_list.filter(google_civic_election_id=google_civic_election_id)
+            batch_set_query = batch_set_query.filter(google_civic_election_id=google_civic_election_id)
+
+        batch_set_list = batch_set_query[:100]
         if len(batch_set_list):
             batch_set_list_found = True
     except BatchSet.DoesNotExist:
         # This is fine
-        batch_set_list = BatchSet()
+        batch_set_list = []
         batch_set_list_found = False
         pass
 
@@ -1468,7 +1470,7 @@ def batch_process_pause_toggle_view(request):
             message = "BATCH_PROCESS_PAUSED: " + str(batch_process.batch_process_paused) + " "
             messages.add_message(request, messages.INFO, message)
         except Exception as e:
-            message = "COULD_NOT_SAVE_BATCH_PROCESS-BATCH_PROCESS_PAUSED "
+            message = "COULD_NOT_SAVE_BATCH_PROCESS-BATCH_PROCESS_PAUSED " + str(e) + " "
             messages.add_message(request, messages.ERROR, message)
     else:
         message = "BATCH_PROCESS_COULD_NOT_BE_FOUND: " + str(batch_process_id)
@@ -1657,6 +1659,7 @@ def batch_set_batch_list_view(request):
             batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
             batch_description_query = batch_description_query.filter(batch_description_analyzed=False)
             batch_list = list(batch_description_query)
+            batch_list_not_analyzed_count = len(batch_list)
 
             for one_batch_description in batch_list:
                 results = create_batch_row_actions(
@@ -1681,24 +1684,26 @@ def batch_set_batch_list_view(request):
                 measure_objects_dict = results['measure_objects_dict']
                 office_objects_dict = results['office_objects_dict']
 
-            batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
-            if positive_value_exists(len(batch_header_id_created_list)):
-                batch_description_query = batch_description_query.exclude(
-                    batch_header_id__in=batch_header_id_created_list)
-            batch_list = list(batch_description_query)
+            # If there were not any entries with batch_description_analyzed set to False, then retrieve all
+            if not positive_value_exists(batch_list_not_analyzed_count):
+                batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+                if positive_value_exists(len(batch_header_id_created_list)):
+                    batch_description_query = batch_description_query.exclude(
+                        batch_header_id__in=batch_header_id_created_list)
+                batch_list = list(batch_description_query)
 
-            for one_batch_description in batch_list:
-                results = create_batch_row_actions(one_batch_description.batch_header_id)
-                if results['batch_actions_created']:
-                    batch_actions_analyzed += 1
-                    try:
-                        # If BatchRowAction's were created for BatchDescription, this batch_description was analyzed
-                        one_batch_description.batch_description_analyzed = True
-                        one_batch_description.save()
-                    except Exception as e:
-                        pass
-                else:
-                    batch_actions_not_analyzed += 1
+                for one_batch_description in batch_list:
+                    results = create_batch_row_actions(one_batch_description.batch_header_id)
+                    if results['batch_actions_created']:
+                        batch_actions_analyzed += 1
+                        try:
+                            # If BatchRowAction's were created for BatchDescription, this batch_description was analyzed
+                            one_batch_description.batch_description_analyzed = True
+                            one_batch_description.save()
+                        except Exception as e:
+                            pass
+                    else:
+                        batch_actions_not_analyzed += 1
 
             if positive_value_exists(batch_actions_analyzed):
                 messages.add_message(request, messages.INFO, "Analyze All, BatchRows Analyzed: "
