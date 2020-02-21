@@ -4622,6 +4622,7 @@ class BatchProcessManager(models.Model):
             batch_process_queryset = BatchProcess.objects.all()
             batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
             batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+            batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
             batch_process_queryset = batch_process_queryset.filter(
                 google_civic_election_id__in=google_civic_election_id_list)
 
@@ -4673,9 +4674,11 @@ class BatchProcessManager(models.Model):
             if positive_value_exists(process_active):
                 batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
                 batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+                batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
             elif positive_value_exists(process_queued):
                 batch_process_queryset = batch_process_queryset.filter(date_started__isnull=True)
                 batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+                batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
 
             if positive_value_exists(for_upcoming_elections):
                 # Limit this search to upcoming_elections only
@@ -4797,13 +4800,14 @@ class BatchProcess(models.Model):
         verbose_name="we vote permanent id of the polling location", max_length=255, default=None, null=True,
         blank=True, unique=False)
 
-    date_added_to_queue = models.DateTimeField(verbose_name='start', null=True, auto_now_add=True)
+    date_added_to_queue = models.DateTimeField(verbose_name='start', null=True)
     date_started = models.DateTimeField(verbose_name='start', null=True)
     # When have all of the steps completed?
     date_completed = models.DateTimeField(verbose_name='finished', null=True)
     # When a batch_process is running, we mark when it was "taken off the shelf" to be worked on.
     #  When the process is complete, we should reset this to "NULL"
     date_checked_out = models.DateTimeField(null=True)
+    batch_process_paused = models.BooleanField(default=False)
 
 
 class BatchProcessBallotItemChunk(models.Model):
