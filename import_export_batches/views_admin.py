@@ -1279,6 +1279,33 @@ def batch_set_list_process_view(request):
 
 
 @login_required
+def batch_process_system_toggle_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+    show_all_elections = request.GET.get('show_all_elections', False)
+    batch_process_search = request.GET.get('batch_process_search', '')
+
+    from wevote_settings.models import WeVoteSettingsManager
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results(setting_name='batch_process_system_on', read_only=False)
+    if results['we_vote_setting_found']:
+        we_vote_setting = results['we_vote_setting']
+        we_vote_setting.boolean_value = not we_vote_setting.boolean_value
+        we_vote_setting.save()
+    else:
+        messages.add_message(request, messages.ERROR, "CANNOT_FIND_WE_VOTE_SETTING-batch_process_system_on")
+
+    return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + str(state_code))
+
+
+@login_required
 def batch_process_list_view(request):
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
@@ -1428,9 +1455,13 @@ def batch_process_list_view(request):
 
     messages_on_stage = get_messages(request)
 
+    from wevote_settings.models import fetch_batch_process_system_on
+    batch_process_system_on = fetch_batch_process_system_on()
+
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'batch_process_list':       batch_process_list,
+        'batch_process_system_on':  batch_process_system_on,
         'batch_process_search':     batch_process_search,
         'election_list':            election_list,
         'state_code':               state_code,

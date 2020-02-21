@@ -57,7 +57,7 @@ class WeVoteSettingsManager(models.Model):
         setting_name = setting_name.strip()
         try:
             if setting_name != '':
-                we_vote_setting = WeVoteSetting.objects.get(name=setting_name)
+                we_vote_setting = WeVoteSetting.objects.using('readonly').get(name=setting_name)
                 if we_vote_setting.value_type == WeVoteSetting.BOOLEAN:
                     return we_vote_setting.boolean_value
                 elif we_vote_setting.value_type == WeVoteSetting.INTEGER:
@@ -75,8 +75,69 @@ class WeVoteSettingsManager(models.Model):
 
         return ''
 
+    def fetch_setting_results(self, setting_name, read_only=True):
+        status = ""
+        success = True
+        setting_name = setting_name.strip()
+        try:
+            if setting_name != '':
+                if positive_value_exists(read_only):
+                    we_vote_setting = WeVoteSetting.objects.using('readonly').get(name=setting_name)
+                else:
+                    we_vote_setting = WeVoteSetting.objects.get(name=setting_name)
+                we_vote_setting_found = True
+                if we_vote_setting.value_type == WeVoteSetting.BOOLEAN:
+                    return {
+                        'name':             we_vote_setting.name,
+                        'setting_value':    we_vote_setting.boolean_value,
+                        'success':          success,
+                        'status':           status,
+                        'we_vote_setting':  we_vote_setting,
+                        'we_vote_setting_found':  we_vote_setting_found
+                    }
+                elif we_vote_setting.value_type == WeVoteSetting.INTEGER:
+                    return {
+                        'name':             we_vote_setting.name,
+                        'setting_value':    we_vote_setting.integer_value,
+                        'success':          success,
+                        'status':           status,
+                        'we_vote_setting':  we_vote_setting,
+                        'we_vote_setting_found':  we_vote_setting_found
+                    }
+                elif we_vote_setting.value_type == WeVoteSetting.STRING:
+                    return {
+                        'name':             we_vote_setting.name,
+                        'setting_value':    we_vote_setting.string_value,
+                        'success':          success,
+                        'status':           status,
+                        'we_vote_setting':  we_vote_setting,
+                        'we_vote_setting_found':  we_vote_setting_found
+                    }
+                else:
+                    success = False
+            else:
+                success = False
+        except WeVoteSetting.MultipleObjectsReturned as e:
+            status += "FETCH_SETTINGS_RESULTS-MULTIPLE_OBJECTS_RETURNED " + str(e) + " "
+            success = False
+        except WeVoteSetting.DoesNotExist:
+            status += "FETCH_SETTINGS_RESULTS-DOES_NOT_EXIST "
+            success = True
+        except Exception as e:
+            status += "FETCH_SETTINGS_RESULTS: " + str(e) + " "
+            success = False
+
+        return {
+            'name':                     setting_name,
+            'setting_value':            None,
+            'success':                  success,
+            'status':                   status,
+            'we_vote_setting':          None,
+            'we_vote_setting_found':    False
+        }
+
     def save_setting(self, setting_name, setting_value, value_type=None):
-        accepted_value_types = ['bool', 'int', 'str']
+        accepted_value_types = [WeVoteSetting.BOOLEAN, WeVoteSetting.INTEGER, WeVoteSetting.STRING]
 
         if value_type is None:
             if type(setting_value).__name__ == 'bool':
@@ -156,6 +217,23 @@ class WeVoteSettingsManager(models.Model):
 # site_unique_id_prefix
 # we_vote_id_last_org_integer
 # we_vote_id_last_position_integer
+
+
+def fetch_batch_process_system_on():
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results('batch_process_system_on', read_only=True)
+    if results['success']:
+        if results['we_vote_setting_found']:
+            return results['setting_value']
+        else:
+            # Create the setting the first time
+            results = we_vote_settings_manager.save_setting(
+                setting_name='batch_process_system_on',
+                setting_value=True,
+                value_type=WeVoteSetting.BOOLEAN)
+            return results['success']
+    else:
+        return False
 
 
 def fetch_site_unique_id_prefix():
