@@ -146,7 +146,7 @@ def process_one_ballot_item_batch_process(batch_process):
     success = True
     batch_manager = BatchManager()
     batch_process_manager = BatchProcessManager()
-    retrieve_time_out_duration = 60 * 60  # 30 minutes
+    retrieve_time_out_duration = 30 * 60  # 30 minutes * 60 seconds
     analyze_time_out_duration = 30 * 60  # 30 minutes
     create_time_out_duration = 20 * 60  # 30 minutes
 
@@ -549,14 +549,22 @@ def process_one_ballot_item_batch_process(batch_process):
         date_when_analyze_has_timed_out = \
             batch_process_ballot_item_chunk.analyze_date_started + timedelta(seconds=analyze_time_out_duration)
         if now() > date_when_analyze_has_timed_out:
-            if not positive_value_exists(batch_process_ballot_item_chunk.analyze_row_count):
-                # Were there batches created in the batch set from the retrieve?
-                if positive_value_exists(batch_process_ballot_item_chunk.batch_set_id):
-                    batch_process_ballot_item_chunk.analyze_row_count = \
-                        batch_manager.count_number_of_batches_in_batch_set(
-                            batch_set_id=batch_process_ballot_item_chunk.batch_set_id, batch_row_analyzed=True)
+            # Before seeing if we should mark analyze_date_completed, are there are still items in the
+            # batch set that need to be analyzed?
+            number_of_batches = 0
+            if positive_value_exists(batch_process_ballot_item_chunk.batch_set_id):
+                number_not_analyzed = batch_manager.count_number_of_batches_in_batch_set(
+                    batch_set_id=batch_process_ballot_item_chunk.batch_set_id, batch_row_analyzed=False)
+                if positive_value_exists(number_not_analyzed):
+                    # Now analyze the batch that was stored in the "refresh_ballotpedia_ballots..." function
+                    results = process_batch_set(
+                        batch_set_id=batch_process_ballot_item_chunk.batch_set_id, analyze_all=True)
+                    status += results['status']
             try:
-                # If so, set analyze_date_completed to now and set analyze_timed_out to True
+                # If a second analyze run works, set analyze_date_completed to now and set analyze_timed_out to True
+                batch_process_ballot_item_chunk.analyze_row_count = \
+                    batch_manager.count_number_of_batches_in_batch_set(
+                        batch_set_id=batch_process_ballot_item_chunk.batch_set_id, batch_row_analyzed=True)
                 batch_process_ballot_item_chunk.analyze_date_completed = now()
                 batch_process_ballot_item_chunk.analyze_timed_out = True
                 batch_process_ballot_item_chunk.save()

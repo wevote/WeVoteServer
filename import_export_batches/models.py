@@ -4512,6 +4512,7 @@ class BatchProcessManager(models.Model):
                 polling_location_we_vote_id=polling_location_we_vote_id,
                 state_code=state_code,
                 voter_id=voter_id,
+                date_added_to_queue=now(),
             )
             status += 'BATCH_PROCESS_SAVED '
         except Exception as e:
@@ -4696,7 +4697,7 @@ class BatchProcessManager(models.Model):
             batch_process_list = list(batch_process_queryset)
 
             # Cycle through all processes retrieved and make sure they aren't being worked on by other processes
-            checked_out_expiration_time = 60 * 60  # 60 minutes
+            checked_out_expiration_time = 30 * 60  # 30 minutes * 60 seconds
             for batch_process in batch_process_list:
                 if batch_process.date_checked_out is None:
                     filtered_batch_process_list.append(batch_process)
