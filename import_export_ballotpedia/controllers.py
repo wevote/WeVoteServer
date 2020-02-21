@@ -1594,9 +1594,6 @@ def retrieve_ballotpedia_measures_by_district_from_api(google_civic_election_id,
     batch_header_id = 0
     ballotpedia_election_id = 0
     election_manager = ElectionManager()
-    results = election_manager.retrieve_election(google_civic_election_id)
-    if results['election_found']:
-        election = results['election']
 
     ballotpedia_election_query = BallotpediaElection.objects.filter(
         google_civic_election_id=google_civic_election_id)

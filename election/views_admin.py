@@ -575,7 +575,7 @@ def election_delete_process_view(request):
                                     "&state_code=" + str(state_code))
 
     election_manager = ElectionManager()
-    results = election_manager.retrieve_election(0, election_id)
+    results = election_manager.retrieve_election(0, election_id, read_only=False)
     if results['election_found']:
         election = results['election']
 
@@ -965,7 +965,7 @@ def nationwide_election_list_view(request):
     national_election = None
     if positive_value_exists(google_civic_election_id):
         election_manager = ElectionManager()
-        results = election_manager.retrieve_election(google_civic_election_id)
+        results = election_manager.retrieve_election(google_civic_election_id, read_only=False)
         if results['election_found']:
             national_election = results['election']
             is_national_election = national_election.is_national_election
@@ -1555,7 +1555,7 @@ def election_migration_view(request):
     if not positive_value_exists(we_vote_election_id):
         we_vote_election_id = convert_to_int(request.POST.get('we_vote_election_id', 0))
     if positive_value_exists(we_vote_election_id):
-        results = election_manager.retrieve_election(we_vote_election_id)
+        results = election_manager.retrieve_election(we_vote_election_id, read_only=False)
         if results['election_found']:
             we_vote_election = results['election']
             we_vote_election_found = True
@@ -1565,7 +1565,7 @@ def election_migration_view(request):
     if not positive_value_exists(google_civic_election_id):
         google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
     if positive_value_exists(google_civic_election_id):
-        results = election_manager.retrieve_election(google_civic_election_id)
+        results = election_manager.retrieve_election(google_civic_election_id, read_only=False)
         if results['election_found']:
             google_civic_election = results['election']
             google_civic_election_found = True

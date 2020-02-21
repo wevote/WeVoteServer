@@ -49,6 +49,7 @@ POLITICIAN = 'POLITICIAN'
 
 def create_batch_row_actions(
         batch_header_id,
+        batch_description=None,
         batch_row_id=0,
         state_code="",
         election_objects_dict={},
@@ -58,6 +59,7 @@ def create_batch_row_actions(
     Cycle through all BatchRow entries for this batch_header_id and move the values we can find into
     the BatchRowActionYYY table so we can review it before importing it
     :param batch_header_id:
+    :param batch_description:
     :param batch_row_id:
     :param state_code:
     :param election_objects_dict:
@@ -91,8 +93,11 @@ def create_batch_row_actions(
         return results
 
     try:
-        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
-        batch_description_found = True
+        if batch_description is not None:
+            batch_description_found = True
+        else:
+            batch_description = BatchDescription.objects.using('readonly').get(batch_header_id=batch_header_id)
+            batch_description_found = True
     except BatchDescription.DoesNotExist:
         # This is fine
         batch_description = BatchDescription()
@@ -104,17 +109,17 @@ def create_batch_row_actions(
         kind_of_batch = batch_description.kind_of_batch
 
         try:
-            batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+            batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
             batch_header_map_found = True
         except BatchHeaderMap.DoesNotExist:
             # This is fine
-            batch_header_map = BatchHeaderMap()
+            pass
 
     batch_row_list = []
     batch_row_action_list_found = False
-    if batch_header_map_found:
+    if batch_description_found and batch_header_map_found:
         try:
-            batch_row_query = BatchRow.objects.all()
+            batch_row_query = BatchRow.objects.all()  # We need to be able to save this
             batch_row_query = batch_row_query.filter(batch_header_id=batch_header_id)
             if positive_value_exists(batch_row_id):
                 batch_row_query = batch_row_query.filter(id=batch_row_id)
@@ -921,8 +926,8 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
     # if google_civic_election_id is null, get it from election_day and/or state_code
     if not positive_value_exists(google_civic_election_id):
         election_day = batch_manager.retrieve_value_from_batch_row("election_day", batch_header_map, one_batch_row)
-        election_results = batch_manager.retrieve_election_details_from_election_day_or_state_code(election_day,
-                                                                                                   state_code)
+        election_results = batch_manager.retrieve_election_details_from_election_day_or_state_code(
+            election_day, state_code, read_only=True)
         if election_results['success']:
             google_civic_election_id = election_results['google_civic_election_id']
 
@@ -1650,8 +1655,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     # if google_civic_election_id is null, look up using state_code and/or election_day
     if not positive_value_exists(google_civic_election_id):
         election_day = batch_manager.retrieve_value_from_batch_row("election_day", batch_header_map, one_batch_row)
-        election_results = batch_manager.retrieve_election_details_from_election_day_or_state_code(election_day,
-                                                                                                   state_code)
+        election_results = batch_manager.retrieve_election_details_from_election_day_or_state_code(
+            election_day, state_code)
         if election_results['success']:
             google_civic_election_id = election_results['google_civic_election_id']
 
@@ -1673,7 +1678,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     if keep_looking_for_duplicates and positive_value_exists(ballotpedia_candidate_id):
         candidate_campaign_manager = CandidateCampaignManager()
         matching_results = candidate_campaign_manager.retrieve_candidate_campaign_from_ballotpedia_candidate_id(
-            ballotpedia_candidate_id, google_civic_election_id=google_civic_election_id)
+            ballotpedia_candidate_id, read_only=True)
         if matching_results['candidate_campaign_found']:
             candidate = matching_results['candidate_campaign']
             candidate_found = True
@@ -1964,8 +1969,8 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     if not positive_value_exists(google_civic_election_id):
         # look up google_civic_election_id using state and election_day
         election_day = batch_manager.retrieve_value_from_batch_row("election_day", batch_header_map, one_batch_row)
-        election_results = batch_manager.retrieve_election_details_from_election_day_or_state_code(election_day,
-                                                                                                   state_code)
+        election_results = batch_manager.retrieve_election_details_from_election_day_or_state_code(
+            election_day, state_code, read_only=True)
         if election_results['success']:
             google_civic_election_id = election_results['google_civic_election_id']
             # election_name = election_results['election_name']
@@ -2396,7 +2401,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
                 state_code = election.state_code
         else:
             election_manager = ElectionManager()
-            results = election_manager.retrieve_election(google_civic_election_id, read_only=True)
+            results = election_manager.retrieve_election(google_civic_election_id)
             if results['election_found']:
                 election = results['election']
                 state_code = election.state_code
@@ -2445,9 +2450,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name, read_only=True)
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
-            candidate_found = True
             keep_looking_for_duplicates = False
-            candidate_we_vote_id = candidate.we_vote_id
             contest_office_we_vote_id = candidate.contest_office_we_vote_id
 
     contest_measure_manager = ContestMeasureManager()

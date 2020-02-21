@@ -124,8 +124,8 @@ def batch_list_view(request):
             polling_location_found = True
             election_state = polling_location.state
 
+    election_manager = ElectionManager()
     if google_civic_election_id:
-        election_manager = ElectionManager()
         results = election_manager.retrieve_election(google_civic_election_id)
         if results['election_found']:
             election = results['election']
@@ -143,7 +143,6 @@ def batch_list_view(request):
     else:
         ask_for_election = True
 
-        election_manager = ElectionManager()
         if positive_value_exists(show_all_elections):
             results = election_manager.retrieve_elections()
             election_list = results['election_list']
@@ -768,7 +767,8 @@ def batch_action_list_analyze_process_view(request):
     # if create_actions_button in (MEASURE, ELECTED_OFFICE, CANDIDATE, ORGANIZATION_WORD,
     # POSITION, POLITICIAN, IMPORT_BALLOT_ITEM)
     # Run the analysis of either A) every row in this batch, or B) Just the batch_row_id specified within this batch
-    results = create_batch_row_actions(batch_header_id, batch_row_id, state_code)
+    results = create_batch_row_actions(batch_header_id=batch_header_id, batch_description=None,
+                                       batch_row_id=batch_row_id, state_code=state_code)
     kind_of_batch = results['kind_of_batch']
 
     messages.add_message(request, messages.INFO, 'Batch Actions: '
@@ -1695,6 +1695,7 @@ def batch_set_batch_list_view(request):
             for one_batch_description in batch_list:
                 results = create_batch_row_actions(
                     one_batch_description.batch_header_id,
+                    batch_description=one_batch_description,
                     election_objects_dict=election_objects_dict,
                     measure_objects_dict=measure_objects_dict,
                     office_objects_dict=office_objects_dict,
@@ -1724,7 +1725,8 @@ def batch_set_batch_list_view(request):
                 batch_list = list(batch_description_query)
 
                 for one_batch_description in batch_list:
-                    results = create_batch_row_actions(one_batch_description.batch_header_id)
+                    results = create_batch_row_actions(
+                        one_batch_description.batch_header_id, batch_description=one_batch_description)
                     if results['batch_actions_created']:
                         batch_actions_analyzed += 1
                         try:

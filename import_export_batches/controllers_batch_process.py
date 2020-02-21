@@ -771,12 +771,13 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False):
         batch_header_id_created_list = []
 
         batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
-        batch_description_query = batch_description_query.filter(batch_description_analyzed=False)
+        batch_description_query = batch_description_query.exclude(batch_description_analyzed=True)
         batch_list = list(batch_description_query)
 
         for one_batch_description in batch_list:
             results = create_batch_row_actions(
                 one_batch_description.batch_header_id,
+                batch_description=one_batch_description,
                 election_objects_dict=election_objects_dict,
                 measure_objects_dict=measure_objects_dict,
                 office_objects_dict=office_objects_dict,
