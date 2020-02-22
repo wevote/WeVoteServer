@@ -14,6 +14,7 @@ from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, Ba
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
 from ballot.models import BallotItem, BallotReturnedManager, BallotItemManager
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
+from django.db import transaction
 from django.db.models import Q
 from elected_office.models import ElectedOffice, ElectedOfficeManager
 from electoral_district.controllers import retrieve_electoral_district
@@ -47,6 +48,7 @@ MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
 
 
+@transaction.atomic
 def create_batch_row_actions(
         batch_header_id,
         batch_description=None,
@@ -129,7 +131,7 @@ def create_batch_row_actions(
             # https://groups.google.com/forum/#!topic/django-developers/h5ok_KeXYW4
             # This is because we want to make sure BatchRows that have NOT been analyzed get analyzed first,
             # and BatchRowAction entries that are set to "Create" get updated before those that are set to "Update"
-            batch_row_query = batch_row_query.order_by("-batch_row_created", "-batch_row_analyzed")
+            # batch_row_query = batch_row_query.order_by("-batch_row_created", "-batch_row_analyzed")
 
             batch_row_list = list(batch_row_query)
             if len(batch_row_list):
