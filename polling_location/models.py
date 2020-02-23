@@ -27,17 +27,20 @@ class PollingLocation(models.Model):
     polling_location_id = models.CharField(max_length=255, verbose_name="vip polling_location id", null=False)
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id of this polling location", max_length=255, default=None, null=True,
-        blank=True, unique=True)
+        blank=True, unique=True, db_index=True)
     location_name = models.CharField(max_length=255, verbose_name="location name", null=True, blank=True)
     polling_hours_text = models.CharField(max_length=255, verbose_name="polling hours", null=True, blank=True)
     directions_text = models.TextField(
         verbose_name="directions to get to polling location", null=True, blank=True)
-    line1 = models.CharField(max_length=255, blank=True, null=True, verbose_name='address line 1 returned from VIP')
+    line1 = models.CharField(max_length=255, blank=True, null=True, verbose_name='address line 1 returned from VIP',
+                             db_index=True)
     line2 = models.CharField(max_length=255, blank=True, null=True, verbose_name='address line 2 returned from VIP')
-    city = models.CharField(max_length=255, blank=True, null=True, verbose_name='city returned from VIP')
-    state = models.CharField(max_length=255, blank=True, null=True, verbose_name='state returned from VIP')
+    city = models.CharField(max_length=255, blank=True, null=True, verbose_name='city returned from VIP',
+                            db_index=True)
+    state = models.CharField(max_length=255, blank=True, null=True, verbose_name='state returned from VIP',
+                             db_index=True)
     zip_long = models.CharField(max_length=255, blank=True, null=True,
-                                verbose_name='raw text zip returned from VIP, 9 characters')
+                                verbose_name='raw text zip returned from VIP, 9 characters', db_index=True)
     # We write latitude/longitude back to the PollingLocation table when we get it for the BallotReturned table
     latitude = models.FloatField(null=True, verbose_name='latitude returned from Google')
     longitude = models.FloatField(null=True, verbose_name='longitude returned from Google')

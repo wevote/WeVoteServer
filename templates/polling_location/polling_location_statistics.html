@@ -1,0 +1,93 @@
+{# templates/polling_location/polling_location_statistics.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Polling Locations Statistics{% endblock %}
+
+{%  block content %}
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
+<p>Jump to:
+    <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elections</a> -
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Measures</a> -
+    <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Offices</a> -
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Candidates</a> -
+    <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Offices</a> -
+    <a href="{% url 'elected_official:elected_official_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Officials</a> -
+    <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Politicians</a> -
+    <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Values/Issues</a> -
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Organizations</a> -
+    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Opinions/Positions</a> -
+    <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
+    <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guide Possibilities</a> -
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
+</p>
+
+<h1>Polling Locations Statistics</h1>
+
+    <p>
+        <a href="{% url 'admin_tools:sync_dashboard' %}?state_code={{ state_code }}" target="_blank">
+        Go to "Import Polling Locations From Master Server" Page
+        </a>
+    </p>
+
+    <p>
+      <a href="{% url 'polling_location:polling_location_edit' 0 %}?state_code={{ state_code }}">
+         Create polling location,
+      </a>
+
+      <a href="{% url 'electoral_district:electoral_district_list' %}?state_code={{ state_code }}">
+         See Electoral Districts
+      </a>
+    </p>
+
+<form name="polling_location_search_form" method="get" action="{% url 'polling_location:polling_location_statistics' %}">
+    {% csrf_token %}
+
+
+{% if state_details_list %}
+    <table class="table table-condensed">
+    <thead>
+        <tr>
+            <th></th>
+            <th>State</th>
+            <th></th>
+            <th>Number of Polling Locations</th>
+            <th>Missing Lat/Long</th>
+        </tr>
+    </thead>
+
+    {% for one_state in state_details_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+              {{ one_state.state_code }} - {{ one_state.state_name }}
+            </td>
+            <td>
+              <a
+                href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ one_state.state_code }}"
+                target="_blank"
+              >
+                (go) <span class="glyphicon glyphicon-new-window"></span>
+              </a>
+            </td>
+            <td>
+              {{ one_state.polling_location_count }}
+            </td>
+            <td>
+              {{ one_state.polling_location_without_latitude_count }}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>(no states found)</p>
+{% endif %}
+<br />
+    <script>
+        $(function() {
+            $('#state_code').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

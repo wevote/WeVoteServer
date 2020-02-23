@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception
@@ -74,7 +75,7 @@ STATE_LIST_IMPORT = {
         'OK': 'Oklahoma',
         'OR': 'Oregon',
         'PA': 'Pennsylvania',
-        # 'PR': 'Puerto Rico',
+        'PR': 'Puerto Rico',
         'RI': 'Rhode Island',
         'SC': 'South Carolina',
         'SD': 'South Dakota',
@@ -600,6 +601,58 @@ def polling_locations_add_latitude_and_longitude_view(request):
 
 
 @login_required
+def polling_location_statistics_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'partner_organization', 'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    polling_location_search = request.GET.get('polling_location_search', '')
+
+    state_list = STATE_LIST_IMPORT
+    sorted_state_list = sorted(state_list.items())
+    modified_state_list = []
+    for one_state in sorted_state_list:
+        state_details = {}
+
+        state_code = one_state[0]
+        state_name = one_state[1]
+        state_details['state_code'] = state_code
+        state_details['state_name'] = state_name
+
+        polling_location_count_query = PollingLocation.objects.all()
+        polling_location_query = PollingLocation.objects.all()
+        if not positive_value_exists(polling_location_search):
+            polling_location_count_query = polling_location_count_query.exclude(polling_location_deleted=True)
+            polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
+        polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
+        polling_location_count = polling_location_count_query.count()
+        state_details['polling_location_count'] = polling_location_count
+
+        polling_location_without_latitude_count_query = PollingLocation.objects.all()
+        polling_location_without_latitude_count_query = \
+            polling_location_without_latitude_count_query.filter(state__iexact=state_code)
+        polling_location_without_latitude_count_query = \
+            polling_location_without_latitude_count_query.exclude(polling_location_deleted=True)
+        polling_location_without_latitude_count_query = \
+            polling_location_without_latitude_count_query.filter(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
+        polling_location_without_latitude_count = polling_location_without_latitude_count_query.count()
+        state_details['polling_location_without_latitude_count'] = polling_location_without_latitude_count
+
+        modified_state_list.append(state_details)
+
+    messages_on_stage = get_messages(request)
+
+    template_values = {
+        'messages_on_stage':        messages_on_stage,
+        'google_civic_election_id': google_civic_election_id,
+        'state_details_list':       modified_state_list,
+    }
+    return render(request, 'polling_location/polling_location_statistics.html', template_values)
+
+
+@login_required
 def polling_location_summary_view(request, polling_location_local_id):
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'partner_organization', 'verified_volunteer'}
@@ -688,6 +741,8 @@ def soft_delete_duplicates_view(request):
     status = ""
     state_code = request.GET.get('state_code', "")
     google_civic_election_id = request.GET.get('google_civic_election_id', "")
+    analyze_start = convert_to_int(request.GET.get('analyze_start', 0))
+    analyze_limit = convert_to_int(request.GET.get('analyze_limit', 3000))
 
     if not positive_value_exists(state_code):
         messages.add_message(request, messages.ERROR, 'State code required.')
@@ -702,45 +757,54 @@ def soft_delete_duplicates_view(request):
         polling_location_query = PollingLocation.objects.all()
         polling_location_query = polling_location_query.filter(state__iexact=state_code)
         polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
-        polling_location_list = list(polling_location_query)
+        # Entry must have city to analyze or delete
+        polling_location_query = polling_location_query.exclude(Q(city__isnull=True) | Q(city__iexact=""))
+        polling_location_list = polling_location_query[analyze_start:analyze_limit]
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'No polling locations found. ' + str(e))
 
     polling_locations_deleted = 0
     polling_locations_reviewed = 0
     previously_reviewed_we_vote_ids = []
-    for polling_location in polling_location_list:
-        try:
-            polling_locations_reviewed += 1
-            current_we_vote_id = polling_location.we_vote_id
-            if current_we_vote_id not in previously_reviewed_we_vote_ids:
-                previously_reviewed_we_vote_ids.append(current_we_vote_id)
+    previously_deleted_we_vote_ids = []
+    with transaction.atomic():
+        for polling_location in polling_location_list:
+            try:
+                polling_locations_reviewed += 1
+                current_we_vote_id = polling_location.we_vote_id
+                if current_we_vote_id not in previously_reviewed_we_vote_ids:
+                    previously_reviewed_we_vote_ids.append(current_we_vote_id)
 
-            duplicate_polling_location_query = PollingLocation.objects.all()
-            duplicate_polling_location_query = duplicate_polling_location_query.filter(state__iexact=state_code)
-            duplicate_polling_location_query = \
-                duplicate_polling_location_query.filter(city__iexact=polling_location.city)
-            duplicate_polling_location_query = \
-                duplicate_polling_location_query.filter(line1__iexact=polling_location.line1)
-            duplicate_polling_location_query = \
-                duplicate_polling_location_query.filter(zip_long__iexact=polling_location.zip_long)
-            duplicate_polling_location_query = duplicate_polling_location_query.exclude(polling_location_deleted=True)
-            duplicate_polling_location_query = duplicate_polling_location_query.exclude(
-                we_vote_id__in=previously_reviewed_we_vote_ids)
+                duplicate_polling_location_query = PollingLocation.objects.all()
+                duplicate_polling_location_query = duplicate_polling_location_query.filter(state__iexact=state_code)
+                duplicate_polling_location_query = \
+                    duplicate_polling_location_query.filter(city__iexact=polling_location.city)
+                duplicate_polling_location_query = \
+                    duplicate_polling_location_query.filter(line1__iexact=polling_location.line1)
+                duplicate_polling_location_query = \
+                    duplicate_polling_location_query.filter(zip_long__iexact=polling_location.zip_long)
+                duplicate_polling_location_query = duplicate_polling_location_query.exclude(
+                    polling_location_deleted=True)
+                duplicate_polling_location_query = duplicate_polling_location_query.exclude(
+                    we_vote_id__in=previously_reviewed_we_vote_ids)
+                duplicate_polling_location_query = duplicate_polling_location_query.exclude(
+                    we_vote_id__in=previously_deleted_we_vote_ids)
 
-            mark_as_duplicates_list = list(duplicate_polling_location_query)
+                mark_as_duplicates_list = list(duplicate_polling_location_query)
 
-            for duplicate_polling_location in mark_as_duplicates_list:
-                try:
-                    # Mark duplicates as a soft delete
-                    duplicate_polling_location.polling_location_deleted = True
-                    duplicate_polling_location.save()
-                    polling_locations_deleted += 1
-                except Exception as e:
-                    status += "COULD_NOT_SAVE-ERROR:" + str(e) + " "
+                for duplicate_polling_location in mark_as_duplicates_list:
+                    if duplicate_polling_location.we_vote_id not in previously_deleted_we_vote_ids:
+                        try:
+                            # Mark duplicates as a soft delete
+                            duplicate_polling_location.polling_location_deleted = True
+                            duplicate_polling_location.save()
+                            previously_deleted_we_vote_ids.append(duplicate_polling_location.we_vote_id)
+                            polling_locations_deleted += 1
+                        except Exception as e:
+                            status += "COULD_NOT_SAVE-ERROR:" + str(e) + " "
 
-        except Exception as e:
-            pass
+            except Exception as e:
+                status += "QUERY_PROBLEM:" + str(e) + " "
 
     messages.add_message(request, messages.INFO,
                          'Polling locations reviewed: ' + str(polling_locations_reviewed) +
