@@ -743,6 +743,7 @@ def soft_delete_duplicates_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', "")
     analyze_start = convert_to_int(request.GET.get('analyze_start', 0))
     analyze_limit = convert_to_int(request.GET.get('analyze_limit', 3000))
+    analyze_end = analyze_start + analyze_limit
 
     if not positive_value_exists(state_code):
         messages.add_message(request, messages.ERROR, 'State code required.')
@@ -759,7 +760,7 @@ def soft_delete_duplicates_view(request):
         polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
         # Entry must have city to analyze or delete
         polling_location_query = polling_location_query.exclude(Q(city__isnull=True) | Q(city__iexact=""))
-        polling_location_list = polling_location_query[analyze_start:analyze_limit]
+        polling_location_list = polling_location_query[analyze_start:analyze_end]
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'No polling locations found. ' + str(e))
 
