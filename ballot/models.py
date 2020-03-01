@@ -1211,7 +1211,7 @@ class BallotItemListManager(models.Model):
             ballot_item_queryset = ballot_item_queryset.filter(polling_location_we_vote_id=polling_location_we_vote_id)
             if positive_value_exists(google_civic_election_id):
                 ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
-            ballot_item_list = ballot_item_queryset
+            ballot_item_list = list(ballot_item_queryset)
 
             if len(ballot_item_list):
                 ballot_item_list_found = True
@@ -1225,7 +1225,7 @@ class BallotItemListManager(models.Model):
         except Exception as e:
             handle_exception(e, logger=logger)
             status += 'FAILED retrieve_all_ballot_items_for_polling_location ' \
-                      '{error} [type: {error_type}] '.format(error=e.message, error_type=type(e))
+                      '{error} '.format(error=str(e))
 
         results = {
             'success':                      True if ballot_item_list_found else False,
