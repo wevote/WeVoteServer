@@ -5,14 +5,14 @@
 from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, BatchRowActionOrganization, \
     BatchRowActionMeasure, BatchRowActionElectedOffice, BatchRowActionContestOffice, BatchRowActionPolitician, \
     BatchRowActionCandidate, BatchRowActionPosition, BatchRowActionBallotItem, \
-    CLEAN_DATA_MANUALLY, POSITION, \
+    CLEAN_DATA_MANUALLY, POSITION, IMPORT_DELETE, IMPORT_ALREADY_DELETED, \
     IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_DATA_ALREADY_MATCHING, IMPORT_QUERY_ERROR, \
     IMPORT_TO_BE_DETERMINED, DO_NOT_PROCESS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
-from ballot.models import BallotItem, BallotReturnedManager, BallotItemManager
+from ballot.models import BallotItem, BallotItemListManager, BallotItemManager, BallotReturnedManager
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from django.db import transaction
 from django.db.models import Q
@@ -76,6 +76,8 @@ def create_batch_row_actions(
     number_of_batch_actions_updated = 0
     number_of_batch_actions_failed = 0
     kind_of_batch = ""
+    polling_location_we_vote_id = ""
+    voter_id = 0
 
     if not positive_value_exists(batch_header_id):
         status += "CREATE_BATCH_ROW_ACTIONS-BATCH_HEADER_ID_MISSING "
@@ -91,6 +93,8 @@ def create_batch_row_actions(
             'election_objects_dict':            election_objects_dict,
             'measure_objects_dict':             measure_objects_dict,
             'office_objects_dict':              office_objects_dict,
+            'polling_location_we_vote_id':      polling_location_we_vote_id,
+            'voter_id':                         voter_id,
         }
         return results
 
@@ -98,7 +102,7 @@ def create_batch_row_actions(
         if batch_description is not None:
             batch_description_found = True
         else:
-            batch_description = BatchDescription.objects.using('readonly').get(batch_header_id=batch_header_id)
+            batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)  # read_only=False
             batch_description_found = True
     except BatchDescription.DoesNotExist:
         # This is fine
@@ -140,6 +144,7 @@ def create_batch_row_actions(
             # This is fine
             pass
 
+    batch_row_action_list = []
     if batch_description_found and batch_header_map_found and batch_row_action_list_found:
         for one_batch_row in batch_row_list:
             if kind_of_batch == CANDIDATE:
@@ -237,6 +242,81 @@ def create_batch_row_actions(
                 elif results['batch_row_action_created']:
                     number_of_batch_actions_created += 1
                     success = True
+                elif results['batch_row_action_delete_created']:
+                    number_of_batch_actions_created += 1
+                    success = True
+
+                batch_row_action_ballot_item = results['batch_row_action_ballot_item']
+                polling_location_we_vote_id = batch_row_action_ballot_item.polling_location_we_vote_id
+                voter_id = batch_row_action_ballot_item.voter_id
+
+                batch_row_action_list.append(batch_row_action_ballot_item)
+
+    existing_ballot_item_list = []
+    if kind_of_batch == IMPORT_BALLOT_ITEM:
+        # Don't deal with deleting ballot items if we are only looking at one batch row
+        if batch_description_found and batch_header_map_found and not positive_value_exists(batch_row_id):
+            # Start by retrieving existing ballot items for this polling location
+            if positive_value_exists(polling_location_we_vote_id) and \
+                    positive_value_exists(batch_description.google_civic_election_id):
+                ballot_item_list_manager = BallotItemListManager()
+                results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
+                    batch_description.polling_location_we_vote_id,
+                    batch_description.google_civic_election_id,
+                    read_only=True)
+                if results['ballot_item_list_found']:
+                    existing_ballot_item_list = results['ballot_item_list']
+
+    number_of_batch_action_deletes_created = 0
+    if existing_ballot_item_list and len(existing_ballot_item_list):
+        # If we are here, then we are checking to see if there were previous ballot items that have since been deleted
+        # Note that we should not be here if we are looking at only one batch row
+        for existing_ballot_item in existing_ballot_item_list:
+            batch_row_action_found = False
+            batch_row_action_delete_exists = False
+            for batch_row_action in batch_row_action_list:
+                if batch_row_action_found:
+                    continue
+                elif positive_value_exists(batch_row_action.contest_measure_we_vote_id) and \
+                        batch_row_action.contest_measure_we_vote_id == existing_ballot_item.contest_measure_we_vote_id:
+                    batch_row_action_found = True
+                elif positive_value_exists(batch_row_action.contest_office_we_vote_id) and \
+                        batch_row_action.contest_office_we_vote_id == existing_ballot_item.contest_office_we_vote_id:
+                    batch_row_action_found = True
+                else:
+                    # Doesn't match this existing_ballot_item
+                    pass
+            if not positive_value_exists(batch_row_action_found):
+                # If here we know that a ballot item already exists, and the current data would NOT be
+                #  creating/updating a ballot item. Create a delete action.
+                results = create_batch_row_action_ballot_item_delete(batch_description, existing_ballot_item)
+                batch_row_action_delete_exists = results['batch_row_action_delete_exists']
+
+            if positive_value_exists(batch_row_action_delete_exists):
+                number_of_batch_action_deletes_created += 1
+
+    # Record that this batch_description has been analyzed, and the source for the ballot_item
+    if batch_description_found and success:
+        try:
+            # If BatchRowAction's were created for BatchDescription, this batch_description was analyzed
+            batch_description_changed = False
+            if not positive_value_exists(batch_description.polling_location_we_vote_id) and \
+                    positive_value_exists(polling_location_we_vote_id):
+                batch_description.polling_location_we_vote_id = polling_location_we_vote_id
+                batch_description_changed = True
+            if not positive_value_exists(batch_description.voter_id) and \
+                    positive_value_exists(voter_id):
+                batch_description.voter_id = voter_id
+                batch_description_changed = True
+            if not positive_value_exists(batch_description.batch_description_analyzed) \
+                    and not positive_value_exists(batch_row_id):
+                # We only want to mark this batch_description as analyzed if we are looking at all rows
+                batch_description.batch_description_analyzed = True
+                batch_description_changed = True
+            if batch_description_changed:
+                batch_description.save()
+        except Exception as e:
+            status += "ANALYZE-COULD_NOT_SAVE_BATCH_DESCRIPTION " + str(e) + " "
 
     results = {
         'success':                          success,
@@ -247,9 +327,12 @@ def create_batch_row_actions(
         'number_of_batch_actions_created':  number_of_batch_actions_created,
         'batch_actions_updated':            update_success,
         'number_of_batch_actions_updated':  number_of_batch_actions_updated,
+        'number_of_batch_action_deletes_created':  number_of_batch_action_deletes_created,
         'election_objects_dict':            election_objects_dict,
         'measure_objects_dict':             measure_objects_dict,
         'office_objects_dict':              office_objects_dict,
+        'polling_location_we_vote_id':      polling_location_we_vote_id,
+        'voter_id':                         voter_id,
     }
     return results
 
@@ -1874,7 +1957,6 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     :return:
     """
     batch_manager = BatchManager()
-    success = False
     status = ""
     organization_found = False
     organization_id = 0
@@ -2348,6 +2430,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
                 'batch_row_action_updated':     batch_row_action_updated,
                 'batch_row_action_created':     batch_row_action_created,
                 'batch_row_action_ballot_item': batch_row_action_ballot_item,
+                'batch_row':                    one_batch_row,
                 'election_objects_dict':        election_objects_dict,
                 'measure_objects_dict':         measure_objects_dict,
                 'office_objects_dict':          office_objects_dict,
@@ -2580,6 +2663,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         batch_row_action_ballot_item.no_vote_description = no_vote_description
         batch_row_action_ballot_item.yes_vote_description = yes_vote_description
         batch_row_action_ballot_item.status = status
+        batch_row_action_ballot_item.voter_id = voter_id
         if positive_value_exists(contest_office_name):
             batch_row_action_ballot_item.ballot_item_display_name = contest_office_name
         elif positive_value_exists(contest_measure_name):
@@ -2593,6 +2677,10 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
     try:
         if batch_row_action_created or batch_row_action_updated:
             # If BatchRowAction was created, this batch_row was analyzed
+            if positive_value_exists(polling_location_we_vote_id):
+                one_batch_row.polling_location_we_vote_id = polling_location_we_vote_id
+            if positive_value_exists(voter_id):
+                one_batch_row.voter_id = voter_id
             one_batch_row.batch_row_analyzed = True
             one_batch_row.save()
     except Exception as e:
@@ -2604,9 +2692,71 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         'batch_row_action_created':     batch_row_action_created,
         'batch_row_action_updated':     batch_row_action_updated,
         'batch_row_action_ballot_item': batch_row_action_ballot_item,
+        'batch_row':                    one_batch_row,
         'election_objects_dict':        election_objects_dict,
         'measure_objects_dict':         measure_objects_dict,
         'office_objects_dict':          office_objects_dict,
+    }
+    return results
+
+
+def create_batch_row_action_ballot_item_delete(batch_description, existing_ballot_item):
+    """
+    Schedule the delete of existing ballot_item
+    :param batch_description:
+    :param existing_ballot_item:
+    :return:
+    """
+    batch_manager = BatchManager()
+
+    status = ''
+    success = True
+
+    if positive_value_exists(existing_ballot_item.google_civic_election_id):
+        google_civic_election_id = str(existing_ballot_item.google_civic_election_id)
+    else:
+        google_civic_election_id = str(batch_description.google_civic_election_id)
+
+    # Does a BatchRowActionBallotItem entry already exist?
+    # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
+    #  we are checking for existing duplicate data
+    existing_results = batch_manager.retrieve_batch_row_action_ballot_item(
+        batch_description.batch_header_id, ballot_item_id=existing_ballot_item.id)
+    if existing_results['batch_row_action_found']:
+        batch_row_action_ballot_item = existing_results['batch_row_action_ballot_item']
+        batch_row_action_delete_exists = True
+    else:
+        # If a BatchRowActionBallotItem entry does not exist, create one
+        try:
+            batch_row_action_ballot_item = BatchRowActionBallotItem.objects.create(
+                ballot_item_id=existing_ballot_item.id,
+                ballot_item_display_name=existing_ballot_item.ballot_item_display_name,
+                batch_header_id=batch_description.batch_header_id,
+                batch_set_id=batch_description.batch_set_id,
+                google_civic_election_id=google_civic_election_id,
+                kind_of_action=IMPORT_DELETE,
+            )
+            batch_row_action_delete_exists = True
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_DELETE_CREATED "
+        except Exception as e:
+            batch_row_action_delete_exists = False
+            batch_row_action_ballot_item = BatchRowActionBallotItem()
+            success = False
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_DELETE_NOT_CREATED " + str(e) + " "
+
+            results = {
+                'success':                          success,
+                'status':                           status,
+                'batch_row_action_delete_exists':   batch_row_action_delete_exists,
+                'batch_row_action_ballot_item':     batch_row_action_ballot_item,
+            }
+            return results
+
+    results = {
+        'success':                          success,
+        'status':                           status,
+        'batch_row_action_delete_exists':   batch_row_action_delete_exists,
+        'batch_row_action_ballot_item':     batch_row_action_ballot_item,
     }
     return results
 
@@ -4622,29 +4772,139 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
     return results
 
 
-def import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_header_id, batch_row_id=0, state_code=""):
+def delete_ballot_item_data_from_batch_row_actions(batch_header_id, ballot_item_id=0):
     """
-    Cycle through batch_row_action entries for one kind_of_batch + kind_of_action + batch_header_id, OR
-    for one particular batch_row_id. The kind_of_action is either IMPORT_CREATE or IMPORT_ADD_TO_EXISTING.
+    Delete existing ballot_items, IMPORT_DELETE
+    :param batch_header_id:
+    :param ballot_item_id:
+    :return:
+    """
+    success = True
+    status = ""
+    number_of_table_rows_deleted = 0
+
+    if not positive_value_exists(batch_header_id):
+        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_HEADER_ID_MISSING "
+        success = False
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'number_of_table_rows_deleted': number_of_table_rows_deleted,
+        }
+        return results
+
+    try:
+        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
+        batch_description_found = True
+    except BatchDescription.DoesNotExist:
+        # This is fine
+        batch_description = BatchDescription()
+        batch_description_found = False
+
+    if not batch_description_found:
+        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_DESCRIPTION_MISSING "
+        success = False
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'number_of_table_rows_deleted': number_of_table_rows_deleted,
+        }
+        return results
+
+    try:
+        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map_found = True
+    except BatchHeaderMap.DoesNotExist:
+        # This is fine
+        batch_header_map_found = False
+        success = False
+
+    if not batch_header_map_found:
+        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_HEADER_MAP_MISSING "
+        success = False
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'number_of_table_rows_deleted': number_of_table_rows_deleted,
+        }
+        return results
+
+    batch_row_action_list_found = False
+    try:
+        batch_row_action_list = BatchRowActionBallotItem.objects.all()
+        batch_row_action_list = batch_row_action_list.filter(batch_header_id=batch_header_id)
+        if positive_value_exists(ballot_item_id):
+            batch_row_action_list = batch_row_action_list.filter(ballot_item_id=ballot_item_id)
+        batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_DELETE)
+
+        if len(batch_row_action_list):
+            batch_row_action_list_found = True
+
+    except Exception as e:
+        status += "FAILED_RETRIEVE " + str(e) + " "
+        batch_row_action_list = []
+        batch_row_action_list_found = False
+
+    if not batch_row_action_list_found:
+        status += "DELETE_BALLOT_ITEM_ENTRY-BATCH_ROW_ACTION_LIST_NOT_FOUND "
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'number_of_table_rows_deleted': number_of_table_rows_deleted,
+        }
+        return results
+
+    for one_batch_row_action in batch_row_action_list:
+        ballot_item_manager = BallotItemManager()
+        results = ballot_item_manager.delete_ballot_item(ballot_item_id=one_batch_row_action.ballot_item_id)
+        if results['ballot_item_deleted']:
+            try:
+                one_batch_row_action.kind_of_action = IMPORT_ALREADY_DELETED
+                one_batch_row_action.save()
+                number_of_table_rows_deleted += 1
+                status += "DELETE_BALLOT_ITEM_ENTRY-SUCCESS "
+            except Exception as e:
+                status += "DELETE_BALLOT_ITEM_ENTRY-ERROR: " + str(e) + " "
+        else:
+            status += "BALLOT_ITEM_NOT_DELETED "
+
+    results = {
+        'success':                      success,
+        'status':                       status,
+        'number_of_table_rows_deleted': number_of_table_rows_deleted,
+    }
+    return results
+
+
+def import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_header_id, batch_row_id=0, state_code="",
+                                       ballot_item_id=0):
+    """
+    Cycle through and process batch_row_action entries.
+    The kind_of_action is either IMPORT_CREATE or IMPORT_ADD_TO_EXISTING or IMPORT_DELETE.
     :param kind_of_batch:
     :param kind_of_action:
     :param batch_header_id:
     :param batch_row_id:
     :param state_code:
+    :param ballot_item_id:
     :return:
     """
     success = False
     status = ''
     number_of_table_rows_created = 0
     number_of_table_rows_updated = 0
+    number_of_table_rows_deleted = 0
     create_flag = False
     update_flag = False
+    delete_flag = False
 
     # for one_batch_row in batch_row_list:
     if kind_of_action == IMPORT_CREATE:
         create_flag = True
     elif kind_of_action == IMPORT_ADD_TO_EXISTING:
         update_flag = True
+    elif kind_of_action == IMPORT_DELETE:
+        delete_flag = True
     else:
         # this is error
         status += 'IMPORT_BATCH_ACTION_ROWS_INCORRECT_ACTION '
@@ -4655,7 +4915,8 @@ def import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_head
             'kind_of_batch':                kind_of_batch,
             'table_rows_created':           success,
             'number_of_table_rows_created': number_of_table_rows_created,
-            'number_of_table_rows_updated': number_of_table_rows_updated
+            'number_of_table_rows_updated': number_of_table_rows_updated,
+            'number_of_table_rows_deleted': number_of_table_rows_deleted,
         }
         return results
 
@@ -4739,17 +5000,28 @@ def import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_head
                 number_of_table_rows_updated = results['number_of_positions_updated']
             success = True
     elif kind_of_batch == IMPORT_BALLOT_ITEM:
-        results = import_ballot_item_data_from_batch_row_actions(
-            batch_header_id, batch_row_id, create_flag, update_flag)
-        status += results['status']
-        if results['success']:
-            if results['number_of_ballot_items_created']:
-                # for now, do not handle batch_row_action_ballot_item data
-                # batch_row_action_ballot_item = results['batch_row_action_ballot_items_created']
-                number_of_table_rows_created = results['number_of_ballot_items_created']
-            elif results['number_of_ballot_items_updated']:
-                number_of_table_rows_updated = results['number_of_ballot_items_updated']
-            success = True
+        if create_flag or update_flag:
+            results = import_ballot_item_data_from_batch_row_actions(
+                batch_header_id, batch_row_id, create_flag, update_flag)
+            status += results['status']
+            if results['success']:
+                if results['number_of_ballot_items_created']:
+                    # for now, do not handle batch_row_action_ballot_item data
+                    # batch_row_action_ballot_item = results['batch_row_action_ballot_items_created']
+                    number_of_table_rows_created = results['number_of_ballot_items_created']
+                elif results['number_of_ballot_items_updated']:
+                    number_of_table_rows_updated = results['number_of_ballot_items_updated']
+                success = True
+        elif delete_flag:
+            results = delete_ballot_item_data_from_batch_row_actions(
+                batch_header_id, ballot_item_id=ballot_item_id)
+            status += results['status']
+            if results['success']:
+                number_of_table_rows_deleted = results['number_of_table_rows_deleted']
+                success = True
+        else:
+            status += "IMPORT_BALLOT_ITEM-NOT_CREATE_UPDATE_OR_DELETE "
+            pass
 
     results = {
         'success':                      success,
@@ -4758,7 +5030,8 @@ def import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_head
         'kind_of_batch':                kind_of_batch,
         'table_rows_created':           success,
         'number_of_table_rows_created': number_of_table_rows_created,
-        'number_of_table_rows_updated': number_of_table_rows_updated
+        'number_of_table_rows_updated': number_of_table_rows_updated,
+        'number_of_table_rows_deleted': number_of_table_rows_deleted,
     }
     return results
 

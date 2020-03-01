@@ -68,8 +68,10 @@ KIND_OF_BATCH_CHOICES = (
 IMPORT_TO_BE_DETERMINED = 'IMPORT_TO_BE_DETERMINED'
 DO_NOT_PROCESS = 'DO_NOT_PROCESS'
 CLEAN_DATA_MANUALLY = 'CLEAN_DATA_MANUALLY'
-IMPORT_CREATE = 'IMPORT_CREATE'
-IMPORT_ADD_TO_EXISTING = 'IMPORT_ADD_TO_EXISTING'
+IMPORT_CREATE = 'IMPORT_CREATE'  # kind_of_action
+IMPORT_DELETE = 'IMPORT_DELETE'  # kind_of_action
+IMPORT_ALREADY_DELETED = 'IMPORT_ALREADY_DELETED'  # kind_of_action
+IMPORT_ADD_TO_EXISTING = 'IMPORT_ADD_TO_EXISTING'  # kind_of_action
 IMPORT_DATA_ALREADY_MATCHING = 'IMPORT_DATA_ALREADY_MATCHING'
 IMPORT_QUERY_ERROR = 'IMPORT_QUERY_ERROR'
 
@@ -1619,20 +1621,33 @@ class BatchManager(models.Model):
         }
         return results
 
-    def retrieve_batch_row_action_ballot_item(self, batch_header_id, batch_row_id):
+    def retrieve_batch_row_action_ballot_item(self, batch_header_id, batch_row_id=0, ballot_item_id=0):
         """
         Retrieves data from BatchRowActionBallotItem table
         :param batch_header_id:
         :param batch_row_id:
+        :param ballot_item_id:
         :return:
         """
-
+        batch_row_action_ballot_item = None
+        status = ""
         try:
-            batch_row_action_ballot_item = BatchRowActionBallotItem.objects.get(batch_header_id=batch_header_id,
-                                                                                batch_row_id=batch_row_id)
-            batch_row_action_found = True
-            success = True
-            status = "BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVED "
+            if positive_value_exists(batch_row_id):
+                batch_row_action_ballot_item = BatchRowActionBallotItem.objects.get(batch_header_id=batch_header_id,
+                                                                                    batch_row_id=batch_row_id)
+                batch_row_action_found = True
+                success = True
+                status += "BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVED_BY_BATCH_ROW_ID "
+            elif positive_value_exists(ballot_item_id):
+                batch_row_action_ballot_item = BatchRowActionBallotItem.objects.get(batch_header_id=batch_header_id,
+                                                                                    ballot_item_id=ballot_item_id)
+                batch_row_action_found = True
+                success = True
+                status += "BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVED_BY_BALLOT_ITEM_ID "
+            else:
+                batch_row_action_found = False
+                success = False
+                status += "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_RETRIEVED-MISSING_REQUIRED_VARIABLE "
         except BatchRowActionBallotItem.DoesNotExist:
             batch_row_action_ballot_item = BatchRowActionBallotItem()
             batch_row_action_found = False
@@ -1642,13 +1657,45 @@ class BatchManager(models.Model):
             batch_row_action_ballot_item = BatchRowActionBallotItem()
             batch_row_action_found = False
             success = False
-            status = "BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR "
+            status = "BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR " + str(e) + " "
 
         results = {
             'success':                      success,
             'status':                       status,
             'batch_row_action_found':       batch_row_action_found,
             'batch_row_action_ballot_item': batch_row_action_ballot_item,
+        }
+        return results
+
+    def retrieve_batch_row_action_ballot_item_list(self, batch_header_id, limit_to_kind_of_action_list=[]):
+        """
+        Retrieves data from BatchRowActionBallotItem table
+        :param batch_header_id:
+        :param limit_to_kind_of_action_list:
+        :return:
+        """
+        batch_row_action_list = []
+        status = ""
+        try:
+            batch_row_action_ballot_item_query = BatchRowActionBallotItem.objects.filter(
+                batch_header_id=batch_header_id)
+            if positive_value_exists(limit_to_kind_of_action_list):
+                batch_row_action_ballot_item_query = batch_row_action_ballot_item_query.filter(
+                    kind_of_action__in=limit_to_kind_of_action_list)
+            batch_row_action_list = list(batch_row_action_ballot_item_query)
+            batch_row_action_list_found = True
+            success = True
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_LIST_RETRIEVED_BY_BATCH_HEADER_ID "
+        except Exception as e:
+            batch_row_action_list_found = False
+            success = False
+            status = "BATCH_ROW_ACTION_BALLOT_ITEM_LIST_RETRIEVE_ERROR " + str(e) + " "
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'batch_row_action_list_found':  batch_row_action_list_found,
+            'batch_row_action_list':        batch_row_action_list,
         }
         return results
 
@@ -4241,6 +4288,7 @@ class BatchDescription(models.Model):
         verbose_name="if for positions, the organization's we vote id", max_length=255, null=True, blank=True)
     polling_location_we_vote_id = models.CharField(
         verbose_name="if for ballot items, the polling location we vote id", max_length=255, null=True, blank=True)
+    voter_id = models.IntegerField(null=True, blank=True)
     batch_description_text = models.CharField(max_length=255)
     # Have the batch rows under this description been analyzed?
     batch_description_analyzed = models.BooleanField(default=False)
@@ -4374,6 +4422,8 @@ class BatchRow(models.Model):
     # This is used when we have one batch_set that brings in election data for a variety of elections
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="election id", default=0, null=True, blank=True, db_index=True)
+    polling_location_we_vote_id = models.CharField(max_length=255, default=None, null=True, blank=True, unique=False)
+    voter_id = models.IntegerField(null=True, blank=True)
     # This is useful for filtering while we are processing batch_rows
     state_code = models.CharField(
         verbose_name="state code for this data", max_length=2, null=True, blank=True, db_index=True)
@@ -5650,11 +5700,12 @@ class BatchRowActionBallotItem(models.Model):
     batch_header_id = models.PositiveIntegerField(
         verbose_name="unique id of header row", unique=False, null=False, db_index=True)
     batch_row_id = models.PositiveIntegerField(
-        verbose_name="unique id of batch row", unique=True, null=False, db_index=True)
+        verbose_name="unique id of batch row", null=True, default=None, db_index=True)
     kind_of_action = models.CharField(
         max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
 
-    ballot_item_id = models.IntegerField(verbose_name="ballot item unique id", default=0, null=True, blank=True)
+    ballot_item_id = models.PositiveIntegerField(
+        verbose_name="ballot item unique id", default=None, null=True, db_index=True)
     # Fields from BallotItem
     # The unique id of the voter for which this ballot was retrieved
     voter_id = models.IntegerField(verbose_name="the voter unique id", default=0, null=False, blank=False)
