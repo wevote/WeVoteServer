@@ -2632,9 +2632,9 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
                 existing_ballot_item_query = existing_ballot_item_query.filter(
                     contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
 
-            number_of_existing_entries = existing_ballot_item_query.count()
-            if number_of_existing_entries:
-                existing_ballot_item = existing_ballot_item_query.first()
+            existing_entry_list = existing_ballot_item_query[:1]
+            if len(existing_entry_list):
+                existing_ballot_item = existing_entry_list[0]
                 existing_ballot_item_id = existing_ballot_item.id
                 existing_ballot_item_found = True
             else:
