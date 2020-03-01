@@ -639,6 +639,40 @@ class BallotItemManager(models.Model):
             }
         return results
 
+    def delete_ballot_item(self, ballot_item_id=0):
+        status = ""
+        ballot_item_found = False
+        ballot_item_deleted = False
+        try:
+            if positive_value_exists(ballot_item_id):
+                ballot_item = BallotItem.objects.get(id=ballot_item_id)
+                if ballot_item.id:
+                    ballot_item_found = True
+                    ballot_item.delete()
+                    ballot_item_deleted = True
+                    status = "BALLOT_ITEM_FOUND_AND_DELETED_WITH_BALLOT_ITEM_ID "
+                else:
+                    status = "BALLOT_ITEM_NOT_FOUND_WITH_BALLOT_ITEM_ID "
+                success = True
+            else:
+                status = "DELETE: Insufficient variables included to retrieve one ballot_item."
+                success = False
+        except BallotItem.MultipleObjectsReturned as e:
+            status += "ERROR_MORE_THAN_ONE_BALLOT_ITEM_FOUND-BY_BALLOT_ITEM-DELETE "
+            handle_record_found_more_than_one_exception(e, logger, exception_message_optional=status)
+            success = False
+        except BallotItem.DoesNotExist:
+            status += "BALLOT_ITEM_NOT_FOUND-DELETE "
+            success = True
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'ballot_item_found':    ballot_item_found,
+            'ballot_item_deleted':  ballot_item_deleted,
+        }
+        return results
+
     def refresh_all_ballot_item_measure_entries(self, contest_measure):
         """
         Bulk update all ballot_item entries for this measure

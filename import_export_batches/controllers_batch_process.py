@@ -4,7 +4,7 @@
 
 from .controllers import create_batch_row_actions, import_data_from_batch_row_actions
 from .models import BatchDescription, BatchManager, BatchProcessManager, \
-    IMPORT_CREATE, \
+    IMPORT_CREATE, IMPORT_DELETE, \
     RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, \
     REFRESH_BALLOT_ITEMS_FROM_VOTERS
 from datetime import datetime, timedelta
@@ -737,18 +737,20 @@ def process_one_ballot_item_batch_process(batch_process):
     return results
 
 
-def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False):
+def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False, delete_all=False):
     """
 
     :param batch_set_id:
     :param analyze_all:
     :param create_all:
+    :param delete_all:
     :return:
     """
     status = ""
     success = True
     batch_rows_analyzed = 0
     batch_rows_created = 0
+    batch_rows_deleted = 0
 
     if not positive_value_exists(batch_set_id):
         status += "BATCH_SET_ID_REQUIRED "
@@ -772,6 +774,7 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False):
 
         batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
         batch_description_query = batch_description_query.exclude(batch_description_analyzed=True)
+        # Note that this needs to be read_only=False
         batch_list = list(batch_description_query)
 
         for one_batch_description in batch_list:
@@ -784,13 +787,7 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False):
             )
             if results['batch_actions_created']:
                 batch_rows_analyzed += 1
-                try:
-                    # If BatchRowAction's were created for BatchDescription, this batch_description was analyzed
-                    one_batch_description.batch_description_analyzed = True
-                    one_batch_description.save()
-                    batch_header_id_created_list.append(one_batch_description.batch_header_id)
-                except Exception as e:
-                    status += "ANALYZE-COULD_NOT_SAVE_BATCH_DESCRIPTION " + str(e) + " "
+                batch_header_id_created_list.append(one_batch_description.batch_header_id)
 
             election_objects_dict = results['election_objects_dict']
             measure_objects_dict = results['measure_objects_dict']
@@ -811,6 +808,21 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False):
             if not positive_value_exists(results['success']) and len(status) < 1024:
                 status += results['status']
         status += "BATCH_ROWS_CREATED: " + str(batch_rows_created) + ", "
+    elif positive_value_exists(delete_all):
+        batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+        batch_description_query = batch_description_query.filter(batch_description_analyzed=True)
+        batch_list = list(batch_description_query)
+
+        batch_rows_deleted = 0
+        for one_batch_description in batch_list:
+            results = import_data_from_batch_row_actions(
+                one_batch_description.kind_of_batch, IMPORT_DELETE, one_batch_description.batch_header_id)
+            if results['number_of_table_rows_deleted']:
+                batch_rows_deleted += 1
+
+            if not positive_value_exists(results['success']) and len(status) < 1024:
+                status += results['status']
+        status += "BATCH_ROWS_DELETED: " + str(batch_rows_deleted) + ", "
     else:
         status += "MUST_SPECIFY_ANALYZE_OR_CREATE "
 
@@ -819,6 +831,7 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False):
         'status':               status,
         'batch_rows_analyzed':  batch_rows_analyzed,
         'batch_rows_created':   batch_rows_created,
+        'batch_rows_deleted':   batch_rows_deleted,
     }
     return results
 

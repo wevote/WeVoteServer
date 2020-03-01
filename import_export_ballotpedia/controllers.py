@@ -1896,7 +1896,7 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
     contest_office_manager = ContestOfficeManager()
     candidate_manager = CandidateCampaignManager()
     measure_manager = ContestMeasureManager()
-    politician_manager = PoliticianManager()
+    # politician_manager = PoliticianManager()
     office_names_with_no_state = ["President of the United States"]
 
     if 'data' in structured_json and 'districts' in structured_json['data']:
@@ -1912,6 +1912,10 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
                     candidate_data_exists = 'candidates' in one_race_json and \
                                             positive_value_exists(one_race_json['candidates'])
                     office_data_exists = 'office' in one_race_json and positive_value_exists(one_race_json['office'])
+
+                    if not office_data_exists or not candidate_data_exists:
+                        # We need both office data and candidate data to proceed
+                        continue
 
                     # Clear out prior values
                     ballotpedia_office_id = 0

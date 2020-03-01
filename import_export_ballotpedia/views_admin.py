@@ -516,9 +516,6 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
 
     batch_set_id = 0
     retrieve_row_count = 0
-    election_day_text = ""
-    polling_location_list = []
-    polling_location_count = 0
 
     try:
         if positive_value_exists(google_civic_election_id):

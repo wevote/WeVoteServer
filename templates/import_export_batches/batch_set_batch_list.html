@@ -40,6 +40,14 @@
                         value=1>Update in All Batches</button>
             </div>
         </div>
+
+        <div class="form-group">
+            <label for="delete_all_button_id" class="col-sm-3 control-label"></label>
+            <div class="col-sm-8">
+                <button type="submit" id="delete_all_button_id" name="delete_all_button" class="btn btn-default"
+                        value=1>Delete in All Batches</button>
+            </div>
+        </div>
     </form>
 
 {% if batch_list %}
@@ -52,17 +60,22 @@
             <th>Batch Rows Imported</th>
             <th>Batch Rows Analyzed</th>
             <th>Date Created</th>
-            <th>Batch Row Actions-To Create</th>
-            <th>Batch Row Actions-To Update</th>
-            <th>Batch Row Actions-Duplicate</th>
+            <th>Batch Row Actions To Create</th>
+            <th>To Update</th>
+            <th>To&nbsp;Delete / Deleted</th>
+            <th>Duplicate</th>
         </tr>
     {% for one_batch in batch_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ one_batch.batch_name }}</td>
-            <td><a href="{% url 'import_export_batches:batch_action_list' %}?batch_header_id={{ one_batch.batch_header_id }}&kind_of_batch={{ one_batch.kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">
-            review</a></td>
+            <td>{{ one_batch.batch_name }}{% if one_batch.polling_location_we_vote_id %} ({{ one_batch.polling_location_we_vote_id }}){% endif %}</td>
+            <td>
+              <span style="white-space: nowrap;">
+                <a href="{% url 'import_export_batches:batch_action_list' %}?batch_header_id={{ one_batch.batch_header_id }}&kind_of_batch={{ one_batch.kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}"
+                     target="_blank">
+                  review <span class="glyphicon glyphicon-new-window"></span></a>
+              </span>
+            </td>
             <td>
                 {% for election in election_list %}
                     {% if election.google_civic_election_id|slugify == one_batch.google_civic_election_id|slugify %}
@@ -75,6 +88,15 @@
             <td>{{ one_batch.date_created }}</td>
             <td>{% if one_batch.number_of_batch_actions_to_create %}{{ one_batch.number_of_batch_actions_to_create }}{% endif %}</td>
             <td>{% if one_batch.number_of_table_rows_to_update %}{{ one_batch.number_of_table_rows_to_update }}{% endif %}</td>
+            <td>
+              <span{% if one_batch.number_of_table_rows_to_delete == 0 %} style="color: darkgray;"{% endif %}>
+                {% if one_batch.number_of_table_rows_to_delete or one_batch.number_of_table_rows_already_deleted %}
+                  {% if one_batch.number_of_table_rows_to_delete %}{{ one_batch.number_of_table_rows_to_delete }}{% else %}0{% endif %}
+                  /
+                  {% if one_batch.number_of_table_rows_already_deleted %}{{ one_batch.number_of_table_rows_already_deleted }}{% else %}0{% endif %}
+                {% endif %}
+              </span>
+            </td>
             <td>{% if one_batch.number_of_batch_actions_cannot_act %}{{ one_batch.number_of_batch_actions_cannot_act }}{% endif %}</td>
         </tr>
     {% endfor %}

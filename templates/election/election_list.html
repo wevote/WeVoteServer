@@ -22,6 +22,10 @@
 </p>
 
 <h1>{% if is_national_election %}{{ national_election.election_name }} &mdash; {{ national_election.election_day_text }}{% else %}Elections{% endif %}</h1>
+<p>
+  <a href="{% url 'election:elections_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+    Retrieve All Elections from Master API Server <span class="glyphicon glyphicon-new-window"></span></a> (Meta information only)
+</p>
 
 {#Pinging API Server <span id="testDots" >.</span>#}
 
@@ -39,9 +43,6 @@
     </form>
 
 {% else %}
-{# ############## List of many election dates ############## #}
-    <p><a href="{% url 'election:election_remote_retrieve' %}">Retrieve all elections</a>.
-        <a href="https://votinginfoproject.org/news/vip-continues-support-elections-through-2018/" target="_blank">VIP elections supported.</a></p>
 
     <form name="election_search_form" method="get" action="{% url 'election:election_list' %}">
         {% csrf_token %}
@@ -229,8 +230,11 @@
     <p>(no elections found)</p>
 {% endif %}
     <p>
-        <a href="{% url 'election:election_edit' 0 %}" >Add Upcoming Election Manually</a>
+        <a href="{% url 'election:election_edit' 0 %}" target="_blank" >Add Upcoming Election Manually <span class="glyphicon glyphicon-new-window"></span></a>
     </p>
+{# ############## List of many election dates ############## #}
+    <p><a href="{% url 'election:election_remote_retrieve' %}">Retrieve all elections from Google Civic</a>.
+        <a href="https://votinginfoproject.org/news/vip-continues-support-elections-through-2018/" target="_blank">VIP elections supported <span class="glyphicon glyphicon-new-window"></span></a>.</p>
 
 <script>
     $(function() {

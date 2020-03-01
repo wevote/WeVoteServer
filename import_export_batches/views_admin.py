@@ -11,7 +11,7 @@ from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager,
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS, \
-    IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_VOTER
+    IMPORT_CREATE, IMPORT_DELETE, IMPORT_ALREADY_DELETED, IMPORT_ADD_TO_EXISTING, IMPORT_VOTER
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     create_or_update_batch_header_mapping, export_voter_list_with_emails, import_data_from_batch_row_actions
 from .controllers_batch_process import batch_process_next_steps
@@ -478,6 +478,7 @@ def batch_action_list_view(request):
                     one_batch_row.batch_row_action_exists = False
                 modified_batch_row_list.append(one_batch_row)
             elif kind_of_batch == IMPORT_BALLOT_ITEM:
+                # Retrieve Creates and Updates
                 existing_results = \
                     batch_manager.retrieve_batch_row_action_ballot_item(batch_header_id, one_batch_row.id)
                 if existing_results['batch_row_action_found']:
@@ -487,6 +488,7 @@ def batch_action_list_view(request):
                 else:
                     one_batch_row.batch_row_action_exists = False
                 modified_batch_row_list.append(one_batch_row)
+                # Retrieve Deletes
             elif kind_of_batch == IMPORT_VOTER:
                 existing_results = \
                     batch_manager.retrieve_batch_row_action_ballot_item(batch_header_id, one_batch_row.id)
@@ -533,6 +535,19 @@ def batch_action_list_view(request):
                     one_batch_row.batch_row_action_exists = True
                 else:
                     one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+
+    if kind_of_batch == IMPORT_BALLOT_ITEM:
+        results = batch_manager.retrieve_batch_row_action_ballot_item_list(
+            batch_header_id, limit_to_kind_of_action_list=[IMPORT_DELETE, IMPORT_ALREADY_DELETED])
+        if results['batch_row_action_list_found']:
+            batch_row_action_list = results['batch_row_action_list']
+            for batch_row_action_ballot_item in batch_row_action_list:
+                one_batch_row = BatchRow()
+                one_batch_row.batch_header_id = batch_header_id
+                one_batch_row.batch_row_action = batch_row_action_ballot_item
+                one_batch_row.kind_of_batch = IMPORT_BALLOT_ITEM
+                one_batch_row.batch_row_action_exists = True
                 modified_batch_row_list.append(one_batch_row)
 
     election_query = Election.objects.order_by('-election_day_text')
@@ -1061,6 +1076,7 @@ def batch_action_list_create_or_update_process_view(request):
 
     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
     batch_row_id = convert_to_int(request.GET.get('batch_row_id', 0))
+    ballot_item_id = convert_to_int(request.GET.get('ballot_item_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
     kind_of_action = request.GET.get('kind_of_action')
     state_code = request.GET.get('state_code', '')
@@ -1092,8 +1108,7 @@ def batch_action_list_create_or_update_process_view(request):
 
     if batch_header_map_found and batch_row_list_found:
         results = import_data_from_batch_row_actions(
-            kind_of_batch, kind_of_action, batch_header_id, batch_row_id, state_code)
-
+            kind_of_batch, kind_of_action, batch_header_id, batch_row_id, state_code, ballot_item_id=ballot_item_id)
         if kind_of_action == IMPORT_CREATE:
             if results['success']:
                 messages.add_message(request, messages.INFO,
@@ -1117,6 +1132,17 @@ def batch_action_list_create_or_update_process_view(request):
                                      'Batch kind: {kind_of_batch} UPDATE_FAILED-UPDATE_MAY_NOT_BE_SUPPORTED_YET, '
                                      'status: {status} '
                                      ''.format(kind_of_batch=kind_of_batch, status=status))
+        elif kind_of_action == IMPORT_DELETE:
+            if results['success']:
+                messages.add_message(request, messages.INFO,
+                                     'Kind of Batch: {kind_of_batch}, ' 'Number Deleted: {deleted} '
+                                     ''.format(kind_of_batch=kind_of_batch,
+                                               deleted=results['number_of_table_rows_deleted']))
+            else:
+                status += results['status']
+                messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} delete failed: {status}'
+                                                              ''.format(kind_of_batch=kind_of_batch,
+                                                                        status=status))
         else:
             status += results['status']
             messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} import status: {status}'
@@ -1667,6 +1693,7 @@ def batch_set_batch_list_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     analyze_all_button = request.GET.get('analyze_all_button', 0)
     create_all_button = request.GET.get('create_all_button', 0)
+    delete_all_button = request.GET.get('delete_all_button', 0)
     show_all_batches = request.GET.get('show_all_batches', False)
     state_code = request.GET.get('state_code', "")
     update_all_button = request.GET.get('update_all_button', 0)
@@ -1767,8 +1794,8 @@ def batch_set_batch_list_view(request):
                     batch_actions_not_updated += 1
 
             if positive_value_exists(batch_actions_updated):
-                messages.add_message(request, messages.INFO, "Update in All Batches, Updates: "
-                                                             "" + str(batch_actions_updated))
+                messages.add_message(request, messages.INFO, "Update in All Batches: "
+                                                             "" + str(batch_actions_updated) + ". ")
 
             if positive_value_exists(batch_actions_not_updated):
                 messages.add_message(request, messages.ERROR, "Update in All Batches, Failed Updates: "
@@ -1785,7 +1812,6 @@ def batch_set_batch_list_view(request):
             batch_list = list(batch_description_query)
 
             batch_actions_created = 0
-            batch_actions_not_created = 0
             not_created_status = ""
             for one_batch_description in batch_list:
                 results = import_data_from_batch_row_actions(
@@ -1798,14 +1824,44 @@ def batch_set_batch_list_view(request):
                         not_created_status += results['status']
 
             if positive_value_exists(batch_actions_created):
-                messages.add_message(request, messages.INFO, "Create in All Batches, Creates: "
-                                                             "" + str(batch_actions_created))
+                messages.add_message(request, messages.INFO, "Create in All Batches: "
+                                                             "" + str(batch_actions_created) + ". ")
 
             if positive_value_exists(not_created_status):
                 messages.add_message(request, messages.ERROR,
                                      "Create in All Batches, FAILED Creates: {not_created_status} "
-                                     "".format(batch_actions_not_created=str(batch_actions_not_created),
-                                               not_created_status=not_created_status))
+                                     "".format(not_created_status=not_created_status))
+
+            return HttpResponseRedirect(reverse('import_export_batches:batch_set_batch_list', args=()) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&batch_set_id=" + str(batch_set_id) +
+                                        "&state_code=" + state_code)
+
+        if positive_value_exists(delete_all_button):
+            batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+            batch_description_query = batch_description_query.filter(batch_description_analyzed=True)
+            batch_list = list(batch_description_query)
+
+            batch_actions_deleted = 0
+            not_deleted_status = ""
+            for one_batch_description in batch_list:
+                results = import_data_from_batch_row_actions(
+                    one_batch_description.kind_of_batch, IMPORT_DELETE, one_batch_description.batch_header_id)
+                if results['number_of_table_rows_deleted']:
+                    batch_actions_deleted += 1
+
+                if not positive_value_exists(results['success']):
+                    if len(not_deleted_status) < 1024:
+                        not_deleted_status += results['status']
+
+            if positive_value_exists(batch_actions_deleted):
+                messages.add_message(request, messages.INFO, "Deletes in All Batches: "
+                                                             "" + str(batch_actions_deleted) + ", ")
+
+            if positive_value_exists(not_deleted_status):
+                messages.add_message(request, messages.ERROR,
+                                     "Create in All Batches, FAILED Creates: {not_deleted_status} "
+                                     "".format(not_deleted_status=not_deleted_status))
 
             return HttpResponseRedirect(reverse('import_export_batches:batch_set_batch_list', args=()) +
                                         "?google_civic_election_id=" + str(google_civic_election_id) +
@@ -1831,10 +1887,18 @@ def batch_set_batch_list_view(request):
             one_batch_description.number_of_table_rows_to_update = \
                 batch_manager.fetch_batch_row_action_count(batch_header_id, one_batch_description.kind_of_batch,
                                                            IMPORT_ADD_TO_EXISTING)
+            one_batch_description.number_of_table_rows_to_delete = \
+                batch_manager.fetch_batch_row_action_count(batch_header_id, one_batch_description.kind_of_batch,
+                                                           IMPORT_DELETE)
+            one_batch_description.number_of_table_rows_already_deleted = \
+                batch_manager.fetch_batch_row_action_count(batch_header_id, one_batch_description.kind_of_batch,
+                                                           IMPORT_ALREADY_DELETED)
             one_batch_description.number_of_batch_actions_cannot_act = \
                 one_batch_description.number_of_batch_rows_analyzed - \
                 one_batch_description.number_of_batch_actions_to_create - \
-                one_batch_description.number_of_table_rows_to_update
+                one_batch_description.number_of_table_rows_to_update - \
+                one_batch_description.number_of_table_rows_to_delete - \
+                one_batch_description.number_of_table_rows_already_deleted
 
             batch_set_kind_of_batch = one_batch_description.kind_of_batch
 
@@ -1858,6 +1922,12 @@ def batch_set_batch_list_view(request):
     if positive_value_exists(batch_row_items_to_update_for_this_set):
         status_message += 'BatchRowActions to update: {batch_row_items_to_update_for_this_set} '.format(
             batch_row_items_to_update_for_this_set=batch_row_items_to_update_for_this_set)
+
+    batch_row_items_to_delete_for_this_set = batch_manager.fetch_batch_row_action_count_in_batch_set(
+        batch_set_id, batch_set_kind_of_batch, IMPORT_DELETE)
+    if positive_value_exists(batch_row_items_to_delete_for_this_set):
+        status_message += 'BatchRowActions to delete: {batch_row_items_to_delete_for_this_set} '.format(
+            batch_row_items_to_delete_for_this_set=batch_row_items_to_delete_for_this_set)
 
     messages.add_message(request, messages.INFO, status_message)
 
