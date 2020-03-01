@@ -1201,6 +1201,14 @@ def batch_set_list_view(request):
         batch_description_query = batch_description_query.exclude(batch_description_analyzed=True)
         one_batch_set.batch_description_not_analyzed_count = batch_description_query.count()
 
+        batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_set_id=one_batch_set.id)
+        batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=IMPORT_DELETE)
+        one_batch_set.batch_description_to_delete_count = batch_row_action_query.count()
+
+        batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_set_id=one_batch_set.id)
+        batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=IMPORT_ALREADY_DELETED)
+        one_batch_set.batch_description_already_deleted_count = batch_row_action_query.count()
+
         if positive_value_exists(one_batch_set.batch_description_total_rows_count):
             try:
                 if batch_description.kind_of_batch == IMPORT_BALLOT_ITEM:

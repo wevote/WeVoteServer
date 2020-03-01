@@ -67,6 +67,7 @@
             <th>Election</th>
             <th>To be Analyzed</th>
             <th>To be Created</th>
+            <th>To Delete / Deleted</th>
             <th>Total Records</th>
             <th>Date Created</th>
         </tr>
@@ -85,6 +86,15 @@
             </td>
             <td>{% if one_batch_set.batch_description_not_analyzed_count > 0 %}{{ one_batch_set.batch_description_not_analyzed_count }}{% endif %}</td>
             <td>{% if one_batch_set.batch_description_not_created_count > 0 %}{{ one_batch_set.batch_description_not_created_count }}{% endif %}</td>
+            <td>
+              <span{% if one_batch_set.batch_description_to_delete_count == 0 %} style="color: darkgray;"{% endif %}>
+                {% if one_batch_set.batch_description_to_delete_count or one_batch_set.batch_description_already_deleted_count %}
+                  {% if one_batch_set.batch_description_to_delete_count %}{{ one_batch_set.batch_description_to_delete_count }}{% else %}0{% endif %}
+                  /
+                  {% if one_batch_set.batch_description_already_deleted_count %}{{ one_batch_set.batch_description_already_deleted_count }}{% else %}0{% endif %}
+                {% endif %}
+              </span>
+            </td>
             <td>{% if one_batch_set.batch_description_total_rows_count > 0 %}{{ one_batch_set.batch_description_total_rows_count }}{% endif %}</td>
             <td>{{ one_batch_set.import_date }}</td>
         </tr>
