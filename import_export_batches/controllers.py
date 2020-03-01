@@ -14,7 +14,7 @@ from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, Ba
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
 from ballot.models import BallotItem, BallotItemListManager, BallotItemManager, BallotReturnedManager
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
-from django.db import transaction
+# from django.db import transaction
 from django.db.models import Q
 from elected_office.models import ElectedOffice, ElectedOfficeManager
 from electoral_district.controllers import retrieve_electoral_district
@@ -48,12 +48,12 @@ MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
 
 
-@transaction.atomic
 def create_batch_row_actions(
         batch_header_id,
         batch_description=None,
         batch_row_id=0,
         state_code="",
+        delete_analysis_only=False,
         election_objects_dict={},
         measure_objects_dict={},
         office_objects_dict={}):
@@ -64,6 +64,7 @@ def create_batch_row_actions(
     :param batch_description:
     :param batch_row_id:
     :param state_code:
+    :param delete_analysis_only:
     :param election_objects_dict:
     :param measure_objects_dict:
     :param office_objects_dict:
@@ -123,7 +124,7 @@ def create_batch_row_actions(
 
     batch_row_list = []
     batch_row_action_list_found = False
-    if batch_description_found and batch_header_map_found:
+    if batch_description_found and batch_header_map_found and not delete_analysis_only:
         try:
             batch_row_query = BatchRow.objects.all()  # We need to be able to save this
             batch_row_query = batch_row_query.filter(batch_header_id=batch_header_id)
@@ -145,7 +146,7 @@ def create_batch_row_actions(
             pass
 
     batch_row_action_list = []
-    if batch_description_found and batch_header_map_found and batch_row_action_list_found:
+    if batch_description_found and batch_header_map_found and batch_row_action_list_found and not delete_analysis_only:
         for one_batch_row in batch_row_list:
             if kind_of_batch == CANDIDATE:
                 results = create_batch_row_action_candidate(batch_description, batch_header_map, one_batch_row)
@@ -254,6 +255,20 @@ def create_batch_row_actions(
 
     existing_ballot_item_list = []
     if kind_of_batch == IMPORT_BALLOT_ITEM:
+        if delete_analysis_only and not positive_value_exists(batch_row_id):
+            # If here we need to retrieve existing batch_row_actions
+            batch_manager = BatchManager()
+            results = batch_manager.retrieve_batch_row_action_ballot_item_list(
+                batch_header_id, limit_to_kind_of_action_list=[IMPORT_CREATE, IMPORT_ADD_TO_EXISTING])
+            if results['batch_row_action_list_found']:
+                batch_row_action_list = results['batch_row_action_list']
+                if positive_value_exists(batch_description.polling_location_we_vote_id):
+                    polling_location_we_vote_id = batch_description.polling_location_we_vote_id
+                elif len(batch_row_action_list):
+                    batch_row_action_ballot_item = batch_row_action_list[0]
+                    polling_location_we_vote_id = batch_row_action_ballot_item.polling_location_we_vote_id
+                    voter_id = batch_row_action_ballot_item.voter_id
+
         # Don't deal with deleting ballot items if we are only looking at one batch row
         if batch_description_found and batch_header_map_found and not positive_value_exists(batch_row_id):
             # Start by retrieving existing ballot items for this polling location
@@ -261,7 +276,7 @@ def create_batch_row_actions(
                     positive_value_exists(batch_description.google_civic_election_id):
                 ballot_item_list_manager = BallotItemListManager()
                 results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
-                    batch_description.polling_location_we_vote_id,
+                    polling_location_we_vote_id,
                     batch_description.google_civic_election_id,
                     read_only=True)
                 if results['ballot_item_list_found']:

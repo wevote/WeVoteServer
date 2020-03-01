@@ -175,22 +175,20 @@
     {% if kind_of_batch == "IMPORT_BALLOT_ITEM" %}
     {# TODO Add a way to select a polling location, if one doesn't exist #}
     {% endif %}
-
+<div style="display: flex">
+  <div>
     <form action="{% url 'import_export_batches:batch_action_list_analyze_process' %}" method="get" class="form-horizontal">
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
         <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
         <input type="hidden" name="polling_location_we_vote_id" value="{{ polling_location_we_vote_id }}">
         <input type="hidden" name="state_code" value="{{ state_code }}">
-
-        <div class="form-group">
-            <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
-            <div class="col-sm-8">
-                <button type="submit" id="create_actions_button_id" name="create_actions_button" class="btn btn-default"
-                        value={{ kind_of_batch }}>Analyze Data</button>
-            </div>
-        </div>
+        <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+        <button type="submit" id="create_actions_button_id" name="create_actions_button" class="btn btn-default"
+                value={{ kind_of_batch }}>Analyze Data</button>
     </form>
+  </div>
+  <div>
     <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
@@ -201,6 +199,8 @@
         <button type="submit" id="create_import_create_actions_button_id" name="create_actions_button" class="btn btn-default"
                 value={{ kind_of_batch }}>Create Live Data</button>
     </form>
+  </div>
+  <div>
     <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
@@ -211,6 +211,25 @@
         <button type="submit" id="create_import_update_actions_button_id" name="create_actions_button" class="btn btn-default"
                 value={{ kind_of_batch }}>Update Live Data</button>
     </form>
+  </div>
+  {# Delete #}
+  <div>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </div>
+  <div>
+    <form action="{% url 'import_export_batches:batch_action_list_analyze_process' %}" method="get" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
+        <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
+        <input type="hidden" name="polling_location_we_vote_id" value="{{ polling_location_we_vote_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+        <input type="hidden" name="delete_analysis_only" value="1" />
+        <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+        <button type="submit" id="create_actions_button_id" name="create_actions_button" class="btn btn-default"
+                value={{ kind_of_batch }}>Analyze for Deletes</button>
+    </form>
+  </div>
+  <div>
     <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
@@ -221,7 +240,8 @@
         <button type="submit" id="create_import_update_actions_button_id" name="create_actions_button" class="btn btn-default"
                 value={{ kind_of_batch }}>Delete Live Data</button>
     </form>
-
+  </div>
+</div>
 {% endif %}
 
 {% if batch_row_list %}
