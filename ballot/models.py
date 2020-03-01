@@ -1579,7 +1579,7 @@ class BallotReturned(models.Model):
     election_date = models.DateField(verbose_name='election start date', null=True, auto_now=False)
 
     # Should we show this ballot as an option for this election?
-    ballot_location_display_option_on = models.BooleanField(default=False)
+    ballot_location_display_option_on = models.BooleanField(default=False, db_index=True)
     ballot_location_display_name = models.CharField(verbose_name='name that shows in button',
                                                     max_length=255, blank=True, null=True, db_index=True)
     ballot_location_shortcut = models.CharField(verbose_name='the url string to find this location',

@@ -142,6 +142,7 @@ def elections_retrieve_for_api():  # electionsRetrieve
         success = True
     except Exception as e:
         success = False
+        status += "ERROR: " + str(e) + " "
         results = {
             'success': success,
             'status': status,
@@ -160,10 +161,10 @@ def elections_retrieve_for_api():  # electionsRetrieve
             ballot_returned_query = ballot_returned_query.order_by('ballot_location_display_name')
             ballot_returned_list = list(ballot_returned_query)
 
-            ballot_returned_count_query = BallotReturned.objects.using('readonly')
-            ballot_returned_count_query = ballot_returned_count_query.filter(
-                google_civic_election_id=election.google_civic_election_id)
-            ballot_returned_count = ballot_returned_count_query.count()
+            # ballot_returned_count_query = BallotReturned.objects.using('readonly')
+            # ballot_returned_count_query = ballot_returned_count_query.filter(
+            #     google_civic_election_id=election.google_civic_election_id)
+            # ballot_returned_count = ballot_returned_count_query.count()
 
             for ballot_returned in ballot_returned_list:
                 ballot_location_display_option = {
@@ -186,12 +187,12 @@ def elections_retrieve_for_api():  # electionsRetrieve
                 'state_code':                   election.state_code,
                 'ocd_division_id':              election.ocd_division_id,
                 'ballot_location_list':         ballot_location_list,
-                'ballot_returned_count':        ballot_returned_count,
+                # 'ballot_returned_count':        ballot_returned_count,
             }
             election_list.append(election_json)
 
         except Exception as e:
-            pass
+            status += "FAILURE: " + str(e) + " "
 
     results = {
         'success':          success,
