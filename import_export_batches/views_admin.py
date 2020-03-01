@@ -771,6 +771,7 @@ def batch_action_list_analyze_process_view(request):
     batch_row_id = convert_to_int(request.GET.get('batch_row_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
     state_code = request.GET.get('state_code', '')
+    delete_analysis_only = positive_value_exists(request.GET.get('delete_analysis_only', False))
     if state_code == "None":
         state_code = ""
 
@@ -783,7 +784,8 @@ def batch_action_list_analyze_process_view(request):
     # POSITION, POLITICIAN, IMPORT_BALLOT_ITEM)
     # Run the analysis of either A) every row in this batch, or B) Just the batch_row_id specified within this batch
     results = create_batch_row_actions(batch_header_id=batch_header_id, batch_description=None,
-                                       batch_row_id=batch_row_id, state_code=state_code)
+                                       batch_row_id=batch_row_id, state_code=state_code,
+                                       delete_analysis_only=delete_analysis_only)
     kind_of_batch = results['kind_of_batch']
 
     messages.add_message(request, messages.INFO, 'Batch Actions: '
@@ -1172,6 +1174,7 @@ def batch_set_list_view(request):
     batch_file = request.GET.get('batch_file', '')
     batch_uri = request.GET.get('batch_uri', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    limit = request.GET.get('limit', 25)
 
     messages_on_stage = get_messages(request)
     batch_set_list_found = False
@@ -1181,7 +1184,7 @@ def batch_set_list_view(request):
         if positive_value_exists(google_civic_election_id):
             batch_set_query = batch_set_query.filter(google_civic_election_id=google_civic_election_id)
 
-        batch_set_list = batch_set_query[:100]
+        batch_set_list = batch_set_query[:limit]
         if len(batch_set_list):
             batch_set_list_found = True
     except BatchSet.DoesNotExist:
@@ -1701,6 +1704,7 @@ def batch_set_batch_list_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     analyze_all_button = request.GET.get('analyze_all_button', 0)
     create_all_button = request.GET.get('create_all_button', 0)
+    analyze_for_deletes_button = request.GET.get('analyze_for_deletes_button', 0)
     delete_all_button = request.GET.get('delete_all_button', 0)
     show_all_batches = request.GET.get('show_all_batches', False)
     state_code = request.GET.get('state_code', "")
@@ -1839,6 +1843,40 @@ def batch_set_batch_list_view(request):
                 messages.add_message(request, messages.ERROR,
                                      "Create in All Batches, FAILED Creates: {not_created_status} "
                                      "".format(not_created_status=not_created_status))
+
+            return HttpResponseRedirect(reverse('import_export_batches:batch_set_batch_list', args=()) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&batch_set_id=" + str(batch_set_id) +
+                                        "&state_code=" + state_code)
+
+        if positive_value_exists(analyze_for_deletes_button):
+            batch_actions_analyzed_for_deletes = 0
+            batch_header_id_created_list = []
+
+            batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+            batch_description_query = batch_description_query.filter(batch_description_analyzed=True)
+            batch_list = list(batch_description_query)
+
+            for one_batch_description in batch_list:
+                results = create_batch_row_actions(
+                    one_batch_description.batch_header_id,
+                    batch_description=one_batch_description,
+                    delete_analysis_only=True,
+                    election_objects_dict=election_objects_dict,
+                    measure_objects_dict=measure_objects_dict,
+                    office_objects_dict=office_objects_dict,
+                )
+                if results['batch_actions_created']:
+                    batch_actions_analyzed_for_deletes += 1
+                    batch_header_id_created_list.append(one_batch_description.batch_header_id)
+
+                election_objects_dict = results['election_objects_dict']
+                measure_objects_dict = results['measure_objects_dict']
+                office_objects_dict = results['office_objects_dict']
+
+            if positive_value_exists(batch_actions_analyzed_for_deletes):
+                messages.add_message(request, messages.INFO, "Analyze For Deletes: "
+                                                             "" + str(batch_actions_analyzed_for_deletes))
 
             return HttpResponseRedirect(reverse('import_export_batches:batch_set_batch_list', args=()) +
                                         "?google_civic_election_id=" + str(google_civic_election_id) +
