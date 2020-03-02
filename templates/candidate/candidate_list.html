@@ -266,11 +266,23 @@
     <input type="hidden" name="show_all_elections" id="show_all_elections_id" value="{{ show_all_elections }}" />
     <input type="submit" value="Search for Candidate" />
 
-    {# Turn on/off review mode? #}
+    {# Turn on/off review mode #}
     &nbsp;&nbsp;&nbsp;&nbsp;
     <label for="review_mode_id">
       <input type="checkbox" name="review_mode" id="review_mode_id" value="1"
-             {% if review_mode %}checked{% endif %} /> Review mode (10-30 second load time)
+             {% if review_mode %}checked{% endif %} /> Review mode
+    </label>
+    {# Show candidates without Twitter handle #}
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="show_candidates_without_twitter_id">
+      <input type="checkbox" name="show_candidates_without_twitter" id="show_candidates_without_twitter_id" value="1"
+             {% if show_candidates_without_twitter %}checked{% endif %} /> Show Candidates Without Twitter
+    </label>
+    {# Show candidates with Twitter options #}
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="show_candidates_with_twitter_options_id">
+      <input type="checkbox" name="show_candidates_with_twitter_options" id="show_candidates_with_twitter_options_id" value="1"
+             {% if show_candidates_with_twitter_options %}checked{% endif %} /> Show Twitter "Choose and Update"
     </label>
     {% if not review_mode %}
         <span class="float-right"><a href="{{ previous_page_url }}">Previous page</a> | <a href="{{ next_page_url }}">Next page</a></span>
@@ -351,7 +363,7 @@
                 </td>
                 <td>{% if candidate.candidate_twitter_handle %}
                         <a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
-                            target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
+                            target="_blank">{{ candidate.candidate_twitter_handle }} <span class="glyphicon glyphicon-new-window"></span></a><br />
                         ({{ candidate.twitter_followers_count }} followers)
                     {% else %}
                         {% if candidate.candidate_merge_possibility %}
@@ -360,13 +372,13 @@
                             <a href="https://twitter.com/{{ candidate.candidate_merge_possibility.twitter_handle }}" target="_blank">
                                 <img src='{{ candidate.candidate_merge_possibility.twitter_profile_image_url_https }}' height="25px" /></a>&nbsp;
                             <a href="https://twitter.com/{{ candidate.candidate_merge_possibility.twitter_handle }}" target="_blank">
-                                {{ candidate.candidate_merge_possibility.twitter_handle }}</a>
+                                {{ candidate.candidate_merge_possibility.twitter_handle }} <span class="glyphicon glyphicon-new-window"></span></a>
                             (<a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_all_twitter_search_results=1" target="_blank">
-                                Best Guess: {{ candidate.candidate_merge_possibility.likelihood_score }}</a>)
+                                Best Guess: {{ candidate.candidate_merge_possibility.likelihood_score }} <span class="glyphicon glyphicon-new-window"></span></a>)
                             </span><br />
                             {{ candidate.candidate_merge_possibility.twitter_description }}<br />
                             {% if candidate.candidate_merge_possibility.likelihood_score >= 60 %}
-                                <form action="{% url 'candidate:candidate_edit_process' %}" id="candidate_edit" method="post" class="form-horizontal">
+                                <form action="{% url 'candidate:candidate_edit_process' %}" id="candidate_edit" method="post" class="form-horizontal" target="_blank">
                                     {% csrf_token %}
                                     <input type="hidden" name="candidate_twitter_handle" value="{{ candidate.candidate_merge_possibility.twitter_handle }}" />
                                     <input type="hidden" name="candidate_id" value="{{ candidate.id }}" />
@@ -377,11 +389,11 @@
                                     <input type="hidden" name="refresh_from_twitter" value="1" />
                                     <input type="hidden" name="redirect_to_candidate_list" value="1" />
                                     <input type="hidden" name="twitter_url" value="{{ candidate.candidate_merge_possibility.twitter_url }}" />
-                                    <input id="choose_{{ forloop.counter }}" type="submit" value="Choose and Update" />
+                                    <input id="choose_{{ forloop.counter }}" type="submit" value="Choose and Update" /> <span class="glyphicon glyphicon-new-window"></span>
                                 </form>
                             {% else %}
                             (<a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_all_twitter_search_results=1" target="_blank">
-                                See all Options</a>)
+                                See all Options <span class="glyphicon glyphicon-new-window"></span></a>)
                             {% endif %}
                         </li></ul>
                         {% elif candidate.no_twitter_possibilities_found %}
@@ -556,6 +568,16 @@
     });
     $(function() {
         $('#review_mode_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_candidates_with_twitter_options_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_candidates_without_twitter_id').change(function() {
             this.form.submit();
         });
     });
