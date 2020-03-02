@@ -3269,45 +3269,26 @@ def voter_setup(request):
 class VoterMetricsManager(models.Model):
 
     def fetch_voter_count_with_sign_in(self):
-        or_filter = True
-        has_twitter = True
-        has_facebook = True
-        has_email = False
-        has_verified_email = True
-        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
+        return self.fetch_voter_count(
+            or_filter=True, has_twitter=True, has_facebook=True, has_verified_email=True, has_verified_sms=True)
 
     def fetch_voter_count_with_twitter(self):
-        or_filter = True
-        has_twitter = True
-        has_facebook = False
-        has_email = False
-        has_verified_email = False
-        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
+        return self.fetch_voter_count(or_filter=True, has_twitter=True)
 
     def fetch_voter_count_with_facebook(self):
-        or_filter = True
-        has_twitter = False
-        has_facebook = True
-        has_email = False
-        has_verified_email = False
-        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
+        return self.fetch_voter_count(or_filter=True, has_facebook=True)
 
     def fetch_voter_count_with_verified_email(self):
-        or_filter = True
-        has_twitter = False
-        has_facebook = False
-        has_email = False
-        has_verified_email = True
-        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
+        return self.fetch_voter_count(or_filter=True, has_verified_email=True)
+
+    def fetch_voter_count_with_verified_sms(self):
+        return self.fetch_voter_count(or_filter=True, has_verified_sms=True)
 
     def fetch_voter_count(self, or_filter=True,
                           has_twitter=False, has_facebook=False, has_email=False, has_verified_email=False,
+                          has_verified_sms=False,
                           by_notification_settings=0, by_interface_status_flags=0):
-        if not 'test' in sys.argv:
-            voter_queryset = Voter.objects.using('readonly').all()
-        else:
-            # Feb 2019: We shouldn't need to do this special case for django tests.
-            voter_queryset = Voter.objects.all()
+        voter_queryset = Voter.objects.using('readonly').all()
 
         voter_raw_filters = []
         if positive_value_exists(or_filter):
@@ -3324,6 +3305,10 @@ class VoterMetricsManager(models.Model):
             if positive_value_exists(has_verified_email):
                 new_voter_filter = Q(primary_email_we_vote_id__isnull=False)
                 voter_raw_filters.append(new_voter_filter)
+            if positive_value_exists(has_verified_sms):
+                new_voter_filter = Q(primary_sms_we_vote_id__isnull=False)
+                voter_raw_filters.append(new_voter_filter)
+
         else:
             # Add "and" filter here
             pass
