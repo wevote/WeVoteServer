@@ -2283,7 +2283,9 @@ class BallotReturnedManager(models.Model):
                         ballot_returned_query = ballot_returned_query.filter(
                             google_civic_election_id=past_google_civic_election_id)
 
-            ballot = ballot_returned_query.first()
+            ballot_returned_list = list(ballot_returned_query)
+            if len(ballot_returned_list):
+                ballot = ballot_returned_list[0]
         else:
             # If here, then the geocoder successfully found the address
             status += 'GEOCODER_FOUND_LOCATION '
@@ -2314,7 +2316,9 @@ class BallotReturnedManager(models.Model):
             if positive_value_exists(google_civic_election_id):
                 status += "SEARCHING_BY_GOOGLE_CIVIC_ID "
                 ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
-                ballot = ballot_returned_query.first()
+                ballot_returned_list = list(ballot_returned_query)
+                if len(ballot_returned_list):
+                    ballot = ballot_returned_list[0]
             else:
                 # If we have an active election coming up, including today
                 # fetch_next_upcoming_election_in_this_state returns next election with ballot items
@@ -2324,7 +2328,9 @@ class BallotReturnedManager(models.Model):
                     ballot_returned_query_without_election_id = ballot_returned_query
                     ballot_returned_query = ballot_returned_query.filter(
                         google_civic_election_id=upcoming_google_civic_election_id)
-                    ballot = ballot_returned_query.first()
+                    ballot_returned_list = list(ballot_returned_query)
+                    if len(ballot_returned_list):
+                        ballot = ballot_returned_list[0]
                     # What if this is a National election, but there aren't any races in the state the voter is in?
                     # We want to find the *next* upcoming election
                     if ballot is None:
@@ -2342,7 +2348,9 @@ class BallotReturnedManager(models.Model):
                             if positive_value_exists(upcoming_google_civic_election_id):
                                 ballot_returned_query = ballot_returned_query.filter(
                                     google_civic_election_id=upcoming_google_civic_election_id)
-                                ballot = ballot_returned_query.first()
+                                ballot_returned_list = list(ballot_returned_query)
+                                if len(ballot_returned_list):
+                                    ballot = ballot_returned_list[0]
                                 if ballot is not None:
                                     ballot_not_found = False
                             else:
@@ -2353,7 +2361,9 @@ class BallotReturnedManager(models.Model):
                         # Limit the search to the most recent election with ballot items
                         ballot_returned_query = ballot_returned_query.filter(
                             google_civic_election_id=past_google_civic_election_id)
-                    ballot = ballot_returned_query.first()
+                    ballot_returned_list = list(ballot_returned_query)
+                    if len(ballot_returned_list):
+                        ballot = ballot_returned_list[0]
 
         if ballot is not None:
             ballot_returned = ballot
@@ -2385,7 +2395,9 @@ class BallotReturnedManager(models.Model):
                 status += "SEARCHING_BY_GOOGLE_CIVIC_ID-ATTEMPT2 "
                 ballot_returned_query = ballot_returned_query.filter(
                     google_civic_election_id=google_civic_election_id)
-                ballot_returned = ballot_returned_query.first()
+                ballot_returned_list = list(ballot_returned_query)
+                if len(ballot_returned_list):
+                    ballot_returned = ballot_returned_list[0]
                 if ballot_returned is not None:
                     ballot_returned_found = True
                     status += 'BALLOT_RETURNED_FOUND-ATTEMPT2 '
@@ -3592,7 +3604,7 @@ def find_best_previously_stored_ballot_returned(voter_id, text_for_map_search, g
     :return:
     """
     status = ""
-
+    closest_ballot_returned = None
     ballot_returned_manager = BallotReturnedManager()
     voter_ballot_saved_manager = VoterBallotSavedManager()
     ballot_item_list_manager = BallotItemListManager()
@@ -3803,28 +3815,52 @@ def find_best_previously_stored_ballot_returned(voter_id, text_for_map_search, g
 
     # VoterBallotSaved is updated outside of this function
 
-    results = {
-        'voter_id':                             voter_id,
-        'google_civic_election_id':             closest_ballot_returned.google_civic_election_id,
-        'state_code':                           closest_ballot_returned.normalized_state,
-        'election_day_text':                    closest_ballot_returned.election_day_text(),
-        'election_description_text':            closest_ballot_returned.election_description_text,
-        'text_for_map_search':                  closest_ballot_returned.text_for_map_search,
-        'original_text_city':                   closest_ballot_returned.normalized_city,
-        'original_text_state':                  closest_ballot_returned.normalized_state,
-        'original_text_zip':                    closest_ballot_returned.normalized_zip,
-        'substituted_address_nearby':           closest_ballot_returned.text_for_map_search,
-        'substituted_address_city':             closest_ballot_returned.normalized_city,
-        'substituted_address_state':            closest_ballot_returned.normalized_state,
-        'substituted_address_zip':              closest_ballot_returned.normalized_zip,
-        'ballot_returned_found':               True,
-        'ballot_location_display_name':         closest_ballot_returned.ballot_location_display_name,
-        'ballot_returned_we_vote_id':           closest_ballot_returned.we_vote_id,
-        'ballot_location_shortcut':             closest_ballot_returned.ballot_location_shortcut if
-        closest_ballot_returned.ballot_location_shortcut else '',
-        'polling_location_we_vote_id_source':   closest_ballot_returned.polling_location_we_vote_id,
-        'status':                               status,
-    }
+    if closest_ballot_returned:
+        results = {
+            'voter_id': voter_id,
+            'google_civic_election_id': closest_ballot_returned.google_civic_election_id,
+            'state_code': closest_ballot_returned.normalized_state,
+            'election_day_text': closest_ballot_returned.election_day_text(),
+            'election_description_text': closest_ballot_returned.election_description_text,
+            'text_for_map_search': closest_ballot_returned.text_for_map_search,
+            'original_text_city': closest_ballot_returned.normalized_city,
+            'original_text_state': closest_ballot_returned.normalized_state,
+            'original_text_zip': closest_ballot_returned.normalized_zip,
+            'substituted_address_nearby': closest_ballot_returned.text_for_map_search,
+            'substituted_address_city': closest_ballot_returned.normalized_city,
+            'substituted_address_state': closest_ballot_returned.normalized_state,
+            'substituted_address_zip': closest_ballot_returned.normalized_zip,
+            'ballot_returned_found': True,
+            'ballot_location_display_name': closest_ballot_returned.ballot_location_display_name,
+            'ballot_returned_we_vote_id': closest_ballot_returned.we_vote_id,
+            'ballot_location_shortcut': closest_ballot_returned.ballot_location_shortcut if
+            closest_ballot_returned.ballot_location_shortcut else '',
+            'polling_location_we_vote_id_source': closest_ballot_returned.polling_location_we_vote_id,
+            'status': status,
+        }
+    else:
+        status += "CLOSEST_BALLOT_RETURNED_NOT_FOUND "
+        results = {
+            'voter_id': voter_id,
+            'google_civic_election_id': 0,
+            'state_code': '',
+            'election_day_text': '',
+            'election_description_text': '',
+            'text_for_map_search': '',
+            'original_text_city': '',
+            'original_text_state': '',
+            'original_text_zip': '',
+            'substituted_address_nearby': '',
+            'substituted_address_city': '',
+            'substituted_address_state': '',
+            'substituted_address_zip': '',
+            'ballot_returned_found': False,
+            'ballot_location_display_name': '',
+            'ballot_returned_we_vote_id': '',
+            'ballot_location_shortcut': '',
+            'polling_location_we_vote_id_source': '',
+            'status': status,
+        }
     return results
 
 
