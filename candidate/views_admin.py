@@ -216,6 +216,8 @@ def candidate_list_view(request):
     hide_candidate_tools = request.GET.get('hide_candidate_tools', 0)
     page = convert_to_int(request.GET.get('page', 0))
     page = page if positive_value_exists(page) else 0  # Prevent negative pages
+    show_candidates_without_twitter = request.GET.get('show_candidates_without_twitter', False)
+    show_candidates_with_twitter_options = request.GET.get('show_candidates_with_twitter_options', False)
     show_election_statistics = request.GET.get('show_election_statistics', False)
     show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
     # Remove "&page=" and everything after
@@ -399,6 +401,22 @@ def candidate_list_view(request):
                         final_filters |= item
 
                     candidate_queryset = candidate_queryset.filter(final_filters)
+        if positive_value_exists(show_candidates_with_twitter_options):
+            # Don't show candidates that already have Twitter handles
+            candidate_queryset = candidate_queryset.filter(
+                Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
+            try:
+                twitter_possibility_list = TwitterLinkPossibility.objects.\
+                    values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+                if len(twitter_possibility_list):
+                    candidate_queryset = candidate_queryset.filter(we_vote_id__in=twitter_possibility_list)
+            except Exception as e:
+                pass
+        elif positive_value_exists(show_candidates_without_twitter):
+            # Don't show candidates that already have Twitter handles
+            candidate_queryset = candidate_queryset.filter(
+                Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
+
         candidate_queryset = candidate_queryset.order_by('candidate_name')
         candidate_list_count = candidate_queryset.count()
 
@@ -627,6 +645,8 @@ def candidate_list_view(request):
         'previous_page_url':        previous_page_url,
         'review_mode':              review_mode,
         'show_all_elections':       show_all_elections,
+        'show_candidates_with_twitter_options': show_candidates_with_twitter_options,
+        'show_candidates_without_twitter': show_candidates_without_twitter,
         'show_election_statistics': show_election_statistics,
         'show_marquee_or_battleground': show_marquee_or_battleground,
         'state_code':               state_code,
@@ -903,9 +923,6 @@ def candidate_edit_process_view(request):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
-
-    ballotpedia_image_id = 0
-    ballotpedia_profile_image_url_https = None
 
     look_for_politician = request.POST.get('look_for_politician', False)  # If this comes in with value, don't save
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
@@ -1332,8 +1349,8 @@ def candidate_edit_process_view(request):
                                                       ''.format(error=str(e)))
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
-    if positive_value_exists(ballotpedia_image_id) and not positive_value_exists(ballotpedia_profile_image_url_https):
-        results = retrieve_and_save_ballotpedia_candidate_images(candidate_on_stage)
+    # if positive_value_exists(ballotpedia_image_id) and not positive_value_exists(ballotpedia_profile_image_url_https):
+    #     results = retrieve_and_save_ballotpedia_candidate_images(candidate_on_stage)
 
     if positive_value_exists(refresh_from_twitter) or positive_value_exists(candidate_twitter_handle):
         results = refresh_twitter_candidate_details(candidate_on_stage)
@@ -1343,6 +1360,7 @@ def candidate_edit_process_view(request):
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
                                     '&state_code=' + str(state_code) +
                                     '&hide_candidate_tools=' + str(hide_candidate_tools) +
+                                    '&show_candidates_with_twitter_options=1' +
                                     '&page=' + str(page))
 
     if remove_duplicate_process:
