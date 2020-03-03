@@ -741,7 +741,7 @@ def voter_ballot_list_retrieve_view(request):  # voterBallotListRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_count_view(request):  # voterCount
+def voter_count_view(request):  # voterCountView
     return voter_count()
 
 

@@ -134,6 +134,7 @@ class VoterManager(BaseUserManager):
 
         voter = Voter()
         voter_id = 0
+        voter_created = False
         try:
             if validate_email(email):
                 voter.email = email
@@ -146,6 +147,7 @@ class VoterManager(BaseUserManager):
                 password_not_valid = True
             voter.save()
             voter_id = voter.id
+            voter_created = True
         except IntegrityError as e:
             handle_record_not_saved_exception(e, logger=logger)
             logger.debug("create_voter IntegrityError exception (#1) " + str(e))
@@ -156,6 +158,7 @@ class VoterManager(BaseUserManager):
                 #  should look more closely at this
                 voter.save()
                 voter_id = voter.id
+                voter_created = True
             except IntegrityError as e:
                 handle_record_not_saved_exception(e, logger=logger)
                 logger.debug("create_voter IntegrityError exception (#2): " + str(e))
@@ -171,7 +174,7 @@ class VoterManager(BaseUserManager):
         results = {
             'email_not_valid':      email_not_valid,
             'password_not_valid':   password_not_valid,
-            'voter_created':        True if voter_id > 0 else False,
+            'voter_created':        voter_created,
             'voter':                voter,
         }
         return results
@@ -3288,7 +3291,11 @@ class VoterMetricsManager(models.Model):
                           has_twitter=False, has_facebook=False, has_email=False, has_verified_email=False,
                           has_verified_sms=False,
                           by_notification_settings=0, by_interface_status_flags=0):
-        voter_queryset = Voter.objects.using('readonly').all()
+        if 'test' in sys.argv:
+            # If coming from a test, we cannot use readonly
+            voter_queryset = Voter.objects.all()
+        else:
+            voter_queryset = Voter.objects.using('readonly').all()
 
         voter_raw_filters = []
         if positive_value_exists(or_filter):

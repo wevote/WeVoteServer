@@ -11,6 +11,7 @@ install_aliases()
 
 
 class WeVoteAPIsV1TestsVoterCount(TestCase):
+    databases = ["default", "readonly"]
 
     def setUp(self):
         # self.voter_count_url = "http://localhost:8000%s" % reverse("apis_v1:voterCountView")  # Python3?

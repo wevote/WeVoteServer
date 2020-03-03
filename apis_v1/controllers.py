@@ -131,7 +131,7 @@ def organization_follow_ignore(voter_device_id, organization_id=0, organization_
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_count():
+def voter_count():  # voterCountView
     voter_metrics_manager = VoterMetricsManager()
     voter_count_all = voter_metrics_manager.fetch_voter_count()
     success = True

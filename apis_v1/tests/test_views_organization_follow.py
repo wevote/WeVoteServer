@@ -11,6 +11,7 @@ from wevote_functions.functions import convert_to_int
 
 
 class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
+    databases = ["default", "readonly"]
 
     def setUp(self):
         self.generate_voter_device_id_url = reverse("apis_v1:deviceIdGenerateView")
