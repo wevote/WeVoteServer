@@ -14,6 +14,7 @@ from geopy.exc import GeocoderQuotaExceeded
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
 from polling_location.models import PollingLocationManager
+import sys
 import wevote_functions.admin
 from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
     extract_state_code_from_address_string, positive_value_exists
@@ -2245,7 +2246,9 @@ class BallotReturnedManager(models.Model):
             # If Geocoder is not able to give us a location, look to see if their voter entered their address as
             # "city_name, state_code" eg: "Sunnyvale, CA". If so, try to parse the entry and get ballot data
             # for that location
-            if positive_value_exists(read_only):
+            if 'test' in sys.argv:
+                ballot_returned_query = BallotReturned.objects.all()
+            elif positive_value_exists(read_only):
                 ballot_returned_query = BallotReturned.objects.using('readonly').all()
             else:
                 ballot_returned_query = BallotReturned.objects.all()
@@ -2292,7 +2295,9 @@ class BallotReturnedManager(models.Model):
             address = location.address
             # address has format "line_1, state zip, USA"
 
-            if positive_value_exists(read_only):
+            if 'test' in sys.argv:
+                ballot_returned_query = BallotReturned.objects.all()
+            elif positive_value_exists(read_only):
                 ballot_returned_query = BallotReturned.objects.using('readonly').all()
             else:
                 ballot_returned_query = BallotReturned.objects.all()
@@ -2378,7 +2383,9 @@ class BallotReturnedManager(models.Model):
                 address = location.address
                 # address has format "line_1, state zip, USA"
 
-                if positive_value_exists(read_only):
+                if 'test' in sys.argv:
+                    ballot_returned_query = BallotReturned.objects.all()
+                elif positive_value_exists(read_only):
                     ballot_returned_query = BallotReturned.objects.using('readonly').all()
                 else:
                     ballot_returned_query = BallotReturned.objects.all()

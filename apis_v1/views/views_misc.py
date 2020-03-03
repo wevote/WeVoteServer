@@ -26,7 +26,7 @@ def device_id_generate_view(request):  # deviceIdGenerate
     :return: Unique device id that can be stored in a cookie
     """
     voter_device_id = generate_voter_device_id()  # Stored in cookie elsewhere
-    if not 'test' in sys.argv:
+    if 'test' not in sys.argv:
         logger.debug("apis_v1/views.py, device_id_generate-voter_device_id: {voter_device_id}".format(
             voter_device_id=voter_device_id
     ))

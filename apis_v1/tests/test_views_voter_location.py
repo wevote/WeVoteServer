@@ -20,6 +20,7 @@ import json
 
 
 class WeVoteAPIsV1TestsVoterVoterLocation(TestCase):
+    databases = ["default", "readonly"]
 
     @classmethod
     def setUpTestData(cls):

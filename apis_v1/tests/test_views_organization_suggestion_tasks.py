@@ -12,6 +12,7 @@ from voter.models import Voter, VoterDeviceLink
 
 
 class WeVoteAPIsV1TestsOrganizationSuggestionTasks(TestCase):
+    databases = ["default", "readonly"]
 
     def setUp(self):
         self.generate_voter_device_id_url = reverse("apis_v1:deviceIdGenerateView")

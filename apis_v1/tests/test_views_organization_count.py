@@ -9,6 +9,7 @@ from organization.models import Organization
 
 
 class WeVoteAPIsV1TestsOrganizationCount(TestCase):
+    databases = ["default", "readonly"]
 
     def setUp(self):
         self.organization_count_url = reverse("apis_v1:organizationCountView")

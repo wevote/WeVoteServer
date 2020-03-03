@@ -8,6 +8,7 @@ import json
 
 
 class WeVoteAPIsV1TestsDeviceIdGenerate(TestCase):
+    databases = ["default", "readonly"]
 
     def setUp(self):
         self.read_url = reverse("apis_v1:deviceIdGenerateView")
