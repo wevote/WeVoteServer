@@ -9,7 +9,7 @@ from voter.models import VoterManager, Voter
 from future.standard_library import install_aliases
 install_aliases()
 
-
+# to do tests
 class WeVoteAPIsV1TestsVoterCount(TestCase):
 
     def setUp(self):
