@@ -6,10 +6,11 @@ from .controllers import create_batch_row_actions, import_data_from_batch_row_ac
 from .models import BatchDescription, BatchManager, BatchProcessManager, \
     IMPORT_CREATE, IMPORT_DELETE, \
     RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, \
-    REFRESH_BALLOT_ITEMS_FROM_VOTERS
-from datetime import datetime, timedelta
-from django.utils.timezone import localtime, now
-import pytz
+    REFRESH_BALLOT_ITEMS_FROM_VOTERS, SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE
+from datetime import timedelta
+from django.utils.timezone import now
+from twitter.controllers import fetch_number_of_candidates_needing_twitter_search, \
+    retrieve_possible_twitter_handles_in_bulk
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_batch_process_system_on
@@ -109,6 +110,30 @@ def batch_process_next_steps():
                             kind_of_process=kind_of_process,
                             status=status,
                         )
+        else:
+            # If here, there aren't any more scheduled, so we can schedule regular batch processes
+            number_of_candidates_to_analyze = fetch_number_of_candidates_needing_twitter_search()
+            if positive_value_exists(number_of_candidates_to_analyze):
+                results = batch_process_manager.create_batch_process(
+                    kind_of_process=SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE)
+                status += results['status']
+                success = results['success']
+                if results['batch_process_saved']:
+                    batch_process = results['batch_process']
+                    batch_process_list.append(batch_process)
+                    status += "SCHEDULED_SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        kind_of_process=batch_process.kind_of_process,
+                        status=status,
+                    )
+                else:
+                    status += "FAILED_TO_SCHEDULE-" + str(SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE) + " "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=0,
+                        kind_of_process=SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE,
+                        status=status,
+                    )
         status += "NEW_BATCH_PROCESS_COUNT: " + str(new_batch_process_list_count) + ", "
 
     for batch_process in batch_process_list:
@@ -132,6 +157,9 @@ def batch_process_next_steps():
                     state_code=batch_process.state_code,
                     status=status,
                 )
+        elif batch_process.kind_of_process in [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
+            results = process_one_search_twitter_batch_process(batch_process)
+            status += results['status']
         else:
             status += "KIND_OF_PROCESS_NOT_RECOGNIZED "
 
@@ -729,6 +757,81 @@ def process_one_ballot_item_batch_process(batch_process):
     else:
         # All steps have been completed
         pass
+
+    results = {
+        'success':              success,
+        'status':               status,
+    }
+    return results
+
+
+def process_one_search_twitter_batch_process(batch_process):
+    status = ""
+    success = True
+    batch_process_manager = BatchProcessManager()
+
+    kind_of_process = batch_process.kind_of_process
+
+    # When a batch_process is running, we mark when it was "taken off the shelf" to be worked on.
+    #  When the process is complete, we should reset this to "NULL"
+    try:
+        batch_process.date_started = now()
+        batch_process.date_checked_out = now()
+        batch_process.save()
+    except Exception as e:
+        status += "CHECKED_OUT_TIME_NOT_SAVED " + str(e) + " "
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=kind_of_process,
+            status=status,
+        )
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    retrieve_results = retrieve_possible_twitter_handles_in_bulk()
+    status += retrieve_results['status']
+
+    if retrieve_results['success']:
+        candidates_analyzed = retrieve_results['candidates_analyzed']
+        candidates_to_analyze = retrieve_results['candidates_to_analyze']
+        try:
+            batch_process.completion_summary = "Candidates Analyzed: {candidates_analyzed} " \
+                                               "out of {candidates_to_analyze}" \
+                                               "".format(candidates_analyzed=candidates_analyzed,
+                                                         candidates_to_analyze=candidates_to_analyze)
+            batch_process.date_checked_out = None
+            batch_process.date_completed = now()
+            batch_process.save()
+
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+        except Exception as e:
+            status += "DATE_COMPLETED_TIME_NOT_SAVED " + str(e) + " "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+    else:
+        status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES_FAILED "
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=kind_of_process,
+            status=status,
+        )
 
     results = {
         'success':              success,

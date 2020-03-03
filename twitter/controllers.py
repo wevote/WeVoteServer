@@ -4,15 +4,19 @@
 
 # See also WeVoteServer/import_export_twitter/controllers.py for routines that manage incoming twitter data
 import tweepy
-from .models import TwitterUserManager
+from .models import TwitterLinkPossibility, TwitterUserManager
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
-from candidate.models import CandidateCampaignListManager
+from candidate.models import CandidateCampaign, CandidateCampaignListManager
 from config.base import get_environment_variable
+from datetime import timedelta
+from django.utils.timezone import now
+from django.db.models import Q
+from election.models import ElectionManager
 from office.models import ContestOfficeManager
 from organization.models import OrganizationListManager
 from wevote_functions.functions import convert_state_code_to_state_text, convert_state_code_to_utc_offset, \
     convert_to_int, positive_value_exists, POSITIVE_SEARCH_KEYWORDS, NEGATIVE_SEARCH_KEYWORDS
-from wevote_settings.models import RemoteRequestHistoryManager, RETRIEVE_POSSIBLE_TWITTER_HANDLES
+from wevote_settings.models import RemoteRequestHistory, RemoteRequestHistoryManager, RETRIEVE_POSSIBLE_TWITTER_HANDLES
 from math import floor, log2
 from re import sub
 from time import time
@@ -168,6 +172,7 @@ def delete_possible_twitter_handles(candidate_campaign):
 
 def retrieve_possible_twitter_handles(candidate_campaign):
     status = ""
+    success = True
     twitter_user_manager = TwitterUserManager()
     remote_request_history_manager = RemoteRequestHistoryManager()
 
@@ -190,9 +195,7 @@ def retrieve_possible_twitter_handles(candidate_campaign):
                 candidate_campaign.contest_office_name = contest_office.office_name
                 candidate_campaign.save()
             except Exception as e:
-                pass
-
-    status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES-REACHING_OUT_TO_TWITTER "
+                status += "FAILED_TO_SAVE_CANDIDATE_CAMPAIGN: " + str(e) + " "
 
     search_term = candidate_campaign.candidate_name
 
@@ -248,25 +251,150 @@ def retrieve_possible_twitter_handles(candidate_campaign):
         analyze_twitter_search_results(modified_search_results_2, modified_search_results_2_found,
                                        candidate_name, candidate_campaign, possible_twitter_handles_list)
 
-    success = bool(possible_twitter_handles_list)
+    twitter_handles_found = bool(possible_twitter_handles_list)
+    status += "NUMBER_POSSIBLE_TWITTER_HANDLES_FOUND: " + str(len(possible_twitter_handles_list)) + " "
 
-    if success:
-        status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES-RETRIEVED_FROM_TWITTER"
-
+    if twitter_handles_found:
         for possibility_result in possible_twitter_handles_list:
             save_twitter_user_results = twitter_user_manager.update_or_create_twitter_link_possibility(
                 candidate_campaign.we_vote_id, possibility_result['twitter_json'],
                 possibility_result['search_term'], possibility_result['likelihood_score'])
+            if not save_twitter_user_results['success']:
+                status += save_twitter_user_results['status']
+                success = False
 
     # Create a record denoting that we have retrieved from Twitter for this candidate
     save_results_history = remote_request_history_manager.create_remote_request_history_entry(
         RETRIEVE_POSSIBLE_TWITTER_HANDLES, candidate_campaign.google_civic_election_id,
         candidate_campaign.we_vote_id, None, len(possible_twitter_handles_list), status)
+    if not save_results_history['success']:
+        status += save_results_history['status']
+        success = False
 
     results = {
-        'success':                  True,
+        'success':                  success,
         'status':                   status,
         'num_of_possibilities':     str(len(possible_twitter_handles_list)),
+    }
+
+    return results
+
+
+def fetch_number_of_candidates_needing_twitter_search():
+    election_manager = ElectionManager()
+    office_manager = ContestOfficeManager()
+    # Run Twitter account search and analysis on candidates without a linked or possible Twitter account
+    candidate_queryset = CandidateCampaign.objects.using('readonly').all()
+    # Limit this search to upcoming_elections only
+    google_civic_election_id_list = []
+    results = election_manager.retrieve_upcoming_elections()
+    election_list = results['election_list']
+    for one_election in election_list:
+        google_civic_election_id_list.append(one_election.google_civic_election_id)
+    office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+        host_google_civic_election_id_list=google_civic_election_id_list)
+    candidate_queryset = candidate_queryset.filter(
+        Q(google_civic_election_id__in=google_civic_election_id_list) |
+        Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+    candidate_queryset = candidate_queryset.filter(
+        Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
+    # Exclude candidates we have already have TwitterLinkPossibility data for
+    try:
+        twitter_possibility_list = TwitterLinkPossibility.objects.using('readonly'). \
+            values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+        if len(twitter_possibility_list):
+            candidate_queryset = candidate_queryset.exclude(we_vote_id__in=twitter_possibility_list)
+    except Exception as e:
+        pass
+    # Exclude candidates we have requested information for in the last month
+    try:
+        remote_request_query = RemoteRequestHistory.objects.using('readonly').filter(
+            google_civic_election_id__in=google_civic_election_id_list)
+        # Exclude candidates searched for in the last month
+        one_month_of_seconds = 60 * 60 * 24 * 30  # 60 seconds, 60 minutes, 24 hours, 30 days
+        one_month_ago = now() - timedelta(seconds=one_month_of_seconds)
+        remote_request_query = remote_request_query.filter(datetime_of_action__gt=one_month_ago)
+        remote_request_list = remote_request_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+        if len(remote_request_list):
+            candidate_queryset = candidate_queryset.exclude(we_vote_id__in=remote_request_list)
+    except Exception as e:
+        pass
+
+    try:
+        candidate_count = candidate_queryset.count()
+    except Exception as e:
+        candidate_count = 0
+
+    return candidate_count
+
+
+def retrieve_possible_twitter_handles_in_bulk():
+    status = ""
+    success = True
+
+    election_manager = ElectionManager()
+    office_manager = ContestOfficeManager()
+    # Run Twitter account search and analysis on candidates without a linked or possible Twitter account
+    candidate_queryset = CandidateCampaign.objects.all()  # Cannot be readonly
+    # Limit this search to upcoming_elections only
+    google_civic_election_id_list = []
+    results = election_manager.retrieve_upcoming_elections()
+    election_list = results['election_list']
+    for one_election in election_list:
+        google_civic_election_id_list.append(one_election.google_civic_election_id)
+    office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+        host_google_civic_election_id_list=google_civic_election_id_list)
+    candidate_queryset = candidate_queryset.filter(
+        Q(google_civic_election_id__in=google_civic_election_id_list) |
+        Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+    candidate_queryset = candidate_queryset.filter(
+        Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
+    # Exclude candidates we have already have TwitterLinkPossibility data for
+    try:
+        twitter_possibility_list = TwitterLinkPossibility.objects. \
+            values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+        if len(twitter_possibility_list):
+            candidate_queryset = candidate_queryset.exclude(we_vote_id__in=twitter_possibility_list)
+    except Exception as e:
+        status += "PROBLEM_RETRIEVING_TWITTER_LINK_POSSIBILITY " + str(e) + " "
+    # Exclude candidates we have requested information for in the last month
+    try:
+        remote_request_query = RemoteRequestHistory.objects.filter(
+            google_civic_election_id__in=google_civic_election_id_list)
+        # Exclude candidates searched for in the last month
+        one_month_of_seconds = 60 * 60 * 24 * 30  # 60 seconds, 60 minutes, 24 hours, 30 days
+        one_month_ago = now() - timedelta(seconds=one_month_of_seconds)
+        remote_request_query = remote_request_query.filter(datetime_of_action__gt=one_month_ago)
+        remote_request_list = remote_request_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+        if len(remote_request_list):
+            candidate_queryset = candidate_queryset.exclude(we_vote_id__in=remote_request_list)
+    except Exception as e:
+        status += "PROBLEM_RETRIEVING_TWITTER_LINK_POSSIBILITY " + str(e) + " "
+
+    # Limit so we don't overwhelm Twitter's rate limiting
+    # https://developer.twitter.com/en/docs/basics/rate-limits
+    # GET users/search is limited to 900 per 15 minutes
+    # Since we run one batch per minute, that means that 900 / 15 = 60
+    # retrieve_possible_twitter_handles *might* search as many as 3 times per candidate, so we limit the number of
+    # candidates we analyze to 20 per minute
+    number_of_candidates_limit = 20
+    candidates_to_analyze = candidate_queryset.count()
+    candidate_list = candidate_queryset[:number_of_candidates_limit]
+
+    candidates_analyzed = 0
+    status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES_LOOP-TOTAL: " + str(candidates_to_analyze) + " "
+    for one_candidate in candidate_list:
+        # Twitter account search and analysis has not been run on this candidate yet
+        results = retrieve_possible_twitter_handles(one_candidate)
+        if results['success']:
+            candidates_analyzed += 1
+        status += results['status']
+
+    results = {
+        'success':                  success,
+        'status':                   status,
+        'candidates_to_analyze':    candidates_to_analyze,
+        'candidates_analyzed':      candidates_analyzed,
     }
 
     return results

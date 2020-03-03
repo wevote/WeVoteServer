@@ -3,7 +3,6 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import delete_possible_twitter_handles, retrieve_possible_twitter_handles
-from .models import TwitterLinkPossibility
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateCampaignManager
 from django.contrib.auth.decorators import login_required
