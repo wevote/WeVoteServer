@@ -128,8 +128,18 @@
               </a>
               {% endif %}
             </td>
-            <td>{{ batch_process.kind_of_process }}</td>
-            <td>{{ batch_process.google_civic_election_id|default_if_none:"" }}</td>
+            <td>
+              {{ batch_process.kind_of_process }}
+              {% if batch_process.completion_summary %}
+                <br />
+                {{ batch_process.completion_summary }}
+              {% endif %}
+            </td>
+            <td>
+              {% if batch_process.google_civic_election_id %}
+                {{ batch_process.google_civic_election_id|default_if_none:"" }}
+              {% endif %}
+            </td>
             <td>{{ batch_process.state_code }}</td>
             <td>{{ batch_process.date_added_to_queue|localtime|default_if_none:"" }}</td>
             <td>{{ batch_process.date_started|localtime|default_if_none:"" }}</td>

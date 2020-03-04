@@ -22,7 +22,16 @@ span.wrap_word { word-break: break-word; }
 <input type="hidden" name="redirect_to_candidate_list" value="0">
 
 <div class="form-group">
-    <label for="candidate_name_id" class="col-sm-3 control-label">Candidate Name</label>
+    <label for="candidate_name_id" class="col-sm-3 control-label">
+      Candidate Name
+      {% if candidate %}
+        <br />
+        <a href="https://quality.wevote.us/candidate/{{ candidate.we_vote_id }}" target="_blank">
+        View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+      {% endif %}
+
+    </label>
     <div class="col-sm-8">
         <input type="text" name="candidate_name" id="candidate_name_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_name|default_if_none:"" }}{% else %}{{ candidate_name|default_if_none:"" }}{% endif %}" />
@@ -256,10 +265,10 @@ span.wrap_word { word-break: break-word; }
             <td>{{ one_row.likelihood_score|default_if_none:"n/a" }}</td>
             <td><img src='{{ one_row.twitter_profile_image_url_https }}' /></td>
             <td>{{ one_row.twitter_name }}</td>
-            <td><a href="https://twitter.com/{{ one_row.twitter_handle }}" target="_blank">{{ one_row.twitter_handle|default_if_none:"n/a" }}</a><br />
+            <td><a href="https://twitter.com/{{ one_row.twitter_handle }}" target="_blank">{{ one_row.twitter_handle|default_if_none:"n/a" }} <span class="glyphicon glyphicon-new-window"></span></a><br />
                 <input id="choose_{{ forloop.counter }}" type="button" value="Choose and Update" onclick="document.getElementById('candidate_twitter_handle_id').value = '{{ one_row.twitter_handle }}';document.getElementById('candidate_edit').submit();" />
             </td>
-            <td><a href="{{ one_row.twitter_url }}" target="_blank">{{ one_row.twitter_url|default_if_none:"" }}</a></td>
+            <td><a href="{{ one_row.twitter_url }}" target="_blank">{{ one_row.twitter_url|default_if_none:"" }} <span class="glyphicon glyphicon-new-window"></span></a></td>
             <td>{{ one_row.twitter_location|default_if_none:"n/a" }}</td>
             <td>{% if one_row.twitter_utc_offset %}{{ one_row.twitter_utc_offset|default_if_none:"n/a" }}{% endif %}</td>
             <td>{{ one_row.twitter_followers_count|default_if_none:"" }}</td>

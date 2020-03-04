@@ -392,11 +392,13 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS = {
 RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
 REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
 REFRESH_BALLOT_ITEMS_FROM_VOTERS = "REFRESH_BALLOT_ITEMS_FROM_VOTERS"
+SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE = "SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE"
 
 KIND_OF_PROCESS_CHOICES = (
     (RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,  'Retrieve Ballot Items from Polling Locations'),
     (REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, 'Refresh Ballot Items from BallotReturned Polling Locations'),
     (REFRESH_BALLOT_ITEMS_FROM_VOTERS, 'Refresh Ballot Items from Voter Custom Addresses'),
+    (SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE, 'Search for Candidate Twitter Handles'),
 )
 
 
@@ -4541,7 +4543,7 @@ class BatchProcessManager(models.Model):
 
     def create_batch_process(
             self,
-            google_civic_election_id="",
+            google_civic_election_id=0,
             kind_of_process=None,
             polling_location_we_vote_id=None,
             state_code="",
@@ -4550,8 +4552,11 @@ class BatchProcessManager(models.Model):
         success = True
         batch_process = None
 
-        if kind_of_process not in [REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_VOTERS,
-                                   RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS]:
+        if kind_of_process not in \
+                [REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
+                 REFRESH_BALLOT_ITEMS_FROM_VOTERS,
+                 RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
+                 SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
             status += "KIND_OF_PROCESS_NOT_FOUND: " + str(kind_of_process) + " "
             success = False
             results = {
@@ -4563,6 +4568,7 @@ class BatchProcessManager(models.Model):
             return results
 
         try:
+            google_civic_election_id = convert_to_int(google_civic_election_id)
             batch_process = BatchProcess.objects.create(
                 google_civic_election_id=google_civic_election_id,
                 kind_of_process=kind_of_process,
@@ -4739,8 +4745,8 @@ class BatchProcessManager(models.Model):
                 batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
 
             if positive_value_exists(for_upcoming_elections):
-                # Limit this search to upcoming_elections only
-                google_civic_election_id_list = []
+                # Limit this search to upcoming_elections only, or no election specified
+                google_civic_election_id_list = [0]
                 for one_election in election_list:
                     google_civic_election_id_list.append(one_election.google_civic_election_id)
                 batch_process_queryset = batch_process_queryset.filter(
@@ -4768,7 +4774,7 @@ class BatchProcessManager(models.Model):
                 batch_process_list_found = True
                 status += 'BATCH_PROCESS_LIST_RETRIEVED '
             else:
-                status += 'BATCH_PROCESS_LIST_NOT_RETRIEVED '
+                status += 'BATCH_PROCESS_LIST_NONE_FOUND '
         except BatchProcess.DoesNotExist:
             # No batch_process found. Not a problem.
             status += 'NO_BATCH_PROCESS_FOUND_DoesNotExist '
@@ -4867,6 +4873,7 @@ class BatchProcess(models.Model):
     #  When the process is complete, we should reset this to "NULL"
     date_checked_out = models.DateTimeField(null=True)
     batch_process_paused = models.BooleanField(default=False)
+    completion_summary = models.TextField(null=True, blank=True)
 
 
 class BatchProcessBallotItemChunk(models.Model):

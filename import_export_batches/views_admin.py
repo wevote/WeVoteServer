@@ -1380,7 +1380,7 @@ def batch_process_list_view(request):
             pass
         else:
             # Limit this search to upcoming_elections only
-            google_civic_election_id_list = []
+            google_civic_election_id_list = [0]
             for one_election in election_list:
                 google_civic_election_id_list.append(one_election.google_civic_election_id)
             batch_process_queryset = batch_process_queryset.filter(
@@ -1584,8 +1584,8 @@ def batch_process_log_entry_list_view(request):
             # Return offices from all elections
             pass
         else:
-            # Limit this search to upcoming_elections only
-            google_civic_election_id_list = []
+            # Limit this search to upcoming_elections only, or entries with no election
+            google_civic_election_id_list = [0]
             for one_election in election_list:
                 google_civic_election_id_list.append(one_election.google_civic_election_id)
             batch_process_queryset = batch_process_queryset.filter(
