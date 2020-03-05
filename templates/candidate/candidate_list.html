@@ -260,7 +260,6 @@
     {% endif %}
     <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
     <input type="hidden" name="hide_candidate_tools" value="{{ hide_candidate_tools }}" />
-    <input type="hidden" name="page" value="{{ current_page_number }}" />
     <input type="hidden" name="state_code" value="{{ state_code }}" />
     <input type="text" name="candidate_search" id="candidate_search_id" style="width: 290px;" value="{{ candidate_search }}" />
     <input type="hidden" name="show_all_elections" id="show_all_elections_id" value="{{ show_all_elections }}" />
@@ -294,6 +293,7 @@
       <input type="checkbox" name="show_candidates_with_twitter_options" id="show_candidates_with_twitter_options_id" value="1"
              {% if show_candidates_with_twitter_options %}checked{% endif %} /> Show All Twitter Search Results
     </label>
+    <input type="hidden" name="page" value="{{ current_page_number }}" />
 </form>
 
 <br style="clear:left;"/>
