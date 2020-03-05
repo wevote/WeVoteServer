@@ -40,7 +40,7 @@ def elected_office_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     show_all = request.GET.get('show_all', False)
-    show_all_elections = request.GET.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     elected_office_search = request.GET.get('elected_office_search', '')
 
     elected_office_list_found = False

@@ -241,7 +241,7 @@ def position_list_view(request):
 
     messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    show_all_elections = request.GET.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     state_code = request.GET.get('state_code', '')
 
     position_search = request.GET.get('position_search', '')

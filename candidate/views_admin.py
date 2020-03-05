@@ -210,17 +210,26 @@ def candidate_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    hide_pagination = False
+
     candidate_search = request.GET.get('candidate_search', '')
     current_page_url = request.get_full_path()
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    hide_candidate_tools = request.GET.get('hide_candidate_tools', 0)
+    hide_candidate_tools = positive_value_exists(request.GET.get('hide_candidate_tools', 0))
     page = convert_to_int(request.GET.get('page', 0))
     page = page if positive_value_exists(page) else 0  # Prevent negative pages
-    show_candidates_without_twitter = request.GET.get('show_candidates_without_twitter', False)
-    show_candidates_with_best_twitter_options = request.GET.get('show_candidates_with_best_twitter_options', False)
-    show_candidates_with_twitter_options = request.GET.get('show_candidates_with_twitter_options', False)
-    show_election_statistics = request.GET.get('show_election_statistics', False)
-    show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
+    show_all = positive_value_exists(request.GET.get('show_all', False))
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
+    show_candidates_without_twitter = positive_value_exists(request.GET.get('show_candidates_without_twitter', False))
+    show_candidates_with_best_twitter_options = \
+        positive_value_exists(request.GET.get('show_candidates_with_best_twitter_options', False))
+    show_candidates_with_twitter_options = \
+        positive_value_exists(request.GET.get('show_candidates_with_twitter_options', False))
+    show_election_statistics = positive_value_exists(request.GET.get('show_election_statistics', False))
+    show_marquee_or_battleground = positive_value_exists(request.GET.get('show_marquee_or_battleground', False))
+
+    review_mode = positive_value_exists(request.GET.get('review_mode', False))
+
     # # Remove "&page=" and everything after
     # if "&page=" in current_page_url:
     #     location_of_page_variable = current_page_url.find("&page=")
@@ -261,10 +270,6 @@ def candidate_list_view(request):
     # else:
     #     sorted_state_list = sorted(state_list.items())
 
-    show_all = request.GET.get('show_all', False)
-    show_all_elections = request.GET.get('show_all_elections', False)
-
-    review_mode = request.GET.get('review_mode', False)
     if positive_value_exists(review_mode):
         if positive_value_exists(google_civic_election_id):
             # Only show all if there is an election id
@@ -444,6 +449,7 @@ def candidate_list_view(request):
             if candidate_list_count <= number_to_show_per_page:
                 # Ignore pagination
                 candidate_list = list(candidate_queryset)
+                hide_pagination = True
             else:
                 candidate_count_start = number_to_show_per_page * page
                 candidate_count_end = candidate_count_start + number_to_show_per_page
@@ -656,6 +662,7 @@ def candidate_list_view(request):
         'facebook_urls_without_picture_urls':       facebook_urls_without_picture_urls,
         'google_civic_election_id': google_civic_election_id,
         'hide_candidate_tools':     hide_candidate_tools,
+        'hide_pagination':          hide_pagination,
         'messages_on_stage':        messages_on_stage,
         'next_page_url':            next_page_url,
         'previous_page_url':        previous_page_url,
