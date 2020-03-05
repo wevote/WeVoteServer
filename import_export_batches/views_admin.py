@@ -1353,14 +1353,14 @@ def batch_process_list_view(request):
     success = True
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    kind_of_processes_to_show = request.GET.get('kind_of_processes_to_show', '')
     state_code = request.GET.get('state_code', '')
     show_all_elections = request.GET.get('show_all_elections', False)
+    show_active_processes_only = request.GET.get('show_active_processes_only', False)
+    show_paused_processes_only = request.GET.get('show_paused_processes_only', False)
     batch_process_search = request.GET.get('batch_process_search', '')
 
-    batch_process_list_found = False
     batch_process_list = []
-    updated_batch_process_list = []
-    batch_process_list_count = 0
 
     election_manager = ElectionManager()
     batch_process_manager = BatchProcessManager()
@@ -1387,6 +1387,22 @@ def batch_process_list_view(request):
                 google_civic_election_id__in=google_civic_election_id_list)
         if positive_value_exists(state_code):
             batch_process_queryset = batch_process_queryset.filter(state_code__iexact=state_code)
+        if positive_value_exists(show_active_processes_only):
+            batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+            batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
+        if positive_value_exists(show_paused_processes_only):
+            batch_process_queryset = batch_process_queryset.filter(batch_process_paused=True)
+        if positive_value_exists(kind_of_processes_to_show):
+            if kind_of_processes_to_show == "BALLOT_ITEMS":
+                ballot_item_processes = [
+                    'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS',
+                    'REFRESH_BALLOT_ITEMS_FROM_VOTERS',
+                    'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
+            if kind_of_processes_to_show == "SEARCH_TWITTER":
+                search_twitter_processes = [
+                    'SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=search_twitter_processes)
         batch_process_queryset = batch_process_queryset.order_by("-id")
 
         if positive_value_exists(batch_process_search):
@@ -1420,7 +1436,7 @@ def batch_process_list_view(request):
 
         batch_process_list_count = batch_process_queryset.count()
 
-        batch_process_queryset = batch_process_queryset[:500]
+        batch_process_queryset = batch_process_queryset[:100]
         batch_process_list = list(batch_process_queryset)
 
         if len(batch_process_list):
@@ -1501,8 +1517,11 @@ def batch_process_list_view(request):
         'batch_process_system_on':  batch_process_system_on,
         'batch_process_search':     batch_process_search,
         'election_list':            election_list,
+        'kind_of_processes_to_show':    kind_of_processes_to_show,
         'state_code':               state_code,
         'show_all_elections':       show_all_elections,
+        'show_active_processes_only':   show_active_processes_only,
+        'show_paused_processes_only':   show_paused_processes_only,
         'state_list':               sorted_state_list,
         'google_civic_election_id': google_civic_election_id,
     }

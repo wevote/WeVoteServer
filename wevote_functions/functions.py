@@ -211,6 +211,19 @@ STATE_GEOGRAPHIC_CENTER = {
     'VI': [18.093611, -64.830278, 9],
 }
 
+POSITIVE_TWITTER_HANDLE_SEARCH_KEYWORDS = [
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "congress",
+    "for",
+    "rep",
+    "sen",
+    "vote",
+]
+
 POSITIVE_SEARCH_KEYWORDS = [
     "affiliate",
     "candidate",
@@ -224,6 +237,7 @@ POSITIVE_SEARCH_KEYWORDS = [
     "district",
     "elect",
     "endorse",
+    "government",
     "leader",
     "local",
     "municipal",
@@ -235,6 +249,8 @@ POSITIVE_SEARCH_KEYWORDS = [
     "represent",
     "running",
     "state",
+    "taxes",
+    "transparency",
 ]
 
 NEGATIVE_SEARCH_KEYWORDS = [

@@ -217,6 +217,7 @@ def candidate_list_view(request):
     page = convert_to_int(request.GET.get('page', 0))
     page = page if positive_value_exists(page) else 0  # Prevent negative pages
     show_candidates_without_twitter = request.GET.get('show_candidates_without_twitter', False)
+    show_candidates_with_best_twitter_options = request.GET.get('show_candidates_with_best_twitter_options', False)
     show_candidates_with_twitter_options = request.GET.get('show_candidates_with_twitter_options', False)
     show_election_statistics = request.GET.get('show_election_statistics', False)
     show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
@@ -401,7 +402,18 @@ def candidate_list_view(request):
                         final_filters |= item
 
                     candidate_queryset = candidate_queryset.filter(final_filters)
-        if positive_value_exists(show_candidates_with_twitter_options):
+        if positive_value_exists(show_candidates_with_best_twitter_options):
+            # Don't show candidates that already have Twitter handles
+            candidate_queryset = candidate_queryset.filter(
+                Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
+            try:
+                twitter_query = TwitterLinkPossibility.objects.filter(likelihood_score__gte=60)
+                twitter_list = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+                if len(twitter_list):
+                    candidate_queryset = candidate_queryset.filter(we_vote_id__in=twitter_list)
+            except Exception as e:
+                pass
+        elif positive_value_exists(show_candidates_with_twitter_options):
             # Don't show candidates that already have Twitter handles
             candidate_queryset = candidate_queryset.filter(
                 Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
@@ -645,6 +657,7 @@ def candidate_list_view(request):
         'previous_page_url':        previous_page_url,
         'review_mode':              review_mode,
         'show_all_elections':       show_all_elections,
+        'show_candidates_with_best_twitter_options':    show_candidates_with_best_twitter_options,
         'show_candidates_with_twitter_options': show_candidates_with_twitter_options,
         'show_candidates_without_twitter': show_candidates_without_twitter,
         'show_election_statistics': show_election_statistics,
