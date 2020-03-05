@@ -319,7 +319,7 @@ def fetch_number_of_candidates_needing_twitter_search():
         one_month_of_seconds = 60 * 60 * 24 * 30  # 60 seconds, 60 minutes, 24 hours, 30 days
         one_month_ago = now() - timedelta(seconds=one_month_of_seconds)
         remote_request_query = remote_request_query.filter(datetime_of_action__gt=one_month_ago)
-        remote_request_query = remote_request_query.filter(kind_of_action_iexact=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
+        remote_request_query = remote_request_query.filter(kind_of_action__iexact=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
         remote_request_list = remote_request_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
         if len(remote_request_list):
             candidate_queryset = candidate_queryset.exclude(we_vote_id__in=remote_request_list)
@@ -370,7 +370,7 @@ def retrieve_possible_twitter_handles_in_bulk():
         one_month_of_seconds = 60 * 60 * 24 * 30  # 60 seconds, 60 minutes, 24 hours, 30 days
         one_month_ago = now() - timedelta(seconds=one_month_of_seconds)
         remote_request_query = remote_request_query.filter(datetime_of_action__gt=one_month_ago)
-        remote_request_query = remote_request_query.filter(kind_of_action_iexact=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
+        remote_request_query = remote_request_query.filter(kind_of_action__iexact=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
         remote_request_list = remote_request_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
         if len(remote_request_list):
             candidate_queryset = candidate_queryset.exclude(we_vote_id__in=remote_request_list)

@@ -221,11 +221,15 @@ def candidate_list_view(request):
     show_candidates_with_twitter_options = request.GET.get('show_candidates_with_twitter_options', False)
     show_election_statistics = request.GET.get('show_election_statistics', False)
     show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
-    # Remove "&page=" and everything after
+    # # Remove "&page=" and everything after
+    # if "&page=" in current_page_url:
+    #     location_of_page_variable = current_page_url.find("&page=")
+    #     if location_of_page_variable != -1:
+    #         current_page_url = current_page_url[:location_of_page_variable]
+    # Remove "&page="
     if "&page=" in current_page_url:
-        location_of_page_variable = current_page_url.find("&page=")
-        if location_of_page_variable != -1:
-            current_page_url = current_page_url[:location_of_page_variable]
+        # This will leave harmless number in URL
+        current_page_url = current_page_url.replace("&page=", "&")
     # Remove "&hide_candidate_tools=1"
     if current_page_url:
         current_page_minus_candidate_tools_url = current_page_url.replace("&hide_candidate_tools=1", "")
