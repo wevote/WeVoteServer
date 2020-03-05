@@ -166,7 +166,7 @@ def office_list_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
-    show_all_elections = request.GET.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
     office_search = request.GET.get('office_search', '')
 
@@ -334,7 +334,7 @@ def office_list_process_view(request):
     status = ""
     google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
     state_code = request.POST.get('state_code', '')
-    show_all_elections = request.POST.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
     show_marquee_or_battleground = request.POST.get('show_marquee_or_battleground', False)
     office_search = request.POST.get('office_search', '')
 

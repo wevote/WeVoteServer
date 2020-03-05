@@ -226,6 +226,7 @@ POSITIVE_TWITTER_HANDLE_SEARCH_KEYWORDS = [
 
 POSITIVE_SEARCH_KEYWORDS = [
     "affiliate",
+    "america",
     "candidate",
     "chair",
     "city",
@@ -241,6 +242,7 @@ POSITIVE_SEARCH_KEYWORDS = [
     "endorse",
     "government",
     "leader",
+    "liberal",
     "local",
     "municipal",
     "office",
@@ -251,6 +253,7 @@ POSITIVE_SEARCH_KEYWORDS = [
     "represent",
     "republican",
     "running",
+    "senate",
     "state",
     "taxes",
     "transparency",

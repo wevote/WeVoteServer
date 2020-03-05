@@ -1001,7 +1001,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     candidate_campaign_id = request.GET.get('candidate_campaign_id', 0)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
-    show_all_elections = request.GET.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
 
     # We pass candidate_we_vote_id to this page to pre-populate the form
     candidate_campaign_manager = CandidateCampaignManager()
@@ -1161,7 +1161,7 @@ def organization_position_new_view(request, organization_id):
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', False)
     measure_we_vote_id = request.GET.get('measure_we_vote_id', False)
     state_code = request.GET.get('state_code', '')
-    show_all_elections = request.GET.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
 
     # Take in some incoming values
     candidate_and_measure_not_found = request.GET.get('candidate_and_measure_not_found', False)
@@ -1353,7 +1353,7 @@ def organization_position_edit_view(request, organization_id=0, organization_we_
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
-    show_all_elections = request.GET.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
 
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
@@ -1447,7 +1447,7 @@ def organization_position_edit_process_view(request):
     stance = request.POST.get('stance', SUPPORT)  # Set a default if stance comes in empty
     statement_text = request.POST.get('statement_text', '')  # Set a default if stance comes in empty
     more_info_url = request.POST.get('more_info_url', '')
-    show_all_elections = request.POST.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
 
     go_back_to_add_new = False
     candidate_campaign_we_vote_id = ""

@@ -770,7 +770,7 @@ def election_list_view(request):
         # Give priority to show_all_elections_this_year
         show_all_elections = False
     else:
-        show_all_elections = request.GET.get('show_all_elections', False)
+        show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
         if positive_value_exists(show_all_elections):
             # If here, then we want to make sure show_all_elections_this_year is False
             show_all_elections_this_year = False
@@ -951,7 +951,7 @@ def nationwide_election_list_view(request):
         # Give priority to show_all_elections_this_year
         show_all_elections = False
     else:
-        show_all_elections = request.GET.get('show_all_elections', False)
+        show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
         if positive_value_exists(show_all_elections):
             # If here, then we want to make sure show_all_elections_this_year is False
             show_all_elections_this_year = False

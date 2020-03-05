@@ -32,6 +32,11 @@
 {% csrf_token %}
 
 <form name="candidate_choose_election" method="get" action="{% url 'candidate:candidate_list' %}">
+    {# These are input checkboxes from a form further down this page #}
+    <input type="hidden" name="review_mode" value="{{ review_mode }}" />
+    <input type="hidden" name="show_candidates_without_twitter" value="{{ show_candidates_without_twitter }}" />
+    <input type="hidden" name="show_candidates_with_best_twitter_options" value="{{ show_candidates_with_best_twitter_options }}" />
+    <input type="hidden" name="show_candidates_with_twitter_options" value="{{ show_candidates_with_twitter_options }}" />
 
     {% if election_list %}
     <select id="google_civic_election_id" name="google_civic_election_id">
@@ -263,9 +268,12 @@
     <input type="hidden" name="state_code" value="{{ state_code }}" />
     <input type="text" name="candidate_search" id="candidate_search_id" style="width: 290px;" value="{{ candidate_search }}" />
     <input type="hidden" name="show_all_elections" id="show_all_elections_id" value="{{ show_all_elections }}" />
+    <input type="hidden" name="show_election_statistics" value="{{ show_election_statistics }}" />
+    <input type="hidden" name="show_marquee_or_battleground" value="{{ show_marquee_or_battleground }}" />
+
     <input type="submit" value="Search for Candidate" />
 
-    {% if not review_mode %}
+    {% if not review_mode and not hide_pagination %}
         <span class="float-right"><a href="{{ previous_page_url }}">Previous page</a> | <a href="{{ next_page_url }}">Next page</a></span>
     {% endif %}
     <br />
@@ -466,7 +474,9 @@
         {% endfor %}
         </table>
 
+        {% if not hide_pagination %}
         <span class="float-right"><a href="{{ previous_page_url }}">Previous page</a> | <a href="{{ next_page_url }}">Next page</a></span>
+        {% endif %}
 
         <p>
         </p>

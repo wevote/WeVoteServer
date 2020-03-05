@@ -166,7 +166,7 @@ def issue_list_view(request):
 
     issue_search = request.GET.get('issue_search', '')
     show_hidden_issues = request.GET.get('show_hidden_issues', False)
-    show_all_elections = request.GET.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
 
     issue_list_count = 0
 

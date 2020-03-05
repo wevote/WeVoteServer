@@ -78,7 +78,7 @@ def batch_list_view(request):
     polling_location_we_vote_id = request.GET.get('polling_location_we_vote_id', '')
     polling_location_city = request.GET.get('polling_location_city', '')
     polling_location_zip = request.GET.get('polling_location_zip', '')
-    show_all_elections = request.GET.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
 
     messages_on_stage = get_messages(request)
     batch_list_found = False
@@ -199,7 +199,7 @@ def batch_list_process_view(request):
     polling_location_we_vote_id = request.POST.get('polling_location_we_vote_id', "")
     polling_location_city = request.POST.get('polling_location_city', '')
     polling_location_zip = request.POST.get('polling_location_zip', '')
-    show_all_elections = request.POST.get('show_all_elections', "")
+    show_all_elections = positive_value_exists(request.POST.get('show_all_elections', ""))
     state_code = request.POST.get('state_code', "")
     if kind_of_batch not in (MEASURE, ELECTED_OFFICE, CONTEST_OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION,
                              POLITICIAN, IMPORT_BALLOT_ITEM):
@@ -1324,7 +1324,7 @@ def batch_process_system_toggle_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
-    show_all_elections = request.GET.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     batch_process_search = request.GET.get('batch_process_search', '')
 
     from wevote_settings.models import WeVoteSettingsManager
@@ -1355,7 +1355,7 @@ def batch_process_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     kind_of_processes_to_show = request.GET.get('kind_of_processes_to_show', '')
     state_code = request.GET.get('state_code', '')
-    show_all_elections = request.GET.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_active_processes_only = request.GET.get('show_active_processes_only', False)
     show_paused_processes_only = request.GET.get('show_paused_processes_only', False)
     batch_process_search = request.GET.get('batch_process_search', '')
@@ -1580,7 +1580,7 @@ def batch_process_log_entry_list_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
-    show_all_elections = request.GET.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     batch_process_log_entry_search = request.GET.get('batch_process_log_entry_search', '')
 
     batch_process_log_entry_list_found = False

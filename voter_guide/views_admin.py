@@ -1883,8 +1883,7 @@ def voter_guide_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     show_all = request.GET.get('show_all', False)
     show_all = positive_value_exists(show_all)
-    show_all_elections = request.GET.get('show_all_elections', False)
-    show_all_elections = positive_value_exists(show_all_elections)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_individuals = request.GET.get('show_individuals', False)
     show_individuals = positive_value_exists(show_individuals)
     sort_by = request.GET.get('sort_by', False)
@@ -2185,7 +2184,7 @@ def voter_guide_possibility_list_process_view(request):
 
     # Capture the current filter view of the page and other settings, so we can pass along url_variables at the end
     google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
-    show_all_elections = request.POST.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
     from_prior_election = request.POST.get('from_prior_election', False)
     show_candidates_missing_from_we_vote = request.POST.get('show_candidates_missing_from_we_vote', False)
     show_cannot_find_endorsements = request.POST.get('show_cannot_find_endorsements', False)
