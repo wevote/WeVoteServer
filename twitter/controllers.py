@@ -15,7 +15,8 @@ from election.models import ElectionManager
 from office.models import ContestOfficeManager
 from organization.models import OrganizationListManager
 from wevote_functions.functions import convert_state_code_to_state_text, convert_state_code_to_utc_offset, \
-    convert_to_int, positive_value_exists, POSITIVE_SEARCH_KEYWORDS, NEGATIVE_SEARCH_KEYWORDS
+    convert_to_int, positive_value_exists, POSITIVE_SEARCH_KEYWORDS, NEGATIVE_SEARCH_KEYWORDS, \
+    POSITIVE_TWITTER_HANDLE_SEARCH_KEYWORDS
 from wevote_settings.models import RemoteRequestHistory, RemoteRequestHistoryManager, RETRIEVE_POSSIBLE_TWITTER_HANDLES
 from math import floor, log2
 from re import sub
@@ -103,6 +104,11 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
                     office_found_in_description = True
             if not office_found_in_description:
                 likelihood_score -= 10
+
+        # Increase the score for every positive twitter handle keyword we find
+        for keyword in POSITIVE_TWITTER_HANDLE_SEARCH_KEYWORDS:
+            if one_result.screen_name and keyword in one_result.screen_name.lower():
+                likelihood_score += 20
 
         # Increase the score for every positive keyword we find
         for keyword in POSITIVE_SEARCH_KEYWORDS:
@@ -308,12 +314,12 @@ def fetch_number_of_candidates_needing_twitter_search():
         pass
     # Exclude candidates we have requested information for in the last month
     try:
-        remote_request_query = RemoteRequestHistory.objects.using('readonly').filter(
-            google_civic_election_id__in=google_civic_election_id_list)
         # Exclude candidates searched for in the last month
+        remote_request_query = RemoteRequestHistory.objects.using('readonly').all()
         one_month_of_seconds = 60 * 60 * 24 * 30  # 60 seconds, 60 minutes, 24 hours, 30 days
         one_month_ago = now() - timedelta(seconds=one_month_of_seconds)
         remote_request_query = remote_request_query.filter(datetime_of_action__gt=one_month_ago)
+        remote_request_query = remote_request_query.filter(kind_of_action_iexact=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
         remote_request_list = remote_request_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
         if len(remote_request_list):
             candidate_queryset = candidate_queryset.exclude(we_vote_id__in=remote_request_list)
@@ -359,12 +365,12 @@ def retrieve_possible_twitter_handles_in_bulk():
         status += "PROBLEM_RETRIEVING_TWITTER_LINK_POSSIBILITY " + str(e) + " "
     # Exclude candidates we have requested information for in the last month
     try:
-        remote_request_query = RemoteRequestHistory.objects.filter(
-            google_civic_election_id__in=google_civic_election_id_list)
         # Exclude candidates searched for in the last month
+        remote_request_query = RemoteRequestHistory.objects.all()
         one_month_of_seconds = 60 * 60 * 24 * 30  # 60 seconds, 60 minutes, 24 hours, 30 days
         one_month_ago = now() - timedelta(seconds=one_month_of_seconds)
         remote_request_query = remote_request_query.filter(datetime_of_action__gt=one_month_ago)
+        remote_request_query = remote_request_query.filter(kind_of_action_iexact=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
         remote_request_list = remote_request_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
         if len(remote_request_list):
             candidate_queryset = candidate_queryset.exclude(we_vote_id__in=remote_request_list)

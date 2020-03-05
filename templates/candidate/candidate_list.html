@@ -266,6 +266,11 @@
     <input type="hidden" name="show_all_elections" id="show_all_elections_id" value="{{ show_all_elections }}" />
     <input type="submit" value="Search for Candidate" />
 
+    {% if not review_mode %}
+        <span class="float-right"><a href="{{ previous_page_url }}">Previous page</a> | <a href="{{ next_page_url }}">Next page</a></span>
+    {% endif %}
+    <br />
+
     {# Turn on/off review mode #}
     &nbsp;&nbsp;&nbsp;&nbsp;
     <label for="review_mode_id">
@@ -280,13 +285,15 @@
     </label>
     {# Show candidates with Twitter options #}
     &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="show_candidates_with_best_twitter_options_id">
+      <input type="checkbox" name="show_candidates_with_best_twitter_options" id="show_candidates_with_best_twitter_options_id" value="1"
+             {% if show_candidates_with_best_twitter_options %}checked{% endif %} /> Show Twitter "Choose and Update"
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <label for="show_candidates_with_twitter_options_id">
       <input type="checkbox" name="show_candidates_with_twitter_options" id="show_candidates_with_twitter_options_id" value="1"
-             {% if show_candidates_with_twitter_options %}checked{% endif %} /> Show Twitter "Choose and Update"
+             {% if show_candidates_with_twitter_options %}checked{% endif %} /> Show All Twitter Search Results
     </label>
-    {% if not review_mode %}
-        <span class="float-right"><a href="{{ previous_page_url }}">Previous page</a> | <a href="{{ next_page_url }}">Next page</a></span>
-    {% endif %}
 </form>
 
 <br style="clear:left;"/>
@@ -568,6 +575,11 @@
     });
     $(function() {
         $('#review_mode_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_candidates_with_best_twitter_options_id').change(function() {
             this.form.submit();
         });
     });

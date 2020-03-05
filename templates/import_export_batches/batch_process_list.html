@@ -57,15 +57,39 @@
         <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
             show all states</a>
         {% endif %}
-        {% endif %}
-        <br />
-        {% if batch_process_search %}
-            <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                 clear search</a>&nbsp;
-        {% endif %}
-        <input type="text" name="batch_process_search" id="batch_process_search_id" value="{{ batch_process_search }}" style="width: 450px" />
-        <input type="submit" value="Search Batches" />
-        {# End of if state_list #}
+    {# End of if state_list #}
+    {% endif %}
+
+    <br />
+    {% if batch_process_search %}
+        <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+             clear search</a>&nbsp;
+    {% endif %}
+    <input type="text" name="batch_process_search" id="batch_process_search_id" value="{{ batch_process_search }}" style="width: 450px" />
+    <input type="submit" value="Search Batches" />
+
+    <br />
+    <select id="kind_of_processes_to_show_id" name="kind_of_processes_to_show">
+        <option value="">-- Show All --</option>
+        <option value="BALLOT_ITEMS"
+        {% if kind_of_processes_to_show == "BALLOT_ITEMS" %} selected="selected"{% endif %}>
+            Ballot Items</option>
+        <option value="SEARCH_TWITTER"
+        {% if kind_of_processes_to_show == "SEARCH_TWITTER" %} selected="selected"{% endif %}>
+            Search Twitter</option>
+    </select>
+&nbsp;&nbsp;&nbsp;
+    <label for="show_active_processes_only_id">
+      <input type="checkbox" name="show_active_processes_only" id="show_active_processes_only_id" value="1"
+             {% if show_active_processes_only %}checked{% endif %} /> Only Show Active Processes
+    </label>
+&nbsp;&nbsp;&nbsp;
+    <label for="show_paused_processes_only_id">
+      <input type="checkbox" name="show_paused_processes_only" id="show_paused_processes_only_id" value="1"
+             {% if show_paused_processes_only %}checked{% endif %} /> Only Show Paused Processes
+    </label>
+
+
 </form>{#  End of organization_position_choose_election form #}
 
 {% if batch_process_list %}
@@ -224,7 +248,22 @@
         });
     });
     $(function() {
+        $('#kind_of_processes_to_show_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_active_processes_only_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
         $('#show_all_elections_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_paused_processes_only_id').change(function() {
             this.form.submit();
         });
     });
