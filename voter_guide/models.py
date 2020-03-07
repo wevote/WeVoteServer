@@ -2048,9 +2048,9 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_guide_possibility_from_url(self, voter_guide_possibility_url, voter_who_submitted_we_vote_id):
+    def retrieve_voter_guide_possibility_from_url(self, voter_guide_possibility_url, voter_who_submitted_we_vote_id,
+                                                  google_civic_election_id=0):
         voter_guide_possibility_id = 0
-        google_civic_election_id = 0
         return self.retrieve_voter_guide_possibility(
             voter_guide_possibility_id, google_civic_election_id,
             voter_guide_possibility_url, voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id)

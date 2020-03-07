@@ -25,6 +25,11 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
             'value':        'string',  # boolean, integer, long, string
             'description':  'The url of the list of endorsements that the voter is viewing.',
         },
+        {
+            'name':         'google_civic_election_id',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'The Google civic election ID. Provide a value, only if you want data for a prior election.',
+        },
     ]
 
     potential_status_codes_list = [
