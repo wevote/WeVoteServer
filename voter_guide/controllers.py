@@ -66,6 +66,10 @@ URLS_TO_NEVER_HIGHLIGHT = [
     'sketchviewer.com',
     '*.travis-ci.com',
     '*.travis-ci.org',
+    'blank',
+    'platform.twitter.com',
+    's7.addthis.com',
+    'vars.hotjar.com',
 ]
 
 
@@ -1824,7 +1828,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
 
 
 def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilityHighlightsRetrieve
-        voter_device_id, url_to_scan):
+        voter_device_id, url_to_scan, google_civic_election_id):
     status = "VOTER_GUIDE_POSSIBILITY_HIGHLIGHTS_RETRIEVE "
     success = True
     highlight_list = []
@@ -1834,7 +1838,8 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
 
     # Once we know we have a voter_device_id to work with, get this working
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
-    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(url_to_scan, voter_we_vote_id)
+    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(url_to_scan, voter_we_vote_id,
+                                                                                        google_civic_election_id)
     if results['voter_guide_possibility_found']:
         voter_guide_possibility_id = results['voter_guide_possibility_id']
         results = voter_guide_possibility_positions_retrieve_for_api(
