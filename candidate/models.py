@@ -117,6 +117,7 @@ class CandidateCampaignListManager(models.Model):
                 candidate_queryset = candidate_queryset.filter(contest_office_id=office_id)
             elif positive_value_exists(office_we_vote_id):
                 candidate_queryset = candidate_queryset.filter(contest_office_we_vote_id=office_we_vote_id)
+            candidate_queryset = candidate_queryset.exclude(do_not_display_on_ballot=True)
             candidate_queryset = candidate_queryset.order_by('-twitter_followers_count')
             candidate_list = candidate_queryset
 
@@ -1399,6 +1400,8 @@ class CandidateCampaign(models.Model):
                                                       max_length=255, null=True, blank=True)
     withdrawn_from_election = models.BooleanField(verbose_name='Candidate has withdrawn from election', default=False)
     withdrawal_date = models.DateField(verbose_name='Withdrawal date from election', null=True, auto_now=False)
+    # Set to true if we don't want to display this candidate for some reason
+    do_not_display_on_ballot = models.BooleanField(default=False)
 
     def election(self):
         try:

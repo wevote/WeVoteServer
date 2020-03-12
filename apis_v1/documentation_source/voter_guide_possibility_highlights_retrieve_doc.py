@@ -68,6 +68,7 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
                    '      "we_vote_id": string,\n' \
                    '      "display": string, (\'STORED\', \'DELETED\', \'POSSIBILITY\', or \'DEFAULT\')\n' \
                    '      "stance": string, (\'SUPPORT\', \'OPPOSED\', or \'INFO_ONLY\')\n'\
+                   '      "prior": integer, (\'1\' if from a prior election)\n'\
                    '    }\n' \
                    '  ],\n' \
                    '  "never_highlight_on": list [\n' \
@@ -81,7 +82,8 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
         'api_name': 'voterGuidePossibilityHighlightsRetrieve',
         'api_slug': 'voterGuidePossibilityHighlightsRetrieve',
         'api_introduction':
-            "Retrieve all of the candidates that might be highlighted on an endorsement guide. DEFAULT = is in an upcoming election",
+            "Retrieve all of the candidates that might be highlighted on an endorsement guide. "
+            "DEFAULT = there is no entry in this organization's Voter Guide Possibility yet.",
         'try_now_link': 'apis_v1:voterGuidePossibilityHighlightsRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

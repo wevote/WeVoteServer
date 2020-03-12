@@ -108,7 +108,13 @@ span.wrap_word { word-break: break-word; }
             value="{{ candidate.withdrawal_date|date:'Y-m-d' }}"
             style="width: 125px; float: left; {% if not candidate.withdrawn_from_election %} color: white {% endif %} "/>
         <span style="float: left; padding: 8px 0 0 10px;">
-            Announcement date must be in the YYYY-MM-DD format.
+          Use YYYY-MM-DD format
+        &nbsp;&nbsp;&nbsp;
+          <label for="do_not_display_on_ballot_id" class="control-label">Don't Display Candidate on Ballot:&nbsp;
+              <input type="checkbox" name="do_not_display_on_ballot" id="do_not_display_on_ballot_id"
+                 value=1
+                 {% if candidate.do_not_display_on_ballot %}checked{% endif %} />
+          </label>
         </span>
     </div>
 </div>

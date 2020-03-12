@@ -445,12 +445,13 @@ class ElectionManager(models.Model):
 
         # If a state code IS included, then the above retrieve_upcoming_elections will have missed the national election
         if positive_value_exists(limit_to_this_state_code):
-            results = self.retrieve_next_national_election()
-            if results['election_found']:
-                one_election = results['election']
-                if positive_value_exists(one_election.google_civic_election_id) \
-                        and one_election.google_civic_election_id not in upcoming_google_civic_election_id_list:
-                    upcoming_google_civic_election_id_list.append(one_election.google_civic_election_id)
+            results = self.retrieve_upcoming_national_elections()
+            if results['election_list_found']:
+                election_list = results['election_list']
+                for one_election in election_list:
+                    if positive_value_exists(one_election.google_civic_election_id) \
+                            and one_election.google_civic_election_id not in upcoming_google_civic_election_id_list:
+                        upcoming_google_civic_election_id_list.append(one_election.google_civic_election_id)
             else:
                 status += results['status']
 
@@ -461,6 +462,82 @@ class ElectionManager(models.Model):
             'status':                                       status,
             'upcoming_google_civic_election_id_list':       upcoming_google_civic_election_id_list,
             'upcoming_google_civic_election_id_list_found': upcoming_google_civic_election_id_list_found,
+        }
+        return results
+
+    def retrieve_prior_elections_this_year(self, state_code="", without_state_code=False):
+        status = ""
+        success = True
+        election_list_found = False
+        prior_election_list = []
+        today = datetime.now().date()
+        we_vote_date_string = convert_date_to_we_vote_date_string(today)
+        first_day_this_year_string = "{year}-01-01".format(year=today.year)
+        try:
+            election_list_query = Election.objects.using('readonly').all()
+            election_list_query = election_list_query.filter(
+                Q(election_day_text__lt=we_vote_date_string) & Q(election_day_text__gte=first_day_this_year_string))
+            if positive_value_exists(without_state_code):
+                election_list_query = election_list_query.filter(Q(state_code__isnull=True) | Q(state_code__exact=''))
+            elif positive_value_exists(state_code):
+                election_list_query = election_list_query.filter(state_code__iexact=state_code)
+            election_list_query = election_list_query.exclude(google_civic_election_id=2000)
+            election_list_query = election_list_query.order_by('election_day_text')
+
+            prior_election_list = list(election_list_query)
+
+            status += 'PRIOR_ELECTIONS_FOUND '
+            election_list_found = positive_value_exists(len(prior_election_list))
+            success = True
+        except Election.DoesNotExist as e:
+            status += 'NO_PRIOR_ELECTIONS_FOUND '
+            success = True
+            election_list_found = False
+        except Exception as e:
+            status += "RETRIEVE_PRIOR_ELECTIONS_QUERY_FAILURE " + str(e) + " "
+            success = False
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'election_list':    prior_election_list,
+            'election_list_found': election_list_found,
+        }
+        return results
+
+    def retrieve_prior_google_civic_election_id_list_this_year(self, limit_to_this_state_code=''):
+        status = ""
+        success = True
+        prior_google_civic_election_id_list = []
+        results = self.retrieve_prior_elections_this_year(state_code=limit_to_this_state_code)
+        if results['election_list_found']:
+            election_list = results['election_list']
+            for one_election in election_list:
+                if positive_value_exists(one_election.google_civic_election_id):
+                    prior_google_civic_election_id_list.append(one_election.google_civic_election_id)
+        else:
+            status += results['status']
+            # success = results['success']
+
+        # If a state code IS included, then the above retrieve_upcoming_elections will have missed the national election
+        if positive_value_exists(limit_to_this_state_code):
+            results = self.retrieve_prior_national_elections_this_year()
+            if results['election_list_found']:
+                election_list = results['election_list_found']
+                for one_election in election_list:
+                    if positive_value_exists(one_election.google_civic_election_id) \
+                            and one_election.google_civic_election_id not in prior_google_civic_election_id_list:
+                        prior_google_civic_election_id_list.append(one_election.google_civic_election_id)
+            else:
+                status += results['status']
+
+        prior_google_civic_election_id_list_found = len(prior_google_civic_election_id_list)
+
+        results = {
+            'success': success,
+            'status': status,
+            'prior_google_civic_election_id_list': prior_google_civic_election_id_list,
+            'prior_google_civic_election_id_list_found': prior_google_civic_election_id_list_found,
         }
         return results
 
@@ -535,6 +612,38 @@ class ElectionManager(models.Model):
         }
         return results
 
+    def retrieve_upcoming_national_elections(self):
+        """
+        We want all upcoming national election
+        :return:
+        """
+        status = ""
+        without_state_code = True
+        upcoming_national_elections_results = self.retrieve_upcoming_elections("", without_state_code)
+        election_list = upcoming_national_elections_results['election_list']
+
+        if not len(election_list):
+            status += upcoming_national_elections_results['status']
+            success = True
+            status += "RETRIEVE_UPCOMING_ELECTIONS_FOR_STATE-NOT_FOUND: "
+            results = {
+                'success':          success,
+                'status':           status,
+                'election_list_found':   False,
+                'election_list':         election_list,
+            }
+            return results
+
+        success = True
+        status += "RETRIEVE_UPCOMING_ELECTIONS_FOR_STATE-FOUND "
+        results = {
+            'success':          success,
+            'status':           status,
+            'election_list_found': False,
+            'election_list': election_list,
+        }
+        return results
+
     def retrieve_next_election_with_state_optional(self, state_code=""):
         """
         We want either the next election in this state, or the next national election, whichever comes first
@@ -572,6 +681,38 @@ class ElectionManager(models.Model):
             'status':           status,
             'election_found':   True,
             'election':         election,
+        }
+        return results
+
+    def retrieve_prior_national_elections_this_year(self):
+        """
+        We want the prior national elections this year
+        :return:
+        """
+        status = ""
+        without_state_code = True
+        prior_national_elections_results = self.retrieve_prior_elections_this_year("", without_state_code)
+        election_list = prior_national_elections_results['election_list']
+
+        if not len(election_list):
+            status += prior_national_elections_results['status']
+            success = True
+            status += "RETRIEVE_PRIOR_ELECTION_FOR_STATE-NOT_FOUND: "
+            results = {
+                'success':          success,
+                'status':           status,
+                'election_list_found':   False,
+                'election_list':         election_list,
+            }
+            return results
+
+        success = True
+        status += "RETRIEVE_PRIOR_ELECTION_FOR_STATE-FOUND "
+        results = {
+            'success':          success,
+            'status':           status,
+            'election_found':   True,
+            'election_list': election_list,
         }
         return results
 
