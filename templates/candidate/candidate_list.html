@@ -347,7 +347,11 @@
                 </span>
                 {% if candidate.withdrawn_from_election %}
                     <br />
-                    <span><b>Withdrew From Election ({{ candidate.withdrawal_date }})</b></span>
+                    <span><b>Withdrew {% if candidate.withdrawal_date %}({{ candidate.withdrawal_date }}){% endif %}</b></span>
+                {% endif %}
+                {% if candidate.do_not_display_on_ballot %}
+                    <br />
+                    <span><b>Don't Display on Ballot</b></span>
                 {% endif %}
                 <br />
                     {{ candidate.we_vote_id }}

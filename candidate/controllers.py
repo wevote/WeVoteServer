@@ -1366,6 +1366,54 @@ def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_ele
     return results
 
 
+def retrieve_candidate_list_for_all_prior_elections_this_year(
+        prior_google_civic_election_id_list=[],
+        limit_to_this_state_code="",
+        return_list_of_objects=False,
+        super_light_candidate_list=False):
+
+    status = ""
+    success = True
+    candidate_list_objects = []
+    candidate_list_light = []
+    candidate_list_found = False
+
+    if not prior_google_civic_election_id_list \
+            or not positive_value_exists(len(prior_google_civic_election_id_list)):
+        election_manager = ElectionManager()
+        election_list_results = \
+            election_manager.retrieve_prior_google_civic_election_id_list_this_year(limit_to_this_state_code)
+
+        prior_google_civic_election_id_list = election_list_results['prior_google_civic_election_id_list']
+        status += election_list_results['status']
+
+    if len(prior_google_civic_election_id_list):
+        candidate_list_manager = CandidateCampaignListManager()
+        results = candidate_list_manager.retrieve_candidates_for_specific_elections(
+            prior_google_civic_election_id_list,
+            limit_to_this_state_code=limit_to_this_state_code,
+            return_list_of_objects=return_list_of_objects,
+            super_light_candidate_list=super_light_candidate_list)
+        if results['candidate_list_found']:
+            candidate_list_found = True
+            candidate_list_light = results['candidate_list_light']
+        else:
+            status += results['status']
+            success = results['success']
+
+    results = {
+        'success': success,
+        'status': status,
+        'candidate_list_found':             candidate_list_found,
+        'candidate_list_objects':           candidate_list_objects if return_list_of_objects else [],
+        'candidate_list_light':             candidate_list_light,
+        'google_civic_election_id_list':    prior_google_civic_election_id_list,
+        'return_list_of_objects':           return_list_of_objects,
+        'super_light_candidate_list':       super_light_candidate_list,
+    }
+    return results
+
+
 def save_image_to_candidate_table(candidate, image_url, source_link, url_is_broken, kind_of_source_website=None):
     cache_results = {
         'we_vote_hosted_profile_image_url_large':   None,

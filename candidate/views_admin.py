@@ -798,7 +798,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
     show_all_google_search_users = request.GET.get('show_all_google_search_users', False)
     show_all_twitter_search_results = request.GET.get('show_all_twitter_search_results', False)
     withdrawal_date = request.GET.get('withdrawal_date', False)
-    withdrawn_from_election = request.GET.get('withdrawn_from_election', False)
+    withdrawn_from_election = positive_value_exists(request.GET.get('withdrawn_from_election', False))
+    do_not_display_on_ballot = positive_value_exists(request.GET.get('do_not_display_on_ballot', False))
 
     messages_on_stage = get_messages(request)
     candidate_id = convert_to_int(candidate_id)
@@ -927,6 +928,9 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
             'vote_smart_id':                    vote_smart_id,
             'maplight_id':                      maplight_id,
             'page':                             page,
+            'withdrawal_date':                  withdrawal_date,
+            'withdrawn_from_election':          withdrawn_from_election,
+            'do_not_display_on_ballot':         do_not_display_on_ballot,
         }
     else:
         template_values = {
@@ -987,7 +991,8 @@ def candidate_edit_process_view(request):
     google_search_link = request.POST.get('google_search_link', False)
     twitter_url = request.POST.get('twitter_url', False)
     withdrawal_date = request.POST.get('withdrawal_date', False)
-    withdrawn_from_election = request.POST.get('withdrawn_from_election', False)
+    withdrawn_from_election = positive_value_exists(request.POST.get('withdrawn_from_election', False))
+    do_not_display_on_ballot = positive_value_exists(request.POST.get('do_not_display_on_ballot', False))
 
     # Note: A date is not required, but if provided it needs to be in a correct date format
     if positive_value_exists(withdrawn_from_election) and positive_value_exists(withdrawal_date):
@@ -1223,12 +1228,13 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
             if twitter_url is not False:
                 candidate_on_stage.twitter_url = twitter_url
+            candidate_on_stage.withdrawn_from_election = withdrawn_from_election
             if withdrawn_from_election:
-                candidate_on_stage.withdrawn_from_election = withdrawn_from_election
                 if positive_value_exists(withdrawal_date):
                     candidate_on_stage.withdrawal_date = withdrawal_date
                 else:
                     candidate_on_stage.withdrawal_date = None
+            candidate_on_stage.do_not_display_on_ballot = do_not_display_on_ballot
 
             if google_search_image_file:
                 # If google search image exist then cache master and resized images and save them to candidate table
@@ -1294,6 +1300,8 @@ def candidate_edit_process_view(request):
                 if withdrawn_from_election:
                     candidate_on_stage.withdrawn_from_election = withdrawn_from_election
                     candidate_on_stage.withdrawal_date = withdrawal_date
+                if do_not_display_on_ballot:
+                    candidate_on_stage.do_not_display_on_ballot = do_not_display_on_ballot
                 if candidate_url is not False:
                     candidate_on_stage.candidate_url = candidate_url
                 if candidate_contact_form_url is not False:
