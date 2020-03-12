@@ -9,6 +9,8 @@ from django.conf.urls import url
 urlpatterns = [
     # views_admin
     url(r'^$', views_admin.analytics_index_view, name='analytics_index',),
+    url(r'^analytics_index_process/$',
+        views_admin.analytics_index_process_view, name='analytics_index_process'),
     url(r'^analytics_action_list/(?P<voter_we_vote_id>wv[\w]{2}voter[\w]+)/$',
         views_admin.analytics_action_list_view, name='analytics_action_list'),
     url(r'^analytics_action_list/(?P<organization_we_vote_id>wv[\w]{2}org[\w]+)/$',

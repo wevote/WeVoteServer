@@ -224,6 +224,11 @@ POSITIVE_TWITTER_HANDLE_SEARCH_KEYWORDS = [
     "vote",
 ]
 
+NEGATIVE_TWITTER_HANDLE_SEARCH_KEYWORDS = [
+    "coach",
+    "nfl",
+]
+
 POSITIVE_SEARCH_KEYWORDS = [
     "affiliate",
     "america",
@@ -247,6 +252,7 @@ POSITIVE_SEARCH_KEYWORDS = [
     "municipal",
     "office",
     "official",
+    "paid for",
     "party",
     "politic",
     "public",
@@ -260,23 +266,38 @@ POSITIVE_SEARCH_KEYWORDS = [
 ]
 
 NEGATIVE_SEARCH_KEYWORDS = [
+    "album",
+    "amateur",
+    "author",
     "available to serve your needs",
+    "books",
     "brexit",
     "call us today",
+    "coach",
     "cricket",
     "complete satisfaction",
+    "dean",
     "fake",
+    "folk",
     "for our customers",
     "inc.",
     "is a city",
+    "listen",
     "musician",
     "nightlife",
     "our quality work",
     "parody",
+    "photographer",
+    "preorder",
+    "pre-order",
+    "produced by",
     "promoter",
+    "quarterback",
     "singer",
+    "soul",
     "view the profiles of people named",
     "we guarantee",
+    "writer",
 ]
 
 AMERICAN_INDEPENDENT = 'AMERICAN_INDEPENDENT'
@@ -760,6 +781,12 @@ def convert_date_to_date_as_integer(date):
         date.day,
     )
     return convert_to_int(day_as_string)
+
+
+def convert_date_as_integer_to_date(date_as_integer):
+    date_as_string = convert_to_str(date_as_integer)
+    date = datetime.datetime.strptime(date_as_string, '%Y%m%d')
+    return date
 
 
 def convert_date_to_we_vote_date_string(date):

@@ -154,9 +154,14 @@
             </td>
             <td>
               {{ batch_process.kind_of_process }}
-              {% if batch_process.completion_summary %}
+              {% if batch_process.completion_summary or batch_process.analytics_date_as_integer %}
                 <br />
-                {{ batch_process.completion_summary }}
+                {% if batch_process.analytics_date_as_integer %}
+                  Analytics Date:
+                  {{ batch_process.analytics_date_as_integer|default_if_none:"" }}
+                  &nbsp;&nbsp;&nbsp;
+                {% endif %}
+                {{ batch_process.completion_summary|default_if_none:"" }}
               {% endif %}
             </td>
             <td>
@@ -225,6 +230,39 @@
                         <td>
                           {% if batch_process_ballot_item_chunk.create_date_completed %}
                             {{ batch_process_ballot_item_chunk.create_row_count|default_if_none:"" }}
+                          {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+        {% elif batch_process.batch_process_analytics_chunk_list %}
+        <tr style="color: darkgray;">
+            <td>&nbsp;</td>
+            <td colspan="6">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Chunk ID</th>
+                            <th>Start</th>
+                            <th>Completed</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    {% for batch_process_analytics_chunk in batch_process.batch_process_analytics_chunk_list %}
+                    <tr>
+                        <td>{{ batch_process_analytics_chunk.id }}</td>
+                        <td>{{ batch_process_analytics_chunk.date_started|localtime|default_if_none:"" }}</td>
+                        <td>
+                          {{ batch_process_analytics_chunk.date_completed|localtime|default_if_none:"" }}
+                          {% if batch_process_analytics_chunk.timed_out %} *{% endif %}
+                        </td>
+                        <td>
+                          Total to review: {{ batch_process_analytics_chunk.number_of_rows_being_reviewed|default_if_none:"" }},
+                          Reviewed: {{ batch_process_analytics_chunk.number_of_rows_successfully_reviewed|default_if_none:"" }}
+                          {% if batch_process_analytics_chunk.date_completed %}
+                          {% else %}
                           {% endif %}
                         </td>
                     </tr>
