@@ -968,12 +968,22 @@ class AnalyticsManager(models.Model):
         analytics_processing_status = None
         analytics_processing_status_found = False
         create_new_status_entry = False
-        new_analytics_date_as_integer = 20180213  # Default
         we_vote_settings_manager = WeVoteSettingsManager()
-        analytics_date_as_integer_last_processed = 0
         results = we_vote_settings_manager.fetch_setting_results('analytics_date_as_integer_last_processed')
+        analytics_date_as_integer_last_processed = 0
         if results['we_vote_setting_found']:
             analytics_date_as_integer_last_processed = convert_to_int(results['setting_value'])
+
+        if not positive_value_exists(analytics_date_as_integer_last_processed):
+            status += "analytics_date_as_integer_last_processed-MISSING"
+            success = False
+            results = {
+                'success': success,
+                'status': status,
+                'analytics_processing_status': analytics_processing_status,
+                'analytics_processing_status_found': analytics_processing_status_found,
+            }
+            return results
 
         try:
             # Is there an analytics_processing_status for the date we care about?
@@ -982,7 +992,7 @@ class AnalyticsManager(models.Model):
                 defaults = {}
                 analytics_processing_status, created = AnalyticsProcessingStatus.objects.using('analytics').\
                     update_or_create(
-                        analytics_date_as_integer=new_analytics_date_as_integer,
+                        analytics_date_as_integer=analytics_date_as_integer_last_processed,
                         defaults=defaults
                     )
             else:
@@ -1014,9 +1024,10 @@ class AnalyticsManager(models.Model):
         except Exception as e:
             analytics_processing_status_found = False
             status += "ANALYTICS_PROCESSING_STATUS_ERROR: " + str(e) + " "
+            success = False
 
         # If here, we need to create a new entry
-        if create_new_status_entry and positive_value_exists(new_analytics_date_as_integer):
+        if create_new_status_entry and positive_value_exists(new_analytics_date_as_integer) and success:
             try:
                 defaults = {}
                 analytics_processing_status, created = AnalyticsProcessingStatus.objects.using('analytics').\
