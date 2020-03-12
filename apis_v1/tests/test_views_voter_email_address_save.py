@@ -13,5 +13,15 @@ class WeVoteAPIsV1TestsVoterEmailAddressSave(TestCase):
     def setUp(self):
         self.generate_voter_device_id_url = reverse("apis_v1:deviceIdGenerateView")
         self.voter_create_url = reverse("apis_v1:voterCreateView")
-        self.voter_address_save_url = reverse("apis_v1:voterAddressSaveView")
-        self.voter_address_retrieve_url = reverse("apis_v1:voterAddressRetrieveView")
+        self.voter_email_address_save_url = reverse("apis_v1:voterEmailAddressSaveView")
+        self.voter_email_address_retrieve_url = reverse("apis_v1:voterEmailAddressRetrieveView")
+        
+    def test_save_with_no_voter_device_id(self):
+        response = self.client.post(self.voter_email_address_save_url)
+        json_data = json.loads(response.content.decode())
+        print("Inside test_views_voter_email_address_save****************")
+        #######################################
+        # Without a cookie, we don't expect valid response
+        self.assertEqual('status' in json_data, True, "status expected in the json response, and not found")
+        self.assertEqual('voter_device_id' in json_data, True,
+                         "voter_device_id expected in the voterAddressSaveView json response, and not found")
