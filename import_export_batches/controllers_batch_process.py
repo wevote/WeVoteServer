@@ -3,10 +3,21 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import create_batch_row_actions, import_data_from_batch_row_actions
-from .models import BatchDescription, BatchManager, BatchProcessManager, \
+from .models import AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT, \
+    BatchDescription, BatchManager, BatchProcessManager, \
+    CALCULATE_ORGANIZATION_DAILY_METRICS, \
+    CALCULATE_ORGANIZATION_ELECTION_METRICS, \
+    CALCULATE_SITEWIDE_DAILY_METRICS, \
+    CALCULATE_SITEWIDE_ELECTION_METRICS, \
+    CALCULATE_SITEWIDE_VOTER_METRICS, \
     IMPORT_CREATE, IMPORT_DELETE, \
     RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, \
     REFRESH_BALLOT_ITEMS_FROM_VOTERS, SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE
+from analytics.controllers import calculate_sitewide_daily_metrics, \
+    process_one_analytics_batch_process_augment_with_election_id, \
+    process_one_analytics_batch_process_augment_with_first_visit, process_sitewide_voter_metrics, \
+    retrieve_analytics_processing_next_step
+from analytics.models import AnalyticsManager
 from datetime import timedelta
 from django.utils.timezone import now
 from twitter.controllers import fetch_number_of_candidates_needing_twitter_search, \
@@ -112,7 +123,11 @@ def batch_process_next_steps():
                         )
         else:
             # If here, there aren't any more scheduled, so we can schedule regular batch processes
-            number_of_candidates_to_analyze = fetch_number_of_candidates_needing_twitter_search()
+            # ############################
+            # Twitter Search
+            # number_of_candidates_to_analyze = fetch_number_of_candidates_needing_twitter_search()
+            # Turned off
+            number_of_candidates_to_analyze = 0
             if positive_value_exists(number_of_candidates_to_analyze):
                 results = batch_process_manager.create_batch_process(
                     kind_of_process=SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE)
@@ -134,6 +149,70 @@ def batch_process_next_steps():
                         kind_of_process=SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE,
                         status=status,
                     )
+            # ############################
+            # Processing Analytics
+            analytics_process_is_currently_running = batch_process_manager.is_analytics_process_currently_running()
+            if not analytics_process_is_currently_running:
+                analytics_processing_status = retrieve_analytics_processing_next_step()
+                kind_of_process = None
+                analytics_date_as_integer = 0
+                status += analytics_processing_status['status']
+                if not analytics_processing_status['success']:
+                    status += "FAILURE_TRYING_TO_RETRIEVE_ANALYTICS_PROCESSING_NEXT_STEP "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=0,
+                        kind_of_process=kind_of_process,
+                        status=status,
+                    )
+                elif analytics_processing_status['analytics_processing_status_found']:
+                    analytics_date_as_integer = analytics_processing_status['analytics_date_as_integer']
+                    if analytics_processing_status['augment_analytics_action_with_election_id']:
+                        kind_of_process = AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID
+                    elif analytics_processing_status['augment_analytics_action_with_first_visit']:
+                        kind_of_process = AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT
+                    elif analytics_processing_status['calculate_sitewide_voter_metrics']:
+                        kind_of_process = CALCULATE_SITEWIDE_VOTER_METRICS
+                    elif analytics_processing_status['calculate_sitewide_daily_metrics']:
+                        kind_of_process = CALCULATE_SITEWIDE_DAILY_METRICS
+                    elif analytics_processing_status['calculate_sitewide_election_metrics']:
+                        kind_of_process = CALCULATE_SITEWIDE_ELECTION_METRICS
+                    elif analytics_processing_status['calculate_organization_daily_metrics']:
+                        kind_of_process = CALCULATE_ORGANIZATION_DAILY_METRICS
+                    elif analytics_processing_status['calculate_organization_election_metrics']:
+                        kind_of_process = CALCULATE_ORGANIZATION_ELECTION_METRICS
+                if kind_of_process:
+                    results = batch_process_manager.create_batch_process(
+                        kind_of_process=kind_of_process,
+                        analytics_date_as_integer=analytics_date_as_integer)
+                    status += results['status']
+                    success = results['success']
+                    if results['batch_process_saved']:
+                        batch_process = results['batch_process']
+                        try:
+                            batch_process.date_started = now()
+                            batch_process.save()
+                            batch_process_list.append(batch_process)
+                            status += "SCHEDULED_PROCESS: " + str(kind_of_process) + " "
+                            batch_process_manager.create_batch_process_log_entry(
+                                batch_process_id=batch_process.id,
+                                kind_of_process=batch_process.kind_of_process,
+                                status=status,
+                            )
+                        except Exception as e:
+                            status += "BATCH_PROCESS_ANALYTICS-CANNOT_SAVE_DATE_STARTED " + str(e) + " "
+                            batch_process_manager.create_batch_process_log_entry(
+                                batch_process_id=batch_process.id,
+                                kind_of_process=kind_of_process,
+                                status=status,
+                            )
+                    else:
+                        status += "FAILED_TO_SCHEDULE-" + str(kind_of_process) + " "
+                        batch_process_manager.create_batch_process_log_entry(
+                            batch_process_id=0,
+                            kind_of_process=kind_of_process,
+                            status=status,
+                        )
+
         status += "NEW_BATCH_PROCESS_COUNT: " + str(new_batch_process_list_count) + ", "
 
     for batch_process in batch_process_list:
@@ -157,11 +236,217 @@ def batch_process_next_steps():
                     state_code=batch_process.state_code,
                     status=status,
                 )
+        elif batch_process.kind_of_process in [
+                AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
+                CALCULATE_SITEWIDE_VOTER_METRICS,
+                CALCULATE_SITEWIDE_ELECTION_METRICS, CALCULATE_ORGANIZATION_DAILY_METRICS,
+                CALCULATE_ORGANIZATION_ELECTION_METRICS]:
+            results = process_one_analytics_batch_process(batch_process)
+            status += results['status']
+        elif batch_process.kind_of_process in [CALCULATE_SITEWIDE_DAILY_METRICS]:
+            results = process_one_sitewide_daily_analytics_batch_process(batch_process)
+            status += results['status']
         elif batch_process.kind_of_process in [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
             results = process_one_search_twitter_batch_process(batch_process)
             status += results['status']
         else:
             status += "KIND_OF_PROCESS_NOT_RECOGNIZED "
+
+    results = {
+        'success': success,
+        'status': status,
+    }
+    return results
+
+
+def process_one_analytics_batch_process(batch_process):
+    from import_export_batches.models import BatchProcessManager
+    batch_process_manager = BatchProcessManager()
+    status = ""
+    success = True
+
+    # When a batch_process is running, we mark when it was "taken off the shelf" to be worked on.
+    #  When the process is complete, we should reset this to "NULL"
+    try:
+        batch_process.date_checked_out = now()
+        batch_process.save()
+    except Exception as e:
+        status += "CHECKED_OUT_TIME_NOT_SAVED " + str(e) + " "
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    # Retrieve any existing BatchProcessAnalyticsChunk that has not completed
+    # (this could include ones that haven't started yet)
+    results = batch_process_manager.retrieve_analytics_action_chunk_not_completed(batch_process_id=batch_process.id)
+    if not results['success']:
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            analytics_date_as_integer=batch_process.analytics_date_as_integer,
+            status=results['status'],
+        )
+        status += results['status']
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+    if results['batch_process_analytics_chunk_found']:
+        batch_process_analytics_chunk = results['batch_process_analytics_chunk']
+    else:
+        # We need to create a new batch_process_analytics_chunk here.
+        # We don't consider a batch_process completed until
+        # a batch_process_analytics_chunk reports that there are no more items retrieved
+        results = batch_process_manager.create_batch_process_analytics_chunk(batch_process=batch_process)
+        if results['batch_process_analytics_chunk_created']:
+            batch_process_analytics_chunk = results['batch_process_analytics_chunk']
+        else:
+            status += results['status']
+            status += "UNABLE_TO_CREATE_ANALYTICS_CHUNK "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=batch_process.kind_of_process,
+                analytics_date_as_integer=batch_process.analytics_date_as_integer,
+                status=status,
+            )
+            status += results['status']
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+    # If the batch_process_analytics_chunk has been started but not completed, figure out how many got
+    # processed before failing
+    analytics_manager = AnalyticsManager()
+    if batch_process_analytics_chunk.date_started is not None and batch_process_analytics_chunk.date_completed is None:
+        results = analytics_manager.retrieve_analytics_processed_list(
+            batch_process_id=batch_process.id,
+            batch_process_analytics_chunk_id=batch_process_analytics_chunk.id)
+        analytics_processed_count = 0
+        if results['analytics_processed_list_found']:
+            # Exclude the voters already processed for analytics_date_as_integer
+            analytics_processed_list = results['analytics_processed_list']
+            analytics_processed_count = len(analytics_processed_list)
+        else:
+            status += results['status']
+        try:
+            batch_process_analytics_chunk.number_of_rows_successfully_reviewed = analytics_processed_count
+            batch_process_analytics_chunk.timed_out = True
+            batch_process_analytics_chunk.date_completed = now()
+            batch_process_analytics_chunk.save()
+
+            status += "BATCH_PROCESS_ANALYTICS_CHUNK_TIMED_OUT, ROWS_REVIEWED: " + str(analytics_processed_count) + " "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=batch_process.kind_of_process,
+                status=status,
+            )
+        except Exception as e:
+            status += "BATCH_PROCESS_ANALYTICS_CHUNK_TIMED_OUT-DATE_COMPLETED_TIME_NOT_SAVED " + str(e) + " "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=batch_process.kind_of_process,
+                status=status,
+            )
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        # Now free up the batch_process to process in the next loop
+        try:
+            batch_process.date_checked_out = None
+            batch_process.save()
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=batch_process.kind_of_process,
+                status=status,
+            )
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+        except Exception as e:
+            status += "TIMED_OUT-DATE_COMPLETED_TIME_NOT_SAVED " + str(e) + " "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=batch_process.kind_of_process,
+                status=status,
+            )
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+    try:
+        batch_process_analytics_chunk.date_started = now()
+        batch_process_analytics_chunk.save()
+    except Exception as e:
+        status += "ANALYTICS_CHUNK_DATE_STARTED_TIME_NOT_SAVED " + str(e) + " "
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    mark_as_completed = False
+    if batch_process.kind_of_process in [AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID]:
+        results = process_one_analytics_batch_process_augment_with_election_id(
+            batch_process, batch_process_analytics_chunk)
+        status += results['status']
+    elif batch_process.kind_of_process in [AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT]:
+        results = process_one_analytics_batch_process_augment_with_first_visit(
+            batch_process, batch_process_analytics_chunk)
+        status += results['status']
+    elif batch_process.kind_of_process in [CALCULATE_SITEWIDE_VOTER_METRICS]:
+        results = process_sitewide_voter_metrics(batch_process, batch_process_analytics_chunk)
+        status += results['status']
+    # elif batch_process.kind_of_process in [CALCULATE_SITEWIDE_DAILY_METRICS]:
+    #     # Should not be here
+    #     pass
+    elif batch_process.kind_of_process in [CALCULATE_SITEWIDE_ELECTION_METRICS]:
+        # Not implemented yet -- mark as completed
+        mark_as_completed = True
+    elif batch_process.kind_of_process in [CALCULATE_ORGANIZATION_DAILY_METRICS]:
+        # Not implemented yet -- mark as completed
+        mark_as_completed = True
+    elif batch_process.kind_of_process in [CALCULATE_ORGANIZATION_ELECTION_METRICS]:
+        # Not implemented yet -- mark as completed
+        mark_as_completed = True
+    else:
+        status += "MISSING_KIND_OF_PROCESS "
+
+    try:
+        if mark_as_completed:
+            # Not implemented yet -- mark as completed
+            batch_process.date_completed = now()
+        batch_process.date_checked_out = None
+        batch_process.save()
+    except Exception as e:
+        status += "CHECKED_OUT_TIME_NOT_RESET: " + str(e) + " "
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            analytics_date_as_integer=batch_process.analytics_date_as_integer,
+            status=status,
+        )
 
     results = {
         'success': success,
@@ -836,6 +1121,88 @@ def process_one_search_twitter_batch_process(batch_process):
     results = {
         'success':              success,
         'status':               status,
+    }
+    return results
+
+
+def process_one_sitewide_daily_analytics_batch_process(batch_process):
+    from import_export_batches.models import BatchProcessManager
+    analytics_manager = AnalyticsManager()
+    batch_process_manager = BatchProcessManager()
+    status = ""
+    success = True
+
+    # When a batch_process is running, we mark when it was "taken off the shelf" to be worked on.
+    #  When the process is complete, we should reset this to "NULL"
+    try:
+        batch_process.date_checked_out = now()
+        batch_process.date_started = now()
+        batch_process.save()
+    except Exception as e:
+        status += "CHECKED_OUT_TIME_NOT_SAVED-SITEWIDE_DAILY " + str(e) + " "
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    daily_metrics_calculated = False
+    results = calculate_sitewide_daily_metrics(batch_process.analytics_date_as_integer)
+    status += results['status']
+    if positive_value_exists(results['success']):
+        sitewide_daily_metrics_values = results['sitewide_daily_metrics_values']
+        update_results = analytics_manager.save_sitewide_daily_metrics_values(sitewide_daily_metrics_values)
+        status += update_results['status']
+        if positive_value_exists(update_results['success']):
+            daily_metrics_calculated = True
+        else:
+            status += "SAVE_SITEWIDE_DAILY_METRICS-FAILED_TO_SAVE "
+            success = False
+    else:
+        status += "SAVE_SITEWIDE_DAILY_METRICS-FAILED_TO_CALCULATE "
+
+    try:
+        if daily_metrics_calculated:
+            batch_process.date_completed = now()
+            batch_process.completion_summary = "Sitewide daily metrics SAVED"
+        else:
+            batch_process.completion_summary = "Sitewide daily metrics NOT saved"
+        batch_process.date_checked_out = None
+        batch_process.save()
+    except Exception as e:
+        status += "CHECKED_OUT_TIME_NOT_RESET: " + str(e) + " "
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            analytics_date_as_integer=batch_process.analytics_date_as_integer,
+            status=status,
+        )
+
+    if daily_metrics_calculated:
+        # If here, there aren't any more sitewide_daily_metrics to process for this date
+        defaults = {
+            'finished_calculate_sitewide_daily_metrics': True,
+        }
+        status_results = analytics_manager.save_analytics_processing_status(
+            batch_process.analytics_date_as_integer,
+            defaults=defaults)
+        status += status_results['status']
+    else:
+        status += "COULD_NOT_CALCULATE_SITEWIDE_DAILY_METRICS "
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
+
+    results = {
+        'success': success,
+        'status': status,
     }
     return results
 

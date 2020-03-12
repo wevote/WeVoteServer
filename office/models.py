@@ -340,27 +340,38 @@ class ContestOfficeManager(models.Model):
         results = self.retrieve_offices_are_not_duplicates_list(office_we_vote_id)
         return results['contest_offices_are_not_duplicates_list_we_vote_ids']
 
-    def retrieve_offices_visiting_list(self, host_google_civic_election_id_list, read_only=True):
+    def retrieve_offices_visiting_list(self, host_google_civic_election_id_list=[],
+                                       origin_google_civic_election_id_list=[], read_only=True):
         """
         Get a list of office_we_vote_id's from other elections which are "visiting" this election
         :param host_google_civic_election_id_list:
+        :param origin_google_civic_election_id_list:
         :param read_only:
         :return:
         """
         host_google_civic_election_id_list_int = []
+        host_list_found = False
+        origin_google_civic_election_id_list_int = []
+        origin_list_found = False
         for host_google_civic_election_id in host_google_civic_election_id_list:
             host_google_civic_election_id_list_int.append(convert_to_int(host_google_civic_election_id))
+            host_list_found = True
+        for origin_google_civic_election_id in origin_google_civic_election_id_list:
+            origin_google_civic_election_id_list_int.append(convert_to_int(origin_google_civic_election_id))
+            origin_list_found = True
         contest_office_visiting_list = []
         try:
             if positive_value_exists(read_only):
-                contest_office_visiting_list_query = \
-                    ContestOfficeVisitingOtherElection.objects.using('readonly').filter(
+                contest_office_visiting_list_query = ContestOfficeVisitingOtherElection.objects.using('readonly').all()
+            else:
+                contest_office_visiting_list_query = ContestOfficeVisitingOtherElection.objects.all()
+            if host_list_found:
+                contest_office_visiting_list_query = contest_office_visiting_list_query.filter(
                         host_google_civic_election_id__in=host_google_civic_election_id_list_int,
                     )
-            else:
-                contest_office_visiting_list_query = \
-                    ContestOfficeVisitingOtherElection.objects.filter(
-                        host_google_civic_election_id__in=host_google_civic_election_id_list_int,
+            if origin_list_found:
+                contest_office_visiting_list_query = contest_office_visiting_list_query.filter(
+                        origin_google_civic_election_id__in=origin_google_civic_election_id_list_int,
                     )
             contest_office_visiting_list = list(contest_office_visiting_list_query)
             success = True
@@ -389,6 +400,11 @@ class ContestOfficeManager(models.Model):
     def fetch_office_visiting_list_we_vote_ids(self, host_google_civic_election_id_list):
         results = self.retrieve_offices_visiting_list(
             host_google_civic_election_id_list=host_google_civic_election_id_list, read_only=True)
+        return results['contest_office_visiting_list_we_vote_ids']
+
+    def fetch_office_visiting_list_we_vote_ids_from_origin_list(self, origin_google_civic_election_id_list):
+        results = self.retrieve_offices_visiting_list(
+            origin_google_civic_election_id_list=origin_google_civic_election_id_list, read_only=True)
         return results['contest_office_visiting_list_we_vote_ids']
 
     def update_or_create_contest_office(

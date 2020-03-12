@@ -389,6 +389,13 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS = {
 }
 
 # BatchProcess constants
+AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID = "AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID"
+AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT = "AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT"
+CALCULATE_ORGANIZATION_DAILY_METRICS = "CALCULATE_ORGANIZATION_DAILY_METRICS"
+CALCULATE_ORGANIZATION_ELECTION_METRICS = "CALCULATE_ORGANIZATION_ELECTION_METRICS"
+CALCULATE_SITEWIDE_DAILY_METRICS = "CALCULATE_SITEWIDE_DAILY_METRICS"
+CALCULATE_SITEWIDE_ELECTION_METRICS = "CALCULATE_SITEWIDE_ELECTION_METRICS"
+CALCULATE_SITEWIDE_VOTER_METRICS = "CALCULATE_SITEWIDE_VOTER_METRICS"
 RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
 REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
 REFRESH_BALLOT_ITEMS_FROM_VOTERS = "REFRESH_BALLOT_ITEMS_FROM_VOTERS"
@@ -4500,6 +4507,46 @@ class BatchProcessManager(models.Model):
     def __unicode__(self):
         return "BatchProcessManager"
 
+    def create_batch_process_analytics_chunk(self, batch_process_id=0, batch_process=None):
+        status = ""
+        success = True
+        batch_process_analytics_chunk = None
+        batch_process_analytics_chunk_created = False
+
+        if not batch_process:
+            results = self.retrieve_batch_process(batch_process_id)
+            if not results['batch_process_found']:
+                status += results['status'] + "BATCH_PROCESS_ANALYTICS_CHUNK_NOT_FOUND "
+                results = {
+                    'success':                                  success,
+                    'status':                                   status,
+                    'batch_process_analytics_chunk':            batch_process_analytics_chunk,
+                    'batch_process_analytics_chunk_created':    batch_process_analytics_chunk_created,
+                }
+                return results
+            batch_process = results['batch_process']
+
+        try:
+            batch_process_analytics_chunk = BatchProcessAnalyticsChunk.objects.create(
+                batch_process_id=batch_process.id,
+            )
+            if batch_process_analytics_chunk:
+                status += 'BATCH_PROCESS_ANALYTICS_CHUNK_SAVED '
+                batch_process_analytics_chunk_created = True
+            else:
+                status += 'FAILED_TO_CREATE_BATCH_PROCESS_ANALYTICS_CHUNK '
+        except Exception as e:
+            success = False
+            status += 'COULD_NOT_SAVE_BATCH_PROCESS_ANALYTICS_CHUNK ' + str(e) + ' '
+
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'batch_process_analytics_chunk':            batch_process_analytics_chunk,
+            'batch_process_analytics_chunk_created':    batch_process_analytics_chunk_created,
+        }
+        return results
+
     def create_batch_process_ballot_item_chunk(self, batch_process_id=0):
         status = ""
         success = True
@@ -4547,7 +4594,8 @@ class BatchProcessManager(models.Model):
             kind_of_process=None,
             polling_location_we_vote_id=None,
             state_code="",
-            voter_id=None):
+            voter_id=None,
+            analytics_date_as_integer=None):
         status = ""
         success = True
         batch_process = None
@@ -4556,7 +4604,14 @@ class BatchProcessManager(models.Model):
                 [REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
                  REFRESH_BALLOT_ITEMS_FROM_VOTERS,
                  RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
-                 SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
+                 SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE,
+                 AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID,
+                 AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
+                 CALCULATE_SITEWIDE_VOTER_METRICS,
+                 CALCULATE_SITEWIDE_DAILY_METRICS,
+                 CALCULATE_SITEWIDE_ELECTION_METRICS,
+                 CALCULATE_ORGANIZATION_DAILY_METRICS,
+                 CALCULATE_ORGANIZATION_ELECTION_METRICS]:
             status += "KIND_OF_PROCESS_NOT_FOUND: " + str(kind_of_process) + " "
             success = False
             results = {
@@ -4569,12 +4624,15 @@ class BatchProcessManager(models.Model):
 
         try:
             google_civic_election_id = convert_to_int(google_civic_election_id)
+            if analytics_date_as_integer:
+                analytics_date_as_integer = convert_to_int(analytics_date_as_integer)
             batch_process = BatchProcess.objects.create(
                 google_civic_election_id=google_civic_election_id,
                 kind_of_process=kind_of_process,
                 polling_location_we_vote_id=polling_location_we_vote_id,
                 state_code=state_code,
                 voter_id=voter_id,
+                analytics_date_as_integer=analytics_date_as_integer,
                 date_added_to_queue=now(),
             )
             status += 'BATCH_PROCESS_SAVED '
@@ -4600,7 +4658,8 @@ class BatchProcessManager(models.Model):
             polling_location_we_vote_id=None,
             state_code="",
             status="",
-            voter_id=None):
+            voter_id=None,
+            analytics_date_as_integer=None):
         success = True
         batch_process_log_entry = None
         batch_process_log_entry_saved = False
@@ -4625,6 +4684,9 @@ class BatchProcessManager(models.Model):
                 save_changes = True
             if positive_value_exists(polling_location_we_vote_id):
                 batch_process_log_entry.polling_location_we_vote_id = polling_location_we_vote_id
+                save_changes = True
+            if positive_value_exists(analytics_date_as_integer):
+                batch_process_log_entry.analytics_date_as_integer = analytics_date_as_integer
                 save_changes = True
             if save_changes:
                 batch_process_log_entry.save()
@@ -4719,6 +4781,27 @@ class BatchProcessManager(models.Model):
             status += 'FAILED_COUNT_CHECKED_OUT_BATCH_PROCESSES ' + str(e) + ' '
         return batch_process_count
 
+    def is_analytics_process_currently_running(self):
+        status = ""
+        analytics_kind_of_process_list = [
+                AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
+                CALCULATE_SITEWIDE_VOTER_METRICS, CALCULATE_SITEWIDE_DAILY_METRICS,
+                CALCULATE_SITEWIDE_ELECTION_METRICS, CALCULATE_ORGANIZATION_DAILY_METRICS,
+                CALCULATE_ORGANIZATION_ELECTION_METRICS]
+        try:
+            batch_process_queryset = BatchProcess.objects.all()
+            batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
+            batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+            batch_process_queryset = batch_process_queryset.filter(date_checked_out__isnull=False)
+            batch_process_queryset = batch_process_queryset.filter(
+                kind_of_process__in=analytics_kind_of_process_list)
+
+            batch_process_count = batch_process_queryset.count()
+            return positive_value_exists(batch_process_count)
+        except Exception as e:
+            status += 'FAILED_COUNT_CHECKED_OUT_BATCH_PROCESSES ' + str(e) + ' '
+            return True
+
     def retrieve_batch_process_list(self, process_active=True, process_queued=False, for_upcoming_elections=True):
         status = ""
         success = True
@@ -4767,8 +4850,10 @@ class BatchProcessManager(models.Model):
                 else:
                     date_checked_out_time_out = \
                         batch_process.date_checked_out + timedelta(seconds=checked_out_expiration_time)
+                    status += "CHECKED_OUT_PROCESS_FOUND "
                     if now() > date_checked_out_time_out:
                         filtered_batch_process_list.append(batch_process)
+                        status += "CHECKED_OUT_PROCESS_FOUND-HAS_TIMED_OUT "
 
             if len(filtered_batch_process_list):
                 batch_process_list_found = True
@@ -4791,7 +4876,7 @@ class BatchProcessManager(models.Model):
         }
         return results
 
-    def retrieve_active_ballot_item_chunk_not_completed(self, batch_process_id=0):
+    def retrieve_active_ballot_item_chunk_not_completed(self, batch_process_id):
         status = ""
         success = True
         batch_process_ballot_item_chunk = None
@@ -4841,6 +4926,50 @@ class BatchProcessManager(models.Model):
         }
         return results
 
+    def retrieve_analytics_action_chunk_not_completed(self, batch_process_id):
+        status = ""
+        success = True
+        batch_process_analytics_chunk = None
+        batch_process_analytics_chunk_found = False
+        try:
+            batch_process_queryset = BatchProcessAnalyticsChunk.objects.all()
+            batch_process_queryset = batch_process_queryset.filter(batch_process_id=batch_process_id)
+
+            # Limit to chunks that have at least one completed_date == NULL
+            filters = []  # Reset for each search word
+            new_filter = Q(date_completed__isnull=True)
+            filters.append(new_filter)
+
+            # Add the first query
+            final_filters = filters.pop()
+            # ...and "OR" the remaining items in the list
+            for item in filters:
+                final_filters |= item
+            batch_process_queryset = batch_process_queryset.filter(final_filters)
+
+            batch_process_queryset = batch_process_queryset.order_by("id")
+            batch_process_analytics_chunk = batch_process_queryset.first()
+            if batch_process_analytics_chunk:
+                batch_process_analytics_chunk_found = True
+                status += 'BATCH_PROCESS_ANALYTICS_CHUNK_RETRIEVED '
+            else:
+                status += 'BATCH_PROCESS_ANALYTICS_CHUNK_NOT_FOUND '
+        except BatchProcessAnalyticsChunk.DoesNotExist:
+            # No chunk found. Not a problem.
+            status += 'BATCH_PROCESS_ANALYTICS_CHUNK_NOT_FOUND_DoesNotExist '
+        except Exception as e:
+            status += 'FAILED_BATCH_PROCESS_ANALYTICS_CHUNK_RETRIEVE ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+            success = False
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'batch_process_analytics_chunk':        batch_process_analytics_chunk,
+            'batch_process_analytics_chunk_found':  batch_process_analytics_chunk_found,
+        }
+        return results
+
     def system_turned_off(self):
         from wevote_settings.models import fetch_batch_process_system_on
         return not fetch_batch_process_system_on()
@@ -4856,6 +4985,8 @@ class BatchProcess(models.Model):
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False, db_index=True)
     state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
+    # This is used to identify the date of analytics we are processing
+    analytics_date_as_integer = models.PositiveIntegerField(null=True, blank=True)
 
     # Either voter_id or polling_location_we_vote_id will be set, but not both.
     # The unique id of the voter for which this ballot was retrieved.
@@ -4874,6 +5005,18 @@ class BatchProcess(models.Model):
     date_checked_out = models.DateTimeField(null=True)
     batch_process_paused = models.BooleanField(default=False)
     completion_summary = models.TextField(null=True, blank=True)
+
+
+class BatchProcessAnalyticsChunk(models.Model):
+    """
+    """
+    batch_process_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
+
+    date_started = models.DateTimeField(default=None, null=True)
+    timed_out = models.NullBooleanField(default=None, null=True)
+    date_completed = models.DateTimeField(default=None, null=True)
+    number_of_rows_being_reviewed = models.PositiveIntegerField(default=0, null=True)
+    number_of_rows_successfully_reviewed = models.PositiveIntegerField(default=0, null=True)
 
 
 class BatchProcessBallotItemChunk(models.Model):
@@ -4921,6 +5064,7 @@ class BatchProcessLogEntry(models.Model):
     critical_failure = models.NullBooleanField(default=None, null=True)
     date_added = models.DateTimeField(null=True, auto_now_add=True)
     kind_of_process = models.CharField(max_length=50, default="")
+    analytics_date_as_integer = models.PositiveIntegerField(default=None, null=True)
     status = models.TextField(null=True, blank=True)
 
 

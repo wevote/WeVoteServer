@@ -6,16 +6,25 @@ from .models import AnalyticsAction, AnalyticsCountManager, AnalyticsManager, \
     ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
-from datetime import timedelta
+from datetime import date, datetime, timedelta
 from django.db.models import Q
 from django.utils.timezone import localtime, now
 from exception.models import print_to_log
 from follow.models import FollowMetricsManager, FollowOrganizationList
+from import_export_batches.models import AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, \
+    AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT, \
+    BatchProcessManager, \
+    CALCULATE_ORGANIZATION_DAILY_METRICS, \
+    CALCULATE_ORGANIZATION_ELECTION_METRICS, \
+    CALCULATE_SITEWIDE_DAILY_METRICS, \
+    CALCULATE_SITEWIDE_ELECTION_METRICS, \
+    CALCULATE_SITEWIDE_VOTER_METRICS
 from measure.models import ContestMeasureManager
+from office.models import ContestOfficeManager
 from position.models import PositionMetricsManager
 from voter.models import VoterManager, VoterMetricsManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -73,7 +82,281 @@ def augment_voter_analytics_action_entries_without_election_id(date_as_integer, 
     return results
 
 
-def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote_id, starting_analytics_action_id=0):
+def process_one_analytics_batch_process_augment_with_election_id(batch_process, batch_process_analytics_chunk):
+    status = ""
+    success = True
+
+    if not batch_process or not batch_process_analytics_chunk or not batch_process.analytics_date_as_integer:
+        status += "MISSING_REQUIRED_VARIABLES "
+        results = {
+            'success':              success,
+            'status':               status,
+        }
+        return results
+
+    analytics_manager = AnalyticsManager()
+    batch_process_manager = BatchProcessManager()
+
+    # Start by finding voters already processed for analytics_date_as_integer
+    exclude_voter_we_vote_id_list = []
+    results = analytics_manager.retrieve_analytics_processed_list(
+        analytics_date_as_integer=batch_process.analytics_date_as_integer,
+        kind_of_process=AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID)
+    if results['retrieved_voter_we_vote_id_list_found']:
+        # Exclude the voters already processed for analytics_date_as_integer
+        exclude_voter_we_vote_id_list = results['retrieved_voter_we_vote_id_list']
+
+    # Find voters who haven't been processed yet for analytics_date_as_integer
+    try:
+        voter_list_query = AnalyticsAction.objects.using('analytics').all()
+        voter_list_query = voter_list_query.filter(date_as_integer=batch_process.analytics_date_as_integer)
+        if len(exclude_voter_we_vote_id_list):
+            voter_list_query = voter_list_query.exclude(voter_we_vote_id__in=exclude_voter_we_vote_id_list)
+        # Find entries where there is at least one empty google_civic_election_id
+        voter_list_query = voter_list_query.filter(Q(google_civic_election_id=None) | Q(google_civic_election_id=0))
+        voter_list_query = voter_list_query.values_list('voter_we_vote_id', flat=True).distinct()
+        voter_analytics_list = voter_list_query[:250]  # Limit to 250 voters at a time
+    except Exception as e:
+        status += "ANALYTICS_ACTION_ERROR_FIND_VOTERS: " + str(e) + " "
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
+        results = {
+            'success':              success,
+            'status':               status,
+        }
+        return results
+
+    if len(voter_analytics_list):
+        try:
+            batch_process_analytics_chunk.number_of_rows_being_reviewed = len(voter_analytics_list)
+            batch_process_analytics_chunk.save()
+
+            status += "ROWS_BEING_REVIEWED: " + str(len(voter_analytics_list)) + " "
+        except Exception as e:
+            status += "NUMBER_OF_ROWS_BEING_REVIEWED_NOT_SAVED " + str(e) + " "
+
+    candidate_cache = {}
+    candidate_ids_visiting_other_elections = []
+    origin_elections_reviewed = []
+    office_we_vote_ids_visiting_other_elections = []
+    measure_cache = {}
+    analytics_updated_count = 0
+    number_of_rows_successfully_reviewed = 0
+    for voter_we_vote_id in voter_analytics_list:
+        retrieve_results = augment_analytics_action_with_election_id_one_voter(
+            voter_we_vote_id,
+            analytics_date_as_integer=batch_process.analytics_date_as_integer,
+            candidate_cache=candidate_cache,
+            candidate_ids_visiting_other_elections=candidate_ids_visiting_other_elections,
+            origin_elections_reviewed=origin_elections_reviewed,
+            office_we_vote_ids_visiting_other_elections=office_we_vote_ids_visiting_other_elections,
+            measure_cache=measure_cache,
+        )
+        candidate_cache = retrieve_results['candidate_cache']
+        candidate_ids_visiting_other_elections = retrieve_results['candidate_ids_visiting_other_elections']
+        origin_elections_reviewed = retrieve_results['origin_elections_reviewed']
+        office_we_vote_ids_visiting_other_elections = retrieve_results['office_we_vote_ids_visiting_other_elections']
+        measure_cache = retrieve_results['measure_cache']
+
+        status += retrieve_results['status']
+        analytics_updated_count += retrieve_results['analytics_updated_count']
+        if results['success']:
+            number_of_rows_successfully_reviewed += 1
+
+    try:
+        batch_process_analytics_chunk.number_of_rows_successfully_reviewed = number_of_rows_successfully_reviewed
+        batch_process_analytics_chunk.date_completed = now()
+        batch_process_analytics_chunk.save()
+
+        status += "BATCH_PROCESS_ANALYTICS_CHUNK, ROWS_REVIEWED: " \
+                  "" + str(number_of_rows_successfully_reviewed) + " "
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
+    except Exception as e:
+        status += "BATCH_PROCESS_ANALYTICS_CHUNK_TIMED_OUT-DATE_COMPLETED_TIME_NOT_SAVED " + str(e) + " "
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
+
+    if not len(voter_analytics_list):
+        try:
+            batch_process.date_completed = now()
+            batch_process.save()
+        except Exception as e:
+            status += "BATCH_PROCESS_DATE_COMPLETED_NOT_SAVED: " + str(e) + " "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=batch_process.kind_of_process,
+                analytics_date_as_integer=batch_process.analytics_date_as_integer,
+                status=status,
+            )
+
+        # If here, there aren't any more analytics to process for augment_with_election_id for this date
+        defaults = {
+            'finished_augment_analytics_action_with_election_id': True,
+        }
+        status_results = analytics_manager.save_analytics_processing_status(
+            batch_process.analytics_date_as_integer,
+            defaults=defaults)
+        status += status_results['status']
+
+    results = {
+        'success':              success,
+        'status':               status,
+    }
+    return results
+
+
+def process_one_analytics_batch_process_augment_with_first_visit(batch_process, batch_process_analytics_chunk):
+    status = ""
+    success = True
+    first_visit_today_count = 0
+
+    if not batch_process or not batch_process_analytics_chunk or not batch_process.analytics_date_as_integer:
+        status += "MISSING_REQUIRED_VARIABLES-FIRST_VISIT "
+        results = {
+            'success':              success,
+            'status':               status,
+        }
+        return results
+
+    analytics_manager = AnalyticsManager()
+    batch_process_manager = BatchProcessManager()
+
+    # Start by finding voters already processed for analytics_date_as_integer
+    exclude_voter_we_vote_id_list = []
+    results = analytics_manager.retrieve_analytics_processed_list(
+        analytics_date_as_integer=batch_process.analytics_date_as_integer,
+        kind_of_process=AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT)
+    if results['retrieved_voter_we_vote_id_list_found']:
+        # Exclude the voters already processed for analytics_date_as_integer
+        exclude_voter_we_vote_id_list = results['retrieved_voter_we_vote_id_list']
+
+    # Find voters who haven't been processed yet for analytics_date_as_integer
+    try:
+        voter_list_query = AnalyticsAction.objects.using('analytics').all()
+        voter_list_query = voter_list_query.filter(date_as_integer=batch_process.analytics_date_as_integer)
+        if len(exclude_voter_we_vote_id_list):
+            voter_list_query = voter_list_query.exclude(voter_we_vote_id__in=exclude_voter_we_vote_id_list)
+        # Find entries where there is at least one empty google_civic_election_id
+        voter_list_query = voter_list_query.values_list('voter_we_vote_id', flat=True).distinct()
+        voter_analytics_list = voter_list_query[:250]  # Limit to 250 voters at a time
+    except Exception as e:
+        status += "ANALYTICS_ACTION_ERROR_FIND_VOTERS-FIRST_VISIT: " + str(e) + " "
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
+        results = {
+            'success':              success,
+            'status':               status,
+        }
+        return results
+
+    if len(voter_analytics_list):
+        try:
+            batch_process_analytics_chunk.number_of_rows_being_reviewed = len(voter_analytics_list)
+            batch_process_analytics_chunk.save()
+
+            status += "ROWS_BEING_REVIEWED-FIRST_VISIT: " + str(len(voter_analytics_list)) + " "
+        except Exception as e:
+            status += "NUMBER_OF_ROWS_BEING_REVIEWED_NOT_SAVED-FIRST_VISIT " + str(e) + " "
+
+    for voter_we_vote_id in voter_analytics_list:
+        analysis_success = True
+        try:
+            first_visit_query = AnalyticsAction.objects.using('analytics').all()
+            first_visit_query = first_visit_query.order_by("id")  # order by oldest first
+            first_visit_query = first_visit_query.filter(date_as_integer=batch_process.analytics_date_as_integer)
+            first_visit_query = first_visit_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            analytics_action = first_visit_query.first()
+
+            analytics_action.first_visit_today = True
+            analytics_action.save()
+            first_visit_today_count += 1
+        except Exception as e:
+            status += "FAILED_SAVING_ANALYTICS_ACTION " + str(e) + " "
+            analysis_success = False
+        if analysis_success:
+            defaults = {
+                'analytics_date_as_integer': batch_process.analytics_date_as_integer,
+                'voter_we_vote_id': voter_we_vote_id,
+                'kind_of_process': AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
+            }
+            results = analytics_manager.save_analytics_processed(
+                analytics_date_as_integer=batch_process.analytics_date_as_integer,
+                voter_we_vote_id=voter_we_vote_id,
+                defaults=defaults)
+
+    try:
+        batch_process_analytics_chunk.number_of_rows_successfully_reviewed = first_visit_today_count
+        batch_process_analytics_chunk.date_completed = now()
+        batch_process_analytics_chunk.save()
+
+        status += "BATCH_PROCESS_ANALYTICS_CHUNK, ROWS_REVIEWED-FIRST_VISIT: " \
+                  "" + str(first_visit_today_count) + " "
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
+    except Exception as e:
+        status += "DATE_COMPLETED_TIME_NOT_SAVED-FIRST_VISIT " + str(e) + " "
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
+
+    if not len(voter_analytics_list):
+        try:
+            batch_process.date_completed = now()
+            batch_process.save()
+        except Exception as e:
+            status += "BATCH_PROCESS_DATE_COMPLETED_NOT_SAVED-FIRST_VISIT: " + str(e) + " "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=batch_process.kind_of_process,
+                analytics_date_as_integer=batch_process.analytics_date_as_integer,
+                status=status,
+            )
+
+        # If here, there aren't any more analytics to process for augment_with_election_id for this date
+        defaults = {
+            'finished_augment_analytics_action_with_first_visit': True,
+        }
+        status_results = analytics_manager.save_analytics_processing_status(
+            batch_process.analytics_date_as_integer,
+            defaults=defaults)
+        status += status_results['status']
+
+    results = {
+        'success':              success,
+        'status':               status,
+    }
+    return results
+
+
+def augment_analytics_action_with_election_id_one_voter(
+        voter_we_vote_id, analytics_date_as_integer=0,
+        candidate_cache={},
+        candidate_ids_visiting_other_elections=[],
+        origin_elections_reviewed=[],
+        office_we_vote_ids_visiting_other_elections=[],
+        measure_cache={}):
     success = True
     status = ""
     voter_history_list = []
@@ -81,65 +364,96 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
     try:
         voter_history_query = AnalyticsAction.objects.using('analytics').all()
         voter_history_query = voter_history_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
-        if positive_value_exists(starting_analytics_action_id):
-            voter_history_query = voter_history_query.filter(id__gte=starting_analytics_action_id)
+        voter_history_query = voter_history_query.filter(date_as_integer=analytics_date_as_integer)
         voter_history_query = voter_history_query.order_by("id")  # order by oldest first
         voter_history_list = list(voter_history_query)
     except Exception as e:
-        pass
+        status += "COULD_NOT_RETRIEVE_ANALYTICS_FOR_VOTER-ONE_VOTER: " + str(e) + " "
 
     # First loop through and assign election for candidates and measures associated with specific election
+    analytics_manager = AnalyticsManager()
     candidate_campaign_manager = CandidateCampaignManager()
     contest_measure_manager = ContestMeasureManager()
-    candidate_found_list = []
-    candidate_cache = {}
-    measure_found_list = []
-    measure_cache = {}
+    contest_office_manager = ContestOfficeManager()
     for analytics_action in voter_history_list:
+        analysis_success = True
         if positive_value_exists(analytics_action.ballot_item_we_vote_id) \
                 and not positive_value_exists(analytics_action.google_civic_election_id):
             if "cand" in analytics_action.ballot_item_we_vote_id:
                 # If we are looking at a candidate without a google_civic_election_id
                 candidate_found = False
-                if analytics_action.ballot_item_we_vote_id in candidate_found_list:
+                candidate_campaign_google_civic_election_id = 0
+                if analytics_action.ballot_item_we_vote_id in candidate_ids_visiting_other_elections:
+                    # If here, it means that the google_civic_election_id for this candidate doesn't necessarily
+                    #  match the election the voter is actually looking at, so we don't want to risk it
+                    pass
+                elif analytics_action.ballot_item_we_vote_id in candidate_cache:
                     candidate_found = True
                     candidate_campaign = candidate_cache[analytics_action.ballot_item_we_vote_id]
+                    candidate_campaign_google_civic_election_id = candidate_campaign.google_civic_election_id
                 else:
                     results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
                         analytics_action.ballot_item_we_vote_id)
                     if results['candidate_campaign_found']:
                         candidate_campaign = results['candidate_campaign']
-                        candidate_cache[analytics_action.ballot_item_we_vote_id] = candidate_campaign
-                        candidate_found_list.append(analytics_action.ballot_item_we_vote_id)
-                        candidate_found = True
-                if candidate_found and positive_value_exists(candidate_campaign.google_civic_election_id):
+                        if candidate_campaign.google_civic_election_id not in origin_elections_reviewed:
+                            # Find the office_we_vote_ids that originate from this election
+                            # (origin_google_civic_election_id) and
+                            # "visit" other elections (host_google_civic_election_id). If this candidate's origin
+                            # is another election, do not use its google_civic_election_id for the analytics update
+                            # use the google_civic_election_id in the candidate_campaign if it from a previous election
+                            new_office_we_vote_ids = \
+                                contest_office_manager.fetch_office_visiting_list_we_vote_ids_from_origin_list(
+                                    origin_google_civic_election_id_list=[candidate_campaign.google_civic_election_id])
+                            origin_elections_reviewed.append(candidate_campaign.google_civic_election_id)
+                            for office_we_vote_id in new_office_we_vote_ids:
+                                office_we_vote_ids_visiting_other_elections.append(office_we_vote_id)
+                        if candidate_campaign.contest_office_we_vote_id in office_we_vote_ids_visiting_other_elections:
+                            candidate_ids_visiting_other_elections.append(analytics_action.ballot_item_we_vote_id)
+                        else:
+                            candidate_cache[analytics_action.ballot_item_we_vote_id] = candidate_campaign
+                            candidate_found = True
+                            candidate_campaign_google_civic_election_id = candidate_campaign.google_civic_election_id
+                if candidate_found and positive_value_exists(candidate_campaign_google_civic_election_id):
                     try:
-                        analytics_action.google_civic_election_id = candidate_campaign.google_civic_election_id
+                        analytics_action.google_civic_election_id = candidate_campaign_google_civic_election_id
                         analytics_action.save()
                         analytics_updated_count += 1
                     except Exception as e:
-                        pass
+                        status += "COULD_NOT_SAVE_ANALYTICS_ACTION-CANDIDATE_CAMPAIGN: " + str(e) + " "
             elif "meas" in analytics_action.ballot_item_we_vote_id:
                 measure_found = False
                 # If we are looking at a measure without a google_civic_election_id
-                if analytics_action.ballot_item_we_vote_id in measure_found_list:
+                contest_measure_google_civic_election_id = 0
+                if analytics_action.ballot_item_we_vote_id in measure_cache:
                     measure_found = True
                     contest_measure = measure_cache[analytics_action.ballot_item_we_vote_id]
+                    contest_measure_google_civic_election_id = contest_measure.google_civic_election_id
                 else:
                     results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
                         analytics_action.ballot_item_we_vote_id)
                     if results['contest_measure_found']:
                         contest_measure = results['contest_measure']
                         measure_cache[analytics_action.ballot_item_we_vote_id] = contest_measure
-                        measure_found_list.append(analytics_action.ballot_item_we_vote_id)
                         measure_found = True
-                if measure_found and positive_value_exists(contest_measure.google_civic_election_id):
+                        contest_measure_google_civic_election_id = contest_measure.google_civic_election_id
+                if measure_found and positive_value_exists(contest_measure_google_civic_election_id):
                     try:
-                        analytics_action.google_civic_election_id = contest_measure.google_civic_election_id
+                        analytics_action.google_civic_election_id = contest_measure_google_civic_election_id
                         analytics_action.save()
                         analytics_updated_count += 1
                     except Exception as e:
-                        pass
+                        status += "COULD_NOT_SAVE_ANALYTICS_ACTION-CONTEST_MEASURE: " + str(e) + " "
+        if analysis_success:
+            defaults = {
+                'analytics_date_as_integer': analytics_date_as_integer,
+                'voter_we_vote_id': voter_we_vote_id,
+                'kind_of_process': AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID,
+            }
+            results = analytics_manager.save_analytics_processed(
+                analytics_date_as_integer=analytics_date_as_integer,
+                voter_we_vote_id=voter_we_vote_id,
+                defaults=defaults)
 
     # Now "fill-in-the-gaps"
     leading_edge_google_civic_election_id = 0  # The very first google_civic_election_id found
@@ -172,7 +486,7 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
                         analytics_action.save()
                         analytics_updated_count += 1
                     except Exception as e:
-                        pass
+                        status += "COULD_NOT_SAVE_ANALYTICS_ACTION-WITHIN_ONE_WEEK: " + str(e) + " "
                 else:
                     # Recursively start up the process starting from this entry, and then break out of this loop
                     new_starting_analytics_action_id = analytics_action.id
@@ -196,7 +510,7 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
                     analytics_action.save()
                     analytics_updated_count += 1
                 except Exception as e:
-                    pass
+                    status += "COULD_NOT_SAVE_ANALYTICS_ACTION-BEFORE_FIRST_ELECTION: " + str(e) + " "
 
     # 2017-09-21 As of now, we are not going to guess the election if there wasn't any election-related activity.
 
@@ -204,6 +518,296 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
         'success': success,
         'status': status,
         'analytics_updated_count': analytics_updated_count,
+        'candidate_cache': candidate_cache,
+        'candidate_ids_visiting_other_elections': candidate_ids_visiting_other_elections,
+        'origin_elections_reviewed': origin_elections_reviewed,
+        'office_we_vote_ids_visiting_other_elections': office_we_vote_ids_visiting_other_elections,
+        'measure_cache': measure_cache,
+    }
+    return results
+
+
+def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote_id, starting_analytics_action_id=0):
+    success = True
+    status = ""
+    voter_history_list = []
+    analytics_updated_count = 0
+    try:
+        voter_history_query = AnalyticsAction.objects.using('analytics').all()
+        voter_history_query = voter_history_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+        if positive_value_exists(starting_analytics_action_id):
+            voter_history_query = voter_history_query.filter(id__gte=starting_analytics_action_id)
+        voter_history_query = voter_history_query.order_by("id")  # order by oldest first
+        voter_history_list = list(voter_history_query)
+    except Exception as e:
+        status += "COULD_NOT_RETRIEVE_ANALYTICS_FOR_VOTER-gte=starting_analytics_action: " + str(e) + " "
+
+    # First loop through and assign election for candidates and measures associated with specific election
+    candidate_campaign_manager = CandidateCampaignManager()
+    contest_measure_manager = ContestMeasureManager()
+    candidate_found_list = []
+    candidate_cache = {}
+    measure_found_list = []
+    measure_cache = {}
+    for analytics_action in voter_history_list:
+        if positive_value_exists(analytics_action.ballot_item_we_vote_id) \
+                and not positive_value_exists(analytics_action.google_civic_election_id):
+            if "cand" in analytics_action.ballot_item_we_vote_id:
+                # If we are looking at a candidate without a google_civic_election_id
+                candidate_found = False
+                candidate_campaign_google_civic_election_id = 0
+                if analytics_action.ballot_item_we_vote_id in candidate_found_list:
+                    candidate_found = True
+                    candidate_campaign = candidate_cache[analytics_action.ballot_item_we_vote_id]
+                    candidate_campaign_google_civic_election_id = candidate_campaign.google_civic_election_id
+                else:
+                    results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+                        analytics_action.ballot_item_we_vote_id)
+                    if results['candidate_campaign_found']:
+                        candidate_campaign = results['candidate_campaign']
+                        candidate_cache[analytics_action.ballot_item_we_vote_id] = candidate_campaign
+                        candidate_found_list.append(analytics_action.ballot_item_we_vote_id)
+                        candidate_found = True
+                        candidate_campaign_google_civic_election_id = candidate_campaign.google_civic_election_id
+                if candidate_found and positive_value_exists(candidate_campaign_google_civic_election_id):
+                    try:
+                        analytics_action.google_civic_election_id = candidate_campaign_google_civic_election_id
+                        analytics_action.save()
+                        analytics_updated_count += 1
+                    except Exception as e:
+                        status += "COULD_NOT_SAVE_ANALYTICS_ACTION-CANDIDATE_CAMPAIGN: " + str(e) + " "
+            elif "meas" in analytics_action.ballot_item_we_vote_id:
+                measure_found = False
+                # If we are looking at a measure without a google_civic_election_id
+                contest_measure_google_civic_election_id = 0
+                if analytics_action.ballot_item_we_vote_id in measure_found_list:
+                    measure_found = True
+                    contest_measure = measure_cache[analytics_action.ballot_item_we_vote_id]
+                    contest_measure_google_civic_election_id = contest_measure.google_civic_election_id
+                else:
+                    results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
+                        analytics_action.ballot_item_we_vote_id)
+                    if results['contest_measure_found']:
+                        contest_measure = results['contest_measure']
+                        measure_cache[analytics_action.ballot_item_we_vote_id] = contest_measure
+                        measure_found_list.append(analytics_action.ballot_item_we_vote_id)
+                        measure_found = True
+                        contest_measure_google_civic_election_id = contest_measure.google_civic_election_id
+                if measure_found and positive_value_exists(contest_measure_google_civic_election_id):
+                    try:
+                        analytics_action.google_civic_election_id = contest_measure_google_civic_election_id
+                        analytics_action.save()
+                        analytics_updated_count += 1
+                    except Exception as e:
+                        status += "COULD_NOT_SAVE_ANALYTICS_ACTION-CONTEST_MEASURE: " + str(e) + " "
+
+    # Now "fill-in-the-gaps"
+    leading_edge_google_civic_election_id = 0  # The very first google_civic_election_id found
+    latest_google_civic_election_id = 0  # As we go from oldest-to-newest, update this to the next id found
+    analytics_action_list_before_first_election = []
+    datetime_of_last_analytics_action_entry = None
+    one_week = timedelta(days=7)
+    for analytics_action in voter_history_list:
+        if positive_value_exists(analytics_action.google_civic_election_id):
+            # If the next-newest analytics_action entry has a google_civic_election_id,
+            #  reset the latest_google_civic_election_id
+            latest_google_civic_election_id = analytics_action.google_civic_election_id
+            if not positive_value_exists(leading_edge_google_civic_election_id):
+                # Only set this once
+                leading_edge_google_civic_election_id = analytics_action.google_civic_election_id
+        else:
+            if positive_value_exists(latest_google_civic_election_id):
+                # If within 1 week of last analytics_action entry, set the google_civic_election_id
+                # to the leading_edge_google_civic_election_id
+                is_within_one_week = False
+                if datetime_of_last_analytics_action_entry:
+                    time_passed_since_last_entry = \
+                        analytics_action.exact_time - datetime_of_last_analytics_action_entry
+                    if time_passed_since_last_entry < one_week:
+                        is_within_one_week = True
+
+                if is_within_one_week:
+                    try:
+                        analytics_action.google_civic_election_id = latest_google_civic_election_id
+                        analytics_action.save()
+                        analytics_updated_count += 1
+                    except Exception as e:
+                        status += "COULD_NOT_SAVE_ANALYTICS_ACTION-WITHIN_ONE_WEEK: " + str(e) + " "
+                else:
+                    # Recursively start up the process starting from this entry, and then break out of this loop
+                    new_starting_analytics_action_id = analytics_action.id
+                    results = augment_one_voter_analytics_action_entries_without_election_id(
+                        voter_we_vote_id, new_starting_analytics_action_id)
+                    analytics_updated_count += results['analytics_updated_count']
+                    break
+            else:
+                # If here, we have not set the leading_edge_google_civic_election_id yet
+                #  so we want to save these entries into a "precursor" list
+                analytics_action_list_before_first_election.append(analytics_action)
+
+        datetime_of_last_analytics_action_entry = analytics_action.exact_time
+
+    if positive_value_exists(leading_edge_google_civic_election_id):
+        for analytics_action in analytics_action_list_before_first_election:
+            # Loop through these and set to leading_edge_google_civic_election_id
+            if not positive_value_exists(analytics_action.google_civic_election_id):  # Make sure it is empty
+                try:
+                    analytics_action.google_civic_election_id = leading_edge_google_civic_election_id
+                    analytics_action.save()
+                    analytics_updated_count += 1
+                except Exception as e:
+                    status += "COULD_NOT_SAVE_ANALYTICS_ACTION-BEFORE_FIRST_ELECTION: " + str(e) + " "
+
+    # 2017-09-21 As of now, we are not going to guess the election if there wasn't any election-related activity.
+
+    results = {
+        'success': success,
+        'status': status,
+        'analytics_updated_count': analytics_updated_count,
+    }
+    return results
+
+
+def process_sitewide_voter_metrics(batch_process, batch_process_analytics_chunk):
+    status = ""
+    success = True
+    sitewide_voter_metrics_updated = 0
+
+    if not batch_process or not batch_process_analytics_chunk or not batch_process.analytics_date_as_integer:
+        status += "MISSING_REQUIRED_VARIABLES-VOTER_METRICS "
+        results = {
+            'success':              success,
+            'status':               status,
+        }
+        return results
+
+    analytics_manager = AnalyticsManager()
+    batch_process_manager = BatchProcessManager()
+
+    # Start by finding voters already processed for analytics_date_as_integer or more recent
+    exclude_voter_we_vote_id_list = []
+    results = analytics_manager.retrieve_analytics_processed_list(
+        analytics_date_as_integer_more_recent_than=batch_process.analytics_date_as_integer,
+        kind_of_process=CALCULATE_SITEWIDE_VOTER_METRICS)
+    if results['retrieved_voter_we_vote_id_list_found']:
+        # Exclude the voters already processed for analytics_date_as_integer
+        exclude_voter_we_vote_id_list = results['retrieved_voter_we_vote_id_list']
+
+    # Find voters who haven't been processed yet for analytics_date_as_integer
+    try:
+        voter_list_query = AnalyticsAction.objects.using('analytics').all()
+        voter_list_query = voter_list_query.filter(date_as_integer=batch_process.analytics_date_as_integer)
+        if len(exclude_voter_we_vote_id_list):
+            voter_list_query = voter_list_query.exclude(voter_we_vote_id__in=exclude_voter_we_vote_id_list)
+        # Find entries where there is at least one empty google_civic_election_id
+        voter_list_query = voter_list_query.values_list('voter_we_vote_id', flat=True).distinct()
+        voter_analytics_list = voter_list_query[:250]  # Limit to 250 voters at a time
+    except Exception as e:
+        status += "ANALYTICS_ACTION_ERROR_FIND_VOTERS-VOTER_METRICS: " + str(e) + " "
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
+        results = {
+            'success':              success,
+            'status':               status,
+        }
+        return results
+
+    if len(voter_analytics_list):
+        try:
+            batch_process_analytics_chunk.number_of_rows_being_reviewed = len(voter_analytics_list)
+            batch_process_analytics_chunk.save()
+
+            status += "ROWS_BEING_REVIEWED-VOTER_METRICS: " + str(len(voter_analytics_list)) + " "
+        except Exception as e:
+            status += "NUMBER_OF_ROWS_BEING_REVIEWED_NOT_SAVED-VOTER_METRICS " + str(e) + " "
+
+    for voter_we_vote_id in voter_analytics_list:
+        analysis_success = True
+        results = calculate_sitewide_voter_metrics_for_one_voter(voter_we_vote_id)
+        status += results['status']
+        if positive_value_exists(results['success']):
+            sitewide_voter_metrics_values = results['sitewide_voter_metrics_values']
+            sitewide_voter_metrics_values['last_calculated_date_as_integer'] = batch_process.analytics_date_as_integer
+
+            analytics_manager = AnalyticsManager()
+            update_results = analytics_manager.save_sitewide_voter_metrics_values_for_one_voter(
+                sitewide_voter_metrics_values)
+            status += update_results['status']
+            if positive_value_exists(update_results['success']):
+                sitewide_voter_metrics_updated += 1
+            else:
+                status += "SAVE_SITEWIDE_VOTER_METRICS-FAILED_TO_SAVE "
+                analysis_success = False
+        else:
+            # So we can set a breakpoint in case of problems
+            status += "SAVE_SITEWIDE_VOTER_METRICS-FAILED_TO_CALCULATE "
+            analysis_success = False
+        if analysis_success:
+            # We save analytics_date_as_integer as today since the statistics saved are all based on today
+            # We check to see if there is an entry greater than or equal to the analytics_date_as_integer,
+            # so it doesn't re-calculate metrics that are already up-to-date
+            today = datetime.now().date()
+            today_date_as_integer = convert_date_to_date_as_integer(today)
+            defaults = {
+                'analytics_date_as_integer': today_date_as_integer,
+                'voter_we_vote_id': voter_we_vote_id,
+                'kind_of_process': CALCULATE_SITEWIDE_VOTER_METRICS,
+            }
+            results = analytics_manager.save_analytics_processed(
+                analytics_date_as_integer=today_date_as_integer,
+                voter_we_vote_id=voter_we_vote_id,
+                defaults=defaults)
+
+    try:
+        batch_process_analytics_chunk.number_of_rows_successfully_reviewed = sitewide_voter_metrics_updated
+        batch_process_analytics_chunk.date_completed = now()
+        batch_process_analytics_chunk.save()
+
+        status += "BATCH_PROCESS_ANALYTICS_CHUNK, ROWS_REVIEWED-VOTER_METRICS: " \
+                  "" + str(sitewide_voter_metrics_updated) + " "
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
+    except Exception as e:
+        status += "DATE_COMPLETED_TIME_NOT_SAVED-VOTER_METRICS " + str(e) + " "
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
+
+    if not len(voter_analytics_list):
+        try:
+            batch_process.date_completed = now()
+            batch_process.save()
+        except Exception as e:
+            status += "BATCH_PROCESS_DATE_COMPLETED_NOT_SAVED-VOTER_METRICS: " + str(e) + " "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=batch_process.kind_of_process,
+                analytics_date_as_integer=batch_process.analytics_date_as_integer,
+                status=status,
+            )
+
+        # If here, there aren't any more analytics to process for augment_with_election_id for this date
+        defaults = {
+            'finished_calculate_sitewide_voter_metrics': True,
+        }
+        status_results = analytics_manager.save_analytics_processing_status(
+            batch_process.analytics_date_as_integer,
+            defaults=defaults)
+        status += status_results['status']
+
+    results = {
+        'success':              success,
+        'status':               status,
     }
     return results
 
@@ -631,6 +1235,7 @@ def calculate_sitewide_voter_metrics_for_one_voter(voter_we_vote_id):
     signed_in_twitter = False
     signed_in_facebook = False
     signed_in_with_email = False
+    signed_in_with_sms_phone_number = False
     analytics_count_manager = AnalyticsCountManager()
     follow_metrics_manager = FollowMetricsManager()
     position_metrics_manager = PositionMetricsManager()
@@ -644,6 +1249,7 @@ def calculate_sitewide_voter_metrics_for_one_voter(voter_we_vote_id):
         signed_in_twitter = voter.signed_in_twitter()
         signed_in_facebook = voter.signed_in_facebook()
         signed_in_with_email = voter.signed_in_with_email()
+        signed_in_with_sms_phone_number = voter.signed_in_with_sms_phone_number()
 
     actions_count = analytics_count_manager.fetch_voter_action_count(voter_we_vote_id)
     seconds_on_site = None
@@ -685,6 +1291,7 @@ def calculate_sitewide_voter_metrics_for_one_voter(voter_we_vote_id):
         'signed_in_twitter':        signed_in_twitter,
         'signed_in_facebook':       signed_in_facebook,
         'signed_in_with_email':     signed_in_with_email,
+        'signed_in_with_sms_phone_number':  signed_in_with_sms_phone_number,
         'days_visited':             days_visited,
         'last_action_date': last_action_date,
     }
@@ -753,6 +1360,110 @@ def move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote
         'to_voter_we_vote_id':          to_voter_we_vote_id,
         'analytics_action_moved':       analytics_action_moved,
         'analytics_action_not_moved':   analytics_action_not_moved,
+    }
+    return results
+
+
+def retrieve_analytics_processing_next_step():
+    """
+    What is the next processing required to bring our analytics data up-to-date?
+    Start by augmenting voter_analytics data
+    Then move through each of these for one day:
+    save_sitewide_daily_metrics
+    save_sitewide_election_metrics
+    save_sitewide_voter_metrics
+    save_organization_daily_metrics
+    save_organization_election_metrics
+    :return:
+    """
+    status = ""
+    analytics_processing_status_found = False
+
+    analytics_date_as_integer = 0
+    calculate_sitewide_voter_metrics = False
+    calculate_sitewide_election_metrics = False
+    calculate_sitewide_daily_metrics = False
+    calculate_organization_election_metrics = False
+    calculate_organization_daily_metrics = False
+    augment_analytics_action_with_first_visit = False
+    augment_analytics_action_with_election_id = False
+
+    analytics_manager = AnalyticsManager()
+    results = analytics_manager.retrieve_or_create_next_analytics_processing_status()
+    success = results['success']
+    if not success:
+        status += results['status']
+    if results['analytics_processing_status_found']:
+        analytics_processing_status_found = True
+        analytics_processing_status = results['analytics_processing_status']
+
+        # TEMP Mark some of these steps as temporarily done
+        analytics_processing_status.finished_calculate_organization_daily_metrics = True
+        analytics_processing_status.finished_calculate_organization_election_metrics = True
+        analytics_processing_status.finished_calculate_sitewide_election_metrics = True
+
+        analytics_date_as_integer = analytics_processing_status.analytics_date_as_integer
+        if analytics_processing_status.finished_augment_analytics_action_with_election_id and \
+                analytics_processing_status.finished_augment_analytics_action_with_first_visit and \
+                analytics_processing_status.finished_calculate_organization_daily_metrics and \
+                analytics_processing_status.finished_calculate_organization_election_metrics and \
+                analytics_processing_status.finished_calculate_sitewide_daily_metrics and \
+                analytics_processing_status.finished_calculate_sitewide_election_metrics and \
+                analytics_processing_status.finished_calculate_sitewide_voter_metrics:
+            # If here, then all of the steps have been processed
+            pass
+        elif analytics_processing_status.finished_augment_analytics_action_with_election_id and \
+                analytics_processing_status.finished_augment_analytics_action_with_first_visit and \
+                analytics_processing_status.finished_calculate_organization_daily_metrics and \
+                analytics_processing_status.finished_calculate_organization_election_metrics and \
+                analytics_processing_status.finished_calculate_sitewide_daily_metrics and \
+                analytics_processing_status.finished_calculate_sitewide_election_metrics:
+            # CALCULATE_SITEWIDE_VOTER_METRICS
+            calculate_sitewide_voter_metrics = True
+        # elif analytics_processing_status.finished_augment_analytics_action_with_election_id and \
+        #         analytics_processing_status.finished_augment_analytics_action_with_first_visit and \
+        #         analytics_processing_status.finished_calculate_organization_daily_metrics and \
+        #         analytics_processing_status.finished_calculate_organization_election_metrics and \
+        #         analytics_processing_status.finished_calculate_sitewide_daily_metrics:
+        #     # CALCULATE_SITEWIDE_ELECTION_METRICS
+        #     calculate_sitewide_election_metrics = True
+        elif analytics_processing_status.finished_augment_analytics_action_with_election_id and \
+                analytics_processing_status.finished_augment_analytics_action_with_first_visit and \
+                analytics_processing_status.finished_calculate_organization_daily_metrics and \
+                analytics_processing_status.finished_calculate_organization_election_metrics:
+            # CALCULATE_SITEWIDE_DAILY_METRICS
+            calculate_sitewide_daily_metrics = True
+        # elif analytics_processing_status.finished_augment_analytics_action_with_election_id and \
+        #         analytics_processing_status.finished_augment_analytics_action_with_first_visit and \
+        #         analytics_processing_status.finished_calculate_organization_daily_metrics:
+        #     # CALCULATE_ORGANIZATION_ELECTION_METRICS
+        #     calculate_organization_election_metrics = True
+        # elif analytics_processing_status.finished_augment_analytics_action_with_election_id and \
+        #         analytics_processing_status.finished_augment_analytics_action_with_first_visit:
+        #     # CALCULATE_ORGANIZATION_DAILY_METRICS
+        #     calculate_organization_daily_metrics = True
+        elif analytics_processing_status.finished_augment_analytics_action_with_election_id:
+            # AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT
+            augment_analytics_action_with_first_visit = True
+        elif not analytics_processing_status.finished_augment_analytics_action_with_election_id:
+            # AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID
+            augment_analytics_action_with_election_id = True
+        else:
+            # None of them need to be processed
+            pass
+
+    results = {
+        'status':                                       status,
+        'success':                                      success,
+        'analytics_processing_status_found':            analytics_processing_status_found,
+        'analytics_date_as_integer':                    analytics_date_as_integer,
+        'calculate_sitewide_voter_metrics':             calculate_sitewide_voter_metrics,
+        'calculate_sitewide_election_metrics':          calculate_sitewide_election_metrics,
+        'calculate_sitewide_daily_metrics':             calculate_sitewide_daily_metrics,
+        'calculate_organization_election_metrics':      calculate_organization_election_metrics,
+        'calculate_organization_daily_metrics':         calculate_organization_daily_metrics,
+        'augment_analytics_action_with_first_visit':    augment_analytics_action_with_first_visit,
+        'augment_analytics_action_with_election_id':    augment_analytics_action_with_election_id,
     }
     return results
 

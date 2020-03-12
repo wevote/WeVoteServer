@@ -5,12 +5,15 @@
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import localtime, now
+from datetime import timedelta
 from election.models import Election
 from exception.models import print_to_log
 from follow.models import FollowOrganizationList
 from organization.models import Organization
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
+    convert_to_int, positive_value_exists
+from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 ACTION_VOTER_GUIDE_VISIT = 1
 ACTION_VOTER_GUIDE_ENTRY = 2  # DEPRECATED: Now we use ACTION_VOTER_GUIDE_VISIT + first_visit
@@ -601,7 +604,7 @@ class AnalyticsManager(models.Model):
             status += 'ACTION_TYPE2_SAVED '
         except Exception as e:
             success = False
-            status += 'COULD_NOT_SAVE_ACTION_TYPE2 '
+            status += 'COULD_NOT_SAVE_ACTION_TYPE2 ' + str(e) + ' '
 
         results = {
             'success':      success,
@@ -636,12 +639,409 @@ class AnalyticsManager(models.Model):
             analytics_action_list_found = True
         except Exception as e:
             analytics_action_list_found = False
+            status += "ANALYTICS_ACTION_LIST_ERROR: " + str(e) + " "
 
         results = {
             'success':                      success,
             'status':                       status,
             'analytics_action_list':        analytics_action_list,
             'analytics_action_list_found':  analytics_action_list_found,
+        }
+        return results
+
+    def retrieve_analytics_processed_list(
+            self, analytics_date_as_integer=0, voter_we_vote_id='', voter_we_vote_id_list=[],
+            google_civic_election_id=0, organization_we_vote_id='', kind_of_process='',
+            batch_process_id=0, batch_process_analytics_chunk_id=0, analytics_date_as_integer_more_recent_than=0):
+        success = True
+        status = ""
+        analytics_processed_list = []
+        retrieved_voter_we_vote_id_list = []
+
+        try:
+            list_query = AnalyticsProcessed.objects.using('analytics').all()
+            if positive_value_exists(batch_process_id):
+                list_query = list_query.filter(batch_process_id=batch_process_id)
+            if positive_value_exists(batch_process_analytics_chunk_id):
+                list_query = list_query.filter(batch_process_analytics_chunk_id=batch_process_analytics_chunk_id)
+            if positive_value_exists(analytics_date_as_integer_more_recent_than):
+                list_query = list_query.filter(analytics_date_as_integer__gte=analytics_date_as_integer)
+            elif positive_value_exists(analytics_date_as_integer):
+                list_query = list_query.filter(analytics_date_as_integer=analytics_date_as_integer)
+            if positive_value_exists(voter_we_vote_id):
+                list_query = list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            elif len(voter_we_vote_id_list):
+                list_query = list_query.filter(voter_we_vote_id__in=voter_we_vote_id_list)
+            if positive_value_exists(google_civic_election_id):
+                list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(organization_we_vote_id):
+                list_query = list_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            if positive_value_exists(kind_of_process):
+                list_query = list_query.filter(kind_of_process__iexact=kind_of_process)
+
+            voter_list_query = list_query
+            analytics_processed_list = list(list_query)
+            analytics_processed_list_found = True
+        except Exception as e:
+            analytics_processed_list_found = False
+            status += "ANALYTICS_PROCESSED_LIST_ERROR: " + str(e) + " "
+            success = False
+
+        try:
+            retrieved_voter_we_vote_id_list = voter_list_query.values_list('voter_we_vote_id', flat=True).distinct()
+            retrieved_voter_we_vote_id_list_found = True
+        except Exception as e:
+            retrieved_voter_we_vote_id_list_found = False
+            status += "ANALYTICS_PROCESSED_LIST_VOTER_WE_VOTE_ID_ERROR: " + str(e) + " "
+            success = False
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'analytics_processed_list':         analytics_processed_list,
+            'analytics_processed_list_found':   analytics_processed_list_found,
+            'retrieved_voter_we_vote_id_list':  retrieved_voter_we_vote_id_list,
+            'retrieved_voter_we_vote_id_list_found':    retrieved_voter_we_vote_id_list_found,
+        }
+        return results
+
+    def delete_analytics_processed_list(
+            self, analytics_date_as_integer=0, voter_we_vote_id='', voter_we_vote_id_list=[],
+            google_civic_election_id=0, organization_we_vote_id='', kind_of_process=''):
+        success = True
+        status = ""
+
+        try:
+            list_query = AnalyticsProcessed.objects.using('analytics').filter(
+                analytics_date_as_integer=analytics_date_as_integer)
+            if positive_value_exists(voter_we_vote_id):
+                list_query = list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            elif len(voter_we_vote_id_list):
+                list_query = list_query.filter(voter_we_vote_id__in=voter_we_vote_id_list)
+            if positive_value_exists(google_civic_election_id):
+                list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(organization_we_vote_id):
+                list_query = list_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            if positive_value_exists(kind_of_process):
+                list_query = list_query.filter(kind_of_process__iexact=kind_of_process)
+            list_query.delete()
+            analytics_processed_list_deleted = True
+        except Exception as e:
+            analytics_processed_list_deleted = False
+            status += "ANALYTICS_PROCESSED_LIST_ERROR: " + str(e) + " "
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'analytics_processed_list_deleted':  analytics_processed_list_deleted,
+        }
+        return results
+
+    def save_analytics_processed(self, analytics_date_as_integer, voter_we_vote_id, defaults):
+        success = True
+        status = ""
+        analytics_processed = None
+        analytics_processed_saved = False
+
+        try:
+            analytics_processed, created = AnalyticsProcessed.objects.using('analytics').\
+                update_or_create(
+                    analytics_date_as_integer=analytics_date_as_integer,
+                    voter_we_vote_id=voter_we_vote_id,
+                    kind_of_process=defaults['kind_of_process'],
+                    defaults=defaults
+                )
+            analytics_processed_saved = True
+        except Exception as e:
+            success = False
+            status += 'SAVE_ANALYTICS_PROCESSED_PROBLEM: ' + str(e) + ' '
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'analytics_processed_saved':    analytics_processed_saved,
+            'analytics_processed':          analytics_processed,
+        }
+        return results
+
+    def save_analytics_processing_status(self, analytics_date_as_integer, defaults):
+        success = True
+        status = ""
+        analytics_processing_status = None
+        analytics_processing_status_saved = False
+
+        try:
+            analytics_processing_status, created = AnalyticsProcessingStatus.objects.using('analytics').\
+                update_or_create(
+                    analytics_date_as_integer=analytics_date_as_integer,
+                    defaults=defaults
+                )
+            analytics_processing_status_saved = True
+        except Exception as e:
+            success = False
+            status += 'SAVE_ANALYTICS_PROCESSING_STATUS_PROBLEM: ' + str(e) + ' '
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'analytics_processing_status_saved':    analytics_processing_status_saved,
+            'analytics_processing_status':          analytics_processing_status,
+        }
+        return results
+
+    def retrieve_analytics_processing_status_by_date_as_integer(self, analytics_date_as_integer):
+        success = False
+        status = ""
+
+        try:
+            analytics_processing_status = AnalyticsProcessingStatus.objects.using('analytics').get(
+                analytics_date_as_integer=analytics_date_as_integer)
+            analytics_processing_status_found = True
+        except Exception as e:
+            analytics_processing_status = None
+            analytics_processing_status_found = False
+            status += "RETRIEVE_ANALYTICS_PROCESSING_STATUS: " + str(e) + " "
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'analytics_processing_status':          analytics_processing_status,
+            'analytics_processing_status_found':    analytics_processing_status_found,
+        }
+        return results
+
+    def find_next_date_with_analytics_to_process(self, last_analytics_date_as_integer):
+        status = ""
+        success = True
+        times_tried = 0
+        still_looking_for_next_date = True
+        prior_analytics_date_as_integer = last_analytics_date_as_integer
+        new_analytics_date_as_integer = 0
+        new_analytics_date_as_integer_found = False
+
+        # If here, these are all finished and we need to analyze the next day
+        date_now = now()
+        date_now_as_integer = convert_date_to_date_as_integer(date_now)
+
+        while still_looking_for_next_date:
+            times_tried += 1
+            if times_tried > 500:
+                still_looking_for_next_date = False
+                continue
+
+            # Make sure the last date_as_integer analyzed isn't past today
+            prior_analytics_date = convert_date_as_integer_to_date(prior_analytics_date_as_integer)
+            one_day = timedelta(days=1)
+            new_analytics_date = prior_analytics_date + one_day
+            new_analytics_date_as_integer = convert_date_to_date_as_integer(new_analytics_date)
+
+            if new_analytics_date_as_integer >= date_now_as_integer:
+                new_analytics_date_as_integer_found = False
+                status += "NEXT_ANALYTICS_DATE_IS_TODAY "
+                results = {
+                    'success':                              success,
+                    'status':                               status,
+                    'new_analytics_date_as_integer':        new_analytics_date_as_integer,
+                    'new_analytics_date_as_integer_found':  new_analytics_date_as_integer_found,
+                }
+                return results
+
+            # Now see if we have analytics on that date
+            try:
+                voter_history_query = AnalyticsAction.objects.using('analytics').all()
+                voter_history_query = voter_history_query.filter(date_as_integer=new_analytics_date_as_integer)
+                analytics_count = voter_history_query.count()
+                if positive_value_exists(analytics_count):
+                    still_looking_for_next_date = False
+                    new_analytics_date_as_integer_found = True
+                else:
+                    prior_analytics_date_as_integer = new_analytics_date_as_integer
+            except Exception as e:
+                status += "COULD_NOT_RETRIEVE_ANALYTICS: " + str(e) + " "
+                still_looking_for_next_date = False
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'new_analytics_date_as_integer':        new_analytics_date_as_integer,
+            'new_analytics_date_as_integer_found':  new_analytics_date_as_integer_found,
+        }
+        return results
+
+    def does_analytics_processing_status_exist_for_one_date(self, analytics_date_as_integer_last_processed):
+        status = ""
+        success = True
+
+        queryset = AnalyticsProcessingStatus.objects.using('analytics').order_by('analytics_date_as_integer')
+        if positive_value_exists(analytics_date_as_integer_last_processed):
+            # If there is a start date, force this query to only search before that date.
+            # Go back and find the next date with analytics to process
+            queryset = queryset.filter(analytics_date_as_integer=analytics_date_as_integer_last_processed)
+        analytics_processing_status_list = queryset[:1]
+        analytics_processing_status = None
+        analytics_processing_status_found = False
+        if len(analytics_processing_status_list):
+            # We have found one to work on
+            analytics_processing_status = analytics_processing_status_list[0]
+            analytics_processing_status_found = True
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'analytics_processing_status':          analytics_processing_status,
+            'analytics_processing_status_found':    analytics_processing_status_found,
+        }
+        return results
+
+    def request_unfinished_analytics_processing_status_for_one_date(self, analytics_date_as_integer_last_processed):
+        status = ""
+        success = True
+
+        queryset = AnalyticsProcessingStatus.objects.using('analytics').order_by('analytics_date_as_integer')
+        if positive_value_exists(analytics_date_as_integer_last_processed):
+            # If there is a start date, force this query to only search before that date.
+            # Go back and find the next date with analytics to process
+            queryset = queryset.filter(analytics_date_as_integer=analytics_date_as_integer_last_processed)
+
+        # Limit to entries that haven't been finished
+        filters = []
+        # AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID
+        new_filter = Q(finished_augment_analytics_action_with_election_id=False)
+        filters.append(new_filter)
+
+        # AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT
+        new_filter = Q(finished_augment_analytics_action_with_first_visit=False)
+        filters.append(new_filter)
+
+        # CALCULATE_ORGANIZATION_DAILY_METRICS
+        # new_filter = Q(finished_calculate_organization_daily_metrics=False)
+        # filters.append(new_filter)
+        #
+        # CALCULATE_ORGANIZATION_ELECTION_METRICS
+        # new_filter = Q(finished_calculate_organization_election_metrics=False)
+        # filters.append(new_filter)
+
+        # CALCULATE_SITEWIDE_DAILY_METRICS
+        new_filter = Q(finished_calculate_sitewide_daily_metrics=False)
+        filters.append(new_filter)
+
+        # CALCULATE_SITEWIDE_ELECTION_METRICS
+        # new_filter = Q(finished_calculate_sitewide_election_metrics=False)
+        # filters.append(new_filter)
+
+        # CALCULATE_SITEWIDE_VOTER_METRICS
+        new_filter = Q(finished_calculate_sitewide_voter_metrics=False)
+        filters.append(new_filter)
+
+        # Add the first query
+        final_filters = filters.pop()
+        # ...and "OR" the remaining items in the list
+        for item in filters:
+            final_filters |= item
+        queryset = queryset.filter(final_filters)
+        analytics_processing_status_list = queryset[:1]
+
+        analytics_processing_status = None
+        analytics_processing_status_found = False
+        if len(analytics_processing_status_list):
+            # We have found one to work on
+            analytics_processing_status = analytics_processing_status_list[0]
+            analytics_processing_status_found = True
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'analytics_processing_status':          analytics_processing_status,
+            'analytics_processing_status_found':    analytics_processing_status_found,
+        }
+        return results
+
+    def retrieve_or_create_next_analytics_processing_status(self):
+        """
+        Find the highest (most recent) date_as_integer. If all elements have been completed,
+        then create an entry for the next day. If not, return the latest entry.
+        :return:
+        """
+        success = True
+        status = ""
+        analytics_processing_status = None
+        analytics_processing_status_found = False
+        create_new_status_entry = False
+        new_analytics_date_as_integer = 20180213  # Default
+        we_vote_settings_manager = WeVoteSettingsManager()
+        analytics_date_as_integer_last_processed = 0
+        results = we_vote_settings_manager.fetch_setting_results('analytics_date_as_integer_last_processed')
+        if results['we_vote_setting_found']:
+            analytics_date_as_integer_last_processed = convert_to_int(results['setting_value'])
+
+        try:
+            # Is there an analytics_processing_status for the date we care about?
+            results = self.does_analytics_processing_status_exist_for_one_date(analytics_date_as_integer_last_processed)
+            if not results['analytics_processing_status_found']:
+                defaults = {}
+                analytics_processing_status, created = AnalyticsProcessingStatus.objects.using('analytics').\
+                    update_or_create(
+                        analytics_date_as_integer=new_analytics_date_as_integer,
+                        defaults=defaults
+                    )
+            else:
+                # Are there any tasks remaining on this date?
+                results = self.request_unfinished_analytics_processing_status_for_one_date(
+                    analytics_date_as_integer_last_processed)
+                if results['analytics_processing_status_found']:
+                    # We have found one to work on
+                    analytics_processing_status = results['analytics_processing_status']
+                    analytics_processing_status_found = True
+                else:
+                    if positive_value_exists(analytics_date_as_integer_last_processed):
+                        results = self.find_next_date_with_analytics_to_process(
+                            last_analytics_date_as_integer=analytics_date_as_integer_last_processed)
+                        if results['new_analytics_date_as_integer_found']:
+                            new_analytics_date_as_integer = results['new_analytics_date_as_integer']
+                            create_new_status_entry = True
+                    else:
+                        # Find last day processed with all calculations finished, so we advance to next available day
+                        status += "NO_ANALYTICS_PROCESSING_STATUS_FOUND "
+                        queryset = AnalyticsProcessingStatus.objects.using('analytics').\
+                            order_by('-analytics_date_as_integer')
+                        analytics_processing_status_list = queryset[:1]
+                        if len(analytics_processing_status_list):
+                            # We have found one to work on
+                            analytics_processing_status = analytics_processing_status_list[0]
+                            new_analytics_date_as_integer = analytics_processing_status.analytics_date_as_integer
+
+        except Exception as e:
+            analytics_processing_status_found = False
+            status += "ANALYTICS_PROCESSING_STATUS_ERROR: " + str(e) + " "
+
+        # If here, we need to create a new entry
+        if create_new_status_entry and positive_value_exists(new_analytics_date_as_integer):
+            try:
+                defaults = {}
+                analytics_processing_status, created = AnalyticsProcessingStatus.objects.using('analytics').\
+                    update_or_create(
+                        analytics_date_as_integer=new_analytics_date_as_integer,
+                        defaults=defaults
+                    )
+                analytics_processing_status_found = True
+                status += "ANALYTICS_PROCESSING_STATUS_CREATED "
+                if positive_value_exists(new_analytics_date_as_integer):
+                    # Update this value in the settings table: analytics_date_as_integer_last_processed
+                    # ...to new_analytics_date_as_integer
+                    results = we_vote_settings_manager.save_setting(
+                        setting_name="analytics_date_as_integer_last_processed",
+                        setting_value=new_analytics_date_as_integer,
+                        value_type=WeVoteSetting.INTEGER)
+            except Exception as e:
+                success = False
+                status += 'CREATE_ANALYTICS_PROCESSING_STATUS_ERROR: ' + str(e) + ' '
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'analytics_processing_status':          analytics_processing_status,
+            'analytics_processing_status_found':    analytics_processing_status_found,
         }
         return results
 
@@ -658,6 +1058,8 @@ class AnalyticsManager(models.Model):
             organization_election_metrics_list_found = True
         except Exception as e:
             organization_election_metrics_list_found = False
+            success = False
+            status += 'ORGANIZATION_ELECTION_METRICS_ERROR: ' + str(e) + ' '
 
         results = {
             'success':                      success,
@@ -828,7 +1230,7 @@ class AnalyticsManager(models.Model):
                 )
             except Exception as e:
                 success = False
-                status += 'ORGANIZATION_DAILY_METRICS_UPDATE_OR_CREATE_FAILED '
+                status += 'ORGANIZATION_DAILY_METRICS_UPDATE_OR_CREATE_FAILED ' + str(e) + ' '
 
         results = {
             'success':          success,
@@ -865,7 +1267,7 @@ class AnalyticsManager(models.Model):
                 )
             except Exception as e:
                 success = False
-                status += 'ORGANIZATION_ELECTION_METRICS_UPDATE_OR_CREATE_FAILED '
+                status += 'ORGANIZATION_ELECTION_METRICS_UPDATE_OR_CREATE_FAILED ' + str(e) + ' '
 
         results = {
             'success':          success,
@@ -892,7 +1294,7 @@ class AnalyticsManager(models.Model):
                 sitewide_daily_metrics_saved = True
             except Exception as e:
                 success = False
-                status += 'SITEWIDE_DAILY_METRICS_UPDATE_OR_CREATE_FAILED '
+                status += 'SITEWIDE_DAILY_METRICS_UPDATE_OR_CREATE_FAILED ' + str(e) + ' '
         else:
             status += "SITEWIDE_DAILY_METRICS-MISSING_DATE_AS_INTEGER "
 
@@ -920,7 +1322,7 @@ class AnalyticsManager(models.Model):
                 )
             except Exception as e:
                 success = False
-                status += 'SITEWIDE_ELECTION_METRICS_UPDATE_OR_CREATE_FAILED '
+                status += 'SITEWIDE_ELECTION_METRICS_UPDATE_OR_CREATE_FAILED ' + str(e) + ' '
 
         results = {
             'success': success,
@@ -988,7 +1390,7 @@ class AnalyticsManager(models.Model):
             distinct_days_found = True
         except Exception as e:
             success = False
-            status += "UPDATE_FIRST_VISIT_TODAY-DISTINCT_DAY_QUERY_ERROR "
+            status += "UPDATE_FIRST_VISIT_TODAY-DISTINCT_DAY_QUERY_ERROR " + str(e) + ' '
             distinct_days_found = False
 
         simple_distinct_days_list = []
@@ -1012,7 +1414,7 @@ class AnalyticsManager(models.Model):
                 voter_list_found = True
             except Exception as e:
                 success = False
-                status += "UPDATE_FIRST_VISIT_TODAY-DISTINCT_VOTER_QUERY_ERROR "
+                status += "UPDATE_FIRST_VISIT_TODAY-DISTINCT_VOTER_QUERY_ERROR " + str(e) + ' '
                 voter_list_found = False
 
             simple_voter_list = []
@@ -1043,7 +1445,7 @@ class AnalyticsManager(models.Model):
                         first_visit_today_count += 1
                 except Exception as e:
                     success = False
-                    status += "UPDATE_FIRST_VISIT_TODAY-VOTER_ON_DATE_QUERY_ERROR "
+                    status += "UPDATE_FIRST_VISIT_TODAY-VOTER_ON_DATE_QUERY_ERROR " + str(e) + ' '
                     print_to_log(logger=logger, exception_message_optional=status)
                     first_visit_found = False
 
@@ -1095,6 +1497,40 @@ class AnalyticsManager(models.Model):
             'first_visit_today_count': first_visit_today_count,
         }
         return results
+
+
+class AnalyticsProcessingStatus(models.Model):
+    """
+    When we have finished analyzing one element of the analytics data for a day, store our completion here
+    """
+    analytics_date_as_integer = models.PositiveIntegerField(verbose_name="YYYYMMDD", null=False, unique=True)
+    # AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID
+    finished_augment_analytics_action_with_election_id = models.BooleanField(default=False)
+    # AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT
+    finished_augment_analytics_action_with_first_visit = models.BooleanField(default=False)
+    # CALCULATE_ORGANIZATION_DAILY_METRICS
+    finished_calculate_organization_daily_metrics = models.BooleanField(default=False)
+    # CALCULATE_ORGANIZATION_ELECTION_METRICS
+    finished_calculate_organization_election_metrics = models.BooleanField(default=False)
+    # CALCULATE_SITEWIDE_DAILY_METRICS
+    finished_calculate_sitewide_daily_metrics = models.BooleanField(default=False)
+    # CALCULATE_SITEWIDE_ELECTION_METRICS
+    finished_calculate_sitewide_election_metrics = models.BooleanField(default=False)
+    # CALCULATE_SITEWIDE_VOTER_METRICS
+    finished_calculate_sitewide_voter_metrics = models.BooleanField(default=False)
+
+
+class AnalyticsProcessed(models.Model):
+    """
+    When we have finished analyzing one element of the analytics data for a day, store our completion here
+    """
+    analytics_date_as_integer = models.PositiveIntegerField(verbose_name="YYYYMMDD", null=False, unique=False)
+    batch_process_id = models.PositiveIntegerField(null=True, unique=False)
+    batch_process_analytics_chunk_id = models.PositiveIntegerField(null=True, unique=False)
+    organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    google_civic_election_id = models.PositiveIntegerField(null=True, unique=False)
+    voter_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    kind_of_process = models.CharField(max_length=50, null=True, unique=False)
 
 
 class OrganizationDailyMetrics(models.Model):
@@ -1384,6 +1820,7 @@ class SitewideVoterMetrics(models.Model):
     signed_in_twitter = models.BooleanField(verbose_name='', default=False)
     signed_in_facebook = models.BooleanField(verbose_name='', default=False)
     signed_in_with_email = models.BooleanField(verbose_name='', default=False)
+    signed_in_with_sms_phone_number = models.BooleanField(verbose_name='', default=False)
     seconds_on_site = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
     days_visited = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
     last_action_date = models.DateTimeField(verbose_name='last action date and time', null=True, db_index=True)

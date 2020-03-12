@@ -16,7 +16,7 @@ from office.models import ContestOfficeManager
 from organization.models import OrganizationListManager
 from wevote_functions.functions import convert_state_code_to_state_text, convert_state_code_to_utc_offset, \
     convert_to_int, positive_value_exists, POSITIVE_SEARCH_KEYWORDS, NEGATIVE_SEARCH_KEYWORDS, \
-    POSITIVE_TWITTER_HANDLE_SEARCH_KEYWORDS
+    POSITIVE_TWITTER_HANDLE_SEARCH_KEYWORDS, NEGATIVE_TWITTER_HANDLE_SEARCH_KEYWORDS
 from wevote_settings.models import RemoteRequestHistory, RemoteRequestHistoryManager, RETRIEVE_POSSIBLE_TWITTER_HANDLES
 from math import floor, log2
 from re import sub
@@ -109,6 +109,11 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
         for keyword in POSITIVE_TWITTER_HANDLE_SEARCH_KEYWORDS:
             if one_result.screen_name and keyword in one_result.screen_name.lower():
                 likelihood_score += 20
+
+        # Decrease the score for every negative twitter handle keyword we find
+        for keyword in NEGATIVE_TWITTER_HANDLE_SEARCH_KEYWORDS:
+            if one_result.screen_name and keyword in one_result.screen_name.lower():
+                likelihood_score -= 20
 
         # Increase the score for every positive keyword we find
         for keyword in POSITIVE_SEARCH_KEYWORDS:

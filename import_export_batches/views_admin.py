@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager, \
-    BatchProcess, BatchProcessBallotItemChunk, BatchProcessLogEntry, BatchProcessManager, \
+    BatchProcess, BatchProcessAnalyticsChunk, BatchProcessBallotItemChunk, BatchProcessLogEntry, BatchProcessManager, \
     BatchRow, BatchRowActionBallotItem, \
     BatchSet, \
     CONTEST_OFFICE, ELECTED_OFFICE, IMPORT_BALLOT_ITEM, \
@@ -1457,6 +1457,8 @@ def batch_process_list_view(request):
     for batch_process in batch_process_list:
         batch_process_ballot_item_chunk_list = []
         batch_process_ballot_item_chunk_list_found = False
+        batch_process_analytics_chunk_list = []
+        batch_process_analytics_chunk_list_found = False
         try:
             batch_process_chunk_queryset = BatchProcessBallotItemChunk.objects.all()
             batch_process_chunk_queryset = batch_process_chunk_queryset.filter(batch_process_id=batch_process.id)
@@ -1472,6 +1474,24 @@ def batch_process_list_view(request):
                       '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
         batch_process.batch_process_ballot_item_chunk_list = batch_process_ballot_item_chunk_list
         batch_process.batch_process_ballot_item_chunk_list_found = batch_process_ballot_item_chunk_list_found
+
+        if not positive_value_exists(batch_process_ballot_item_chunk_list_found):
+            # Now check to see if this is an analytics
+            try:
+                batch_process_chunk_queryset = BatchProcessAnalyticsChunk.objects.all()
+                batch_process_chunk_queryset = batch_process_chunk_queryset.filter(batch_process_id=batch_process.id)
+                batch_process_chunk_queryset = batch_process_chunk_queryset.order_by("-id")
+                batch_process_analytics_chunk_list = list(batch_process_chunk_queryset)
+                batch_process_analytics_chunk_list_found = \
+                    positive_value_exists(len(batch_process_analytics_chunk_list))
+            except BatchProcessBallotItemChunk.DoesNotExist:
+                # BatchProcessBallotItemChunk not found. Not a problem.
+                status += 'NO_BatchProcessAnalyticsChunk_FOUND_DoesNotExist '
+            except Exception as e:
+                status += 'FAILED BatchProcessAnalyticsChunk ' \
+                          '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+            batch_process.batch_process_analytics_chunk_list = batch_process_analytics_chunk_list
+            batch_process.batch_process_analytics_chunk_list_found = batch_process_analytics_chunk_list_found
 
     # Make sure we always include the current election in the election_list, even if it is older
     if positive_value_exists(google_civic_election_id):
