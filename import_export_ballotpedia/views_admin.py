@@ -658,8 +658,8 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
             polling_location_count = len(polling_location_list)
     except PollingLocation.DoesNotExist:
         message = 'Could not retrieve ballot data for the {election_name}. ' \
-                  'No polling locations exist for the state \'{state}\'. ' \
-                  'Data needed from VIP.'.format(
+                  'Ballotpedia Ballots-No polling locations exist for the state \'{state}\'. ' \
+                  ''.format(
                      election_name=election_name,
                      state=state_code)
         if from_browser:
@@ -678,7 +678,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
 
     if polling_location_count == 0:
         message = 'Did not retrieve ballot data for the {election_name}. ' \
-                  'No polling locations exist for the state \'{state}\' earlier than ' \
+                  'Data for all polling locations for the state \'{state}\' has been retrieved once ' \
                   'date_last_updated_should_not_exceed: \'{date_last_updated_should_not_exceed}\'. ' \
                   '(result 2 - retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view)'.format(
                      election_name=election_name,

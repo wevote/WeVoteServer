@@ -554,7 +554,7 @@ class BatchManager(models.Model):
 
                     if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
                         # Now save the BatchDescription
-                        batch_name = "EXPORT_VOTERS batch_header_id: " + str(batch_header_id)
+                        batch_name = "EXPORT_VOTERS batch_header_id-" + str(batch_header_id)
                         batch_description_text = ""
                         batch_description = BatchDescription.objects.create(
                             batch_header_id=batch_header_id,
@@ -563,11 +563,11 @@ class BatchManager(models.Model):
                             batch_description_text=batch_description_text,
                             kind_of_batch=IMPORT_VOTER,
                         )
-                        status += " BATCH_DESCRIPTION_SAVED"
+                        status += " BATCH_DESCRIPTION_SAVED "
                         success = True
                 except Exception as e:
                     batch_header_id = 0
-                    status += " EXCEPTION_BATCH_HEADER"
+                    status += " EXCEPTION_BATCH_HEADER " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
 
@@ -590,7 +590,7 @@ class BatchManager(models.Model):
                 number_of_voters += 1
             except Exception as e:
                 # Stop trying to save rows -- break out of the for loop
-                status += " EXCEPTION_BATCH_ROW"
+                status += " EXCEPTION_BATCH_ROW " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 break
 
@@ -766,7 +766,7 @@ class BatchManager(models.Model):
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
                     batch_header_id = 0
-                    status += "EXCEPTION_BATCH_HEADER "
+                    status += "EXCEPTION_BATCH_HEADER " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             else:
@@ -831,7 +831,7 @@ class BatchManager(models.Model):
                         number_of_batch_rows += 1
                     except Exception as e:
                         # Stop trying to save rows -- break out of the for loop
-                        status += "EXCEPTION_BATCH_ROW "
+                        status += "EXCEPTION_BATCH_ROW " + str(e) + " "
                         break
 
         results = {
@@ -1011,7 +1011,7 @@ class BatchManager(models.Model):
         except Exception as e:
             # Stop trying to save rows -- break out of the for loop
             batch_header_id = 0
-            status += "EXCEPTION_BATCH_HEADER_FOR_JSON "
+            status += "EXCEPTION_BATCH_HEADER_FOR_JSON " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         if positive_value_exists(batch_header_id):
@@ -1076,7 +1076,7 @@ class BatchManager(models.Model):
                     number_of_batch_rows += 1
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
-                    status += "EXCEPTION_BATCH_ROW_FOR_JSON "
+                    status += "EXCEPTION_BATCH_ROW_FOR_JSON " + str(e) + " "
                     break
 
             results = {
