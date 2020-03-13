@@ -1869,7 +1869,8 @@ class Voter(AbstractBaseUser):
 
     # Does this voter want to be on the We Vote newsletter? This is using a series of bits in case we want
     #  to offer different newsletter or notification options.
-    notification_settings_flags = models.PositiveIntegerField(verbose_name="notification status flags", default=0)
+    # Default new voters to our mailing list: NOTIFICATION_NEWSLETTER_OPT_IN = 1
+    notification_settings_flags = models.PositiveIntegerField(default=1)
 
     # Interface Status Flags is a positive integer, when represented as a stream of bits,
     # each bit maps to a status of a variable's boolean value

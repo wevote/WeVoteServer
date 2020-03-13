@@ -668,11 +668,16 @@ def batch_action_list_export_view(request):
     row_field_names = []
     for field in row_opts.fields:
         if field.name not in ['id', 'batch_header_id', 'batch_row_analyzed', 'batch_row_created']:
-            row_field_names.append(field.name)
+            if kind_of_batch == 'IMPORT_VOTER':
+                if field.name not in ['state_code', 'google_civic_election_id', 'polling_location_we_vote_id', 'voter_id']:
+                    row_field_names.append(field.name)
+            else:
+                row_field_names.append(field.name)
 
     header_list = [getattr(batch_header_map, field) for field in header_field_names]
-    header_list.insert(0, 'google_civic_election_id')
-    header_list.insert(0, 'state_code')
+    if kind_of_batch != 'IMPORT_VOTER':
+        header_list.insert(0, 'google_civic_election_id')
+        header_list.insert(0, 'state_code')
     # - Filter out headers that are None.
     header_list = list(filter(None, header_list))
 
