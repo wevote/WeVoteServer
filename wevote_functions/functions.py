@@ -13,6 +13,8 @@ import wevote_functions.admin
 import json
 import requests
 from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 import django.utils.html
 
 # We don't want to include the actual constants from organization/models.py, since that can cause include conflicts
@@ -1103,6 +1105,19 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
     twitter_text_string = twitter_text_string.replace("/", "")
     twitter_text_string = twitter_text_string.split("?", 1)[0]  # Remove everything after first "?" (including "?")
     return twitter_text_string
+
+
+def is_url_valid(url_to_test):
+    if not url_to_test:
+        return False
+    try:
+        validate = URLValidator(
+            schemes="https"
+        )
+        result = validate(url_to_test)
+    except ValidationError as e:
+        return False
+    return True
 
 
 def is_valid_state_code(possible_state_code):
