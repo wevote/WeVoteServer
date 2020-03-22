@@ -26,8 +26,8 @@ from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOW
 from voter.models import voter_has_authority, VoterManager
 from voter_guide.controllers_possibility import organizations_found_on_url
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, get_voter_device_id, \
-    get_maximum_number_to_retrieve_from_request, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_website_from_url, get_voter_device_id, \
+    get_maximum_number_to_retrieve_from_request, is_url_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -382,6 +382,9 @@ def organization_save_view(request):  # organizationSave
 
     organization_manager = OrganizationManager()
     chosen_domain_string = request.GET.get('chosen_domain_string', False)
+    # We strip out http or https, and remove paths
+    if positive_value_exists(chosen_domain_string):
+        chosen_domain_string = extract_website_from_url(chosen_domain_string)
     chosen_subdomain_string = request.GET.get('chosen_subdomain_string', False)
 
     chosen_google_analytics_account_number = request.GET.get('chosen_google_analytics_account_number', False)
@@ -465,7 +468,9 @@ def organization_save_view(request):  # organizationSave
         return HttpResponse(json.dumps(results), content_type='application/json')
 
     full_domain_string_already_taken = None
+    full_domain_string_not_valid = None
     subdomain_string_already_taken = None
+    subdomain_string_not_valid = None
     if voter_is_signed_in and organization_linked_to_this_voter:
         # Check to make sure it is ok to assign this full_domain or subdomain to this organization
         # Voter must be signed in to save this
@@ -475,17 +480,33 @@ def organization_save_view(request):  # organizationSave
                 if results['success']:
                     organization_id = results['organization_id']
         full_domain_string_already_taken = False
+        full_domain_string_not_valid = False
         if positive_value_exists(chosen_domain_string):
-            domain_results = full_domain_string_available(chosen_domain_string,
-                                                          requesting_organization_id=organization_id)
+            domain_string_to_test = "https://{chosen_domain_string}" \
+                                    "".format(chosen_domain_string=chosen_domain_string)
+            if not is_url_valid(domain_string_to_test):
+                full_domain_string_not_valid = True
+                # Do not save it
+                chosen_domain_string = False
+        if positive_value_exists(chosen_domain_string):
+            domain_results = full_domain_string_available(
+                chosen_domain_string, requesting_organization_id=organization_id)
             if not domain_results['full_domain_string_available']:
                 full_domain_string_already_taken = True
                 # Do not save it
                 chosen_domain_string = False
         subdomain_string_already_taken = False
+        subdomain_string_not_valid = False
         if positive_value_exists(chosen_subdomain_string):
-            domain_results = subdomain_string_available(chosen_subdomain_string,
-                                                         requesting_organization_id=organization_id)
+            domain_string_to_test = "https://{chosen_subdomain_string}.wevote.us" \
+                                    "".format(chosen_subdomain_string=chosen_subdomain_string)
+            if not is_url_valid(domain_string_to_test):
+                subdomain_string_not_valid = True
+                # Do not save it
+                chosen_subdomain_string = False
+        if positive_value_exists(chosen_subdomain_string):
+            domain_results = subdomain_string_available(
+                chosen_subdomain_string, requesting_organization_id=organization_id)
             if not domain_results['subdomain_string_available']:
                 subdomain_string_already_taken = True
                 # Do not save it
@@ -520,7 +541,9 @@ def organization_save_view(request):  # organizationSave
         chosen_subscription_plan=chosen_subscription_plan,
     )
     results['full_domain_string_already_taken'] = full_domain_string_already_taken
+    results['full_domain_string_not_valid'] = full_domain_string_not_valid
     results['subdomain_string_already_taken'] = subdomain_string_already_taken
+    results['subdomain_string_not_valid'] = subdomain_string_not_valid
 
     return HttpResponse(json.dumps(results), content_type='application/json')
 
