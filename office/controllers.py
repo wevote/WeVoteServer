@@ -20,6 +20,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")  # officesSyncOut
+OFFICES_VISITING_SYNC_URL = "https://api.wevoteusa.org/apis/v1/officesVisitingSyncOut/"  # officesVisitingSyncOut
 
 
 def add_contest_office_name_to_next_spot(contest_office_to_update, google_civic_office_name_to_add):
@@ -68,7 +69,7 @@ def offices_import_from_sample_file():
     return offices_import_from_structured_json(structured_json)
 
 
-def offices_import_from_master_server(request, google_civic_election_id='', state_code=''):
+def offices_import_from_master_server(request, google_civic_election_id='', state_code=''):  # officesSyncOut
     """
     Get the json data, and either create new entries or update existing
     :return:
@@ -90,6 +91,26 @@ def offices_import_from_master_server(request, google_civic_election_id='', stat
 
         import_results = offices_import_from_structured_json(filtered_structured_json)
         import_results['duplicates_removed'] = duplicates_removed
+
+    return import_results
+
+
+def offices_visiting_import_from_master_server(request, host_google_civic_election_id=''):  # officesVisitingSyncOut
+    """
+    Get the json data, and either create new entries or update existing
+    :return:
+    """
+    # Request json file from We Vote servers
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Contest Offices Visiting from We Vote Master servers",
+        OFFICES_VISITING_SYNC_URL, {
+            "key": WE_VOTE_API_KEY,
+            "host_google_civic_election_id": str(host_google_civic_election_id),
+        }
+    )
+
+    if import_results['success']:
+        import_results = offices_visiting_import_from_structured_json(structured_json)
 
     return import_results
 
@@ -338,7 +359,7 @@ def merge_these_two_offices(contest_office1_we_vote_id, contest_office2_we_vote_
     bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_contest_office(
         contest_office2_we_vote_id)
     if bookmark_results['bookmark_item_list_found']:
-        status += "Bookmarks found for Contest Office 2 - automatic merge not working yet."
+        status += "Bookmarks found for Contest Office 2 - automatic merge not working yet. "
         results = {
             'success': False,
             'status': status,
@@ -497,7 +518,7 @@ def filter_offices_structured_json_for_local_duplicates(structured_json):
 
     offices_results = {
         'success':              True,
-        'status':               "FILTER_OFFICES_PROCESS_COMPLETE",
+        'status':               "FILTER_OFFICES_PROCESS_COMPLETE ",
         'duplicates_removed':   duplicates_removed,
         'structured_json':      filtered_structured_json,
     }
@@ -605,7 +626,7 @@ def offices_import_from_structured_json(structured_json):
             offices_not_processed += 1
             results = {
                 'success': False,
-                'status': 'Required value missing, cannot update or create'
+                'status': 'Required value missing, cannot update or create '
             }
 
         if results['success']:
@@ -616,12 +637,58 @@ def offices_import_from_structured_json(structured_json):
 
     offices_results = {
         'success':          True,
-        'status':           "OFFICE_IMPORT_PROCESS_COMPLETE",
+        'status':           "OFFICE_IMPORT_PROCESS_COMPLETE ",
         'saved':            offices_saved,
         'updated':          offices_updated,
         'not_processed':    offices_not_processed,
     }
     return offices_results
+
+
+def offices_visiting_import_from_structured_json(structured_json):  # officesVisitingSyncOut
+    office_manager = ContestOfficeManager()
+    offices_visiting_saved = 0
+    offices_visiting_updated = 0
+    offices_visiting_not_processed = 0
+    for one_office_visiting in structured_json:
+        contest_office_we_vote_id = one_office_visiting['contest_office_we_vote_id'] \
+            if 'contest_office_we_vote_id' in one_office_visiting else ''
+        ballotpedia_race_id = one_office_visiting['ballotpedia_race_id'] \
+            if 'ballotpedia_race_id' in one_office_visiting else ''
+        host_google_civic_election_id = one_office_visiting['host_google_civic_election_id'] \
+            if 'host_google_civic_election_id' in one_office_visiting else ''
+        origin_google_civic_election_id = one_office_visiting['origin_google_civic_election_id'] \
+            if 'origin_google_civic_election_id' in one_office_visiting else ''
+        if positive_value_exists(contest_office_we_vote_id) \
+                and positive_value_exists(ballotpedia_race_id) \
+                and positive_value_exists(host_google_civic_election_id) \
+                and positive_value_exists(origin_google_civic_election_id):
+            results = office_manager.update_or_create_visiting_link(
+                contest_office_we_vote_id=contest_office_we_vote_id,
+                ballotpedia_race_id=ballotpedia_race_id,
+                host_google_civic_election_id=host_google_civic_election_id,
+                origin_google_civic_election_id=origin_google_civic_election_id)
+        else:
+            offices_visiting_not_processed += 1
+            results = {
+                'success': False,
+                'status': 'Required value missing, cannot update or create'
+            }
+
+        if results['success']:
+            if results['new_office_created']:
+                offices_visiting_saved += 1
+            else:
+                offices_visiting_updated += 1
+
+    offices_visiting_results = {
+        'success':          True,
+        'status':           "OFFICE_VISITING_IMPORT_PROCESS_COMPLETE ",
+        'saved':            offices_visiting_saved,
+        'updated':          offices_visiting_updated,
+        'not_processed':    offices_visiting_not_processed,
+    }
+    return offices_visiting_results
 
 
 def office_retrieve_for_api(office_id, office_we_vote_id):
@@ -635,7 +702,7 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
     #  a ballot data lookup from Google Civic, like voterBallotItemsFromGoogleCivic does
 
     if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
-        status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING'
+        status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING '
         json_data = {
             'status':                   status,
             'success':                  False,
@@ -657,7 +724,7 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
         success = results['success']
         status = results['status']
     else:
-        status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING_2'  # It should be impossible to reach this
+        status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING_2 '  # It should be impossible to reach this
         json_data = {
             'status':                   status,
             'success':                  False,

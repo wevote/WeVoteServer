@@ -697,7 +697,9 @@ class ContestOfficeManager(models.Model):
             contest_office_visiting, new_contest_office_visiting_created = \
                 ContestOfficeVisitingOtherElection.objects.update_or_create(
                     contest_office_we_vote_id=contest_office_we_vote_id,
+                    ballotpedia_race_id=ballotpedia_race_id,
                     host_google_civic_election_id=host_google_civic_election_id,
+                    origin_google_civic_election_id=origin_google_civic_election_id,
                     defaults=updated_values)
             status += "CONTEST_OFFICE_VISITING_UPDATED_OR_CREATED "
         except ContestOfficeVisitingOtherElection.MultipleObjectsReturned as e:

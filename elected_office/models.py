@@ -32,10 +32,9 @@ class ElectedOffice(models.Model):
     google_civic_elected_office_name = models.CharField(
         verbose_name="elected_office name exactly as received from google civic", max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
-    google_civic_election_id = models.CharField(verbose_name="google civic election id",
-                                                max_length=255, null=False, blank=False)
-    google_civic_election_id_new = models.PositiveIntegerField(
-        verbose_name="google civic election id", default=0, null=False, blank=False)
+    # TODO: Turn back on after field removed
+    # google_civic_election_id = models.PositiveIntegerField(
+    #     verbose_name="google civic election id", default=0, null=False, blank=False)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     maplight_id = models.CharField(
         verbose_name="maplight unique identifier", max_length=255, null=True, blank=True, unique=True)
