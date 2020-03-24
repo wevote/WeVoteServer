@@ -676,7 +676,7 @@ def offices_visiting_import_from_structured_json(structured_json):  # officesVis
             }
 
         if results['success']:
-            if results['new_office_created']:
+            if results['new_contest_office_visiting_created']:
                 offices_visiting_saved += 1
             else:
                 offices_visiting_updated += 1

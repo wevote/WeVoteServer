@@ -336,7 +336,7 @@ urlpatterns = [
         views_docs.measure_list_for_upcoming_elections_retrieve_doc_view,
         name='measureListForUpcomingElectionsRetrieveDocs'),
     url(r'^docs/officeRetrieve/$', views_docs.office_retrieve_doc_view, name='officeRetrieveDocs'),
-    url(r'^docs/officeSyncOut/$', views_docs.offices_sync_out_doc_view, name='officesSyncOutDocs'),
+    url(r'^docs/officesSyncOut/$', views_docs.offices_sync_out_doc_view, name='officesSyncOutDocs'),
     url(r'^docs/organizationAnalyticsByVoter/$', views_docs.organization_analytics_by_voter_doc_view,
         name='organizationAnalyticsByVoterDocs'),
     url(r'^docs/organizationCount/$', views_docs.organization_count_doc_view, name='organizationCountDocs'),
