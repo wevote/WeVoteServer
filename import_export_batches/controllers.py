@@ -21,7 +21,7 @@ from electoral_district.controllers import retrieve_electoral_district
 from election.models import ElectionManager
 from exception.models import handle_exception
 from image.controllers import retrieve_and_save_ballotpedia_candidate_images
-from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasureList
+from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasureListManager
 from office.models import ContestOffice, ContestOfficeListManager, ContestOfficeManager
 from organization.models import Organization, OrganizationListManager, OrganizationManager, \
     NONPROFIT_501C3, NONPROFIT_501C4, POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, \
@@ -2206,7 +2206,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         else:
             pass
     elif positive_value_exists(contest_measure_title):
-        contest_measure_list_manager = ContestMeasureList()
+        contest_measure_list_manager = ContestMeasureListManager()
         google_civic_election_id_list = [google_civic_election_id]
         matching_results = contest_measure_list_manager.retrieve_contest_measures_from_non_unique_identifiers(
             google_civic_election_id_list, state_code, contest_measure_title)
@@ -2577,7 +2577,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
 
     if keep_looking_for_duplicates and not positive_value_exists(contest_measure_name):
         # See if we have an measure name
-        contest_measure_list = ContestMeasureList()
+        contest_measure_list = ContestMeasureListManager()
         keep_looking_for_duplicates = True
         google_civic_election_id_list = [google_civic_election_id]
         matching_results = contest_measure_list.retrieve_contest_measures_from_non_unique_identifiers(

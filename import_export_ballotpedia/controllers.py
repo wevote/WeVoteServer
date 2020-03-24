@@ -13,7 +13,7 @@ from exception.models import handle_exception
 from geopy.geocoders import get_geocoder_for_service
 from import_export_batches.controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
 import json
-from measure.models import ContestMeasureList, ContestMeasureManager
+from measure.models import ContestMeasureListManager, ContestMeasureManager
 from office.models import ContestOfficeListManager, ContestOfficeManager
 from politician.models import PoliticianManager
 from polling_location.models import PollingLocationManager
@@ -2647,7 +2647,7 @@ def process_ballotpedia_voter_districts(google_civic_election_id, state_code, mo
 
     candidate_campaign_list = CandidateCampaignListManager()
     contest_office_list_manager = ContestOfficeListManager()
-    measure_list_manager = ContestMeasureList()
+    measure_list_manager = ContestMeasureListManager()
     return_list_of_objects = True
     for one_district in modified_district_json_list:
         if 'ballotpedia_district_id' in one_district \

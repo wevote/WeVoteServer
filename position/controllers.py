@@ -16,7 +16,7 @@ from election.models import fetch_election_state
 from exception.models import handle_record_not_saved_exception
 from follow.models import FollowOrganizationManager, FollowOrganizationList
 from friend.models import FriendManager
-from measure.models import ContestMeasureManager, ContestMeasureList
+from measure.models import ContestMeasureManager, ContestMeasureListManager
 from office.models import ContestOfficeManager, ContestOfficeListManager
 from operator import itemgetter
 from organization.models import Organization, OrganizationManager, PUBLIC_FIGURE, UNKNOWN
@@ -4220,7 +4220,7 @@ def refresh_positions_with_contest_measure_details_for_election(google_civic_ele
     positions_updated_count = 0
     google_civic_election_id = convert_to_int(google_civic_election_id)
 
-    contest_measure_list_manager = ContestMeasureList()
+    contest_measure_list_manager = ContestMeasureListManager()
     return_list_of_objects = True
     google_civic_election_id_list = [google_civic_election_id]
     contest_measures_results = contest_measure_list_manager.retrieve_all_measures_for_upcoming_election(

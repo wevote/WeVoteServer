@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import ContestMeasure, ContestMeasureList, ContestMeasureManager, CONTEST_MEASURE_UNIQUE_IDENTIFIERS
+from .models import ContestMeasure, ContestMeasureListManager, ContestMeasureManager, \
+    CONTEST_MEASURE_UNIQUE_IDENTIFIERS
 from ballot.models import MEASURE
 from config.base import get_environment_variable
 from django.http import HttpResponse
@@ -28,7 +29,7 @@ def fetch_duplicate_measure_count(contest_measure, ignore_measure_we_vote_id_lis
         return 0
 
     # Search for other offices within this election that match name and election
-    contest_measure_list_manager = ContestMeasureList()
+    contest_measure_list_manager = ContestMeasureListManager()
     return contest_measure_list_manager.fetch_measures_from_non_unique_identifiers_count(
         contest_measure.google_civic_election_id, contest_measure.state_code,
         contest_measure.office_name, ignore_measure_we_vote_id_list)
@@ -72,7 +73,7 @@ def filter_measures_structured_json_for_local_duplicates(structured_json):
     """
     duplicates_removed = 0
     filtered_structured_json = []
-    measure_list_manager = ContestMeasureList()
+    measure_list_manager = ContestMeasureListManager()
     for one_measure in structured_json:
         measure_title = one_measure['measure_title'] if 'measure_title' in one_measure else ''
         we_vote_id = one_measure['we_vote_id'] if 'we_vote_id' in one_measure else ''
@@ -124,7 +125,7 @@ def find_duplicate_contest_measure(contest_measure, ignore_measure_we_vote_id_li
         return error_results
 
     # Search for other contest measures within this election that match name and election
-    contest_measure_list_manager = ContestMeasureList()
+    contest_measure_list_manager = ContestMeasureListManager()
     try:
         google_civic_election_id_list = [contest_measure.google_civic_election_id]
         results = contest_measure_list_manager.retrieve_contest_measures_from_non_unique_identifiers(
@@ -450,7 +451,7 @@ def retrieve_measure_list_for_all_upcoming_elections(upcoming_google_civic_elect
         status += election_list_results['status']
 
     if len(upcoming_google_civic_election_id_list):
-        measure_list_manager = ContestMeasureList()
+        measure_list_manager = ContestMeasureListManager()
         results = measure_list_manager.retrieve_measures_for_specific_elections(
             upcoming_google_civic_election_id_list,
             limit_to_this_state_code=limit_to_this_state_code,

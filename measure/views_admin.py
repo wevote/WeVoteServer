@@ -6,7 +6,8 @@
 from .controllers import fetch_duplicate_measure_count, figure_out_measure_conflict_values, \
     find_duplicate_contest_measure, \
     measures_import_from_master_server
-from .models import ContestMeasure, ContestMeasureManager, CONTEST_MEASURE_UNIQUE_IDENTIFIERS
+from .models import ContestMeasure, ContestMeasureListManager, ContestMeasureManager, \
+    CONTEST_MEASURE_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.controllers import move_ballot_items_to_another_measure
 from bookmark.models import BookmarkItemList
@@ -516,7 +517,22 @@ def measure_list_view(request):
         pass
 
     state_list = STATE_CODE_MAP
-    sorted_state_list = sorted(state_list.items())
+    state_list_modified = {}
+    contest_measure_list_manager = ContestMeasureListManager()
+    for one_state_code, one_state_name in state_list.items():
+        count_result = contest_measure_list_manager.retrieve_measure_count_for_election_and_state(
+            google_civic_election_id, one_state_code)
+        state_name_modified = one_state_name
+        if positive_value_exists(count_result['measure_count']):
+            state_name_modified += " - " + str(count_result['measure_count'])
+            state_list_modified[one_state_code] = state_name_modified
+        elif str(one_state_code.lower()) == str(state_code.lower()):
+            state_name_modified += " - 0"
+            state_list_modified[one_state_code] = state_name_modified
+        else:
+            # Do not include state in drop-down if there aren't any candidates in that state
+            pass
+    sorted_state_list = sorted(state_list_modified.items())
 
     status_print_list = ""
     status_print_list += "measure_list_count: " + \

@@ -261,6 +261,9 @@ def candidate_list_view(request):
         if positive_value_exists(count_result['candidate_count']):
             state_name_modified += " - " + str(count_result['candidate_count'])
             state_list_modified[one_state_code] = state_name_modified
+        elif str(one_state_code.lower()) == str(state_code.lower()):
+            state_name_modified += " - 0"
+            state_list_modified[one_state_code] = state_name_modified
         else:
             # Do not include state in drop-down if there aren't any candidates in that state
             pass

@@ -21,7 +21,7 @@ from issue.models import OrganizationLinkToIssueList
 import json
 from measure.controllers import add_measure_name_alternatives_to_measure_list_light, \
     retrieve_measure_list_for_all_upcoming_elections
-from measure.models import ContestMeasureList, ContestMeasureManager
+from measure.models import ContestMeasureListManager, ContestMeasureManager
 from office.models import ContestOfficeManager
 from organization.controllers import organization_follow_or_unfollow_or_ignore, \
     push_organization_data_to_other_table_caches, \
@@ -937,7 +937,7 @@ def match_endorsement_list_with_measures_in_database(
 
     possible_endorsement_list_modified = []
     measure_manager = ContestMeasureManager()
-    measure_list_manager = ContestMeasureList()
+    measure_list_manager = ContestMeasureListManager()
     for possible_endorsement in possible_endorsement_list:
         possible_endorsement_matched = False
         if 'measure_we_vote_id' in possible_endorsement \
