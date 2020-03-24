@@ -24,7 +24,7 @@ from import_export_twitter.controllers import refresh_twitter_organization_detai
 from import_export_vote_smart.models import VoteSmartSpecialInterestGroupManager
 from issue.models import ALPHABETICAL_ASCENDING, IssueListManager, IssueManager, \
     OrganizationLinkToIssueList, OrganizationLinkToIssueManager, MOST_LINKED_ORGANIZATIONS
-from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
+from measure.models import ContestMeasure, ContestMeasureListManager, ContestMeasureManager
 import operator
 from organization.models import OrganizationListManager, OrganizationManager, ORGANIZATION_TYPE_MAP, UNKNOWN
 from organization.controllers import organization_retrieve_tweets_from_twitter, organization_analyze_tweets
@@ -1224,7 +1224,7 @@ def organization_position_new_view(request, organization_id):
         candidate_campaigns_for_this_election_list = results['candidate_list_objects']
 
     # Prepare a drop down of measures in this election
-    contest_measure_list = ContestMeasureList()
+    contest_measure_list = ContestMeasureListManager()
     contest_measures_for_this_election_list = []
     results = contest_measure_list.retrieve_all_measures_for_upcoming_election(google_civic_election_id_list,
                                                                                state_code, True)

@@ -866,13 +866,13 @@ class ContestMeasureManager(models.Model):
         return results
 
 
-class ContestMeasureList(models.Model):
+class ContestMeasureListManager(models.Model):
     """
     This is a class to make it easy to retrieve lists of Measures
     """
 
     def __unicode__(self):
-        return "ContestMeasureList"
+        return "ContestMeasureListManager"
 
     def fetch_measures_from_non_unique_identifiers_count(
             self, google_civic_election_id, state_code, measure_title, ignore_measure_we_vote_id_list=[]):
@@ -1352,6 +1352,50 @@ class ContestMeasureList(models.Model):
             'measure_list_found':   measure_list_found,
             'measure_list_objects': measure_list_objects if return_list_of_objects else [],
             'measure_list_light':   measure_list_light,
+        }
+        return results
+
+    def retrieve_measure_count_for_election_and_state(self, google_civic_election_id=0, state_code=''):
+        status = ''
+        if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
+            status += 'VALID_ELECTION_ID_AND_STATE_CODE_MISSING '
+            results = {
+                'success':                  False,
+                'status':                   status,
+                'google_civic_election_id': google_civic_election_id,
+                'state_code':               state_code,
+                'measure_count':            0,
+            }
+            return results
+
+        try:
+            measure_queryset = ContestMeasure.objects.using('readonly').all()
+            if positive_value_exists(google_civic_election_id):
+                google_civic_election_id_list = [convert_to_int(google_civic_election_id)]
+                measure_queryset = measure_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+            if positive_value_exists(state_code):
+                measure_queryset = measure_queryset.filter(state_code__iexact=state_code)
+            measure_count = measure_queryset.count()
+            success = True
+            status += "MEASURE_COUNT_FOUND "
+        except ContestMeasure.DoesNotExist:
+            # No candidates found. Not a problem.
+            status += 'NO_MEASURES_FOUND_DoesNotExist '
+            measure_count = 0
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status += 'FAILED RETRIEVE_MEASURE_COUNT ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            success = False
+            measure_count = 0
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'state_code':               state_code,
+            'measure_count':            measure_count,
         }
         return results
 

@@ -39,7 +39,7 @@ from import_export_google_civic.models import GoogleCivicApiCounter, GoogleCivic
     GoogleCivicApiCounterWeeklySummary, GoogleCivicApiCounterMonthlySummary
 from import_export_vote_smart.models import VoteSmartApiCounter, VoteSmartApiCounterDailySummary, \
     VoteSmartApiCounterWeeklySummary, VoteSmartApiCounterMonthlySummary
-from measure.models import ContestMeasure, ContestMeasureList
+from measure.models import ContestMeasure, ContestMeasureListManager
 from office.models import ContestOffice, ContestOfficeListManager, ContestOfficeManager, \
     ContestOfficeVisitingOtherElection
 from pledge_to_vote.models import PledgeToVoteManager
@@ -1761,14 +1761,16 @@ def election_migration_view(request):
         if positive_value_exists(from_state_code):
             from_election_ballot_returned_count = BallotReturned.objects\
                 .filter(google_civic_election_id=from_election_id)\
-                .filter(state_code__iexact=from_state_code).count()
+                .filter(Q(state_code__iexact=from_state_code) | Q(normalized_state__iexact=from_state_code))\
+                .count()
         else:
             from_election_ballot_returned_count = \
                 BallotReturned.objects.filter(google_civic_election_id=from_election_id).count()
         if positive_value_exists(change_now):
             if positive_value_exists(from_state_code):
                 BallotReturned.objects.filter(google_civic_election_id=from_election_id)\
-                    .filter(state_code__iexact=from_state_code).update(google_civic_election_id=to_election_id)
+                    .filter(Q(state_code__iexact=from_state_code) | Q(normalized_state__iexact=from_state_code))\
+                    .update(google_civic_election_id=to_election_id)
             else:
                 BallotReturned.objects.filter(google_civic_election_id=from_election_id)\
                     .update(google_civic_election_id=to_election_id)

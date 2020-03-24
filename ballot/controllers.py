@@ -14,7 +14,7 @@ from exception.models import handle_exception
 from import_export_google_civic.controllers import \
     refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved, \
     voter_ballot_items_retrieve_from_google_civic_for_api
-from measure.models import ContestMeasureList, ContestMeasureManager
+from measure.models import ContestMeasureListManager, ContestMeasureManager
 from office.models import ContestOfficeManager, ContestOfficeListManager
 from polling_location.models import PollingLocationManager
 import pytz
@@ -830,7 +830,7 @@ def repair_ballot_items_for_election(google_civic_election_id, refresh_from_goog
     ballot_item_list_manager = BallotItemListManager()
     candidate_campaign_list = CandidateCampaignListManager()
     office_list_manager = ContestOfficeListManager()
-    measure_list_manager = ContestMeasureList()
+    measure_list_manager = ContestMeasureListManager()
     results = office_list_manager.retrieve_offices(google_civic_election_id=google_civic_election_id)
     offices_in_this_election_list = results['office_list_light']
     ballot_items_deleted_count = 0
@@ -1943,7 +1943,7 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
     success = True
     contest_office_list_manager = ContestOfficeListManager()
     candidate_list_object = CandidateCampaignListManager()
-    contest_measure_list_manager = ContestMeasureList()
+    contest_measure_list_manager = ContestMeasureListManager()
 
     ballot_item_list = []
     ballot_items_to_display = []
@@ -2338,7 +2338,7 @@ def ballot_item_options_retrieve_for_api(google_civic_election_id, search_string
 
     measure_success = False
     # try:
-    #     measure_list_object = ContestMeasureList()
+    #     measure_list_object = ContestMeasureListManager()
     #     results = measure_list_object.retrieve_all_measures_for_upcoming_election(
     # google_civic_election_id, state_code)
     #     measure_success = results['success']
