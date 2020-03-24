@@ -615,8 +615,9 @@ class AnalyticsManager(models.Model):
         return results
 
     def retrieve_analytics_action_list(self, voter_we_vote_id='', voter_we_vote_id_list=[], google_civic_election_id=0,
-                                       organization_we_vote_id='', action_constant='', distinct_for_members=False):
-        success = False
+                                       organization_we_vote_id='', action_constant='', distinct_for_members=False,
+                                       state_code=''):
+        success = True
         status = ""
         analytics_action_list = []
 
@@ -632,14 +633,17 @@ class AnalyticsManager(models.Model):
                 list_query = list_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             if positive_value_exists(action_constant):
                 list_query = list_query.filter(action_constant=action_constant)
+            if positive_value_exists(state_code):
+                list_query = list_query.filter(state_code__iexact=state_code)
             if positive_value_exists(distinct_for_members):
                 list_query = list_query.distinct(
                     'google_civic_election_id', 'organization_we_vote_id', 'voter_we_vote_id')
             analytics_action_list = list(list_query)
-            analytics_action_list_found = True
+            analytics_action_list_found = positive_value_exists(len(analytics_action_list))
         except Exception as e:
             analytics_action_list_found = False
             status += "ANALYTICS_ACTION_LIST_ERROR: " + str(e) + " "
+            success = False
 
         results = {
             'success':                      success,

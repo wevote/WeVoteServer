@@ -848,7 +848,7 @@ class BallotItemListManager(models.Model):
         }
         return results
 
-    def retrieve_ballot_items_for_election(self, google_civic_election_id):
+    def retrieve_ballot_items_for_election(self, google_civic_election_id, state_code=''):
         ballot_item_list = []
         ballot_item_list_found = False
         status = ''
@@ -856,8 +856,9 @@ class BallotItemListManager(models.Model):
             # We cannot use 'readonly' because the result set sometimes gets modified with .save()
             ballot_item_queryset = BallotItem.objects.all()
             ballot_item_queryset = ballot_item_queryset.order_by('local_ballot_order', 'google_ballot_placement')
-            ballot_item_queryset = ballot_item_queryset.filter(
-                google_civic_election_id=google_civic_election_id)
+            ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                ballot_item_queryset = ballot_item_queryset.filter(state_code__iexact=state_code)
             ballot_item_list = list(ballot_item_queryset)
             success = True
             if positive_value_exists(ballot_item_list):

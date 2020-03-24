@@ -4,8 +4,9 @@
 
 from .controllers import add_contest_office_name_to_next_spot, fetch_duplicate_office_count, \
     find_duplicate_contest_office, figure_out_office_conflict_values, merge_if_duplicate_offices, \
-    offices_import_from_master_server
-from .models import ContestOffice, ContestOfficeListManager, ContestOfficeManager, CONTEST_OFFICE_UNIQUE_IDENTIFIERS
+    offices_import_from_master_server, offices_visiting_import_from_master_server
+from .models import ContestOffice, ContestOfficeListManager, ContestOfficeManager, CONTEST_OFFICE_UNIQUE_IDENTIFIERS, \
+    ContestOfficeVisitingOtherElection
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.controllers import move_ballot_items_to_another_office
 from bookmark.models import BookmarkItemList
@@ -122,10 +123,36 @@ def offices_sync_out_view(request):  # officesSyncOut
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+# This page does not need to be protected.
+def offices_visiting_sync_out_view(request):  # officesVisitingSyncOut
+    host_google_civic_election_id = convert_to_int(request.GET.get('host_google_civic_election_id', 0))
+
+    try:
+        query = ContestOfficeVisitingOtherElection.objects.using('readonly').all()
+        if positive_value_exists(host_google_civic_election_id):
+            query = query.filter(host_google_civic_election_id=host_google_civic_election_id)
+        # get the data using values_list
+        contest_office_visiting_list_dict = query.values(
+            'contest_office_we_vote_id', 'ballotpedia_race_id',
+            'host_google_civic_election_id', 'origin_google_civic_election_id')
+        if contest_office_visiting_list_dict:
+            contest_office_visiting_list_json = list(contest_office_visiting_list_dict)
+            return HttpResponse(json.dumps(contest_office_visiting_list_json), content_type='application/json')
+    except ContestOfficeVisitingOtherElection.DoesNotExist:
+        pass
+
+    json_data = {
+        'success': False,
+        'status': 'CONTEST_OFFICE_MISSING'
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
 @login_required
 def offices_import_from_master_server_view(request):
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
+    status = ""
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -137,8 +164,12 @@ def offices_import_from_master_server_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
-    results = offices_import_from_master_server(request, google_civic_election_id, state_code)
+    results = offices_visiting_import_from_master_server(
+        request, host_google_civic_election_id=google_civic_election_id)
+    if not results['success']:
+        messages.add_message(request, messages.ERROR, results['status'])
 
+    results = offices_import_from_master_server(request, google_civic_election_id, state_code)
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])
     else:

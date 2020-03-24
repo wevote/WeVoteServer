@@ -661,10 +661,9 @@ class ElectedOfficial(models.Model):
     # The order the elected official appears on the ballot relative to other elected_officials for this contest.
     order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
-    google_civic_election_id = models.CharField(
-        verbose_name="google civic election id", max_length=255, null=True, blank=True)
-    google_civic_election_id_new = models.PositiveIntegerField(
-        verbose_name="google civic election id", default=0, null=True, blank=True)
+    # TODO: Turn back on after field removed
+    # google_civic_election_id = models.PositiveIntegerField(
+    #     verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     # State code
     state_code = models.CharField(verbose_name="state this elected official serves", max_length=2, null=True,
