@@ -112,16 +112,18 @@ class VoterGuideManager(models.Manager):
     """
     A class for working with the VoterGuide model
     """
-    def update_or_create_organization_voter_guide_by_election_id(self, voter_guide_we_vote_id,
-                                                                 organization_we_vote_id,
-                                                                 google_civic_election_id,
+    def update_or_create_organization_voter_guide_by_election_id(self, voter_guide_we_vote_id='',
+                                                                 organization_we_vote_id='',
+                                                                 google_civic_election_id=0,
                                                                  state_code='',
                                                                  pledge_goal=0,
                                                                  we_vote_hosted_profile_image_url_large='',
                                                                  we_vote_hosted_profile_image_url_medium='',
                                                                  we_vote_hosted_profile_image_url_tiny='',
                                                                  vote_smart_ratings_only=False,
-                                                                 elections_dict={}
+                                                                 elections_dict={},
+                                                                 organizations_dict={},
+                                                                 voter_we_vote_id_dict={},
                                                                  ):
         """
         This creates voter_guides, and also refreshes voter guides with updated organization data
@@ -134,7 +136,7 @@ class VoterGuideManager(models.Manager):
         new_voter_guide_created = False
         voter_we_vote_id = None
         status = ''
-        success = False
+        success = True
         if not google_civic_election_id or not organization_we_vote_id:
             status += 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE '
             success = False
@@ -143,18 +145,29 @@ class VoterGuideManager(models.Manager):
             # Retrieve the organization object so we can bring over values
             # NOTE: If we don't have this organization in the local database, we won't create a voter guide
             organization_manager = OrganizationManager()
-            results = organization_manager.retrieve_organization(0, organization_we_vote_id)
-            if results['organization_found']:
-                voter_manager = VoterManager()
+            voter_manager = VoterManager()
+
+            if organization_we_vote_id in organizations_dict:
+                organization = organizations_dict[organization_we_vote_id]
                 organization_found = True
-                organization = results['organization']
-                voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(
-                    organization_we_vote_id)
-                if voter_results['voter_found']:
-                    try:
-                        voter_we_vote_id = voter_results['voter'].we_vote_id
-                    except Exception as e:
-                        status += 'COULD_NOT_RETRIEVE_VOTER_WE_VOTE_ID ' + str(e) + ' '
+            else:
+                results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+                if results['organization_found']:
+                    organization = results['organization']
+                    organizations_dict[organization_we_vote_id] = organization
+                    organization_found = True
+
+            if organization_found:
+                if organization_we_vote_id in voter_we_vote_id_dict:
+                    voter_we_vote_id = voter_we_vote_id_dict[organization_we_vote_id]
+                else:
+                    voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id)
+                    if voter_results['voter_found']:
+                        try:
+                            voter_we_vote_id = voter_results['voter'].we_vote_id
+                            voter_we_vote_id_dict[organization_we_vote_id] = voter_we_vote_id
+                        except Exception as e:
+                            status += 'COULD_NOT_RETRIEVE_VOTER_WE_VOTE_ID ' + str(e) + ' '
 
             # Retrieve the election so we can bring over the state_code if needed
             if positive_value_exists(state_code):
@@ -288,6 +301,8 @@ class VoterGuideManager(models.Manager):
             'voter_guide':              voter_guide_on_stage,
             'new_voter_guide_created':  new_voter_guide_created,
             'elections_dict':           elections_dict,
+            'organizations_dict':       organizations_dict,
+            'voter_we_vote_id_dict':    voter_we_vote_id_dict,
         }
         return results
 
