@@ -2204,19 +2204,19 @@ def election_migration_view(request):
 
     # ########################################
     # VoterGuidePossibility
-    if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
-        one_number = 0
-        if positive_value_exists(change_now):
-            try:
-                for one_number in POSSIBLE_ENDORSEMENT_NUMBER_LIST:
-                    key = "google_civic_election_id_" + one_number
-                    VoterGuidePossibility.objects.filter(
-                        **{key: from_election_id}).update(
-                        **{key: to_election_id})
-            except Exception as e:
-                error = True
-                status += "COULD_NOT_UPDATE_ALL_VOTER_GUIDE_POSSIBILITIES, one_number: " + str(one_number) + \
-                          " " + str(e) + ' '
+    # if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
+    #     one_number = 0
+    #     if positive_value_exists(change_now):
+    #         try:
+    #             for one_number in POSSIBLE_ENDORSEMENT_NUMBER_LIST:
+    #                 key = "google_civic_election_id_" + one_number
+    #                 VoterGuidePossibility.objects.filter(
+    #                     **{key: from_election_id}).update(
+    #                     **{key: to_election_id})
+    #         except Exception as e:
+    #             error = True
+    #             status += "COULD_NOT_UPDATE_ALL_VOTER_GUIDE_POSSIBILITIES, one_number: " + str(one_number) + \
+    #                       " " + str(e) + ' '
 
     # ########################################
     # VoteSmartApiCounter

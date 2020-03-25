@@ -1504,6 +1504,9 @@ def voter_guides_import_from_structured_json(structured_json):
     voter_guides_saved = 0
     voter_guides_updated = 0
     voter_guides_not_processed = 0
+    elections_dict = {}
+    organizations_dict = {}
+    voter_we_vote_id_dict = {}
     for one_voter_guide in structured_json:
         voter_guide_we_vote_id = one_voter_guide['we_vote_id'] if 'we_vote_id' in one_voter_guide else ''
         google_civic_election_id = one_voter_guide['google_civic_election_id'] \
@@ -1558,8 +1561,15 @@ def voter_guides_import_from_structured_json(structured_json):
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
                     voter_guide_we_vote_id, organization_we_vote_id, google_civic_election_id, state_code, pledge_goal,
                     we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
-                    we_vote_hosted_profile_image_url_tiny
+                    we_vote_hosted_profile_image_url_tiny,
+                    elections_dict=elections_dict,
+                    organizations_dict=organizations_dict,
+                    voter_we_vote_id_dict=voter_we_vote_id_dict,
                 )
+                if results['success']:
+                    elections_dict = results['elections_dict']
+                    organizations_dict = results['organizations_dict']
+                    voter_we_vote_id_dict = results['voter_we_vote_id_dict']
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
                     voter_guide_we_vote_id, organization_we_vote_id, vote_smart_time_span, pledge_goal,
@@ -4317,6 +4327,8 @@ def refresh_existing_voter_guides(google_civic_election_id, organization_we_vote
             voter_guide_list = results['voter_guide_list']
 
     elections_dict = {}
+    organizations_dict = {}
+    voter_we_vote_id_dict = {}
     organization_we_vote_ids_refreshed = []
     if voter_guide_list_found:
         for voter_guide in voter_guide_list:
@@ -4331,11 +4343,17 @@ def refresh_existing_voter_guides(google_civic_election_id, organization_we_vote
                     voter_guide_we_vote_id = ''
                     results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
                         voter_guide_we_vote_id,
-                        voter_guide.organization_we_vote_id, voter_guide.google_civic_election_id,
-                        elections_dict=elections_dict)
+                        voter_guide.organization_we_vote_id,
+                        voter_guide.google_civic_election_id,
+                        elections_dict=elections_dict,
+                        organizations_dict=organizations_dict,
+                        voter_we_vote_id_dict=voter_we_vote_id_dict,
+                    )
                     if results['success']:
                         voter_guide_updated_count += 1
                         elections_dict = results['elections_dict']
+                        organizations_dict = results['organizations_dict']
+                        voter_we_vote_id_dict = results['voter_we_vote_id_dict']
                 elif positive_value_exists(voter_guide.vote_smart_time_span):
                     voter_guide_we_vote_id = ''
                     results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
