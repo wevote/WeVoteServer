@@ -1658,7 +1658,7 @@ def election_migration_view(request):
                         one_sitewide_election_metrics.save()
                 except Exception as e:
                     error = True
-                    status += sitewide_election_metrics_results['status']
+                    status += sitewide_election_metrics_results['status'] + str(e) + ' '
 
     # ########################################
     # BallotpediaApiCounter
@@ -2417,33 +2417,34 @@ def election_migration_view(request):
 
     # ########################################
     # There are some settings on the election object we want to transfer
-    if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
-        if positive_value_exists(change_now) and not positive_value_exists(error):
-            try:
-                google_civic_election.candidate_photos_finished = from_election.candidate_photos_finished
-                from_election.candidate_photos_finished = False
-    
-                google_civic_election.election_preparation_finished = from_election.election_preparation_finished
-                from_election.election_preparation_finished = False
-    
-                google_civic_election.ignore_this_election = from_election.ignore_this_election
-                from_election.ignore_this_election = False
-    
-                google_civic_election.include_in_list_for_voters = from_election.include_in_list_for_voters
-                from_election.include_in_list_for_voters = False
-    
-                google_civic_election.internal_notes = from_election.internal_notes
-                from_election.internal_notes = None
-    
-                google_civic_election.is_national_election = from_election.is_national_election
-                from_election.is_national_election = False
-    
-                google_civic_election.save()
-                from_election.save()
-    
-            except Exception as e:
-                error = True
-                status += "COULD_NOT_SAVE_ELECTIONS " + str(e) + ' '
+    # NOTE: This is less relevant when we are moving elections into other elections
+    # if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
+    #     if positive_value_exists(change_now) and not positive_value_exists(error):
+    #         try:
+    #             google_civic_election.candidate_photos_finished = from_election.candidate_photos_finished
+    #             from_election.candidate_photos_finished = False
+    #
+    #             google_civic_election.election_preparation_finished = from_election.election_preparation_finished
+    #             from_election.election_preparation_finished = False
+    #
+    #             google_civic_election.ignore_this_election = from_election.ignore_this_election
+    #             from_election.ignore_this_election = False
+    #
+    #             google_civic_election.include_in_list_for_voters = from_election.include_in_list_for_voters
+    #             from_election.include_in_list_for_voters = False
+    #
+    #             google_civic_election.internal_notes = from_election.internal_notes
+    #             from_election.internal_notes = None
+    #
+    #             google_civic_election.is_national_election = from_election.is_national_election
+    #             from_election.is_national_election = False
+    #
+    #             google_civic_election.save()
+    #             from_election.save()
+    #
+    #         except Exception as e:
+    #             error = True
+    #             status += "COULD_NOT_SAVE_ELECTIONS " + str(e) + ' '
 
     # #########################
     # Now print results to the screen
