@@ -1917,23 +1917,22 @@ def election_migration_view(request):
     # ########################################
     # ContestOfficeVisitingOtherElection
     # HOST
+    contest_office_manager = ContestOfficeManager()
     contest_office_visiting_host_count = 0
     try:
-        if positive_value_exists(from_state_code):
-            contest_office_visiting_host_count = ContestOfficeVisitingOtherElection.objects\
-                .filter(host_google_civic_election_id=from_election_id)\
-                .filter(contest_office_we_vote_id__in=contest_office_we_vote_ids_migrated).count()
-        else:
-            contest_office_visiting_host_count = ContestOfficeVisitingOtherElection.objects.filter(
-                host_google_civic_election_id=from_election_id).count()
+        contest_office_visiting_host_count = ContestOfficeVisitingOtherElection.objects\
+            .filter(host_google_civic_election_id=from_election_id).count()
         if positive_value_exists(change_now):
-            if positive_value_exists(from_state_code):
-                ContestOfficeVisitingOtherElection.objects.filter(host_google_civic_election_id=from_election_id)\
-                    .filter(contest_office_we_vote_id__in=contest_office_we_vote_ids_migrated)\
-                    .update(host_google_civic_election_id=to_election_id)
-            else:
-                ContestOfficeVisitingOtherElection.objects.filter(host_google_civic_election_id=from_election_id)\
-                    .update(host_google_civic_election_id=to_election_id)
+            contest_office_visiting_query = ContestOfficeVisitingOtherElection.objects\
+                .filter(host_google_civic_election_id=from_election_id)
+            contest_office_visiting_list = list(contest_office_visiting_query)
+            for contest_office_visiting in contest_office_visiting_list:
+                # Make a copy for the new election. Some might not be relevant, but won't cause any harm.
+                contest_office_manager.update_or_create_visiting_link(
+                    contest_office_we_vote_id=contest_office_visiting.contest_office_we_vote_id,
+                    ballotpedia_race_id=contest_office_visiting.ballotpedia_race_id,
+                    host_google_civic_election_id=to_election_id,
+                    origin_google_civic_election_id=contest_office_visiting.origin_google_civic_election_id)
             status += 'CONTEST_OFFICE_VISITING_HOST_UPDATED '
     except Exception as e:
         error = True
@@ -1942,21 +1941,19 @@ def election_migration_view(request):
     # ORIGIN
     contest_office_visiting_origin_count = 0
     try:
-        if positive_value_exists(from_state_code):
-            contest_office_visiting_origin_count = ContestOfficeVisitingOtherElection.objects\
-                .filter(origin_google_civic_election_id=from_election_id)\
-                .filter(contest_office_we_vote_id__in=contest_office_we_vote_ids_migrated).count()
-        else:
-            contest_office_visiting_origin_count = ContestOfficeVisitingOtherElection.objects.filter(
-                origin_google_civic_election_id=from_election_id).count()
+        contest_office_visiting_origin_count = ContestOfficeVisitingOtherElection.objects.filter(
+            origin_google_civic_election_id=from_election_id).count()
         if positive_value_exists(change_now):
-            if positive_value_exists(from_state_code):
-                ContestOfficeVisitingOtherElection.objects.filter(origin_google_civic_election_id=from_election_id)\
-                    .filter(contest_office_we_vote_id__in=contest_office_we_vote_ids_migrated)\
-                    .update(origin_google_civic_election_id=to_election_id)
-            else:
-                ContestOfficeVisitingOtherElection.objects.filter(origin_google_civic_election_id=from_election_id)\
-                    .update(origin_google_civic_election_id=to_election_id)
+            contest_office_visiting_query = ContestOfficeVisitingOtherElection.objects\
+                .filter(origin_google_civic_election_id=from_election_id)
+            contest_office_visiting_list = list(contest_office_visiting_query)
+            for contest_office_visiting in contest_office_visiting_list:
+                # Make a copy for the new election
+                contest_office_manager.update_or_create_visiting_link(
+                    contest_office_we_vote_id=contest_office_visiting.contest_office_we_vote_id,
+                    ballotpedia_race_id=contest_office_visiting.ballotpedia_race_id,
+                    host_google_civic_election_id=contest_office_visiting.host_google_civic_election_id,
+                    origin_google_civic_election_id=to_election_id)
             status += 'CONTEST_OFFICE_VISITING_ORIGIN_UPDATED '
     except Exception as e:
         error = True
