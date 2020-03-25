@@ -584,7 +584,8 @@ def election_delete_process_view(request):
         election = results['election']
 
         office_list_manager = ContestOfficeListManager()
-        office_count = office_list_manager.fetch_office_count(election.google_civic_election_id)
+        office_count = office_list_manager.fetch_office_count(
+            election.google_civic_election_id, ignore_office_visiting_list=True)
 
         if positive_value_exists(office_count):
             messages.add_message(request, messages.ERROR, 'Could not delete -- '
