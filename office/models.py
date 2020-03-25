@@ -1150,18 +1150,21 @@ class ContestOfficeListManager(models.Model):
         state_code = ""
         return self.retrieve_offices(google_civic_election_id, state_code, office_list, return_list_of_objects)
 
-    def fetch_office_count(self, google_civic_election_id=0, state_code=""):
+    def fetch_office_count(self, google_civic_election_id=0, state_code="", ignore_office_visiting_list=False):
         office_count = 0
         office_manager = ContestOfficeManager()
 
         try:
-            office_queryset = ContestOffice.objects.all()
+            office_queryset = ContestOffice.objects.using('readonly').all()
             if positive_value_exists(google_civic_election_id):
-                office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                    host_google_civic_election_id_list=[google_civic_election_id])
-                office_queryset = office_queryset.filter(
-                    Q(google_civic_election_id=google_civic_election_id) |
-                    Q(we_vote_id__in=office_visiting_list_we_vote_ids))
+                if ignore_office_visiting_list:
+                    office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
+                else:
+                    office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                        host_google_civic_election_id_list=[google_civic_election_id])
+                    office_queryset = office_queryset.filter(
+                        Q(google_civic_election_id=google_civic_election_id) |
+                        Q(we_vote_id__in=office_visiting_list_we_vote_ids))
             if positive_value_exists(state_code):
                 office_queryset = office_queryset.filter(state_code__iexact=state_code)
 
