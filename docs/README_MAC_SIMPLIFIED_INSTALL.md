@@ -220,7 +220,7 @@ the following command:
     
     ```
     Collecting psycopg2 (from django-toolbelt==0.0.1->-r requirements.txt (line 11))
-  Using cached https://files.pythonhosted.org/packages/5c/1c/6997288da181277a0c29bc39a5f9143ff20b8c99f2a7d059cfb55163e165/psycopg2-2.8.3.tar.gz
+    Using cached https://files.pythonhosted.org/packages/5c/1c/6997288da181277a0c29bc39a5f9143ff20b8c99f2a7d059cfb55163e165/psycopg2-2.8.3.tar.gz
     ERROR: Complete output from command python setup.py egg_info:
     ERROR: running egg_info
     creating pip-egg-info/psycopg2.egg-info
@@ -231,7 +231,6 @@ the following command:
     
     Error: pg_config executable not found.
     ```
-    
      
 ## Install and set up PostgreSQL and pgAdmin4
 
