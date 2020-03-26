@@ -220,7 +220,7 @@ the following command:
     
     ```
     Collecting psycopg2 (from django-toolbelt==0.0.1->-r requirements.txt (line 11))
-  Using cached https://files.pythonhosted.org/packages/5c/1c/6997288da181277a0c29bc39a5f9143ff20b8c99f2a7d059cfb55163e165/psycopg2-2.8.3.tar.gz
+    Using cached https://files.pythonhosted.org/packages/5c/1c/6997288da181277a0c29bc39a5f9143ff20b8c99f2a7d059cfb55163e165/psycopg2-2.8.3.tar.gz
     ERROR: Complete output from command python setup.py egg_info:
     ERROR: running egg_info
     creating pip-egg-info/psycopg2.egg-info
@@ -231,7 +231,20 @@ the following command:
     
     Error: pg_config executable not found.
     ```
-    
+1. Install pdfminer.six command line utility for the Chrome Extension 
+    ```
+   pip install pdfminer.six
+   ```
+   Then in a terminal window, create a symlink to the executable script pdf2txt.py, and then test that the symlink
+   works by attempting to run the script without any files for it to convert (from PDFs to HTML files).
+   ```
+   (WeVoteServerPy3.7) WeVoteServer % ln -s ~/PycharmEnvironments/WeVoteServerPy3.7/bin/pdf2txt.py pdf2txt.py
+   (WeVoteServerPy3.7) WeVoteServer % python pdf2txt.py
+   usage: pdf2txt.py [-h] [--debug] [--disable-caching]
+      ...
+   pdf2txt.py: error: the following arguments are required: files
+   (WeVoteServerPy3.7) WeVoteServer % 
+   ```
      
 ## Install and set up PostgreSQL and pgAdmin4
 
