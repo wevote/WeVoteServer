@@ -231,20 +231,6 @@ the following command:
     
     Error: pg_config executable not found.
     ```
-1. Install pdfminer.six command line utility for the Chrome Extension 
-    ```
-   pip install pdfminer.six
-   ```
-   Then in a terminal window, create a symlink to the executable script pdf2txt.py, and then test that the symlink
-   works by attempting to run the script without any files for it to convert (from PDFs to HTML files).
-   ```
-   (WeVoteServerPy3.7) WeVoteServer % ln -s ~/PycharmEnvironments/WeVoteServerPy3.7/bin/pdf2txt.py pdf2txt.py
-   (WeVoteServerPy3.7) WeVoteServer % python pdf2txt.py
-   usage: pdf2txt.py [-h] [--debug] [--disable-caching]
-      ...
-   pdf2txt.py: error: the following arguments are required: files
-   (WeVoteServerPy3.7) WeVoteServer % 
-   ```
      
 ## Install and set up PostgreSQL and pgAdmin4
 

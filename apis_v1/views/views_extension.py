@@ -5,13 +5,13 @@ import boto3
 import datetime
 import json
 import os
-import subprocess
 import urllib.request
 from django.http import HttpResponse
 import wevote_functions.admin
 from config.base import get_environment_variable
 from wevote_functions.functions import positive_value_exists, get_voter_device_id
 from exception.models import handle_exception
+from pdfminer_six import pdf2txt
 
 AWS_ACCESS_KEY_ID = get_environment_variable("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = get_environment_variable("AWS_SECRET_ACCESS_KEY")
@@ -44,8 +44,8 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
 
     file_name, headers = urllib.request.urlretrieve(pdf_url)
     temp_file_name = file_name + '.html'
-    process = subprocess.run(['python', 'pdf2txt.py', '-o', temp_file_name, file_name])
-    output = process.stdout
+
+    pdf2txt.main(['-o', temp_file_name, file_name])
 
     s3_url_for_html = store_temporary_html_file_to_aws(temp_file_name)
     print("views_extension stored temp html file: ", temp_file_name, s3_url_for_html)
@@ -54,7 +54,7 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
     json_data = {
         'status': status,
         'success': True,
-        'output_from_subprocess': output,
+        # 'output_from_subprocess': output,
         's3_url_for_html': s3_url_for_html,
     }
 
