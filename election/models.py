@@ -839,6 +839,7 @@ class ElectionManager(models.Model):
         """
         Retrieve elections using google_civic_election_id
         :param google_civic_election_id_list:
+        :param read_only:
         :return:
         """
 
@@ -863,6 +864,10 @@ class ElectionManager(models.Model):
         except Election.DoesNotExist as e:
             status = 'NO_ELECTIONS_FOUND '
             success = True
+            election_list = []
+        except Exception as e:
+            status = 'NO_ELECTIONS_FOUND - ERROR ' + str(e) + ' '
+            success = False
             election_list = []
 
         results = {
