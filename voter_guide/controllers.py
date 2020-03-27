@@ -3865,21 +3865,41 @@ def voter_guides_retrieve_for_api(organization_we_vote_id="", voter_we_vote_id="
     :return:
     """
     voter_guide_list_manager = VoterGuideListManager()
+    election_manager = ElectionManager()
     results = voter_guide_list_manager.retrieve_all_voter_guides(
         organization_we_vote_id, 0, voter_we_vote_id, maximum_number_to_retrieve=maximum_number_to_retrieve)
     status = results['status']
     voter_guide_list = results['voter_guide_list']
     voter_guides = []
+    elections_dict = {}
+    elections_to_retrieve_by_we_vote_id = []
     if results['voter_guide_list_found']:
+        for voter_guide in voter_guide_list:
+            if positive_value_exists(voter_guide.google_civic_election_id) \
+                    and voter_guide.google_civic_election_id not in elections_to_retrieve_by_we_vote_id:
+                elections_to_retrieve_by_we_vote_id.append(voter_guide.google_civic_election_id)
+        # Now retrieve all of these elections and put them in elections_dict
+        election_results = election_manager.retrieve_elections_by_google_civic_election_id_list(
+            google_civic_election_id_list=elections_to_retrieve_by_we_vote_id, read_only=True)
+        if election_results['success']:
+            election_list = election_results['election_list']
+            for one_election in election_list:
+                elections_dict[convert_to_int(one_election.google_civic_election_id)] = one_election
         for voter_guide in voter_guide_list:
             if voter_guide.last_updated:
                 last_updated = voter_guide.last_updated.strftime('%Y-%m-%d %H:%M')
             else:
                 last_updated = ''
+            election_description_text = ''
+            if positive_value_exists(voter_guide.google_civic_election_id):
+                one_election = elections_dict.get(convert_to_int(voter_guide.google_civic_election_id))
+                if one_election and positive_value_exists(one_election.google_civic_election_id):
+                    election_description_text = one_election.election_name
             one_voter_guide = {
                 'we_vote_id':                   voter_guide.we_vote_id,
                 'google_civic_election_id':     voter_guide.google_civic_election_id,
                 'election_day_text':            voter_guide.election_day_text,
+                'election_description_text':    election_description_text,
                 'voter_guide_display_name':     voter_guide.voter_guide_display_name(),
                 'voter_guide_image_url_large':  voter_guide.we_vote_hosted_profile_image_url_large
                 if positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large)
