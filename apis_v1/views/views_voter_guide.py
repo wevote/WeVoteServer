@@ -216,12 +216,11 @@ def voter_guides_ignored_retrieve_view(request):  # voterGuidesIgnoredRetrieve
 
 
 def voter_guides_retrieve_view(request):  # voterGuidesRetrieve
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    # voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     voter_we_vote_id = request.GET.get('voter_we_vote_id', '')
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
-    return voter_guides_retrieve_for_api(voter_device_id=voter_device_id,
-                                         organization_we_vote_id=organization_we_vote_id,
+    return voter_guides_retrieve_for_api(organization_we_vote_id=organization_we_vote_id,
                                          voter_we_vote_id=voter_we_vote_id,
                                          maximum_number_to_retrieve=maximum_number_to_retrieve)
 
