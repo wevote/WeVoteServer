@@ -1804,9 +1804,11 @@ class BallotReturnedManager(models.Model):
                 if ballot_returned and hasattr(ballot_returned, "id"):
                     # If still here, we found an existing ballot_returned
                     ballot_returned_id = ballot_returned.id
+                    ballot_returned_we_vote_id = ballot_returned.we_vote_id
                     ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                     success = True
-                    status += "BALLOT_RETURNED_FOUND_FROM_GOOGLE_CIVIC_ELECTION_ID "
+                    status += "BALLOT_RETURNED_FOUND_FROM_GOOGLE_CIVIC_ELECTION_ID " \
+                              "" + str(ballot_returned_we_vote_id) + ' '
                 else:
                     ballot_returned_found = False
                     success = True
@@ -3612,10 +3614,9 @@ def find_best_previously_stored_ballot_returned(voter_id, text_for_map_search, g
     :return:
     """
     status = ""
-    closest_ballot_returned = None
     ballot_returned_manager = BallotReturnedManager()
-    voter_ballot_saved_manager = VoterBallotSavedManager()
-    ballot_item_list_manager = BallotItemListManager()
+    # voter_ballot_saved_manager = VoterBallotSavedManager()
+    # ballot_item_list_manager = BallotItemListManager()
 
     text_for_map_search_empty = not positive_value_exists(text_for_map_search) or text_for_map_search == ""
 
@@ -3651,7 +3652,7 @@ def find_best_previously_stored_ballot_returned(voter_id, text_for_map_search, g
             return error_results
 
         # A specific ballot was found.
-        ballot_returned_to_copy = find_results['ballot_returned']
+        closest_ballot_returned = find_results['ballot_returned']
     elif positive_value_exists(ballot_location_shortcut):
         find_results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_location_shortcut(
             ballot_location_shortcut)
@@ -3684,7 +3685,7 @@ def find_best_previously_stored_ballot_returned(voter_id, text_for_map_search, g
             return error_results
 
         # A specific ballot was found.
-        ballot_returned_to_copy = find_results['ballot_returned']
+        closest_ballot_returned = find_results['ballot_returned']
     elif positive_value_exists(google_civic_election_id) and text_for_map_search_empty:
         find_results = ballot_returned_manager.retrieve_ballot_returned_from_google_civic_election_id(
             google_civic_election_id)
@@ -3717,7 +3718,7 @@ def find_best_previously_stored_ballot_returned(voter_id, text_for_map_search, g
             return error_results
 
         # A specific ballot was found.
-        ballot_returned_to_copy = find_results['ballot_returned']
+        closest_ballot_returned = find_results['ballot_returned']
     elif text_for_map_search_empty:
         status += "TEXT_FOR_MAP_SEARCH_EMPTY "
 
