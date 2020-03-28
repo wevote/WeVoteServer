@@ -23,6 +23,7 @@ from apis_v1.documentation_source import all_ballot_items_retrieve_doc, ballot_i
     organization_stop_ignoring_doc, organization_photos_save_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, organizations_sync_out_doc, \
     organization_suggestion_tasks_doc, \
+    pdf_to_html_doc, \
     pledge_to_vote_with_voter_guide_doc, politicians_sync_out_doc, polling_locations_sync_out_doc, \
     position_like_count_doc, position_list_for_ballot_item_doc, position_list_for_ballot_item_from_friends_doc, \
     position_list_for_opinion_maker_doc, \
@@ -1497,5 +1498,15 @@ def voter_update_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_update_doc.voter_update_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def pdf_to_html_retrieve_view(request):
+    """
+    Show documentation about pdfToHtmlRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = pdf_to_html_doc.pdf_to_html_retrieve_view(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)

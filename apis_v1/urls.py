@@ -11,7 +11,7 @@ from django.conf.urls import url
 from django.conf.urls.static import static
 
 from apis_v1.views import views_docs, views_analytics, views_ballot, views_candidate, views_donation, \
-    views_election, views_facebook, views_friend, views_issues, views_measure, views_misc, views_organization, \
+    views_election, views_extension, views_facebook, views_friend, views_issues, views_measure, views_misc, views_organization, \
     views_pledge_to_vote, views_position, views_task, views_twitter, views_voter, views_voter_guide
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view
@@ -276,6 +276,7 @@ urlpatterns = [
     url(r'^voterTwitterSaveToCurrentAccount/',
         views_voter.voter_twitter_save_to_current_account_view, name='voterTwitterSaveToCurrentAccountView'),
     url(r'^voterUpdate/', views_voter.voter_update_view, name='voterUpdateView'),
+    url(r'^pdfToHtmlRetrieve/', views_extension.pdf_to_html_retrieve_view, name='pdfToHtmlRetrieve'),
     url(r'^voterVerifySecretCode/', views_voter.voter_verify_secret_code_view, name='voterVerifySecretCodeView'),
 
     ##########################
@@ -520,6 +521,7 @@ urlpatterns = [
     url(r'^docs/voterTwitterSaveToCurrentAccount/$',
         views_docs.voter_twitter_save_to_current_account_doc_view, name='voterTwitterSaveToCurrentAccountDocs'),
     url(r'^docs/voterUpdate/$', views_docs.voter_update_doc_view, name='voterUpdateDocs'),
+    url(r'^docs/pdfToHtmlRetrieve/$', views_docs.pdf_to_html_retrieve_view, name='pdfToHtmlRetrieveDocs'),
     url(r'^docs/voterVerifySecretCode/$',
         views_docs.voter_verify_secret_code_doc_view, name='voterVerifySecretCodeDocs'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

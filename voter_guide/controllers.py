@@ -3855,55 +3855,51 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_guides_retrieve_for_api(voter_device_id, organization_we_vote_id="", voter_we_vote_id="",
+def voter_guides_retrieve_for_api(organization_we_vote_id="", voter_we_vote_id="",  # voterGuidesRetrieve
                                   maximum_number_to_retrieve=0):
     """
-    voter_guides_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0)  # voterGuidesRetrieve
     This function allows us to search for voter guides using a variety of criteria.
-    :param voter_device_id:
     :param organization_we_vote_id:
     :param voter_we_vote_id:
     :param maximum_number_to_retrieve:
     :return:
     """
-    if not positive_value_exists(voter_device_id):
-        json_data = {
-            'status': 'VALID_VOTER_DEVICE_ID_MISSING',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'maximum_number_to_retrieve': maximum_number_to_retrieve,
-            'voter_guides': [],
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if not positive_value_exists(voter_id):
-        json_data = {
-            'status': 'VALID_VOTER_ID_MISSING',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'maximum_number_to_retrieve': maximum_number_to_retrieve,
-            'voter_guides': [],
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-
     voter_guide_list_manager = VoterGuideListManager()
-    results = voter_guide_list_manager.retrieve_all_voter_guides(organization_we_vote_id, 0, voter_we_vote_id)
+    election_manager = ElectionManager()
+    results = voter_guide_list_manager.retrieve_all_voter_guides(
+        organization_we_vote_id, 0, voter_we_vote_id, maximum_number_to_retrieve=maximum_number_to_retrieve)
     status = results['status']
     voter_guide_list = results['voter_guide_list']
     voter_guides = []
+    elections_dict = {}
+    elections_to_retrieve_by_we_vote_id = []
     if results['voter_guide_list_found']:
-        number_added_to_list = 0
+        for voter_guide in voter_guide_list:
+            if positive_value_exists(voter_guide.google_civic_election_id) \
+                    and voter_guide.google_civic_election_id not in elections_to_retrieve_by_we_vote_id:
+                elections_to_retrieve_by_we_vote_id.append(voter_guide.google_civic_election_id)
+        # Now retrieve all of these elections and put them in elections_dict
+        election_results = election_manager.retrieve_elections_by_google_civic_election_id_list(
+            google_civic_election_id_list=elections_to_retrieve_by_we_vote_id, read_only=True)
+        if election_results['success']:
+            election_list = election_results['election_list']
+            for one_election in election_list:
+                elections_dict[convert_to_int(one_election.google_civic_election_id)] = one_election
         for voter_guide in voter_guide_list:
             if voter_guide.last_updated:
                 last_updated = voter_guide.last_updated.strftime('%Y-%m-%d %H:%M')
             else:
                 last_updated = ''
+            election_description_text = ''
+            if positive_value_exists(voter_guide.google_civic_election_id):
+                one_election = elections_dict.get(convert_to_int(voter_guide.google_civic_election_id))
+                if one_election and positive_value_exists(one_election.google_civic_election_id):
+                    election_description_text = one_election.election_name
             one_voter_guide = {
                 'we_vote_id':                   voter_guide.we_vote_id,
                 'google_civic_election_id':     voter_guide.google_civic_election_id,
                 'election_day_text':            voter_guide.election_day_text,
-                'time_span':                    voter_guide.vote_smart_time_span,
+                'election_description_text':    election_description_text,
                 'voter_guide_display_name':     voter_guide.voter_guide_display_name(),
                 'voter_guide_image_url_large':  voter_guide.we_vote_hosted_profile_image_url_large
                 if positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large)
@@ -3912,37 +3908,26 @@ def voter_guides_retrieve_for_api(voter_device_id, organization_we_vote_id="", v
                 'voter_guide_image_url_tiny':   voter_guide.we_vote_hosted_profile_image_url_tiny,
                 'voter_guide_owner_type':       voter_guide.voter_guide_owner_type,
                 'organization_we_vote_id':      voter_guide.organization_we_vote_id,
-                'public_figure_we_vote_id':     voter_guide.public_figure_we_vote_id,
                 'twitter_description':          voter_guide.twitter_description,
                 'twitter_followers_count':      voter_guide.twitter_followers_count,
                 'twitter_handle':               voter_guide.twitter_handle,
-                'owner_voter_id':               voter_guide.owner_voter_id,
                 'pledge_goal':                  voter_guide.pledge_goal,
                 'pledge_count':                 voter_guide.pledge_count,
                 'state_code':                   voter_guide.state_code,
                 'last_updated':                 last_updated,
             }
             voter_guides.append(one_voter_guide.copy())
-            # If we have passed in a limit (that is not zero), honor it
-            if positive_value_exists(maximum_number_to_retrieve):
-                number_added_to_list += 1
-                if number_added_to_list >= maximum_number_to_retrieve:
-                    break
 
-        if len(voter_guides):
-            status += 'NO_VOTER_GUIDES_RETRIEVED '
-            success = True
-        else:
-            status += 'NO_VOTER_GUIDE_LIST_FOUND1 '
-            success = True
+        if not len(voter_guides):
+            status += 'NO_VOTER_GUIDES_FOUND-STRANGE_BEHAVIOR '
+        success = True
     else:
-        status += 'NO_VOTER_GUIDE_LIST_FOUND2 '
-        success = False
+        status += 'NO_VOTER_GUIDE_LIST_FOUND '
+        success = results['success']
 
     json_data = {
         'status': status,
         'success': success,
-        'voter_device_id': voter_device_id,
         'maximum_number_to_retrieve': maximum_number_to_retrieve,
         'voter_guides': voter_guides,
     }

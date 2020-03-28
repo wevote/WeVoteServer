@@ -1336,16 +1336,17 @@ class VoterGuideListManager(models.Model):
         organization_we_vote_id = ""
         owner_voter_id = 0
         return self.retrieve_all_voter_guides(organization_we_vote_id, owner_voter_id, owner_voter_we_vote_id,
-                                              read_only)
+                                              read_only=read_only)
 
     def retrieve_all_voter_guides(self, organization_we_vote_id, owner_voter_id=0, owner_voter_we_vote_id="",
-                                  read_only=True):
+                                  maximum_number_to_retrieve=0, read_only=True):
+        status = ''
         voter_guide_list = []
         voter_guide_list_found = False
 
         if not positive_value_exists(organization_we_vote_id) and not positive_value_exists(owner_voter_id) and \
                 not positive_value_exists(owner_voter_we_vote_id):
-            status = 'NO_VOTER_GUIDES_FOUND-MISSING_REQUIRED_VARIABLE '
+            status += 'NO_VOTER_GUIDES_FOUND-MISSING_REQUIRED_VARIABLE '
             success = False
             results = {
                 'success':                      success,
@@ -1360,6 +1361,7 @@ class VoterGuideListManager(models.Model):
                 voter_guide_query = VoterGuide.objects.using('readonly').all()
             else:
                 voter_guide_query = VoterGuide.objects.all()
+            voter_guide_query = voter_guide_query.order_by('-election_day_text')
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             if positive_value_exists(organization_we_vote_id):
                 voter_guide_query = voter_guide_query.filter(
@@ -1370,18 +1372,20 @@ class VoterGuideListManager(models.Model):
             elif positive_value_exists(owner_voter_we_vote_id):
                 voter_guide_query = voter_guide_query.filter(
                     owner_we_vote_id__iexact=owner_voter_we_vote_id)
-            voter_guide_list = list(voter_guide_query)
+            if positive_value_exists(maximum_number_to_retrieve):
+                voter_guide_list = voter_guide_query[:maximum_number_to_retrieve]
+            else:
+                voter_guide_list = list(voter_guide_query)
 
             if len(voter_guide_list):
                 voter_guide_list_found = True
-                status = 'VOTER_GUIDES_FOUND_BY_RETRIEVE_ALL_VOTER_GUIDES '
+                status += 'VOTER_GUIDES_FOUND_BY_RETRIEVE_ALL_VOTER_GUIDES '
             else:
-                status = 'NO_VOTER_GUIDES_FOUND_BY_RETRIEVE_ALL_VOTER_GUIDES '
+                status += 'NO_VOTER_GUIDES_FOUND_BY_RETRIEVE_ALL_VOTER_GUIDES '
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
-            status = 'retrieve_all_voter_guides: Unable to retrieve voter guides from db. ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'retrieve_all_voter_guides: Unable to retrieve voter guides from db. ' + str(e) + ' '
             success = False
 
         results = {
