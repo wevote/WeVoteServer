@@ -4,6 +4,7 @@
 
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
 
 
 def health_view(request):
@@ -13,6 +14,17 @@ def health_view(request):
     :return:
     """
     return HttpResponse("1", content_type='text/html')
+
+
+def robots_view(request):
+    """
+    Response for robots.txt requests
+    :param request:
+    :return:
+    """
+    template_values = {
+    }
+    return render(request, 'admin/robots.txt', template_values)
 
 
 def start_view(request):
