@@ -2316,7 +2316,7 @@ class PositionListManager(models.Model):
                                                 exclude_positions_current_voter_election=False,
                                                 voter_device_id='',
                                                 voter_we_vote_id='',
-                                                google_civic_election_id=0,
+                                                google_civic_election_id='',
                                                 state_code='', read_only=False):
         """
         Return a position list with all of the organization's positions.
@@ -2401,22 +2401,22 @@ class PositionListManager(models.Model):
                 if stance_we_are_looking_for != ANY_STANCE:
                     public_positions_query = public_positions_query.filter(stance__iexact=stance_we_are_looking_for)
 
-                google_civic_election_id_local_scope = 0
+                google_civic_election_id_local_scope = ''
                 if positive_value_exists(show_positions_current_voter_election) \
                         or positive_value_exists(exclude_positions_current_voter_election):
                     if positive_value_exists(voter_device_id):
                         results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
-                        google_civic_election_id_local_scope = results['google_civic_election_id']
+                        google_civic_election_id_local_scope = str(results['google_civic_election_id'])
                     else:
                         results = figure_out_google_civic_election_id_voter_is_watching_by_voter_we_vote_id(
                             voter_we_vote_id)
-                        google_civic_election_id_local_scope = results['google_civic_election_id']
+                        google_civic_election_id_local_scope = str(results['google_civic_election_id'])
                 # We can filter by only one of these
                 if positive_value_exists(show_positions_current_voter_election):  # This is the default option
                     if positive_value_exists(google_civic_election_id):
                         # Please note that this option doesn't catch Vote Smart ratings, which are not
                         # linked by google_civic_election_id
-                        google_civic_election_id_list = [convert_to_int(google_civic_election_id)]
+                        google_civic_election_id_list = [str(google_civic_election_id)]
                         office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
                             host_google_civic_election_id_list=google_civic_election_id_list)
                         public_positions_query = public_positions_query.filter(
@@ -2424,7 +2424,7 @@ class PositionListManager(models.Model):
                             Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
                     elif positive_value_exists(google_civic_election_id_local_scope):
                         # Limit positions we can retrieve for an org to only the items in this election
-                        google_civic_election_id_list = [convert_to_int(google_civic_election_id_local_scope)]
+                        google_civic_election_id_list = [google_civic_election_id_local_scope]
                         office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
                             host_google_civic_election_id_list=google_civic_election_id_list)
                         public_positions_query = public_positions_query.filter(
@@ -2441,7 +2441,7 @@ class PositionListManager(models.Model):
                         # Please note that this option doesn't catch Vote Smart ratings, which are not
                         # linked by google_civic_election_id
                         public_positions_query = public_positions_query.exclude(
-                            google_civic_election_id=google_civic_election_id)
+                            google_civic_election_id=str(google_civic_election_id))
                     elif positive_value_exists(google_civic_election_id_local_scope):
                         # Limit positions we can retrieve for an org to only the items NOT in this election
                         public_positions_query = public_positions_query.exclude(
@@ -2563,23 +2563,23 @@ class PositionListManager(models.Model):
 
                     # Gather the ids for all positions in this election so we can figure out which positions
                     # relate to the election the voter is currently looking at, vs. for all other elections
-                    google_civic_election_id_local_scope = 0
+                    google_civic_election_id_local_scope = ''
                     if positive_value_exists(show_positions_current_voter_election) \
                             or positive_value_exists(exclude_positions_current_voter_election):
                         if positive_value_exists(voter_device_id):
                             results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
-                            google_civic_election_id_local_scope = results['google_civic_election_id']
+                            google_civic_election_id_local_scope = str(results['google_civic_election_id'])
                         else:
                             results = figure_out_google_civic_election_id_voter_is_watching_by_voter_we_vote_id(
                                 voter_we_vote_id)
-                            google_civic_election_id_local_scope = results['google_civic_election_id']
+                            google_civic_election_id_local_scope = str(results['google_civic_election_id'])
 
                     # We can filter by only one of these
                     if positive_value_exists(show_positions_current_voter_election):  # This is the default option
                         if positive_value_exists(google_civic_election_id):
                             # Please note that this option doesn't catch Vote Smart ratings, which are not
                             # linked by google_civic_election_id
-                            google_civic_election_id_list = [convert_to_int(google_civic_election_id)]
+                            google_civic_election_id_list = [str(google_civic_election_id)]
                             office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
                                 host_google_civic_election_id_list=google_civic_election_id_list)
                             friends_positions_query = friends_positions_query.filter(
@@ -2587,7 +2587,7 @@ class PositionListManager(models.Model):
                                 Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
                         elif positive_value_exists(google_civic_election_id_local_scope):
                             # Limit positions we can retrieve for an org to only the items in this election
-                            google_civic_election_id_list = [convert_to_int(google_civic_election_id_local_scope)]
+                            google_civic_election_id_list = [str(google_civic_election_id_local_scope)]
                             office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
                                 host_google_civic_election_id_list=google_civic_election_id_list)
                             friends_positions_query = friends_positions_query.filter(
@@ -2617,7 +2617,7 @@ class PositionListManager(models.Model):
                         # linked by google_civic_election_id
                         # We are only using this if google_civic_election_id was passed
                         # into retrieve_all_positions_for_organization
-                        google_civic_election_id_list = [convert_to_int(google_civic_election_id)]
+                        google_civic_election_id_list = [str(google_civic_election_id)]
                         office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
                             host_google_civic_election_id_list=google_civic_election_id_list)
                         friends_positions_query = friends_positions_query.filter(

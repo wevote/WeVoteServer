@@ -162,7 +162,7 @@ def position_list_for_opinion_maker_view(request):  # positionListForOpinionMake
     kind_of_opinion_maker = request.GET.get('kind_of_opinion_maker', "")
     opinion_maker_id = request.GET.get('opinion_maker_id', 0)
     opinion_maker_we_vote_id = request.GET.get('opinion_maker_we_vote_id', "")
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')  # The Position tables use str
     state_code = request.GET.get('state_code', "")
     filter_for_voter = positive_value_exists(request.GET.get('filter_for_voter', True))
     filter_out_voter = positive_value_exists(request.GET.get('filter_out_voter', False))
