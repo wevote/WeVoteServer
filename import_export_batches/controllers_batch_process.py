@@ -639,16 +639,17 @@ def process_one_ballot_item_batch_process(batch_process):
                         'status': status,
                     }
                     return results
-                if not positive_value_exists(retrieve_row_count):
-                    # If no batch rows were found, we know the entire batch_process is finished.
-                    # Update batch_process.date_completed to now
-                    status += "RETRIEVE_DATE_STARTED-NO_RETRIEVE_VALUES_FOUND-BATCH_IS_COMPLETE "
-                    results = mark_batch_process_as_complete(batch_process, batch_process_ballot_item_chunk,
-                                                             google_civic_election_id=google_civic_election_id,
-                                                             kind_of_process=kind_of_process,
-                                                             state_code=state_code,
-                                                             status=status)
-                    status += results['status']
+                # 2020-03-29 We are going to let these run all the way instead of stopping with retrieve_row_count of 0
+                # if not positive_value_exists(retrieve_row_count):
+                #     # If no batch rows were found, we know the entire batch_process is finished.
+                #     # Update batch_process.date_completed to now
+                #     status += "RETRIEVE_DATE_STARTED-NO_RETRIEVE_VALUES_FOUND-BATCH_IS_COMPLETE "
+                #     results = mark_batch_process_as_complete(batch_process, batch_process_ballot_item_chunk,
+                #                                              google_civic_election_id=google_civic_election_id,
+                #                                              kind_of_process=kind_of_process,
+                #                                              state_code=state_code,
+                #                                              status=status)
+                #     status += results['status']
                 results = {
                     'success': success,
                     'status': status,
@@ -711,21 +712,22 @@ def process_one_ballot_item_batch_process(batch_process):
                 if positive_value_exists(batch_process_ballot_item_chunk.batch_set_id):
                     number_of_batches = batch_manager.count_number_of_batches_in_batch_set(
                         batch_set_id=batch_process_ballot_item_chunk.batch_set_id)
-                if not positive_value_exists(number_of_batches):
-                    # If no batch rows were found, we know the entire batch_process is finished.
-                    # Update batch_process.date_completed to now
-                    status += "ANALYZE_DATE_STARTED-NO_RETRIEVE_VALUES_FOUND-BATCH_IS_COMPLETE "
-                    results = mark_batch_process_as_complete(batch_process, batch_process_ballot_item_chunk,
-                                                             google_civic_election_id=google_civic_election_id,
-                                                             kind_of_process=kind_of_process,
-                                                             state_code=state_code,
-                                                             status=status)
-                    status += results['status']
-                    results = {
-                        'success': success,
-                        'status': status,
-                    }
-                    return results
+                # 2020-03-29 We are going to let these run all the way instead of stopping with retrieve_row_count of 0
+                # if not positive_value_exists(number_of_batches):
+                #     # If no batch rows were found, we know the entire batch_process is finished.
+                #     # Update batch_process.date_completed to now
+                #     status += "ANALYZE_DATE_STARTED-NO_RETRIEVE_VALUES_FOUND-BATCH_IS_COMPLETE "
+                #     results = mark_batch_process_as_complete(batch_process, batch_process_ballot_item_chunk,
+                #                                              google_civic_election_id=google_civic_election_id,
+                #                                              kind_of_process=kind_of_process,
+                #                                              state_code=state_code,
+                #                                              status=status)
+                #     status += results['status']
+                #     results = {
+                #         'success': success,
+                #         'status': status,
+                #     }
+                #     return results
             try:
                 if not positive_value_exists(batch_process_ballot_item_chunk.retrieve_row_count):
                     # Make sure to store the retrieve_row_count if it wasn't already stored
@@ -763,21 +765,22 @@ def process_one_ballot_item_batch_process(batch_process):
             if positive_value_exists(batch_process_ballot_item_chunk.batch_set_id):
                 number_of_batches = batch_manager.count_number_of_batches_in_batch_set(
                     batch_set_id=batch_process_ballot_item_chunk.batch_set_id)
-            if not positive_value_exists(number_of_batches):
-                # If no batch rows were found, we know the entire batch_process is finished.
-                # Update batch_process.date_completed to now
-                status += "ANALYZE_DATE_STARTED-NO_RETRIEVE_VALUES_FOUND-BATCH_IS_COMPLETE "
-                results = mark_batch_process_as_complete(batch_process, batch_process_ballot_item_chunk,
-                                                         google_civic_election_id=google_civic_election_id,
-                                                         kind_of_process=kind_of_process,
-                                                         state_code=state_code,
-                                                         status=status)
-                status += results['status']
-                results = {
-                    'success': success,
-                    'status': status,
-                }
-                return results
+            # 2020-03-29 We are going to let these run all the way instead of stopping with retrieve_row_count of 0
+            # if not positive_value_exists(number_of_batches):
+            #     # If no batch rows were found, we know the entire batch_process is finished.
+            #     # Update batch_process.date_completed to now
+            #     status += "ANALYZE_DATE_STARTED-NO_RETRIEVE_VALUES_FOUND-BATCH_IS_COMPLETE "
+            #     results = mark_batch_process_as_complete(batch_process, batch_process_ballot_item_chunk,
+            #                                              google_civic_election_id=google_civic_election_id,
+            #                                              kind_of_process=kind_of_process,
+            #                                              state_code=state_code,
+            #                                              status=status)
+            #     status += results['status']
+            #     results = {
+            #         'success': success,
+            #         'status': status,
+            #     }
+            #     return results
         try:
             # If here we know we have batches that need to be analyzed
             if not positive_value_exists(batch_process_ballot_item_chunk.retrieve_row_count):
