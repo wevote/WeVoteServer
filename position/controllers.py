@@ -77,10 +77,12 @@ def add_position_network_count_entries_for_one_organization(voter_id, organizati
     show_positions_current_voter_election = True
     exclude_positions_current_voter_election = False
     position_results = position_list_manager.retrieve_all_positions_for_organization(
-        organization_id, organization_we_vote_id,
-        ANY_STANCE, PUBLIC_ONLY,
-        show_positions_current_voter_election,
-        exclude_positions_current_voter_election,
+        organization_id=organization_id,
+        organization_we_vote_id=organization_we_vote_id,
+        stance_we_are_looking_for=ANY_STANCE,
+        friends_vs_public=PUBLIC_ONLY,
+        show_positions_current_voter_election=show_positions_current_voter_election,
+        exclude_positions_current_voter_election=exclude_positions_current_voter_election,
         google_civic_election_id=google_civic_election_id)
 
     # ballot_item_list is populated with contest_office and contest_measure entries
@@ -192,10 +194,12 @@ def add_position_network_count_entries_for_one_friend(voter_id, friend_voter_we_
         show_positions_current_voter_election = True
         exclude_positions_current_voter_election = False
         position_list = position_list_manager.retrieve_all_positions_for_organization(
-            organization_id, friend_voter_linked_organization_we_vote_id,
-            ANY_STANCE, PUBLIC_ONLY,
-            show_positions_current_voter_election,
-            exclude_positions_current_voter_election,
+            organization_id=organization_id,
+            organization_we_vote_id=friend_voter_linked_organization_we_vote_id,
+            stance_we_are_looking_for=ANY_STANCE,
+            friends_vs_public=PUBLIC_ONLY,
+            show_positions_current_voter_election=show_positions_current_voter_election,
+            exclude_positions_current_voter_election=exclude_positions_current_voter_election,
             google_civic_election_id=google_civic_election_id)
 
         for one_position in position_list:
@@ -1278,8 +1282,10 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
     friends_vs_public = FRIENDS_ONLY
 
     from_position_private_list = position_list_manager.retrieve_all_positions_for_organization(
-        from_organization_id, from_organization_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        organization_id=from_organization_id,
+        organization_we_vote_id=from_organization_we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        friends_vs_public=friends_vs_public)
 
     for from_position_entry in from_position_private_list:
         # See if the "to_organization" already has the same entry
@@ -1345,8 +1351,10 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
                 position_entries_not_moved += 1
 
     from_position_private_list_remaining = position_list_manager.retrieve_all_positions_for_organization(
-        from_organization_id, from_organization_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        organization_id=from_organization_id,
+        organization_we_vote_id=from_organization_we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        friends_vs_public=friends_vs_public)
     for from_position_entry in from_position_private_list_remaining:
         # Delete the remaining position values
         try:
@@ -1358,8 +1366,10 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = PUBLIC_ONLY
     from_position_public_list = position_list_manager.retrieve_all_positions_for_organization(
-        from_organization_id, from_organization_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        organization_id=from_organization_id,
+        organization_we_vote_id=from_organization_we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        friends_vs_public=friends_vs_public)
 
     for from_position_entry in from_position_public_list:
         # See if the "to_organization" already has the same entry
@@ -1424,8 +1434,20 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
                 position_entries_not_moved += 1
 
     from_position_public_list_remaining = position_list_manager.retrieve_all_positions_for_organization(
-        from_organization_id, from_organization_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        organization_id=from_organization_id,
+        organization_we_vote_id=from_organization_we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        friends_vs_public=friends_vs_public)
+    # organization_id,
+    # organization_we_vote_id,
+    # stance_we_are_looking_for,
+    # friends_vs_public,
+    # show_positions_current_voter_election = False,
+    # exclude_positions_current_voter_election = False,
+    # voter_device_id = '',
+    # voter_we_vote_id = '',
+    # google_civic_election_id = '',
+    # state_code = '', read_only =
     for from_position_entry in from_position_public_list_remaining:
         # Delete the remaining position values
         try:
@@ -2820,36 +2842,17 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 is_ignoring = True
 
             position_list_raw = position_list_manager.retrieve_all_positions_for_organization(
-                    organization_id, organization_we_vote_id, stance_we_are_looking_for, friends_vs_public,
-                    filter_for_voter, filter_out_voter, voter_device_id, google_civic_election_id)
+                organization_id=organization_id,
+                organization_we_vote_id=organization_we_vote_id,
+                stance_we_are_looking_for=stance_we_are_looking_for,
+                friends_vs_public=friends_vs_public,
+                show_positions_current_voter_election=filter_for_voter,
+                exclude_positions_current_voter_election=filter_out_voter,
+                voter_device_id=voter_device_id,
+                google_civic_election_id=google_civic_election_id)
         else:
             opinion_maker_id = organization_id
             opinion_maker_we_vote_id = organization_we_vote_id
-    elif is_speaker_type_public_figure(kind_of_opinion_maker):
-        status += "SPEAKER_IS_PUBLIC_FIGURE " + str(kind_of_opinion_maker) + " "
-        # TODO retrieve_all_positions_for_public_figure is just a stub, and doesn't do anything.  The list is empty.
-        position_list_raw = position_list_manager.retrieve_all_positions_for_public_figure(
-                public_figure_id, public_figure_we_vote_id, stance_we_are_looking_for,
-                filter_for_voter, filter_out_voter, voter_device_id, google_civic_election_id, state_code)
-
-        # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions
-        # for this opinion_maker, we retrieve the following so we can have the id and we_vote_id (per the request of
-        # the WebApp team)
-        # TODO Do we want to give public figures an entry separate from their voter account? Needs to be implemented.
-        # candidate_campaign_manager = CandidateCampaignManager()
-        # if positive_value_exists(candidate_id):
-        #     results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(candidate_id)
-        # else:
-        #     results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
-        #
-        # if results['candidate_campaign_found']:
-        #     candidate_campaign = results['candidate_campaign']
-        #     ballot_item_id = candidate_campaign.id
-        #     ballot_item_we_vote_id = candidate_campaign.we_vote_id
-        #     opinion_maker_found = True
-        # else:
-        #     ballot_item_id = candidate_id
-        #     ballot_item_we_vote_id = candidate_we_vote_id
     else:
         position_list = []
         status += 'POSITION_LIST_RETRIEVE_MISSING_OPINION_MAKER_ID '
@@ -4318,9 +4321,15 @@ def retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(voter_id,
         voter_device_id = ''
 
         position_list_raw = position_list_manager.retrieve_all_positions_for_organization(
-            organization_id, organization_we_vote_id, stance_we_are_looking_for, friends_vs_public,
-            show_positions_current_voter_election, exclude_positions_current_voter_election, voter_device_id,
-            google_civic_election_id, read_only=True)
+            organization_id=organization_id,
+            organization_we_vote_id=organization_we_vote_id,
+            stance_we_are_looking_for=stance_we_are_looking_for,
+            friends_vs_public=friends_vs_public,
+            show_positions_current_voter_election=show_positions_current_voter_election,
+            exclude_positions_current_voter_election=exclude_positions_current_voter_election,
+            voter_device_id=voter_device_id,
+            google_civic_election_id=google_civic_election_id,
+            read_only=True)
     else:
         opinion_maker_found = False
 
@@ -4457,9 +4466,13 @@ def retrieve_ballot_item_we_vote_ids_for_organization_static(
     organization_we_vote_id = organization.we_vote_id
 
     position_list_raw = position_list_manager.retrieve_all_positions_for_organization(
-        organization_id, organization_we_vote_id, stance_we_are_looking_for, friends_vs_public,
+        organization_id=organization_id,
+        organization_we_vote_id=organization_we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        friends_vs_public=friends_vs_public,
         voter_we_vote_id=voter_we_vote_id,
-        google_civic_election_id=google_civic_election_id, read_only=True)
+        google_civic_election_id=google_civic_election_id,
+        read_only=True)
 
     ballot_item_we_vote_ids_list = []
     for one_position in position_list_raw:
@@ -4715,7 +4728,10 @@ def reset_position_entered_image_details_from_organization(organization, twitter
         speaker_image_url_https = facebook_profile_image_url_https
 
     public_position_list = position_list_manager.retrieve_all_positions_for_organization(
-        organization.id, organization.we_vote_id, stance_we_are_looking_for, friends_vs_public)
+        organization_id=organization.id,
+        organization_we_vote_id=organization.we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        friends_vs_public=friends_vs_public)
     for position_object in public_position_list:
         reset_position_image_urls_results = position_manager.reset_position_image_details(
             position_object, speaker_image_url_https=speaker_image_url_https)
@@ -4744,7 +4760,10 @@ def update_position_entered_details_from_organization(organization):
     friends_vs_public = PUBLIC_ONLY
 
     public_position_list = position_list_manager.retrieve_all_positions_for_organization(
-        organization.id, organization.we_vote_id, stance_we_are_looking_for, friends_vs_public)
+        organization_id=organization.id,
+        organization_we_vote_id=organization.we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        friends_vs_public=friends_vs_public)
     for position_object in public_position_list:
         update_position_image_urls_results = position_manager.update_position_image_urls_from_organization(
             position_object, organization)

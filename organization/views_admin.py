@@ -25,6 +25,7 @@ from import_export_vote_smart.models import VoteSmartSpecialInterestGroupManager
 from issue.models import ALPHABETICAL_ASCENDING, IssueListManager, IssueManager, \
     OrganizationLinkToIssueList, OrganizationLinkToIssueManager, MOST_LINKED_ORGANIZATIONS
 from measure.models import ContestMeasure, ContestMeasureListManager, ContestMeasureManager
+from office.models import ContestOfficeManager
 import operator
 from organization.models import OrganizationListManager, OrganizationManager, ORGANIZATION_TYPE_MAP, UNKNOWN
 from organization.controllers import organization_retrieve_tweets_from_twitter, organization_analyze_tweets
@@ -996,12 +997,38 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    office_manager = ContestOfficeManager()
+    status = ""
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     candidate_campaign_id = request.GET.get('candidate_campaign_id', 0)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
+
+    election_manager = ElectionManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+        # Make sure we always include the current election in the election_list, even if it is older
+        if positive_value_exists(google_civic_election_id):
+            this_election_found = False
+            for one_election in election_list:
+                if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                    this_election_found = True
+                    break
+            if not this_election_found:
+                results = election_manager.retrieve_election(google_civic_election_id)
+                if results['election_found']:
+                    one_election = results['election']
+                    election_list.append(one_election)
+
+    google_civic_election_id_list = []
+    for one_election in election_list:
+        google_civic_election_id_list.append(str(one_election.google_civic_election_id))
 
     # We pass candidate_we_vote_id to this page to pre-populate the form
     candidate_campaign_manager = CandidateCampaignManager()
@@ -1037,17 +1064,28 @@ def organization_position_list_view(request, organization_id=0, organization_we_
                              'Could not find organization when trying to retrieve positions.')
         return HttpResponseRedirect(reverse('organization:organization_list', args=()))
     else:
-        organization_position_list_found = False
+        office_visiting_list_we_vote_ids = []
+        if positive_value_exists(google_civic_election_id):
+            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                host_google_civic_election_id_list=[google_civic_election_id])
+        elif len(google_civic_election_id_list):
+            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                host_google_civic_election_id_list=google_civic_election_id_list)
+
         try:
             public_position_query = PositionEntered.objects.all()
             # As of Aug 2018 we are no longer using PERCENT_RATING
             public_position_query = public_position_query.exclude(stance__iexact='PERCENT_RATING')
             public_position_query = public_position_query.filter(organization_id=organization_id)
             if positive_value_exists(google_civic_election_id):
-                public_position_query = public_position_query.filter(
-                    google_civic_election_id=google_civic_election_id)
-            public_position_query = public_position_query.order_by(
-                '-google_civic_election_id', '-vote_smart_time_span')
+                public_position_query = public_position_query\
+                    .filter(Q(google_civic_election_id=google_civic_election_id) |
+                            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+            elif len(google_civic_election_id_list):
+                public_position_query = public_position_query\
+                    .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
+                            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+            public_position_query = public_position_query.order_by('-id')
             public_position_list = list(public_position_query)
 
             friends_only_position_query = PositionForFriends.objects.all()
@@ -1055,10 +1093,14 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             friends_only_position_query = friends_only_position_query.exclude(stance__iexact='PERCENT_RATING')
             friends_only_position_query = friends_only_position_query.filter(organization_id=organization_id)
             if positive_value_exists(google_civic_election_id):
-                friends_only_position_query = friends_only_position_query.filter(
-                    google_civic_election_id=google_civic_election_id)
-            friends_only_position_query = friends_only_position_query.order_by(
-                '-google_civic_election_id', '-vote_smart_time_span')
+                friends_only_position_query = friends_only_position_query\
+                    .filter(Q(google_civic_election_id=google_civic_election_id) |
+                            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+            elif len(google_civic_election_id_list):
+                friends_only_position_query = friends_only_position_query\
+                    .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
+                            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+            friends_only_position_query = friends_only_position_query.order_by('-id')
             friends_only_position_list = list(friends_only_position_query)
 
             organization_position_list = public_position_list + friends_only_position_list
@@ -1080,6 +1122,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
                 organization_blocked_issues_list.append(issue_object)
 
         except Exception as e:
+            status += "COULD_NOT_RETRIEVE_POSITION_LIST " + str(e) + ' '
             organization_position_list = []
 
         voter_manager = VoterManager()
@@ -1107,26 +1150,6 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             organizations_dict = results['organizations_dict']
             voters_by_linked_org_dict = results['voters_by_linked_org_dict']
             voters_dict = results['voters_dict']
-
-        election_manager = ElectionManager()
-        if positive_value_exists(show_all_elections):
-            results = election_manager.retrieve_elections()
-            election_list = results['election_list']
-        else:
-            results = election_manager.retrieve_upcoming_elections()
-            election_list = results['election_list']
-            # Make sure we always include the current election in the election_list, even if it is older
-            if positive_value_exists(google_civic_election_id):
-                this_election_found = False
-                for one_election in election_list:
-                    if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
-                        this_election_found = True
-                        break
-                if not this_election_found:
-                    results = election_manager.retrieve_election(google_civic_election_id)
-                    if results['election_found']:
-                        one_election = results['election']
-                        election_list.append(one_election)
 
         organization_type_display_text = ORGANIZATION_TYPE_MAP.get(organization_on_stage.organization_type,
                                                                    ORGANIZATION_TYPE_MAP[UNKNOWN])
