@@ -36,9 +36,9 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
     if not positive_value_exists(pdf_url):
         status = 'PDF_URL_MISSING'
         json_data = {
-            'status':                   status,
-            'success':                  False,
-            's3_url_for_html':          '',
+            'status': status,
+            'success': False,
+            's3_url_for_html': '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -46,6 +46,8 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
     temp_file_name = file_name + '.html'
 
     pdf2txt.main(['-o', temp_file_name, file_name])
+
+    insert_pdf_filename_in_tmp_file(temp_file_name, pdf_url)
 
     s3_url_for_html = store_temporary_html_file_to_aws(temp_file_name)
     print("views_extension stored temp html file: ", temp_file_name, s3_url_for_html)
@@ -78,11 +80,28 @@ def store_temporary_html_file_to_aws(temp_file_name):
         s3.Bucket(AWS_STORAGE_BUCKET_NAME).upload_file(
             temp_file_name, tail, ExtraArgs={'Expires': date_in_a_week, 'ContentType': 'text/html'})
         s3_html_url = "https://{bucket_name}.s3.amazonaws.com/{file_location}" \
-                            "".format(bucket_name=AWS_STORAGE_BUCKET_NAME,
-                                      file_location=tail)
+                      "".format(bucket_name=AWS_STORAGE_BUCKET_NAME,
+                                file_location=tail)
     except Exception as e:
         print(e)
         exception_message = "store_temp_html_file_to_aws failed"
         handle_exception(e, logger=logger, exception_message=exception_message)
 
     return s3_html_url
+
+
+def insert_pdf_filename_in_tmp_file(temp_file, pdf_url):
+    f = open(temp_file, "r")
+    contents = f.readlines()
+    f.close()
+
+    value = "<input type=\"hidden\" name=\"pdfFileName\" value=\"{pdf_url}\" />\n".format(pdf_url=pdf_url)
+
+    # insert the hidden input as the first line of the body -- containgingthe original URL for the PDF
+    offset = contents.index("</head><body>\n") + 1
+    contents.insert(offset, value)
+
+    f = open(temp_file, "w")
+    contents = "".join(contents)
+    f.write(contents)
+    f.close()
