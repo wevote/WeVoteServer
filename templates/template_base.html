@@ -97,10 +97,20 @@
             </div>
         </div>
         <div class="wrapper">
-            {# Display django.contrib.messages as Bootstrap alerts #}
-            {% bootstrap_messages %}
-
             <div id="content" class="container-fluid">
+                {# Display django.contrib.messages #}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div
+                        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}class="alert alert-danger" role="alert"
+                        {% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}class="alert alert-primary" role="alert"
+                        {% endif %}
+                        >
+                        {{ message|linebreaksbr }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
                 {% block content %}
                 {% endblock %}
             </div>
