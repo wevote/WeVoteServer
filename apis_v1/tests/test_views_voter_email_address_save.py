@@ -25,3 +25,9 @@ class WeVoteAPIsV1TestsVoterEmailAddressSave(TestCase):
         self.assertEqual('status' in json_data, True, "status expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data, True,
                          "voter_device_id expected in the voterAddressSaveView json response, and not found")
+        
+        self.assertEqual(json_data['status'], 
+                        "VOTER_EMAIL_ADDRESS_SAVE-START VALID_VOTER_DEVICE_ID_MISSING VOTER_DEVICE_ID_NOT_VALID ",
+            "status: {status} ('VOTER_EMAIL_ADDRESS_SAVE-START VALID_VOTER_DEVICE_ID_MISSING VOTER_DEVICE_ID_NOT_VALID' expected), "
+            "voter_device_id: {voter_device_id}".format(status=json_data['status'], 
+            voter_device_id=json_data['voter_device_id']))
