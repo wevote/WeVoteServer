@@ -184,6 +184,22 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
     </div>
 </div>
 
+{# More details #}
+<div class="form-group">
+    <label for="more_details_id" class="col-sm-2 control-label">
+      More Details
+    </label>
+    <div class="col-sm-9">
+        <strong>{{ organization_position.we_vote_id }}</strong>,
+        <span class="u-no-break">candidate_campaign_we_vote_id: <strong>{{ organization_position.candidate_campaign_we_vote_id }}</strong>,</span>
+        <span class="u-no-break">politician_we_vote_id: <strong>{{ organization_position.politician_we_vote_id }}</strong>,</span>
+        <span class="u-no-break">contest_office_we_vote_id: <strong>{{ organization_position.contest_office_we_vote_id }}</strong>,</span>
+        <span class="u-no-break">contest_measure_we_vote_id: <strong>{{ organization_position.contest_measure_we_vote_id }}</strong>,</span>
+        <span class="u-no-break">is_public: <strong>{{ organization_position.is_public_position }}</strong>,</span>
+        <span class="u-no-break">organization_we_vote_id: <strong>{{ organization_position.organization_we_vote_id }}</strong></span>
+    </div>
+</div>
+
 <div class="form-group">
     <div class="col-sm-9">
         <button type="submit" class="btn btn-default">
