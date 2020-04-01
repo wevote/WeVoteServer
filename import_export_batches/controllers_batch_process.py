@@ -640,8 +640,9 @@ def process_one_ballot_item_batch_process(batch_process):
                     }
                     return results
                 if not positive_value_exists(retrieve_row_count):
-                    if batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS or \
-                            batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_VOTERS:
+                    if batch_process.kind_of_process == RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS \
+                            or batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS \
+                            or batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_VOTERS:
                         # If no batch rows were found, we know the entire batch_process is finished.
                         # Update batch_process.date_completed to now
                         status += "RETRIEVE_DATE_STARTED-NO_RETRIEVE_VALUES_FOUND-BATCH_IS_COMPLETE "
