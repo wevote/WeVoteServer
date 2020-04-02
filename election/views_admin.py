@@ -1532,6 +1532,7 @@ def election_migration_view(request):
     from_election = Election()
     from_election_list = []
     from_election_found = False
+    office_manager = ContestOfficeManager()
     position_list_manager = PositionListManager()
     from_election_candidate_list = []
     from_election_office_list = []
@@ -1803,6 +1804,23 @@ def election_migration_view(request):
         status += 'FAILED_TO_UPDATE_CANDIDATES ' + str(e) + ' '
 
     # ########################################
+    # Candidates Hosted From Other Elections - We don't move, but include the count for error checking
+    office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+        host_google_civic_election_id_list=[from_election_id])
+    from_election_hosted_candidate_count = 0
+    try:
+        if positive_value_exists(from_state_code):
+            from_election_hosted_candidate_count = CandidateCampaign.objects\
+                .filter(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids)\
+                .filter(state_code__iexact=from_state_code).count()
+        else:
+            from_election_hosted_candidate_count = \
+                CandidateCampaign.objects.filter(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids).count()
+    except Exception as e:
+        error = True
+        status += 'FAILED_TO_COUNT_HOSTED_CANDIDATES ' + str(e) + ' '
+
+    # ########################################
     # GoogleCivicApiCounter
     if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
         google_civic_api_query = GoogleCivicApiCounter.objects.filter(
@@ -1914,6 +1932,21 @@ def election_migration_view(request):
     except Exception as e:
         error = True
         status += 'FAILED_TO_UPDATE_OFFICES ' + str(e) + ' '
+
+    # ########################################
+    # Offices Hosted From Other Elections - We don't move, but include the count for error checking
+    from_election_hosted_office_count = 0
+    try:
+        if positive_value_exists(from_state_code):
+            from_election_hosted_office_count = ContestOffice.objects\
+                .filter(we_vote_id__in=office_visiting_list_we_vote_ids)\
+                .filter(state_code__iexact=from_state_code).count()
+        else:
+            from_election_hosted_office_count = \
+                ContestOffice.objects.filter(we_vote_id__in=office_visiting_list_we_vote_ids).count()
+    except Exception as e:
+        error = True
+        status += 'FAILED_TO_COUNT_HOSTED_OFFICES ' + str(e) + ' '
 
     # ########################################
     # ContestOfficeVisitingOtherElection
@@ -2466,33 +2499,43 @@ def election_migration_view(request):
         messages.add_message(request, messages.ERROR, error_message)
     else:
 
-        current_counts = "\'from\' counts: \n" \
-                         'office_count: {office_count}, \n' \
-                         'candidate_count: {candidate_count}, \n' \
-                         'public_position_count: {public_position_count}, \n' \
-                         'friend_position_count: {friend_position_count}, \n' \
-                         'analytics_action_count: {analytics_action_count}, \n' \
-                         'organization_election_metrics_count: {organization_election_metrics_count}, \n' \
-                         'sitewide_election_metrics_count: {sitewide_election_metrics_count}, \n' \
-                         'ballot_item_count: {ballot_item_count}, \n' \
-                         'ballot_returned_count: {ballot_returned_count}, \n' \
-                         'voter_ballot_saved_count: {voter_ballot_saved_count}, \n' \
-                         'we_vote_image_count: {we_vote_image_count}, \n' \
-                         'measure_count: {measure_count}, \n' \
-                         'pledge_to_vote_count: {pledge_to_vote_count}, \n' \
-                         'quick_info_count: {quick_info_count}, \n' \
-                         'remote_request_history_count: {remote_request_history_count}, \n' \
-                         'voter_address_count: {voter_address_count}, \n' \
-                         'voter_device_link_count: {voter_device_link_count}, \n' \
-                         'voter_guide_count: {voter_guide_count}, \n' \
-                         'position_network_scores_count: {position_network_scores_migrated}, \n' \
-                         'elected_office_count: {elected_office_count}, \n' \
-                         'elected_official_count: {elected_official_count}, \n' \
-                         'contest_office_visiting_host_count: {contest_office_visiting_host_count}, \n' \
-                         'contest_office_visiting_origin_count: {contest_office_visiting_origin_count}, \n' \
+        current_counts = "\'from\' counts: " \
+                         "\n" \
+                         'office_count: {office_count}, ' \
+                         'hosted_office_count: {hosted_office_count}, ' \
+                         'candidate_count: {candidate_count}, ' \
+                         'hosted_candidate_count: {hosted_candidate_count}, ' \
+                         '\n' \
+                         'public_position_count: {public_position_count}, ' \
+                         'friend_position_count: {friend_position_count}, ' \
+                         'analytics_action_count: {analytics_action_count}, ' \
+                         'organization_election_metrics_count: {organization_election_metrics_count}, ' \
+                         'sitewide_election_metrics_count: {sitewide_election_metrics_count}, ' \
+                         '\n' \
+                         'ballot_item_count: {ballot_item_count}, ' \
+                         'ballot_returned_count: {ballot_returned_count}, ' \
+                         'voter_ballot_saved_count: {voter_ballot_saved_count}, ' \
+                         'we_vote_image_count: {we_vote_image_count}, ' \
+                         '\n' \
+                         'measure_count: {measure_count}, ' \
+                         'pledge_to_vote_count: {pledge_to_vote_count}, ' \
+                         'quick_info_count: {quick_info_count}, ' \
+                         'remote_request_history_count: {remote_request_history_count}, ' \
+                         '\n' \
+                         'voter_address_count: {voter_address_count}, ' \
+                         'voter_device_link_count: {voter_device_link_count}, ' \
+                         'voter_guide_count: {voter_guide_count}, ' \
+                         'position_network_scores_count: {position_network_scores_migrated}, ' \
+                         '\n' \
+                         'elected_office_count: {elected_office_count}, ' \
+                         'elected_official_count: {elected_official_count}, ' \
+                         'contest_office_visiting_host_count: {contest_office_visiting_host_count}, ' \
+                         'contest_office_visiting_origin_count: {contest_office_visiting_origin_count}, ' \
                          'status: {status} '.format(
                              office_count=from_election_office_count,
+                             hosted_office_count=from_election_hosted_office_count,
                              candidate_count=from_election_candidate_count,
+                             hosted_candidate_count=from_election_hosted_candidate_count,
                              public_position_count=public_position_count,
                              friend_position_count=friend_position_count,
                              analytics_action_count=from_election_analytics_action_count,

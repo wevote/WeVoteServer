@@ -166,13 +166,18 @@ def offices_import_from_master_server_view(request):
 
     results = offices_visiting_import_from_master_server(
         request, host_google_civic_election_id=google_civic_election_id)
-    if not results['success']:
+    if results['success']:
+        messages.add_message(request, messages.INFO, 'Offices Visiting import completed. '
+                                                     'Saved: {saved}, Updated: {updated}, '
+                                                     'Not processed: {not_processed}'
+                                                     ''.format(saved=results['saved'],
+                                                               updated=results['updated'],
+                                                               not_processed=results['not_processed']))
+    else:
         messages.add_message(request, messages.ERROR, results['status'])
 
     results = offices_import_from_master_server(request, google_civic_election_id, state_code)
-    if not results['success']:
-        messages.add_message(request, messages.ERROR, results['status'])
-    else:
+    if results['success']:
         messages.add_message(request, messages.INFO, 'Offices import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
                                                      'Duplicates skipped: '
@@ -182,6 +187,9 @@ def offices_import_from_master_server_view(request):
                                                                updated=results['updated'],
                                                                duplicates_removed=results['duplicates_removed'],
                                                                not_processed=results['not_processed']))
+    else:
+        messages.add_message(request, messages.ERROR, results['status'])
+
     return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
                                 str(google_civic_election_id) + "&state_code=" + str(state_code))
 

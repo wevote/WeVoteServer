@@ -639,9 +639,10 @@ def process_one_ballot_item_batch_process(batch_process):
                         'status': status,
                     }
                     return results
-                if batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS or \
-                        batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_VOTERS:
-                    if not positive_value_exists(retrieve_row_count):
+                if not positive_value_exists(retrieve_row_count):
+                    if batch_process.kind_of_process == RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS \
+                            or batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS \
+                            or batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_VOTERS:
                         # If no batch rows were found, we know the entire batch_process is finished.
                         # Update batch_process.date_completed to now
                         status += "RETRIEVE_DATE_STARTED-NO_RETRIEVE_VALUES_FOUND-BATCH_IS_COMPLETE "
@@ -713,9 +714,9 @@ def process_one_ballot_item_batch_process(batch_process):
                 if positive_value_exists(batch_process_ballot_item_chunk.batch_set_id):
                     number_of_batches = batch_manager.count_number_of_batches_in_batch_set(
                         batch_set_id=batch_process_ballot_item_chunk.batch_set_id)
-                if batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS or \
-                        batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_VOTERS:
-                    if not positive_value_exists(number_of_batches):
+                if not positive_value_exists(number_of_batches):
+                    if batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS or \
+                            batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_VOTERS:
                         # If no batch rows were found, we know the entire batch_process is finished.
                         # Update batch_process.date_completed to now
                         status += "ANALYZE_DATE_STARTED-NO_RETRIEVE_VALUES_FOUND-BATCH_IS_COMPLETE "
@@ -819,7 +820,24 @@ def process_one_ballot_item_batch_process(batch_process):
             batch_set_id=batch_process_ballot_item_chunk.batch_set_id, analyze_all=True)
         analyze_row_count = results['batch_rows_analyzed']
         status += results['status']
-        if not positive_value_exists(results['success']):
+        if positive_value_exists(results['success']):
+            if not positive_value_exists(analyze_row_count):
+                if batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_VOTERS:
+                    # If no batch rows were found, we know the entire batch_process is finished.
+                    # Update batch_process.date_completed to now
+                    status += "ANALYZE_DATE_STARTED-REFRESH_BALLOT_ITEMS_FROM_VOTERS-ANALYZE_ROW_COUNT_ZERO "
+                    results = mark_batch_process_as_complete(batch_process, batch_process_ballot_item_chunk,
+                                                             google_civic_election_id=google_civic_election_id,
+                                                             kind_of_process=kind_of_process,
+                                                             state_code=state_code,
+                                                             status=status)
+                    status += results['status']
+                    results = {
+                        'success': success,
+                        'status': status,
+                    }
+                    return results
+        else:
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
