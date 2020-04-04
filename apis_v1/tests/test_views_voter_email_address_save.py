@@ -24,10 +24,64 @@ class WeVoteAPIsV1TestsVoterEmailAddressSave(TestCase):
         # Without a cookie, we don't expect valid response
         self.assertEqual('status' in json_data, True, "status expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data, True,
-                         "voter_device_id expected in the voterAddressSaveView json response, and not found")
+                         "voter_device_id expected in the voterEmailAddressSaveView json response, and not found")
         
         self.assertEqual(json_data['status'], 
                         "VOTER_EMAIL_ADDRESS_SAVE-START VALID_VOTER_DEVICE_ID_MISSING VOTER_DEVICE_ID_NOT_VALID ",
             "status: {status} ('VOTER_EMAIL_ADDRESS_SAVE-START VALID_VOTER_DEVICE_ID_MISSING VOTER_DEVICE_ID_NOT_VALID' expected), "
             "voter_device_id: {voter_device_id}".format(status=json_data['status'], 
             voter_device_id=json_data['voter_device_id']))
+            
+    def test_save_with_voter_device_id(self):
+        #######################################
+        # Generate the voter_device_id cookie
+        response = self.client.get(self.generate_voter_device_id_url)
+        json_data = json.loads(response.content.decode())
+
+        # Make sure we got back a voter_device_id we can use
+        self.assertEqual('voter_device_id' in json_data, True,
+                         "voter_device_id expected in the deviceIdGenerateView json response")
+        
+        # Now put the voter_device_id in a variable we can use below
+        voter_device_id = json_data['voter_device_id'] if 'voter_device_id' in json_data else ''
+        
+        #######################################
+        # Create a voter so we can test retrieve
+        response2 = self.client.get(self.voter_create_url, {'voter_device_id': voter_device_id})
+        json_data2 = json.loads(response2.content.decode())
+
+        self.assertEqual('status' in json_data2, True,
+                         "status expected in the voterEmailAddressSaveView json response but not found")
+        self.assertEqual('voter_device_id' in json_data2, True,
+                         "voter_device_id expected in the voterEmailAddressSaveView json response but not found")
+
+        # With a brand new voter_device_id, a new voter record should be created
+        self.assertEqual(
+            json_data2['status'], 'VOTER_CREATED',
+            "status: {status} (VOTER_CREATED expected in voterEmailAddressSaveView), "
+            "voter_device_id: {voter_device_id}".format(
+                status=json_data2['status'], voter_device_id=json_data2['voter_device_id']))
+
+        #######################################
+        # Create a voter email address so we can test retrieve
+        response2 = self.client.get(self.voter_email_address_save_url, {'text_for_email_address':
+                                                                  'test123@gmail.com',
+                                                                  'voter_device_id': voter_device_id})
+
+        json_data2 = json.loads(response2.content.decode())
+
+        self.assertEqual('status' in json_data2, True,
+                         "status expected in the voterEmailAddressSaveView json response but not found")
+        self.assertEqual('voter_device_id' in json_data2, True,
+                         "voter_device_id expected in the voterEmailAddressSaveView json response but not found")
+        self.assertEqual('success' in json_data2, True,
+                         "success expected in the voterEmailAddressSaveView json response but not found")
+        self.assertEqual('text_for_email_address' in json_data2, True,
+                         "address expected in the voterEmailAddressSaveView json response but not found")
+
+        # First voter email address save
+        self.assertEqual(json_data2['status'], 
+                        "VOTER_EMAIL_ADDRESS_SAVE-START CREATE_NEW_EMAIL_ADDRESS EMAIL_ADDRESS_FOR_VOTER_CREATED EMAIL_ADDRESS_FOR_VOTER_CREATED EMAIL_OUTBOUND_DESCRIPTION_CREATED  SCHEDULE_EMAIL_CREATED  EMAIL_SCHEDULED ",
+            "status: {status} ('VOTER_EMAIL_ADDRESS_SAVE-START CREATE_NEW_EMAIL_ADDRESS EMAIL_ADDRESS_FOR_VOTER_CREATED EMAIL_ADDRESS_FOR_VOTER_CREATED EMAIL_OUTBOUND_DESCRIPTION_CREATED  SCHEDULE_EMAIL_CREATED  EMAIL_SCHEDULED ' expected), "
+            "voter_device_id: {voter_device_id}".format(status=json_data2['status'], 
+            voter_device_id=json_data2['voter_device_id']))
