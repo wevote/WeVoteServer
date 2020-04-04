@@ -5,13 +5,13 @@ import boto3
 import datetime
 import json
 import os
+import subprocess
 import urllib.request
 from django.http import HttpResponse
 import wevote_functions.admin
 from config.base import get_environment_variable
 from wevote_functions.functions import positive_value_exists, get_voter_device_id
 from exception.models import handle_exception
-from pdfminer_six import pdf2txt
 
 AWS_ACCESS_KEY_ID = get_environment_variable("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = get_environment_variable("AWS_SECRET_ACCESS_KEY")
@@ -36,16 +36,39 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
     if not positive_value_exists(pdf_url):
         status = 'PDF_URL_MISSING'
         json_data = {
-            'status': status,
-            'success': False,
-            's3_url_for_html': '',
+            'status':                   status,
+            'success':                  False,
+            's3_url_for_html':          '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     file_name, headers = urllib.request.urlretrieve(pdf_url)
-    temp_file_name = file_name + '.html'
+    pdf_name = os.path.basename(pdf_url)
+    dirname, basename = os.path.split(file_name)
+    temp_file_name = file_name.replace(basename, pdf_name)
+    try:
+        os.remove(temp_file_name)
+        html_name = temp_file_name.replace('.pdf', '.html')
+        os.remove(html_name)
+    except Exception:
+        pass
 
-    pdf2txt.main(['-o', temp_file_name, file_name])
+    os.rename(file_name, temp_file_name)
+
+    # https://github.com/pdf2htmlEX/pdf2htmlEX  !Not the abandoned coolwanglu original branch!
+    # https://github.com/pdf2htmlEX/pdf2htmlEX/wiki/Command-Line-Options
+    # pdf2htmlEX -zoom 1.3 Cook-18-Primary-Web.pdf
+    # Test cases:
+    # https://www.iuoe399.org/media/filer_public/45/77/457700c9-dd70-4cfc-be49-a81cb3fba0a6/2020_lu399_primary_endorsement.pdf
+    # http://www.local150.org/wp-content/uploads/2018/02/Cook-18-Primary-Web.pdf
+    # http://www.sddemocrats.org/sites/sdcdp/files/pdf/Endorsements_Flyer_P2020b.pdf
+    # https://crpa.org/wp-content/uploads/2020-CA-Primary-Candidate-Final.pdf
+    # TODO: Note there is some post processing of the html in fixupForPdf2htmlEX() in the chrome extension that will be
+    #  needed here, if we use this on the server and process the resulting HTML in Python
+
+    process = subprocess.run(['pdf2htmlEX', '--dest-dir', dirname, temp_file_name])
+    output = process.stdout
+    temp_file_name = temp_file_name.replace('.pdf', '.html')
 
     insert_pdf_filename_in_tmp_file(temp_file_name, pdf_url)
 
@@ -56,7 +79,7 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
     json_data = {
         'status': status,
         'success': True,
-        # 'output_from_subprocess': output,
+        'output_from_subprocess': output,
         's3_url_for_html': s3_url_for_html,
     }
 
@@ -72,13 +95,13 @@ def store_temporary_html_file_to_aws(temp_file_name):
     s3_html_url = ""
     try:
         head, tail = os.path.split(temp_file_name)
-        date_in_a_week = datetime.datetime.now() + + datetime.timedelta(days=7)
+        date_in_a_year = datetime.datetime.now() + + datetime.timedelta(days=365)
         session = boto3.session.Session(region_name=AWS_REGION_NAME,
                                         aws_access_key_id=AWS_ACCESS_KEY_ID,
                                         aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
         s3 = session.resource(AWS_STORAGE_SERVICE)
         s3.Bucket(AWS_STORAGE_BUCKET_NAME).upload_file(
-            temp_file_name, tail, ExtraArgs={'Expires': date_in_a_week, 'ContentType': 'text/html'})
+            temp_file_name, tail, ExtraArgs={'Expires': date_in_a_year, 'ContentType': 'text/html'})
         s3_html_url = "https://{bucket_name}.s3.amazonaws.com/{file_location}" \
                       "".format(bucket_name=AWS_STORAGE_BUCKET_NAME,
                                 file_location=tail)
@@ -98,7 +121,7 @@ def insert_pdf_filename_in_tmp_file(temp_file, pdf_url):
     value = "<input type=\"hidden\" name=\"pdfFileName\" value=\"{pdf_url}\" />\n".format(pdf_url=pdf_url)
 
     # insert the hidden input as the first line of the body -- containgingthe original URL for the PDF
-    offset = contents.index("</head><body>\n") + 1
+    offset = contents.index("<body>\n") + 1
     contents.insert(offset, value)
 
     f = open(temp_file, "w")

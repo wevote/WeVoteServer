@@ -71,6 +71,7 @@ URLS_TO_NEVER_HIGHLIGHT = [
     'platform.twitter.com',
     's7.addthis.com',
     'vars.hotjar.com',
+    'regex101.com',
 ]
 
 
@@ -114,8 +115,8 @@ def convert_candidate_endorsement_list_light_to_possible_endorsement_list(endors
     results = {
         'status':                           status,
         'success':                          success,
-        'possible_endorsement_list':          possible_endorsement_list,
-        'possible_endorsement_list_found':    possible_endorsement_list_found,
+        'possible_endorsement_list':        possible_endorsement_list,
+        'possible_endorsement_list_found':  possible_endorsement_list_found,
     }
     return results
 
