@@ -1969,6 +1969,7 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
 def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibilityPositionsRetrieve
         voter_device_id, voter_guide_possibility_id, voter_guide_possibility_position_id=0):
     status = "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE "
+    voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
     possible_endorsement_list = []
 
     # Do not require voter_device_id yet
