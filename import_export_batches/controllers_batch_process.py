@@ -125,9 +125,9 @@ def batch_process_next_steps():
             # If here, there aren't any more scheduled, so we can schedule regular batch processes
             # ############################
             # Twitter Search
-            # number_of_candidates_to_analyze = fetch_number_of_candidates_needing_twitter_search()
-            # Turned off
-            number_of_candidates_to_analyze = 0
+            number_of_candidates_to_analyze = fetch_number_of_candidates_needing_twitter_search()
+            # To turn off
+            # number_of_candidates_to_analyze = 0
             if positive_value_exists(number_of_candidates_to_analyze):
                 results = batch_process_manager.create_batch_process(
                     kind_of_process=SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE)
