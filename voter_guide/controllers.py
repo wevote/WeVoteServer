@@ -1605,12 +1605,13 @@ def voter_guides_import_from_structured_json(structured_json):
     return voter_guides_results
 
 
-def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possibility_id=0, url_to_scan=''):
+def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possibility_id=0, url_to_scan='', pdf_url=''):
     """
     voterGuidePossibilityRetrieve
     :param voter_device_id:
     :param voter_guide_possibility_id:
     :param url_to_scan:
+    :param pdf_url: The url of the PDF that was used to generate the url_to_scan in S3
     :return:
     """
     status = ""
@@ -1651,7 +1652,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
             return HttpResponse(json.dumps(json_data), content_type='application/json')
 
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(
-                url_to_scan, voter_who_submitted_we_vote_id)
+                url_to_scan, pdf_url, voter_who_submitted_we_vote_id)
 
     status += results['status']
     voter_guide_possibility_found = False
@@ -1680,7 +1681,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
             'voter_guide_possibility_type': voter_guide_possibility_type,
         }
         create_results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
-            url_to_scan, voter_who_submitted_we_vote_id, updated_values=updated_values)
+            url_to_scan, pdf_url, voter_who_submitted_we_vote_id, updated_values=updated_values)
         if create_results['voter_guide_possibility_saved']:
             voter_guide_possibility_found = True
             voter_guide_possibility = create_results['voter_guide_possibility']
@@ -1840,7 +1841,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
 
 
 def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilityHighlightsRetrieve
-        voter_device_id, url_to_scan, google_civic_election_id):
+        voter_device_id, url_to_scan, pdf_url, google_civic_election_id):
     status = "VOTER_GUIDE_POSSIBILITY_HIGHLIGHTS_RETRIEVE "
     success = True
     highlight_list = []
@@ -1850,7 +1851,8 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
 
     # Once we know we have a voter_device_id to work with, get this working
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
-    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(url_to_scan, voter_we_vote_id,
+    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(url_to_scan, pdf_url,
+                                                                                        voter_we_vote_id,
                                                                                         google_civic_election_id)
     if results['voter_guide_possibility_found']:
         voter_guide_possibility_id = results['voter_guide_possibility_id']
