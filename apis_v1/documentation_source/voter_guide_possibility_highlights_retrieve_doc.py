@@ -25,6 +25,11 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
             'value':        'string',  # boolean, integer, long, string
             'description':  'The url of the list of endorsements that the voter is viewing.',
         },
+         {
+            'name':         'pdf_url',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The url of the list of endorsements, if the endorsement was originally on a pdf.',
+        },
         {
             'name':         'google_civic_election_id',
             'value':        'integer',  # boolean, integer, long, string
@@ -62,6 +67,7 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "url_to_scan": string,\n' \
+                   '  "pdf_url": string,\n' \
                    '  "highlight_list": list [\n' \
                    '    {\n' \
                    '      "name": string,\n' \

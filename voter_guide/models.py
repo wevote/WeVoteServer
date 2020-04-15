@@ -2067,15 +2067,15 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_guide_possibility_from_url(self, voter_guide_possibility_url, voter_who_submitted_we_vote_id,
-                                                  google_civic_election_id=0):
+    def retrieve_voter_guide_possibility_from_url(self, voter_guide_possibility_url, pdf_url,
+                                                  voter_who_submitted_we_vote_id, google_civic_election_id=0):
         voter_guide_possibility_id = 0
         return self.retrieve_voter_guide_possibility(
             voter_guide_possibility_id, google_civic_election_id,
-            voter_guide_possibility_url, voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id)
+            voter_guide_possibility_url, pdf_url, voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id)
 
     def retrieve_voter_guide_possibility(self, voter_guide_possibility_id=0, google_civic_election_id=0,
-                                         voter_guide_possibility_url='',
+                                         voter_guide_possibility_url='', pdf_url='',
                                          organization_we_vote_id=None,
                                          voter_who_submitted_we_vote_id=None):
         status = ""
@@ -2120,6 +2120,20 @@ class VoterGuidePossibilityManager(models.Manager):
                     success = True
                 else:
                     status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_WITH_URL "
+                    success = True
+            elif positive_value_exists(pdf_url):
+                status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_PDF_URL "  # Set this in case the get fails
+                # Search both http and https
+                voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
+                    Q(voter_guide_possibility_pdf_url__iexact=pdf_url))
+                voter_guide_possibility_query = voter_guide_possibility_query.filter(hide_from_active_review=False)
+                voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
+                if voter_guide_possibility_on_stage is not None:
+                    voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
+                    status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_PDF_URL "
+                    success = True
+                else:
+                    status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_WITH_PDF_URL "
                     success = True
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
                 # Set this status in case the 'get' fails
@@ -2687,6 +2701,9 @@ class VoterGuidePossibility(models.Model):
     # Where a volunteer thinks there is a voter guide
     voter_guide_possibility_url = models.URLField(
         verbose_name='url of possible voter guide', max_length=255, blank=True, null=True)
+
+    voter_guide_possibility_pdf_url = models.URLField(
+        verbose_name='url of possible voter guide which is a PDF', max_length=255, blank=True, null=True)
 
     # The unique id of the organization making the endorsements, if/when we know it
     organization_we_vote_id = models.CharField(
