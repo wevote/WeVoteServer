@@ -188,9 +188,6 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
     :param measure_we_vote_id:
     :return:
     """
-    # NOTE: Office retrieve is independent of *who* wants to see the data. Office retrieve never triggers
-    #  a ballot data lookup from Google Civic, like voterBallotItemsFromGoogleCivic does
-
     if not positive_value_exists(measure_id) and not positive_value_exists(measure_we_vote_id):
         status = 'VALID_MEASURE_ID_AND_MEASURE_WE_VOTE_ID_MISSING'
         json_data = {
@@ -237,24 +234,24 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
             'status':                   status,
             'success':                  True,
             'ballot_item_display_name': contest_measure.measure_title,
-            'no_vote_description':      strip_html_tags(contest_measure.ballotpedia_no_vote_description),
-            'yes_vote_description':     strip_html_tags(contest_measure.ballotpedia_yes_vote_description),
             'district_name':            contest_measure.district_name,
             'election_display_name':    election_display_name,
             'google_civic_election_id': contest_measure.google_civic_election_id,
             'id':                       contest_measure.id,
             'kind_of_ballot_item':      MEASURE,
-            'measure_subtitle':         contest_measure.measure_subtitle,
             'maplight_id':              contest_measure.maplight_id,
+            'measure_subtitle':         contest_measure.measure_subtitle,
             'measure_text':             contest_measure.measure_text,
             'measure_url':              contest_measure.measure_url
             if contest_measure.measure_url else contest_measure.ballotpedia_measure_url,
+            'no_vote_description':      strip_html_tags(contest_measure.ballotpedia_no_vote_description),
             'ocd_division_id':          contest_measure.ocd_division_id,
             'regional_display_name':    "",
             'state_code':               contest_measure.state_code,
             'state_display_name':       convert_state_code_to_state_text(contest_measure.state_code),
             'vote_smart_id':            contest_measure.vote_smart_id,
             'we_vote_id':               contest_measure.we_vote_id,
+            'yes_vote_description':     strip_html_tags(contest_measure.ballotpedia_yes_vote_description),
         }
     else:
         json_data = {

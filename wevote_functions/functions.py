@@ -1380,6 +1380,8 @@ def positive_value_exists(value):
 
 
 def convert_state_text_to_state_code(state_text):
+    if not positive_value_exists(state_text):
+        return ""
     for state_code, state_name in STATE_CODE_MAP.items():
         if state_text.lower() == state_name.lower():
             return state_code
@@ -1388,6 +1390,8 @@ def convert_state_text_to_state_code(state_text):
 
 
 def convert_state_code_to_state_text(incoming_state_code):
+    if not positive_value_exists(incoming_state_code):
+        return ""
     for state_code, state_name in STATE_CODE_MAP.items():
         if incoming_state_code.lower() == state_code.lower():
             return state_name

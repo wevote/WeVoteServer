@@ -63,21 +63,23 @@ def measure_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '  "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
-                   '  "id": integer,\n' \
-                   '  "we_vote_id": string,\n' \
-                   '  "google_civic_election_id": integer,\n' \
                    '  "ballot_item_display_name": string,\n' \
-                   '  "measure_subtitle": string,\n' \
+                   '  "district_name": string,\n' \
+                   '  "election_display_name": string,\n' \
+                   '  "google_civic_election_id": integer,\n' \
+                   '  "id": integer,\n' \
+                   '  "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
                    '  "maplight_id": integer,\n' \
-                   '  "no_vote_description": string,\n' \
-                   '  "vote_smart_id": string,\n' \
+                   '  "measure_subtitle": string,\n' \
                    '  "measure_text": string,\n' \
                    '  "measure_url": string,\n' \
+                   '  "no_vote_description": string,\n' \
                    '  "ocd_division_id": string,\n' \
-                   '  "district_name": string,\n' \
+                   '  "regional_display_name": string,\n' \
                    '  "state_code": string,\n' \
+                   '  "state_display_name": string,\n' \
+                   '  "vote_smart_id": string,\n' \
+                   '  "we_vote_id": string,\n' \
                    '  "yes_vote_description": string,\n' \
                    '}'
 
