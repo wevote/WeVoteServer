@@ -11,8 +11,9 @@ from django.conf.urls import url
 from django.conf.urls.static import static
 
 from apis_v1.views import views_docs, views_analytics, views_ballot, views_candidate, views_donation, \
-    views_election, views_extension, views_facebook, views_friend, views_issues, views_measure, views_misc, views_organization, \
-    views_pledge_to_vote, views_position, views_task, views_twitter, views_voter, views_voter_guide
+    views_election, views_extension, views_facebook, views_friend, \
+    views_issues, views_measure, views_misc, views_organization, \
+    views_pledge_to_vote, views_position, views_task, views_share, views_twitter, views_voter, views_voter_guide
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view
 from issue.views_admin import issue_descriptions_retrieve_view, issues_followed_retrieve_view,\
@@ -151,10 +152,12 @@ urlpatterns = [
         views_position.position_support_count_for_ballot_item_view, name='positionSupportCountForBallotItemView'),
     url(r'^quickInfoRetrieve/', views_misc.quick_info_retrieve_view, name='quickInfoRetrieveView'),
     url(r'^retrieveIssuesToFollow/', retrieve_issues_to_follow_view, name='retrieveIssuesToFollowView'),
-    url(r'^siteConfigurationRetrieve/',
-        views_organization.site_configuration_retrieve_view, name='siteConfigurationRetrieveView'),
     url(r'^saveAnalyticsAction/', views_analytics.save_analytics_action_view, name='saveAnalyticsActionView'),
     url(r'^searchAll/', views_misc.search_all_view, name='searchAllView'),
+    url(r'^sharedItemRetrieve/', views_share.shared_item_retrieve_view, name='sharedItemRetrieveView'),
+    url(r'^sharedItemSave/', views_share.shared_item_save_view, name='sharedItemSaveView'),
+    url(r'^siteConfigurationRetrieve/',
+        views_organization.site_configuration_retrieve_view, name='siteConfigurationRetrieveView'),
 
     url(r'^taskDelete/', views_task.delete_task, name='taskDelete'),
     url(r'^taskSaveNew/', views_task.save_new_task, name='taskSaveNewView'),
@@ -402,6 +405,10 @@ urlpatterns = [
         name='retrieveIssuesToFollowDocs'),
     url(r'^docs/saveAnalyticsAction/$',
         views_docs.save_analytics_action_doc_view, name='saveAnalyticsActionDocs'),
+    url(r'^docs/sharedItemRetrieve/$',
+        views_docs.shared_item_retrieve_doc_view, name='sharedItemRetrieveDocs'),
+    url(r'^docs/sharedItemSave/$',
+        views_docs.shared_item_save_doc_view, name='sharedItemSaveDocs'),
     url(r'^docs/siteConfigurationRetrieve/$',
         views_docs.site_configuration_retrieve_doc_view, name='siteConfigurationRetrieveDocs'),
     url(r'^docs/searchAll/$',

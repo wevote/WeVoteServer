@@ -137,6 +137,7 @@ INSTALLED_APPS = (
     'rest_framework',    # Jan 2019, looks abandoned
     'scheduled_tasks',
     'search',
+    'share',
     'sms',
     'support_oppose_deciding',
     'tag',
