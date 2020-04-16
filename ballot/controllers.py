@@ -9,6 +9,7 @@ from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
 from datetime import datetime, timedelta
 import datetime as the_other_datetime
+from election.controllers import retrieve_upcoming_election_id_list
 from election.models import ElectionManager, fetch_next_election_for_state
 from exception.models import handle_exception
 from import_export_google_civic.controllers import \
@@ -2310,8 +2311,9 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
     return results
 
 
-def ballot_item_options_retrieve_for_api(google_civic_election_id, search_string, state_code=''):
+def ballot_item_options_retrieve_for_api(google_civic_election_id='', search_string='', state_code=''):
     """
+    ballotItemOptionsRetrieve
     This function returns a normalized list of candidates and measures so we can pre-populate form fields.
     Not specific to one voter.
     :param google_civic_election_id:
@@ -2319,46 +2321,71 @@ def ballot_item_options_retrieve_for_api(google_civic_election_id, search_string
     :param state_code:
     :return:
     """
-
     status = ""
+    candidate_list = []
+    candidate_success = True
+    measure_list = []
+    measure_success = True
+
+    if not positive_value_exists(search_string):
+        status += "SEARCH_STRING_REQUIRED "
+        json_data = {
+            'status': status,
+            'success': True,
+            'search_string': search_string,
+            'ballot_item_list': [],
+            'google_civic_election_id': google_civic_election_id,
+        }
+        results = {
+            'status': status,
+            'success': True,
+            'search_string': search_string,
+            'google_civic_election_id': google_civic_election_id,
+            'json_data': json_data,
+        }
+        return results
+
+    if positive_value_exists(google_civic_election_id):
+        google_civic_election_id_list = [google_civic_election_id]
+    else:
+        google_civic_election_id_list = retrieve_upcoming_election_id_list(state_code)
+
     try:
         candidate_list_object = CandidateCampaignListManager()
-        google_civic_election_id_list = [google_civic_election_id]
-        results = candidate_list_object.search_candidates_for_upcoming_election(
+        results = candidate_list_object.search_candidates_in_specific_elections(
             google_civic_election_id_list, search_string, state_code)
         candidate_success = results['success']
         status += results['status']
         candidate_list = results['candidate_list_json']
     except Exception as e:
-        status += 'FAILED ballot_item_options_retrieve_for_api, candidate_list. ' \
+        status += 'FAILED_BALLOT_ITEM_OPTIONS_RETRIEVE-CANDIDATE_LIST. ' \
                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
         handle_exception(e, logger=logger, exception_message=status)
         candidate_list = []
         candidate_success = False
 
-    measure_success = False
-    # try:
-    #     measure_list_object = ContestMeasureListManager()
-    #     results = measure_list_object.retrieve_all_measures_for_upcoming_election(
-    # google_civic_election_id, state_code)
-    #     measure_success = results['success']
-    #     status += ' ' + results['status']
-    #     measure_list = results['measure_list_light']
-    # except Exception as e:
-    #     status += 'FAILED ballot_item_options_retrieve_for_api, measure_list. ' \
-    #              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-    #     handle_exception(e, logger=logger, exception_message=status)
-    #     measure_list = []
-    #     measure_success = False
+    try:
+        measure_list_object = ContestMeasureListManager()
+        results = measure_list_object.search_measures_in_specific_elections(
+            google_civic_election_id_list, state_code)
+        measure_success = results['success']
+        status += ' ' + results['status']
+        measure_list = results['measure_list_json']
+    except Exception as e:
+        status += 'FAILED_BALLOT_ITEM_OPTIONS_RETRIEVE-MEASURE_LIST ' \
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        handle_exception(e, logger=logger, exception_message=status)
+        measure_list = []
+        measure_success = False
 
     ballot_items_to_display = []
     if candidate_success and len(candidate_list):
         for candidate in candidate_list:
             ballot_items_to_display.append(candidate.copy())
 
-    # if measure_success and len(measure_list):
-    #     for measure in measure_list:
-    #         ballot_items_to_display.append(measure.copy())
+    if measure_success and len(measure_list):
+        for measure in measure_list:
+            ballot_items_to_display.append(measure.copy())
 
     json_data = {
         'status':                   status,
@@ -2371,6 +2398,7 @@ def ballot_item_options_retrieve_for_api(google_civic_election_id, search_string
         'status':                   status,
         'success':                  candidate_success or measure_success,
         'search_string':            search_string,
+        'state_code':               state_code,
         'google_civic_election_id': google_civic_election_id,
         'json_data':                json_data,
     }

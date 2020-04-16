@@ -756,7 +756,7 @@ class CandidateCampaignListManager(models.Model):
         """
         This function, retrieve_candidates_from_non_unique_identifiers, is built to find possible duplicate candidates
         with stricter parameters.
-        This is a different approach from search_candidates_for_upcoming_election, which casts a wider net.
+        This is a different approach from search_candidates_in_specific_elections, which casts a wider net.
         Another related function, retrieve_possible_duplicate_candidates, is used to avoid duplicate candidate imports.
         :param google_civic_election_id_list:
         :param state_code:
@@ -1053,13 +1053,13 @@ class CandidateCampaignListManager(models.Model):
 
         return 0
 
-    def search_candidates_for_upcoming_election(self, google_civic_election_id_list, search_string='', state_code='',
+    def search_candidates_in_specific_elections(self, google_civic_election_id_list, search_string='', state_code='',
                                                 candidate_name='', candidate_twitter_handle='',
                                                 candidate_website='', candidate_email='',
                                                 candidate_facebook='', twitter_handle_list='', facebook_page_list='',
                                                 exact_match=False):
         """
-        This function, search_candidates_for_upcoming_election, is meant to cast a wider net for any
+        This function, search_candidates_in_specific_elections, is meant to cast a wider net for any
         possible candidates that might match.
         It has some parallels with organization.models: organization_search_find_any_possibilities
         This is different than retrieve_candidates_from_non_unique_identifiers, which is built to find
@@ -1163,14 +1163,15 @@ class CandidateCampaignListManager(models.Model):
                     new_filter = Q(candidate_email__icontains=candidate_email)
                 filters.append(new_filter)
 
-            final_filters = filters.pop()
-            for item in filters:
-                final_filters |= item
+            if positive_value_exists(len(filters)):
+                final_filters = filters.pop()
+                for item in filters:
+                    final_filters |= item
 
-            # Add as new filter for "AND"
-            candidate_queryset = candidate_queryset.filter(final_filters)
+                # Add as new filter for "AND"
+                candidate_queryset = candidate_queryset.filter(final_filters)
 
-            candidate_list_objects = candidate_queryset[:10]
+            candidate_list_objects = candidate_queryset[:25]
 
             if len(candidate_list_objects):
                 candidate_list_found = True
@@ -1181,7 +1182,7 @@ class CandidateCampaignListManager(models.Model):
                 success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status += 'FAILED search_candidates_for_upcoming_election ' \
+            status += 'FAILED_SEARCH_CANDIDATES_FOR_UPCOMING_ELECTION ' \
                       '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
             success = False
 
@@ -1189,47 +1190,46 @@ class CandidateCampaignListManager(models.Model):
             for candidate in candidate_list_objects:
                 one_candidate = {
                     'ballot_item_display_name':     candidate.display_candidate_name(),
+                    'ballotpedia_candidate_id':     candidate.ballotpedia_candidate_id,
+                    'ballotpedia_candidate_url':    candidate.ballotpedia_candidate_url,
+                    'ballotpedia_office_id':        candidate.ballotpedia_office_id,
+                    'ballotpedia_person_id':        candidate.ballotpedia_person_id,
+                    'ballotpedia_race_id':          candidate.ballotpedia_race_id,
+                    'candidate_contact_form_url':   candidate.candidate_contact_form_url,
                     'candidate_email':              candidate.candidate_email,
+                    'candidate_name':               candidate.candidate_name,  # For Voter Guide Possibility System
                     'candidate_phone':              candidate.candidate_phone,
                     'candidate_photo_url_large':    candidate.we_vote_hosted_profile_image_url_large
                     if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large)
                     else candidate.candidate_photo_url(),
                     'candidate_photo_url_medium':   candidate.we_vote_hosted_profile_image_url_medium,
                     'candidate_photo_url_tiny':     candidate.we_vote_hosted_profile_image_url_tiny,
+                    'candidate_url':                candidate.candidate_url,
                     'candidate_we_vote_id':         candidate.we_vote_id,
-                    'candidate_name':               candidate.candidate_name,  # For Voter Guide Possibility System
                     'candidate_website':            candidate.candidate_url,  # For Voter Guide Possibility System
                     'candidate_twitter_handle':     candidate.candidate_twitter_handle,  # For Voter Guide Possibility
                     'candidate_facebook':           candidate.facebook_url,  # For Voter Guide Possibility System
-                    'id':                           candidate.id,
-                    'office_we_vote_id':            candidate.contest_office_we_vote_id,
-                    'order_on_ballot':              candidate.order_on_ballot,
-                    'kind_of_ballot_item':          "CANDIDATE",
-                    'we_vote_id':                   candidate.we_vote_id,
-                    'google_civic_election_id':     candidate.google_civic_election_id,
-                    'ballotpedia_candidate_id':     candidate.ballotpedia_candidate_id,
-                    'ballotpedia_candidate_url':    candidate.ballotpedia_candidate_url,
-                    'ballotpedia_office_id':        candidate.ballotpedia_office_id,
-                    'ballotpedia_person_id':        candidate.ballotpedia_person_id,
-                    'ballotpedia_race_id':          candidate.ballotpedia_race_id,
-                    'maplight_id':                  candidate.maplight_id,
                     'contest_office_id':            candidate.contest_office_id,
                     'contest_office_we_vote_id':    candidate.contest_office_we_vote_id,
                     'contest_office_name':          candidate.contest_office_name,
+                    'facebook_url':                 candidate.facebook_url,
+                    'google_civic_election_id':     candidate.google_civic_election_id,
+                    'id':                           candidate.id,
+                    'kind_of_ballot_item':          "CANDIDATE",
+                    'maplight_id':                  candidate.maplight_id,
+                    'ocd_division_id':              candidate.ocd_division_id,
+                    'office_we_vote_id':            candidate.contest_office_we_vote_id,
+                    'order_on_ballot':              candidate.order_on_ballot,
                     'politician_id':                candidate.politician_id,
                     'politician_we_vote_id':        candidate.politician_we_vote_id,
                     'party':                        candidate.political_party_display(),
-                    'ocd_division_id':              candidate.ocd_division_id,
                     'state_code':                   candidate.state_code,
-                    'candidate_url':                candidate.candidate_url,
-                    'candidate_contact_form_url':   candidate.candidate_contact_form_url,
-                    'facebook_url':                 candidate.facebook_url,
                     'twitter_url':                  candidate.twitter_url,
                     'twitter_handle':               candidate.fetch_twitter_handle(),
                     'twitter_description':          candidate.twitter_description,
                     'twitter_followers_count':      candidate.twitter_followers_count,
-                    'google_plus_url':              candidate.google_plus_url,
                     'youtube_url':                  candidate.youtube_url,
+                    'we_vote_id': candidate.we_vote_id,
                 }
                 candidate_list_json.append(one_candidate.copy())
 
