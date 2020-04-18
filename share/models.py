@@ -5,7 +5,6 @@
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import localtime, now
-from config.base import get_environment_variable
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
 
@@ -157,6 +156,10 @@ class ShareManager(models.Model):
         shared_item_found = False
         status = ""
         success = True
+        if positive_value_exists(google_civic_election_id):
+            google_civic_election_id = convert_to_int(google_civic_election_id)
+        else:
+            google_civic_election_id = 0
         if not positive_value_exists(destination_full_url) or not positive_value_exists(shared_by_voter_we_vote_id):
             status += "CREATE_OR_UPDATE_SHARED_ITEM-MISSING_REQUIRED_VARIABLE "
             results = {
@@ -198,7 +201,8 @@ class ShareManager(models.Model):
 
         if shared_item_found:
             if positive_value_exists(shared_item_code_no_opinions) \
-                    or positive_value_exists(shared_item_code_all_opinions):
+                    or positive_value_exists(shared_item_code_all_opinions) \
+                    or not positive_value_exists(shared_item.year_as_integer):
                 # There is a reason to update
                 try:
                     change_to_save = False
@@ -207,6 +211,9 @@ class ShareManager(models.Model):
                         change_to_save = True
                     if positive_value_exists(shared_item_code_all_opinions):
                         shared_item.shared_item_code_all_opinions = shared_item_code_all_opinions
+                        change_to_save = True
+                    if not positive_value_exists(shared_item.year_as_integer):
+                        shared_item.generate_year_as_integer()
                         change_to_save = True
                     if change_to_save:
                         shared_item.save()
@@ -263,12 +270,26 @@ class ShareManager(models.Model):
             shared_to_organization_we_vote_id='',
             google_civic_election_id=None,
             year_as_integer=None):
-        generate_shared_by_organization_we_vote_id = False
-        generate_shared_to_organization_we_vote_id = False
         shared_permissions_granted_created = False
         shared_permissions_granted_found = False
         status = ""
         success = True
+        if positive_value_exists(google_civic_election_id):
+            google_civic_election_id = convert_to_int(google_civic_election_id)
+        else:
+            google_civic_election_id = 0
+        # If a year_as_integer wasn't passed in, check to see if there is one in the shared_item
+        if not positive_value_exists(year_as_integer) and positive_value_exists(shared_item_id):
+            shared_item_results = self.retrieve_shared_item(shared_item_id=shared_item_id)
+            if shared_item_results['shared_item_found']:
+                shared_item = shared_item_results['shared_item']
+                try:
+                    shared_item.generate_year_as_integer()
+                    shared_item.save()
+                    year_as_integer = shared_item.year_as_integer
+                except Exception as e:
+                    status += "COULD_NOT_GENERATE_YEAR_AS_INTEGER " + str(e) + ' '
+
         if not positive_value_exists(shared_item_id) or not positive_value_exists(shared_by_voter_we_vote_id) \
                 or not positive_value_exists(shared_to_voter_we_vote_id) or not positive_value_exists(year_as_integer):
             status += "CREATE_OR_UPDATE_SHARED_PERMISSIONS_GRANTED-MISSING_REQUIRED_VARIABLE "
@@ -294,38 +315,23 @@ class ShareManager(models.Model):
         status += results['status']
 
         if shared_permissions_granted_found:
-            if not positive_value_exists(shared_by_organization_we_vote_id):
-              generate_shared_by_organization_we_vote_id = True
-            if not positive_value_exists(shared_to_organization_we_vote_id):
-              generate_shared_to_organization_we_vote_id = True
-
-        if shared_permissions_granted_found:
-            if positive_value_exists(generate_shared_by_organization_we_vote_id) \
-                    or positive_value_exists(generate_shared_to_organization_we_vote_id):
+            if not positive_value_exists(shared_permissions_granted.year_as_integer):
                 # There is a reason to update
-                pass
-                # try:
-                #     change_to_save = False
-                #     if positive_value_exists(generate_shared_by_organization_we_vote_id):
-                #         # Look up here
-                #         shared_by_organization_we_vote_id = ''
-                #       shared_permissions_granted.shared_by_organization_we_vote_id = shared_by_organization_we_vote_id
-                #         change_to_save = True
-                #     if positive_value_exists(generate_shared_to_organization_we_vote_id):
-                #         # Look up here
-                #         shared_to_organization_we_vote_id = ''
-                #       shared_permissions_granted.shared_to_organization_we_vote_id = shared_to_organization_we_vote_id
-                #         change_to_save = True
-                #     if change_to_save:
-                #         shared_permissions_granted.save()
-                #         shared_permissions_granted_created = True
-                #         success = True
-                #         status += "SHARED_PERMISSIONS_GRANTED_UPDATED "
-                # except Exception as e:
-                #     shared_permissions_granted_created = False
-                #     shared_permissions_granted = None
-                #     success = False
-                #     status += "SHARED_PERMISSIONS_GRANTED_NOT_UPDATED " + str(e) + " "
+                try:
+                    change_to_save = False
+                    if not positive_value_exists(shared_permissions_granted.year_as_integer):
+                        shared_permissions_granted.year_as_integer = year_as_integer
+                        change_to_save = True
+                    if change_to_save:
+                        shared_permissions_granted.save()
+                        shared_permissions_granted_created = True
+                        success = True
+                        status += "SHARED_PERMISSIONS_GRANTED_UPDATED "
+                except Exception as e:
+                    shared_permissions_granted_created = False
+                    shared_permissions_granted = None
+                    success = False
+                    status += "SHARED_PERMISSIONS_GRANTED_NOT_UPDATED " + str(e) + " "
         else:
             try:
                 shared_permissions_granted = SharedPermissionsGranted.objects.create(
@@ -463,7 +469,7 @@ class ShareManager(models.Model):
             status += "RETRIEVE_SHARED_ITEM_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'FAILED retrieve_shared_item SharedItem ' + str(e) + ' '
+            status += 'FAILED_RETRIEVE_SHARED_ITEM ' + str(e) + ' '
 
         results = {
             'success':                 success,

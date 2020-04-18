@@ -15,13 +15,13 @@ logger = wevote_functions.admin.get_logger(__name__)
 def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id,
                                        from_organization_we_vote_id, to_organization_we_vote_id):
     status = ''
-    success = False
-    to_voter_id = 0
+    success = True
     shared_item_entries_moved = 0
     shared_item_entries_not_moved = 0
 
     if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
         status += "MOVE_SHARED_ITEMS-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -34,6 +34,7 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
 
     if from_voter_we_vote_id == to_voter_we_vote_id:
         status += "MOVE_SHARED_ITEMS-FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -290,7 +291,7 @@ def shared_item_save_for_api(  # sharedItemSave
         voter_device_id='',
         destination_full_url='',
         ballot_item_we_vote_id='',
-        google_civic_election_id='',
+        google_civic_election_id=0,
         is_ballot_share=False,
         is_candidate_share=False,
         is_measure_share=False,
