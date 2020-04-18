@@ -1608,8 +1608,13 @@ def process_contest_referendum_from_structured_json(
 
         contest_measure_manager = ContestMeasureManager()
         update_or_create_contest_measure_results = contest_measure_manager.update_or_create_contest_measure(
-            we_vote_id, google_civic_election_id, referendum_title, district_id, district_name, state_code,
-            updated_contest_measure_values)
+            we_vote_id=we_vote_id,
+            google_civic_election_id=google_civic_election_id,
+            measure_title=referendum_title,
+            district_id=district_id,
+            district_name=district_name,
+            state_code=state_code,
+            updated_contest_measure_values=updated_contest_measure_values)
     else:
         update_or_create_contest_measure_results = {
             'success': False,

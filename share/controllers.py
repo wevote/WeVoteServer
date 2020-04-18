@@ -4,11 +4,131 @@
 
 from .models import ShareManager
 from organization.models import OrganizationManager
+from share.models import SharedItem, SharedLinkClicked, SharedPermissionsGranted
 from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id,
+                                       from_organization_we_vote_id, to_organization_we_vote_id):
+    status = ''
+    success = False
+    to_voter_id = 0
+    shared_item_entries_moved = 0
+    shared_item_entries_not_moved = 0
+
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        status += "MOVE_SHARED_ITEMS-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'shared_item_entries_moved': shared_item_entries_moved,
+            'shared_item_entries_not_moved': shared_item_entries_not_moved,
+        }
+        return results
+
+    if from_voter_we_vote_id == to_voter_we_vote_id:
+        status += "MOVE_SHARED_ITEMS-FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'shared_item_entries_moved': shared_item_entries_moved,
+            'shared_item_entries_not_moved': shared_item_entries_not_moved,
+        }
+        return results
+
+    # ######################
+    # Migrations
+    if positive_value_exists(to_organization_we_vote_id):
+        try:
+            shared_item_entries_moved += SharedItem.objects\
+                .filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id)\
+                .update(shared_by_voter_we_vote_id=to_voter_we_vote_id,
+                        shared_by_organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-SHARED_ITEM-SHARED_BY_VOTER_WE_VOTE_ID-INCLUDING_ORG " + str(e) + " "
+        try:
+            SharedLinkClicked.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
+                .update(shared_by_voter_we_vote_id=to_voter_we_vote_id,
+                        shared_by_organization_we_vote_id=to_organization_we_vote_id)
+            SharedLinkClicked.objects.filter(viewed_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
+                .update(viewed_by_voter_we_vote_id=to_voter_we_vote_id,
+                        viewed_by_organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-SHARED_LINK_CLICKED-SHARED_BY_VOTER_WE_VOTE_ID-INCLUDING_ORG " + str(e) + " "
+        try:
+            SharedPermissionsGranted.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
+                .update(shared_by_voter_we_vote_id=to_voter_we_vote_id,
+                        shared_by_organization_we_vote_id=to_organization_we_vote_id)
+            SharedPermissionsGranted.objects.filter(shared_to_voter_we_vote_id__iexact=from_voter_we_vote_id) \
+                .update(shared_to_voter_we_vote_id=to_voter_we_vote_id,
+                        shared_to_organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-SHARED_PERMISSIONS_GRANTED-SHARED_BY_VOTER_WE_VOTE_ID-INCLUDING_ORG " + str(e) + " "
+    else:
+        try:
+            SharedItem.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id)\
+                .update(shared_by_voter_we_vote_id=to_voter_we_vote_id)
+        except Exception as e:
+            status += "FAILED-SHARED_ITEM-SHARED_BY_VOTER_WE_VOTE_ID " + str(e) + " "
+        try:
+            SharedLinkClicked.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
+                .update(shared_by_voter_we_vote_id=to_voter_we_vote_id)
+            SharedLinkClicked.objects.filter(viewed_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
+                .update(viewed_by_voter_we_vote_id=to_voter_we_vote_id)
+        except Exception as e:
+            status += "FAILED-SHARED_LINK_CLICKED-SHARED_BY_VOTER_WE_VOTE_ID " + str(e) + " "
+        try:
+            SharedPermissionsGranted.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
+                .update(shared_by_voter_we_vote_id=to_voter_we_vote_id)
+            SharedPermissionsGranted.objects.filter(shared_to_voter_we_vote_id__iexact=from_voter_we_vote_id) \
+                .update(shared_to_voter_we_vote_id=to_voter_we_vote_id)
+        except Exception as e:
+            status += "FAILED-SHARED_PERMISSIONS_GRANTED-SHARED_BY_VOTER_WE_VOTE_ID " + str(e) + " "
+
+    if positive_value_exists(from_organization_we_vote_id) and positive_value_exists(to_organization_we_vote_id):
+        try:
+            SharedItem.objects.filter(site_owner_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(site_owner_organization_we_vote_id=to_organization_we_vote_id)
+            SharedItem.objects.filter(shared_by_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(shared_by_organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-SHARED_ITEM-SITE_OWNER_ORGANIZATION_WE_VOTE_ID " + str(e) + " "
+        try:
+            SharedLinkClicked.objects.filter(shared_by_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(shared_by_organization_we_vote_id=to_organization_we_vote_id)
+            SharedLinkClicked.objects.filter(viewed_by_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(viewed_by_organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-SHARED_LINK_CLICKED-SHARED_BY_ORGANIZATION_WE_VOTE_ID " + str(e) + " "
+        try:
+            SharedPermissionsGranted.objects\
+                .filter(shared_by_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(shared_by_organization_we_vote_id=to_organization_we_vote_id)
+            SharedPermissionsGranted.objects\
+                .filter(shared_to_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(shared_to_organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-SHARED_PERMISSIONS_GRANTED-SHARED_BY_ORGANIZATION_WE_VOTE_ID " + str(e) + " "
+    else:
+        status += "MOVE_SHARED_ITEMS-MISSING_EITHER_FROM_OR_TO_ORGANIZATION_WE_VOTE_ID "
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_voter_we_vote_id': from_voter_we_vote_id,
+        'to_voter_we_vote_id': to_voter_we_vote_id,
+        'shared_item_entries_moved': shared_item_entries_moved,
+        'shared_item_entries_not_moved': shared_item_entries_not_moved,
+    }
+    return results
 
 
 def shared_item_retrieve_for_api(  # sharedItemRetrieve
@@ -31,11 +151,11 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     shared_by_voter_we_vote_id = ''
     shared_by_organization_we_vote_id = ''
     shared_item_code_no_opinions = ''
-    shared_item_code_with_opinions = ''
+    shared_item_code_all_opinions = ''
     shared_item_id = 0
     site_owner_organization_we_vote_id = ''
     url_with_shared_item_code_no_opinions = ''
-    url_with_shared_item_code_with_opinions = ''
+    url_with_shared_item_code_all_opinions = ''
     viewed_by_voter_we_vote_id = ''
     viewed_by_organization_we_vote_id = ''
     share_manager = ShareManager()
@@ -59,9 +179,9 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             'success':                      False,
             'destination_full_url':         destination_full_url,
             'shared_item_code_no_opinions':             shared_item_code_no_opinions,
-            'shared_item_code_with_opinions':           shared_item_code_with_opinions,
+            'shared_item_code_all_opinions':           shared_item_code_all_opinions,
             'url_with_shared_item_code_no_opinions':    url_with_shared_item_code_no_opinions,
-            'url_with_shared_item_code_with_opinions':  url_with_shared_item_code_with_opinions,
+            'url_with_shared_item_code_all_opinions':  url_with_shared_item_code_all_opinions,
             'is_ballot_share':              is_ballot_share,
             'is_candidate_share':           is_candidate_share,
             'is_measure_share':             is_measure_share,
@@ -87,27 +207,45 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             if '/' in hostname:
                 hostname_array = hostname.split('/')
                 hostname = hostname_array[0]
+            url_with_shared_item_code_no_opinions = \
+                "https://" + hostname + "/-" + shared_item.shared_item_code_no_opinions
+            url_with_shared_item_code_all_opinions = \
+                "https://" + hostname + "/-" + shared_item.shared_item_code_all_opinions
         except Exception as e:
             status += "COULD_NOT_MODIFY_HOSTNAME " + str(e) + " "
-        url_with_shared_item_code_no_opinions = "https://" + hostname + "/-" + shared_item.shared_item_code_no_opinions
-        url_with_shared_item_code_with_opinions = \
-            "https://" + hostname + "/-" + shared_item.shared_item_code_with_opinions
 
     if viewed_by_voter_we_vote_id == shared_item.shared_by_voter_we_vote_id:
         api_call_coming_from_voter_who_shared = True
 
     # Store that the link was clicked
     if positive_value_exists(shared_item_clicked):
-        opinions_included = shared_item.shared_item_code_with_opinions == shared_item_code
+        all_opinions_included = shared_item.shared_item_code_all_opinions == shared_item_code
+        public_only_opinions_included = False
         clicked_results = share_manager.create_shared_link_clicked(
+            destination_full_url=shared_item.destination_full_url,
             shared_item_code=shared_item_code,
             shared_item_id=shared_item_id,
             shared_by_voter_we_vote_id=shared_item.shared_by_voter_we_vote_id,
             shared_by_organization_we_vote_id=shared_item.shared_by_organization_we_vote_id,
+            site_owner_organization_we_vote_id=shared_item.site_owner_organization_we_vote_id,
             viewed_by_voter_we_vote_id=viewed_by_voter_we_vote_id,
             viewed_by_organization_we_vote_id=viewed_by_organization_we_vote_id,
-            opinions_included=opinions_included)
+            all_opinions_included=all_opinions_included,
+            public_only_opinions_included=public_only_opinions_included,
+        )
         status += clicked_results['status']
+
+        # Store the new permissions granted
+        if positive_value_exists(all_opinions_included):
+            permission_results = share_manager.create_or_update_shared_permissions_granted(
+                shared_item_id=shared_item.id,
+                shared_by_voter_we_vote_id=shared_item.shared_by_voter_we_vote_id,
+                shared_by_organization_we_vote_id=shared_item.shared_by_organization_we_vote_id,
+                shared_to_voter_we_vote_id=viewed_by_voter_we_vote_id,
+                shared_to_organization_we_vote_id=viewed_by_organization_we_vote_id,
+                google_civic_election_id=google_civic_election_id,
+                year_as_integer=shared_item.year_as_integer)
+            status += permission_results['status']
 
     results = {
         'status':                       status,
@@ -128,9 +266,9 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     }
     if api_call_coming_from_voter_who_shared:
         results['shared_item_code_no_opinions'] = shared_item.shared_item_code_no_opinions
-        results['shared_item_code_with_opinions'] = shared_item.shared_item_code_with_opinions
+        results['shared_item_code_all_opinions'] = shared_item.shared_item_code_all_opinions
         results['url_with_shared_item_code_no_opinions'] = url_with_shared_item_code_no_opinions
-        results['url_with_shared_item_code_with_opinions'] = url_with_shared_item_code_with_opinions
+        results['url_with_shared_item_code_all_opinions'] = url_with_shared_item_code_all_opinions
     else:
         # If here we don't want to reveal the other shared_item code
         if shared_item.shared_item_code_no_opinions == shared_item_code:
@@ -139,12 +277,12 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         else:
             results['shared_item_code_no_opinions'] = ''
             results['url_with_shared_item_code_no_opinions'] = ''
-        if shared_item.shared_item_code_with_opinions == shared_item_code:
-            results['shared_item_code_with_opinions'] = shared_item.shared_item_code_with_opinions
-            results['url_with_shared_item_code_with_opinions'] = url_with_shared_item_code_with_opinions
+        if shared_item.shared_item_code_all_opinions == shared_item_code:
+            results['shared_item_code_all_opinions'] = shared_item.shared_item_code_all_opinions
+            results['url_with_shared_item_code_all_opinions'] = url_with_shared_item_code_all_opinions
         else:
-            results['shared_item_code_with_opinions'] = ''
-            results['url_with_shared_item_code_with_opinions'] = ''
+            results['shared_item_code_all_opinions'] = ''
+            results['url_with_shared_item_code_all_opinions'] = ''
     return results
 
 
@@ -166,10 +304,10 @@ def shared_item_save_for_api(  # sharedItemSave
     shared_by_voter_we_vote_id = ''
     shared_by_organization_we_vote_id = ''
     shared_item_code_no_opinions = ''
-    shared_item_code_with_opinions = ''
+    shared_item_code_all_opinions = ''
     site_owner_organization_we_vote_id = ''
     url_with_shared_item_code_no_opinions = destination_full_url  # Default to this
-    url_with_shared_item_code_with_opinions = destination_full_url  # Default to this
+    url_with_shared_item_code_all_opinions = destination_full_url  # Default to this
 
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
@@ -214,9 +352,9 @@ def shared_item_save_for_api(  # sharedItemSave
             'success':                      False,
             'destination_full_url':         destination_full_url,
             'shared_item_code_no_opinions':             shared_item_code_no_opinions,
-            'shared_item_code_with_opinions':           shared_item_code_with_opinions,
+            'shared_item_code_all_opinions':           shared_item_code_all_opinions,
             'url_with_shared_item_code_no_opinions':    url_with_shared_item_code_no_opinions,
-            'url_with_shared_item_code_with_opinions':  url_with_shared_item_code_with_opinions,
+            'url_with_shared_item_code_all_opinions':  url_with_shared_item_code_all_opinions,
             'is_ballot_share':              is_ballot_share,
             'is_candidate_share':           is_candidate_share,
             'is_measure_share':             is_measure_share,
@@ -256,18 +394,18 @@ def shared_item_save_for_api(  # sharedItemSave
     if create_results['shared_item_found']:
         shared_item = create_results['shared_item']
         shared_item_code_no_opinions = shared_item.shared_item_code_no_opinions
-        shared_item_code_with_opinions = shared_item.shared_item_code_with_opinions
+        shared_item_code_all_opinions = shared_item.shared_item_code_all_opinions
         url_with_shared_item_code_no_opinions = "https://" + hostname + "/-" + shared_item_code_no_opinions
-        url_with_shared_item_code_with_opinions = "https://" + hostname + "/-" + shared_item_code_with_opinions
+        url_with_shared_item_code_all_opinions = "https://" + hostname + "/-" + shared_item_code_all_opinions
 
     results = {
         'status':                       status,
         'success':                      success,
         'destination_full_url':         destination_full_url,
         'shared_item_code_no_opinions':             shared_item_code_no_opinions,
-        'shared_item_code_with_opinions':           shared_item_code_with_opinions,
+        'shared_item_code_all_opinions':           shared_item_code_all_opinions,
         'url_with_shared_item_code_no_opinions':    url_with_shared_item_code_no_opinions,
-        'url_with_shared_item_code_with_opinions':  url_with_shared_item_code_with_opinions,
+        'url_with_shared_item_code_all_opinions':  url_with_shared_item_code_all_opinions,
         'is_ballot_share':              is_ballot_share,
         'is_candidate_share':           is_candidate_share,
         'is_measure_share':             is_measure_share,
