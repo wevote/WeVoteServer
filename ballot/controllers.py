@@ -2353,7 +2353,9 @@ def ballot_item_options_retrieve_for_api(google_civic_election_id='', search_str
     try:
         candidate_list_object = CandidateCampaignListManager()
         results = candidate_list_object.search_candidates_in_specific_elections(
-            google_civic_election_id_list, search_string, state_code)
+            google_civic_election_id_list=google_civic_election_id_list,
+            search_string=search_string,
+            state_code=state_code)
         candidate_success = results['success']
         status += results['status']
         candidate_list = results['candidate_list_json']
@@ -2367,7 +2369,9 @@ def ballot_item_options_retrieve_for_api(google_civic_election_id='', search_str
     try:
         measure_list_object = ContestMeasureListManager()
         results = measure_list_object.search_measures_in_specific_elections(
-            google_civic_election_id_list, state_code)
+            google_civic_election_id_list=google_civic_election_id_list,
+            search_string=search_string,
+            state_code=state_code)
         measure_success = results['success']
         status += ' ' + results['status']
         measure_list = results['measure_list_json']

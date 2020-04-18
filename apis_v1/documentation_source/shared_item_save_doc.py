@@ -77,9 +77,9 @@ def shared_item_save_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "destination_full_url": string,\n' \
                    '  "shared_item_code_no_opinions": string,\n' \
-                   '  "shared_item_code_with_opinions": string,\n' \
+                   '  "shared_item_code_all_opinions": string,\n' \
                    '  "url_with_shared_item_code_no_opinions": string,\n' \
-                   '  "url_with_shared_item_code_with_opinions": string,\n' \
+                   '  "url_with_shared_item_code_all_opinions": string,\n' \
                    '  "is_ballot_share": boolean,\n' \
                    '  "is_candidate_share": boolean,\n' \
                    '  "is_measure_share": boolean,\n' \

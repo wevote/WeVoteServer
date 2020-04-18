@@ -308,7 +308,7 @@ def measures_import_from_structured_json(structured_json):
         we_vote_id = one_measure['we_vote_id'] if 'we_vote_id' in one_measure else ''
         google_civic_election_id = \
             one_measure['google_civic_election_id'] if 'google_civic_election_id' in one_measure else 0
-        google_civic_election_id = convert_to_int(google_civic_election_id)
+        # google_civic_election_id = convert_to_int(google_civic_election_id)
 
         if positive_value_exists(we_vote_id) and positive_value_exists(google_civic_election_id):
             proceed_to_update_or_create = True
@@ -382,8 +382,13 @@ def measures_import_from_structured_json(structured_json):
             }
 
             results = contest_measure_manager.update_or_create_contest_measure(
-                we_vote_id, google_civic_election_id, measure_title,
-                district_id, district_name, state_code, updated_contest_measure_values)
+                we_vote_id=we_vote_id,
+                google_civic_election_id=google_civic_election_id,
+                measure_title=measure_title,
+                district_id=district_id,
+                district_name=district_name,
+                state_code=state_code,
+                updated_contest_measure_values=updated_contest_measure_values)
         else:
             measures_not_processed += 1
             results = {
