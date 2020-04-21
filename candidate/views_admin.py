@@ -620,6 +620,7 @@ def candidate_list_view(request):
                 twitter_possibility_query = twitter_possibility_query.filter(
                     candidate_campaign_we_vote_id=candidate.we_vote_id)
                 twitter_possibility_list = list(twitter_possibility_query)
+                candidate.twitter_possibility_list_count = len(twitter_possibility_list)
                 if twitter_possibility_list and positive_value_exists(len(twitter_possibility_list)):
                     candidate.candidate_merge_possibility = twitter_possibility_list[0]
                 else:

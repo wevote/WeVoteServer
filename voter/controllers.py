@@ -32,6 +32,7 @@ from organization.models import OrganizationListManager, OrganizationManager, IN
 from position.controllers import duplicate_positions_to_another_voter, move_positions_to_another_voter
 from position.models import PositionListManager
 import robot_detection
+from share.controllers import move_shared_items_to_another_voter
 from sms.controllers import move_sms_phone_number_entries_to_another_voter
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from validate_email import validate_email
@@ -1724,6 +1725,12 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         from_voter_we_vote_id, to_voter_we_vote_id,
         from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
     status += " " + move_voter_guide_results['status']
+
+    # Bring over SharedItems
+    move_shared_items_results = move_shared_items_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id,
+        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
+    status += " " + move_shared_items_results['status']
 
     # Bring over Analytics information
     move_analytics_results = move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)

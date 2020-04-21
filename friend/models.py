@@ -426,7 +426,7 @@ class FriendManager(models.Model):
             current_friend = CurrentFriend()
             results = {
                 'success':                  False,
-                'status':                   "ONE_OR_MORE_FRIEND_NOT_A_VALID_VALUE",
+                'status':                   "ONE_OR_MORE_FRIEND_NOT_A_VALID_VALUE ",
                 'current_friend_found':     False,
                 'current_friend_created':   False,
                 'current_friend':           current_friend,
@@ -437,7 +437,7 @@ class FriendManager(models.Model):
             current_friend = CurrentFriend()
             results = {
                 'success':                  False,
-                'status':                   "BOTH_FRIEND_ENTRIES_ARE_THE_SAME",
+                'status':                   "BOTH_FRIEND_ENTRIES_ARE_THE_SAME ",
                 'current_friend_found':     False,
                 'current_friend_created':   False,
                 'current_friend':           current_friend,

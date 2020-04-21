@@ -1473,6 +1473,97 @@ class ContestMeasureListManager(models.Model):
         }
         return results
 
+    def search_measures_in_specific_elections(self, google_civic_election_id_list, search_string='', state_code=''):
+        """
+        This function, search_measures_in_specific_elections, is meant to cast a wider net for any
+        possible candidates that might match.
+        :param google_civic_election_id_list:
+        :param search_string:
+        :param state_code:
+        :return:
+        """
+        status = ""
+        measure_list_objects = []
+        measure_list_json = []
+        measure_list_found = False
+
+        search_words = search_string.split()
+
+        try:
+            measure_queryset = ContestMeasure.objects.all()
+            measure_queryset = measure_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+            if positive_value_exists(state_code):
+                measure_queryset = measure_queryset.filter(state_code__iexact=state_code)
+            measure_queryset = measure_queryset.order_by("measure_title")
+
+            # This is an "OR" search for each term, but an "AND" search across all search_words
+            for search_word in search_words:
+                filters = []
+
+                # We want to find measures with *any* of these values
+                new_filter = Q(ballotpedia_measure_name__icontains=search_word)
+                filters.append(new_filter)
+                new_filter = Q(ballotpedia_measure_summary__icontains=search_word)
+                filters.append(new_filter)
+                new_filter = Q(google_civic_measure_title__icontains=search_word)
+                filters.append(new_filter)
+                new_filter = Q(measure_title__icontains=search_word)
+                filters.append(new_filter)
+                new_filter = Q(measure_text__icontains=search_word)
+                filters.append(new_filter)
+                new_filter = Q(measure_subtitle__icontains=search_word)
+                filters.append(new_filter)
+
+                # Add the first query
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                # Add as new filter for "AND"
+                measure_queryset = measure_queryset.filter(final_filters)
+
+            measure_list_objects = measure_queryset[:25]
+
+            if len(measure_list_objects):
+                measure_list_found = True
+                status += 'SEARCH_MEASURES_FOR_UPCOMING_ELECTION_FOUND '
+                success = True
+            else:
+                status += 'SEARCH_MEASURES_FOR_UPCOMING_ELECTION_NOT_FOUND '
+                success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status += 'FAILED_SEARCH_MEASURES_FOR_UPCOMING_ELECTION ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            success = False
+
+        if measure_list_found:
+            for measure in measure_list_objects:
+                one_measure = {
+                    'ballot_item_display_name': measure.measure_title,
+                    'google_civic_election_id': measure.google_civic_election_id,
+                    'kind_of_ballot_item':      "MEASURE",
+                    'measure_subtitle':         measure.measure_subtitle,
+                    'measure_text':             measure.measure_text,
+                    'measure_url':              measure.measure_url,
+                    'measure_we_vote_id':       measure.we_vote_id,
+                    'no_vote_description':      measure.ballotpedia_no_vote_description,
+                    'state_code':               measure.state_code,
+                    'yes_vote_description':     measure.ballotpedia_yes_vote_description,
+                }
+                measure_list_json.append(one_measure.copy())
+
+        results = {
+            'success': success,
+            'status': status,
+            'measure_list': measure_list_objects,
+            'measure_list_found': measure_list_found,
+            'measure_list_json': measure_list_json,
+        }
+        return results
+
     def update_or_create_contest_measures_are_not_duplicates(self, contest_measure1_we_vote_id,
                                                              contest_measure2_we_vote_id):
         """

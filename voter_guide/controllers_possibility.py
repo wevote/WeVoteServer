@@ -68,18 +68,13 @@ def candidates_found_on_url(url_to_scan, google_civic_election_id_list=[], state
                     facebook_page_list_modified.append(one_facebook_page_lower)
 
         voter_guide_website = extract_website_from_url(url_to_scan)
-        results = candidate_list_manager.search_candidates_for_upcoming_election(
+        results = candidate_list_manager.search_candidates_in_specific_elections(
             google_civic_election_id_list=google_civic_election_id_list,
             candidate_website=voter_guide_website,
             facebook_page_list=facebook_page_list_modified,
             state_code=state_code,
             twitter_handle_list=twitter_handle_list_modified
         )
-        # search_candidates_for_upcoming_election(self, google_civic_election_id_list, search_string='', state_code='',
-        #                                         candidate_name='', candidate_twitter_handle='',
-        #                                         candidate_website='', candidate_email='',
-        #                                         candidate_facebook='', twitter_handle_list='', facebook_page_list='',
-        #                                         exact_match=False)
         if results['candidate_list_found']:
             owner_of_website_candidate_list = results['candidate_list']
             owner_of_website_candidate_list_count = len(owner_of_website_candidate_list)
