@@ -85,3 +85,41 @@ class WeVoteAPIsV1TestsVoterEmailAddressSave(TestCase):
             "status: {status} ('VOTER_EMAIL_ADDRESS_SAVE-START CREATE_NEW_EMAIL_ADDRESS EMAIL_ADDRESS_FOR_VOTER_CREATED EMAIL_ADDRESS_FOR_VOTER_CREATED EMAIL_OUTBOUND_DESCRIPTION_CREATED  SCHEDULE_EMAIL_CREATED  EMAIL_SCHEDULED ' expected), "
             "voter_device_id: {voter_device_id}".format(status=json_data2['status'], 
             voter_device_id=json_data2['voter_device_id']))
+            
+        # Try and save the voter email address again
+        response3 = self.client.get(self.voter_email_address_save_url, {'text_for_email_address':
+                                                                  'test321@gmail.com',
+                                                                  'voter_device_id': voter_device_id})
+
+        json_data3 = json.loads(response3.content.decode())
+        
+        self.assertEqual(json_data3['status'], 
+                        "VOTER_EMAIL_ADDRESS_SAVE-START CREATE_NEW_EMAIL_ADDRESS EMAIL_ADDRESS_FOR_VOTER_CREATED EMAIL_ADDRESS_FOR_VOTER_CREATED EMAIL_OUTBOUND_DESCRIPTION_CREATED  SCHEDULE_EMAIL_CREATED  EMAIL_SCHEDULED ",
+            "status: {status} ('VOTER_EMAIL_ADDRESS_SAVE-START CREATE_NEW_EMAIL_ADDRESS EMAIL_ADDRESS_FOR_VOTER_CREATED EMAIL_ADDRESS_FOR_VOTER_CREATED EMAIL_OUTBOUND_DESCRIPTION_CREATED  SCHEDULE_EMAIL_CREATED  EMAIL_SCHEDULED ' expected), "
+            "voter_device_id: {voter_device_id}".format(status=json_data3['status'], 
+            voter_device_id=json_data3['voter_device_id']))
+         
+        ######################################################################    
+        # Test to make sure the email address has been saved in the database
+        response4 = self.client.get(self.voter_email_address_retrieve_url, {'voter_device_id': voter_device_id})
+        json_data4 = json.loads(response4.content.decode())
+        print("json_data4 **************************************************************************")
+        print(json_data4)
+        print("**************************************************************************")
+        # Are any expected fields missing?
+        self.assertEqual('status' in json_data4, True,
+                         "status expected in the voterEmailAddressSaveView json response but not found")
+        self.assertEqual('voter_device_id' in json_data4, True,
+                         "voter_device_id expected in the voterEmailAddressSaveView json response but not found")
+        self.assertEqual('success' in json_data4, True,
+                         "success expected in the voterEmailAddressSaveView json response but not found")
+        self.assertEqual('email_address_list' in json_data4, True,
+                         "email_address_list expected in the voterEmailAddressSaveView json response but not found")
+        # A more thorough testing of expected variables is done in test_views_voter_email_address_retrieve.py
+
+        # Confirm that we have two email addresses for this user
+        self.assertEqual(
+            len(json_data4['email_address_list']), 2, 
+            "Length of email_address_list:{email_address_list_length} (expected to be 2), "
+            "voter_device_id: {voter_device_id}".format(
+                email_address_list_length=len(json_data4['email_address_list']), voter_device_id=json_data4['voter_device_id']))
