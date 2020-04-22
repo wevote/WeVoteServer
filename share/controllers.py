@@ -220,8 +220,8 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
 
     # Store that the link was clicked
     if positive_value_exists(shared_item_clicked):
-        all_opinions_included = shared_item.shared_item_code_all_opinions == shared_item_code
-        public_only_opinions_included = False
+        include_public_positions = shared_item.shared_item_code_all_opinions == shared_item_code
+        include_friends_only_positions = shared_item.shared_item_code_all_opinions == shared_item_code
         clicked_results = share_manager.create_shared_link_clicked(
             destination_full_url=shared_item.destination_full_url,
             shared_item_code=shared_item_code,
@@ -231,21 +231,22 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             site_owner_organization_we_vote_id=shared_item.site_owner_organization_we_vote_id,
             viewed_by_voter_we_vote_id=viewed_by_voter_we_vote_id,
             viewed_by_organization_we_vote_id=viewed_by_organization_we_vote_id,
-            all_opinions_included=all_opinions_included,
-            public_only_opinions_included=public_only_opinions_included,
+            include_public_positions=include_public_positions,
+            include_friends_only_positions=include_friends_only_positions,
         )
         status += clicked_results['status']
 
-        # Store the new permissions granted
-        if positive_value_exists(all_opinions_included):
+        # Store the new permissions granted if the public or friends-only positions were shared
+        if positive_value_exists(include_public_positions) or positive_value_exists(include_friends_only_positions):
             permission_results = share_manager.create_or_update_shared_permissions_granted(
-                shared_item_id=shared_item.id,
                 shared_by_voter_we_vote_id=shared_item.shared_by_voter_we_vote_id,
                 shared_by_organization_we_vote_id=shared_item.shared_by_organization_we_vote_id,
                 shared_to_voter_we_vote_id=viewed_by_voter_we_vote_id,
                 shared_to_organization_we_vote_id=viewed_by_organization_we_vote_id,
                 google_civic_election_id=google_civic_election_id,
-                year_as_integer=shared_item.year_as_integer)
+                year_as_integer=shared_item.year_as_integer,
+                include_friends_only_positions=include_friends_only_positions,
+            )
             status += permission_results['status']
 
     results = {

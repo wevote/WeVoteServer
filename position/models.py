@@ -1079,7 +1079,7 @@ class PositionListManager(models.Model):
         :return:
         """
         if stance_we_are_looking_for not \
-                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             return 0
 
         # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
@@ -1194,7 +1194,7 @@ class PositionListManager(models.Model):
         :return:
         """
         if stance_we_are_looking_for not \
-                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             return 0
 
         # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
@@ -1303,7 +1303,7 @@ class PositionListManager(models.Model):
                                               retrieve_public_positions=True, stance_we_are_looking_for=ANY_STANCE):
         # Don't proceed unless we have a correct stance identifier
         if stance_we_are_looking_for not \
-                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             return 0
 
         # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
@@ -1811,9 +1811,12 @@ class PositionListManager(models.Model):
 
         return results
 
-    def retrieve_all_positions_for_candidate_campaign(self, retrieve_public_positions,
-                                                      candidate_campaign_id, candidate_campaign_we_vote_id='',
-                                                      stance_we_are_looking_for=ANY_STANCE, most_recent_only=True,
+    def retrieve_all_positions_for_candidate_campaign(self,
+                                                      retrieve_public_positions=True,
+                                                      candidate_campaign_id=0,
+                                                      candidate_campaign_we_vote_id='',
+                                                      stance_we_are_looking_for=ANY_STANCE,
+                                                      most_recent_only=True,
                                                       friends_we_vote_id_list=False,
                                                       organizations_followed_we_vote_id_list=False,
                                                       retrieve_all_admin_override=False,
@@ -1838,7 +1841,7 @@ class PositionListManager(models.Model):
         :return:
         """
         if stance_we_are_looking_for not \
-                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
             return position_list
 
@@ -1964,6 +1967,116 @@ class PositionListManager(models.Model):
                 position_list_filtered = []
         else:
             position_list_filtered = position_list
+
+        if position_list_found:
+            return position_list_filtered
+        else:
+            position_list_filtered = []
+            return position_list_filtered
+
+    def retrieve_shared_item_positions_for_candidate_campaign(
+            self,
+            retrieve_public_positions=True,
+            candidate_campaign_id=0,
+            candidate_campaign_we_vote_id='',
+            stance_we_are_looking_for=ANY_STANCE,
+            shared_by_organization_we_vote_id_list=[],
+            read_only=False):
+        """
+        We do not attempt to retrieve public positions and friend's-only positions in the same call.
+        :param retrieve_public_positions:
+        :param candidate_campaign_id:
+        :param candidate_campaign_we_vote_id:
+        :param stance_we_are_looking_for:
+        :param shared_by_organization_we_vote_id_list:
+        :param read_only:
+        :return:
+        """
+        if type(shared_by_organization_we_vote_id_list) is not list or len(shared_by_organization_we_vote_id_list) == 0:
+            position_list = []
+            return position_list
+
+        if stance_we_are_looking_for not \
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+            position_list = []
+            return position_list
+
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
+        #  which means we want to return all stances
+
+        if not positive_value_exists(candidate_campaign_id) and not \
+                positive_value_exists(candidate_campaign_we_vote_id):
+            position_list = []
+            return position_list
+
+        # Retrieve the support positions for this candidate_campaign_id
+        position_list = []
+        position_list_found = False
+        try:
+            if retrieve_public_positions:
+                # We intentionally do not use 'readonly' here since we need to save based on the results of this query
+                if read_only:
+                    position_list_query = PositionEntered.objects.using('readonly').order_by('-date_entered')
+                else:
+                    position_list_query = PositionEntered.objects.order_by('-date_entered')
+            else:
+                # We intentionally do not use 'readonly' here since we need to save based on the results of this query
+                if read_only:
+                    position_list_query = PositionForFriends.objects.using('readonly').order_by('-date_entered')
+                else:
+                    position_list_query = PositionForFriends.objects.order_by('-date_entered')
+
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
+            if positive_value_exists(candidate_campaign_id):
+                position_list_query = position_list_query.filter(candidate_campaign_id=candidate_campaign_id)
+            else:
+                position_list_query = position_list_query.filter(
+                    candidate_campaign_we_vote_id__iexact=candidate_campaign_we_vote_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            # if stance_we_are_looking_for != ANY_STANCE:
+            #     # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+            #     if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+            #         position_list_query = position_list_query.filter(
+            #             Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
+            #     else:
+            #         position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+            if stance_we_are_looking_for != ANY_STANCE:
+                position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
+
+            if type(shared_by_organization_we_vote_id_list) is list and len(shared_by_organization_we_vote_id_list) > 0:
+                # Find positions from organizations in shared_items. Look for we_vote_id case insensitive.
+                we_vote_id_filter = Q()
+                for we_vote_id in shared_by_organization_we_vote_id_list:
+                    we_vote_id_filter |= Q(organization_we_vote_id__iexact=we_vote_id)
+                position_list_query = position_list_query.filter(we_vote_id_filter)
+            position_list = list(position_list_query)
+
+            # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
+            if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                revised_position_list = []
+                for one_position in position_list:
+                    if stance_we_are_looking_for == SUPPORT:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_positive_rating():  # This was "is_support"
+                                revised_position_list.append(one_position)
+                        else:
+                            revised_position_list.append(one_position)
+                    elif stance_we_are_looking_for == OPPOSE:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_negative_rating():  # This was "is_oppose"
+                                revised_position_list.append(one_position)
+                        else:
+                            revised_position_list.append(one_position)
+                position_list = revised_position_list
+
+            if len(position_list):
+                position_list_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        position_list_filtered = position_list
 
         if position_list_found:
             return position_list_filtered
@@ -2099,6 +2212,98 @@ class PositionListManager(models.Model):
             position_list_filtered = []
             return position_list_filtered
 
+    def retrieve_shared_item_positions_for_contest_measure(
+            self,
+            retrieve_public_positions=True,
+            contest_measure_id=0,
+            contest_measure_we_vote_id='',
+            stance_we_are_looking_for=ANY_STANCE,
+            shared_by_organization_we_vote_id_list=[],
+            read_only=False):
+        """
+
+        :param retrieve_public_positions:
+        :param contest_measure_id:
+        :param contest_measure_we_vote_id:
+        :param stance_we_are_looking_for:
+        :param shared_by_organization_we_vote_id_list:
+        :param read_only:
+        :return:
+        """
+        if type(shared_by_organization_we_vote_id_list) is not list or len(shared_by_organization_we_vote_id_list) == 0:
+            position_list = []
+            return position_list
+
+        if stance_we_are_looking_for not \
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+            position_list = []
+            return position_list
+
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY' which means we want to return
+        #  all stances
+
+        if not positive_value_exists(contest_measure_id) and not \
+                positive_value_exists(contest_measure_we_vote_id):
+            position_list = []
+            return position_list
+
+        # Retrieve the support positions for this contest_measure_id
+        position_list = []
+        position_list_found = False
+        try:
+            if retrieve_public_positions:
+                # We intentionally do not use 'readonly' here since we need to save based on the results of this query
+                if read_only:
+                    position_list_query = PositionEntered.objects.using('readonly').order_by('-date_entered')
+                else:
+                    position_list_query = PositionEntered.objects.order_by('-date_entered')
+            else:
+                # We intentionally do not use 'readonly' here since we need to save based on the results of this query
+                if read_only:
+                    position_list_query = PositionForFriends.objects.using('readonly').order_by('-date_entered')
+                else:
+                    position_list_query = PositionForFriends.objects.order_by('-date_entered')
+
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
+            if positive_value_exists(contest_measure_id):
+                position_list_query = position_list_query.filter(contest_measure_id=contest_measure_id)
+            else:
+                position_list_query = position_list_query.filter(
+                    contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            if stance_we_are_looking_for != ANY_STANCE:
+                # If we passed in the stance "ANY" it means we want to not filter down the list
+                position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
+                # NOTE: We don't have a special case for
+                # "if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE"
+                # for contest_measure (like we do for candidate_campaign) because we don't have to deal with
+                # PERCENT_RATING data with measures
+
+            # Find positions from shared_items. Look for we_vote_id case insensitive.
+            if type(shared_by_organization_we_vote_id_list) is list and len(shared_by_organization_we_vote_id_list) > 0:
+                we_vote_id_filter = Q()
+                for we_vote_id in shared_by_organization_we_vote_id_list:
+                    we_vote_id_filter |= Q(organization_we_vote_id__iexact=we_vote_id)
+                position_list_query = position_list_query.filter(we_vote_id_filter)
+
+            # We don't need to filter out the positions that have a percent rating that doesn't match
+            # the stance_we_are_looking_for (like we do for candidates)
+            position_list = list(position_list_query)
+            if len(position_list):
+                position_list_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        position_list_filtered = position_list
+
+        if position_list_found:
+            return position_list_filtered
+        else:
+            position_list_filtered = []
+            return position_list_filtered
+
     def retrieve_all_positions_for_contest_office(self, retrieve_public_positions,
                                                   contest_office_id, contest_office_we_vote_id,
                                                   stance_we_are_looking_for,
@@ -2187,6 +2392,99 @@ class PositionListManager(models.Model):
                 position_list_filtered = []
         else:
             position_list_filtered = position_list
+
+        if position_list_found:
+            return position_list_filtered
+        else:
+            position_list_filtered = []
+            return position_list_filtered
+
+    def retrieve_shared_item_positions_for_contest_office(
+            self,
+            retrieve_public_positions=True,
+            contest_office_id=0,
+            contest_office_we_vote_id='',
+            stance_we_are_looking_for=ANY_STANCE,
+            shared_by_organization_we_vote_id_list=[],
+            read_only=False):
+        """
+
+        :param retrieve_public_positions:
+        :param contest_office_id:
+        :param contest_office_we_vote_id:
+        :param stance_we_are_looking_for:
+        :param shared_by_organization_we_vote_id_list:
+        :param read_only:
+        :return:
+        """
+        status = ""
+        if type(shared_by_organization_we_vote_id_list) is not list or len(shared_by_organization_we_vote_id_list) == 0:
+            position_list = []
+            return position_list
+
+        if stance_we_are_looking_for not \
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+            position_list = []
+            return position_list
+
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY' which means we want to return
+        #  all stances
+
+        if not positive_value_exists(contest_office_id) and not \
+                positive_value_exists(contest_office_we_vote_id):
+            position_list = []
+            return position_list
+
+        # Retrieve the support positions for this contest_office_id
+        position_list_found = False
+        try:
+            if retrieve_public_positions:
+                if read_only:
+                    position_list_query = PositionEntered.objects.using('readonly').order_by('-date_entered')
+                else:
+                    # We intentionally do not use 'readonly' here for when we save based on the results of this query
+                    position_list_query = PositionEntered.objects.order_by('-date_entered')
+            else:
+                if read_only:
+                    position_list_query = PositionForFriends.objects.using('readonly').order_by('-date_entered')
+                else:
+                    # We intentionally do not use 'readonly' here for when we save based on the results of this query
+                    position_list_query = PositionForFriends.objects.order_by('-date_entered')
+
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
+            if positive_value_exists(contest_office_we_vote_id):
+                position_list_query = position_list_query.filter(
+                    contest_office_we_vote_id__iexact=contest_office_we_vote_id)
+            else:
+                position_list_query = position_list_query.filter(contest_office_id=contest_office_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            if stance_we_are_looking_for != ANY_STANCE:
+                # If we passed in the stance "ANY" it means we want to not filter down the list
+                position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
+                # NOTE: We don't have a special case for
+                # "if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE"
+                # for contest_office (like we do for candidate_campaign) because we don't have to deal with
+                # PERCENT_RATING data with measures
+
+            if type(shared_by_organization_we_vote_id_list) is list and len(shared_by_organization_we_vote_id_list) > 0:
+                # Find positions from friends. Look for we_vote_id case insensitive.
+                we_vote_id_filter = Q()
+                for we_vote_id in shared_by_organization_we_vote_id_list:
+                    we_vote_id_filter |= Q(organization_we_vote_id__iexact=we_vote_id)
+                    position_list_query = position_list_query.filter(we_vote_id_filter)
+
+            # We don't need to filter out the positions that have a percent rating that doesn't match
+            # the stance_we_are_looking_for (like we do for candidates)
+            position_list = list(position_list_query)
+            if len(position_list):
+                position_list_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status += "ERROR_IN_POSITION_LIST_QUERY: " + str(e) + " "
+
+        position_list_filtered = position_list
 
         if position_list_found:
             return position_list_filtered
@@ -3075,7 +3373,7 @@ class PositionListManager(models.Model):
         position_list = []
 
         if stance_we_are_looking_for not \
-                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
             return position_list
 
@@ -3184,7 +3482,7 @@ class PositionListManager(models.Model):
                                                      friends_we_vote_id_list=False,
                                                      organizations_followed_we_vote_id_list=False):
         if stance_we_are_looking_for not \
-                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             stance_we_are_looking_for = ANY_STANCE
 
         # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
@@ -3196,7 +3494,7 @@ class PositionListManager(models.Model):
 
         retrieve_friends_positions = False
         retrieve_public_positions = False
-        if public_or_private not in(PUBLIC_ONLY, FRIENDS_ONLY):
+        if public_or_private not in (PUBLIC_ONLY, FRIENDS_ONLY):
             public_or_private = PUBLIC_ONLY
         if public_or_private == FRIENDS_ONLY:
             retrieve_friends_positions = True
@@ -3300,7 +3598,7 @@ class PositionListManager(models.Model):
                                                  stance_we_are_looking_for,
                                                  public_or_private=PUBLIC_ONLY):
         if stance_we_are_looking_for not \
-                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             stance_we_are_looking_for = ANY_STANCE
 
         # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
@@ -3310,7 +3608,7 @@ class PositionListManager(models.Model):
                 positive_value_exists(contest_office_we_vote_id):
             return 0
 
-        if public_or_private not in(PUBLIC_ONLY, FRIENDS_ONLY):
+        if public_or_private not in (PUBLIC_ONLY, FRIENDS_ONLY):
             public_or_private = PUBLIC_ONLY
         if public_or_private == FRIENDS_ONLY:
             position_list_query = PositionForFriends.objects.using('readonly').all()
@@ -3377,7 +3675,7 @@ class PositionListManager(models.Model):
                                                   stance_we_are_looking_for,
                                                   public_or_private=PUBLIC_ONLY):
         if stance_we_are_looking_for not \
-                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             stance_we_are_looking_for = ANY_STANCE
 
         # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
@@ -3387,7 +3685,7 @@ class PositionListManager(models.Model):
                 positive_value_exists(contest_measure_we_vote_id):
             return 0
 
-        if public_or_private not in(PUBLIC_ONLY, FRIENDS_ONLY):
+        if public_or_private not in (PUBLIC_ONLY, FRIENDS_ONLY):
             public_or_private = PUBLIC_ONLY
         if public_or_private == FRIENDS_ONLY:
             position_list_query = PositionForFriends.objects.using('readonly').all()
@@ -7270,7 +7568,7 @@ class PositionManager(models.Model):
                 if ballot_item_display_name is False:
                     ballot_item_display_name = None
 
-                if stance not in(SUPPORT, NO_STANCE, INFORMATION_ONLY, STILL_DECIDING, OPPOSE, PERCENT_RATING):
+                if stance not in (SUPPORT, NO_STANCE, INFORMATION_ONLY, STILL_DECIDING, OPPOSE, PERCENT_RATING):
                     stance = NO_STANCE
 
                 if statement_text is False:

@@ -20,6 +20,7 @@ from measure.models import ContestMeasureManager, ContestMeasureListManager
 from office.models import ContestOfficeManager, ContestOfficeListManager
 from operator import itemgetter
 from organization.models import Organization, OrganizationManager, PUBLIC_FIGURE, UNKNOWN
+from share.models import ShareManager
 import json
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 from voter_guide.models import ORGANIZATION, VOTER, VoterGuideManager
@@ -2374,10 +2375,14 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
 
 
 def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallotItemFromFriends
-        voter_device_id, friends_vs_public,
-        office_id, office_we_vote_id,
-        candidate_id, candidate_we_vote_id,
-        measure_id, measure_we_vote_id,
+        voter_device_id='',
+        friends_vs_public=FRIENDS_AND_PUBLIC,
+        office_id=0,
+        office_we_vote_id='',
+        candidate_id=0,
+        candidate_we_vote_id='',
+        measure_id=0,
+        measure_we_vote_id='',
         stance_we_are_looking_for=ANY_STANCE):
     """
     We want to return a JSON file with the position identifiers from orgs and public figures
@@ -2386,7 +2391,6 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
     status = "POSITION_LIST_FOR_BALLOT_ITEM_FROM_FRIENDS "
     success = True
 
-    position_manager = PositionManager()
     # Get voter_id from the voter_device_id so we can know who is supporting/opposing
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -2427,6 +2431,141 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
     retrieve_friends_positions = friends_vs_public in (FRIENDS_ONLY, FRIENDS_AND_PUBLIC)
     retrieve_public_positions = friends_vs_public in (PUBLIC_ONLY, FRIENDS_AND_PUBLIC)
 
+    results = retrieve_position_list_for_ballot_item_from_friends(
+        candidate_id=candidate_id,
+        candidate_we_vote_id=candidate_we_vote_id,
+        measure_id=measure_id,
+        measure_we_vote_id=measure_we_vote_id,
+        office_id=office_id,
+        office_we_vote_id=office_we_vote_id,
+        retrieve_public_positions=retrieve_public_positions,
+        retrieve_friends_positions=retrieve_friends_positions,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        voter_we_vote_id=voter_we_vote_id)
+    friends_position_objects = results['position_list']
+    kind_of_ballot_item = results['kind_of_ballot_item']
+    ballot_item_id = results['ballot_item_id']
+    ballot_item_we_vote_id = results['ballot_item_we_vote_id']
+
+    results = retrieve_position_list_for_ballot_item_from_shared_items(
+        candidate_id=candidate_id,
+        candidate_we_vote_id=candidate_we_vote_id,
+        measure_id=measure_id,
+        measure_we_vote_id=measure_we_vote_id,
+        office_id=office_id,
+        office_we_vote_id=office_we_vote_id,
+        retrieve_public_positions=retrieve_public_positions,
+        retrieve_friends_positions=retrieve_friends_positions,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        voter_we_vote_id=voter_we_vote_id)
+    shared_position_objects = results['position_list']
+
+    position_list = []
+    combined_objects = friends_position_objects + shared_position_objects
+    for one_position in combined_objects:
+        # Is there sufficient information in the position to display it?
+        some_data_exists = True if one_position.is_support_or_positive_rating() \
+                           or one_position.is_oppose_or_negative_rating() \
+                           or one_position.is_information_only() \
+                           or positive_value_exists(one_position.vote_smart_rating) \
+                           or positive_value_exists(one_position.statement_text) \
+                           or positive_value_exists(one_position.more_info_url) else False
+        if not some_data_exists:
+            # Skip this position if there isn't any data to display
+            continue
+
+        # Whose position is it?
+        if positive_value_exists(one_position.organization_we_vote_id):
+            speaker_id = one_position.organization_id
+            speaker_we_vote_id = one_position.organization_we_vote_id
+            one_position_success = True
+            speaker_display_name = one_position.speaker_display_name
+        elif positive_value_exists(one_position.voter_id):
+            if voter_id == one_position.voter_id:
+                # Do not show your own position on the position list, since it will be in the edit spot already
+                continue
+            speaker_id = one_position.voter_id
+            speaker_we_vote_id = one_position.voter_we_vote_id
+            one_position_success = True
+            if positive_value_exists(one_position.speaker_display_name):
+                speaker_display_name = one_position.speaker_display_name
+            else:
+                speaker_display_name = "Your Friend (Missing Name)"
+        elif positive_value_exists(one_position.public_figure_we_vote_id):
+            speaker_id = one_position.public_figure_id
+            speaker_we_vote_id = one_position.public_figure_we_vote_id
+            one_position_success = True
+            speaker_display_name = one_position.speaker_display_name
+        else:
+            speaker_display_name = "Unknown"
+            speaker_id = None
+            speaker_we_vote_id = None
+            one_position_success = False
+
+        if one_position_success:
+            one_position_dict_for_api = {
+                'position_we_vote_id':              one_position.we_vote_id,
+                'ballot_item_display_name':         one_position.ballot_item_display_name,
+                'kind_of_ballot_item':              one_position.get_kind_of_ballot_item(),
+                'ballot_item_id':                   one_position.get_ballot_item_id(),
+                'ballot_item_we_vote_id':           one_position.get_ballot_item_we_vote_id(),
+                'speaker_display_name':             speaker_display_name,
+                'speaker_image_url_https_large':    one_position.speaker_image_url_https_large
+                if positive_value_exists(one_position.speaker_image_url_https_large)
+                else one_position.speaker_image_url_https,
+                'speaker_image_url_https_medium':   one_position.speaker_image_url_https_medium,
+                'speaker_image_url_https_tiny':     one_position.speaker_image_url_https_tiny,
+                'speaker_twitter_handle':           one_position.speaker_twitter_handle,
+                'twitter_followers_count':          one_position.twitter_followers_count,
+                'speaker_type':                     one_position.speaker_type,
+                'speaker_id':                       speaker_id,
+                'speaker_we_vote_id':               speaker_we_vote_id,
+                'is_support':                       one_position.is_support(),
+                'is_positive_rating':               one_position.is_positive_rating(),
+                'is_support_or_positive_rating':    one_position.is_support_or_positive_rating(),
+                'is_oppose':                        one_position.is_oppose(),
+                'is_negative_rating':               one_position.is_negative_rating(),
+                'is_oppose_or_negative_rating':     one_position.is_oppose_or_negative_rating(),
+                'is_information_only':              one_position.is_information_only(),
+                'is_public_position':               one_position.is_public_position(),
+                'has_video':                        is_link_to_video(one_position.more_info_url),
+                'vote_smart_rating':                one_position.vote_smart_rating,
+                'vote_smart_time_span':             one_position.vote_smart_time_span,
+                'statement_text':                   one_position.statement_text,
+                'more_info_url':                    one_position.more_info_url,
+                'last_updated':                     one_position.last_updated(),
+            }
+            position_list.append(one_position_dict_for_api)
+
+    positions_count = len(position_list)
+
+    json_data = {
+        'status':                   status,
+        'success':                  success,
+        'count':                    positions_count,
+        'kind_of_ballot_item':      kind_of_ballot_item,
+        'ballot_item_id':           ballot_item_id,
+        'ballot_item_we_vote_id':   ballot_item_we_vote_id,
+        'position_list':            position_list,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def retrieve_position_list_for_ballot_item_from_friends(
+        candidate_id=0,
+        candidate_we_vote_id='',
+        measure_id=0,
+        measure_we_vote_id='',
+        office_id=0,
+        office_we_vote_id='',
+        retrieve_public_positions=False,
+        retrieve_friends_positions=False,
+        stance_we_are_looking_for=ANY_STANCE,
+        voter_we_vote_id=''):
+    status = ""
+    success = True
+    position_list_manager = PositionListManager()
+
     friends_we_vote_id_list = []
     if positive_value_exists(voter_we_vote_id):
         friend_manager = FriendManager()
@@ -2437,9 +2576,7 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
     # Add yourself as a friend so your opinions show up
     friends_we_vote_id_list.append(voter_we_vote_id)
 
-    position_list_manager = PositionListManager()
     ballot_item_found = False
-    friends_positions_list = []
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
         kind_of_ballot_item = CANDIDATE
         status += "KIND_OF_BALLOT_ITEM_CANDIDATE "
@@ -2450,8 +2587,12 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
             retrieve_public_positions_now = True  # The alternate is positions for friends-only
             return_only_latest_position_per_speaker = True
             public_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-                retrieve_public_positions_now, candidate_id, candidate_we_vote_id, stance_we_are_looking_for,
-                return_only_latest_position_per_speaker, friends_we_vote_id_list=friends_we_vote_id_list,
+                retrieve_public_positions=retrieve_public_positions_now,
+                candidate_campaign_id=candidate_id,
+                candidate_campaign_we_vote_id=candidate_we_vote_id,
+                stance_we_are_looking_for=stance_we_are_looking_for,
+                most_recent_only=return_only_latest_position_per_speaker,
+                friends_we_vote_id_list=friends_we_vote_id_list,
                 read_only=True)
             # is_public_position_setting = True
             # public_positions_list = position_list_manager.add_is_public_position(public_positions_list,
@@ -2465,8 +2606,12 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
             retrieve_public_positions_now = False  # This being False means: "Positions from friends-only"
             return_only_latest_position_per_speaker = True
             friends_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-                retrieve_public_positions_now, candidate_id, candidate_we_vote_id, stance_we_are_looking_for,
-                return_only_latest_position_per_speaker, friends_we_vote_id_list=friends_we_vote_id_list,
+                retrieve_public_positions_now,
+                candidate_id,
+                candidate_we_vote_id,
+                stance_we_are_looking_for,
+                return_only_latest_position_per_speaker,
+                friends_we_vote_id_list=friends_we_vote_id_list,
                 read_only=True)
             # Now add is_public_position to each value
             # is_public_position_setting = False
@@ -2600,120 +2745,319 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
             ballot_item_we_vote_id = office_we_vote_id
     else:
         position_list = []
-        json_data = {
-            'status':                   'POSITION_LIST_RETRIEVE_MISSING_BALLOT_ITEM_ID',
-            'success':                  False,
-            'count':                    0,
-            'kind_of_ballot_item':      "UNKNOWN",
+        status += 'POSITION_LIST_RETRIEVE_BALLOT_ITEM_NOT_FOUND '
+        success = False
+        results = {
+            'status':                   status,
+            'success':                  success,
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
+            'kind_of_ballot_item':      "UNKNOWN",
             'position_list':            position_list,
+            'position_list_found':      False,
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return results
 
     if not ballot_item_found:
         position_list = []
-        json_data = {
-            'status':                   'POSITION_LIST_RETRIEVE_BALLOT_ITEM_NOT_FOUND',
-            'success':                  False,
-            'count':                    0,
-            'kind_of_ballot_item':      "UNKNOWN",
+        status += 'POSITION_LIST_RETRIEVE_BALLOT_ITEM_NOT_FOUND '
+        success = False
+        results = {
+            'status':                   status,
+            'success':                  success,
             'ballot_item_id':           ballot_item_id,
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
+            'kind_of_ballot_item':      "UNKNOWN",
             'position_list':            position_list,
+            'position_list_found':      False,
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return results
 
     position_objects = friends_positions_list + public_positions_list
-
-    position_list = []
-    for one_position in position_objects:
-        # Is there sufficient information in the position to display it?
-        some_data_exists = True if one_position.is_support_or_positive_rating() \
-                           or one_position.is_oppose_or_negative_rating() \
-                           or one_position.is_information_only() \
-                           or positive_value_exists(one_position.vote_smart_rating) \
-                           or positive_value_exists(one_position.statement_text) \
-                           or positive_value_exists(one_position.more_info_url) else False
-        if not some_data_exists:
-            # Skip this position if there isn't any data to display
-            continue
-
-        # Whose position is it?
-        if positive_value_exists(one_position.organization_we_vote_id):
-            speaker_id = one_position.organization_id
-            speaker_we_vote_id = one_position.organization_we_vote_id
-            one_position_success = True
-            speaker_display_name = one_position.speaker_display_name
-        elif positive_value_exists(one_position.voter_id):
-            if voter_id == one_position.voter_id:
-                # Do not show your own position on the position list, since it will be in the edit spot already
-                continue
-            speaker_id = one_position.voter_id
-            speaker_we_vote_id = one_position.voter_we_vote_id
-            one_position_success = True
-            if positive_value_exists(one_position.speaker_display_name):
-                speaker_display_name = one_position.speaker_display_name
-            else:
-                speaker_display_name = "Your Friend (Missing Name)"
-        elif positive_value_exists(one_position.public_figure_we_vote_id):
-            speaker_id = one_position.public_figure_id
-            speaker_we_vote_id = one_position.public_figure_we_vote_id
-            one_position_success = True
-            speaker_display_name = one_position.speaker_display_name
-        else:
-            speaker_display_name = "Unknown"
-            speaker_id = None
-            speaker_we_vote_id = None
-            one_position_success = False
-
-        if one_position_success:
-            one_position_dict_for_api = {
-                'position_we_vote_id':              one_position.we_vote_id,
-                'ballot_item_display_name':         one_position.ballot_item_display_name,
-                'kind_of_ballot_item':              one_position.get_kind_of_ballot_item(),
-                'ballot_item_id':                   one_position.get_ballot_item_id(),
-                'ballot_item_we_vote_id':           one_position.get_ballot_item_we_vote_id(),
-                'speaker_display_name':             speaker_display_name,
-                'speaker_image_url_https_large':    one_position.speaker_image_url_https_large
-                if positive_value_exists(one_position.speaker_image_url_https_large)
-                else one_position.speaker_image_url_https,
-                'speaker_image_url_https_medium':   one_position.speaker_image_url_https_medium,
-                'speaker_image_url_https_tiny':     one_position.speaker_image_url_https_tiny,
-                'speaker_twitter_handle':           one_position.speaker_twitter_handle,
-                'twitter_followers_count':          one_position.twitter_followers_count,
-                'speaker_type':                     one_position.speaker_type,
-                'speaker_id':                       speaker_id,
-                'speaker_we_vote_id':               speaker_we_vote_id,
-                'is_support':                       one_position.is_support(),
-                'is_positive_rating':               one_position.is_positive_rating(),
-                'is_support_or_positive_rating':    one_position.is_support_or_positive_rating(),
-                'is_oppose':                        one_position.is_oppose(),
-                'is_negative_rating':               one_position.is_negative_rating(),
-                'is_oppose_or_negative_rating':     one_position.is_oppose_or_negative_rating(),
-                'is_information_only':              one_position.is_information_only(),
-                'is_public_position':               one_position.is_public_position(),
-                'has_video':                        is_link_to_video(one_position.more_info_url),
-                'vote_smart_rating':                one_position.vote_smart_rating,
-                'vote_smart_time_span':             one_position.vote_smart_time_span,
-                'statement_text':                   one_position.statement_text,
-                'more_info_url':                    one_position.more_info_url,
-                'last_updated':                     one_position.last_updated(),
-            }
-            position_list.append(one_position_dict_for_api)
-
-    positions_count = len(position_list)
-
-    json_data = {
+    position_list_found = positive_value_exists(len(position_objects))
+    results = {
         'status':                   status,
-        'success':                  success,
-        'count':                    positions_count,
-        'kind_of_ballot_item':      kind_of_ballot_item,
+        'success':                  False,
         'ballot_item_id':           ballot_item_id,
         'ballot_item_we_vote_id':   ballot_item_we_vote_id,
-        'position_list':            position_list,
+        'kind_of_ballot_item':      kind_of_ballot_item,
+        'position_list':            position_objects,
+        'position_list_found':      position_list_found,
     }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    return results
+
+
+def retrieve_position_list_for_ballot_item_from_shared_items(
+        candidate_id=0,
+        candidate_we_vote_id='',
+        measure_id=0,
+        measure_we_vote_id='',
+        office_id=0,
+        office_we_vote_id='',
+        retrieve_public_positions=False,
+        retrieve_friends_positions=False,
+        stance_we_are_looking_for=ANY_STANCE,
+        voter_we_vote_id=''):
+    status = ""
+    success = True
+    position_list = []
+
+    if not positive_value_exists(voter_we_vote_id):
+        status += 'RETRIEVE_POSITION_LIST_FOR_BALLOT_ITEM_FROM_SHARED_ITEMS-NO_VOTER_WE_VOTE_ID '
+        success = False
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'ballot_item_id':           0,
+            'ballot_item_we_vote_id':   '',
+            'kind_of_ballot_item':      "UNKNOWN",
+            'position_list':            position_list,
+            'position_list_found':      False,
+        }
+        return results
+
+    share_manager = ShareManager()
+    # #####################
+    # Retrieve all of the organization_we_vote_ids from any group that has shared with us
+    # (either public or friends only)
+    permission_results = share_manager.retrieve_shared_permissions_granted_list(
+        shared_to_voter_we_vote_id=voter_we_vote_id,
+        current_year_only=True,
+        only_include_friends_only_positions=False,
+        read_only=True)
+    shared_by_organization_we_vote_id_list = []
+    if permission_results['shared_permissions_granted_list_found']:
+        shared_permissions_granted_list = permission_results['shared_permissions_granted_list']
+        for shared_permissions_granted in shared_permissions_granted_list:
+            if positive_value_exists(shared_permissions_granted.shared_by_organization_we_vote_id) \
+                    and shared_permissions_granted.shared_by_organization_we_vote_id \
+                    not in shared_by_organization_we_vote_id_list:
+                shared_by_organization_we_vote_id_list.append(
+                    shared_permissions_granted.shared_by_organization_we_vote_id)
+
+    if len(shared_by_organization_we_vote_id_list) == 0:
+        success = True
+        status += "NO_SHARED_BY_ORGANIZATIONS_SO_NO_POSITIONS "
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'ballot_item_id':           0,
+            'ballot_item_we_vote_id':   '',
+            'kind_of_ballot_item':      "UNKNOWN",
+            'position_list':            position_list,
+            'position_list_found':      False,
+        }
+        return results
+
+    # #####################
+    # Retrieve the organization_we_vote_ids from any group that has shared with us private opinions
+    permission_results = share_manager.retrieve_shared_permissions_granted_list(
+        shared_to_voter_we_vote_id=voter_we_vote_id,
+        current_year_only=True,
+        only_include_friends_only_positions=True,
+        read_only=True)
+    friends_only_shared_by_organization_we_vote_id_list = []
+    if permission_results['shared_permissions_granted_list_found']:
+        shared_permissions_granted_list = permission_results['shared_permissions_granted_list']
+        for shared_permissions_granted in shared_permissions_granted_list:
+            if positive_value_exists(shared_permissions_granted.shared_by_organization_we_vote_id) \
+                    and shared_permissions_granted.shared_by_organization_we_vote_id \
+                    not in friends_only_shared_by_organization_we_vote_id_list:
+                friends_only_shared_by_organization_we_vote_id_list.append(
+                    shared_permissions_granted.shared_by_organization_we_vote_id)
+
+    position_list_manager = PositionListManager()
+    ballot_item_found = False
+    if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
+        kind_of_ballot_item = CANDIDATE
+        status += "KIND_OF_BALLOT_ITEM_CANDIDATE "
+
+        ############################
+        # Retrieve positions from shared_items that are publicly visible
+        if retrieve_public_positions:
+            retrieve_public_positions_now = True  # The alternate is positions for friends-only
+            public_positions_list = position_list_manager.retrieve_shared_item_positions_for_candidate_campaign(
+                retrieve_public_positions=retrieve_public_positions_now,
+                candidate_campaign_id=candidate_id,
+                candidate_campaign_we_vote_id=candidate_we_vote_id,
+                stance_we_are_looking_for=stance_we_are_looking_for,
+                shared_by_organization_we_vote_id_list=shared_by_organization_we_vote_id_list,
+                read_only=True)
+        else:
+            public_positions_list = []
+
+        ##################################
+        # Now retrieve positions from your friends that are friend's-only visible
+        if retrieve_friends_positions:
+            retrieve_public_positions_now = False  # This being False means: "Positions from friends-only"
+            friends_positions_list = position_list_manager.retrieve_shared_item_positions_for_candidate_campaign(
+                retrieve_public_positions=retrieve_public_positions_now,
+                candidate_campaign_id=candidate_id,
+                candidate_campaign_we_vote_id=candidate_we_vote_id,
+                stance_we_are_looking_for=stance_we_are_looking_for,
+                shared_by_organization_we_vote_id_list=friends_only_shared_by_organization_we_vote_id_list,
+                read_only=True)
+        else:
+            friends_positions_list = []
+
+        # Since we want to return the id and we_vote_id for this ballot item, and we don't know for sure that
+        # there are any positions for this ballot_item (which would include both the id and we_vote_id),
+        # we retrieve the following so we can get the ballot item's id and we_vote_id (per the request of
+        # the WebApp team)
+        candidate_campaign_manager = CandidateCampaignManager()
+        if positive_value_exists(candidate_id):
+            results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(candidate_id)
+        else:
+            results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+
+        if results['candidate_campaign_found']:
+            candidate_campaign = results['candidate_campaign']
+            ballot_item_id = candidate_campaign.id
+            ballot_item_we_vote_id = candidate_campaign.we_vote_id
+            ballot_item_found = True
+        else:
+            ballot_item_id = candidate_id
+            ballot_item_we_vote_id = candidate_we_vote_id
+    elif positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):
+        kind_of_ballot_item = MEASURE
+        status += "KIND_OF_BALLOT_ITEM_MEASURE "
+
+        ############################
+        # Retrieve public positions
+        if retrieve_public_positions:
+            retrieve_public_positions_now = True  # The alternate is positions for friends-only
+            public_positions_list = position_list_manager.retrieve_shared_item_positions_for_contest_measure(
+                retrieve_public_positions=retrieve_public_positions_now,
+                contest_measure_id=measure_id,
+                contest_measure_we_vote_id=measure_we_vote_id,
+                stance_we_are_looking_for=stance_we_are_looking_for,
+                shared_by_organization_we_vote_id_list=shared_by_organization_we_vote_id_list,
+                read_only=True)
+        else:
+            public_positions_list = []
+
+        ##################################
+        # Now retrieve friend's positions
+        if retrieve_friends_positions:
+            retrieve_public_positions_now = False  # This being False means: "Positions from friends-only"
+            friends_positions_list = position_list_manager.retrieve_shared_item_positions_for_contest_measure(
+                retrieve_public_positions=retrieve_public_positions_now,
+                contest_measure_id=measure_id,
+                contest_measure_we_vote_id=measure_we_vote_id,
+                stance_we_are_looking_for=stance_we_are_looking_for,
+                shared_by_organization_we_vote_id_list=friends_only_shared_by_organization_we_vote_id_list,
+                read_only=True)
+        else:
+            friends_positions_list = []
+
+        # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions
+        # for this ballot_item, we retrieve the following so we can get the id and we_vote_id (per the request of
+        # the WebApp team)
+        contest_measure_manager = ContestMeasureManager()
+        if positive_value_exists(measure_id):
+            results = contest_measure_manager.retrieve_contest_measure_from_id(measure_id)
+        else:
+            results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(measure_we_vote_id)
+
+        if results['contest_measure_found']:
+            contest_measure = results['contest_measure']
+            ballot_item_id = contest_measure.id
+            ballot_item_we_vote_id = contest_measure.we_vote_id
+            ballot_item_found = True
+        else:
+            ballot_item_id = measure_id
+            ballot_item_we_vote_id = measure_we_vote_id
+    elif positive_value_exists(office_id) or positive_value_exists(office_we_vote_id):
+        kind_of_ballot_item = OFFICE
+
+        ############################
+        # Retrieve public positions
+        if retrieve_public_positions:
+            retrieve_public_positions_now = True  # The alternate is positions for friends-only
+            public_positions_list = position_list_manager.retrieve_shared_item_positions_for_contest_office(
+                retrieve_public_positions=retrieve_public_positions_now,
+                contest_office_id=office_id,
+                contest_office_we_vote_id=office_we_vote_id,
+                stance_we_are_looking_for=stance_we_are_looking_for,
+                shared_by_organization_we_vote_id_list=shared_by_organization_we_vote_id_list,
+                read_only=True)
+        else:
+            public_positions_list = []
+
+        ##################################
+        # Now retrieve friend's positions
+        if retrieve_friends_positions:
+            retrieve_public_positions_now = False  # This being False means: "Positions from friends-only"
+            friends_positions_list = position_list_manager.retrieve_shared_item_positions_for_contest_office(
+                retrieve_public_positions=retrieve_public_positions_now,
+                contest_office_id=office_id,
+                contest_office_we_vote_id=office_we_vote_id,
+                stance_we_are_looking_for=stance_we_are_looking_for,
+                shared_by_organization_we_vote_id_list=friends_only_shared_by_organization_we_vote_id_list,
+                read_only=True)
+        else:
+            friends_positions_list = []
+
+        # Since we want to return the id and we_vote_id for this ballot item, and we don't know for sure that
+        # there are any positions for this ballot_item (which would include both the id and we_vote_id),
+        # we retrieve the following so we can get the ballot item's id and we_vote_id (per the request of
+        # the WebApp team)
+        contest_office_manager = ContestOfficeManager()
+        if positive_value_exists(office_id):
+            results = contest_office_manager.retrieve_contest_office_from_id(office_id)
+        else:
+            results = contest_office_manager.retrieve_contest_office_from_we_vote_id(office_we_vote_id)
+
+        if results['contest_office_found']:
+            contest_office = results['contest_office']
+            ballot_item_id = contest_office.id
+            ballot_item_we_vote_id = contest_office.we_vote_id
+            ballot_item_found = True
+        else:
+            ballot_item_id = office_id
+            ballot_item_we_vote_id = office_we_vote_id
+    else:
+        position_list = []
+        status += 'POSITION_LIST_RETRIEVE_BALLOT_ITEM_NOT_FOUND '
+        success = False
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'ballot_item_id':           0,
+            'ballot_item_we_vote_id':   '',
+            'kind_of_ballot_item':      "UNKNOWN",
+            'position_list':            position_list,
+            'position_list_found':      False,
+        }
+        return results
+
+    if not ballot_item_found:
+        position_list = []
+        status += 'POSITION_LIST_RETRIEVE_BALLOT_ITEM_NOT_FOUND '
+        success = False
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'ballot_item_id':           ballot_item_id,
+            'ballot_item_we_vote_id':   ballot_item_we_vote_id,
+            'kind_of_ballot_item':      "UNKNOWN",
+            'position_list':            position_list,
+            'position_list_found':      False,
+        }
+        return results
+
+    position_objects = friends_positions_list + public_positions_list
+    position_list_found = positive_value_exists(len(position_objects))
+    results = {
+        'status':                   status,
+        'success':                  False,
+        'ballot_item_id':           ballot_item_id,
+        'ballot_item_we_vote_id':   ballot_item_we_vote_id,
+        'kind_of_ballot_item':      kind_of_ballot_item,
+        'position_list':            position_objects,
+        'position_list_found':      position_list_found,
+    }
+    return results
 
 
 def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForOpinionMaker
@@ -4418,9 +4762,11 @@ def retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(voter_id,
 
 
 def retrieve_ballot_item_we_vote_ids_for_organization_static(
-        organization, google_civic_election_id,
+        organization,
+        google_civic_election_id,
         stance_we_are_looking_for=SUPPORT,
-        state_code='', friends_vs_public=PUBLIC_ONLY,
+        state_code='',
+        friends_vs_public=PUBLIC_ONLY,
         voter_we_vote_id=''):
     """
     For this organization, we want to return a list of ballot_items that this organization has
