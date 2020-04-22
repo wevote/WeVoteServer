@@ -309,7 +309,7 @@ def quick_info_retrieve_for_api(kind_of_ballot_item, ballot_item_we_vote_id):
     ballot_item_we_vote_id = ballot_item_we_vote_id.strip().lower()
 
     if not positive_value_exists(kind_of_ballot_item) and \
-            not kind_of_ballot_item in(OFFICE, CANDIDATE, POLITICIAN, MEASURE):
+            not kind_of_ballot_item in (OFFICE, CANDIDATE, POLITICIAN, MEASURE):
         json_data = {
             'status':                           "QUICK_INFO_RETRIEVE_KIND_OF_BALLOT_ITEM_NOT_SPECIFIED",
             'success':                          False,

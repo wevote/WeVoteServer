@@ -203,10 +203,10 @@ def friend_list_view(request):  # friendList
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_list = request.GET.get('kind_of_list', CURRENT_FRIENDS)
-    if kind_of_list in(CURRENT_FRIENDS, FRIEND_INVITATIONS_PROCESSED,
-                       FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME,
-                       FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION, FRIENDS_IN_COMMON,
-                       IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIEND_LIST):
+    if kind_of_list in (CURRENT_FRIENDS, FRIEND_INVITATIONS_PROCESSED,
+                        FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME,
+                        FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION, FRIENDS_IN_COMMON,
+                        IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIEND_LIST):
         kind_of_list_we_are_looking_for = kind_of_list
     else:
         kind_of_list_we_are_looking_for = CURRENT_FRIENDS
