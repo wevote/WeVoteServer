@@ -21,6 +21,7 @@ from organization.models import Organization, OrganizationManager, \
     CORPORATION, GROUP, INDIVIDUAL, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, NEWS_ORGANIZATION, \
     ORGANIZATION, POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, UNKNOWN, VOTER, ORGANIZATION_TYPE_CHOICES
 import robot_detection
+from share.models import ShareManager
 from twitter.models import TwitterUser
 from voter.models import fetch_voter_id_from_voter_we_vote_id, fetch_voter_we_vote_id_from_voter_id, Voter, VoterManager
 from voter_guide.models import VoterGuideManager
@@ -2822,9 +2823,23 @@ class PositionListManager(models.Model):
                         if organization_voter_we_vote_id in friends_we_vote_id_list:
                             voter_is_friend_of_organization = True
 
+                organization_has_shared_friends_only_positions_with_voter = False
+                if not positive_value_exists(voter_is_friend_of_organization):
+                    # If not already a friend, check to see if the organization has shared with this voter
+                    share_manager = ShareManager()
+                    results = share_manager.retrieve_shared_permissions_granted(
+                        shared_by_voter_we_vote_id=organization_voter_we_vote_id,
+                        shared_to_voter_we_vote_id=current_voter_we_vote_id,
+                        current_year_only=True,
+                        read_only=True)
+                    if results['shared_permissions_granted_found']:
+                        shared_permissions_granted = results['shared_permissions_granted']
+                        organization_has_shared_friends_only_positions_with_voter = \
+                            shared_permissions_granted.include_friends_only_positions
+
                 friends_positions_list = []
-                if voter_is_friend_of_organization:
-                    # If here, then the viewer is a friend with the organization. Look up positions that
+                if voter_is_friend_of_organization or organization_has_shared_friends_only_positions_with_voter:
+                    # If here, then the viewer is a friend with the organization, or has shared. Look up positions that
                     #  are only shown to friends.
                     # '-vote_smart_time_span',
                     # DALE 2018-09-07 Speeding up retrieve by removing order_by

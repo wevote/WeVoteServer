@@ -504,6 +504,7 @@ class ShareManager(models.Model):
                                             shared_to_voter_we_vote_id='',
                                             google_civic_election_id=0,
                                             year_as_integer=0,
+                                            current_year_only=True,
                                             read_only=False):
         """
         This implementation assumes we only ever get single item results
@@ -512,6 +513,7 @@ class ShareManager(models.Model):
         :param shared_to_voter_we_vote_id:
         :param google_civic_election_id:
         :param year_as_integer:
+        :param current_year_only:
         :param read_only:
         :return:
         """
@@ -520,6 +522,9 @@ class ShareManager(models.Model):
         shared_permissions_granted_found = False
         shared_permissions_granted = None
         status = ""
+
+        if positive_value_exists(current_year_only):
+            year_as_integer = self.generate_year_as_integer()
 
         try:
             if positive_value_exists(shared_permissions_granted_id):
