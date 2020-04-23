@@ -329,6 +329,7 @@ class FollowIssueManager(models.Model):
         :param from_twitter:
         :return:
         """
+        status = ''
         try:
             suggested_issue_to_follow, created = SuggestedIssueToFollow.objects.update_or_create(
                 viewer_voter_we_vote_id=viewer_voter_we_vote_id,
@@ -341,12 +342,12 @@ class FollowIssueManager(models.Model):
             )
             suggested_issue_to_follow_saved = True
             success = True
-            status = "SUGGESTED_ISSUE_TO_FOLLOW_UPDATED"
-        except Exception:
+            status += "SUGGESTED_ISSUE_TO_FOLLOW_UPDATED "
+        except Exception as e:
             suggested_issue_to_follow_saved = False
             suggested_issue_to_follow = SuggestedIssueToFollow()
             success = False
-            status = "SUGGESTED_ISSUE_TO_FOLLOW_NOT_UPDATED"
+            status += "SUGGESTED_ISSUE_TO_FOLLOW_NOT_UPDATED " + str(e) + ' '
         results = {
             'success':                                  success,
             'status':                                   status,
@@ -363,6 +364,7 @@ class FollowIssueManager(models.Model):
         :return:
         """
         suggested_issue_to_follow_list = []
+        status = ''
         try:
             suggested_issue_to_follow_queryset = SuggestedIssueToFollow.objects.all()
             suggested_issue_to_follow_list = suggested_issue_to_follow_queryset.filter(
@@ -371,20 +373,20 @@ class FollowIssueManager(models.Model):
             if len(suggested_issue_to_follow_list):
                 success = True
                 suggested_issue_to_follow_list_found = True
-                status = "SUGGESTED_ISSUE_TO_FOLLOW_RETRIEVED"
+                status += "SUGGESTED_ISSUE_TO_FOLLOW_RETRIEVED "
             else:
                 success = True
                 suggested_issue_to_follow_list_found = False
-                status = "NO_SUGGESTED_ISSUE_TO_FOLLOW_LIST_RETRIEVED"
+                status += "NO_SUGGESTED_ISSUE_TO_FOLLOW_LIST_RETRIEVED "
         except SuggestedIssueToFollow.DoesNotExist:
             # No data found. Try again below
             success = True
             suggested_issue_to_follow_list_found = False
-            status = 'NO_SUGGESTED_ISSUE_TO_FOLLOW_LIST_RETRIEVED_DoesNotExist'
+            status = 'NO_SUGGESTED_ISSUE_TO_FOLLOW_LIST_RETRIEVED_DoesNotExist '
         except Exception as e:
             success = False
             suggested_issue_to_follow_list_found = False
-            status = "SUGGESTED_ISSUE_TO_FOLLOW_LIST_NOT_RETRIEVED"
+            status += "SUGGESTED_ISSUE_TO_FOLLOW_LIST_NOT_RETRIEVED " + str(e) + ' '
 
         results = {
             'success':                               success,
@@ -783,6 +785,7 @@ class FollowOrganizationManager(models.Model):
         exception_multiple_object_returned = False
         follow_organization_on_stage = FollowOrganization()
         follow_organization_on_stage_id = 0
+        status = ""
 
         try:
             if positive_value_exists(follow_organization_id):
@@ -793,7 +796,7 @@ class FollowOrganizationManager(models.Model):
                     follow_organization_on_stage = FollowOrganization.objects.get(id=follow_organization_id)
                 follow_organization_on_stage_id = organization_id.id
                 success = True
-                status = 'FOLLOW_ORGANIZATION_FOUND_WITH_ID'
+                status += 'FOLLOW_ORGANIZATION_FOUND_WITH_ID '
             elif positive_value_exists(voter_id) and positive_value_exists(organization_id):
                 if read_only:
                     follow_organization_on_stage = FollowOrganization.objects.using('readonly').get(
@@ -803,7 +806,7 @@ class FollowOrganizationManager(models.Model):
                         voter_id=voter_id, organization_id=organization_id)
                 follow_organization_on_stage_id = follow_organization_on_stage.id
                 success = True
-                status = 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_ID'
+                status += 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_ID '
             elif positive_value_exists(voter_id) and positive_value_exists(organization_we_vote_id):
                 if read_only:
                     follow_organization_on_stage = FollowOrganization.objects.using('readonly').get(
@@ -813,16 +816,16 @@ class FollowOrganizationManager(models.Model):
                         voter_id=voter_id, organization_we_vote_id=organization_we_vote_id)
                 follow_organization_on_stage_id = follow_organization_on_stage.id
                 success = True
-                status = 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_WE_VOTE_ID'
+                status += 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_WE_VOTE_ID '
             else:
                 success = False
-                status = 'FOLLOW_ORGANIZATION_MISSING_REQUIRED_VARIABLES'
+                status += 'FOLLOW_ORGANIZATION_MISSING_REQUIRED_VARIABLES '
         except FollowOrganization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True
             exception_multiple_object_returned = True
             success = False
-            status = 'FOLLOW_ORGANIZATION_NOT_FOUND_MultipleObjectsReturned'
+            status += 'FOLLOW_ORGANIZATION_NOT_FOUND_MultipleObjectsReturned '
             follow_organization_list_found = False
             follow_organization_list = []
 
@@ -838,7 +841,7 @@ class FollowOrganizationManager(models.Model):
                     follow_organization_list_found = positive_value_exists(len(follow_organization_list))
 
                     success = True
-                    status = 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_ID'
+                    status += 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_ID '
                 elif positive_value_exists(voter_id) and positive_value_exists(organization_we_vote_id):
                     follow_organization_query = FollowOrganization.objects.all()
                     follow_organization_query = follow_organization_query.filter(
@@ -849,7 +852,7 @@ class FollowOrganizationManager(models.Model):
                     follow_organization_list_found = positive_value_exists(len(follow_organization_list))
 
                     success = True
-                    status = 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_WE_VOTE_ID'
+                    status += 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_WE_VOTE_ID '
 
                 if follow_organization_list_found:
                     follow_organization_on_stage = follow_organization_list.pop()
@@ -865,7 +868,7 @@ class FollowOrganizationManager(models.Model):
             error_result = False
             exception_does_not_exist = True
             success = True
-            status = 'FOLLOW_ORGANIZATION_NOT_FOUND_DoesNotExist'
+            status += 'FOLLOW_ORGANIZATION_NOT_FOUND_DoesNotExist '
 
         if positive_value_exists(follow_organization_on_stage_id):
             follow_organization_on_stage_found = True
@@ -933,6 +936,7 @@ class FollowOrganizationManager(models.Model):
         :param from_twitter:
         :return:
         """
+        status = ''
         try:
             suggested_organization_to_follow, created = SuggestedOrganizationToFollow.objects.update_or_create(
                 viewer_voter_we_vote_id=viewer_voter_we_vote_id,
@@ -945,12 +949,12 @@ class FollowOrganizationManager(models.Model):
             )
             suggested_organization_to_follow_saved = True
             success = True
-            status = "SUGGESTED_ORGANIZATION_TO_FOLLOW_UPDATED"
-        except Exception:
+            status += "SUGGESTED_ORGANIZATION_TO_FOLLOW_UPDATED "
+        except Exception as e:
             suggested_organization_to_follow_saved = False
             suggested_organization_to_follow = SuggestedOrganizationToFollow()
             success = False
-            status = "SUGGESTED_ORGANIZATION_TO_FOLLOW_NOT_UPDATED"
+            status += "SUGGESTED_ORGANIZATION_TO_FOLLOW_NOT_UPDATED " + str(e) + ' '
         results = {
             'success':                                  success,
             'status':                                   status,
@@ -967,6 +971,7 @@ class FollowOrganizationManager(models.Model):
         :return:
         """
         suggested_organization_to_follow_list = []
+        status = ''
         try:
             suggested_organization_to_follow_queryset = SuggestedOrganizationToFollow.objects.all()
             suggested_organization_to_follow_list = suggested_organization_to_follow_queryset.filter(
@@ -975,20 +980,20 @@ class FollowOrganizationManager(models.Model):
             if len(suggested_organization_to_follow_list):
                 success = True
                 suggested_organization_to_follow_list_found = True
-                status = "SUGGESTED_ORGANIZATION_TO_FOLLOW_RETRIEVED"
+                status += "SUGGESTED_ORGANIZATION_TO_FOLLOW_RETRIEVED "
             else:
                 success = True
                 suggested_organization_to_follow_list_found = False
-                status = "NO_SUGGESTED_ORGANIZATION_TO_FOLLOW_LIST_RETRIEVED"
+                status += "NO_SUGGESTED_ORGANIZATION_TO_FOLLOW_LIST_RETRIEVED "
         except SuggestedOrganizationToFollow.DoesNotExist:
             # No data found. Try again below
             success = True
             suggested_organization_to_follow_list_found = False
-            status = 'NO_SUGGESTED_ORGANIZATION_TO_FOLLOW_LIST_RETRIEVED_DoesNotExist'
+            status += 'NO_SUGGESTED_ORGANIZATION_TO_FOLLOW_LIST_RETRIEVED_DoesNotExist '
         except Exception as e:
             success = False
             suggested_organization_to_follow_list_found = False
-            status = "SUGGESTED_ORGANIZATION_TO_FOLLOW_LIST_NOT_RETRIEVED"
+            status += "SUGGESTED_ORGANIZATION_TO_FOLLOW_LIST_NOT_RETRIEVED " + str(e) + ' '
 
         results = {
             'success':                                      success,

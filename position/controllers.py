@@ -3070,7 +3070,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                                             google_civic_election_id=0,
                                             state_code=''):
     """
-    We want to return a JSON file with a list of positions held by orgs, and friends public figures.
+    We want to return a JSON file with a list of positions held by organizations, and friends public figures.
     We can limit the positions to friend's only if needed.
     """
     is_following = False

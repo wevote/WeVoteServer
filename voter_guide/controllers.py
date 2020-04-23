@@ -3261,6 +3261,7 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
     voter_guide_list_manager = VoterGuideListManager()
     if positive_value_exists(voter_we_vote_id):
         voter_guide_organization_we_vote_id_already_from_friend = []
+        # ####################
         # From friends
         voter_guide_list = []
         voter_guide_results = retrieve_voter_guides_from_friends(
@@ -3270,23 +3271,25 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
             sort_order='desc',
             google_civic_election_id_list=google_civic_election_id_list,
             read_only=True)
+        status += voter_guide_results['status']
         if voter_guide_results['voter_guide_list_found']:
             voter_guide_list = voter_guide_results['voter_guide_list']
             for voter_guide in voter_guide_list:
                 voter_guide_organization_we_vote_id_already_from_friend.append(voter_guide.organization_we_vote_id)
+        # ####################
         # From SharedItems
         voter_guide_shared_results = retrieve_voter_guides_from_shared_items(
             voter_we_vote_id=voter_we_vote_id,
             maximum_number_to_retrieve=500,
             google_civic_election_id_list=google_civic_election_id_list,
             read_only=True)
+        status += voter_guide_shared_results['status']
         if voter_guide_shared_results['voter_guide_list_found']:
             voter_guide_shared_list = voter_guide_shared_results['voter_guide_list']
             for voter_guide in voter_guide_shared_list:
                 if voter_guide.organization_we_vote_id not in voter_guide_organization_we_vote_id_already_from_friend:
-                    # Includes added variables like this:
-                    # voter_guide.from_shared_item = True
-                    # voter_guide.friends_vs_public = PUBLIC_ONLY
+                    # Includes added variable to signal that this isn't from friend:
+                    voter_guide.from_shared_item = True
                     voter_guide_list.append(voter_guide)
     else:
         voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_generic(
@@ -3388,6 +3391,7 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
             'ballot_item_we_vote_ids_this_org_info_only':   ballot_item_we_vote_ids_this_org_info_only,
             'ballot_item_we_vote_ids_this_org_opposes':     ballot_item_we_vote_ids_this_org_opposes,
             'election_day_text':            voter_guide.election_day_text,
+            'from_shared_item':             hasattr(voter_guide, 'from_shared_item'),
             'google_civic_election_id':     voter_guide.google_civic_election_id,
             'issue_we_vote_ids_linked':     issue_we_vote_ids_linked,
             'last_updated':                 last_updated,
