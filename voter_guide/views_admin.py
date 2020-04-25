@@ -2195,9 +2195,9 @@ def voter_guide_possibility_list_process_view(request):
     which_marking = request.POST.get("which_marking")
 
     # Make sure 'which_marking' is one of the allowed Filter fields
-    if which_marking not in("add_to_active_review", "candidates_missing_from_we_vote",
-                            "cannot_find_endorsements", "capture_detailed_comments",
-                            "hide_from_active_review", "ignore_this_source"):
+    if which_marking not in ("add_to_active_review", "candidates_missing_from_we_vote",
+                             "cannot_find_endorsements", "capture_detailed_comments",
+                             "hide_from_active_review", "ignore_this_source"):
         messages.add_message(request, messages.ERROR,
                              'The filter you are trying to update is not recognized: {which_marking}'
                              ''.format(which_marking=which_marking))

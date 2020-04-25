@@ -51,7 +51,7 @@ def ballot_item_retrieve_view(request):  # ballotItemRetrieve
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
 
-    if not positive_value_exists(kind_of_ballot_item) or kind_of_ballot_item not in(OFFICE, CANDIDATE, MEASURE):
+    if not positive_value_exists(kind_of_ballot_item) or kind_of_ballot_item not in (OFFICE, CANDIDATE, MEASURE):
         status = 'VALID_BALLOT_ITEM_TYPE_MISSING'
         json_data = {
             'status':                   status,

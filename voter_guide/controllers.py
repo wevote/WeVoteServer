@@ -33,6 +33,7 @@ from position.controllers import retrieve_ballot_item_we_vote_ids_for_organizati
 from position.models import ANY_STANCE, FRIENDS_AND_PUBLIC, FRIENDS_ONLY, INFORMATION_ONLY, OPPOSE, \
     PositionEntered, PositionManager, PositionListManager, PUBLIC_ONLY, SUPPORT
 import pytz
+from share.models import ShareManager
 from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
     fetch_voter_we_vote_id_from_voter_id, VoterManager
@@ -3259,19 +3260,45 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
 
     voter_guide_list_manager = VoterGuideListManager()
     if positive_value_exists(voter_we_vote_id):
+        voter_guide_organization_we_vote_id_already_from_friend = []
+        # ####################
+        # From friends
+        voter_guide_list = []
         voter_guide_results = retrieve_voter_guides_from_friends(
-            voter_we_vote_id=voter_we_vote_id, maximum_number_to_retrieve=500,
-            sort_by='twitter_followers_count', sort_order='desc',
-            google_civic_election_id_list=google_civic_election_id_list, read_only=True)
+            voter_we_vote_id=voter_we_vote_id,
+            maximum_number_to_retrieve=500,
+            sort_by='twitter_followers_count',
+            sort_order='desc',
+            google_civic_election_id_list=google_civic_election_id_list,
+            read_only=True)
+        status += voter_guide_results['status']
+        if voter_guide_results['voter_guide_list_found']:
+            voter_guide_list = voter_guide_results['voter_guide_list']
+            for voter_guide in voter_guide_list:
+                voter_guide_organization_we_vote_id_already_from_friend.append(voter_guide.organization_we_vote_id)
+        # ####################
+        # From SharedItems
+        voter_guide_shared_results = retrieve_voter_guides_from_shared_items(
+            voter_we_vote_id=voter_we_vote_id,
+            maximum_number_to_retrieve=500,
+            google_civic_election_id_list=google_civic_election_id_list,
+            read_only=True)
+        status += voter_guide_shared_results['status']
+        if voter_guide_shared_results['voter_guide_list_found']:
+            voter_guide_shared_list = voter_guide_shared_results['voter_guide_list']
+            for voter_guide in voter_guide_shared_list:
+                if voter_guide.organization_we_vote_id not in voter_guide_organization_we_vote_id_already_from_friend:
+                    # Includes added variable to signal that this isn't from friend:
+                    voter_guide.from_shared_item = True
+                    voter_guide_list.append(voter_guide)
     else:
         voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_generic(
             maximum_number_to_retrieve=500, sort_by='twitter_followers_count', sort_order='desc',
             google_civic_election_id_list=google_civic_election_id_list, read_only=True)
-
-    if voter_guide_results['voter_guide_list_found']:
-        voter_guide_list = voter_guide_results['voter_guide_list']
-    else:
-        voter_guide_list = []
+        if voter_guide_results['voter_guide_list_found']:
+            voter_guide_list = voter_guide_results['voter_guide_list']
+        else:
+            voter_guide_list = []
 
     success = voter_guide_results['success']
     status += voter_guide_results['status']
@@ -3293,10 +3320,22 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
 
         organization = results['organization']
 
+        if hasattr(voter_guide, 'from_shared_item') and positive_value_exists(voter_guide.from_shared_item):
+            if hasattr(voter_guide, 'friends_vs_public') \
+                    and voter_guide.friends_vs_public in (FRIENDS_AND_PUBLIC, FRIENDS_ONLY):
+                friends_vs_public_for_this_voter_guide = voter_guide.friends_vs_public
+            else:
+                friends_vs_public_for_this_voter_guide = PUBLIC_ONLY
+        else:
+            friends_vs_public_for_this_voter_guide = friends_vs_public
+
         # Augment the voter guide with a list of ballot_item we_vote_id's that this org supports
         stance_we_are_looking_for = SUPPORT
         ballot_item_support_results = retrieve_ballot_item_we_vote_ids_for_organization_static(
-            organization, google_civic_election_id, stance_we_are_looking_for, friends_vs_public=friends_vs_public,
+            organization,
+            google_civic_election_id,
+            stance_we_are_looking_for,
+            friends_vs_public=friends_vs_public_for_this_voter_guide,
             voter_we_vote_id=voter_we_vote_id)
         if ballot_item_support_results['count']:
             ballot_item_we_vote_ids_this_org_supports = ballot_item_support_results[
@@ -3308,11 +3347,13 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
         # Augment the voter guide with a list of ballot_item we_vote_id's that this org has info about
         stance_we_are_looking_for = INFORMATION_ONLY
         ballot_item_info_only_results = retrieve_ballot_item_we_vote_ids_for_organization_static(
-            organization, google_civic_election_id, stance_we_are_looking_for, friends_vs_public=friends_vs_public,
+            organization,
+            google_civic_election_id,
+            stance_we_are_looking_for,
+            friends_vs_public=friends_vs_public_for_this_voter_guide,
             voter_we_vote_id=voter_we_vote_id)
         if ballot_item_info_only_results['count']:
-            ballot_item_we_vote_ids_this_org_info_only = \
-                ballot_item_info_only_results['ballot_item_we_vote_ids_list']
+            ballot_item_we_vote_ids_this_org_info_only = ballot_item_info_only_results['ballot_item_we_vote_ids_list']
         else:
             ballot_item_we_vote_ids_this_org_info_only = []
         voter_guide.ballot_item_we_vote_ids_this_org_info_only = ballot_item_we_vote_ids_this_org_info_only
@@ -3320,11 +3361,13 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
         # Augment the voter guide with a list of ballot_item we_vote_id's that this org opposes
         stance_we_are_looking_for = OPPOSE
         ballot_item_oppose_results = retrieve_ballot_item_we_vote_ids_for_organization_static(
-            organization, google_civic_election_id, stance_we_are_looking_for, friends_vs_public=friends_vs_public,
+            organization,
+            google_civic_election_id,
+            stance_we_are_looking_for,
+            friends_vs_public=friends_vs_public_for_this_voter_guide,
             voter_we_vote_id=voter_we_vote_id)
         if ballot_item_oppose_results['count']:
-            ballot_item_we_vote_ids_this_org_opposes = ballot_item_oppose_results[
-                'ballot_item_we_vote_ids_list']
+            ballot_item_we_vote_ids_this_org_opposes = ballot_item_oppose_results['ballot_item_we_vote_ids_list']
         else:
             ballot_item_we_vote_ids_this_org_opposes = []
         voter_guide.ballot_item_we_vote_ids_this_org_opposes = ballot_item_we_vote_ids_this_org_opposes
@@ -3348,6 +3391,7 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
             'ballot_item_we_vote_ids_this_org_info_only':   ballot_item_we_vote_ids_this_org_info_only,
             'ballot_item_we_vote_ids_this_org_opposes':     ballot_item_we_vote_ids_this_org_opposes,
             'election_day_text':            voter_guide.election_day_text,
+            'from_shared_item':             hasattr(voter_guide, 'from_shared_item'),
             'google_civic_election_id':     voter_guide.google_civic_election_id,
             'issue_we_vote_ids_linked':     issue_we_vote_ids_linked,
             'last_updated':                 last_updated,
@@ -3372,10 +3416,6 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
         }
 
         voter_guides.append(one_voter_guide.copy())
-        # if positive_value_exists(maximum_number_to_retrieve):
-        #     number_added_to_list += 1
-        #     if number_added_to_list >= maximum_number_to_retrieve:
-        #         break
 
     number_retrieved = len(voter_guides)
     json_data = {
@@ -4496,11 +4536,14 @@ def retrieve_voter_guide_followers_by_organization_we_vote_id(organization_we_vo
 
 
 def retrieve_voter_guides_from_friends(
-        voter_we_vote_id='', maximum_number_to_retrieve=0, sort_by='', sort_order='',
+        voter_we_vote_id='',
+        maximum_number_to_retrieve=0,
+        sort_by='',
+        sort_order='',
         google_civic_election_id_list=[],
         read_only=False):
     """
-    Get the voter guides for orgs that we found by looking at the positions for an org found based on time span
+    Get the voter guides for friends of the voter
     """
     status = ""
     voter_guide_list = []
@@ -4632,6 +4675,160 @@ def retrieve_voter_guides_from_friends(
         'status':                       status,
         'voter_guide_list_found':       voter_guide_list_found,
         'voter_guide_list':             voter_guide_list_filtered,
+    }
+    return results
+
+
+def retrieve_voter_guides_from_shared_items(
+        voter_we_vote_id='',
+        maximum_number_to_retrieve=0,
+        sort_by='',
+        sort_order='',
+        google_civic_election_id_list=[],
+        read_only=False):
+    """
+    Get the voter guides for the people who have shared with you
+    """
+    status = ""
+    voter_guide_list = []
+    voter_guide_list_found = False
+    if not positive_value_exists(maximum_number_to_retrieve):
+        maximum_number_to_retrieve = 30
+
+    share_manager = ShareManager()
+    permission_results = share_manager.retrieve_shared_permissions_granted_list(
+        shared_to_voter_we_vote_id=voter_we_vote_id,
+        current_year_only=True,
+        read_only=True)
+    shared_permissions_granted_list = []
+    shared_by_organization_we_vote_id_list = []
+    if permission_results['shared_permissions_granted_list_found']:
+        shared_permissions_granted_list = permission_results['shared_permissions_granted_list']
+        for shared_permissions_granted in shared_permissions_granted_list:
+            if positive_value_exists(shared_permissions_granted.shared_by_organization_we_vote_id) \
+                    and shared_permissions_granted.shared_by_organization_we_vote_id \
+                    not in shared_by_organization_we_vote_id_list:
+                shared_by_organization_we_vote_id_list.append(
+                    shared_permissions_granted.shared_by_organization_we_vote_id)
+
+    if len(shared_by_organization_we_vote_id_list) == 0:
+        success = True
+        status += "NO_SHARED_BY_ORGANIZATIONS_SO_NO_VOTER_GUIDES "
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+    try:
+        if read_only:
+            voter_guide_query = VoterGuide.objects.using('readonly').all()
+        else:
+            voter_guide_query = VoterGuide.objects.all()
+        # As of August 2018, we no longer want to support Vote Smart ratings voter guides
+        voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
+        voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+
+        voter_guide_query = voter_guide_query.filter(
+            organization_we_vote_id__in=shared_by_organization_we_vote_id_list)
+
+        if positive_value_exists(len(google_civic_election_id_list)):
+            status += "CONVERTING_GOOGLE_CIVIC_ELECTION_ID_LIST_TO_INTEGER "
+            google_civic_election_id_integer_list = []
+            for google_civic_election_id in google_civic_election_id_list:
+                google_civic_election_id_integer_list.append(convert_to_int(google_civic_election_id))
+            voter_guide_query = voter_guide_query.filter(
+                google_civic_election_id__in=google_civic_election_id_integer_list)
+
+        # We retrieve anyone you are friends with, even if they are public figures
+
+        if not positive_value_exists(len(google_civic_election_id_list)):
+            # We also want to exclude voter guides with election_day_text smaller than today's date
+            status += "EXCLUDE_PAST_ELECTION_DAYS "
+            timezone = pytz.timezone("America/Los_Angeles")
+            datetime_now = timezone.localize(datetime.now())
+            two_days = timedelta(days=2)
+            datetime_two_days_ago = datetime_now - two_days
+            earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
+            voter_guide_query = voter_guide_query.exclude(election_day_text__lt=earliest_date_to_show)
+            voter_guide_query = voter_guide_query.exclude(election_day_text__isnull=True)
+
+        if sort_order == 'desc':
+            voter_guide_query = voter_guide_query.order_by('-' + sort_by)[:maximum_number_to_retrieve]
+        elif positive_value_exists(sort_by):
+            voter_guide_query = voter_guide_query.order_by(sort_by)[:maximum_number_to_retrieve]
+        else:
+            voter_guide_query = voter_guide_query[:maximum_number_to_retrieve]
+
+        voter_guide_list = list(voter_guide_query)
+        if len(voter_guide_list):
+            voter_guide_list_found = True
+            status += 'VOTER_GUIDE_FOUND_VOTER_GUIDES_FROM_SHARED_ITEMS '
+        else:
+            status += 'NO_VOTER_GUIDES_FOUND_VOTER_GUIDES_FROM_SHARED_ITEMS '
+        success = True
+    except Exception as e:
+        handle_record_not_found_exception(e, logger=logger)
+        status += 'RETRIEVE_VOTER_GUIDES_FROM_SHARED_ITEMS-FAILED ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    # Since we are in the function that retrieves voter guides for voterGuidesFromFriendsUpcomingRetrieve
+    # heal the data if we haven't moved the voter_we_vote_id into the voter_guide
+    if voter_guide_list_found:
+        voter_manager = VoterManager()
+        for one_voter_guide in voter_guide_list:
+            if not positive_value_exists(one_voter_guide.voter_we_vote_id):
+                if read_only:
+                    # Retrieve fresh object that will allow us to save
+                    voter_guide_manager = VoterGuideManager()
+                    voter_guide_results = voter_guide_manager.retrieve_voter_guide(voter_guide_id=one_voter_guide.id)
+                    if voter_guide_results['voter_guide_found']:
+                        one_voter_guide = voter_guide_results['voter_guide']
+                results = voter_manager.retrieve_voter_by_organization_we_vote_id(
+                    one_voter_guide.organization_we_vote_id)
+                if results['voter_found']:
+                    try:
+                        one_voter_guide.voter_we_vote_id = results['voter'].we_vote_id
+                        one_voter_guide.save()
+                    except Exception as e:
+                        status += 'SHARED_ITEMS-COULD_NOT_UPDATE_VOTER_WE_VOTE_ID ' + str(e) + ' '
+    else:
+        voter_guide_list = []
+
+    # # If we have multiple voter guides for one org, we only want to show the most recent
+    # if voter_guide_list_found:
+    #     if not positive_value_exists(len(google_civic_election_id_list)):
+    #         # If we haven't specified multiple elections, then remove old voter guides
+    #         voter_guide_list_manager = VoterGuideListManager()
+    #         voter_guide_list_filtered = \
+    #             voter_guide_list_manager.remove_older_voter_guides_for_each_org(voter_guide_list)
+    #     else:
+    #         voter_guide_list_filtered = voter_guide_list
+    # else:
+    #     voter_guide_list_filtered = []
+
+    voter_guide_list_augmented = []
+    for voter_guide in voter_guide_list:
+        include_friends_only_positions = False
+        voter_guide.from_shared_item = True
+        for shared_permissions_granted in shared_permissions_granted_list:
+            if voter_guide.organization_we_vote_id == shared_permissions_granted.shared_by_organization_we_vote_id:
+                include_friends_only_positions = shared_permissions_granted.include_friends_only_positions
+                break
+        if include_friends_only_positions:
+            voter_guide.friends_vs_public = FRIENDS_AND_PUBLIC
+        else:
+            voter_guide.friends_vs_public = PUBLIC_ONLY
+        voter_guide_list_augmented.append(voter_guide)
+    voter_guide_list_found = len(voter_guide_list_augmented)
+
+    results = {
+        'success':                      success,
+        'status':                       status,
+        'voter_guide_list_found':       voter_guide_list_found,
+        'voter_guide_list':             voter_guide_list_augmented,
     }
     return results
 
