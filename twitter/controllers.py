@@ -339,7 +339,10 @@ def fetch_number_of_candidates_needing_twitter_search():
     return candidate_count
 
 
-def retrieve_possible_twitter_handles_in_bulk():
+def retrieve_possible_twitter_handles_in_bulk(
+        google_civic_election_id=0,
+        state_code='',
+        limit=0):
     status = ""
     success = True
 
@@ -349,10 +352,13 @@ def retrieve_possible_twitter_handles_in_bulk():
     candidate_queryset = CandidateCampaign.objects.all()  # Cannot be readonly
     # Limit this search to upcoming_elections only
     google_civic_election_id_list = []
-    results = election_manager.retrieve_upcoming_elections()
-    election_list = results['election_list']
-    for one_election in election_list:
-        google_civic_election_id_list.append(one_election.google_civic_election_id)
+    if positive_value_exists(google_civic_election_id):
+        google_civic_election_id_list.append(google_civic_election_id)
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+        for one_election in election_list:
+            google_civic_election_id_list.append(one_election.google_civic_election_id)
     office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
         host_google_civic_election_id_list=google_civic_election_id_list)
     candidate_queryset = candidate_queryset.filter(
@@ -360,6 +366,9 @@ def retrieve_possible_twitter_handles_in_bulk():
         Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
     candidate_queryset = candidate_queryset.filter(
         Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
+    if positive_value_exists(state_code):
+        candidate_queryset = candidate_queryset.filter(state_code__iexact=state_code)
+
     # Exclude candidates we have already have TwitterLinkPossibility data for
     try:
         twitter_possibility_list = TwitterLinkPossibility.objects. \
@@ -388,7 +397,10 @@ def retrieve_possible_twitter_handles_in_bulk():
     # Since we run one batch per minute, that means that 900 / 15 = 60
     # retrieve_possible_twitter_handles *might* search as many as 3 times per candidate, so we limit the number of
     # candidates we analyze to 20 per minute
-    number_of_candidates_limit = 20
+    if positive_value_exists(limit):
+        number_of_candidates_limit = limit
+    else:
+        number_of_candidates_limit = 20
     candidates_to_analyze = candidate_queryset.count()
     candidate_list = candidate_queryset[:number_of_candidates_limit]
 
