@@ -962,17 +962,24 @@ class OrganizationManager(models.Manager):
             organization_website_search, organization_twitter_search,
             organization_name=False, organization_description=False,
             organization_website=False,
-            organization_twitter_handle=False, organization_email=False,
-            organization_facebook=False, organization_instagram_handle=False,
+            organization_twitter_handle=False,
+            organization_email=False,
+            organization_facebook=False,
+            organization_instagram_handle=False,
             organization_image=False,
             organization_type=False, refresh_from_twitter=False,
             facebook_id=False, facebook_email=False,
             facebook_profile_image_url_https=False,
             facebook_background_image_url_https=False,
-            chosen_domain_string=False, chosen_google_analytics_account_number=False,
-            chosen_html_verification_string=False, chosen_hide_we_vote_logo=None,
+            chosen_domain_string=False,
+            chosen_google_analytics_account_number=False,
+            chosen_html_verification_string=False,
+            chosen_hide_we_vote_logo=None,
+            chosen_ready_introduction_text=False,
+            chosen_ready_introduction_title=False,
             chosen_social_share_description=False,
-            chosen_subdomain_string=False, chosen_subscription_plan=False,
+            chosen_subdomain_string=False,
+            chosen_subscription_plan=False,
     ):
         """
         Either update or create an organization entry.
@@ -998,12 +1005,13 @@ class OrganizationManager(models.Manager):
         :param chosen_google_analytics_account_number:
         :param chosen_html_verification_string:
         :param chosen_hide_we_vote_logo:
+        :param chosen_ready_introduction_text:
+        :param chosen_ready_introduction_title:
         :param chosen_social_share_description:
         :param chosen_subdomain_string:
         :param chosen_subscription_plan:
         :return:
         """
-
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         organization_on_stage_found = False
@@ -1035,6 +1043,10 @@ class OrganizationManager(models.Manager):
             if chosen_google_analytics_account_number is not False else False
         chosen_html_verification_string = chosen_html_verification_string.strip() \
             if chosen_html_verification_string is not False else False
+        # if isinstance(chosen_ready_introduction_text, str):
+        #     chosen_ready_introduction_text = chosen_ready_introduction_text.strip()
+        # if isinstance(chosen_ready_introduction_title, str):
+        #     chosen_ready_introduction_title = chosen_ready_introduction_title.strip()
         chosen_social_share_description = chosen_social_share_description.strip() \
             if chosen_social_share_description is not False else False
         chosen_subdomain_string = chosen_subdomain_string.strip() if chosen_subdomain_string is not False else False
@@ -1139,6 +1151,12 @@ class OrganizationManager(models.Manager):
                 if chosen_hide_we_vote_logo is not None:
                     value_changed = True
                     organization_on_stage.chosen_hide_we_vote_logo = positive_value_exists(chosen_hide_we_vote_logo)
+                if chosen_ready_introduction_text is not False:
+                    value_changed = True
+                    organization_on_stage.chosen_ready_introduction_text = chosen_ready_introduction_text
+                if chosen_ready_introduction_title is not False:
+                    value_changed = True
+                    organization_on_stage.chosen_ready_introduction_title = chosen_ready_introduction_title
                 if chosen_social_share_description is not False:
                     value_changed = True
                     organization_on_stage.chosen_social_share_description = chosen_social_share_description
@@ -1351,6 +1369,12 @@ class OrganizationManager(models.Manager):
                     if chosen_hide_we_vote_logo is not None:
                         value_changed = True
                         organization_on_stage.chosen_hide_we_vote_logo = chosen_hide_we_vote_logo
+                    if chosen_ready_introduction_text is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_ready_introduction_text = chosen_ready_introduction_text
+                    if chosen_ready_introduction_title is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_ready_introduction_title = chosen_ready_introduction_title
                     if chosen_social_share_description is not False:
                         value_changed = True
                         organization_on_stage.chosen_social_share_description = chosen_social_share_description
@@ -1499,6 +1523,12 @@ class OrganizationManager(models.Manager):
                     if chosen_hide_we_vote_logo is not None:
                         value_changed = True
                         organization_on_stage.chosen_hide_we_vote_logo = chosen_hide_we_vote_logo
+                    if chosen_ready_introduction_text is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_ready_introduction_text = chosen_ready_introduction_text
+                    if chosen_ready_introduction_title is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_ready_introduction_title = chosen_ready_introduction_title
                     if chosen_social_share_description is not False:
                         value_changed = True
                         organization_on_stage.chosen_social_share_description = chosen_social_share_description
@@ -2722,6 +2752,9 @@ class Organization(models.Model):
         verbose_name='url of client logo', max_length=255, blank=True, null=True)
     # Client chosen pass code that needs to be sent with organization-focused API calls
     chosen_organization_api_pass_code = models.TextField(null=True, blank=True)
+    # Ready? page title and text
+    chosen_ready_introduction_title = models.CharField(max_length=255, null=True, blank=True)
+    chosen_ready_introduction_text = models.TextField(null=True, blank=True)
     # Client configured text that will show in index.html
     chosen_social_share_description = models.TextField(null=True, blank=True)
     chosen_social_share_master_image_url_https = models.URLField(
