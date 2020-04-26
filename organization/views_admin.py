@@ -899,6 +899,8 @@ def organization_edit_account_process_view(request):
     chosen_hide_we_vote_logo = request.POST.get('chosen_hide_we_vote_logo', None)
     chosen_logo_url_https = request.POST.get('chosen_logo_url_https', None)
     chosen_organization_api_pass_code = request.POST.get('chosen_organization_api_pass_code', None)
+    chosen_ready_introduction_text = request.POST.get('chosen_ready_introduction_text', None)
+    chosen_ready_introduction_title = request.POST.get('chosen_ready_introduction_title', None)
     chosen_social_share_description = request.POST.get('chosen_social_share_description', None)
     chosen_social_share_image_256x256_url_https = request.POST.get('chosen_social_share_image_256x256_url_https', None)
     chosen_subdomain_string = request.POST.get('chosen_subdomain_string', None)
@@ -946,6 +948,10 @@ def organization_edit_account_process_view(request):
                 organization_on_stage.chosen_logo_url_https = chosen_logo_url_https.strip()
             if chosen_organization_api_pass_code is not None:
                 organization_on_stage.chosen_organization_api_pass_code = chosen_organization_api_pass_code.strip()
+            if chosen_ready_introduction_text is not None:
+                organization_on_stage.chosen_ready_introduction_text = chosen_ready_introduction_text
+            if chosen_ready_introduction_title is not None:
+                organization_on_stage.chosen_ready_introduction_title = chosen_ready_introduction_title
             if chosen_social_share_description is not None:
                 organization_on_stage.chosen_social_share_description = chosen_social_share_description.strip()
             if chosen_social_share_image_256x256_url_https is not None:
@@ -954,7 +960,7 @@ def organization_edit_account_process_view(request):
             if chosen_subdomain_string is not None:
                 if positive_value_exists(chosen_subdomain_string):
                     domain_results = subdomain_string_available(chosen_subdomain_string,
-                                                                 requesting_organization_id=organization_id)
+                                                                requesting_organization_id=organization_id)
                     if domain_results['subdomain_string_available']:
                         organization_on_stage.chosen_subdomain_string = chosen_subdomain_string.strip()
                     else:

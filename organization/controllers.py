@@ -1710,6 +1710,8 @@ def organization_retrieve_for_api(  # organizationRetrieve
             'chosen_html_verification_string':  '',
             'chosen_hide_we_vote_logo':         '',
             'chosen_logo_url_https':            '',
+            'chosen_ready_introduction_text':   '',
+            'chosen_ready_introduction_title':  '',
             'chosen_social_share_description':  '',
             'chosen_social_share_image_256x256_url_https': '',
             'chosen_social_share_master_image_url_https': '',
@@ -1784,8 +1786,10 @@ def organization_retrieve_for_api(  # organizationRetrieve
             'chosen_html_verification_string':  organization.chosen_html_verification_string,
             'chosen_hide_we_vote_logo':         organization.chosen_hide_we_vote_logo,
             'chosen_logo_url_https':            organization.chosen_logo_url_https,
+            'chosen_ready_introduction_text':   organization.chosen_ready_introduction_text,
+            'chosen_ready_introduction_title':  organization.chosen_ready_introduction_title,
             'chosen_social_share_description':  organization.chosen_social_share_description,
-            'chosen_social_share_master_image_url_https':         organization.chosen_social_share_master_image_url_https,
+            'chosen_social_share_master_image_url_https':   organization.chosen_social_share_master_image_url_https,
             'chosen_social_share_image_256x256_url_https':  organization.chosen_social_share_image_256x256_url_https,
             'chosen_subdomain_string':          organization.chosen_subdomain_string,
             'chosen_subscription_plan':         organization.chosen_subscription_plan,
@@ -1838,6 +1842,8 @@ def organization_retrieve_for_api(  # organizationRetrieve
             'chosen_html_verification_string':  '',
             'chosen_hide_we_vote_logo':            '',
             'chosen_logo_url_https':            '',
+            'chosen_ready_introduction_text':   '',
+            'chosen_ready_introduction_title':  '',
             'chosen_social_share_description':  '',
             'chosen_social_share_image_256x256_url_https': '',
             'chosen_social_share_master_image_url_https': '',
@@ -1869,17 +1875,31 @@ def organization_retrieve_for_api(  # organizationRetrieve
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def organization_save_for_api(voter_device_id, organization_id, organization_we_vote_id,   # organizationSave
-                              organization_name, organization_description,
-                              organization_email, organization_website,
-                              organization_twitter_handle, organization_facebook, organization_instagram_handle,
-                              organization_image, organization_type,
-                              refresh_from_twitter,
-                              facebook_id, facebook_email, facebook_profile_image_url_https,
-                              chosen_domain_string, chosen_google_analytics_account_number,
-                              chosen_html_verification_string, chosen_hide_we_vote_logo,
-                              chosen_social_share_description,
-                              chosen_subdomain_string, chosen_subscription_plan):
+def organization_save_for_api(voter_device_id='',  # organizationSave
+                              organization_id=0,
+                              organization_we_vote_id='',
+                              organization_name=False,
+                              organization_description=False,
+                              organization_email=False,
+                              organization_website=False,
+                              organization_twitter_handle=False,
+                              organization_facebook=False,
+                              organization_instagram_handle=False,
+                              organization_image=False,
+                              organization_type=False,
+                              refresh_from_twitter=False,
+                              facebook_id=False,
+                              facebook_email=False,
+                              facebook_profile_image_url_https=False,
+                              chosen_domain_string=False,
+                              chosen_google_analytics_account_number=False,
+                              chosen_html_verification_string=False,
+                              chosen_hide_we_vote_logo=None,
+                              chosen_ready_introduction_text=False,
+                              chosen_ready_introduction_title=False,
+                              chosen_social_share_description=False,
+                              chosen_subdomain_string=False,
+                              chosen_subscription_plan=False):
     """
     We use this to store displayable organization data
     TODO: Make sure voter's can't change their Twitter handles here.
@@ -1903,6 +1923,8 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
     :param chosen_google_analytics_account_number:
     :param chosen_html_verification_string:
     :param chosen_hide_we_vote_logo:
+    :param chosen_ready_introduction_text:
+    :param chosen_ready_introduction_title:
     :param chosen_social_share_description:
     :param chosen_subdomain_string:
     :param chosen_subscription_plan:
@@ -1935,7 +1957,9 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'chosen_html_verification_string':  chosen_html_verification_string,
             'chosen_hide_we_vote_logo':     chosen_hide_we_vote_logo,
             'chosen_logo_url_https':        '',
-            'chosen_social_share_description':  chosen_social_share_description,
+            'chosen_ready_introduction_text': chosen_ready_introduction_text,
+            'chosen_ready_introduction_title': chosen_ready_introduction_title,
+            'chosen_social_share_description': chosen_social_share_description,
             'chosen_social_share_image_256x256_url_https': '',
             'chosen_subdomain_string':      chosen_subdomain_string,
             'chosen_subscription_plan':     chosen_subscription_plan,
@@ -1970,6 +1994,8 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'chosen_html_verification_string':  chosen_html_verification_string,
             'chosen_hide_we_vote_logo':     chosen_hide_we_vote_logo,
             'chosen_logo_url_https':        '',
+            'chosen_ready_introduction_text': chosen_ready_introduction_text,
+            'chosen_ready_introduction_title': chosen_ready_introduction_title,
             'chosen_social_share_description':  chosen_social_share_description,
             'chosen_social_share_image_256x256_url_https': '',
             'chosen_subdomain_string':      chosen_subdomain_string,
@@ -2045,23 +2071,33 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             chosen_subdomain_string_previous = organization_previous_state.chosen_subdomain_string
 
     save_results = organization_manager.update_or_create_organization(
-        organization_id=organization_id, we_vote_id=organization_we_vote_id,
-        organization_website_search=organization_website, organization_twitter_search=organization_twitter_handle,
-        organization_name=organization_name, organization_description=organization_description,
+        organization_id=organization_id,
+        we_vote_id=organization_we_vote_id,
+        organization_website_search=organization_website,
+        organization_twitter_search=organization_twitter_handle,
+        organization_name=organization_name,
+        organization_description=organization_description,
         organization_website=organization_website,
-        organization_twitter_handle=organization_twitter_handle, organization_email=organization_email,
-        organization_facebook=organization_facebook, organization_instagram_handle=organization_instagram_handle,
+        organization_twitter_handle=organization_twitter_handle,
+        organization_email=organization_email,
+        organization_facebook=organization_facebook,
+        organization_instagram_handle=organization_instagram_handle,
         organization_image=organization_image,
-        organization_type=organization_type, refresh_from_twitter=refresh_from_twitter,
-        facebook_id=facebook_id, facebook_email=facebook_email,
+        organization_type=organization_type,
+        refresh_from_twitter=refresh_from_twitter,
+        facebook_id=facebook_id,
+        facebook_email=facebook_email,
         facebook_profile_image_url_https=facebook_profile_image_url_https,
         facebook_background_image_url_https=facebook_background_image_url_https,
         chosen_domain_string=chosen_domain_string,
         chosen_google_analytics_account_number=chosen_google_analytics_account_number,
         chosen_html_verification_string=chosen_html_verification_string,
         chosen_hide_we_vote_logo=chosen_hide_we_vote_logo,
+        chosen_ready_introduction_text=chosen_ready_introduction_text,
+        chosen_ready_introduction_title=chosen_ready_introduction_title,
         chosen_social_share_description=chosen_social_share_description,
-        chosen_subdomain_string=chosen_subdomain_string, chosen_subscription_plan=chosen_subscription_plan,
+        chosen_subdomain_string=chosen_subdomain_string,
+        chosen_subscription_plan=chosen_subscription_plan,
     )
 
     success = save_results['success']
@@ -2183,8 +2219,10 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'chosen_favicon_url_https':         organization.chosen_favicon_url_https,
             'chosen_google_analytics_account_number': organization.chosen_google_analytics_account_number,
             'chosen_html_verification_string':  organization.chosen_html_verification_string,
-            'chosen_hide_we_vote_logo':            organization.chosen_hide_we_vote_logo,
+            'chosen_hide_we_vote_logo':         organization.chosen_hide_we_vote_logo,
             'chosen_logo_url_https':            organization.chosen_logo_url_https,
+            'chosen_ready_introduction_text':   organization.chosen_ready_introduction_text,
+            'chosen_ready_introduction_title':  organization.chosen_ready_introduction_title,
             'chosen_social_share_description':  organization.chosen_social_share_description,
             'chosen_social_share_image_256x256_url_https': organization.chosen_social_share_image_256x256_url_https,
             'chosen_subdomain_string':          organization.chosen_subdomain_string,
@@ -2239,6 +2277,8 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'chosen_html_verification_string':  chosen_html_verification_string,
             'chosen_hide_we_vote_logo':            chosen_hide_we_vote_logo,
             'chosen_logo_url_https':            '',
+            'chosen_ready_introduction_text': chosen_ready_introduction_text,
+            'chosen_ready_introduction_title': chosen_ready_introduction_title,
             'chosen_social_share_description':  chosen_social_share_description,
             'chosen_social_share_image_256x256_url_https': '',
             'chosen_subdomain_string':          chosen_subdomain_string,
@@ -2554,6 +2594,8 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
     success = True
     chosen_hide_we_vote_logo = False
     chosen_logo_url_https = ''
+    chosen_ready_introduction_text = ''
+    chosen_ready_introduction_title = ''
     features_provided_bitmap = 0
     organization_we_vote_id = ''
     reserved_by_we_vote = False
@@ -2564,6 +2606,8 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
             'status':                   status,
             'chosen_hide_we_vote_logo': chosen_hide_we_vote_logo,
             'chosen_logo_url_https':    chosen_logo_url_https,
+            'chosen_ready_introduction_text':   chosen_ready_introduction_text,
+            'chosen_ready_introduction_title':  chosen_ready_introduction_title,
             'features_provided_bitmap': features_provided_bitmap,
             'hostname':                 hostname,
             'organization_we_vote_id':  organization_we_vote_id,
@@ -2585,6 +2629,8 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
             'status':                   status,
             'chosen_hide_we_vote_logo': chosen_hide_we_vote_logo,
             'chosen_logo_url_https':    chosen_logo_url_https,
+            'chosen_ready_introduction_text':   chosen_ready_introduction_text,
+            'chosen_ready_introduction_title':  chosen_ready_introduction_title,
             'features_provided_bitmap': features_provided_bitmap,
             'hostname':                 hostname,
             'organization_we_vote_id':  organization_we_vote_id,
@@ -2599,6 +2645,8 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
     if organization_found:
         chosen_hide_we_vote_logo = organization.chosen_hide_we_vote_logo
         chosen_logo_url_https = organization.chosen_logo_url_https
+        chosen_ready_introduction_text = organization.chosen_ready_introduction_text
+        chosen_ready_introduction_title = organization.chosen_ready_introduction_title
         features_provided_bitmap = organization.features_provided_bitmap
         organization_we_vote_id = organization.we_vote_id
     else:
@@ -2618,6 +2666,8 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
         'status':                   status,
         'chosen_hide_we_vote_logo': chosen_hide_we_vote_logo,
         'chosen_logo_url_https':    chosen_logo_url_https,
+        'chosen_ready_introduction_text': chosen_ready_introduction_text,
+        'chosen_ready_introduction_title': chosen_ready_introduction_title,
         'features_provided_bitmap': features_provided_bitmap,
         'hostname':                 hostname,
         'organization_we_vote_id':  organization_we_vote_id,
