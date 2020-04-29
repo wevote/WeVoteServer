@@ -655,6 +655,7 @@ def office_summary_view(request, office_id):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', "")
     office_search = request.GET.get('office_search', "")
+    office_manager = ContestOfficeManager()
 
     try:
         contest_office = ContestOffice.objects.get(id=office_id)
@@ -666,6 +667,15 @@ def office_summary_view(request, office_id):
     except ContestOffice.DoesNotExist:
         # This is fine, create new
         pass
+
+    contest_office_visiting_election_list = []
+    results = office_manager.retrieve_election_ids_office_is_visiting(
+        contest_office_we_vote_id=contest_office.we_vote_id)
+    if results['contest_office_visiting_list_found']:
+        contest_office_visiting_election_id_list = results['contest_office_visiting_election_id_list']
+        election_query = Election.objects.filter(google_civic_election_id__in=contest_office_visiting_election_id_list)\
+            .using('readonly')
+        contest_office_visiting_election_list = list(election_query)
 
     candidate_list_modified = []
     position_list_manager = PositionListManager()
@@ -776,6 +786,7 @@ def office_summary_view(request, office_id):
             'office_search':            office_search,
             'office_search_results_list':   office_search_results_list_modified,
             'google_civic_election_id': google_civic_election_id,
+            'contest_office_visiting_election_list': contest_office_visiting_election_list,
         }
     else:
         template_values = {
@@ -785,8 +796,31 @@ def office_summary_view(request, office_id):
 
 
 @login_required
+def delete_office_visiting_process_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    office_id = request.GET.get('office_id', '')
+    office_we_vote_id = request.GET.get('office_we_vote_id', '')
+    host_google_civic_election_id = convert_to_int(request.GET.get('host_google_civic_election_id', 0))
+
+    try:
+        ContestOfficeVisitingOtherElection.objects.filter(
+            contest_office_we_vote_id__iexact=office_we_vote_id,
+            host_google_civic_election_id=host_google_civic_election_id).delete()
+    except ContestOffice.MultipleObjectsReturned as e:
+        pass
+    except ContestOffice.DoesNotExist:
+        pass
+    return HttpResponseRedirect(reverse('office:office_summary', args=(office_id,)))
+
+
+@login_required
 def office_delete_process_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

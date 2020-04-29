@@ -176,7 +176,7 @@ span.wrap_word { word-break: break-word; }
         {% endif %}
         <a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
             Add New Office</a> (in new window)&nbsp;&nbsp;&nbsp;
-        {% if candidate and candidate.contest_office_we_vote_id %}
+        {% if candidate and candidate.contest_office_id %}
             <a href="{% url 'office:office_summary' office_id=candidate.contest_office_id %}" target="_blank">
                 View this Office</a> (in new window)
         {% endif %}
@@ -232,6 +232,8 @@ span.wrap_word { word-break: break-word; }
 {#               value="{% if candidate %}{{ candidate.maplight_id|default_if_none:"" }}{% else %}{{ maplight_id|default_if_none:"" }}{% endif %}" />#}
 {#    </div>#}
 {#</div>#}
+
+<a name="twitter_link_possibility_list" />
 
 <div class="form-group">
     <label for="candidate_twitter_handle_id" class="col-sm-3 control-label">Twitter Handle</label>
@@ -576,7 +578,7 @@ span.wrap_word { word-break: break-word; }
             <td>{{ candidate.get_candidate_state }}</td>
             <td>{{ candidate.election.election_name }}</td>
             <td>
-        {% if candidate.office %}
+        {% if candidate.office and candidate.office.id %}
                 <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
         {% else %}
             (office missing)
