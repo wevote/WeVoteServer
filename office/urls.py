@@ -13,6 +13,8 @@ urlpatterns = [
     url(r'^compare_two_offices/$',
         views_admin.compare_two_offices_for_merge_view, name='compare_two_offices_for_merge'),
     url(r'^delete/$', views_admin.office_delete_process_view, name='office_delete_process'),
+    url(r'^delete_office_visiting/$',
+        views_admin.delete_office_visiting_process_view, name='delete_office_visiting_process'),
     url(r'^(?P<office_id>[0-9]+)/find_duplicate_office/$',
         views_admin.find_duplicate_office_view, name='find_duplicate_office'),
     url(r'^duplicate_offices/$',

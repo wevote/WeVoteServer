@@ -263,6 +263,46 @@ class ContestOfficeManager(models.Model):
             return results['contest_office_we_vote_id']
         return 0
 
+    def retrieve_election_ids_office_is_visiting(self, contest_office_we_vote_id='', read_only=True):
+        """
+        Get a list of election ids this office is "visiting"
+        :param contest_office_we_vote_id:
+        :param read_only:
+        :return:
+        """
+        contest_office_visiting_list = []
+        try:
+            if positive_value_exists(read_only):
+                contest_office_visiting_list_query = ContestOfficeVisitingOtherElection.objects.using('readonly').all()
+            else:
+                contest_office_visiting_list_query = ContestOfficeVisitingOtherElection.objects.all()
+            contest_office_visiting_list_query = contest_office_visiting_list_query.filter(
+                    contest_office_we_vote_id__iexact=contest_office_we_vote_id,
+                )
+            contest_office_visiting_list = list(contest_office_visiting_list_query)
+            success = True
+            status = "CONTEST_OFFICE_VISITING_LIST_RETRIEVED_BY_OFFICE_WE_VOTE_ID "
+        except ContestOfficeVisitingOtherElection.DoesNotExist:
+            # No data found. Try again below
+            success = True
+            status = 'NO_CONTEST_OFFICE_VISITING_LIST_RETRIEVED_BY_OFFICE_WE_VOTE_ID_DoesNotExist '
+        except Exception as e:
+            success = False
+            status = "CONTEST_OFFICE_VISITING_LIST_ERROR: " + str(e) + " "
+
+        contest_office_visiting_list_found = positive_value_exists(len(contest_office_visiting_list))
+        contest_office_visiting_election_id_list = []
+        for one_entry in contest_office_visiting_list:
+            contest_office_visiting_election_id_list.append(one_entry.host_google_civic_election_id)
+        results = {
+            'success':                                   success,
+            'status':                                    status,
+            'contest_office_visiting_list_found':        contest_office_visiting_list_found,
+            'contest_office_visiting_list':              contest_office_visiting_list,
+            'contest_office_visiting_election_id_list':  contest_office_visiting_election_id_list,
+        }
+        return results
+
     def retrieve_offices_are_not_duplicates_list(self, contest_office_we_vote_id, read_only=True):
         """
         Get a list of other office_we_vote_id's that are not duplicates
