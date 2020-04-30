@@ -412,7 +412,7 @@
                                     <input id="choose_{{ forloop.counter }}" type="submit" value="Choose and Update" /> <span class="glyphicon glyphicon-new-window"></span>
                                 </form>
                             {% else %}
-                            (<a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_all_twitter_search_results=1" target="_blank">
+                            (<a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_all_twitter_search_results=1#twitter_link_possibility_list" target="_blank">
                                 See all Options
                                 {% if candidate.twitter_possibility_list_count %}
                                   ({{ candidate.twitter_possibility_list_count }})

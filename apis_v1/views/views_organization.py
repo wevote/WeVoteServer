@@ -144,6 +144,7 @@ def organization_index_view(request, organization_incoming_domain=''):  # organi
         features_provided_bitmap = organization.features_provided_bitmap
         chosen_hide_we_vote_logo = organization.chosen_hide_we_vote_logo
         chosen_html_verification_string = organization.chosen_html_verification_string
+        chosen_prevent_sharing_opinions = organization.chosen_prevent_sharing_opinions
         if not positive_value_exists(features_provided_bitmap) \
                 and positive_value_exists(organization.chosen_feature_package) \
                 and organization.chosen_feature_package not in 'FREE':
@@ -211,6 +212,7 @@ def organization_index_view(request, organization_incoming_domain=''):  # organi
         'chosen_favicon_url_https':         chosen_favicon_url_https,
         'chosen_google_analytics_account_number': chosen_google_analytics_account_number,
         'chosen_html_verification_string':  chosen_html_verification_string,
+        'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
         'chosen_social_share_description':  chosen_social_share_description,
         'chosen_social_share_master_image_url_https': chosen_social_share_master_image_url_https,
         'hide_favicon':                     hide_favicon,
@@ -390,6 +392,7 @@ def organization_save_view(request):  # organizationSave
     chosen_google_analytics_account_number = request.GET.get('chosen_google_analytics_account_number', False)
     chosen_html_verification_string = request.GET.get('chosen_html_verification_string', False)
     chosen_hide_we_vote_logo = request.GET.get('chosen_hide_we_vote_logo', None)
+    chosen_prevent_sharing_opinions = request.GET.get('chosen_prevent_sharing_opinions', None)
     chosen_ready_introduction_text = request.GET.get('chosen_ready_introduction_text', False)
     chosen_ready_introduction_title = request.GET.get('chosen_ready_introduction_title', False)
     chosen_social_share_description = request.GET.get('chosen_social_share_description', False)
@@ -443,6 +446,7 @@ def organization_save_view(request):  # organizationSave
             'chosen_html_verification_string': '',
             'chosen_hide_we_vote_logo': '',
             'chosen_logo_url_https': '',
+            'chosen_prevent_sharing_opinions':  '',
             'chosen_ready_introduction_text': '',
             'chosen_ready_introduction_title': '',
             'chosen_social_share_description': '',
@@ -540,6 +544,7 @@ def organization_save_view(request):  # organizationSave
         chosen_google_analytics_account_number=chosen_google_analytics_account_number,
         chosen_html_verification_string=chosen_html_verification_string,
         chosen_hide_we_vote_logo=chosen_hide_we_vote_logo,
+        chosen_prevent_sharing_opinions=chosen_prevent_sharing_opinions,
         chosen_ready_introduction_text=chosen_ready_introduction_text,
         chosen_ready_introduction_title=chosen_ready_introduction_title,
         chosen_social_share_description=chosen_social_share_description,
@@ -634,8 +639,9 @@ def site_configuration_retrieve_view(request):  # siteConfigurationRetrieve
         'status':                   results['status'],
         'chosen_hide_we_vote_logo': results['chosen_hide_we_vote_logo'],
         'chosen_logo_url_https':    results['chosen_logo_url_https'],
-        'chosen_ready_introduction_text':   results['chosen_ready_introduction_text'],
-        'chosen_ready_introduction_title':  results['chosen_ready_introduction_title'],
+        'chosen_prevent_sharing_opinions': results['chosen_prevent_sharing_opinions'],
+        'chosen_ready_introduction_text':  results['chosen_ready_introduction_text'],
+        'chosen_ready_introduction_title': results['chosen_ready_introduction_title'],
         'features_provided_bitmap': results['features_provided_bitmap'],
         'hostname':                 results['hostname'],
         'organization_we_vote_id':  results['organization_we_vote_id'],

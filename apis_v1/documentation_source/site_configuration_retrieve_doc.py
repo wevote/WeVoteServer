@@ -41,6 +41,7 @@ def site_configuration_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \
                    '  "chosen_hide_we_vote_logo": boolean,\n' \
+                   '  "chosen_prevent_sharing_opinions": boolean,\n' \
                    '  "chosen_logo_url_https": string,\n' \
                    '  "features_provided_bitmap": integer,\n' \
                    '  "hostname": string,\n' \
