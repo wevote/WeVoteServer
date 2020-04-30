@@ -123,3 +123,23 @@ class WeVoteAPIsV1TestsVoterEmailAddressSave(TestCase):
             "Length of email_address_list:{email_address_list_length} (expected to be 2), "
             "voter_device_id: {voter_device_id}".format(
                 email_address_list_length=len(json_data4['email_address_list']), voter_device_id=json_data4['voter_device_id']))
+        
+        ######################################################################
+        # Now try to save an invalid email address
+        response5 = self.client.get(self.voter_email_address_save_url, {'text_for_email_address':
+                                                                  'test321gmail.com',
+                                                                  'voter_device_id': voter_device_id})
+
+        json_data5 = json.loads(response5.content.decode())
+        
+        self.assertEqual(json_data5['status'], 
+                        "VOTER_EMAIL_ADDRESS_SAVE-START VOTER_EMAIL_ADDRESS_SAVE_MISSING_VALID_EMAIL ",
+            "status: {status} ('VOTER_EMAIL_ADDRESS_SAVE-START VOTER_EMAIL_ADDRESS_SAVE_MISSING_VALID_EMAIL ' expected), "
+            "voter_device_id: {voter_device_id}".format(status=json_data5['status'], 
+            voter_device_id=json_data5['voter_device_id']))
+        
+        self.assertEqual(json_data5['email_address_not_valid'], 
+                        True,
+            "email_address_not_valid: {email_address_not_valid} ('True' expected), "
+            "voter_device_id: {voter_device_id}".format(email_address_not_valid=json_data5['email_address_not_valid'],
+            voter_device_id=json_data5['voter_device_id']))
