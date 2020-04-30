@@ -390,6 +390,8 @@ def organization_save_view(request):  # organizationSave
     chosen_google_analytics_account_number = request.GET.get('chosen_google_analytics_account_number', False)
     chosen_html_verification_string = request.GET.get('chosen_html_verification_string', False)
     chosen_hide_we_vote_logo = request.GET.get('chosen_hide_we_vote_logo', None)
+    chosen_ready_introduction_text = request.GET.get('chosen_ready_introduction_text', False)
+    chosen_ready_introduction_title = request.GET.get('chosen_ready_introduction_title', False)
     chosen_social_share_description = request.GET.get('chosen_social_share_description', False)
     chosen_subscription_plan = request.GET.get('chosen_subscription_plan', False)
 
@@ -441,6 +443,8 @@ def organization_save_view(request):  # organizationSave
             'chosen_html_verification_string': '',
             'chosen_hide_we_vote_logo': '',
             'chosen_logo_url_https': '',
+            'chosen_ready_introduction_text': '',
+            'chosen_ready_introduction_title': '',
             'chosen_social_share_description': '',
             'chosen_social_share_image_256x256_url_https': '',
             'chosen_subdomain_string': '',
@@ -536,6 +540,8 @@ def organization_save_view(request):  # organizationSave
         chosen_google_analytics_account_number=chosen_google_analytics_account_number,
         chosen_html_verification_string=chosen_html_verification_string,
         chosen_hide_we_vote_logo=chosen_hide_we_vote_logo,
+        chosen_ready_introduction_text=chosen_ready_introduction_text,
+        chosen_ready_introduction_title=chosen_ready_introduction_title,
         chosen_social_share_description=chosen_social_share_description,
         chosen_subdomain_string=chosen_subdomain_string,
         chosen_subscription_plan=chosen_subscription_plan,
@@ -628,6 +634,8 @@ def site_configuration_retrieve_view(request):  # siteConfigurationRetrieve
         'status':                   results['status'],
         'chosen_hide_we_vote_logo': results['chosen_hide_we_vote_logo'],
         'chosen_logo_url_https':    results['chosen_logo_url_https'],
+        'chosen_ready_introduction_text':   results['chosen_ready_introduction_text'],
+        'chosen_ready_introduction_title':  results['chosen_ready_introduction_title'],
         'features_provided_bitmap': results['features_provided_bitmap'],
         'hostname':                 results['hostname'],
         'organization_we_vote_id':  results['organization_we_vote_id'],
