@@ -61,6 +61,12 @@ def organization_save_doc_template_values(url_root):
                             'It is changed by a client in Settings section.',
         },
         {
+            'name':         'chosen_prevent_sharing_opinions',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'If you are a 501c3, this lets you maintain compliance by turning off the ability '
+                            'for voters to share their opinions out to social media, from your site.',
+        },
+        {
             'name':         'chosen_social_share_description',
             'value':        'string',  # boolean, integer, long, string
             'description':  'This is the value of client\'s customized description. '

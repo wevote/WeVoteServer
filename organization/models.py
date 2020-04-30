@@ -975,6 +975,7 @@ class OrganizationManager(models.Manager):
             chosen_google_analytics_account_number=False,
             chosen_html_verification_string=False,
             chosen_hide_we_vote_logo=None,
+            chosen_prevent_sharing_opinions=None,
             chosen_ready_introduction_text=False,
             chosen_ready_introduction_title=False,
             chosen_social_share_description=False,
@@ -1005,6 +1006,7 @@ class OrganizationManager(models.Manager):
         :param chosen_google_analytics_account_number:
         :param chosen_html_verification_string:
         :param chosen_hide_we_vote_logo:
+        :param chosen_prevent_sharing_opinions:
         :param chosen_ready_introduction_text:
         :param chosen_ready_introduction_title:
         :param chosen_social_share_description:
@@ -1151,6 +1153,10 @@ class OrganizationManager(models.Manager):
                 if chosen_hide_we_vote_logo is not None:
                     value_changed = True
                     organization_on_stage.chosen_hide_we_vote_logo = positive_value_exists(chosen_hide_we_vote_logo)
+                if chosen_prevent_sharing_opinions is not None:
+                    value_changed = True
+                    organization_on_stage.chosen_prevent_sharing_opinions = \
+                        positive_value_exists(chosen_prevent_sharing_opinions)
                 if chosen_ready_introduction_text is not False:
                     value_changed = True
                     organization_on_stage.chosen_ready_introduction_text = chosen_ready_introduction_text
@@ -1369,6 +1375,10 @@ class OrganizationManager(models.Manager):
                     if chosen_hide_we_vote_logo is not None:
                         value_changed = True
                         organization_on_stage.chosen_hide_we_vote_logo = chosen_hide_we_vote_logo
+                    if chosen_prevent_sharing_opinions is not None:
+                        value_changed = True
+                        organization_on_stage.chosen_prevent_sharing_opinions = \
+                            positive_value_exists(chosen_prevent_sharing_opinions)
                     if chosen_ready_introduction_text is not False:
                         value_changed = True
                         organization_on_stage.chosen_ready_introduction_text = chosen_ready_introduction_text
@@ -1523,6 +1533,10 @@ class OrganizationManager(models.Manager):
                     if chosen_hide_we_vote_logo is not None:
                         value_changed = True
                         organization_on_stage.chosen_hide_we_vote_logo = chosen_hide_we_vote_logo
+                    if chosen_prevent_sharing_opinions is not None:
+                        value_changed = True
+                        organization_on_stage.chosen_prevent_sharing_opinions = \
+                            positive_value_exists(chosen_prevent_sharing_opinions)
                     if chosen_ready_introduction_text is not False:
                         value_changed = True
                         organization_on_stage.chosen_ready_introduction_text = chosen_ready_introduction_text
@@ -2752,6 +2766,8 @@ class Organization(models.Model):
         verbose_name='url of client logo', max_length=255, blank=True, null=True)
     # Client chosen pass code that needs to be sent with organization-focused API calls
     chosen_organization_api_pass_code = models.TextField(null=True, blank=True)
+    # For sites managed by 501c3 organizations, we need to prevent voters from sharing their opinions
+    chosen_prevent_sharing_opinions = models.BooleanField(default=False)
     # Ready? page title and text
     chosen_ready_introduction_title = models.CharField(max_length=255, null=True, blank=True)
     chosen_ready_introduction_text = models.TextField(null=True, blank=True)
