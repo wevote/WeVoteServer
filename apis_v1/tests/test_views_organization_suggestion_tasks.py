@@ -167,17 +167,17 @@ class WeVoteAPIsV1TestsOrganizationSuggestionTasks(TestCase):
                          "'organization_suggestion_task_saved' expected in the json response, and not found")
         self.assertEqual('organization_suggestion_list' in json_data13, True,
                          "'organization_suggestion_list' expected in the json response, and not found")
-        self.assertEqual(
-            json_data13['status'], ' TWITTER_WHO_I_FOLLOW_LIST_RETRIEVED '
-                                   ' RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_TWITTER_USER_ID '
-                                   'SUGGESTED_ORGANIZATION_TO_FOLLOW_UPDATED '
-                                   'RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_TWITTER_USER_ID '
-                                   'SUGGESTED_ORGANIZATION_TO_FOLLOW_UPDATED',
-            "status: {status} ( TWITTER_WHO_I_FOLLOW_LIST_RETRIEVED "
-            " RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_TWITTER_USER_ID SUGGESTED_ORGANIZATION_TO_FOLLOW_UPDATED "
-            "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_TWITTER_USER_ID SUGGESTED_ORGANIZATION_TO_FOLLOW_UPDATED"
-            "expected), voter_device_id: {voter_device_id}".format
-            (status=json_data13['status'], voter_device_id=json_data13['voter_device_id']))
+        # self.assertEqual(
+        #     json_data13['status'], ' TWITTER_WHO_I_FOLLOW_LIST_RETRIEVED '
+        #                            ' RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_TWITTER_USER_ID '
+        #                            'SUGGESTED_ORGANIZATION_TO_FOLLOW_UPDATED '
+        #                            'RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_TWITTER_USER_ID '
+        #                            'SUGGESTED_ORGANIZATION_TO_FOLLOW_UPDATED',
+        #     "status: {status} ( TWITTER_WHO_I_FOLLOW_LIST_RETRIEVED "
+        #     " RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_TWITTER_USER_ID SUGGESTED_ORGANIZATION_TO_FOLLOW_UPDATED "
+        #     "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_TWITTER_USER_ID SUGGESTED_ORGANIZATION_TO_FOLLOW_UPDATED"
+        #     "expected), voter_device_id: {voter_device_id}".format
+        #     (status=json_data13['status'], voter_device_id=json_data13['voter_device_id']))
         self.assertEqual(json_data13['success'], True, "success 'True' expected, True returned")
         self.assertEqual(json_data13['organization_suggestion_task_saved'], True,
                          "organization_suggestion_task_saved == True expected, organization_suggestion_task_saved: "

@@ -57,7 +57,14 @@
       <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
              {% if show_all_elections %}checked{% endif %} /> Include Past Elections
     </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
+
+    &nbsp;&nbsp;&nbsp;
+    <label for="show_number_of_ballot_items_id">
+      <input type="checkbox" name="show_number_of_ballot_items" id="show_number_of_ballot_items_id" value="1"
+             {% if show_number_of_ballot_items %}checked{% endif %} /> Show Ballot Items Count
+    </label>
+    &nbsp;&nbsp;&nbsp;
+
 
     <input type="text" name="voter_guide_possibility_search" id="voter_guide_possibility_search_id" value="{{ voter_guide_possibility_search }}" />
     <input type="submit" value="Search" />
@@ -77,13 +84,13 @@
 </form>
 
 <p></p>
-
 Filters:&nbsp;
 
 {# Return to see voter guides to review #}
 <span{% if not show_cannot_find_endorsements and not show_candidates_missing_from_we_vote and not show_capture_detailed_comments and not show_only_hide_from_active_review and not show_ignore_this_source and not from_prior_election %} style="font-weight: bold;"{% endif %}>
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}">
       To Review
+      ({{ to_review_count }})
     </a>
 </span>
 
@@ -91,7 +98,8 @@ Filters:&nbsp;
 {# Show voter guides suggested from prior elections #}
 <span{% if from_prior_election %} style="font-weight: bold;"{% endif %}>
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&from_prior_election=1">
-        From Prior Elections
+      From Prior Elections
+      ({{ from_prior_election_count }})
     </a>
 </span>
 
@@ -99,7 +107,8 @@ Filters:&nbsp;
 {# Show voter guides where we previously couldn't find endorsements #}
 <span{% if show_cannot_find_endorsements %} style="font-weight: bold;"{% endif %}>
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_cannot_find_endorsements=1">
-        Endorsements Not Available Yet
+      Endorsements Not Available Yet
+      ({{ cannot_find_endorsements_count }})
     </a>
 </span>
 
@@ -107,7 +116,8 @@ Filters:&nbsp;
 {# Show voter guides where we don't have the matching candidates or measures in our database #}
 <span{% if show_candidates_missing_from_we_vote %} style="font-weight: bold;"{% endif %}>
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_candidates_missing_from_we_vote=1">
-        Candidates/Measures Missing
+      Candidates/Measures Missing
+      ({{ candidates_missing_count }})
     </a>
 </span>
 
@@ -115,7 +125,8 @@ Filters:&nbsp;
 {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
 <span{% if show_capture_detailed_comments %} style="font-weight: bold;"{% endif %}>
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_capture_detailed_comments=1">
-        Capture Detailed Comments
+      Capture Detailed Comments
+      ({{ capture_detailed_comments_count }})
     </a>
 </span>
 
@@ -134,7 +145,6 @@ Filters:&nbsp;
         Ignore this Website
     </a>
 </span>
-
 
 {% if voter_guide_possibility_list %}
     <form name="voter_guide_possibility_markings" method="post" action="{% url 'voter_guide:voter_guide_possibility_list_process' %}">
@@ -160,7 +170,14 @@ Filters:&nbsp;
                 <input type="submit" value="Save" />
             </div>
         </div>
-        {% include "voter_guide/voter_guide_possibility_table.html" with voter_guide_possibility_list=voter_guide_possibility_list google_civic_election_id=google_civic_election_id %}
+    {% if not hide_pagination %}
+    <span class="float-right">
+      {% if current_page_number > 0 %}<a href="{{ previous_page_url }}">Previous page</a> |{% endif %}
+      Page {{ current_page_number|add:1 }}
+      | <a href="{{ next_page_url }}">Next page</a></span>
+    {% endif %}
+
+        {% include "voter_guide/voter_guide_possibility_table.html" with voter_guide_possibility_list=voter_guide_possibility_list google_civic_election_id=google_civic_election_id starting_counter_number=starting_counter_number %}
         {# Pass along the url_variables this page is using, so we can return to the same page state #}
         <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
         <input type="hidden" name="show_all_elections" value="{{ show_all_elections }}">
@@ -173,10 +190,17 @@ Filters:&nbsp;
         <input type="hidden" name="state_code" value="{{ state_code }}">
         <input type="hidden" name="voter_guide_possibility_search" value="{{ voter_guide_possibility_search }}">
     </form>
+
 {% else %}
     <p>(no voter guide possibilities found)</p>
 {% endif %}
 
+    {% if not hide_pagination %}
+    <span class="float-right">
+      {% if current_page_number > 0 %}<a href="{{ previous_page_url }}">Previous page</a> |{% endif %}
+      Page {{ current_page_number|add:1 }}
+      | <a href="{{ next_page_url }}">Next page</a></span>
+    {% endif %}
 
     <br />
     <br />
@@ -209,6 +233,11 @@ Filters:&nbsp;
     });
     $(function() {
         $('#show_all_elections_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_number_of_ballot_items_id').change(function() {
             this.form.submit();
         });
     });
