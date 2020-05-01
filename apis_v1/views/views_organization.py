@@ -130,6 +130,7 @@ def organization_index_view(request, organization_incoming_domain=''):  # organi
     chosen_favicon_url_https = None
     chosen_google_analytics_account_number = ''
     chosen_html_verification_string = None
+    chosen_prevent_sharing_opinions = None
     chosen_social_share_description = \
         "We Vote helps you vote your values, with help from your friends and other " \
         "people you trust. Through our nonpartisan, open source platform, we'll help you become a " \
