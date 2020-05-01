@@ -424,7 +424,7 @@ def candidate_list_view(request):
 
                     candidate_queryset = candidate_queryset.filter(final_filters)
         if positive_value_exists(show_candidates_with_best_twitter_options):
-            # Don't show candidates that already have Twitter handles
+            # Show candidates with TwitterLinkPossibilities of greater than 60
             candidate_queryset = candidate_queryset.filter(
                 Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
             try:
@@ -435,12 +435,14 @@ def candidate_list_view(request):
             except Exception as e:
                 pass
         elif positive_value_exists(show_candidates_with_twitter_options):
-            # Don't show candidates that already have Twitter handles
-            candidate_queryset = candidate_queryset.filter(
-                Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
+            # Show candidates that we have Twitter search results for
             try:
-                twitter_possibility_list = TwitterLinkPossibility.objects.\
-                    values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+                candidate_queryset = candidate_queryset.filter(
+                    Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
+
+                twitter_query = TwitterLinkPossibility.objects.all()
+                twitter_possibility_list = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True)\
+                    .distinct()
                 if len(twitter_possibility_list):
                     candidate_queryset = candidate_queryset.filter(we_vote_id__in=twitter_possibility_list)
             except Exception as e:
@@ -474,27 +476,28 @@ def candidate_list_view(request):
     # SELECT * FROM public.candidate_candidatecampaign where google_civic_election_id = '1000052' and facebook_url
     #     is not null and facebook_profile_image_url_https is null
     facebook_urls_without_picture_urls = 0
-    try:
-        candidate_facebook_missing_query = CandidateCampaign.objects.all()
-        if positive_value_exists(google_civic_election_id):
-            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                host_google_civic_election_id_list=[google_civic_election_id])
-            candidate_facebook_missing_query = candidate_facebook_missing_query.filter(
-                Q(google_civic_election_id=google_civic_election_id) |
-                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+    if positive_value_exists(google_civic_election_id):
+        try:
+            candidate_facebook_missing_query = CandidateCampaign.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                    host_google_civic_election_id_list=[google_civic_election_id])
+                candidate_facebook_missing_query = candidate_facebook_missing_query.filter(
+                    Q(google_civic_election_id=google_civic_election_id) |
+                    Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
 
-        # include profile images that are null or ''
-        candidate_facebook_missing_query = candidate_facebook_missing_query.\
-            filter(Q(facebook_profile_image_url_https__isnull=True) | Q(facebook_profile_image_url_https__exact=''))
+            # include profile images that are null or ''
+            candidate_facebook_missing_query = candidate_facebook_missing_query.\
+                filter(Q(facebook_profile_image_url_https__isnull=True) | Q(facebook_profile_image_url_https__exact=''))
 
-        # exclude facebook_urls that are null or ''
-        candidate_facebook_missing_query = candidate_facebook_missing_query.exclude(facebook_url__isnull=True).\
-            exclude(facebook_url__iexact='').exclude(facebook_url_is_broken='True')
+            # exclude facebook_urls that are null or ''
+            candidate_facebook_missing_query = candidate_facebook_missing_query.exclude(facebook_url__isnull=True).\
+                exclude(facebook_url__iexact='').exclude(facebook_url_is_broken='True')
 
-        facebook_urls_without_picture_urls = candidate_facebook_missing_query.count()
+            facebook_urls_without_picture_urls = candidate_facebook_missing_query.count()
 
-    except Exception as e:
-        logger.error("Find facebook URLs without facebook pictures in candidate: " + e)
+        except Exception as e:
+            logger.error("Find facebook URLs without facebook pictures in candidate: " + e)
 
     status_print_list = ""
     status_print_list += "candidate_list_count: " + str(candidate_list_count) + " "
@@ -621,7 +624,8 @@ def candidate_list_view(request):
                 candidate.id, candidate.we_vote_id)
             if positive_value_exists(candidate.candidate_twitter_handle):
                 total_twitter_handles += 1
-    else:
+    elif positive_value_exists(show_candidates_with_best_twitter_options) \
+            or positive_value_exists(show_candidates_with_twitter_options):
         # Attach the best guess Twitter account, if any, to each candidate in list
         for candidate in candidate_list:
             try:
@@ -668,7 +672,6 @@ def candidate_list_view(request):
         'candidate_list':           candidate_list,
         'candidate_search':         candidate_search,
         'current_page_number':      page,
-        'current_page_url':         current_page_url,
         'current_page_minus_candidate_tools_url':   current_page_minus_candidate_tools_url,
         'election':                 election,
         'election_list':            election_list,

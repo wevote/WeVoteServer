@@ -274,7 +274,10 @@
     <input type="submit" value="Search for Candidate" />
 
     {% if not review_mode and not hide_pagination %}
-        <span class="float-right"><a href="{{ previous_page_url }}">Previous page</a> | <a href="{{ next_page_url }}">Next page</a></span>
+      <span class="float-right">
+      {% if current_page_number > 0 %}<a href="{{ previous_page_url }}">Previous page</a> |{% endif %}
+      Page {{ current_page_number|add:1 }}
+      | <a href="{{ next_page_url }}">Next page</a></span>
     {% endif %}
     <br />
 
@@ -484,7 +487,10 @@
         </table>
 
         {% if not hide_pagination %}
-        <span class="float-right"><a href="{{ previous_page_url }}">Previous page</a> | <a href="{{ next_page_url }}">Next page</a></span>
+        <span class="float-right">
+          {% if current_page_number > 0 %}<a href="{{ previous_page_url }}">Previous page</a> |{% endif %}
+          Page {{ current_page_number|add:1 }}
+          | <a href="{{ next_page_url }}">Next page</a></span>
         {% endif %}
 
         <p>
@@ -599,16 +605,22 @@
     });
     $(function() {
         $('#show_candidates_with_best_twitter_options_id').change(function() {
+            this.form.show_candidates_with_twitter_options_id.value = '0';
+            this.form.show_candidates_without_twitter_id.value = '0';
             this.form.submit();
         });
     });
     $(function() {
         $('#show_candidates_with_twitter_options_id').change(function() {
+            this.form.show_candidates_with_best_twitter_options_id.value = '0';
+            this.form.show_candidates_without_twitter_id.value = '0';
             this.form.submit();
         });
     });
     $(function() {
         $('#show_candidates_without_twitter_id').change(function() {
+            this.form.show_candidates_with_best_twitter_options_id.value = '0';
+            this.form.show_candidates_with_twitter_options_id.value = '0';
             this.form.submit();
         });
     });

@@ -15,7 +15,7 @@
         </thead>
     {% for voter_guide_possibility in voter_guide_possibility_list %}
         <tr>
-            <td>{{ forloop.counter }}</td>
+            <td>{{ forloop.counter|add:starting_counter_number }}</td>
             <td>
             {% if voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES or voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE %}
                 {% if voter_guide_possibility.organization %}

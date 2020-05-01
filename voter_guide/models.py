@@ -2198,27 +2198,37 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_guide_possibility_list(self, order_by='', limit_number=0, search_string='',
+    def retrieve_voter_guide_possibility_list(self,
+                                              order_by='',
+                                              start_number=0,
+                                              end_number=25,
+                                              search_string='',
                                               google_civic_election_id=0,
                                               hide_from_active_review=False,
                                               cannot_find_endorsements=False,
                                               candidates_missing_from_we_vote=False,
                                               capture_detailed_comments=False,
                                               from_prior_election=False,
-                                              ignore_this_source=False):
+                                              ignore_this_source=False,
+                                              return_count_only=False):
+        start_number = convert_to_int(start_number)
+        end_number = convert_to_int(end_number)
         hide_from_active_review = positive_value_exists(hide_from_active_review)
         candidates_missing_from_we_vote = positive_value_exists(candidates_missing_from_we_vote)
         cannot_find_endorsements = positive_value_exists(cannot_find_endorsements)
         capture_detailed_comments = positive_value_exists(capture_detailed_comments)
         from_prior_election = positive_value_exists(from_prior_election)
         ignore_this_source = positive_value_exists(ignore_this_source)
+        return_count_only = positive_value_exists(return_count_only)
 
         status = ""
         voter_guide_possibility_list = []
         voter_guide_possibility_list_found = False
+        voter_guide_possibility_list_count = 0
         try:
             voter_guide_query = VoterGuidePossibility.objects.all()
-            voter_guide_query = voter_guide_query.order_by(order_by)
+            if positive_value_exists(order_by):
+                voter_guide_query = voter_guide_query.order_by(order_by)
 
             if not positive_value_exists(search_string):
                 if not positive_value_exists(ignore_this_source):
@@ -2319,7 +2329,7 @@ class VoterGuidePossibilityManager(models.Manager):
                             new_filter = Q(id__in=voter_guide_possibility_parent_id_list)
                             filters.append(new_filter)
                     except Exception as e:
-                        pass
+                        status += "SET_OF_QUERIES_FAILURE: " + str(e) + ' '
 
                     # Add the first query
                     if len(filters):
@@ -2331,16 +2341,20 @@ class VoterGuidePossibilityManager(models.Manager):
 
                         voter_guide_query = voter_guide_query.filter(final_filters)
 
-            if positive_value_exists(limit_number):
-                voter_guide_possibility_list = voter_guide_query[:limit_number]
+            if positive_value_exists(return_count_only):
+                voter_guide_possibility_list_count = voter_guide_query.count()
             else:
-                voter_guide_possibility_list = list(voter_guide_query)
+                voter_guide_possibility_list_count = voter_guide_query.count()
+                if positive_value_exists(end_number):
+                    voter_guide_possibility_list = voter_guide_query[start_number:end_number]
+                else:
+                    voter_guide_possibility_list = list(voter_guide_query)
 
-            if len(voter_guide_possibility_list):
-                voter_guide_possibility_list_found = True
-                status += 'VOTER_GUIDE_FOUND '
-            else:
-                status += 'NO_VOTER_GUIDES_FOUND '
+                if len(voter_guide_possibility_list):
+                    voter_guide_possibility_list_found = True
+                    status += 'VOTER_GUIDE_FOUND '
+                else:
+                    status += 'NO_VOTER_GUIDES_FOUND '
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
@@ -2353,6 +2367,7 @@ class VoterGuidePossibilityManager(models.Manager):
             'status':                               status,
             'voter_guide_possibility_list_found':   voter_guide_possibility_list_found,
             'voter_guide_possibility_list':         voter_guide_possibility_list,
+            'voter_guide_possibility_list_count':   voter_guide_possibility_list_count,
         }
         return results
 
