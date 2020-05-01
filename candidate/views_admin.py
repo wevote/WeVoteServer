@@ -24,6 +24,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
+from election.controllers import retrieve_upcoming_election_id_list
 from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
@@ -254,9 +255,17 @@ def candidate_list_view(request):
     state_list = STATE_CODE_MAP
     state_list_modified = {}
     candidate_campaign_list_manager = CandidateCampaignListManager()
+    if positive_value_exists(google_civic_election_id):
+        google_civic_election_id_list = [convert_to_int(google_civic_election_id)]
+    elif positive_value_exists(show_all_elections):
+        google_civic_election_id_list = []
+    else:
+        # Limit to just upcoming elections
+        google_civic_election_id_list = retrieve_upcoming_election_id_list()
+
     for one_state_code, one_state_name in state_list.items():
         count_result = candidate_campaign_list_manager.retrieve_candidate_count_for_election_and_state(
-            google_civic_election_id, one_state_code)
+            google_civic_election_id_list, one_state_code)
         state_name_modified = one_state_name
         if positive_value_exists(count_result['candidate_count']):
             state_name_modified += " - " + str(count_result['candidate_count'])

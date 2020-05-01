@@ -346,24 +346,23 @@ class CandidateCampaignListManager(models.Model):
         }
         return results
 
-    def retrieve_candidate_count_for_election_and_state(self, google_civic_election_id=0, state_code=''):
+    def retrieve_candidate_count_for_election_and_state(self, google_civic_election_id_list=[], state_code=''):
         status = ''
         office_manager = ContestOfficeManager()
-        if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
+        if not positive_value_exists(google_civic_election_id_list) and not positive_value_exists(state_code):
             status += 'VALID_ELECTION_ID_AND_STATE_CODE_MISSING '
             results = {
-                'success':                  False,
-                'status':                   status,
-                'google_civic_election_id': google_civic_election_id,
-                'state_code':               state_code,
-                'candidate_count':          0,
+                'success':                          False,
+                'status':                           status,
+                'google_civic_election_id_list':    google_civic_election_id_list,
+                'state_code':                       state_code,
+                'candidate_count':                  0,
             }
             return results
 
         try:
             candidate_queryset = CandidateCampaign.objects.using('readonly').all()
-            if positive_value_exists(google_civic_election_id):
-                google_civic_election_id_list = [convert_to_int(google_civic_election_id)]
+            if positive_value_exists(google_civic_election_id_list):
                 office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
                     host_google_civic_election_id_list=google_civic_election_id_list)
                 candidate_queryset = candidate_queryset.filter(
@@ -389,11 +388,11 @@ class CandidateCampaignListManager(models.Model):
             candidate_count = 0
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'google_civic_election_id': google_civic_election_id,
-            'state_code':               state_code,
-            'candidate_count':          candidate_count,
+            'success':                          success,
+            'status':                           status,
+            'google_civic_election_id_list':    google_civic_election_id_list,
+            'state_code':                       state_code,
+            'candidate_count':                  candidate_count,
         }
         return results
 
