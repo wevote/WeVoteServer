@@ -2289,9 +2289,14 @@ class BallotReturnedManager(models.Model):
                         ballot_returned_query = ballot_returned_query.filter(
                             google_civic_election_id=past_google_civic_election_id)
 
-            ballot_returned_list = list(ballot_returned_query)
-            if len(ballot_returned_list):
-                ballot = ballot_returned_list[0]
+            try:
+                ballot = ballot_returned_query.first()
+            except Exception as e:
+                ballot = None
+                status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+            # ballot_returned_list = list(ballot_returned_query)
+            # if len(ballot_returned_list):
+            #     ballot = ballot_returned_list[0]
         else:
             # If here, then the geocoder successfully found the address
             status += 'GEOCODER_FOUND_LOCATION '
@@ -2324,9 +2329,14 @@ class BallotReturnedManager(models.Model):
             if positive_value_exists(google_civic_election_id):
                 status += "SEARCHING_BY_GOOGLE_CIVIC_ID "
                 ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
-                ballot_returned_list = list(ballot_returned_query)
-                if len(ballot_returned_list):
-                    ballot = ballot_returned_list[0]
+                try:
+                    ballot = ballot_returned_query.first()
+                except Exception as e:
+                    ballot = None
+                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                # ballot_returned_list = list(ballot_returned_query)
+                # if len(ballot_returned_list):
+                #     ballot = ballot_returned_list[0]
             else:
                 # If we have an active election coming up, including today
                 # fetch_next_upcoming_election_in_this_state returns next election with ballot items
@@ -2336,9 +2346,14 @@ class BallotReturnedManager(models.Model):
                     ballot_returned_query_without_election_id = ballot_returned_query
                     ballot_returned_query = ballot_returned_query.filter(
                         google_civic_election_id=upcoming_google_civic_election_id)
-                    ballot_returned_list = list(ballot_returned_query)
-                    if len(ballot_returned_list):
-                        ballot = ballot_returned_list[0]
+                    try:
+                        ballot = ballot_returned_query.first()
+                    except Exception as e:
+                        ballot = None
+                        status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                    # ballot_returned_list = list(ballot_returned_query)
+                    # if len(ballot_returned_list):
+                    #     ballot = ballot_returned_list[0]
                     # What if this is a National election, but there aren't any races in the state the voter is in?
                     # We want to find the *next* upcoming election
                     if ballot is None:
@@ -2356,9 +2371,14 @@ class BallotReturnedManager(models.Model):
                             if positive_value_exists(upcoming_google_civic_election_id):
                                 ballot_returned_query = ballot_returned_query.filter(
                                     google_civic_election_id=upcoming_google_civic_election_id)
-                                ballot_returned_list = list(ballot_returned_query)
-                                if len(ballot_returned_list):
-                                    ballot = ballot_returned_list[0]
+                                try:
+                                    ballot = ballot_returned_query.first()
+                                except Exception as e:
+                                    ballot = None
+                                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                                # ballot_returned_list = list(ballot_returned_query)
+                                # if len(ballot_returned_list):
+                                #     ballot = ballot_returned_list[0]
                                 if ballot is not None:
                                     ballot_not_found = False
                             else:
@@ -2369,9 +2389,14 @@ class BallotReturnedManager(models.Model):
                         # Limit the search to the most recent election with ballot items
                         ballot_returned_query = ballot_returned_query.filter(
                             google_civic_election_id=past_google_civic_election_id)
-                    ballot_returned_list = list(ballot_returned_query)
-                    if len(ballot_returned_list):
-                        ballot = ballot_returned_list[0]
+                    try:
+                        ballot = ballot_returned_query.first()
+                    except Exception as e:
+                        ballot = None
+                        status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                    # ballot_returned_list = list(ballot_returned_query)
+                    # if len(ballot_returned_list):
+                    #     ballot = ballot_returned_list[0]
 
         if ballot is not None:
             ballot_returned = ballot
@@ -2405,9 +2430,14 @@ class BallotReturnedManager(models.Model):
                 status += "SEARCHING_BY_GOOGLE_CIVIC_ID-ATTEMPT2 "
                 ballot_returned_query = ballot_returned_query.filter(
                     google_civic_election_id=google_civic_election_id)
-                ballot_returned_list = list(ballot_returned_query)
-                if len(ballot_returned_list):
-                    ballot_returned = ballot_returned_list[0]
+                try:
+                    ballot_returned = ballot_returned_query.first()
+                except Exception as e:
+                    ballot_returned = None
+                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                # ballot_returned_list = list(ballot_returned_query)
+                # if len(ballot_returned_list):
+                #     ballot_returned = ballot_returned_list[0]
                 if ballot_returned is not None:
                     ballot_returned_found = True
                     status += 'BALLOT_RETURNED_FOUND-ATTEMPT2 '
