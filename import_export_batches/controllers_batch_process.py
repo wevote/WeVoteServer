@@ -20,7 +20,7 @@ from analytics.controllers import calculate_sitewide_daily_metrics, \
 from analytics.models import AnalyticsManager
 from datetime import timedelta
 from django.utils.timezone import now
-from twitter.controllers import fetch_number_of_candidates_needing_twitter_search, \
+from import_export_twitter.controllers import fetch_number_of_candidates_needing_twitter_search, \
     retrieve_possible_twitter_handles_in_bulk
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists

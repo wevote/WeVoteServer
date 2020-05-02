@@ -39,7 +39,7 @@ from politician.models import PoliticianManager
 from position.models import PositionEntered, PositionListManager
 import pytz
 import re
-from twitter.models import TwitterLinkPossibility
+from twitter.models import TwitterLinkPossibility, TwitterUserManager
 from voter.models import voter_has_authority
 from voter_guide.models import VoterGuide
 import wevote_functions.admin
@@ -434,7 +434,7 @@ def candidate_list_view(request):
             candidate_queryset = candidate_queryset.filter(
                 Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
             try:
-                twitter_query = TwitterLinkPossibility.objects.filter(likelihood_score__gte=60)
+                twitter_query = TwitterLinkPossibility.objects.filter(likelihood_score__gte=60, not_a_match=False)
                 twitter_list = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
                 if len(twitter_list):
                     candidate_queryset = candidate_queryset.filter(we_vote_id__in=twitter_list)
@@ -446,7 +446,7 @@ def candidate_list_view(request):
                 candidate_queryset = candidate_queryset.filter(
                     Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
 
-                twitter_query = TwitterLinkPossibility.objects.all()
+                twitter_query = TwitterLinkPossibility.objects.filter(not_a_match=False)
                 twitter_possibility_list = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True)\
                     .distinct()
                 if len(twitter_possibility_list):
@@ -465,7 +465,7 @@ def candidate_list_view(request):
         if positive_value_exists(show_all):
             pass
         else:
-            number_to_show_per_page = 25
+            number_to_show_per_page = 10
             if candidate_list_count <= number_to_show_per_page:
                 # Ignore pagination
                 candidate_list = list(candidate_queryset)
@@ -637,7 +637,8 @@ def candidate_list_view(request):
             try:
                 twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_score')
                 twitter_possibility_query = twitter_possibility_query.filter(
-                    candidate_campaign_we_vote_id=candidate.we_vote_id)
+                    candidate_campaign_we_vote_id=candidate.we_vote_id,
+                    not_a_match=False)
                 twitter_possibility_list = list(twitter_possibility_query)
                 candidate.twitter_possibility_list_count = len(twitter_possibility_list)
                 if twitter_possibility_list and positive_value_exists(len(twitter_possibility_list)):
@@ -892,7 +893,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
 
         twitter_link_possibility_list = []
         try:
-            twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_score')
+            twitter_possibility_query = TwitterLinkPossibility.objects.order_by('not_a_match', '-likelihood_score')
             twitter_possibility_query = twitter_possibility_query.filter(
                 candidate_campaign_we_vote_id=candidate_on_stage.we_vote_id)
             if positive_value_exists(show_all_twitter_search_results):
@@ -979,8 +980,9 @@ def candidate_edit_process_view(request):
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     refresh_from_twitter = request.POST.get('refresh_from_twitter', False)
 
-    candidate_id = convert_to_int(request.POST['candidate_id'])
-    redirect_to_candidate_list = convert_to_int(request.POST['redirect_to_candidate_list'])
+    candidate_id = convert_to_int(request.POST.get('candidate_id', 0))
+    reject_twitter_link_possibility_id = convert_to_int(request.POST.get('reject_twitter_link_possibility_id', 0))
+    redirect_to_candidate_list = positive_value_exists(request.POST.get('redirect_to_candidate_list', False))
     candidate_name = request.POST.get('candidate_name', False)
     google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
     google_civic_candidate_name2 = request.POST.get('google_civic_candidate_name2', False)
@@ -1016,6 +1018,8 @@ def candidate_edit_process_view(request):
     withdrawal_date = request.POST.get('withdrawal_date', False)
     withdrawn_from_election = positive_value_exists(request.POST.get('withdrawn_from_election', False))
     do_not_display_on_ballot = positive_value_exists(request.POST.get('do_not_display_on_ballot', False))
+    select_for_marking_twitter_link_possibility_ids = request.POST.getlist('select_for_marking_checks[]')
+    which_marking = request.POST.get('which_marking')
 
     # Note: A date is not required, but if provided it needs to be in a correct date format
     if positive_value_exists(withdrawn_from_election) and positive_value_exists(withdrawal_date):
@@ -1410,6 +1414,73 @@ def candidate_edit_process_view(request):
     if positive_value_exists(refresh_from_twitter) or positive_value_exists(candidate_twitter_handle):
         results = refresh_twitter_candidate_details(candidate_on_stage)
 
+    # Make sure 'which_marking' is one of the allowed Filter fields
+    if positive_value_exists(which_marking) \
+            and which_marking not in ("not_a_match", "possible_match"):
+        messages.add_message(request, messages.ERROR,
+                             'The filter you are trying to update is not recognized: {which_marking}'
+                             ''.format(which_marking=which_marking))
+
+    show_all_twitter_search_results = 0
+    twitter_manager = TwitterUserManager()
+    if positive_value_exists(reject_twitter_link_possibility_id):
+        try:
+            defaults = {
+                'not_a_match': True,
+            }
+            results = twitter_manager.update_or_create_twitter_link_possibility(
+                twitter_link_possibility_id=reject_twitter_link_possibility_id,
+                defaults=defaults)
+            show_all_twitter_search_results = 1
+            if results['success']:
+                messages.add_message(request, messages.INFO, 'TwitterLinkPossibility marked as not a match.')
+            else:
+                messages.add_message(request, messages.ERROR,
+                                     'TwitterLinkPossibility {results}'
+                                     ''.format(results=results))
+        except ValueError:
+            messages.add_message(request, messages.ERROR,
+                                 'Bad id: {reject_twitter_link_possibility_id}'
+                                 ''.format(reject_twitter_link_possibility_id=reject_twitter_link_possibility_id))
+    elif positive_value_exists(which_marking):
+        items_processed_successfully = 0
+        update = False
+        not_a_match = False
+        if which_marking == 'not_a_match':
+            not_a_match = True
+            update = True
+        elif which_marking == 'possible_match':
+            not_a_match = False
+            update = True
+        if update:
+            for twitter_link_possibility_id_string in select_for_marking_twitter_link_possibility_ids:
+                try:
+                    twitter_link_possibility_id = int(twitter_link_possibility_id_string)
+                    defaults = {
+                        'not_a_match': not_a_match,
+                    }
+                    results = twitter_manager.update_or_create_twitter_link_possibility(
+                        twitter_link_possibility_id=twitter_link_possibility_id,
+                        defaults=defaults)
+                    show_all_twitter_search_results = 1
+                    if results['success']:
+                        items_processed_successfully += 1
+                    else:
+                        messages.add_message(request, messages.ERROR,
+                                             'TwitterLinkPossibility {results}'
+                                             ''.format(results=results))
+                except ValueError:
+                    messages.add_message(request, messages.ERROR,
+                                         'Bad id for: {voter_guide_possibility_id_string}')
+
+        messages.add_message(request, messages.INFO,
+                             'TwitterLinkPossibility processed successfully: {items_processed_successfully}'
+                             ''.format(items_processed_successfully=items_processed_successfully))
+
+    url_variables = "?null=1"
+    if positive_value_exists(show_all_twitter_search_results):
+        url_variables += "&show_all_twitter_search_results=1#twitter_link_possibility_list"
+
     if redirect_to_candidate_list:
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
@@ -1423,7 +1494,8 @@ def candidate_edit_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
     else:
-        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
+                                    url_variables)
 
 
 @login_required

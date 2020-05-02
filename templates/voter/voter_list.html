@@ -24,6 +24,37 @@
 {% endif %}
     <input type="text" name="voter_search" id="voter_search_id" value="{{ voter_search }}" />
     <input type="submit" value="Search for Voter" />
+
+<div>
+    <label for="is_admin_id">
+      <input type="checkbox" name="is_admin" id="is_admin_id" value="1"
+             {% if is_admin %}checked{% endif %} /> Is Admin
+    </label>
+
+    &nbsp;&nbsp;&nbsp;
+    <label for="is_partner_organization_id">
+      <input type="checkbox" name="is_partner_organization" id="is_partner_organization_id" value="1"
+             {% if is_partner_organization %}checked{% endif %} /> Is Partner Organization
+    </label>
+
+    &nbsp;&nbsp;&nbsp;
+    <label for="is_political_data_manager_id">
+      <input type="checkbox" name="is_political_data_manager" id="is_political_data_manager_id" value="1"
+             {% if is_political_data_manager %}checked{% endif %} /> Is Political Data Manager
+    </label>
+
+    &nbsp;&nbsp;&nbsp;
+    <label for="is_political_data_viewer_id">
+      <input type="checkbox" name="is_political_data_viewer" id="is_political_data_viewer_id" value="1"
+             {% if is_political_data_viewer %}checked{% endif %} /> Is Political Data Viewer
+    </label>
+
+    &nbsp;&nbsp;&nbsp;
+    <label for="is_verified_volunteer_id">
+      <input type="checkbox" name="is_verified_volunteer" id="is_verified_volunteer_id" value="1"
+             {% if is_verified_volunteer %}checked{% endif %} /> Is Verified Volunteer
+    </label>
+</div>
 </form>
 
 
@@ -135,4 +166,36 @@
 {% endif %}
 <br />
 
+<script>
+    $(function() {
+        $('#is_admin_id').change(function() {
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#is_partner_organization_id').change(function() {
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#is_political_data_manager_id').change(function() {
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#is_political_data_viewer_id').change(function() {
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#is_verified_volunteer_id').change(function() {
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            this.form.submit();
+        });
+    });
+</script>
 {% endblock %}

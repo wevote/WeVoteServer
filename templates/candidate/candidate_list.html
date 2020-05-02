@@ -225,7 +225,7 @@
         <li><a href="{% url 'import_export_twitter:scrape_social_media_for_candidates_in_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
         Go to Candidate Sites and get Twitter Handles for this Election</a> (1-2 minutes)</li>
 
-        <li><a href="{% url 'twitter2:bulk_retrieve_possible_twitter_handles' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}" target="_blank" >
+        <li><a href="{% url 'import_export_twitter:bulk_retrieve_possible_twitter_handles' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}" target="_blank" >
         Retrieve Possible Twitter Handles</a> (25 at a time - about 30 seconds - Open in New Window)</li>
 
         <li><a href="{% url 'import_export_facebook:bulk_retrieve_facebook_photos' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}" target="_blank" >
@@ -397,6 +397,7 @@
                     {% else %}
                         {% if candidate.candidate_merge_possibility %}
                         <ul><li>
+                        <div id="twitter_link_possibility_id_block_{{ candidate.candidate_merge_possibility.id }}">
                             <span class="u-no-break">
                             <a href="https://twitter.com/{{ candidate.candidate_merge_possibility.twitter_handle }}" target="_blank">
                                 <img src='{{ candidate.candidate_merge_possibility.twitter_profile_image_url_https }}' height="25px" /></a>&nbsp;
@@ -417,7 +418,6 @@
                                     <input type="hidden" name="page" value="{{ current_page_number }}" />
                                     <input type="hidden" name="state_code" value="{{ state_code }}" />
                                     <input type="hidden" name="refresh_from_twitter" value="1" />
-                                    <input type="hidden" name="redirect_to_candidate_list" value="1" />
                                     <input type="hidden" name="twitter_url" value="{{ candidate.candidate_merge_possibility.twitter_url }}" />
                                     <input id="choose_{{ forloop.counter }}" type="submit" value="Choose and Update" /> <span class="glyphicon glyphicon-new-window"></span>
                                 </form>
@@ -429,6 +429,24 @@
                                 {% endif %}
                               <span class="glyphicon glyphicon-new-window"></span></a>)
                             {% endif %}
+                              <div class="float-right">
+                                <form action="{% url 'candidate:candidate_edit_process' %}" id="candidate_edit" method="post" class="form-horizontal" target="_blank">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="reject_twitter_link_possibility_id" value="{{ candidate.candidate_merge_possibility.id }}" />
+                                    <input type="hidden" name="candidate_id" value="{{ candidate.id }}" />
+                                    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
+                                    <input type="hidden" name="hide_candidate_tools" value="{{ hide_candidate_tools }}" />
+                                    <input type="hidden" name="page" value="{{ current_page_number }}" />
+                                    <input type="hidden" name="state_code" value="{{ state_code }}" />
+                                    <input type="hidden" name="refresh_from_twitter" value="1" />
+                                    <input type="hidden" name="twitter_url" value="{{ candidate.candidate_merge_possibility.twitter_url }}" />
+                                    <input id="reject_{{ forloop.counter }}" type="submit" value="Reject" onclick="hideElement('twitter_link_possibility_id_block_{{ candidate.candidate_merge_possibility.id }}'); showElement('rejected_notice_{{ candidate.candidate_merge_possibility.id }}');" />
+                                </form>
+                              </div>
+                        </div>
+                        <div id="rejected_notice_{{ candidate.candidate_merge_possibility.id }}" style="display: none;">
+                          Twitter Option Rejected
+                        </div>
                         </li></ul>
                         {% elif candidate.no_twitter_possibilities_found %}
                         <ul><li>no twitter options found
@@ -600,6 +618,14 @@
 <br />
 <br />
     <script>
+    function hideElement(elementId) {
+      var x = document.getElementById(elementId);
+      x.style.display = "none";
+    }
+    function showElement(elementId) {
+      var x = document.getElementById(elementId);
+      x.style.display = "block";
+    }
     $(function() {
         $('#google_civic_election_id').change(function() {
             this.form.submit();

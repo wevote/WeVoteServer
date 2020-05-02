@@ -250,10 +250,21 @@ span.wrap_word { word-break: break-word; }
     {% endif %}
     {% if candidate.twitter_url %}Twitter URL (from Google Civic): {{ candidate.twitter_url }}{% endif %}
     {% if candidate %}
-    (<a href="{% url 'twitter2:retrieve_possible_twitter_handles' candidate.we_vote_id %}">retrieve possible Twitter handles</a>)
-    (<a href="{% url 'twitter2:delete_possible_twitter_handles' candidate.we_vote_id %}">delete possible Twitter handles</a>)
+    (<a href="{% url 'import_export_twitter:retrieve_possible_twitter_handles' candidate.we_vote_id %}">retrieve possible Twitter handles</a>)
+    (<a href="{% url 'import_export_twitter:delete_possible_twitter_handles' candidate.we_vote_id %}">delete possible Twitter handles</a>)
     {% endif %}
     {% if twitter_link_possibility_list %}
+    <div class="form-group pull-right">
+        <label for="which_marking_id" class="control-label">
+          <span class="u-no-break">Mark selected rows as:</span>
+        </label>
+        <select id="which_marking_id" name="which_marking">
+            {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
+            <option value="not_a_match">Not a Match</option>
+            <option value="possible_match">Possible Match</option>
+        </select>
+        <input type="submit" value="Save" />
+    </div>
     <table border="1" cellpadding="5" cellspacing="5" class="table">
         <tr>
             <th>#</th>
@@ -261,26 +272,45 @@ span.wrap_word { word-break: break-word; }
             <th></th>
             <th>name</th>
             <th>screen_name</th>
-            <th>url</th>
-            <th>location</th>
-            <th>utc_offset</th>
-            <th>followers_count</th>
+            <th>location / utc_offset</th>
+            <th>followers count</th>
             <th>description</th>
+            <th>
+              all
+              <input type="checkbox" name="toggle_all" id="toggle_all_id" value="1"/>
+            </th>
         </tr>
     {% for one_row in twitter_link_possibility_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ one_row.likelihood_score|default_if_none:"n/a" }}</td>
+            <td>
+              {% if one_row.not_a_match %}
+                <img src="/static/red_cross.png" height="16px"/>
+                <span class="u-no-break">no match</span>
+                <br />
+              {% endif %}
+              {{ one_row.likelihood_score|default_if_none:"n/a" }}
+            </td>
             <td><img src='{{ one_row.twitter_profile_image_url_https }}' /></td>
             <td>{{ one_row.twitter_name }}</td>
-            <td><a href="https://twitter.com/{{ one_row.twitter_handle }}" target="_blank">{{ one_row.twitter_handle|default_if_none:"n/a" }} <span class="glyphicon glyphicon-new-window"></span></a><br />
+            <td>
+              <a href="https://twitter.com/{{ one_row.twitter_handle }}" target="_blank">{{ one_row.twitter_handle|default_if_none:"n/a" }} <span class="glyphicon glyphicon-new-window"></span></a><br />
+              {% if not one_row.not_a_match %}
                 <input id="choose_{{ forloop.counter }}" type="button" value="Choose and Update" onclick="document.getElementById('candidate_twitter_handle_id').value = '{{ one_row.twitter_handle }}';document.getElementById('candidate_edit').submit();" />
+              {% endif %}
             </td>
-            <td><a href="{{ one_row.twitter_url }}" target="_blank">{{ one_row.twitter_url|default_if_none:"" }} <span class="glyphicon glyphicon-new-window"></span></a></td>
-            <td>{{ one_row.twitter_location|default_if_none:"n/a" }}</td>
-            <td>{% if one_row.twitter_utc_offset %}{{ one_row.twitter_utc_offset|default_if_none:"n/a" }}{% endif %}</td>
+            <td>
+              {{ one_row.twitter_location|default_if_none:"n/a" }}
+              {% if one_row.twitter_utc_offset %} {{ one_row.twitter_utc_offset|default_if_none:"n/a" }}{% endif %}
+            </td>
             <td>{{ one_row.twitter_followers_count|default_if_none:"" }}</td>
-            <td>{{ one_row.twitter_description|default_if_none:"n/a" }}</td>
+            <td>
+              {{ one_row.twitter_description|default_if_none:"n/a" }}
+              {% if one_row.twitter_url %}<a href="{{ one_row.twitter_url }}" target="_blank">{{ one_row.twitter_url|default_if_none:"" }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+            </td>
+            <td>
+                <input type="checkbox" name="select_for_marking_checks[]" id="select_for_marking_id" value="{{ one_row.id }}"/>
+            </td>
         </tr>
     {% endfor %}
     </table>
@@ -612,6 +642,18 @@ span.wrap_word { word-break: break-word; }
     $(function() {
         $('#contest_office_id').change(function() {
             this.form.submit();
+        });
+    });
+    $(function() {
+        $('#toggle_all_id').change(function() {
+            var inputs = document.getElementsByName("select_for_marking_checks[]");
+            for(var i = 0; i < inputs.length; i++) {
+              if (inputs[i].checked === false) {
+                inputs[i].checked = true;
+              } else {
+                inputs[i].checked = false;
+              }
+            }
         });
     });
 </script>
