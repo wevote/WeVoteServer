@@ -1867,11 +1867,11 @@ class VoterGuidePossibilityManager(models.Manager):
 
         if not voter_guide_possibility_found:
             try:
+                now = datetime.now()
                 voter_guide_possibility = VoterGuidePossibility.objects.get(
                     voter_guide_possibility_url__iexact=voter_guide_possibility_url,
-                    voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
-                    target_google_civic_election_id=target_google_civic_election_id,
                     hide_from_active_review=False,
+                    date_last_changed__year=now.year,
                 )
                 voter_guide_possibility_found = True
                 success = True
@@ -1914,7 +1914,6 @@ class VoterGuidePossibilityManager(models.Manager):
                 new_voter_guide_possibility_created = False
                 voter_guide_possibility = VoterGuidePossibility.objects.create(
                     voter_guide_possibility_url=voter_guide_possibility_url,
-                    voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
                     target_google_civic_election_id=target_google_civic_election_id,
                 )
                 if positive_value_exists(voter_guide_possibility.id):
@@ -2113,6 +2112,11 @@ class VoterGuidePossibilityManager(models.Manager):
                     Q(voter_guide_possibility_url__iexact=voter_guide_possibility_url) |
                     Q(voter_guide_possibility_url__iexact=voter_guide_possibility_url_alternate))
                 voter_guide_possibility_query = voter_guide_possibility_query.filter(hide_from_active_review=False)
+
+                # Only retrieve by URL if it was created this year
+                now = datetime.now()
+                voter_guide_possibility_query = voter_guide_possibility_query.filter(date_last_changed__year=now.year)
+
                 voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
                 if voter_guide_possibility_on_stage is not None:
                     voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
@@ -2127,6 +2131,11 @@ class VoterGuidePossibilityManager(models.Manager):
                 voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
                     Q(voter_guide_possibility_pdf_url__iexact=pdf_url))
                 voter_guide_possibility_query = voter_guide_possibility_query.filter(hide_from_active_review=False)
+
+                # Only retrieve by URL if it was created this year
+                now = datetime.now()
+                voter_guide_possibility_query = voter_guide_possibility_query.filter(date_last_changed__year=now.year)
+
                 voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
                 if voter_guide_possibility_on_stage is not None:
                     voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
@@ -2139,10 +2148,13 @@ class VoterGuidePossibilityManager(models.Manager):
                 # Set this status in case the 'get' fails
                 status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_ORGANIZATION_WE_VOTE_ID "
                 # TODO: Update this to deal with the google_civic_election_id being spread across 50 fields
+                # Only retrieve by URL if it was created this year
+                now = datetime.now()
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
                     google_civic_election_id=google_civic_election_id,
                     organization_we_vote_id__iexact=organization_we_vote_id,
-                    hide_from_active_review=False)
+                    hide_from_active_review=False,
+                    date_last_changed__year=now.year)
                 if voter_guide_possibility_on_stage is not None:
                     voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
                     status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_ORGANIZATION_WE_VOTE_ID "
@@ -2210,6 +2222,7 @@ class VoterGuidePossibilityManager(models.Manager):
                                               capture_detailed_comments=False,
                                               from_prior_election=False,
                                               ignore_this_source=False,
+                                              show_prior_years=False,
                                               return_count_only=False):
         start_number = convert_to_int(start_number)
         end_number = convert_to_int(end_number)
@@ -2229,6 +2242,10 @@ class VoterGuidePossibilityManager(models.Manager):
             voter_guide_query = VoterGuidePossibility.objects.all()
             if positive_value_exists(order_by):
                 voter_guide_query = voter_guide_query.order_by(order_by)
+            if not positive_value_exists(show_prior_years):
+                # Default to only showing this year
+                now = datetime.now()
+                voter_guide_query = voter_guide_query.filter(date_last_changed__year=now.year)
 
             if not positive_value_exists(search_string):
                 if not positive_value_exists(ignore_this_source):
@@ -2734,9 +2751,12 @@ class VoterGuidePossibility(models.Model):
 
     voter_who_submitted_name = models.CharField(
         verbose_name="voter name who submitted this", max_length=255, null=True, blank=True, unique=False)
-
     voter_who_submitted_we_vote_id = models.CharField(
         verbose_name="voter we vote id who submitted this", max_length=255, null=True, blank=True, unique=False)
+
+    # Political data manager responsible for processing this voter guide possibility
+    assigned_to_name = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    assigned_to_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
 
     state_code = models.CharField(verbose_name="state the voter guide is related to", max_length=2, null=True)
 
@@ -2786,6 +2806,7 @@ class VoterGuidePossibility(models.Model):
     # For internal notes regarding gathering data
     internal_notes = models.TextField(null=True, blank=True, default=None)
 
+    date_created = models.DateTimeField(null=True, auto_now_add=True)
     # The date of the last change to this voter_guide_possibility
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # last_updated
 

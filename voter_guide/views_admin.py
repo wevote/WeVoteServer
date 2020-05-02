@@ -67,27 +67,30 @@ def create_possible_voter_guides_from_prior_elections_view(request):
     # Endorsements from these urls are not the same from election to election, so bringing them forward
     # to the current election is not helpful to the political data team
     domains_to_not_consider = [
-        'adirondackdailyenterprise.com', 'about:blank', 'apnews.com', 'apple.com',
-        'bloomberg.com', 'boston.com', 'buzzfeed.com',
+        'adirondackdailyenterprise.com', 'about:blank', 'alternet.org', 'apnews.com', 'apple.com',
+        'baltimoresun.com', 'billboard.com', 'bloomberg.com', 'boston.com', 'bostonglobe.com', 'buzzfeed.com',
         'chicagotibune.com', 'cnbc.com', 'cnn.com',
-        'dailykos.com', 'dallasnews.com', 'docs.google.com', 'drive.google.com',
+        'dailydot.com', 'dailykos.com', 'dallasnews.com', 'democracynow.org', 'denverpost.com',
+        'docs.google.com', 'drive.google.com',
+        'essence.com',
         'facebook.com', 'foxbusiness.com', 'foxnews.com',
-        'houstonchronicle.com',
+        'hollywoodreporter.com', 'houstonchronicle.com', 'huffpost.com',
         'instagram.com',
         'gayly.com',
-        'kentucky.com',
+        'kansascity.com', 'kentucky.com',
         'latimes.com', 'localhost:8000',
-        'msnbc.com',
-        'nbcnews.com', 'npr.org', 'nypost.com', 'nytimes.com',
+        'motherjones.com', 'msnbc.com',
+        'nationalreview.com', 'nbcnews.com', 'newsweek.com', 'npr.org', 'nydailynews.com', 'nypost.com', 'nytimes.com',
         'opensecrets.org', 'orlandosentinel.com',
-        'politico.com',
+        'people.com', 'politico.com',
         'rollingstone.com',
-        'sfchronicle.com',
-        'http://t.co', 'https://t.co', 'tampabay.com', 'techcrunch.com', 'texastribune.com', 'thehill.com', 'twitter.com',
+        'sfchronicle.com', 'snewsnet.com', 'spectator.us', 'suntimes.com',
+        'http://t.co', 'https://t.co', 'tampabay.com', 'techcrunch.com', 'texastribune.com', 'thehill.com',
+        'thenation.com', 'twitter.com',
         'usatoday.com',
         'vox.com',
         'wapo.st', 'washingtonpost.com', 'wsj.com',
-        'youtube.com',
+        'youtu.be', 'youtube.com',
     ]
 
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_api_device_id
@@ -2084,6 +2087,7 @@ def voter_guide_possibility_list_view(request):
     results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
         search_string=voter_guide_possibility_search,
         google_civic_election_id=google_civic_election_id,
+        show_prior_years=show_all_elections,
         return_count_only=True)
     to_review_count = results['voter_guide_possibility_list_count']
 
@@ -2092,6 +2096,7 @@ def voter_guide_possibility_list_view(request):
         from_prior_election=True,
         search_string=voter_guide_possibility_search,
         google_civic_election_id=google_civic_election_id,
+        show_prior_years=show_all_elections,
         return_count_only=True)
     from_prior_election_count = results['voter_guide_possibility_list_count']
 
@@ -2100,6 +2105,7 @@ def voter_guide_possibility_list_view(request):
         cannot_find_endorsements=True,
         search_string=voter_guide_possibility_search,
         google_civic_election_id=google_civic_election_id,
+        show_prior_years=show_all_elections,
         return_count_only=True)
     cannot_find_endorsements_count = results['voter_guide_possibility_list_count']
 
@@ -2108,6 +2114,7 @@ def voter_guide_possibility_list_view(request):
         candidates_missing_from_we_vote=True,
         search_string=voter_guide_possibility_search,
         google_civic_election_id=google_civic_election_id,
+        show_prior_years=show_all_elections,
         return_count_only=True)
     candidates_missing_count = results['voter_guide_possibility_list_count']
 
@@ -2116,6 +2123,7 @@ def voter_guide_possibility_list_view(request):
         capture_detailed_comments=True,
         search_string=voter_guide_possibility_search,
         google_civic_election_id=google_civic_election_id,
+        show_prior_years=show_all_elections,
         return_count_only=True)
     capture_detailed_comments_count = results['voter_guide_possibility_list_count']
 
@@ -2134,6 +2142,7 @@ def voter_guide_possibility_list_view(request):
             end_number=end_number,
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
             from_prior_election=from_prior_election)
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
@@ -2147,6 +2156,7 @@ def voter_guide_possibility_list_view(request):
             end_number=end_number,
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
             cannot_find_endorsements=cannot_find_endorsements)
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
@@ -2160,6 +2170,7 @@ def voter_guide_possibility_list_view(request):
             end_number=end_number,
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
             candidates_missing_from_we_vote=candidates_missing_from_we_vote)
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
@@ -2173,6 +2184,7 @@ def voter_guide_possibility_list_view(request):
             end_number=end_number,
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
             capture_detailed_comments=capture_detailed_comments)
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
@@ -2187,6 +2199,7 @@ def voter_guide_possibility_list_view(request):
             end_number=end_number,
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
             hide_from_active_review=hide_from_active_review)
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
@@ -2200,6 +2213,7 @@ def voter_guide_possibility_list_view(request):
             end_number=end_number,
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
             ignore_this_source=ignore_this_source)
         print(f"show_ignore_this_source results {results}")
         if results['success']:
@@ -2214,6 +2228,7 @@ def voter_guide_possibility_list_view(request):
             end_number=end_number,
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
         )
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
