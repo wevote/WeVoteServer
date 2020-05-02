@@ -4,11 +4,10 @@
 from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from import_export_twitter.controllers import twitter_sign_in_start_for_api, \
+from import_export_twitter.controllers import twitter_identity_retrieve_for_api, twitter_sign_in_start_for_api, \
     twitter_sign_in_request_access_token_for_api, twitter_sign_in_request_voter_info_for_api, \
     twitter_sign_in_retrieve_for_api, twitter_retrieve_ids_i_follow_for_api, twitter_native_sign_in_save_for_api
 import json
-from twitter.controllers import twitter_identity_retrieve_for_api
 from urllib.parse import quote
 from urllib.parse import urlencode
 import wevote_functions.admin

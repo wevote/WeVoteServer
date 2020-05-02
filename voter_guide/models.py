@@ -1837,8 +1837,8 @@ class VoterGuidePossibilityManager(models.Manager):
     A class for working with the VoterGuidePossibility and VoterGuidePossibilityPosition model
     """
     def update_or_create_voter_guide_possibility(
-            self, voter_guide_possibility_url,
-            voter_who_submitted_we_vote_id,
+            self, voter_guide_possibility_url='',
+            voter_who_submitted_we_vote_id='',
             voter_guide_possibility_id=0,
             target_google_civic_election_id=0,
             updated_values={}):
@@ -2223,6 +2223,7 @@ class VoterGuidePossibilityManager(models.Manager):
                                               from_prior_election=False,
                                               ignore_this_source=False,
                                               show_prior_years=False,
+                                              assigned_to_voter_we_vote_id=False,
                                               return_count_only=False):
         start_number = convert_to_int(start_number)
         end_number = convert_to_int(end_number)
@@ -2246,6 +2247,9 @@ class VoterGuidePossibilityManager(models.Manager):
                 # Default to only showing this year
                 now = datetime.now()
                 voter_guide_query = voter_guide_query.filter(date_last_changed__year=now.year)
+            if positive_value_exists(assigned_to_voter_we_vote_id):
+                voter_guide_query = voter_guide_query.filter(
+                    assigned_to_voter_we_vote_id__iexact=assigned_to_voter_we_vote_id)
 
             if not positive_value_exists(search_string):
                 if not positive_value_exists(ignore_this_source):
@@ -2382,6 +2386,7 @@ class VoterGuidePossibilityManager(models.Manager):
         results = {
             'success':                              success,
             'status':                               status,
+            'assigned_to_voter_we_vote_id':         assigned_to_voter_we_vote_id,
             'voter_guide_possibility_list_found':   voter_guide_possibility_list_found,
             'voter_guide_possibility_list':         voter_guide_possibility_list,
             'voter_guide_possibility_list_count':   voter_guide_possibility_list_count,

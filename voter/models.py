@@ -916,6 +916,75 @@ class VoterManager(BaseUserManager):
 
         return result
 
+    def retrieve_voter_list_by_permissions(
+            self,
+            is_admin=False,
+            is_partner_organization=False,
+            is_political_data_manager=False,
+            is_political_data_viewer=False,
+            is_verified_volunteer=False,
+            or_filter=True):
+        """
+        Retrieve list of voters based on the permissions they have been granted
+
+        :return result: dictionary with status and list of voters
+        """
+        voter_list = list()
+        status = ''
+
+        if not positive_value_exists(is_admin) \
+                and not positive_value_exists(is_partner_organization) \
+                and not positive_value_exists(is_political_data_manager) \
+                and not positive_value_exists(is_political_data_viewer) \
+                and not positive_value_exists(is_verified_volunteer):
+            status += "MUST_SPECIFY_ONE_PERMISSION_TYPE "
+            result = {
+                'status': status,
+                'voter_list': voter_list,
+            }
+            return result
+
+        voter_queryset = Voter.objects.all()
+
+        voter_raw_filters = []
+        if positive_value_exists(is_admin):
+            new_voter_filter = Q(is_admin=True)
+            voter_raw_filters.append(new_voter_filter)
+        if positive_value_exists(is_partner_organization):
+            new_voter_filter = Q(is_partner_organization=True)
+            voter_raw_filters.append(new_voter_filter)
+        if positive_value_exists(is_political_data_manager):
+            new_voter_filter = Q(is_political_data_manager=True)
+            voter_raw_filters.append(new_voter_filter)
+        if positive_value_exists(is_political_data_viewer):
+            new_voter_filter = Q(is_political_data_viewer=True)
+            voter_raw_filters.append(new_voter_filter)
+        if positive_value_exists(is_verified_volunteer):
+            new_voter_filter = Q(is_verified_volunteer=True)
+            voter_raw_filters.append(new_voter_filter)
+
+        if len(voter_raw_filters):
+            final_voter_filters = voter_raw_filters.pop()
+
+            for item in voter_raw_filters:
+                if positive_value_exists(or_filter):
+                    # "OR" the remaining items in the list
+                    final_voter_filters |= item
+                else:
+                    # "AND" the remaining items in the list
+                    final_voter_filters &= item
+
+            voter_queryset = voter_queryset.filter(final_voter_filters)
+
+        if voter_queryset.exists():
+            voter_list.extend(voter_queryset)
+
+        result = {
+            'status':       status,
+            'voter_list':   voter_list,
+        }
+        return result
+
     def create_voter_with_voter_device_id(self, voter_device_id):
         logger.info("create_voter_with_voter_device_id(voter_device_id)")
 
