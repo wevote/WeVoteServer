@@ -217,6 +217,8 @@ def candidate_list_view(request):
     current_page_url = request.get_full_path()
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     hide_candidate_tools = positive_value_exists(request.GET.get('hide_candidate_tools', 0))
+    hide_candidates_with_photos = \
+        positive_value_exists(request.GET.get('hide_candidates_with_photos', False))
     page = convert_to_int(request.GET.get('page', 0))
     page = page if positive_value_exists(page) else 0  # Prevent negative pages
     show_all = positive_value_exists(request.GET.get('show_all', False))
@@ -423,6 +425,10 @@ def candidate_list_view(request):
                         final_filters |= item
 
                     candidate_queryset = candidate_queryset.filter(final_filters)
+        if positive_value_exists(hide_candidates_with_photos):
+            # Show candidates that do NOT have photos
+            candidate_queryset = candidate_queryset.filter(
+                Q(we_vote_hosted_profile_image_url_medium__isnull=True) | Q(we_vote_hosted_profile_image_url_medium=""))
         if positive_value_exists(show_candidates_with_best_twitter_options):
             # Show candidates with TwitterLinkPossibilities of greater than 60
             candidate_queryset = candidate_queryset.filter(
@@ -678,6 +684,7 @@ def candidate_list_view(request):
         'facebook_urls_without_picture_urls':       facebook_urls_without_picture_urls,
         'google_civic_election_id': google_civic_election_id,
         'hide_candidate_tools':     hide_candidate_tools,
+        'hide_candidates_with_photos':  hide_candidates_with_photos,
         'hide_pagination':          hide_pagination,
         'messages_on_stage':        messages_on_stage,
         'next_page_url':            next_page_url,

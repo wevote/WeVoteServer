@@ -1624,7 +1624,22 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     # if not results['success']:
     #     return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    voter_id = 0
+    voter_who_submitted_we_vote_id = ''
+    voter_who_submitted_name = ''
+    assigned_to_voter_we_vote_id = ''
+    assigned_to_name = ''
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if results['voter_found']:
+        voter = results['voter']
+        voter_id = voter.id
+        voter_who_submitted_we_vote_id = voter.we_vote_id
+        voter_who_submitted_name = voter.get_full_name(real_name_only=True)
+        if voter.is_admin or voter.is_political_data_manager or voter.is_verified_volunteer:
+            assigned_to_voter_we_vote_id = voter.we_vote_id
+            assigned_to_name = voter.get_full_name(real_name_only=True)
+
     if not positive_value_exists(voter_id):
         status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
         # json_data = {
@@ -1633,9 +1648,6 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
         #     'voter_device_id': voter_device_id,
         # }
         # return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-    voter_who_submitted_we_vote_id = fetch_voter_we_vote_id_from_voter_id(voter_id)
-    # TODO We will need the voter_id here so we can control volunteer actions
 
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     voter_guide_possibility = VoterGuidePossibility()
@@ -1679,7 +1691,11 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
         else:
             voter_guide_possibility_type = ORGANIZATION_ENDORSING_CANDIDATES
         updated_values = {
-            'voter_guide_possibility_type': voter_guide_possibility_type,
+            'voter_guide_possibility_type':     voter_guide_possibility_type,
+            'voter_who_submitted_name':         voter_who_submitted_name,
+            'voter_who_submitted_we_vote_id':   voter_who_submitted_we_vote_id,
+            'assigned_to_voter_we_vote_id':     assigned_to_voter_we_vote_id,
+            'assigned_to_name':                 assigned_to_name,
         }
         create_results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
             url_to_scan, pdf_url, voter_who_submitted_we_vote_id, updated_values=updated_values)

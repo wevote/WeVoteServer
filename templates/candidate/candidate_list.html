@@ -34,6 +34,7 @@
 <form name="candidate_choose_election" method="get" action="{% url 'candidate:candidate_list' %}">
     {# These are input checkboxes from a form further down this page #}
     <input type="hidden" name="review_mode" value="{{ review_mode }}" />
+    <input type="hidden" name="hide_candidates_with_photos" value="{{ hide_candidates_with_photos }}" />
     <input type="hidden" name="show_candidates_without_twitter" value="{{ show_candidates_without_twitter }}" />
     <input type="hidden" name="show_candidates_with_best_twitter_options" value="{{ show_candidates_with_best_twitter_options }}" />
     <input type="hidden" name="show_candidates_with_twitter_options" value="{{ show_candidates_with_twitter_options }}" />
@@ -291,7 +292,7 @@
     &nbsp;&nbsp;&nbsp;&nbsp;
     <label for="show_candidates_without_twitter_id">
       <input type="checkbox" name="show_candidates_without_twitter" id="show_candidates_without_twitter_id" value="1"
-             {% if show_candidates_without_twitter %}checked{% endif %} /> Show Candidates Without Twitter
+             {% if show_candidates_without_twitter %}checked{% endif %} /> Show Candidates w/o Twitter
     </label>
     {# Show candidates with Twitter options #}
     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -304,6 +305,12 @@
       <input type="checkbox" name="show_candidates_with_twitter_options" id="show_candidates_with_twitter_options_id" value="1"
              {% if show_candidates_with_twitter_options %}checked{% endif %} /> Show All Twitter Search Results
     </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="hide_candidates_with_photos_id">
+      <input type="checkbox" name="hide_candidates_with_photos" id="hide_candidates_with_photos_id" value="1"
+             {% if hide_candidates_with_photos %}checked{% endif %} /> Hide Candidates w/ Photos
+    </label>
+
     <input type="hidden" name="page" value="{{ current_page_number }}" />
 </form>
 
@@ -600,6 +607,11 @@
     });
     $(function() {
         $('#review_mode_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#hide_candidates_with_photos_id').change(function() {
             this.form.submit();
         });
     });
