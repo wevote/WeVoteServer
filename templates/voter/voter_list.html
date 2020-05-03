@@ -67,11 +67,8 @@
             <th>&nbsp;</th>
             <th>We Vote ID</th>
             <th>You</th>
-            <th>Where</th>
-            <th>FB ID (cached)</th>
-            <th>FB username</th>
-            <th>Tw (cached)</th>
-{#            <th>TwitterLinkToVoter</th> 2017-3-29 Not working#}
+            <th>Facebook</th>
+            <th>Tw</th>
             <th>Email</th>
             <th>Opt In</th>
             <th>Org we_vote_id</th>
@@ -97,32 +94,22 @@
             <td>
             {% if voter.id == voter_id_signed_in %}*ME*{% else %}{% endif %}
             </td>
-            <td>
-                &nbsp;
-            </td>
             <!-- Facebook? //-->
             <td>
-            {{ voter.facebook_id|default_if_none:"" }}
-            </td>
-            <td>
+            {% if voter.facebook_id %}{{ voter.facebook_id|default_if_none:"" }}<br />{% endif %}
+            {% if voter.retrieved_facebook_id %}{{ voter.retrieved_facebook_id|default_if_none:"" }}<br />{% endif %}
             <!-- If we don't have a cached facebook_id, then fb_username is leftover //-->
                 <span {% if not voter.facebook_id %}style="text-decoration: line-through"{% endif %}>
                 {% if voter.fb_username %}{{ voter.fb_username }}{% else %}{% endif %}
+                {% if voter.signed_in_facebook %} (fb account){% endif %}
                 </span>
             </td>
-            <!-- Twitter? OLD //-->
+            <!-- From TwitterLinkToVoter //-->
             <td>
-            {% if voter.twitter_id %}@{{ voter.twitter_screen_name }}<br />
-                {{ voter.twitter_id }}
+            {% if voter.twitter_handle %}
+              @{{ voter.twitter_handle }}
             {% else %}{% endif %}
             </td>
-            <!-- TwitterLinkToVoter //-->
-{#            <td> 2017-3-29 Not working#}
-{#            {% if voter.twitter_id_from_link_to_voter %}#}
-{#                @{{ voter.twitter_screen_name_from_link_to_voter }}<br />#}
-{#                {{ voter.twitter_id_from_link_to_voter }}#}
-{#            {% endif %}#}
-{#            </td>#}
             <!-- Email //-->
             <td>
             {% if voter.email %}{{ voter.email }}{% else %}{% endif %}
