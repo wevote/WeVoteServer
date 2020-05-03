@@ -889,7 +889,15 @@ def voter_list_view(request):
     if positive_value_exists(is_verified_volunteer):
         voter_query = voter_query.filter(is_verified_volunteer=True)
 
-    voter_list = voter_query[:200]
+    voter_list = voter_query[:50]
+    modified_voter_list = []
+
+    facebook_manager = FacebookManager()
+    twitter_user_manager = TwitterUserManager()
+    for one_voter in voter_list:
+        one_voter.twitter_handle = twitter_user_manager.fetch_twitter_handle_from_voter_we_vote_id(one_voter.we_vote_id)
+        one_voter.retrieved_facebook_id = facebook_manager.fetch_facebook_id_from_voter_we_vote_id(one_voter.we_vote_id)
+        modified_voter_list.append(one_voter)
 
     template_values = {
         'is_admin':                     is_admin,
@@ -898,7 +906,7 @@ def voter_list_view(request):
         'is_political_data_viewer':     is_political_data_viewer,
         'is_verified_volunteer':        is_verified_volunteer,
         'messages_on_stage':            messages_on_stage,
-        'voter_list':                   voter_list,
+        'voter_list':                   modified_voter_list,
         'voter_id_signed_in':           voter_id,
         'voter_search':                 voter_search,
     }

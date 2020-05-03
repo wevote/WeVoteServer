@@ -726,6 +726,14 @@ def retrieve_possible_twitter_handles(candidate_campaign):
                 twitter_user_manager.update_or_create_twitter_link_possibility_from_twitter_json(
                     candidate_campaign.we_vote_id, possibility_result['twitter_json'],
                     possibility_result['search_term'], possibility_result['likelihood_score'])
+            if save_twitter_user_results['multiple_objects_returned']:
+                twitter_json = possibility_result['twitter_json']
+                twitter_user_manager.delete_twitter_link_possibility(candidate_campaign.we_vote_id, twitter_json['id'])
+                # Now try again
+                save_twitter_user_results = \
+                    twitter_user_manager.update_or_create_twitter_link_possibility_from_twitter_json(
+                        candidate_campaign.we_vote_id, possibility_result['twitter_json'],
+                        possibility_result['search_term'], possibility_result['likelihood_score'])
             if not save_twitter_user_results['success']:
                 status += save_twitter_user_results['status']
                 success = False
