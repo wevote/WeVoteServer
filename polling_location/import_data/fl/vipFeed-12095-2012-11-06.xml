@@ -1,0 +1,3672 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>12</vip_id>
+  <datetime>2012-10-19T10:00:00</datetime>
+  <description>VIP aggregates this data from official state sources</description>
+</source>
+<state id="12">
+  <name>Florida</name>
+</state>
+<election id="4000">
+  <date>2012-11-06</date>
+  <election_type>State</election_type>
+  <state_id>12</state_id>
+  <statewide>Yes</statewide>
+</election>
+<locality id="11095">
+  <name>ORANGE</name>
+  <state_id>12</state_id>
+  <type>COUNTY</type>
+</locality>
+<precinct id="225010">
+  <name>230</name>
+  <number>230</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950195</polling_location_id>
+</precinct>
+<precinct id="223572">
+  <name>514</name>
+  <number>514</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950134</polling_location_id>
+</precinct>
+<precinct id="221188">
+  <name>301</name>
+  <number>301</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950077</polling_location_id>
+</precinct>
+<precinct id="222750">
+  <name>207</name>
+  <number>207</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950057</polling_location_id>
+</precinct>
+<precinct id="225239">
+  <name>617</name>
+  <number>617</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950170</polling_location_id>
+</precinct>
+<precinct id="221331">
+  <name>208</name>
+  <number>208</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950058</polling_location_id>
+</precinct>
+<precinct id="22943">
+  <name>310</name>
+  <number>310</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950085</polling_location_id>
+</precinct>
+<precinct id="2236">
+  <name>432</name>
+  <number>432</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950020</polling_location_id>
+</precinct>
+<precinct id="224381">
+  <name>313</name>
+  <number>313</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950088</polling_location_id>
+</precinct>
+<precinct id="221734">
+  <name>307</name>
+  <number>307</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950082</polling_location_id>
+</precinct>
+<precinct id="221247">
+  <name>633</name>
+  <number>633</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950182</polling_location_id>
+</precinct>
+<precinct id="224018">
+  <name>509</name>
+  <number>509</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950131</polling_location_id>
+</precinct>
+<precinct id="224104">
+  <name>404</name>
+  <number>404</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950109</polling_location_id>
+</precinct>
+<precinct id="22462">
+  <name>532</name>
+  <number>532</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950150</polling_location_id>
+</precinct>
+<precinct id="22728">
+  <name>613</name>
+  <number>613</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950026</polling_location_id>
+</precinct>
+<precinct id="221280">
+  <name>601</name>
+  <number>601</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950205</polling_location_id>
+</precinct>
+<precinct id="221019">
+  <name>116</name>
+  <number>116</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950040</polling_location_id>
+</precinct>
+<precinct id="221602">
+  <name>414</name>
+  <number>414</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950114</polling_location_id>
+</precinct>
+<precinct id="22627">
+  <name>415</name>
+  <number>415</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950115</polling_location_id>
+</precinct>
+<precinct id="224072">
+  <name>319</name>
+  <number>319</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950093</polling_location_id>
+</precinct>
+<precinct id="222020">
+  <name>240</name>
+  <number>240</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950076</polling_location_id>
+</precinct>
+<precinct id="222209">
+  <name>236</name>
+  <number>236</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950072</polling_location_id>
+</precinct>
+<precinct id="221366">
+  <name>215</name>
+  <number>215</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950060</polling_location_id>
+</precinct>
+<precinct id="224312">
+  <name>122</name>
+  <number>122</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950046</polling_location_id>
+</precinct>
+<precinct id="221709">
+  <name>101</name>
+  <number>101</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950029</polling_location_id>
+</precinct>
+<precinct id="222437">
+  <name>516</name>
+  <number>516</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950136</polling_location_id>
+</precinct>
+<precinct id="222288">
+  <name>603</name>
+  <number>603</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950161</polling_location_id>
+</precinct>
+<precinct id="221876">
+  <name>419</name>
+  <number>419</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950117</polling_location_id>
+</precinct>
+<precinct id="22113">
+  <name>423</name>
+  <number>423</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950119</polling_location_id>
+</precinct>
+<precinct id="221430">
+  <name>402</name>
+  <number>402</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950107</polling_location_id>
+</precinct>
+<precinct id="221977">
+  <name>634</name>
+  <number>634</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950182</polling_location_id>
+</precinct>
+<precinct id="221006">
+  <name>106</name>
+  <number>106</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950185</polling_location_id>
+</precinct>
+<precinct id="22880">
+  <name>318</name>
+  <number>318</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950092</polling_location_id>
+</precinct>
+<precinct id="22678">
+  <name>133</name>
+  <number>133</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950053</polling_location_id>
+</precinct>
+<precinct id="224481">
+  <name>224</name>
+  <number>224</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950065</polling_location_id>
+</precinct>
+<precinct id="22996">
+  <name>544</name>
+  <number>544</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950160</polling_location_id>
+</precinct>
+<precinct id="223889">
+  <name>321</name>
+  <number>321</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950011</polling_location_id>
+</precinct>
+<precinct id="223315">
+  <name>542</name>
+  <number>542</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950158</polling_location_id>
+</precinct>
+<precinct id="223913">
+  <name>604</name>
+  <number>604</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950162</polling_location_id>
+</precinct>
+<precinct id="221455">
+  <name>520</name>
+  <number>520</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950139</polling_location_id>
+</precinct>
+<precinct id="221513">
+  <name>306</name>
+  <number>306</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950197</polling_location_id>
+</precinct>
+<precinct id="22579">
+  <name>102</name>
+  <number>102</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950030</polling_location_id>
+</precinct>
+<precinct id="225295">
+  <name>203</name>
+  <number>203</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950190</polling_location_id>
+</precinct>
+<precinct id="222080">
+  <name>605</name>
+  <number>605</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950163</polling_location_id>
+</precinct>
+<precinct id="2221">
+  <name>502</name>
+  <number>502</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950127</polling_location_id>
+</precinct>
+<precinct id="221427">
+  <name>211</name>
+  <number>211</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950059</polling_location_id>
+</precinct>
+<precinct id="224685">
+  <name>132</name>
+  <number>132</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950052</polling_location_id>
+</precinct>
+<precinct id="22118">
+  <name>339</name>
+  <number>339</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950014</polling_location_id>
+</precinct>
+<precinct id="224747">
+  <name>405</name>
+  <number>405</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950110</polling_location_id>
+</precinct>
+<precinct id="22565">
+  <name>615</name>
+  <number>615</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950169</polling_location_id>
+</precinct>
+<precinct id="223734">
+  <name>431</name>
+  <number>431</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950125</polling_location_id>
+</precinct>
+<precinct id="221667">
+  <name>336</name>
+  <number>336</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950103</polling_location_id>
+</precinct>
+<precinct id="22714">
+  <name>541</name>
+  <number>541</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950157</polling_location_id>
+</precinct>
+<precinct id="223569">
+  <name>521</name>
+  <number>521</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950022</polling_location_id>
+</precinct>
+<precinct id="222267">
+  <name>623</name>
+  <number>623</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950174</polling_location_id>
+</precinct>
+<precinct id="225550">
+  <name>103</name>
+  <number>103</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950031</polling_location_id>
+</precinct>
+<precinct id="22156">
+  <name>327</name>
+  <number>327</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950199</polling_location_id>
+</precinct>
+<precinct id="224429">
+  <name>328</name>
+  <number>328</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950013</polling_location_id>
+</precinct>
+<precinct id="221143">
+  <name>407</name>
+  <number>407</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950111</polling_location_id>
+</precinct>
+<precinct id="221013">
+  <name>539</name>
+  <number>539</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950156</polling_location_id>
+</precinct>
+<precinct id="221571">
+  <name>124</name>
+  <number>124</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950184</polling_location_id>
+</precinct>
+<precinct id="222210">
+  <name>214</name>
+  <number>214</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950005</polling_location_id>
+</precinct>
+<precinct id="221767">
+  <name>326</name>
+  <number>326</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950012</polling_location_id>
+</precinct>
+<precinct id="221505">
+  <name>408</name>
+  <number>408</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950112</polling_location_id>
+</precinct>
+<precinct id="221597">
+  <name>610</name>
+  <number>610</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950168</polling_location_id>
+</precinct>
+<precinct id="22991">
+  <name>614</name>
+  <number>614</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950026</polling_location_id>
+</precinct>
+<precinct id="224171">
+  <name>624</name>
+  <number>624</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950175</polling_location_id>
+</precinct>
+<precinct id="224352">
+  <name>205</name>
+  <number>205</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950056</polling_location_id>
+</precinct>
+<precinct id="225832">
+  <name>434</name>
+  <number>434</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950126</polling_location_id>
+</precinct>
+<precinct id="222662">
+  <name>515</name>
+  <number>515</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950135</polling_location_id>
+</precinct>
+<precinct id="221195">
+  <name>305</name>
+  <number>305</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950081</polling_location_id>
+</precinct>
+<precinct id="221707">
+  <name>335</name>
+  <number>335</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950102</polling_location_id>
+</precinct>
+<precinct id="2296">
+  <name>428</name>
+  <number>428</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950123</polling_location_id>
+</precinct>
+<precinct id="225379">
+  <name>416</name>
+  <number>416</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950115</polling_location_id>
+</precinct>
+<precinct id="221995">
+  <name>528</name>
+  <number>528</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950146</polling_location_id>
+</precinct>
+<precinct id="224314">
+  <name>531</name>
+  <number>531</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950149</polling_location_id>
+</precinct>
+<precinct id="224717">
+  <name>331</name>
+  <number>331</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950098</polling_location_id>
+</precinct>
+<precinct id="222573">
+  <name>308</name>
+  <number>308</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950083</polling_location_id>
+</precinct>
+<precinct id="223880">
+  <name>235</name>
+  <number>235</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950071</polling_location_id>
+</precinct>
+<precinct id="224770">
+  <name>220</name>
+  <number>220</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950192</polling_location_id>
+</precinct>
+<precinct id="223804">
+  <name>413</name>
+  <number>413</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950114</polling_location_id>
+</precinct>
+<precinct id="221825">
+  <name>537</name>
+  <number>537</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950154</polling_location_id>
+</precinct>
+<precinct id="22934">
+  <name>418</name>
+  <number>418</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950017</polling_location_id>
+</precinct>
+<precinct id="224393">
+  <name>616</name>
+  <number>616</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950170</polling_location_id>
+</precinct>
+<precinct id="224">
+  <name>229</name>
+  <number>229</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950008</polling_location_id>
+</precinct>
+<precinct id="22713">
+  <name>135</name>
+  <number>135</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950002</polling_location_id>
+</precinct>
+<precinct id="22515">
+  <name>228</name>
+  <number>228</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950067</polling_location_id>
+</precinct>
+<precinct id="225038">
+  <name>204</name>
+  <number>204</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950191</polling_location_id>
+</precinct>
+<precinct id="225462">
+  <name>618</name>
+  <number>618</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950171</polling_location_id>
+</precinct>
+<precinct id="229">
+  <name>322</name>
+  <number>322</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950094</polling_location_id>
+</precinct>
+<precinct id="223600">
+  <name>534</name>
+  <number>534</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950152</polling_location_id>
+</precinct>
+<precinct id="22261">
+  <name>545</name>
+  <number>545</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950126</polling_location_id>
+</precinct>
+<precinct id="222042">
+  <name>540</name>
+  <number>540</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950023</polling_location_id>
+</precinct>
+<precinct id="225140">
+  <name>631</name>
+  <number>631</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950028</polling_location_id>
+</precinct>
+<precinct id="221107">
+  <name>309</name>
+  <number>309</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950084</polling_location_id>
+</precinct>
+<precinct id="22689">
+  <name>622</name>
+  <number>622</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950173</polling_location_id>
+</precinct>
+<precinct id="22469">
+  <name>504</name>
+  <number>504</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950129</polling_location_id>
+</precinct>
+<precinct id="22600">
+  <name>304</name>
+  <number>304</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950080</polling_location_id>
+</precinct>
+<precinct id="222499">
+  <name>525</name>
+  <number>525</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950143</polling_location_id>
+</precinct>
+<precinct id="222285">
+  <name>529</name>
+  <number>529</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950147</polling_location_id>
+</precinct>
+<precinct id="221612">
+  <name>412</name>
+  <number>412</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950016</polling_location_id>
+</precinct>
+<precinct id="224039">
+  <name>222</name>
+  <number>222</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950007</polling_location_id>
+</precinct>
+<precinct id="221735">
+  <name>608</name>
+  <number>608</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950166</polling_location_id>
+</precinct>
+<precinct id="223078">
+  <name>303</name>
+  <number>303</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950079</polling_location_id>
+</precinct>
+<precinct id="223129">
+  <name>512</name>
+  <number>512</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950203</polling_location_id>
+</precinct>
+<precinct id="22704">
+  <name>118</name>
+  <number>118</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950042</polling_location_id>
+</precinct>
+<precinct id="221486">
+  <name>337</name>
+  <number>337</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950104</polling_location_id>
+</precinct>
+<precinct id="223631">
+  <name>607</name>
+  <number>607</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950165</polling_location_id>
+</precinct>
+<precinct id="221529">
+  <name>530</name>
+  <number>530</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950148</polling_location_id>
+</precinct>
+<precinct id="222553">
+  <name>422</name>
+  <number>422</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950119</polling_location_id>
+</precinct>
+<precinct id="222723">
+  <name>543</name>
+  <number>543</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950159</polling_location_id>
+</precinct>
+<precinct id="22628">
+  <name>611</name>
+  <number>611</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950206</polling_location_id>
+</precinct>
+<precinct id="223978">
+  <name>426</name>
+  <number>426</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950122</polling_location_id>
+</precinct>
+<precinct id="223575">
+  <name>535</name>
+  <number>535</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950149</polling_location_id>
+</precinct>
+<precinct id="22459">
+  <name>324</name>
+  <number>324</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950095</polling_location_id>
+</precinct>
+<precinct id="223336">
+  <name>524</name>
+  <number>524</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950142</polling_location_id>
+</precinct>
+<precinct id="222014">
+  <name>231</name>
+  <number>231</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950196</polling_location_id>
+</precinct>
+<precinct id="223783">
+  <name>429</name>
+  <number>429</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950019</polling_location_id>
+</precinct>
+<precinct id="221955">
+  <name>115</name>
+  <number>115</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950039</polling_location_id>
+</precinct>
+<precinct id="22371">
+  <name>627</name>
+  <number>627</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950178</polling_location_id>
+</precinct>
+<precinct id="222668">
+  <name>522</name>
+  <number>522</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950140</polling_location_id>
+</precinct>
+<precinct id="225409">
+  <name>212</name>
+  <number>212</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950059</polling_location_id>
+</precinct>
+<precinct id="221951">
+  <name>213</name>
+  <number>213</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950004</polling_location_id>
+</precinct>
+<precinct id="222062">
+  <name>119</name>
+  <number>119</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950043</polling_location_id>
+</precinct>
+<precinct id="223761">
+  <name>430</name>
+  <number>430</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950124</polling_location_id>
+</precinct>
+<precinct id="223335">
+  <name>538</name>
+  <number>538</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950155</polling_location_id>
+</precinct>
+<precinct id="22420">
+  <name>417</name>
+  <number>417</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950116</polling_location_id>
+</precinct>
+<precinct id="224716">
+  <name>223</name>
+  <number>223</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950065</polling_location_id>
+</precinct>
+<precinct id="221468">
+  <name>519</name>
+  <number>519</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950138</polling_location_id>
+</precinct>
+<precinct id="22676">
+  <name>501</name>
+  <number>501</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950200</polling_location_id>
+</precinct>
+<precinct id="221837">
+  <name>526</name>
+  <number>526</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950144</polling_location_id>
+</precinct>
+<precinct id="22580">
+  <name>527</name>
+  <number>527</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950145</polling_location_id>
+</precinct>
+<precinct id="222273">
+  <name>511</name>
+  <number>511</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950132</polling_location_id>
+</precinct>
+<precinct id="223099">
+  <name>330</name>
+  <number>330</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950097</polling_location_id>
+</precinct>
+<precinct id="223460">
+  <name>219</name>
+  <number>219</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950063</polling_location_id>
+</precinct>
+<precinct id="221803">
+  <name>114</name>
+  <number>114</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950001</polling_location_id>
+</precinct>
+<precinct id="22892">
+  <name>316</name>
+  <number>316</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950091</polling_location_id>
+</precinct>
+<precinct id="221930">
+  <name>225</name>
+  <number>225</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950193</polling_location_id>
+</precinct>
+<precinct id="224307">
+  <name>311</name>
+  <number>311</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950086</polling_location_id>
+</precinct>
+<precinct id="22656">
+  <name>108</name>
+  <number>108</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950033</polling_location_id>
+</precinct>
+<precinct id="225869">
+  <name>506</name>
+  <number>506</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950130</polling_location_id>
+</precinct>
+<precinct id="22253">
+  <name>130</name>
+  <number>130</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950051</polling_location_id>
+</precinct>
+<precinct id="22503">
+  <name>317</name>
+  <number>317</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950009</polling_location_id>
+</precinct>
+<precinct id="225761">
+  <name>209</name>
+  <number>209</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950003</polling_location_id>
+</precinct>
+<precinct id="223874">
+  <name>131</name>
+  <number>131</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950188</polling_location_id>
+</precinct>
+<precinct id="22487">
+  <name>237</name>
+  <number>237</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950073</polling_location_id>
+</precinct>
+<precinct id="222793">
+  <name>626</name>
+  <number>626</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950177</polling_location_id>
+</precinct>
+<precinct id="22247">
+  <name>120</name>
+  <number>120</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950044</polling_location_id>
+</precinct>
+<precinct id="222105">
+  <name>123</name>
+  <number>123</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950183</polling_location_id>
+</precinct>
+<precinct id="221992">
+  <name>425</name>
+  <number>425</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950121</polling_location_id>
+</precinct>
+<precinct id="223934">
+  <name>111</name>
+  <number>111</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950036</polling_location_id>
+</precinct>
+<precinct id="221467">
+  <name>128</name>
+  <number>128</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950050</polling_location_id>
+</precinct>
+<precinct id="221512">
+  <name>625</name>
+  <number>625</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950176</polling_location_id>
+</precinct>
+<precinct id="221351">
+  <name>606</name>
+  <number>606</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950164</polling_location_id>
+</precinct>
+<precinct id="222122">
+  <name>217</name>
+  <number>217</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950062</polling_location_id>
+</precinct>
+<precinct id="222035">
+  <name>127</name>
+  <number>127</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950049</polling_location_id>
+</precinct>
+<precinct id="224539">
+  <name>134</name>
+  <number>134</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950054</polling_location_id>
+</precinct>
+<precinct id="221584">
+  <name>612</name>
+  <number>612</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950025</polling_location_id>
+</precinct>
+<precinct id="222234">
+  <name>206</name>
+  <number>206</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950056</polling_location_id>
+</precinct>
+<precinct id="222111">
+  <name>609</name>
+  <number>609</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950167</polling_location_id>
+</precinct>
+<precinct id="224909">
+  <name>620</name>
+  <number>620</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950172</polling_location_id>
+</precinct>
+<precinct id="223687">
+  <name>227</name>
+  <number>227</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950066</polling_location_id>
+</precinct>
+<precinct id="224001">
+  <name>210</name>
+  <number>210</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950003</polling_location_id>
+</precinct>
+<precinct id="22175">
+  <name>411</name>
+  <number>411</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950015</polling_location_id>
+</precinct>
+<precinct id="222230">
+  <name>129</name>
+  <number>129</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950187</polling_location_id>
+</precinct>
+<precinct id="225810">
+  <name>329</name>
+  <number>329</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950013</polling_location_id>
+</precinct>
+<precinct id="222727">
+  <name>218</name>
+  <number>218</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950006</polling_location_id>
+</precinct>
+<precinct id="22377">
+  <name>409</name>
+  <number>409</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950112</polling_location_id>
+</precinct>
+<precinct id="22975">
+  <name>427</name>
+  <number>427</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950018</polling_location_id>
+</precinct>
+<precinct id="221737">
+  <name>221</name>
+  <number>221</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950064</polling_location_id>
+</precinct>
+<precinct id="221258">
+  <name>510</name>
+  <number>510</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950202</polling_location_id>
+</precinct>
+<precinct id="221058">
+  <name>503</name>
+  <number>503</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950128</polling_location_id>
+</precinct>
+<precinct id="221144">
+  <name>110</name>
+  <number>110</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950035</polling_location_id>
+</precinct>
+<precinct id="222373">
+  <name>333</name>
+  <number>333</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950100</polling_location_id>
+</precinct>
+<precinct id="222943">
+  <name>632</name>
+  <number>632</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950181</polling_location_id>
+</precinct>
+<precinct id="22944">
+  <name>621</name>
+  <number>621</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950173</polling_location_id>
+</precinct>
+<precinct id="223848">
+  <name>320</name>
+  <number>320</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950010</polling_location_id>
+</precinct>
+<precinct id="223456">
+  <name>113</name>
+  <number>113</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950038</polling_location_id>
+</precinct>
+<precinct id="221534">
+  <name>401</name>
+  <number>401</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950106</polling_location_id>
+</precinct>
+<precinct id="223819">
+  <name>406</name>
+  <number>406</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950110</polling_location_id>
+</precinct>
+<precinct id="22519">
+  <name>602</name>
+  <number>602</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950024</polling_location_id>
+</precinct>
+<precinct id="223868">
+  <name>332</name>
+  <number>332</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950099</polling_location_id>
+</precinct>
+<precinct id="221975">
+  <name>325</name>
+  <number>325</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950096</polling_location_id>
+</precinct>
+<precinct id="223753">
+  <name>109</name>
+  <number>109</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950034</polling_location_id>
+</precinct>
+<precinct id="22416">
+  <name>315</name>
+  <number>315</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950090</polling_location_id>
+</precinct>
+<precinct id="22969">
+  <name>125</name>
+  <number>125</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950047</polling_location_id>
+</precinct>
+<precinct id="221158">
+  <name>517</name>
+  <number>517</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950137</polling_location_id>
+</precinct>
+<precinct id="22860">
+  <name>112</name>
+  <number>112</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950037</polling_location_id>
+</precinct>
+<precinct id="221113">
+  <name>302</name>
+  <number>302</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950078</polling_location_id>
+</precinct>
+<precinct id="222435">
+  <name>518</name>
+  <number>518</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950204</polling_location_id>
+</precinct>
+<precinct id="22517">
+  <name>410</name>
+  <number>410</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950113</polling_location_id>
+</precinct>
+<precinct id="223759">
+  <name>233</name>
+  <number>233</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950069</polling_location_id>
+</precinct>
+<precinct id="223776">
+  <name>234</name>
+  <number>234</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950070</polling_location_id>
+</precinct>
+<precinct id="221789">
+  <name>338</name>
+  <number>338</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950105</polling_location_id>
+</precinct>
+<precinct id="22510">
+  <name>536</name>
+  <number>536</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950153</polling_location_id>
+</precinct>
+<precinct id="22995">
+  <name>533</name>
+  <number>533</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950151</polling_location_id>
+</precinct>
+<precinct id="22693">
+  <name>117</name>
+  <number>117</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950041</polling_location_id>
+</precinct>
+<precinct id="225235">
+  <name>619</name>
+  <number>619</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950171</polling_location_id>
+</precinct>
+<precinct id="223909">
+  <name>505</name>
+  <number>505</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950201</polling_location_id>
+</precinct>
+<precinct id="223952">
+  <name>433</name>
+  <number>433</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950020</polling_location_id>
+</precinct>
+<precinct id="223020">
+  <name>232</name>
+  <number>232</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950068</polling_location_id>
+</precinct>
+<precinct id="224930">
+  <name>201</name>
+  <number>201</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950055</polling_location_id>
+</precinct>
+<precinct id="221071">
+  <name>629</name>
+  <number>629</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950180</polling_location_id>
+</precinct>
+<precinct id="223518">
+  <name>121</name>
+  <number>121</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950045</polling_location_id>
+</precinct>
+<precinct id="224776">
+  <name>628</name>
+  <number>628</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950179</polling_location_id>
+</precinct>
+<precinct id="222380">
+  <name>424</name>
+  <number>424</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950120</polling_location_id>
+</precinct>
+<precinct id="224509">
+  <name>334</name>
+  <number>334</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950101</polling_location_id>
+</precinct>
+<precinct id="223899">
+  <name>312</name>
+  <number>312</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950087</polling_location_id>
+</precinct>
+<precinct id="221392">
+  <name>523</name>
+  <number>523</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950141</polling_location_id>
+</precinct>
+<precinct id="221968">
+  <name>630</name>
+  <number>630</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950027</polling_location_id>
+</precinct>
+<precinct id="223346">
+  <name>202</name>
+  <number>202</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950189</polling_location_id>
+</precinct>
+<precinct id="222040">
+  <name>323</name>
+  <number>323</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950198</polling_location_id>
+</precinct>
+<precinct id="22785">
+  <name>421</name>
+  <number>421</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950118</polling_location_id>
+</precinct>
+<precinct id="224076">
+  <name>420</name>
+  <number>420</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950117</polling_location_id>
+</precinct>
+<precinct id="221037">
+  <name>508</name>
+  <number>508</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950021</polling_location_id>
+</precinct>
+<precinct id="223111">
+  <name>238</name>
+  <number>238</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950074</polling_location_id>
+</precinct>
+<precinct id="221265">
+  <name>507</name>
+  <number>507</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950130</polling_location_id>
+</precinct>
+<precinct id="224672">
+  <name>239</name>
+  <number>239</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950075</polling_location_id>
+</precinct>
+<precinct id="22337">
+  <name>403</name>
+  <number>403</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950108</polling_location_id>
+</precinct>
+<precinct id="221851">
+  <name>126</name>
+  <number>126</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950048</polling_location_id>
+</precinct>
+<precinct id="221289">
+  <name>104</name>
+  <number>104</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950032</polling_location_id>
+</precinct>
+<precinct id="222495">
+  <name>107</name>
+  <number>107</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950186</polling_location_id>
+</precinct>
+<precinct id="22449">
+  <name>105</name>
+  <number>105</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950033</polling_location_id>
+</precinct>
+<precinct id="22421">
+  <name>513</name>
+  <number>513</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950133</polling_location_id>
+</precinct>
+<precinct id="221109">
+  <name>216</name>
+  <number>216</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950061</polling_location_id>
+</precinct>
+<precinct id="22328">
+  <name>314</name>
+  <number>314</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950089</polling_location_id>
+</precinct>
+<precinct id="224732">
+  <name>226</name>
+  <number>226</number>
+  <locality_id>11095</locality_id>
+  <mail_only>NO</mail_only>
+  <polling_location_id>440950194</polling_location_id>
+</precinct>
+<polling_location id="440950001">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>5987 WINDHOVER DR</line1>
+    <state>FL</state>
+    <location_name>WINDHOVER CONDO ASSOCIATION</location_name>
+    <zip>32819</zip>
+  </address>
+</polling_location>
+<polling_location id="440950002">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>8464 WINTER GARDEN VINELAND RD</line1>
+    <state>FL</state>
+    <location_name>1ST BAPTIST CHURCH OF WINDERMERE</location_name>
+    <zip>32836</zip>
+  </address>
+</polling_location>
+<polling_location id="440950003">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>5717 N PINE HILLS RD</line1>
+    <state>FL</state>
+    <location_name>CHRIST SANCTIFIED CHURCH</location_name>
+    <zip>32810</zip>
+  </address>
+</polling_location>
+<polling_location id="440950004">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>4872 ROSE BAY DR</line1>
+    <state>FL</state>
+    <location_name>ROSEMONT COMMUNITY CENTER</location_name>
+    <zip>32808</zip>
+  </address>
+</polling_location>
+<polling_location id="440950005">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>4484 N JOHN YOUNG PKWY</line1>
+    <state>FL</state>
+    <location_name>CHURCH IN THE SON</location_name>
+    <zip>32808</zip>
+  </address>
+</polling_location>
+<polling_location id="440950006">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>OCOEE</city>
+    <line1>1820 A D MIMS RD</line1>
+    <state>FL</state>
+    <location_name>JIM BEECH RECREATION CENTER</location_name>
+    <zip>34761</zip>
+  </address>
+</polling_location>
+<polling_location id="440950007">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>OCOEE</city>
+    <line1>1820 A D MIMS RD</line1>
+    <state>FL</state>
+    <location_name>JIM BEECH RECREATION CENTER</location_name>
+    <zip>34761</zip>
+  </address>
+</polling_location>
+<polling_location id="440950008">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>APOPKA</city>
+    <line1>113 N WEKIWA SPRINGS ROAD</line1>
+    <state>FL</state>
+    <location_name>NEW LIFE PRAISE WORSHIP CENTER</location_name>
+    <zip>32703</zip>
+  </address>
+</polling_location>
+<polling_location id="440950009">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>3000 HANSON PKWY</line1>
+    <state>FL</state>
+    <location_name>ROYAL MANOR VILLAS CLUBHOUSE</location_name>
+    <zip>32822</zip>
+  </address>
+</polling_location>
+<polling_location id="440950010">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>4405 SAINT FLORIAN WAY</line1>
+    <state>FL</state>
+    <location_name>ORANGE COUNTY FIRE STATION 71</location_name>
+    <zip>32822</zip>
+  </address>
+</polling_location>
+<polling_location id="440950011">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>6555 HOFFNER AVE</line1>
+    <state>FL</state>
+    <location_name>GUANG MING TEMPLE</location_name>
+    <zip>32822</zip>
+  </address>
+</polling_location>
+<polling_location id="440950012">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>2809 S FERNCREEK AVE</line1>
+    <state>FL</state>
+    <location_name>NATIONAL GUARD ARMORY</location_name>
+    <zip>32806</zip>
+  </address>
+</polling_location>
+<polling_location id="440950013">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>290 HOLDEN AVE</line1>
+    <state>FL</state>
+    <location_name>CYPRESS GROVE PARK</location_name>
+    <zip>32839</zip>
+  </address>
+</polling_location>
+<polling_location id="440950014">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>5088 HOFFNER AVE</line1>
+    <state>FL</state>
+    <location_name>SOCIEDAD CUBANA DE ORLANDO</location_name>
+    <zip>32812</zip>
+  </address>
+</polling_location>
+<polling_location id="440950015">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>9307 CURRY FORD RD</line1>
+    <state>FL</state>
+    <location_name>FAITH ASSEMBLY OF GOD CHURCH</location_name>
+    <zip>32825</zip>
+  </address>
+</polling_location>
+<polling_location id="440950016">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>2900 NORTHAMPTON AVE</line1>
+    <state>FL</state>
+    <location_name>STONEYBROOK EAST GOLF CLUB</location_name>
+    <zip>32828</zip>
+  </address>
+</polling_location>
+<polling_location id="440950017">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>4301 S CHICKASAW TRL</line1>
+    <state>FL</state>
+    <location_name>ST ISAAC JOGUES CATHOLIC CHURCH</location_name>
+    <zip>32829</zip>
+  </address>
+</polling_location>
+<polling_location id="440950018">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>1751 RHODE ISLAND WOODS CIR</line1>
+    <state>FL</state>
+    <location_name>ORANGE COUNTY MAGIC RECREATION CENTER</location_name>
+    <zip>32824</zip>
+  </address>
+</polling_location>
+<polling_location id="440950019">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>14500 LANDSTAR BLVD</line1>
+    <state>FL</state>
+    <location_name>CATALYST CHURCH</location_name>
+    <zip>32824</zip>
+  </address>
+</polling_location>
+<polling_location id="440950020">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>11221 JOHN WYCLIFFE BLVD</line1>
+    <state>FL</state>
+    <location_name>WYCLIFFE DISCOVERY CENTER</location_name>
+    <zip>32832</zip>
+  </address>
+</polling_location>
+<polling_location id="440950021">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>713 W YALE ST</line1>
+    <state>FL</state>
+    <location_name>COLLEGE PARK BAPTIST CLC (Christian Life Center)</location_name>
+    <zip>32804</zip>
+  </address>
+</polling_location>
+<polling_location id="440950022">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>400 S LAKEMONT AVE</line1>
+    <state>FL</state>
+    <location_name>WINTER PARK PRESBYTERIAN CHURCH</location_name>
+    <zip>32792</zip>
+  </address>
+</polling_location>
+<polling_location id="440950023">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>14481 PEBBLE BEACH BLVD</line1>
+    <state>FL</state>
+    <location_name>FAIRWAYS COUNTRY CLUB</location_name>
+    <zip>32826</zip>
+  </address>
+</polling_location>
+<polling_location id="440950024">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>440 N TAMPA AVE</line1>
+    <state>FL</state>
+    <location_name>ROCK LAKE COMMUNITY CENTER</location_name>
+    <zip>32805</zip>
+  </address>
+</polling_location>
+<polling_location id="440950025">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>5100 L B MCLEOD RD</line1>
+    <state>FL</state>
+    <location_name>ORLANDO WASTEWATER BUREAU</location_name>
+    <zip>32811</zip>
+  </address>
+</polling_location>
+<polling_location id="440950026">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>5590 ARNOLD PALMER DR</line1>
+    <state>FL</state>
+    <location_name>WILLOW KEY APARTMENT HOMES</location_name>
+    <zip>32811</zip>
+  </address>
+</polling_location>
+<polling_location id="440950027">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>2210 S RIO GRANDE AVE</line1>
+    <state>FL</state>
+    <location_name>NEW COVENANT BAPTIST CHURCH</location_name>
+    <zip>32805</zip>
+  </address>
+</polling_location>
+<polling_location id="440950028">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>2210 S RIO GRANDE AVE</line1>
+    <state>FL</state>
+    <location_name>NEW COVENANT BAPTIST CHURCH</location_name>
+    <zip>32805</zip>
+  </address>
+</polling_location>
+<polling_location id="440950029">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>2100 S HIAWASSEE RD</line1>
+    <state>FL</state>
+    <location_name>METROWEST GOLF CLUB</location_name>
+    <zip>32835</zip>
+  </address>
+</polling_location>
+<polling_location id="440950030">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>700 GOOD HOMES RD</line1>
+    <state>FL</state>
+    <location_name>1ST BAPTIST CHURCH OF CENTRAL FLORIDA</location_name>
+    <zip>32835</zip>
+  </address>
+</polling_location>
+<polling_location id="440950031">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Miami</city>
+    <line1>9600 W COLONIAL DR</line1>
+    <state>FL</state>
+    <location_name>ST PAULS PRESBYTERIAN CHURCH</location_name>
+    <zip>33157</zip>
+  </address>
+</polling_location>
+<polling_location id="440950032">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Miami</city>
+    <line1>9600 W COLONIAL DR</line1>
+    <state>FL</state>
+    <location_name>ST PAULS PRESBYTERIAN CHURCH</location_name>
+    <zip>33157</zip>
+  </address>
+</polling_location>
+<polling_location id="440950033">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Winter Garden</city>
+    <line1>631 S DILLARD ST</line1>
+    <state>FL</state>
+    <location_name>CALVARY BAPTIST CHURCH</location_name>
+    <zip>34787</zip>
+  </address>
+</polling_location>
+<polling_location id="440950034">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Winter Garden</city>
+    <line1>671 BEULAH RD</line1>
+    <state>FL</state>
+    <location_name>BEULAH BAPTIST CHURCH</location_name>
+    <zip>34787</zip>
+  </address>
+</polling_location>
+<polling_location id="440950035">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Deltona</city>
+    <line1>3409 MAGUIRE RD</line1>
+    <state>FL</state>
+    <location_name>THE PINES AT WINDERMERE</location_name>
+    <zip>32725</zip>
+  </address>
+</polling_location>
+<polling_location id="440950036">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Gotha</city>
+    <line1>2342 HEMPEL AVE</line1>
+    <state>FL</state>
+    <location_name>NEW LIFE WORSHIP CENTER</location_name>
+    <zip>34734</zip>
+  </address>
+</polling_location>
+<polling_location id="440950037">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>4700 LINCOLN AVE</line1>
+    <state>FL</state>
+    <location_name>PRESBYTERIAN CHURCH OF THE LAKES</location_name>
+    <zip>32819</zip>
+  </address>
+</polling_location>
+<polling_location id="440950038">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>7201 WOODGREEN DR</line1>
+    <state>FL</state>
+    <location_name>ORANGE TREE RECREATION CENTER</location_name>
+    <zip>32819</zip>
+  </address>
+</polling_location>
+<polling_location id="440950039">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>7001 WALLACE RD</line1>
+    <state>FL</state>
+    <location_name>EBON TEMPLE</location_name>
+    <zip>32819</zip>
+  </address>
+</polling_location>
+<polling_location id="440950040">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>7255 DELLA DR</line1>
+    <state>FL</state>
+    <location_name>ORANGE COUNTY LIBRARY SOUTHWEST BRANCH</location_name>
+    <zip>32819</zip>
+  </address>
+</polling_location>
+<polling_location id="440950041">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>5303 GATEWAY AVE</line1>
+    <state>FL</state>
+    <location_name>LIME TREE VILLAGE CLUBHOUSE</location_name>
+    <zip>32821</zip>
+  </address>
+</polling_location>
+<polling_location id="440950042">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>11425 SANDY HILL DR</line1>
+    <state>FL</state>
+    <location_name>SOMERSET VILLAGE CLUBHOUSE</location_name>
+    <zip>32821</zip>
+  </address>
+</polling_location>
+<polling_location id="440950043">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>5100 TOWN CENTER BLVD</line1>
+    <state>FL</state>
+    <location_name>OSPREY PARK COMMUNITY CENTER</location_name>
+    <zip>32837</zip>
+  </address>
+</polling_location>
+<polling_location id="440950044">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>13502 TOWN LOOP BLVD</line1>
+    <state>FL</state>
+    <location_name>PEACE UNITED METHODIST CHURCH</location_name>
+    <zip>32837</zip>
+  </address>
+</polling_location>
+<polling_location id="440950045">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>2950 HUNTERS CREEK BLVD</line1>
+    <state>FL</state>
+    <location_name>EAGLE PARK COMMUNITY ASSOCIATION BLDG</location_name>
+    <zip>32837</zip>
+  </address>
+</polling_location>
+<polling_location id="440950046">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>14101 TOWN LOOP BLVD</line1>
+    <state>FL</state>
+    <location_name>HUNTERS CREEK TOWN HALL</location_name>
+    <zip>32837</zip>
+  </address>
+</polling_location>
+<polling_location id="440950047">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>9020 KILGORE RD</line1>
+    <state>FL</state>
+    <location_name>ORANGE COUNTY SPORTSMENS ASSOCIATION</location_name>
+    <zip>32836</zip>
+  </address>
+</polling_location>
+<polling_location id="440950048">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Winter Garden</city>
+    <line1>14465 VISTA DEL LAGO BLVD</line1>
+    <state>FL</state>
+    <location_name>VISTA DEL LAGO COMMUNITY CENTER</location_name>
+    <zip>34787</zip>
+  </address>
+</polling_location>
+<polling_location id="440950049">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>7900 S APOPKA VINELAND RD</line1>
+    <state>FL</state>
+    <location_name>SALEM LUTHERAN CHURCH</location_name>
+    <zip>32819</zip>
+  </address>
+</polling_location>
+<polling_location id="440950050">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>4851 S APOPKA VINELAND RD</line1>
+    <state>FL</state>
+    <location_name>ST LUKES UNITED METHODIST CHURCH</location_name>
+    <zip>32819</zip>
+  </address>
+</polling_location>
+<polling_location id="440950051">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Windermere</city>
+    <line1>4100 MCKINNON RD</line1>
+    <state>FL</state>
+    <location_name>WINDERMERE 7TH DAY ADVENTIST CHURCH</location_name>
+    <zip>34786</zip>
+  </address>
+</polling_location>
+<polling_location id="440950052">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Oakland</city>
+    <line1>218 E OAKLAND AVE</line1>
+    <state>FL</state>
+    <location_name>OAKLAND PRESBYTERIAN CHURCH</location_name>
+    <zip>34760</zip>
+  </address>
+</polling_location>
+<polling_location id="440950053">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Winter Garden</city>
+    <line1>16161 MARSH RD</line1>
+    <state>FL</state>
+    <location_name>ZION NEW LIFE LUTHERAN CH</location_name>
+    <zip>34787</zip>
+  </address>
+</polling_location>
+<polling_location id="440950054">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Windermere</city>
+    <line1>12120 CHASE RD</line1>
+    <state>FL</state>
+    <location_name>HARVEST BIBLE CHAPEL</location_name>
+    <zip>34786</zip>
+  </address>
+</polling_location>
+<polling_location id="440950055">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1940 TRAYLOR BLVD</line1>
+    <state>FL</state>
+    <location_name>HEART OF FLORIDA UNITED WAY</location_name>
+    <zip>32804</zip>
+  </address>
+</polling_location>
+<polling_location id="440950056">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>5200 EGGLESTON AVE</line1>
+    <state>FL</state>
+    <location_name>COLLEGE PARK TOWERS</location_name>
+    <zip>32810</zip>
+  </address>
+</polling_location>
+<polling_location id="440950057">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>2405 DIANJO DR</line1>
+    <state>FL</state>
+    <location_name>ORLANDO KOREAN PRESBYTERIAN CHURCH</location_name>
+    <zip>32810</zip>
+  </address>
+</polling_location>
+<polling_location id="440950058">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>7601 EDGEWATER DR</line1>
+    <state>FL</state>
+    <location_name>LOCKHART BAPTIST CHURCH</location_name>
+    <zip>32810</zip>
+  </address>
+</polling_location>
+<polling_location id="440950059">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>4925 CLARCONA OCOEE RD</line1>
+    <state>FL</state>
+    <location_name>MOKANNA MASONIC LODGE 329</location_name>
+    <zip>32810</zip>
+  </address>
+</polling_location>
+<polling_location id="440950060">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>5206 INDIAN HILL RD</line1>
+    <state>FL</state>
+    <location_name>RESERVE AT INDIAN HILL</location_name>
+    <zip>32808</zip>
+  </address>
+</polling_location>
+<polling_location id="440950061">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>6101 DENSON DR</line1>
+    <state>FL</state>
+    <location_name>APOSTOLIC CHURCH OF JESUS</location_name>
+    <zip>32808</zip>
+  </address>
+</polling_location>
+<polling_location id="440950062">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>4125 N HIAWASSEE RD</line1>
+    <state>FL</state>
+    <location_name>NORTH ORLANDO 7TH DAY ADVENTIST CHURCH</location_name>
+    <zip>32818</zip>
+  </address>
+</polling_location>
+<polling_location id="440950063">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Ocoee</city>
+    <line1>201 S CLARKE RD</line1>
+    <state>FL</state>
+    <location_name>OCOEE OAKS UNITED METHODIST CHURCH</location_name>
+    <zip>34761</zip>
+  </address>
+</polling_location>
+<polling_location id="440950064">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Ocoee</city>
+    <line1>1701 ADAIR ST</line1>
+    <state>FL</state>
+    <location_name>ISON SENIOR &amp; VETERAN CENTER</location_name>
+    <zip>34761</zip>
+  </address>
+</polling_location>
+<polling_location id="440950065">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Apopka</city>
+    <line1>3535 DAMON RD</line1>
+    <state>FL</state>
+    <location_name>CLARCONA HORSEMANS PARK</location_name>
+    <zip>32703</zip>
+  </address>
+</polling_location>
+<polling_location id="440950066">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Apopka</city>
+    <line1>1022 S ORANGE BLOSSOM TRL</line1>
+    <state>FL</state>
+    <location_name>TRINITY BAPTIST CHURCH</location_name>
+    <zip>32703</zip>
+  </address>
+</polling_location>
+<polling_location id="440950067">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Apopka</city>
+    <line1>750 ROGER WILLIAMS RD</line1>
+    <state>FL</state>
+    <location_name>APOPKA CALVARY NAZARENE CHURCH</location_name>
+    <zip>32703</zip>
+  </address>
+</polling_location>
+<polling_location id="440950068">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Apopka</city>
+    <line1>1355 ERROL PKWY</line1>
+    <state>FL</state>
+    <location_name>ERROL ESTATE COUNTRY CLUB</location_name>
+    <zip>32712</zip>
+  </address>
+</polling_location>
+<polling_location id="440950069">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Apopka</city>
+    <line1>413 W WELCH RD</line1>
+    <state>FL</state>
+    <location_name>NORTHSIDE BAPTIST CHURCH</location_name>
+    <zip>32712</zip>
+  </address>
+</polling_location>
+<polling_location id="440950070">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Apopka</city>
+    <line1>1111 N ROCK SPRINGS RD</line1>
+    <state>FL</state>
+    <location_name>ORANGE COUNTY SERVICES BUILDING</location_name>
+    <zip>32712</zip>
+  </address>
+</polling_location>
+<polling_location id="440950071">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Apopka</city>
+    <line1>584 N WEKIWA SPRINGS RD</line1>
+    <state>FL</state>
+    <location_name>WEKIWA SPRINGS BAPTIST CHURCH</location_name>
+    <zip>32712</zip>
+  </address>
+</polling_location>
+<polling_location id="440950072">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Apopka</city>
+    <line1>4490 N ROCK SPRINGS RD</line1>
+    <state>FL</state>
+    <location_name>NEW BEGINNING WORSHIP CENTER</location_name>
+    <zip>32712</zip>
+  </address>
+</polling_location>
+<polling_location id="440950073">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Apopka</city>
+    <line1>625 ROCK RIDGE BLVD</line1>
+    <state>FL</state>
+    <location_name>ROCK SPRINGS RIDGE GOLF CLUB</location_name>
+    <zip>32712</zip>
+  </address>
+</polling_location>
+<polling_location id="440950074">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Apopka</city>
+    <line1>4253 W PONKAN RD</line1>
+    <state>FL</state>
+    <location_name>NOCIA (North Orange County Improvement Association)</location_name>
+    <zip>32712</zip>
+  </address>
+</polling_location>
+<polling_location id="440950075">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Mt Dora</city>
+    <line1>6803 OLD HIGHWAY 441 S</line1>
+    <state>FL</state>
+    <location_name>ST PATRICKS CATHOLIC CHURCH</location_name>
+    <zip>32757</zip>
+  </address>
+</polling_location>
+<polling_location id="440950076">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Apopka</city>
+    <line1>2434 OLD DIXIE HWY</line1>
+    <state>FL</state>
+    <location_name>DAY SPRING COMMUNITY CHURCH</location_name>
+    <zip>32712</zip>
+  </address>
+</polling_location>
+<polling_location id="440950077">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>515 DELANEY AVE</line1>
+    <state>FL</state>
+    <location_name>KINNERET TOWERS</location_name>
+    <zip>32801</zip>
+  </address>
+</polling_location>
+<polling_location id="440950078">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>2565 E KALEY AVE</line1>
+    <state>FL</state>
+    <location_name>1ST CHRISTIAN CHURCH OF ORLANDO</location_name>
+    <zip>32806</zip>
+  </address>
+</polling_location>
+<polling_location id="440950079">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1655 PEEL AVE</line1>
+    <state>FL</state>
+    <location_name>GRACE COVENANT PRESBYTERIAN CHURCH</location_name>
+    <zip>32806</zip>
+  </address>
+</polling_location>
+<polling_location id="440950080">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1400 GASTON FOSTER RD</line1>
+    <state>FL</state>
+    <location_name>DOVER SHORES COMMUNITY CENTER</location_name>
+    <zip>32812</zip>
+  </address>
+</polling_location>
+<polling_location id="440950081">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>551 GASTON FOSTER RD</line1>
+    <state>FL</state>
+    <location_name>DOVER SHORES BAPTIST CHURCH</location_name>
+    <zip>32807</zip>
+  </address>
+</polling_location>
+<polling_location id="440950082">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1600 N CHICKASAW TRL</line1>
+    <state>FL</state>
+    <location_name>CENTRO CRISTIANO CHURCH</location_name>
+    <zip>32825</zip>
+  </address>
+</polling_location>
+<polling_location id="440950083">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1561 N CHICKASAW TRL</line1>
+    <state>FL</state>
+    <location_name>PRIMERA IGLESIA CRISTIANA DE ORLANDO</location_name>
+    <zip>32825</zip>
+  </address>
+</polling_location>
+<polling_location id="440950084">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>8601 LAKE UNDERHILL RD</line1>
+    <state>FL</state>
+    <location_name>ST STEPHEN PRESBYTERIAN CHURCH</location_name>
+    <zip>32825</zip>
+  </address>
+</polling_location>
+<polling_location id="440950085">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>9000 LAKE UNDERHILL RD</line1>
+    <state>FL</state>
+    <location_name>EASTLAND BAPTIST CHURCH</location_name>
+    <zip>32825</zip>
+  </address>
+</polling_location>
+<polling_location id="440950086">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Deltona</city>
+    <line1>8600 EL PRADO AVE</line1>
+    <state>FL</state>
+    <location_name>RIO PINAR COUNTRY CLUB</location_name>
+    <zip>32725</zip>
+  </address>
+</polling_location>
+<polling_location id="440950087">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Deltona</city>
+    <line1>8600 EL PRADO AVE</line1>
+    <state>FL</state>
+    <location_name>RIO PINAR COUNTRY CLUB</location_name>
+    <zip>32725</zip>
+  </address>
+</polling_location>
+<polling_location id="440950088">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1320 S CHICKASAW TRL</line1>
+    <state>FL</state>
+    <location_name>UNITED CHURCH OFTHE NAZARENE</location_name>
+    <zip>32825</zip>
+  </address>
+</polling_location>
+<polling_location id="440950089">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1900 S GOLDENROD RD</line1>
+    <state>FL</state>
+    <location_name>FRATERNAL ORDER OF EAGLES</location_name>
+    <zip>32822</zip>
+  </address>
+</polling_location>
+<polling_location id="440950090">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>6123 LA COSTA DR</line1>
+    <state>FL</state>
+    <location_name>ENGELWOOD NEIGHBORHOOD CENTER &amp; POOL</location_name>
+    <zip>32807</zip>
+  </address>
+</polling_location>
+<polling_location id="440950091">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>3201 WOODGATE BLVD</line1>
+    <state>FL</state>
+    <location_name>VENTURA COUNTRY CLUB</location_name>
+    <zip>32822</zip>
+  </address>
+</polling_location>
+<polling_location id="440950092">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>2841 S GOLDENROD RD</line1>
+    <state>FL</state>
+    <location_name>IGLESIA TABERNACULO DE LA FE</location_name>
+    <zip>32822</zip>
+  </address>
+</polling_location>
+<polling_location id="440950093">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>4200 S CHICKASAW TRL</line1>
+    <state>FL</state>
+    <location_name>VISTA COMMUNITY CHURCH</location_name>
+    <zip>32829</zip>
+  </address>
+</polling_location>
+<polling_location id="440950094">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>6000 PERSHING AVE</line1>
+    <state>FL</state>
+    <location_name>STARLIGHT RANCH CLUBHOUSE 1</location_name>
+    <zip>32822</zip>
+  </address>
+</polling_location>
+<polling_location id="440950095">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>5240 CURRY FORD RD</line1>
+    <state>FL</state>
+    <location_name>IGLESIA METODISTA UNIDA CRISTO</location_name>
+    <zip>32812</zip>
+  </address>
+</polling_location>
+<polling_location id="440950096">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>3200 E GRANT ST</line1>
+    <state>FL</state>
+    <location_name>EOLA MASONIC LODGE 207</location_name>
+    <zip>32806</zip>
+  </address>
+</polling_location>
+<polling_location id="440950097">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>405 LARUE AVE</line1>
+    <state>FL</state>
+    <location_name>EDGEWOOD CITY HALL</location_name>
+    <zip>32809</zip>
+  </address>
+</polling_location>
+<polling_location id="440950098">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>814 W OAK RIDGE RD</line1>
+    <state>FL</state>
+    <location_name>SOUTH ORLANDO YMCA</location_name>
+    <zip>32809</zip>
+  </address>
+</polling_location>
+<polling_location id="440950099">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>21 W LANCASTER RD</line1>
+    <state>FL</state>
+    <location_name>CHURCH OF CHRIST PINE CASTLE</location_name>
+    <zip>32809</zip>
+  </address>
+</polling_location>
+<polling_location id="440950100">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1600 NELA AVE</line1>
+    <state>FL</state>
+    <location_name>BELLE ISLE CITY HALL</location_name>
+    <zip>32809</zip>
+  </address>
+</polling_location>
+<polling_location id="440950101">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1216 HOFFNER AVE</line1>
+    <state>FL</state>
+    <location_name>PINECASTLE MASONIC LODGE 368</location_name>
+    <zip>32809</zip>
+  </address>
+</polling_location>
+<polling_location id="440950102">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>2000 PERSHING AVE</line1>
+    <state>FL</state>
+    <location_name>PERSHING AVENUE CHRISTIAN CHURCH</location_name>
+    <zip>32806</zip>
+  </address>
+</polling_location>
+<polling_location id="440950103">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>4606 LAKE MARGARET DR</line1>
+    <state>FL</state>
+    <location_name>CALVARY BAPTIST CHURCH</location_name>
+    <zip>32812</zip>
+  </address>
+</polling_location>
+<polling_location id="440950104">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>3401 S CONWAY RD</line1>
+    <state>FL</state>
+    <location_name>CONWAY UNITED METHODIST CHURCH</location_name>
+    <zip>32812</zip>
+  </address>
+</polling_location>
+<polling_location id="440950105">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>5838 HOFFNER AVE</line1>
+    <state>FL</state>
+    <location_name>EVANGEL ASSEMBLY OF GOD CHURCH</location_name>
+    <zip>32822</zip>
+  </address>
+</polling_location>
+<polling_location id="440950106">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1411 N DEAN RD</line1>
+    <state>FL</state>
+    <location_name>FAITH UNITED METHODIST CHURCH</location_name>
+    <zip>32825</zip>
+  </address>
+</polling_location>
+<polling_location id="440950107">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1801 ROUSE RD</line1>
+    <state>FL</state>
+    <location_name>SPIRIT OF JOY LUTHERAN CHRCH</location_name>
+    <zip>32817</zip>
+  </address>
+</polling_location>
+<polling_location id="440950108">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1501 WOODBURY RD</line1>
+    <state>FL</state>
+    <location_name>WOODBURY PRESBYTERIAN CHURCH</location_name>
+    <zip>32828</zip>
+  </address>
+</polling_location>
+<polling_location id="440950109">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1575 PEL ST CLUBHOUSE</line1>
+    <state>FL</state>
+    <location_name>DEERWOOD MOBILE HOME PARK CLUBHOUSE</location_name>
+    <zip>32828</zip>
+  </address>
+</polling_location>
+<polling_location id="440950110">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1001 AVALON PARK SOUTH BLVD</line1>
+    <state>FL</state>
+    <location_name>TIMBERCREEK HIGH SCHOOL</location_name>
+    <zip>32828</zip>
+  </address>
+</polling_location>
+<polling_location id="440950111">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>601 WOODBURY RD</line1>
+    <state>FL</state>
+    <location_name>DISCOVERY MIDDLE SCHOOL</location_name>
+    <zip>32828</zip>
+  </address>
+</polling_location>
+<polling_location id="440950112">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1331 S ALAFAYA TRL</line1>
+    <state>FL</state>
+    <location_name>RISEN SAVIOR LUTHERAN CHURCH</location_name>
+    <zip>32828</zip>
+  </address>
+</polling_location>
+<polling_location id="440950113">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>11898 LAKE UNDERHILL RD</line1>
+    <state>FL</state>
+    <location_name>EAST ORLANDO HARLEY DAVIDSON</location_name>
+    <zip>32825</zip>
+  </address>
+</polling_location>
+<polling_location id="440950114">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>13460 TANJA KING BLVD</line1>
+    <state>FL</state>
+    <location_name>AVALON CHURCH</location_name>
+    <zip>32828</zip>
+  </address>
+</polling_location>
+<polling_location id="440950115">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>4033 CLEARY WAY</line1>
+    <state>FL</state>
+    <location_name>AVALON PARK VILLAGE COMM CEN</location_name>
+    <zip>32828</zip>
+  </address>
+</polling_location>
+<polling_location id="440950116">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>3800 S ECONLOCKHATCHEE TRL</line1>
+    <state>FL</state>
+    <location_name>RENAISSANCE SENIOR CENTER</location_name>
+    <zip>32829</zip>
+  </address>
+</polling_location>
+<polling_location id="440950117">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>9450 S ORANGE AVE</line1>
+    <state>FL</state>
+    <location_name>TAFT COMMUNITY CENTER</location_name>
+    <zip>32824</zip>
+  </address>
+</polling_location>
+<polling_location id="440950118">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>9309 S ORANGE BLOSSOM TRL</line1>
+    <state>FL</state>
+    <location_name>PLANTATION OAKS SENIOR LIVING</location_name>
+    <zip>32837</zip>
+  </address>
+</polling_location>
+<polling_location id="440950119">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>11513 S ORANGE BLOSSOM TRL</line1>
+    <state>FL</state>
+    <location_name>SOUTH ORLANDO BAPTIST CHURCH</location_name>
+    <zip>32837</zip>
+  </address>
+</polling_location>
+<polling_location id="440950120">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>12601 BALCOMBE RD</line1>
+    <state>FL</state>
+    <location_name>ALL SAINTS LUTHERAN CHURCH</location_name>
+    <zip>32837</zip>
+  </address>
+</polling_location>
+<polling_location id="440950121">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1600 BEAR CROSSING DR</line1>
+    <state>FL</state>
+    <location_name>BEAR CREEK PARK</location_name>
+    <zip>32824</zip>
+  </address>
+</polling_location>
+<polling_location id="440950122">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>653 WETHERBEE RD</line1>
+    <state>FL</state>
+    <location_name>LIVING WORD CHURCH (IGLESIA PALABRA VIVA)</location_name>
+    <zip>32824</zip>
+  </address>
+</polling_location>
+<polling_location id="440950123">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>14500 LANDSTAR BLVD</line1>
+    <state>FL</state>
+    <location_name>CATALYST CHURCH</location_name>
+    <zip>32824</zip>
+  </address>
+</polling_location>
+<polling_location id="440950124">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>12500 NARCOOSSEE RD</line1>
+    <state>FL</state>
+    <location_name>LAKE NONA HIGH SCHOOL</location_name>
+    <zip>32827</zip>
+  </address>
+</polling_location>
+<polling_location id="440950125">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>9055 NORTHLAKE PKWY</line1>
+    <state>FL</state>
+    <location_name>LAKE NONA YMCA</location_name>
+    <zip>32827</zip>
+  </address>
+</polling_location>
+<polling_location id="440950126">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Christmas</city>
+    <line1>23760 E COLONIAL DR</line1>
+    <state>FL</state>
+    <location_name>CHRISTMAS CIVIC CENTER</location_name>
+    <zip>32709</zip>
+  </address>
+</polling_location>
+<polling_location id="440950127">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>12 N PRIMROSE DR</line1>
+    <state>FL</state>
+    <location_name>ORLANDO ELKS LODGE 1079</location_name>
+    <zip>32803</zip>
+  </address>
+</polling_location>
+<polling_location id="440950128">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1517 LAKE HIGHLAND DR</line1>
+    <state>FL</state>
+    <location_name>COLONIALTOWN NEIGHBORHOOD CENTER</location_name>
+    <zip>32803</zip>
+  </address>
+</polling_location>
+<polling_location id="440950129">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1920 N FOREST AVE</line1>
+    <state>FL</state>
+    <location_name>HARRY P LEU GARDENS</location_name>
+    <zip>32803</zip>
+  </address>
+</polling_location>
+<polling_location id="440950130">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>250 SW IVANHOE BLVD</line1>
+    <state>FL</state>
+    <location_name>CENTRAL CHRISTIAN CHURCH</location_name>
+    <zip>32804</zip>
+  </address>
+</polling_location>
+<polling_location id="440950131">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>2499 N WESTMORELAND DR</line1>
+    <state>FL</state>
+    <location_name>ST MICHAELS EPISCOPAL CHURCH</location_name>
+    <zip>32804</zip>
+  </address>
+</polling_location>
+<polling_location id="440950132">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Winter Park</city>
+    <line1>701 FORMOSA AVE</line1>
+    <state>FL</state>
+    <location_name>KILLARNEY BAPTIST CHURCH</location_name>
+    <zip>32789</zip>
+  </address>
+</polling_location>
+<polling_location id="440950133">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Maitland</city>
+    <line1>641 S MAITLAND AVE</line1>
+    <state>FL</state>
+    <location_name>MAITLAND CIVIC CENTER</location_name>
+    <zip>32751</zip>
+  </address>
+</polling_location>
+<polling_location id="440950134">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Maitland</city>
+    <line1>220 W HORATIO AVE</line1>
+    <state>FL</state>
+    <location_name>ASBURY UNITED METHODIST CHURCH</location_name>
+    <zip>32751</zip>
+  </address>
+</polling_location>
+<polling_location id="440950135">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Maitland</city>
+    <line1>1950 MOHICAN TRL</line1>
+    <state>FL</state>
+    <location_name>1ST BAPTIST CHURCH OF MAITLAND</location_name>
+    <zip>32751</zip>
+  </address>
+</polling_location>
+<polling_location id="440950136">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Winter Park</city>
+    <line1>1720 HOWELL BRANCH RD</line1>
+    <state>FL</state>
+    <location_name>1ST COVENANT CHURCH</location_name>
+    <zip>32789</zip>
+  </address>
+</polling_location>
+<polling_location id="440950137">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Winter Park</city>
+    <line1>760 N LAKEMONT AVE</line1>
+    <state>FL</state>
+    <location_name>WINTER PARK CHRISTIAN CHURCH</location_name>
+    <zip>32792</zip>
+  </address>
+</polling_location>
+<polling_location id="440950138">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Winter Park</city>
+    <line1>528 HUNTINGTON AVE</line1>
+    <state>FL</state>
+    <location_name>WINTER PARK 9TH GRADE CENTER</location_name>
+    <zip>32789</zip>
+  </address>
+</polling_location>
+<polling_location id="440950139">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Winter Park</city>
+    <line1>100 ST ANDREWS BLVD</line1>
+    <state>FL</state>
+    <location_name>ST ANDREWS METHODIST CHURCH</location_name>
+    <zip>32792</zip>
+  </address>
+</polling_location>
+<polling_location id="440950140">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Winter Park</city>
+    <line1>1140 S LAKEMONT AVE</line1>
+    <state>FL</state>
+    <location_name>1ST CHRISTIAN CHURCH OF WINTER PARK</location_name>
+    <zip>32792</zip>
+  </address>
+</polling_location>
+<polling_location id="440950141">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1603 E WINTER PARK RD</line1>
+    <state>FL</state>
+    <location_name>EMMANUEL EPISCOPAL CHURCH</location_name>
+    <zip>32803</zip>
+  </address>
+</polling_location>
+<polling_location id="440950142">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>3219 CHELSEA ST</line1>
+    <state>FL</state>
+    <location_name>AUDUBON PARK COVENANT CHURCH</location_name>
+    <zip>32803</zip>
+  </address>
+</polling_location>
+<polling_location id="440950143">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>2047 PROSPECT AVE</line1>
+    <state>FL</state>
+    <location_name>NORTH PARK BAPTIST CHURCH</location_name>
+    <zip>32814</zip>
+  </address>
+</polling_location>
+<polling_location id="440950144">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>5815 CORNELIA AVE</line1>
+    <state>FL</state>
+    <location_name>IGLESIA BAUTISTA EL CAMINO CHURCH</location_name>
+    <zip>32807</zip>
+  </address>
+</polling_location>
+<polling_location id="440950145">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Winter Park</city>
+    <line1>2100 SUMMERFIELD RD</line1>
+    <state>FL</state>
+    <location_name>WINTER PARK HIGH SCHOOL</location_name>
+    <zip>32792</zip>
+  </address>
+</polling_location>
+<polling_location id="440950146">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>6721 HANGING MOSS RD</line1>
+    <state>FL</state>
+    <location_name>OCPS TRANSPORT SERVICES EAST</location_name>
+    <zip>32807</zip>
+  </address>
+</polling_location>
+<polling_location id="440950147">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Winter Park</city>
+    <line1>4763 N PALMETTO AVE</line1>
+    <state>FL</state>
+    <location_name>GOLDENROD CIVIC CLUB</location_name>
+    <zip>32792</zip>
+  </address>
+</polling_location>
+<polling_location id="440950148">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Winter Park</city>
+    <line1>3377 ALOMA AVE</line1>
+    <state>FL</state>
+    <location_name>REDEEMER LUTHERAN CHURCH</location_name>
+    <zip>32792</zip>
+  </address>
+</polling_location>
+<polling_location id="440950149">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>5449 N DEAN RD</line1>
+    <state>FL</state>
+    <location_name>CHURCH OF JESUS CHRIST OF LATTER DAY SAINTS</location_name>
+    <zip>32817</zip>
+  </address>
+</polling_location>
+<polling_location id="440950150">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1865 N ECONLOCKHATCHEE TRL</line1>
+    <state>FL</state>
+    <location_name>ASOCIACION BORINQUENA</location_name>
+    <zip>32817</zip>
+  </address>
+</polling_location>
+<polling_location id="440950151">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>2600 N DEAN RD</line1>
+    <state>FL</state>
+    <location_name>HOPE LUTHERAN CHURCH</location_name>
+    <zip>32817</zip>
+  </address>
+</polling_location>
+<polling_location id="440950152">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>2562 ROUSE RD</line1>
+    <state>FL</state>
+    <location_name>UNIVERSITY PRESBYTERIAN CHURCH</location_name>
+    <zip>32817</zip>
+  </address>
+</polling_location>
+<polling_location id="440950153">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>11648 MCCULLOCH RD</line1>
+    <state>FL</state>
+    <location_name>UNIVERSITY UNITARIAN UNIVERSALIST SOCIETY</location_name>
+    <zip>32817</zip>
+  </address>
+</polling_location>
+<polling_location id="440950154">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>2820 N ALAFAYA TRL</line1>
+    <state>FL</state>
+    <location_name>NEW LIFE CHURCH OF GOD</location_name>
+    <zip>32826</zip>
+  </address>
+</polling_location>
+<polling_location id="440950155">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>BLDG 50, GEMINI BLVD N</line1>
+    <state>FL</state>
+    <location_name>UNIVERSITY OF CENTRAL FLORIDA ARENA</location_name>
+    <zip>32816</zip>
+  </address>
+</polling_location>
+<polling_location id="440950156">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>11805 RESEARCH PKWY</line1>
+    <state>FL</state>
+    <location_name>LA QUINTA INNS &amp; SUITES</location_name>
+    <zip>32826</zip>
+  </address>
+</polling_location>
+<polling_location id="440950157">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Deltona</city>
+    <line1>3971 NORTH TANNER RD</line1>
+    <state>FL</state>
+    <location_name>EAST LAKE ELEMENTARY SCHOOL</location_name>
+    <zip>32725</zip>
+  </address>
+</polling_location>
+<polling_location id="440950158">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>15695 E COLONIAL DR</line1>
+    <state>FL</state>
+    <location_name>COUNTY LINE MOOSE LODGE 2427</location_name>
+    <zip>32820</zip>
+  </address>
+</polling_location>
+<polling_location id="440950159">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>18501 WASHINGTON AVE</line1>
+    <state>FL</state>
+    <location_name>BITHLO COMMUNITY CENTER</location_name>
+    <zip>32820</zip>
+  </address>
+</polling_location>
+<polling_location id="440950160">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>20550 MAXIM PKWY</line1>
+    <state>FL</state>
+    <location_name>WEDGEFIELD GOLF CLUB</location_name>
+    <zip>32833</zip>
+  </address>
+</polling_location>
+<polling_location id="440950161">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>3850 WD JUDGE DR</line1>
+    <state>FL</state>
+    <location_name>ANTIOCH MANOR</location_name>
+    <zip>32808</zip>
+  </address>
+</polling_location>
+<polling_location id="440950162">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>4801 W COLONIAL DR</line1>
+    <state>FL</state>
+    <location_name>BARNETT PARK</location_name>
+    <zip>32803</zip>
+  </address>
+</polling_location>
+<polling_location id="440950163">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1336 N PINE HILLS RD</line1>
+    <state>FL</state>
+    <location_name>FAITH CHRISTIAN CENTER CHURCH</location_name>
+    <zip>32808</zip>
+  </address>
+</polling_location>
+<polling_location id="440950164">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1400 N NOWELL ST</line1>
+    <state>FL</state>
+    <location_name>1ST UNITED METHODIST CHURCH</location_name>
+    <zip>32808</zip>
+  </address>
+</polling_location>
+<polling_location id="440950165">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Lake Helen</city>
+    <line1>6408 JENNINGS RD, BLDG B</line1>
+    <state>FL</state>
+    <location_name>PINE HILLS COMMUNITY CENTER</location_name>
+    <zip>32744</zip>
+  </address>
+</polling_location>
+<polling_location id="440950166">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>7510 SILVER STAR RD</line1>
+    <state>FL</state>
+    <location_name>SILVER STAR CHRISTIAN CHURCH</location_name>
+    <zip>32818</zip>
+  </address>
+</polling_location>
+<polling_location id="440950167">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>7351 WOODRIDGE PARK DR</line1>
+    <state>FL</state>
+    <location_name>WOODRIDGE APARTMENTS</location_name>
+    <zip>32818</zip>
+  </address>
+</polling_location>
+<polling_location id="440950168">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>700 GOOD HOMES RD</line1>
+    <state>FL</state>
+    <location_name>1ST BAPTIST CH OF CENTRAL FL</location_name>
+    <zip>32835</zip>
+  </address>
+</polling_location>
+<polling_location id="440950169">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>5905 S KIRKMAN RD</line1>
+    <state>FL</state>
+    <location_name>HOLIDAY INN HOTEL AND SUITES</location_name>
+    <zip>32819</zip>
+  </address>
+</polling_location>
+<polling_location id="440950170">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>7001 RAVENNA AVE</line1>
+    <state>FL</state>
+    <location_name>TANGELO BAPTIST CHURCH</location_name>
+    <zip>32819</zip>
+  </address>
+</polling_location>
+<polling_location id="440950171">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>7531 S ORANGE BLOSSOM TRL</line1>
+    <state>FL</state>
+    <location_name>GOODWILL INDUSTRIES</location_name>
+    <zip>32809</zip>
+  </address>
+</polling_location>
+<polling_location id="440950172">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>6225 BROOKGREEN AVE</line1>
+    <state>FL</state>
+    <location_name>SOUTHWOOD COMMUNITY CENTER</location_name>
+    <zip>32809</zip>
+  </address>
+</polling_location>
+<polling_location id="440950173">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>2500 W OAK RIDGE RD</line1>
+    <state>FL</state>
+    <location_name>IGLESIA EL CALVARIO CHURCH</location_name>
+    <zip>32809</zip>
+  </address>
+</polling_location>
+<polling_location id="440950174">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>4077 PRINCE HALL BLVD</line1>
+    <state>FL</state>
+    <location_name>MT PLEASANT MISSIONARY BAPTIST CHURCH</location_name>
+    <zip>32811</zip>
+  </address>
+</polling_location>
+<polling_location id="440950175">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>4201 COLUMBIA ST</line1>
+    <state>FL</state>
+    <location_name>NEW BETHEL AME CHURCH</location_name>
+    <zip>32811</zip>
+  </address>
+</polling_location>
+<polling_location id="440950176">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>5200 W SOUTH ST</line1>
+    <state>FL</state>
+    <location_name>MT SINAI MISSIONARY BAPT CH</location_name>
+    <zip>32811</zip>
+  </address>
+</polling_location>
+<polling_location id="440950177">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1968 BRUTON BLVD</line1>
+    <state>FL</state>
+    <location_name>ST MARK AME CHURCH</location_name>
+    <zip>32805</zip>
+  </address>
+</polling_location>
+<polling_location id="440950178">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1723 BRUTON BLVD</line1>
+    <state>FL</state>
+    <location_name>DR JAMES R SMITH NEIGHBORHOOD CENTER</location_name>
+    <zip>32805</zip>
+  </address>
+</polling_location>
+<polling_location id="440950179">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>2701 CATALINA DR</line1>
+    <state>FL</state>
+    <location_name>ISLE OF CATALINA BEACH HOUSE</location_name>
+    <zip>32805</zip>
+  </address>
+</polling_location>
+<polling_location id="440950180">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>1002 CARTER ST</line1>
+    <state>FL</state>
+    <location_name>JOHN H JACKSON COMMUNITY CENTER</location_name>
+    <zip>32805</zip>
+  </address>
+</polling_location>
+<polling_location id="440950181">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>4200 S JOHN YOUNG PKWY</line1>
+    <state>FL</state>
+    <location_name>ORANGE COUNTY PUBLIC WORKS</location_name>
+    <zip>32839</zip>
+  </address>
+</polling_location>
+<polling_location id="440950182">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>5431 S RIO GRANDE AVE</line1>
+    <state>FL</state>
+    <location_name>BETHEL EGLISE HAITIENNE SDA CHURCH</location_name>
+    <zip>32839</zip>
+  </address>
+</polling_location>
+<polling_location id="440950183">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>5281 CENTRAL FLORIDA PKWY</line1>
+    <state>FL</state>
+    <location_name>CENTRAL PARKWAY BAPTIST CHURCH</location_name>
+    <zip>32821</zip>
+  </address>
+</polling_location>
+<polling_location id="440950184">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>Orlando</city>
+    <line1>5281 CENTRAL FLORIDA PKWY</line1>
+    <state>FL</state>
+    <location_name>CENTRAL PARKWAY BAPTIST CHURCH</location_name>
+    <zip>32821</zip>
+  </address>
+</polling_location>
+<polling_location id="440950185">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>WINTER GARDEN</city>
+    <line1>29 GARDEN AVE</line1>
+    <state>FL</state>
+    <location_name>TANNER HALL</location_name>
+    <zip>34787</zip>
+  </address>
+</polling_location>
+<polling_location id="440950186">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>WINTER GARDEN</city>
+    <line1>29 GARDEN AVE</line1>
+    <state>FL</state>
+    <location_name>TANNER HALL</location_name>
+    <zip>34787</zip>
+  </address>
+</polling_location>
+<polling_location id="440950187">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>WINDEMERE</city>
+    <line1>520 MAIN ST</line1>
+    <state>FL</state>
+    <location_name>WINDERMERE TOWN HALL</location_name>
+    <zip>34786</zip>
+  </address>
+</polling_location>
+<polling_location id="440950188">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>WINTER GARDEN</city>
+    <line1>15501 TOWNE COMMONS BLVD</line1>
+    <state>FL</state>
+    <location_name>STONEYBROOK WEST GOLF CLUB</location_name>
+    <zip>34787</zip>
+  </address>
+</polling_location>
+<polling_location id="440950189">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>1912 LEE RD, SUITE A</line1>
+    <state>FL</state>
+    <location_name>AMERICAN LEGION STATE HEADQUARTERS</location_name>
+    <zip>32810</zip>
+  </address>
+</polling_location>
+<polling_location id="440950190">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>1912 LEE RD, SUITE A</line1>
+    <state>FL</state>
+    <location_name>AMERICAN LEGION STATE HEADQUARTERS</location_name>
+    <zip>32810</zip>
+  </address>
+</polling_location>
+<polling_location id="440950191">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>EATONVILLE</city>
+    <line1>307 E KENNEDY BLVD</line1>
+    <state>FL</state>
+    <location_name>EATONVILLE TOWN HALL</location_name>
+    <zip>32751</zip>
+  </address>
+</polling_location>
+<polling_location id="440950192">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>OCOEE</city>
+    <line1>125 N LAKESHORE DR</line1>
+    <state>FL</state>
+    <location_name>OCOEE COMMUNITY CENTER</location_name>
+    <zip>34761</zip>
+  </address>
+</polling_location>
+<polling_location id="440950193">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>APOPKA</city>
+    <line1>445 W 13TH ST</line1>
+    <state>FL</state>
+    <location_name>JOHN H BRIDGES COMMUNITY CENTER</location_name>
+    <zip>32703</zip>
+  </address>
+</polling_location>
+<polling_location id="440950194">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>APOPKA</city>
+    <line1>519 S CENTRAL AVE</line1>
+    <state>FL</state>
+    <location_name>APOPKA COMMUNITY CENTER &amp; VFW POST 10147</location_name>
+    <zip>32703</zip>
+  </address>
+</polling_location>
+<polling_location id="440950195">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>WINTER PARK</city>
+    <line1>201 S PARK AVE</line1>
+    <state>FL</state>
+    <location_name>1ST UNITED METHODIST CHURCH</location_name>
+    <zip>32789</zip>
+  </address>
+</polling_location>
+<polling_location id="440950196">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>WINTER PARK</city>
+    <line1>201 S PARK AVE</line1>
+    <state>FL</state>
+    <location_name>1ST UNITED METHODIST CHURCH</location_name>
+    <zip>32789</zip>
+  </address>
+</polling_location>
+<polling_location id="440950197">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>26 WILLOW DR</line1>
+    <state>FL</state>
+    <location_name>CHRIST THE KING EPISCOPAL CHURCH</location_name>
+    <zip>32807</zip>
+  </address>
+</polling_location>
+<polling_location id="440950198">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>500 S SEMORAN BLVD</line1>
+    <state>FL</state>
+    <location_name>ORLANDO BAPTIST CHURCH</location_name>
+    <zip>32807</zip>
+  </address>
+</polling_location>
+<polling_location id="440950199">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>800 E MICHIGAN ST</line1>
+    <state>FL</state>
+    <location_name>REFORMATION LUTHERAN CHURCH</location_name>
+    <zip>32806</zip>
+  </address>
+</polling_location>
+<polling_location id="440950200">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>406 E AMELIA ST</line1>
+    <state>FL</state>
+    <location_name>BROADWAY UNITED METHODIST CH</location_name>
+    <zip>32803</zip>
+  </address>
+</polling_location>
+<polling_location id="440950201">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>610 N LAKE FORMOSA DR</line1>
+    <state>FL</state>
+    <location_name>LOCH HAVEN NEIGHBORHOOD CENTER</location_name>
+    <zip>32803</zip>
+  </address>
+</polling_location>
+<polling_location id="440950202">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>WINTER PARK</city>
+    <line1>1099 CLAY ST</line1>
+    <state>FL</state>
+    <location_name>CALVARY TOWERS</location_name>
+    <zip>32789</zip>
+  </address>
+</polling_location>
+<polling_location id="440950203">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>WINTER PARK</city>
+    <line1>450 HARPER ST</line1>
+    <state>FL</state>
+    <location_name>LAKE ISLAND RECREATION CENTER</location_name>
+    <zip>32789</zip>
+  </address>
+</polling_location>
+<polling_location id="440950204">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>WINTER PARK</city>
+    <line1>1021 N NEW YORK AVE</line1>
+    <state>FL</state>
+    <location_name>1ST BAPTIST CHURCH OF WINTER PRK</location_name>
+    <zip>32789</zip>
+  </address>
+</polling_location>
+<polling_location id="440950205">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>604 W JACKSON ST</line1>
+    <state>FL</state>
+    <location_name>SHILOH BAPTIST CHURCH</location_name>
+    <zip>32805</zip>
+  </address>
+</polling_location>
+<polling_location id="440950206">
+  <polling_hours>07:00:00-19:00:00</polling_hours>
+  <address>
+    <city>ORLANDO</city>
+    <line1>38 S HASTINGS ST</line1>
+    <state>FL</state>
+    <location_name>ORLO VISTA CHAMBER OF COMMERCE</location_name>
+    <zip>32835</zip>
+  </address>
+</polling_location>
+</vip_object>
