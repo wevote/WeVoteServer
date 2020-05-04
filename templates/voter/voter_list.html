@@ -69,7 +69,7 @@
             <th>You</th>
             <th>Facebook</th>
             <th>Tw</th>
-            <th>Email</th>
+            <th>Email / Phone</th>
             <th>Opt In</th>
             <th>Org we_vote_id</th>
             <th>Admin</th>
@@ -96,7 +96,7 @@
             </td>
             <!-- Facebook? //-->
             <td>
-            {% if voter.facebook_id %}{{ voter.facebook_id|default_if_none:"" }}<br />{% endif %}
+            <!-- {% if voter.facebook_id %}{{ voter.facebook_id|default_if_none:"" }}<br />{% endif %} //-->
             {% if voter.retrieved_facebook_id %}{{ voter.retrieved_facebook_id|default_if_none:"" }}<br />{% endif %}
             <!-- If we don't have a cached facebook_id, then fb_username is leftover //-->
                 <span {% if not voter.facebook_id %}style="text-decoration: line-through"{% endif %}>
@@ -110,10 +110,12 @@
               @{{ voter.twitter_handle }}
             {% else %}{% endif %}
             </td>
-            <!-- Email //-->
             <td>
+            <!-- Email //-->
             {% if voter.email %}{{ voter.email }}{% else %}{% endif %}
             {% if voter.facebook_email %}fb:&nbsp;{{ voter.facebook_email|default_if_none:"" }}{% else %}{% endif %}
+            <!-- SMS //-->
+            {% if voter.normalized_sms_phone_number %} {{ voter.normalized_sms_phone_number }}{% else %}{% endif %}
             </td>
             <!-- Opt In //-->
             <td>
