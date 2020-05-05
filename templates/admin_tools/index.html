@@ -40,17 +40,26 @@
             >Opinions/Positions</a> -
         <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
             >Voter Guides</a> -
-    <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guide Possibilities</a> -
+        <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+            >Voter Guide Possibilities</a> -
         <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
             >Polling Locations</a>
     </p>
 {#    <p><a href="{% url 'quick_info:quick_info_list' %}">Quick Info</a></p>#}
-    <p><a href="https://developers.google.com/apis-explorer/#p/civicinfo/v2/civicinfo.elections.voterInfoQuery"
-          target="_blank">One Ballot (Retrieve)</a></p>
+{#    <p><a href="https://developers.google.com/apis-explorer/#p/civicinfo/v2/civicinfo.elections.voterInfoQuery"#}
+{#          target="_blank">One Ballot (Retrieve)</a></p>#}
+
+{# ################## #}
+<h2>Analytics</h2>
+    <p><a href="{% url 'analytics:analytics_index' %}">Analytics</a></p>
+
+<div>
+    <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+        target="_blank">Breakdown of Endorsements, by Partisan Leaning <span class="glyphicon glyphicon-new-window"></span></a>
+</div>
 
 {# ################## #}
 <h2>Maintenance</h2>
-    <p><a href="{% url 'analytics:analytics_index' %}">Analytics</a></p>
     <p><a href="{% url 'voter:voter_list' %}">Voters</a></p>
     <p><a href="{% url 'import_export_batches:batches_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
         >Import Data in Batches</a></p>

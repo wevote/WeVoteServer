@@ -2222,7 +2222,8 @@ def election_migration_view(request):
     from_election_voter_guide_count = 0
     if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
         voter_guide_manager = VoterGuideListManager()
-        voter_guide_results = voter_guide_manager.retrieve_voter_guides_for_election(from_election_id)
+        google_civic_election_id_list = [from_election_id]
+        voter_guide_results = voter_guide_manager.retrieve_voter_guides_for_election(google_civic_election_id_list)
         if voter_guide_results['voter_guide_list_found']:
             from_election_voter_guide_list = voter_guide_results['voter_guide_list']
             from_election_voter_guide_count = len(from_election_voter_guide_list)

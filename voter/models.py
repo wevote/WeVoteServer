@@ -945,6 +945,7 @@ class VoterManager(BaseUserManager):
             return result
 
         voter_queryset = Voter.objects.all()
+        voter_queryset = voter_queryset.order_by('first_name')
 
         voter_raw_filters = []
         if positive_value_exists(is_admin):
