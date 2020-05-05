@@ -2380,7 +2380,8 @@ def refresh_organizations_for_one_election(google_civic_election_id):
     status = ""
 
     voter_guide_list_manager = VoterGuideListManager()
-    results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id)
+    google_civic_election_id_list = [google_civic_election_id]
+    results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id_list)
 
     if results['voter_guide_list_found']:
         voter_guide_list = results['voter_guide_list']

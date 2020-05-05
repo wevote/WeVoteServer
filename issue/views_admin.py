@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
+from election.controllers import retrieve_upcoming_election_id_list
 from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception
 from image.controllers import cache_issue_image_master, cache_resized_image_locally, delete_cached_images_for_issue
@@ -181,7 +182,8 @@ def issue_list_view(request):
         #  in this election linked to issues.
         voter_guide_list_manager = VoterGuideListManager()
         organization_manager = OrganizationManager()
-        results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id)
+        google_civic_election_id_list = [google_civic_election_id]
+        results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id_list)
         if results['voter_guide_list_found']:
             voter_guide_list = results['voter_guide_list']
             for one_voter_guide in voter_guide_list:
@@ -813,40 +815,54 @@ def issue_partisan_analysis_view(request):
     organizations_attached_to_this_issue = {}
     voter_guide_list_manager = VoterGuideListManager()
     if positive_value_exists(google_civic_election_id):
-        # If we are just looking at one election, then we want to retrieve a list of the voter guides associated
-        #  with this election. This way we can order the issues based on the number of organizations with positions
-        #  in this election linked to issues.
-        organization_manager = OrganizationManager()
-        results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id)
-        if results['voter_guide_list_found']:
-            voter_guide_list = results['voter_guide_list']
-            for one_voter_guide in voter_guide_list:
-                organization_we_vote_id_in_this_election_list.append(one_voter_guide.organization_we_vote_id)
-            if positive_value_exists(len(organization_we_vote_id_in_this_election_list)):
-                organization_link_to_issue_list_query = OrganizationLinkToIssue.objects.all()
-                organization_link_to_issue_list_query = organization_link_to_issue_list_query.filter(
-                    organization_we_vote_id__in=organization_we_vote_id_in_this_election_list)
-                organization_link_to_issue_list = list(organization_link_to_issue_list_query)
-            for one_organization_link_to_issue in organization_link_to_issue_list:
-                if one_organization_link_to_issue.organization_we_vote_id not in organization_retrieved_list:
-                    # If here, we need to retrieve the organization
-                    organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-                        one_organization_link_to_issue.organization_we_vote_id)
-                    if organization_results['organization_found']:
-                        organization_object = organization_results['organization']
-                        organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id] = \
-                            organization_object
-                if one_organization_link_to_issue.issue_we_vote_id not in organizations_attached_to_this_issue:
-                    organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id] = []
-                organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id].\
-                    append(organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id])
+        google_civic_election_id_list = [google_civic_election_id]
+    else:
+        google_civic_election_id_list = retrieve_upcoming_election_id_list(state_code)
+
+    organization_manager = OrganizationManager()
+    organization_issues_lists = {}
+    results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id_list)
+    if results['voter_guide_list_found']:
+        voter_guide_list = results['voter_guide_list']
+        for one_voter_guide in voter_guide_list:
+            organization_we_vote_id_in_this_election_list.append(one_voter_guide.organization_we_vote_id)
+        if positive_value_exists(len(organization_we_vote_id_in_this_election_list)):
+            organization_link_to_issue_list_query = OrganizationLinkToIssue.objects.all()
+            organization_link_to_issue_list_query = organization_link_to_issue_list_query.filter(
+                organization_we_vote_id__in=organization_we_vote_id_in_this_election_list)
+            organization_link_to_issue_list_query = organization_link_to_issue_list_query.filter(
+                link_active=True, link_blocked=False)
+            organization_link_to_issue_list = list(organization_link_to_issue_list_query)
+        for one_organization_link_to_issue in organization_link_to_issue_list:
+            if one_organization_link_to_issue.organization_we_vote_id not in organization_issues_lists:
+                # Make sure we have an empty list for every single organization
+                organization_issues_lists[one_organization_link_to_issue.organization_we_vote_id] = []
+            if one_organization_link_to_issue.organization_we_vote_id not in organization_retrieved_list:
+                # If here, we need to retrieve the organization
+                organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                    one_organization_link_to_issue.organization_we_vote_id)
+                if organization_results['organization_found']:
+                    organization_object = organization_results['organization']
+                    organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id] = \
+                        organization_object
+            if one_organization_link_to_issue.issue_we_vote_id not in organizations_attached_to_this_issue:
+                organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id] = []
+            organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id].\
+                append(organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id])
 
     issue_list_left = []
-    issue_list_right = []
     organization_list_left = []
     organization_we_vote_id_list_left = []
+
+    issue_list_center = []
+    organization_list_center = []
+    organization_we_vote_id_list_center = []
+
+    issue_list_right = []
     organization_list_right = []
     organization_we_vote_id_list_right = []
+
+    issue_list_by_issue_we_vote_id = {}
     try:
         issue_list_query = Issue.objects.using('readonly').all()
         issue_list_query = issue_list_query.filter(hide_issue=False)
@@ -859,22 +875,55 @@ def issue_partisan_analysis_view(request):
         if issue_list_count:
             altered_issue_list = []
             for one_issue in issue_list:
+                issue_list_by_issue_we_vote_id[one_issue.we_vote_id] = one_issue
                 if one_issue.we_vote_id not in organizations_attached_to_this_issue:
                     organizations_attached_to_this_issue[one_issue.we_vote_id] = []
                 one_issue.linked_organization_count = len(organizations_attached_to_this_issue[one_issue.we_vote_id])
                 altered_issue_list.append(one_issue)
-                if one_issue.considered_left:
-                    issue_list_left.append(one_issue)
-                    for one_organization in organizations_attached_to_this_issue[one_issue.we_vote_id]:
-                        if one_organization.we_vote_id not in organization_we_vote_id_list_left:
-                            organization_list_left.append(one_organization)
-                            organization_we_vote_id_list_left.append(one_organization.we_vote_id)
                 if one_issue.considered_right:
                     issue_list_right.append(one_issue)
                     for one_organization in organizations_attached_to_this_issue[one_issue.we_vote_id]:
-                        if one_organization.we_vote_id not in organization_we_vote_id_list_right:
+                        if one_organization.we_vote_id in organization_we_vote_id_list_left:
+                            # If already stored as left org, do not label right
+                            pass
+                        elif one_organization.we_vote_id in organization_we_vote_id_list_center:
+                            # If already stored as center org, remove from center
+                            organization_list_center.remove(one_organization)
+                            organization_we_vote_id_list_center.remove(one_organization.we_vote_id)
+                            # ...and then move over to right
                             organization_list_right.append(one_organization)
                             organization_we_vote_id_list_right.append(one_organization.we_vote_id)
+                        elif one_organization.we_vote_id not in organization_we_vote_id_list_right:
+                            organization_list_right.append(one_organization)
+                            organization_we_vote_id_list_right.append(one_organization.we_vote_id)
+                elif one_issue.considered_left:
+                    issue_list_left.append(one_issue)
+                    for one_organization in organizations_attached_to_this_issue[one_issue.we_vote_id]:
+                        if one_organization.we_vote_id in organization_we_vote_id_list_right:
+                            # If already stored as right org, do not label left
+                            pass
+                        elif one_organization.we_vote_id in organization_we_vote_id_list_center:
+                            # If already stored as center org, remove from center
+                            organization_list_center.remove(one_organization)
+                            organization_we_vote_id_list_center.remove(one_organization.we_vote_id)
+                            # ...and then move over to left
+                            organization_list_left.append(one_organization)
+                            organization_we_vote_id_list_left.append(one_organization.we_vote_id)
+                        elif one_organization.we_vote_id not in organization_we_vote_id_list_left:
+                            organization_list_left.append(one_organization)
+                            organization_we_vote_id_list_left.append(one_organization.we_vote_id)
+                else:
+                    issue_list_center.append(one_issue)
+                    for one_organization in organizations_attached_to_this_issue[one_issue.we_vote_id]:
+                        if one_organization.we_vote_id in organization_we_vote_id_list_right:
+                            # If already stored as right org, do not label center
+                            pass
+                        elif one_organization.we_vote_id in organization_we_vote_id_list_left:
+                            # If already stored as left org, do not label center
+                            pass
+                        elif one_organization.we_vote_id not in organization_we_vote_id_list_center:
+                            organization_list_center.append(one_organization)
+                            organization_we_vote_id_list_center.append(one_organization.we_vote_id)
 
         else:
             altered_issue_list = issue_list
@@ -883,68 +932,90 @@ def issue_partisan_analysis_view(request):
         altered_issue_list = []
         pass
 
+    for one_organization_link_to_issue in organization_link_to_issue_list:
+        if one_organization_link_to_issue.organization_we_vote_id not in organization_issues_lists:
+            organization_issues_lists[one_organization_link_to_issue.organization_we_vote_id] = []
+        if one_organization_link_to_issue.issue_we_vote_id in issue_list_by_issue_we_vote_id:
+            organization_issues_lists[one_organization_link_to_issue.organization_we_vote_id].append(
+                issue_list_by_issue_we_vote_id[one_organization_link_to_issue.issue_we_vote_id])
+
     # Order based on number of organizations per issue
     altered_issue_list.sort(key=lambda x: x.linked_organization_count, reverse=True)
     issue_list_left.sort(key=lambda x: x.linked_organization_count, reverse=True)
+    issue_list_center.sort(key=lambda x: x.linked_organization_count, reverse=True)
     issue_list_right.sort(key=lambda x: x.linked_organization_count, reverse=True)
 
     position_list_manager = PositionListManager()
     retrieve_public_positions = True
     endorsement_count_left = position_list_manager.fetch_positions_count_for_voter_guide(
-        organization_we_vote_id_list_left, google_civic_election_id, state_code,
+        organization_we_vote_id_list_left, google_civic_election_id_list, state_code,
+        retrieve_public_positions)
+    endorsement_count_center = position_list_manager.fetch_positions_count_for_voter_guide(
+        organization_we_vote_id_list_center, google_civic_election_id_list, state_code,
         retrieve_public_positions)
     endorsement_count_right = position_list_manager.fetch_positions_count_for_voter_guide(
-        organization_we_vote_id_list_right, google_civic_election_id, state_code,
+        organization_we_vote_id_list_right, google_civic_election_id_list, state_code,
         retrieve_public_positions)
 
-    total_endorsement_count = endorsement_count_left + endorsement_count_right
-    total_organization_count = len(organization_list_left) + len(organization_list_right)
+    total_endorsement_count = endorsement_count_left + endorsement_count_center + endorsement_count_right
+    total_organization_count = \
+        len(organization_list_left) + len(organization_list_center) + len(organization_list_right)
     if positive_value_exists(total_endorsement_count):
         endorsement_percent_left = 100 * (endorsement_count_left / total_endorsement_count)
+        endorsement_percent_center = 100 * (endorsement_count_center / total_endorsement_count)
         endorsement_percent_right = 100 * (endorsement_count_right / total_endorsement_count)
     else:
         endorsement_percent_left = 0
+        endorsement_percent_center = 0
         endorsement_percent_right = 0
     if positive_value_exists(total_organization_count):
         organization_percent_left = 100 * (len(organization_list_left) / total_organization_count)
+        organization_percent_center = 100 * (len(organization_list_center) / total_organization_count)
         organization_percent_right = 100 * (len(organization_list_right) / total_organization_count)
     else:
         organization_percent_left = 0
+        organization_percent_center = 0
         organization_percent_right = 0
 
     messages_on_stage = get_messages(request)
 
-    google_civic_election_id_list = []
+    google_civic_election_id_list_with_voter_guides = []
     results = voter_guide_list_manager.retrieve_google_civic_election_id_list_for_elections_with_voter_guides()
     if positive_value_exists(results['google_civic_election_id_list_found']):
-        google_civic_election_id_list = results['google_civic_election_id_list']
+        google_civic_election_id_list_with_voter_guides = results['google_civic_election_id_list']
 
     election_manager = ElectionManager()
-    read_only = True
     results = election_manager.retrieve_elections_by_google_civic_election_id_list(
-        google_civic_election_id_list, read_only)
+        google_civic_election_id_list_with_voter_guides, read_only=True)
     election_list = results['election_list']
 
     template_values = {
-        'election_list':            election_list,
-        'endorsement_count_left':   endorsement_count_left,
-        'endorsement_count_right':  endorsement_count_right,
-        'endorsement_percent_left': endorsement_percent_left,
-        'endorsement_percent_right': endorsement_percent_right,
-        'google_civic_election_id': google_civic_election_id,
-        'issue_list':               altered_issue_list,
-        'issue_list_left':          issue_list_left,
-        'issue_list_right':         issue_list_right,
-        'issue_search':             issue_search,
-        'messages_on_stage':        messages_on_stage,
-        'organization_list_left':   organization_list_left,
-        'organization_list_right':  organization_list_right,
-        'organization_percent_left': organization_percent_left,
-        'organization_percent_right': organization_percent_right,
-        'show_all_elections':       show_all_elections,
-        'show_hidden_issues':       positive_value_exists(show_hidden_issues),
-        'state_code':               state_code,
-        'state_list':               sorted_state_list,
+        'election_list':                election_list,
+        'endorsement_count_left':       endorsement_count_left,
+        'endorsement_count_center':     endorsement_count_center,
+        'endorsement_count_right':      endorsement_count_right,
+        'endorsement_percent_left':     endorsement_percent_left,
+        'endorsement_percent_center':   endorsement_percent_center,
+        'endorsement_percent_right':    endorsement_percent_right,
+        'google_civic_election_id':     google_civic_election_id,
+        'issue_list':                   altered_issue_list,
+        'issue_list_left':              issue_list_left,
+        'issue_list_center':            issue_list_center,
+        'issue_list_right':             issue_list_right,
+        'issue_search':                 issue_search,
+        'messages_on_stage':            messages_on_stage,
+        'organization_issues_lists':    organization_issues_lists,
+        'organization_list_left':       organization_list_left,
+        'organization_list_center':     organization_list_center,
+        'organization_list_right':      organization_list_right,
+        'organization_percent_left':    organization_percent_left,
+        'organization_percent_center':  organization_percent_center,
+        'organization_percent_right':   organization_percent_right,
+        'show_all_elections':           show_all_elections,
+        'show_hidden_issues':           positive_value_exists(show_hidden_issues),
+        'state_code':                   state_code,
+        'state_list':                   sorted_state_list,
+        'total_endorsement_count':      total_endorsement_count,
     }
     return render(request, 'issue/issue_partisan_analysis.html', template_values)
 

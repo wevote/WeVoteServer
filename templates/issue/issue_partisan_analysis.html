@@ -1,12 +1,16 @@
 {# templates/issue/issue_partisan_analysis.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Partisan Analysis{% endblock %}
+{% block title %}Breakdown of Endorsements, by Partisan Leaning{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
 
-<h1>Partisan Analysis</h1>
+<h1>Breakdown of Endorsements, by Partisan Leaning</h1>
+<p>
+  We Vote Education is a certified nonpartisan 501(c)(3) organization (FEIN 47-2691544).
+  This is a breakdown of the political leaning behind the endorsements we gather.
+</p>
 
 <form name="issue_choose_election" method="get" action="{% url 'issue:issue_partisan_analysis' %}">
     {% csrf_token %}
@@ -23,147 +27,93 @@
     </select>
     {% endif %}{# End of if election_list #}
 
-{#    {% if state_list %}#}
-{#        <select id="state_code_id" name="state_code">#}
-{#            <option value="">#}
-{#                -- Filter by State Served --</option>#}
-{#        {% for key, state in state_list %}#}
-{#            <option value="{{ key }}"#}
-{#                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>#}
-{#                {{ state }}</option>#}
-{#        {% endfor %}#}
-{#        </select>#}
-{#        {% if state_code != "" %}#}
-{#        <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&issue_search={{ issue_search }}">#}
-{#            show all states</a>#}
-{#        {% endif %}#}
-{#    {% endif %}{# End of if state_list #}
+    {% if state_list %}
+        <select id="state_code_id" name="state_code">
+            <option value="">
+                -- Filter by State Served --</option>
+        {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                {{ state }}</option>
+        {% endfor %}
+        </select>
+        {% if state_code != "" %}
+        <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&issue_search={{ issue_search }}">
+            show all states</a>
+        {% endif %}
+    {% endif %}{# End of if state_list #}
 
 </form>
 
 <table border="0" cellpadding="0" cellspacing="0">
+
 <tr>
-    <td colspan="3"><h2>Values & Categories</h2></td>
-</tr>
-<tr>
-    <td><h4>Left-Leaning </h4></td>
-    <td>&nbsp;</td>
-    <td><h4>Right-Leaning</h4></td>
-</tr>
-<tr>
-    <td valign="top">
-
-{% if issue_list_left %}
-    <table class="table">
-      <thead>
-        <tr>
-            <th>&nbsp;</th>
-            <th>&nbsp;</th>
-            <th>Issue/Category Name</th>
-            <th>Orgs</th>
-        </tr>
-      </thead>
-    {% for issue in issue_list_left %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-                {% if issue.we_vote_hosted_image_url_medium %}
-                    <img src="{{ issue.we_vote_hosted_image_url_medium }}" width="48" height="48" />
-                {% endif %}
-            </td>
-            <td>
-                {{ issue.issue_name }}<br />
-                <span style="color: darkgray">{{ issue.issue_description }}</span>
-            </td>
-            <td>{{ issue.linked_organization_count }}</td>
-        </tr>
-    {% endfor %}
-    </table>
-{% endif %}
-
-
-    </td>
-    <td>&nbsp;</td>
-    <td valign="top">
-
-{% if issue_list_right %}
-    <table class="table">
-      <thead>
-        <tr>
-            <th>&nbsp;</th>
-            <th>&nbsp;</th>
-            <th>Issue/Category Name</th>
-            <th>Orgs</th>
-        </tr>
-      </thead>
-    {% for issue in issue_list_right %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-                {% if issue.we_vote_hosted_image_url_medium %}
-                    <img src="{{ issue.we_vote_hosted_image_url_medium }}" width="48" height="48" />
-                {% endif %}
-            </td>
-            <td>
-                {{ issue.issue_name }}<br />
-                <span style="color: darkgray">{{ issue.issue_description }}</span>
-            </td>
-            <td>{{ issue.linked_organization_count }}</td>
-        </tr>
-    {% endfor %}
-    </table>
-{% endif %}
-
-    </td>
-</tr>
-
-
-
-{% if google_civic_election_id %}
-<tr>
-    <td colspan="3">
-        <h2>Number of Endorsements</h2>
+    <td colspan="5">
+        <h2>Percentage of Endorsements, by the Source's Political Leaning</h2>
     </td>
 </tr>
 <tr>
     <td>
-      <h4>{{ endorsement_percent_left|floatformat:1 }}% Left-Leaning</h4>
-      <p>{{ endorsement_count_left }} Candidate or Measure Endorsements</p>
+      <h4>{{ endorsement_percent_left|floatformat:1 }}% From Left-Leaning Sources</h4>
+      <p><strong>{{ endorsement_count_left }}</strong> out of {{ total_endorsement_count }} Endorsements</p>
     </td>
     <td>&nbsp;</td>
     <td>
-      <h4>{{ endorsement_percent_right|floatformat:1 }}% Right-Leaning</h4>
-      <p>{{ endorsement_count_right }} Candidate or Measure Endorsements</p>
+      <h4>{{ endorsement_percent_center|floatformat:1 }}% Center</h4>
+      <p><strong>{{ endorsement_count_center }}</strong> out of {{ total_endorsement_count }} Endorsements</p>
+    </td>
+    <td>&nbsp;</td>
+    <td>
+      <h4>{{ endorsement_percent_right|floatformat:1 }}% From Right-Leaning Sources</h4>
+      <p><strong>{{ endorsement_count_right }}</strong> out of {{ total_endorsement_count }} Endorsements</p>
     </td>
 </tr>
 
 
 <tr>
-    <td colspan="3">&nbsp;</td>
+    <td colspan="5">&nbsp;</td>
 </tr>
 
 
+
+
+{# ##################################################################### #}
+{# ################### Organizations / Public Figures################### #}
+{# ##################################################################### #}
+
+
+
+
 <tr>
-    <td colspan="3">
+    <td colspan="5">
         <h2>Organizations / Public Figures</h2>
-        <p>We Vote invites all organizations and public figures to <a href="https://api.wevoteusa.org/vg/create/" target="_blank">add their endorsements</a> to We Vote.</p>
+        <p>
+          These are all of the organizations who have made endorsements in the election(s) you are looking at.
+          If they are tagged with a left-leaning value/issue, we put them in the "Left-Leaning" column.
+          If they are tagged with a right-leaning value/issue, we put them in the "Right-Leaning" column.
+          All others are in the "Center" column.
+          We Vote invites all organizations and public figures to <a href="https://api.wevoteusa.org/vg/create/" target="_blank">add their endorsements</a> to We Vote.
+        </p>
     </td>
 </tr>
 <tr>
     <td><h4>{{ organization_percent_left|floatformat:1 }}% Left-Leaning ({{ organization_list_left|length }})</h4></td>
+    <td>&nbsp;</td>
+    <td><h4>{{ organization_percent_center|floatformat:1 }}% Center ({{ organization_list_center|length }})</h4></td>
     <td>&nbsp;</td>
     <td><h4>{{ organization_percent_right|floatformat:1 }}% Right-Leaning ({{ organization_list_right|length }})</h4></td>
 </tr>
 <tr>
     <td valign="top">
 
-{% if organization_list_left %}
+    {# ################### Left Leaning ################### #}
+  {% if organization_list_left %}
     <table class="table">
       <thead>
         <tr>
             <th>&nbsp;</th>
             <th>&nbsp;</th>
-            <th>Organization</th>
+            <th>&nbsp;</th>
         </tr>
       </thead>
     {% for organization in organization_list_left %}
@@ -177,6 +127,11 @@
             <td>
                 {{ organization.organization_name }}<br />
                 <span style="color: darkgray">{{ organization.twitter_description }}</span>
+                <span class="u-no-break">
+                  {% for one_issue in organization_issues_lists|get_list_from_dict:organization.we_vote_id %}
+                    <img src="https://wevote.us/img/global/svg-icons/issues/{{ one_issue.issue_icon_local_path }}.svg" height="16" width="16" />
+                  {% endfor %}
+                </span>
                 {% if organization.twitter_followers_count %}
                     <span style="color: darkgray" class="u-no-break">({{ organization.twitter_followers_count }} Twitter Followers)</span>
                 {% endif %}
@@ -184,20 +139,61 @@
         </tr>
     {% endfor %}
     </table>
-{% endif %}
+  {% endif %}
 
 
     </td>
     <td>&nbsp;</td>
     <td valign="top">
 
-{% if organization_list_right %}
+    {# ################### Center ################### #}
+  {% if organization_list_center %}
     <table class="table">
       <thead>
         <tr>
             <th>&nbsp;</th>
             <th>&nbsp;</th>
-            <th>Organization</th>
+            <th>&nbsp;</th>
+        </tr>
+      </thead>
+    {% for organization in organization_list_center %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if organization.we_vote_hosted_profile_image_url_medium %}
+                    <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}" width="48" height="48" />
+                {% endif %}
+            </td>
+            <td>
+                {{ organization.organization_name }}<br />
+                <span style="color: darkgray">{{ organization.twitter_description }}</span>
+                <span class="u-no-break">
+                  {% for one_issue in organization_issues_lists|get_list_from_dict:organization.we_vote_id %}
+                    <img src="https://wevote.us/img/global/svg-icons/issues/{{ one_issue.issue_icon_local_path }}.svg" height="16" width="16" />
+                  {% endfor %}
+                </span>
+                {% if organization.twitter_followers_count %}
+                    <span style="color: darkgray" class="u-no-break">({{ organization.twitter_followers_count }} Twitter Followers)</span>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+  {% endif %}
+
+
+    </td>
+    <td>&nbsp;</td>
+    <td valign="top">
+
+    {# ################### Right Leaning ################### #}
+  {% if organization_list_right %}
+    <table class="table">
+      <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
         </tr>
       </thead>
     {% for organization in organization_list_right %}
@@ -211,6 +207,11 @@
             <td>
                 {{ organization.organization_name }}<br />
                 <span style="color: darkgray">{{ organization.twitter_description }}</span>
+                <span class="u-no-break">
+                  {% for one_issue in organization_issues_lists|get_list_from_dict:organization.we_vote_id %}
+                    <img src="https://wevote.us/img/global/svg-icons/issues/{{ one_issue.issue_icon_local_path }}.svg" height="16" width="16" />
+                  {% endfor %}
+                </span>
                 {% if organization.twitter_followers_count %}
                     <span style="color: darkgray" class="u-no-break">({{ organization.twitter_followers_count }} Twitter Followers)</span>
                 {% endif %}
@@ -218,20 +219,141 @@
         </tr>
     {% endfor %}
     </table>
-{% endif %}
+  {% endif %}
 
 
     </td>
 </tr>
-{% endif %}
 
+
+
+
+{# ####################################################### #}
+{# ################### Values / Issues ################### #}
+{# ####################################################### #}
+
+
+
+
+<tr>
+    <td colspan="5">
+      <h2>Values / Issues</h2>
+      <p>
+        For each value/issue, how many of the organizations or public figures (who are endorsing in these election)
+        are tagged with each issue?
+      </p>
+    </td>
+</tr>
+<tr>
+    <td style="width: 32%"><h4>Left-Leaning </h4></td>
+    <td>&nbsp;</td>
+    <td style="width: 32%"><h4>Center </h4></td>
+    <td>&nbsp;</td>
+    <td style="width: 32%"><h4>Right-Leaning</h4></td>
+</tr>
+<tr>
+    {# ################### Left Leaning ################### #}
+    <td valign="top">
+
+  {% if issue_list_left %}
+    <table class="table">
+      <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+            <th>Issue/Category Name</th>
+            <th>Organizations Tagged</th>
+        </tr>
+      </thead>
+    {% for issue in issue_list_left %}
+        <tr>
+            <td><span style="color: lightgray;">{{ forloop.counter }}</span></td>
+            <td>
+                {% if issue.issue_icon_local_path %}
+                  <img src="https://wevote.us/img/global/svg-icons/issues/{{ issue.issue_icon_local_path }}.svg" height="48" width="48" />
+                {% endif %}
+            </td>
+            <td>
+                {{ issue.issue_name }}<br />
+                <span style="color: darkgray">{{ issue.issue_description }}</span>
+            </td>
+            <td><strong>{{ issue.linked_organization_count }}</strong></td>
+        </tr>
+    {% endfor %}
+    </table>
+  {% endif %}
+
+
+    </td>
+    <td>&nbsp;</td>
+    {# ################### Center ################### #}
+    <td valign="top">
+
+  {% if issue_list_center %}
+    <table class="table">
+      <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+            <th>Issue/Category Name</th>
+            <th>Organizations Tagged</th>
+        </tr>
+      </thead>
+    {% for issue in issue_list_center %}
+        <tr>
+            <td><span style="color: lightgray;">{{ forloop.counter }}</span></td>
+            <td>
+                {% if issue.issue_icon_local_path %}
+                  <img src="https://wevote.us/img/global/svg-icons/issues/{{ issue.issue_icon_local_path }}.svg" height="48" width="48" />
+                {% endif %}
+            </td>
+            <td>
+                {{ issue.issue_name }}<br />
+                <span style="color: darkgray">{{ issue.issue_description }}</span>
+            </td>
+            <td><strong>{{ issue.linked_organization_count }}</strong></td>
+        </tr>
+    {% endfor %}
+    </table>
+  {% endif %}
+
+    </td>
+    <td>&nbsp;</td>
+    {# ################### Right Leaning ################### #}
+    <td valign="top">
+
+  {% if issue_list_right %}
+    <table class="table">
+      <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+            <th>Issue/Category Name</th>
+            <th>Organizations Tagged</th>
+        </tr>
+      </thead>
+    {% for issue in issue_list_right %}
+        <tr>
+            <td><span style="color: lightgray;">{{ forloop.counter }}</span></td>
+            <td>
+                {% if issue.issue_icon_local_path %}
+                  <img src="https://wevote.us/img/global/svg-icons/issues/{{ issue.issue_icon_local_path }}.svg" height="48" width="48" />
+                {% endif %}
+            </td>
+            <td>
+                {{ issue.issue_name }}<br />
+                <span style="color: darkgray">{{ issue.issue_description }}</span>
+            </td>
+            <td><strong>{{ issue.linked_organization_count }}</strong></td>
+        </tr>
+    {% endfor %}
+    </table>
+  {% endif %}
+
+    </td>
+</tr>
 
 </table>
-
-{% if not google_civic_election_id %}
-  <h2>Organizations</h2>
-    Please choose election above to see left and right leaning organizations that provided endorsements.
-{% endif %}
 
     <p></p>
     <p></p>

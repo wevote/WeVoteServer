@@ -1187,7 +1187,7 @@ class VoterGuideListManager(models.Model):
     # NOTE: This is extremely simple way to retrieve voter guides, used by admin tools. Being replaced by:
     #  retrieve_voter_guides_by_ballot_item(ballot_item_we_vote_id) AND
     #  retrieve_voter_guides_by_election(google_civic_election_id)
-    def retrieve_voter_guides_for_election(self, google_civic_election_id):
+    def retrieve_voter_guides_for_election(self, google_civic_election_id_list):
         voter_guide_list = []
         voter_guide_list_found = False
 
@@ -1196,7 +1196,7 @@ class VoterGuideListManager(models.Model):
             voter_guide_query = VoterGuide.objects.order_by('display_name')
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             voter_guide_list = voter_guide_query.filter(
-                google_civic_election_id=google_civic_election_id)
+                google_civic_election_id__in=google_civic_election_id_list)
 
             if len(voter_guide_list):
                 voter_guide_list_found = True

@@ -1300,8 +1300,12 @@ class PositionListManager(models.Model):
 
         return total_count
 
-    def fetch_positions_count_for_voter_guide(self, organization_we_vote_id_list, google_civic_election_id, state_code,
-                                              retrieve_public_positions=True, stance_we_are_looking_for=ANY_STANCE):
+    def fetch_positions_count_for_voter_guide(self,
+                                              organization_we_vote_id_list,
+                                              google_civic_election_id_list,
+                                              state_code,
+                                              retrieve_public_positions=True,
+                                              stance_we_are_looking_for=ANY_STANCE):
         # Don't proceed unless we have a correct stance identifier
         if stance_we_are_looking_for not \
                 in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
@@ -1312,7 +1316,7 @@ class PositionListManager(models.Model):
 
         # Don't proceed unless we have organization identifier and the election we care about
         if not positive_value_exists(len(organization_we_vote_id_list)) and not \
-                positive_value_exists(google_civic_election_id):
+                positive_value_exists(len(google_civic_election_id_list)):
             return 0
 
         position_count = 0
@@ -1324,35 +1328,37 @@ class PositionListManager(models.Model):
                 position_on_stage_starter = PositionForFriends
                 position_on_stage = PositionForFriends()
 
-            position_list = position_on_stage_starter.objects.using('readonly').all()
+            position_query = position_on_stage_starter.objects.using('readonly').all()
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            position_list = position_list.exclude(stance__iexact=PERCENT_RATING)
+            position_query = position_query.exclude(stance__iexact=PERCENT_RATING)
 
-            position_list = position_list.filter(organization_we_vote_id__in=organization_we_vote_id_list)
-            position_list = position_list.filter(google_civic_election_id=google_civic_election_id)
+            position_query = position_query.filter(organization_we_vote_id__in=organization_we_vote_id_list)
+            position_query = position_query.filter(google_civic_election_id__in=google_civic_election_id_list)
+            if positive_value_exists(state_code):
+                position_query = position_query.filter(state_code__iexact=state_code)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             # if stance_we_are_looking_for != ANY_STANCE:
             #     # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
             #     if stance_we_are_looking_for == SUPPORT:
-            #         position_list = position_list.filter(
+            #         position_query = position_query.filter(
             #             Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
             #             (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))
             #         )  # Matches "is_positive_rating"
             #     elif stance_we_are_looking_for == OPPOSE:
-            #         position_list = position_list.filter(
+            #         position_query = position_query.filter(
             #             Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
             #             (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))
             #         )  # Matches "is_negative_rating"
             #     else:
-            #         position_list = position_list.filter(stance=stance_we_are_looking_for)
+            #         position_query = position_query.filter(stance=stance_we_are_looking_for)
 
             if stance_we_are_looking_for != ANY_STANCE:
-                position_list = position_list.filter(stance__iexact=stance_we_are_looking_for)
+                position_query = position_query.filter(stance__iexact=stance_we_are_looking_for)
 
             # Limit to positions in the last x years - currently we are not limiting
-            # position_list = position_list.filter(election_id=election_id)
+            # position_query = position_query.filter(election_id=election_id)
 
-            position_count = position_list.count()
+            position_count = position_query.count()
         except Exception as e:
             pass
 
@@ -1413,9 +1419,9 @@ class PositionListManager(models.Model):
         try:
             position_on_stage_starter = PositionForFriends
 
-            position_list = position_on_stage_starter.objects.using('readonly').all()
-            position_list = position_list.filter(voter_we_vote_id__iexact=voter_we_vote_id)
-            position_count = position_list.count()
+            position_query = position_on_stage_starter.objects.using('readonly').all()
+            position_query = position_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            position_count = position_query.count()
         except Exception as e:
             pass
 
@@ -1425,9 +1431,9 @@ class PositionListManager(models.Model):
         try:
             position_on_stage_starter = PositionEntered
 
-            position_list = position_on_stage_starter.objects.using('readonly').all()
-            position_list = position_list.filter(voter_we_vote_id__iexact=voter_we_vote_id)
-            position_count = position_list.count()
+            position_query = position_on_stage_starter.objects.using('readonly').all()
+            position_query = position_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            position_count = position_query.count()
         except Exception as e:
             pass
 

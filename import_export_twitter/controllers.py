@@ -1050,7 +1050,8 @@ def refresh_twitter_data_for_organizations(state_code='', google_civic_election_
     # Limit this to organizations that have a voter guide in a particular election
     if positive_value_exists(google_civic_election_id):
         voter_guide_list_manager = VoterGuideListManager()
-        results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id)
+        google_civic_election_id_list = [google_civic_election_id]
+        results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id_list)
         if results['voter_guide_list_found']:
             organization_we_vote_ids_in_this_election = []
             voter_guide_list = results['voter_guide_list']
