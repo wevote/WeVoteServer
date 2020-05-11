@@ -362,7 +362,7 @@ def scrape_website_for_social_media_view(request, organization_id, force_retriev
 @login_required
 def refresh_twitter_data_for_organizations_view(request):
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
