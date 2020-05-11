@@ -18,7 +18,8 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 @login_required
 def organization_subscription_list_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

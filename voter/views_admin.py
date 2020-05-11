@@ -178,7 +178,8 @@ def voter_edit_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -265,7 +266,8 @@ def voter_edit_process_view(request):
 
 @login_required
 def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -705,7 +707,8 @@ def voter_change_authority_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -813,7 +816,8 @@ def voter_remove_facebook_auth_process_view(request, voter_id=0, voter_we_vote_i
 
 @login_required
 def voter_list_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -915,7 +919,8 @@ def voter_list_view(request):
 
 @login_required
 def voter_summary_view(request, voter_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
