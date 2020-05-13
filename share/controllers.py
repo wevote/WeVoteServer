@@ -10,6 +10,8 @@ from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 
+INDIVIDUAL = 'I'  # One person
+
 logger = wevote_functions.admin.get_logger(__name__)
 
 
@@ -151,6 +153,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     office_we_vote_id = ''
     api_call_coming_from_voter_who_shared = False
     shared_by_voter_we_vote_id = ''
+    shared_by_organization_type = ''
     shared_by_organization_we_vote_id = ''
     shared_item_code_no_opinions = ''
     shared_item_code_all_opinions = ''
@@ -191,7 +194,8 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             'is_office_share':              is_office_share,
             'google_civic_election_id':     google_civic_election_id,
             'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
-            'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
+            'shared_by_voter_we_vote_id':   shared_by_voter_we_vote_id,
+            'shared_by_organization_type':  shared_by_organization_type,
             'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
             'candidate_we_vote_id':         candidate_we_vote_id,
             'measure_we_vote_id':           measure_we_vote_id,
@@ -229,6 +233,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             shared_item_code=shared_item_code,
             shared_item_id=shared_item_id,
             shared_by_voter_we_vote_id=shared_item.shared_by_voter_we_vote_id,
+            shared_by_organization_type=shared_item.shared_by_organization_type,
             shared_by_organization_we_vote_id=shared_item.shared_by_organization_we_vote_id,
             site_owner_organization_we_vote_id=shared_item.site_owner_organization_we_vote_id,
             viewed_by_voter_we_vote_id=viewed_by_voter_we_vote_id,
@@ -242,6 +247,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         if positive_value_exists(include_public_positions) or positive_value_exists(include_friends_only_positions):
             permission_results = share_manager.create_or_update_shared_permissions_granted(
                 shared_by_voter_we_vote_id=shared_item.shared_by_voter_we_vote_id,
+                shared_by_organization_type=shared_item.shared_by_organization_type,
                 shared_by_organization_we_vote_id=shared_item.shared_by_organization_we_vote_id,
                 shared_to_voter_we_vote_id=viewed_by_voter_we_vote_id,
                 shared_to_organization_we_vote_id=viewed_by_organization_we_vote_id,
@@ -271,9 +277,10 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         'is_measure_share':             shared_item.is_measure_share,
         'is_office_share':              shared_item.is_office_share,
         'google_civic_election_id':     shared_item.google_civic_election_id,
-        'site_owner_organization_we_vote_id':   shared_item.site_owner_organization_we_vote_id,
-        'shared_by_voter_we_vote_id':           shared_item.shared_by_voter_we_vote_id,
+        'shared_by_organization_type':  shared_item.shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_item.shared_by_organization_we_vote_id,
+        'shared_by_voter_we_vote_id':           shared_item.shared_by_voter_we_vote_id,
+        'site_owner_organization_we_vote_id':   shared_item.site_owner_organization_we_vote_id,
         'candidate_we_vote_id':         shared_item.candidate_we_vote_id,
         'measure_we_vote_id':           shared_item.measure_we_vote_id,
         'office_we_vote_id':            shared_item.office_we_vote_id,
@@ -317,6 +324,7 @@ def shared_item_save_for_api(  # sharedItemSave
     measure_we_vote_id = ''
     office_we_vote_id = ''
     shared_by_voter_we_vote_id = ''
+    shared_by_organization_type = ''
     shared_by_organization_we_vote_id = ''
     shared_item_code_no_opinions = ''
     shared_item_code_all_opinions = ''
@@ -330,6 +338,7 @@ def shared_item_save_for_api(  # sharedItemSave
         voter = voter_results['voter']
         shared_by_voter_we_vote_id = voter.we_vote_id
         shared_by_organization_we_vote_id = voter.linked_organization_we_vote_id
+        shared_by_organization_type = INDIVIDUAL
 
     organization_manager = OrganizationManager()
     try:
@@ -375,9 +384,10 @@ def shared_item_save_for_api(  # sharedItemSave
             'is_measure_share':             is_measure_share,
             'is_office_share':              is_office_share,
             'google_civic_election_id':     google_civic_election_id,
-            'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
-            'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
+            'shared_by_organization_type':  shared_by_organization_type,
             'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
+            'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
+            'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
             'candidate_we_vote_id':         candidate_we_vote_id,
             'measure_we_vote_id':           measure_we_vote_id,
             'office_we_vote_id':            office_we_vote_id,
@@ -395,9 +405,10 @@ def shared_item_save_for_api(  # sharedItemSave
         'is_office_share': is_office_share,
         'measure_we_vote_id': measure_we_vote_id,
         'office_we_vote_id': office_we_vote_id,
-        'site_owner_organization_we_vote_id': site_owner_organization_we_vote_id,
-        'shared_by_voter_we_vote_id': shared_by_voter_we_vote_id,
+        'shared_by_organization_type': shared_by_organization_type,
         'shared_by_organization_we_vote_id': shared_by_organization_we_vote_id,
+        'shared_by_voter_we_vote_id': shared_by_voter_we_vote_id,
+        'site_owner_organization_we_vote_id': site_owner_organization_we_vote_id,
     }
     create_results = share_manager.create_or_update_shared_item(
         destination_full_url=destination_full_url,
@@ -426,9 +437,10 @@ def shared_item_save_for_api(  # sharedItemSave
         'is_measure_share':             is_measure_share,
         'is_office_share':              is_office_share,
         'google_civic_election_id':     google_civic_election_id,
-        'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
-        'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
+        'shared_by_organization_type':  shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
+        'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
+        'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
         'candidate_we_vote_id':         candidate_we_vote_id,
         'measure_we_vote_id':           measure_we_vote_id,
         'office_we_vote_id':            office_we_vote_id,

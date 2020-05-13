@@ -5,6 +5,7 @@
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import localtime, now
+from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
 
@@ -24,6 +25,8 @@ class SharedItem(models.Model):
     shared_item_code_all_opinions = models.CharField(max_length=50, null=True, blank=True, unique=True, db_index=True)
     # The voter and organization id of the person initiating the share
     shared_by_voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
+    shared_by_organization_type = models.CharField(
+        verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
     shared_by_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
     # The owner of the custom site this share was from
     site_owner_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=False, db_index=True)
@@ -69,6 +72,8 @@ class SharedPermissionsGranted(models.Model):
     """
     # The voter and organization id of the person initiating the share
     shared_by_voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
+    shared_by_organization_type = models.CharField(
+        verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
     shared_by_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
     # The person being granted the permissions
     shared_to_voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
@@ -90,6 +95,8 @@ class SharedLinkClicked(models.Model):
     destination_full_url = models.URLField(max_length=255, blank=True, null=True)
     # The voter and organization id of the person initiating the share
     shared_by_voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
+    shared_by_organization_type = models.CharField(
+        verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
     shared_by_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
     # The person clicking the link
     viewed_by_voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
@@ -113,6 +120,7 @@ class ShareManager(models.Model):
             shared_item_code='',
             shared_item_id=0,
             shared_by_voter_we_vote_id='',
+            shared_by_organization_type='',
             shared_by_organization_we_vote_id='',
             site_owner_organization_we_vote_id='',
             viewed_by_voter_we_vote_id='',
@@ -129,6 +137,7 @@ class ShareManager(models.Model):
                 shared_item_code=shared_item_code,
                 shared_item_id=shared_item_id,
                 shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
+                shared_by_organization_type=shared_by_organization_type,
                 shared_by_organization_we_vote_id=shared_by_organization_we_vote_id,
                 site_owner_organization_we_vote_id=site_owner_organization_we_vote_id,
                 viewed_by_voter_we_vote_id=viewed_by_voter_we_vote_id,
@@ -248,6 +257,7 @@ class ShareManager(models.Model):
                     is_office_share=defaults['is_office_share'],
                     measure_we_vote_id=defaults['measure_we_vote_id'],
                     office_we_vote_id=defaults['office_we_vote_id'],
+                    shared_by_organization_type=defaults['shared_by_organization_type'],
                     shared_by_organization_we_vote_id=defaults['shared_by_organization_we_vote_id'],
                     shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
                     shared_item_code_no_opinions=shared_item_code_no_opinions,
@@ -275,6 +285,7 @@ class ShareManager(models.Model):
     def create_or_update_shared_permissions_granted(
             self,
             shared_by_voter_we_vote_id='',
+            shared_by_organization_type='',
             shared_by_organization_we_vote_id='',
             shared_to_voter_we_vote_id='',
             shared_to_organization_we_vote_id='',
@@ -343,6 +354,7 @@ class ShareManager(models.Model):
             try:
                 shared_permissions_granted = SharedPermissionsGranted.objects.create(
                     shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
+                    shared_by_organization_type=shared_by_organization_type,
                     shared_by_organization_we_vote_id=shared_by_organization_we_vote_id,
                     shared_to_voter_we_vote_id=shared_to_voter_we_vote_id,
                     shared_to_organization_we_vote_id=shared_to_organization_we_vote_id,

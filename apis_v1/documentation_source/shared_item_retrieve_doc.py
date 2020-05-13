@@ -62,6 +62,7 @@ def shared_item_retrieve_doc_template_values(url_root):
                    '  "google_civic_election_id": integer,\n' \
                    '  "site_owner_organization_we_vote_id": string,\n' \
                    '  "shared_by_voter_we_vote_id": string,\n' \
+                   '  "shared_by_organization_type": string,\n' \
                    '  "shared_by_organization_we_vote_id": string,\n' \
                    '  "candidate_we_vote_id": string,\n' \
                    '  "measure_we_vote_id": string,\n' \
