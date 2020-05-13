@@ -70,7 +70,6 @@ def friend_invitation_by_email_verify_view(request):  # friendInvitationByEmailV
         'invitation_found':             results['invitation_found'],
         'attempted_to_approve_own_invitation':          results['attempted_to_approve_own_invitation'],
         'invitation_secret_key':                        invitation_secret_key,
-        'invitation_secret_key_belongs_to_this_voter':  results['invitation_secret_key_belongs_to_this_voter'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -162,6 +161,7 @@ def friend_invitation_information_view(request):  # friendInvitationInformation
         'invitation_found':                 results['invitation_found'],
         'invitation_message':               results['invitation_message'],
         'invitation_secret_key':            invitation_secret_key,
+        'invitation_secret_key_belongs_to_this_voter':  results['invitation_secret_key_belongs_to_this_voter'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
