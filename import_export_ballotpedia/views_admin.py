@@ -598,7 +598,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
         ballot_returned_list_manager = BallotReturnedListManager()
 
         if positive_value_exists(refresh_ballot_returned):
-            limit_polling_locations_retrieved = 250
+            limit_polling_locations_retrieved = 111  # Odd number so we can find it with search - formerly 250
         else:
             limit_polling_locations_retrieved = 0
 
@@ -640,7 +640,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
 
             # Randomly change the sort order so we over time load different polling locations (before timeout)
             random_sorting = random.randint(1, 5)
-            first_retrieve_limit = 250
+            first_retrieve_limit = 111  # Odd number so we can find it with search - formerly 250
             # first_retrieve_limit = 10  # For Testing
             if random_sorting == 1:
                 # Ordering by "line1" creates a bit of (locational) random order
@@ -934,7 +934,7 @@ def refresh_ballotpedia_ballots_for_voters_api_v4_internal_view(
     #     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
     ballot_returned_list_manager = BallotReturnedListManager()
-    limit_voters_retrieved = 250
+    limit_voters_retrieved = 111  # Odd number so we can find it with search - formerly 250
 
     # Retrieve voter_id entries from ballot_returned table, from oldest to newest
     if positive_value_exists(is_national_election) and positive_value_exists(state_code):

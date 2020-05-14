@@ -893,6 +893,16 @@ def process_one_ballot_item_batch_process(batch_process):
                     batch_set_id=batch_process_ballot_item_chunk.batch_set_id, batch_row_analyzed=False)
                 if positive_value_exists(number_not_analyzed):
                     # Now analyze the batch that was stored in the "refresh_ballotpedia_ballots..." function
+                    status += "ANALYZE_DATE_COMPLETED_IS_NONE-NUMBER_NOT_ANALYZED: " + str(number_not_analyzed) + ' '
+                    status += "BATCH_SET_ID: " + str(batch_process_ballot_item_chunk.batch_set_id) + ' '
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
+                        google_civic_election_id=google_civic_election_id,
+                        kind_of_process=kind_of_process,
+                        state_code=state_code,
+                        status=status,
+                    )
                     results = process_batch_set(
                         batch_set_id=batch_process_ballot_item_chunk.batch_set_id, analyze_all=True)
                     status += results['status']
