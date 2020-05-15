@@ -1794,7 +1794,7 @@ def batch_set_batch_list_view(request):
                         pass
                 else:
                     batch_actions_not_analyzed += 1
-
+                # Keep building up these dicts so we don't have to retrieve data again-and-again from the database
                 election_objects_dict = results['election_objects_dict']
                 measure_objects_dict = results['measure_objects_dict']
                 office_objects_dict = results['office_objects_dict']
@@ -1809,7 +1809,12 @@ def batch_set_batch_list_view(request):
 
                 for one_batch_description in batch_list:
                     results = create_batch_row_actions(
-                        one_batch_description.batch_header_id, batch_description=one_batch_description)
+                        one_batch_description.batch_header_id,
+                        batch_description=one_batch_description,
+                        election_objects_dict=election_objects_dict,
+                        measure_objects_dict=measure_objects_dict,
+                        office_objects_dict=office_objects_dict,
+                    )
                     if results['batch_actions_created']:
                         batch_actions_analyzed += 1
                         try:
@@ -1820,6 +1825,10 @@ def batch_set_batch_list_view(request):
                             pass
                     else:
                         batch_actions_not_analyzed += 1
+                    # Keep building up these dicts so we don't have to retrieve data again-and-again from the database
+                    election_objects_dict = results['election_objects_dict']
+                    measure_objects_dict = results['measure_objects_dict']
+                    office_objects_dict = results['office_objects_dict']
 
             if positive_value_exists(batch_actions_analyzed):
                 messages.add_message(request, messages.INFO, "Analyze All, BatchRows Analyzed: "

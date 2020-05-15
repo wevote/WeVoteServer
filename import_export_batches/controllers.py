@@ -2423,8 +2423,10 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
     if existing_results['batch_row_action_found']:
         batch_row_action_ballot_item = existing_results['batch_row_action_ballot_item']
         batch_row_action_updated = True
+        status += "EXISTING_BATCH_ROW_ACTION_BALLOT_ITEM_FOUND "
     else:
         # If a BatchRowActionBallotItem entry does not exist, create one
+        status += "[BatchRowActionBallotItem.objects.create]"
         try:
             batch_row_action_ballot_item = BatchRowActionBallotItem.objects.create(
                 batch_header_id=batch_description.batch_header_id,
@@ -2517,12 +2519,16 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             if contest_office:
                 contest_office_name = contest_office.office_name
         else:
+            status += "RETRIEVING_OFFICE_FROM_WE_VOTE_ID "
             results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id,
                                                                                      read_only=True)
             if results['contest_office_found']:
                 contest_office = results['contest_office']
                 contest_office_name = contest_office.office_name
                 office_objects_dict[contest_office_we_vote_id] = contest_office
+            else:
+                status += "COULD_NOT_RETRIEVE_OFFICE_FROM_WE_VOTE_ID: "
+                status += results['status']
 
     if keep_looking_for_duplicates and not positive_value_exists(contest_office_name):
         # See if we have an office name
