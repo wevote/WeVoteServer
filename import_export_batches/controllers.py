@@ -107,11 +107,15 @@ def create_batch_row_actions(
             batch_description_found = True
     except BatchDescription.DoesNotExist:
         # This is fine
-        batch_description = BatchDescription()
+        batch_description = None
+        batch_description_found = False
+    except Exception as e:
+        status += "FAILURE_RETRIEVING_BATCH_DESCRIPTION: " + str(e) + " "
+        batch_description = None
         batch_description_found = False
 
     batch_header_map_found = False
-    batch_header_map = BatchHeaderMap()
+    batch_header_map = None
     if batch_description_found:
         kind_of_batch = batch_description.kind_of_batch
 
@@ -121,6 +125,8 @@ def create_batch_row_actions(
         except BatchHeaderMap.DoesNotExist:
             # This is fine
             pass
+        except Exception as e:
+            status += "FAILURE_RETRIEVING_BATCH_HEADER_MAP: " + str(e) + " "
 
     batch_row_list = []
     batch_row_action_list_found = False
