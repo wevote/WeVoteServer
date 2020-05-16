@@ -1179,6 +1179,7 @@ def batch_set_list_view(request):
     batch_file = request.GET.get('batch_file', '')
     batch_uri = request.GET.get('batch_uri', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    batch_set_id = convert_to_int(request.GET.get('batch_set_id', 0))
     limit = request.GET.get('limit', 25)
 
     messages_on_stage = get_messages(request)
@@ -1188,6 +1189,8 @@ def batch_set_list_view(request):
         # batch_set_list = batch_set_list.exclude(batch_set_id__isnull=True)
         if positive_value_exists(google_civic_election_id):
             batch_set_query = batch_set_query.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(batch_set_id):
+            batch_set_query = batch_set_query.filter(id=batch_set_id)
 
         batch_set_list = batch_set_query[:limit]
         if len(batch_set_list):
@@ -1234,6 +1237,7 @@ def batch_set_list_view(request):
             'batch_set_list':           batch_set_list,
             'election_list':            election_list,
             'batch_file':               batch_file,
+            'batch_set_id':             batch_set_id,
             'batch_uri':                batch_uri,
             'google_civic_election_id': google_civic_election_id,
         }
@@ -1242,6 +1246,7 @@ def batch_set_list_view(request):
             'messages_on_stage':        messages_on_stage,
             'election_list':            election_list,
             'batch_file':               batch_file,
+            'batch_set_id':             batch_set_id,
             'batch_uri':                batch_uri,
             'google_civic_election_id': google_civic_election_id,
         }
@@ -1260,6 +1265,7 @@ def batch_set_list_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     batch_uri = request.POST.get('batch_uri', '')
+    batch_set_id = convert_to_int(request.POST.get('batch_set_id', 0))
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     organization_we_vote_id = request.POST.get('organization_we_vote_id', '')
     # Was form submitted, or was election just changed?
@@ -1317,6 +1323,7 @@ def batch_set_list_process_view(request):
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&batch_set_id=" + str(batch_set_id) +
                                 "&batch_uri=" + batch_uri_encoded)
 
 
@@ -1611,6 +1618,8 @@ def batch_process_log_entry_list_view(request):
     state_code = request.GET.get('state_code', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     batch_process_log_entry_search = request.GET.get('batch_process_log_entry_search', '')
+    batch_process_id = convert_to_int(request.GET.get('batch_process_id', 0))
+    batch_process_chunk_id = convert_to_int(request.GET.get('batch_process_chunk_id', 0))
 
     batch_process_log_entry_list_found = False
     batch_process_log_entry_list = []
@@ -1626,6 +1635,11 @@ def batch_process_log_entry_list_view(request):
 
     try:
         batch_process_queryset = BatchProcessLogEntry.objects.all()
+        if positive_value_exists(batch_process_id):
+            batch_process_queryset = batch_process_queryset.filter(batch_process_id=batch_process_id)
+        if positive_value_exists(batch_process_chunk_id):
+            batch_process_queryset = batch_process_queryset.filter(
+                batch_process_ballot_item_chunk_id=batch_process_chunk_id)
         if positive_value_exists(google_civic_election_id):
             batch_process_queryset = batch_process_queryset.filter(google_civic_election_id=google_civic_election_id)
         elif positive_value_exists(show_all_elections):
@@ -1721,6 +1735,8 @@ def batch_process_log_entry_list_view(request):
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
+        'batch_process_id':         batch_process_id,
+        'batch_process_chunk_id':   batch_process_chunk_id,
         'batch_process_log_entry_list':       batch_process_log_entry_list,
         'batch_process_log_entry_search':     batch_process_log_entry_search,
         'election_list':            election_list,

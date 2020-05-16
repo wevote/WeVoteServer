@@ -1,7 +1,7 @@
 {# templates/import_export_batches/batch_set_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}List of Batches{% endblock %}
+{% block title %}Batch Set List{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
@@ -9,7 +9,7 @@
 <p><a href="{% url 'import_export_batches:batches_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Import Batches Index</a></p>
 
 
-    <h1>Batch Set Data</h1>
+    <h1>Batch Set List</h1>
     <p>We have a design that shows all of the import steps in this
         process. <a href="https://docs.google.com/drawings/d/1P2CV5ttH9InmPdwB03dM_I8jlEUU7Kks2UIseb1yu0s/edit" target="_blank">See chart here</a>.</p>
     <form action="{% url "import_export_batches:batch_set_list_process" %}" method="post" class="form-horizontal" enctype="multipart/form-data">
@@ -27,6 +27,9 @@
                         {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
                 {% endfor %}
                 </select>
+                {# Limit to on Batch Set ID #}
+                <input type="text" name="batch_set_id" id="batch_set_id" value="{{ batch_set_id }}" style="width: 80px" />
+                <input type="submit" value="Batch Set Id" />
             </div>
         </div>
         {% endif %}{# End of if election_list #}
@@ -63,6 +66,7 @@
         <tr>
             <th>#</th>
             <th>Batch Name</th>
+            <th>Batch Set ID</th>
             <th>Action</th>
             <th>Election</th>
             <th>To be Analyzed</th>
@@ -75,6 +79,7 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ one_batch_set.batch_set_name }}</td>
+            <td>{{ one_batch_set.id }}</td>
             <td><a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ one_batch_set.id }}&google_civic_election_id={{ google_civic_election_id }}">
             review</a></td>
             <td>
