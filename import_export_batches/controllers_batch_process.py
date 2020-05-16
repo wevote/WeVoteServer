@@ -760,6 +760,9 @@ def process_one_ballot_item_batch_process(batch_process):
             }
             return results
     elif batch_process_ballot_item_chunk.analyze_date_started is None:
+        # ###################
+        # This is the first pass through ANALYZE
+
         # If here, we know that the retrieve_date_completed has a value
         number_of_batches = 0
         if not positive_value_exists(batch_process_ballot_item_chunk.retrieve_row_count):
@@ -881,6 +884,10 @@ def process_one_ballot_item_batch_process(batch_process):
             return results
 
     elif batch_process_ballot_item_chunk.analyze_date_completed is None:
+        # ###################
+        # This is an ANALYZE process that failed part way through
+        status += "RESTARTING_FAILED_ANALYZE_PROCESS "
+
         # Check to see if analyze process has timed out
         date_when_analyze_has_timed_out = \
             batch_process_ballot_item_chunk.analyze_date_started + timedelta(seconds=analyze_time_out_duration)
@@ -942,7 +949,9 @@ def process_one_ballot_item_batch_process(batch_process):
                 analyze_row_count = batch_manager.count_number_of_batches_in_batch_set(
                     batch_set_id=batch_process_ballot_item_chunk.batch_set_id, batch_row_analyzed=True)
                 if positive_value_exists(results['success']):
-                    if not positive_value_exists(analyze_row_count):
+                    not_analyzed_row_count = batch_manager.count_number_of_batches_in_batch_set(
+                        batch_set_id=batch_process_ballot_item_chunk.batch_set_id, batch_row_analyzed=False)
+                    if not positive_value_exists(not_analyzed_row_count):
                         if batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_VOTERS:
                             # If no batch rows were found, we know the entire batch_process is finished.
                             # Update batch_process.date_completed to now
@@ -958,26 +967,48 @@ def process_one_ballot_item_batch_process(batch_process):
                                 'status': status,
                             }
                             return results
-                    try:
-                        batch_process_ballot_item_chunk.analyze_row_count = analyze_row_count
-                        batch_process_ballot_item_chunk.analyze_date_completed = now()
-                        batch_process_ballot_item_chunk.save()
-                        status += "ANALYZE_DATE_STARTED-ANALYZE_DATE_COMPLETED_SAVED "
-                        batch_process_manager.create_batch_process_log_entry(
-                            batch_process_id=batch_process.id,
-                            batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
-                            google_civic_election_id=google_civic_election_id,
-                            kind_of_process=kind_of_process,
-                            state_code=state_code,
-                            status=status,
-                        )
-                    except Exception as e:
-                        status += "ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " + str(e) + " "
-                        results = {
-                            'success': success,
-                            'status': status,
-                        }
-                        return results
+
+                    if positive_value_exists(not_analyzed_row_count):
+                        try:
+                            status += "RESTARTED_FAILED_ANALYZE_PROCESS-STILL_HAS_ROWS_TO_ANALYZE "
+                            batch_process_manager.create_batch_process_log_entry(
+                                batch_process_id=batch_process.id,
+                                batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
+                                google_civic_election_id=google_civic_election_id,
+                                kind_of_process=kind_of_process,
+                                state_code=state_code,
+                                status=status,
+                            )
+                        except Exception as e:
+                            status += "RESTARTED_FAILED_ANALYZE_PROCESS-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " \
+                                      "" + str(e) + " "
+                            results = {
+                                'success': success,
+                                'status': status,
+                            }
+                            return results
+                    else:
+                        # All batches in set have been analyzed
+                        try:
+                            batch_process_ballot_item_chunk.analyze_row_count = analyze_row_count
+                            batch_process_ballot_item_chunk.analyze_date_completed = now()
+                            batch_process_ballot_item_chunk.save()
+                            status += "ANALYZE_DATE_STARTED-ANALYZE_DATE_COMPLETED_SAVED "
+                            batch_process_manager.create_batch_process_log_entry(
+                                batch_process_id=batch_process.id,
+                                batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
+                                google_civic_election_id=google_civic_election_id,
+                                kind_of_process=kind_of_process,
+                                state_code=state_code,
+                                status=status,
+                            )
+                        except Exception as e:
+                            status += "ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " + str(e) + " "
+                            results = {
+                                'success': success,
+                                'status': status,
+                            }
+                            return results
                 else:
                     status += "PROCESS_BATCH_SET-FALSE "
                     batch_process_manager.create_batch_process_log_entry(
@@ -1030,8 +1061,8 @@ def process_one_ballot_item_batch_process(batch_process):
                 'status': status,
             }
             return results
-        results = process_batch_set(
-            batch_set_id=batch_process_ballot_item_chunk.batch_set_id, create_all=True)
+        # Process the create entries
+        results = process_batch_set(batch_set_id=batch_process_ballot_item_chunk.batch_set_id, create_all=True)
         create_row_count = results['batch_rows_created']
         status += results['status']
         if not positive_value_exists(results['success']):
@@ -1049,8 +1080,26 @@ def process_one_ballot_item_batch_process(batch_process):
                 'status': status,
             }
             return results
+        # Process the delete entries
+        results = process_batch_set(batch_set_id=batch_process_ballot_item_chunk.batch_set_id, delete_all=True)
+        status += results['status']
+        if not positive_value_exists(results['success']):
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
+                critical_failure=True,
+                google_civic_election_id=google_civic_election_id,
+                kind_of_process=kind_of_process,
+                state_code=state_code,
+                status=status,
+            )
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+        # If here, we know that the process_batch_set has run
         try:
-            # If here, we know that the process_batch_set has been created
             batch_process_ballot_item_chunk.create_row_count = create_row_count
             batch_process_ballot_item_chunk.create_date_completed = now()
             batch_process_ballot_item_chunk.save()
@@ -1380,7 +1429,7 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False, delet
                 status += results['status']
         status += "BATCH_ROWS_DELETED: " + str(batch_rows_deleted) + ", "
     else:
-        status += "MUST_SPECIFY_ANALYZE_OR_CREATE "
+        status += "MUST_SPECIFY_ANALYZE_CREATE_OR_DELETE "
 
     results = {
         'success':              success,
