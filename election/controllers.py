@@ -274,14 +274,16 @@ def elections_sync_out_list_for_api(voter_device_id):
     return results
 
 
-def retrieve_upcoming_election_id_list(limit_to_this_state_code=''):
+def retrieve_upcoming_election_id_list(limit_to_this_state_code='', require_include_in_list_for_voters=False):
     # There is a parallel function in election_manager.retrieve_upcoming_google_civic_election_id_list(
     # Figure out the elections we care about
     google_civic_election_id_list = []
     election_manager = ElectionManager()
     # If a state_code is included, national elections will NOT be returned
     # If a state_code is NOT included, the national election WILL be returned with this query
-    results = election_manager.retrieve_upcoming_elections(state_code=limit_to_this_state_code)
+    results = election_manager.retrieve_upcoming_elections(
+        state_code=limit_to_this_state_code,
+        require_include_in_list_for_voters=require_include_in_list_for_voters)
     if results['election_list_found']:
         upcoming_election_list = results['election_list']
         for one_election in upcoming_election_list:
@@ -291,7 +293,8 @@ def retrieve_upcoming_election_id_list(limit_to_this_state_code=''):
     # If a state code IS included, then the above retrieve_upcoming_elections will have missed the national election
     # so we want to return it here
     if positive_value_exists(limit_to_this_state_code):
-        results = election_manager.retrieve_next_national_election()
+        results = election_manager.retrieve_next_national_election(
+            require_include_in_list_for_voters=require_include_in_list_for_voters)
         if results['election_found']:
             one_election = results['election']
             if positive_value_exists(one_election.google_civic_election_id) \
