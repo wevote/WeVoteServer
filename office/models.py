@@ -1459,6 +1459,8 @@ class ContestOfficeListManager(models.Model):
             # Existing entry couldn't be found in the contest office table. We should keep looking for
             #  close matches
             success = True
+        except Exception as e:
+            status += "RETRIEVE_CONTEST_OFFICES_FROM_NON_UNIQUE-ERROR1: " + str(e) + " "
 
         # Strip away common words and look for direct matches
         if keep_looking_for_duplicates:
@@ -1539,6 +1541,8 @@ class ContestOfficeListManager(models.Model):
                 # Existing entry couldn't be found in the contest office table. We should keep looking for
                 #  close matches
                 success = True
+            except Exception as e:
+                status += "RETRIEVE_CONTEST_OFFICES_FROM_NON_UNIQUE-ERROR2: " + str(e) + " "
 
         # Factor in OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS
         if keep_looking_for_duplicates:
@@ -1665,6 +1669,8 @@ class ContestOfficeListManager(models.Model):
                 # Existing entry couldn't be found in the contest office table. We should keep looking for
                 #  close matches
                 success = True
+            except Exception as e:
+                status += "RETRIEVE_CONTEST_OFFICES_FROM_NON_UNIQUE-ERROR3: " + str(e) + " "
 
         results = {
             'success':                      success,
