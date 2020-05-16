@@ -16,6 +16,8 @@
     <li><a href="{% url 'import_export_batches:batch_process_system_toggle' %}" >
        {% if batch_process_system_on %}Turn Batch System Off{% else %}Turn Batch System On{% endif %}
        </a></li>
+    <li><a href="{% url 'import_export_batches:batch_set_list' %}" target="_blank" >
+      Batch Set List <span class="glyphicon glyphicon-new-window"></span></a></li>
     <li><a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
       Batch Process Log <span class="glyphicon glyphicon-new-window"></span></a></li>
     <li><a href="{% url 'import_export_batches:batch_process_next_steps' %}" target="_blank" >
@@ -159,9 +161,10 @@
             </td>
             <td>
               {{ batch_process.kind_of_process }}
-              <a href="{% url 'import_export_batches:batch_set_list' %}?batch_process_id={{ batch_process.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}" target="_blank">
-                batch
-              </a>
+              (<a href="{% url 'import_export_batches:batch_set_list' %}?batch_process_id={{ batch_process.id }}"
+                  target="_blank">batch set list</a>)
+              (<a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?batch_process_id={{ batch_process.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}"
+                 target="_blank">batch log</a>)
               {% if batch_process.completion_summary or batch_process.analytics_date_as_integer %}
                 <br />
                 {% if batch_process.analytics_date_as_integer %}
@@ -207,7 +210,11 @@
                     </thead>
                     {% for batch_process_ballot_item_chunk in batch_process.batch_process_ballot_item_chunk_list %}
                     <tr>
-                        <td>{{ batch_process_ballot_item_chunk.id }}</td>
+                        <td>
+                          {{ batch_process_ballot_item_chunk.id }}
+                          (<a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?batch_process_id={{ batch_process.id }}&batch_process_chunk_id={{ batch_process_ballot_item_chunk.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}"
+                              target="_blank">log</a>)
+                        </td>
                         <td>{{ batch_process_ballot_item_chunk.retrieve_date_started|localtime|default_if_none:"" }}</td>
                         <td>
                           {{ batch_process_ballot_item_chunk.retrieve_date_completed|localtime|default_if_none:"" }}
