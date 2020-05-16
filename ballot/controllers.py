@@ -10,7 +10,7 @@ from config.base import get_environment_variable
 from datetime import datetime, timedelta
 import datetime as the_other_datetime
 from election.controllers import retrieve_upcoming_election_id_list
-from election.models import ElectionManager, fetch_next_election_for_state
+from election.models import ElectionManager
 from exception.models import handle_exception
 from import_export_google_civic.controllers import \
     refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved, \
@@ -1634,8 +1634,6 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
     # Retrieve all of the upcoming elections
     ballot_returned_list_manager = BallotReturnedListManager()
     election_manager = ElectionManager()
-    # results = election_manager.retrieve_upcoming_elections()
-    # upcoming_election_list = results['election_list']
     results = election_manager.retrieve_listed_elections()
     election_list = results['election_list']
     elections_retrieved_count = 0
@@ -1820,9 +1818,11 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
 
                 election_manager = ElectionManager()
                 if positive_value_exists(state_code):
-                    results = election_manager.retrieve_next_election_for_state(state_code)  # Read only
+                    results = election_manager.retrieve_next_election_for_state(
+                        state_code, require_include_in_list_for_voters=True)  # Read only
                 else:
-                    results = election_manager.retrieve_next_election_with_state_optional()  # Read only
+                    results = election_manager.retrieve_next_election_with_state_optional(
+                        require_include_in_list_for_voters=True)  # Read only
 
                 if results['election_found']:
                     election = results['election']
@@ -1884,9 +1884,11 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
 
                 election_manager = ElectionManager()
                 if positive_value_exists(state_code):
-                    results = election_manager.retrieve_next_election_for_state(state_code)  # Read only
+                    results = election_manager.retrieve_next_election_for_state(
+                        state_code, require_include_in_list_for_voters=True)  # Read only
                 else:
-                    results = election_manager.retrieve_next_election_with_state_optional()  # Read only
+                    results = election_manager.retrieve_next_election_with_state_optional(
+                        require_include_in_list_for_voters=True)  # Read only
                 if results['election_found']:
                     election = results['election']
                     if positive_value_exists(election.google_civic_election_id):
@@ -2348,7 +2350,8 @@ def ballot_item_options_retrieve_for_api(google_civic_election_id='', search_str
     if positive_value_exists(google_civic_election_id):
         google_civic_election_id_list = [google_civic_election_id]
     else:
-        google_civic_election_id_list = retrieve_upcoming_election_id_list(state_code)
+        google_civic_election_id_list = retrieve_upcoming_election_id_list(
+            state_code, require_include_in_list_for_voters=False)
 
     try:
         candidate_list_object = CandidateCampaignListManager()

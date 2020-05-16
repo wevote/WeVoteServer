@@ -2815,7 +2815,8 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api_v4(
     else:
         # We need to figure out next upcoming election for this person based on the state_code in text_for_map_search
         if positive_value_exists(state_code):
-            election_results = election_manager.retrieve_next_election_for_state(state_code)
+            election_results = election_manager.retrieve_next_election_for_state(
+                state_code, require_include_in_list_for_voters=True)
             if election_results['election_found']:
                 election_data_retrieved = True
                 election = election_results['election']

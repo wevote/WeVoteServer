@@ -40,7 +40,6 @@ POLITICIAN = 'POLITICIAN'
 def batch_process_next_steps():
     success = True
     status = ""
-    batch_manager = BatchManager()
     batch_process_manager = BatchProcessManager()
 
     if not fetch_batch_process_system_on():
@@ -888,13 +887,20 @@ def process_one_ballot_item_batch_process(batch_process):
         if now() > date_when_analyze_has_timed_out:
             # Before seeing if we should mark analyze_date_completed, are there are still items in the
             # batch set that need to be analyzed?
-            if positive_value_exists(batch_process_ballot_item_chunk.batch_set_id):
-                number_not_analyzed = batch_manager.count_number_of_batches_in_batch_set(
-                    batch_set_id=batch_process_ballot_item_chunk.batch_set_id, batch_row_analyzed=False)
-                if positive_value_exists(number_not_analyzed):
-                    # Now analyze the batch that was stored in the "refresh_ballotpedia_ballots..." function
-                    status += "ANALYZE_DATE_COMPLETED_IS_NONE-NUMBER_NOT_ANALYZED: " + str(number_not_analyzed) + ' '
-                    status += "BATCH_SET_ID: " + str(batch_process_ballot_item_chunk.batch_set_id) + ' '
+            if not positive_value_exists(batch_process_ballot_item_chunk.batch_set_id):
+                status += "MISSING [batch_process_ballot_item_chunk.batch_set_id]"
+                success = False
+                try:
+                    # Set analyze_date_completed to now and set analyze_timed_out to True
+                    batch_process_ballot_item_chunk.analyze_date_completed = now()
+                    batch_process_ballot_item_chunk.analyze_timed_out = True
+                    # Update analyze_row_count
+                    if positive_value_exists(batch_process_ballot_item_chunk.batch_set_id):
+                        batch_process_ballot_item_chunk.analyze_row_count = \
+                            batch_manager.count_number_of_batches_in_batch_set(
+                                batch_set_id=batch_process_ballot_item_chunk.batch_set_id, batch_row_analyzed=True)
+                    batch_process_ballot_item_chunk.save()
+                    status += "ANALYZE_DATE_COMPLETED-SAVED_AFTER_TIMEOUT-NO_BATCH_SET_ID "
                     batch_process_manager.create_batch_process_log_entry(
                         batch_process_id=batch_process.id,
                         batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
@@ -903,44 +909,91 @@ def process_one_ballot_item_batch_process(batch_process):
                         state_code=state_code,
                         status=status,
                     )
-                    results = process_batch_set(
-                        batch_set_id=batch_process_ballot_item_chunk.batch_set_id, analyze_all=True)
-                    status += results['status']
+                    results = {
+                        'success': success,
+                        'status': status,
+                    }
+                    return results
+                except Exception as e:
+                    status += "ANALYZE_DATE_COMPLETED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " + str(e) + " "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        # batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
+                        google_civic_election_id=google_civic_election_id,
+                        kind_of_process=kind_of_process,
+                        state_code=state_code,
+                        status=status,
+                    )
+                    results = {
+                        'success': success,
+                        'status': status,
+                    }
+                    return results
+            else:
+                # Continue processing where we left off
                 # We have time for this to run before the time out check above is run again,
                 # since we have this batch checked out
-            try:
-                # Set analyze_date_completed to now and set analyze_timed_out to True
-                batch_process_ballot_item_chunk.analyze_date_completed = now()
-                batch_process_ballot_item_chunk.analyze_timed_out = True
-                # Update analyze_row_count
-                batch_process_ballot_item_chunk.analyze_row_count = \
-                    batch_manager.count_number_of_batches_in_batch_set(
-                        batch_set_id=batch_process_ballot_item_chunk.batch_set_id, batch_row_analyzed=True)
-                batch_process_ballot_item_chunk.save()
-                status += "ANALYZE_DATE_COMPLETED-ANALYZE_DATE_COMPLETED_SAVED "
-                batch_process_manager.create_batch_process_log_entry(
-                    batch_process_id=batch_process.id,
-                    batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
-                    google_civic_election_id=google_civic_election_id,
-                    kind_of_process=kind_of_process,
-                    state_code=state_code,
-                    status=status,
-                )
-            except Exception as e:
-                status += "ANALYZE_DATE_COMPLETED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " + str(e) + " "
-                batch_process_manager.create_batch_process_log_entry(
-                    batch_process_id=batch_process.id,
-                    batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
-                    google_civic_election_id=google_civic_election_id,
-                    kind_of_process=kind_of_process,
-                    state_code=state_code,
-                    status=status,
-                )
-                results = {
-                    'success': success,
-                    'status': status,
-                }
-                return results
+                results = process_batch_set(
+                    batch_set_id=batch_process_ballot_item_chunk.batch_set_id, analyze_all=True)
+                status += results['status']
+                # Instead of using analyze_row_count, since this process was picked up after failing, we want to query
+                #  for the total number completed
+                # analyze_row_count = results['batch_rows_analyzed']
+                analyze_row_count = batch_manager.count_number_of_batches_in_batch_set(
+                    batch_set_id=batch_process_ballot_item_chunk.batch_set_id, batch_row_analyzed=True)
+                if positive_value_exists(results['success']):
+                    if not positive_value_exists(analyze_row_count):
+                        if batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_VOTERS:
+                            # If no batch rows were found, we know the entire batch_process is finished.
+                            # Update batch_process.date_completed to now
+                            status += "ANALYZE_DATE_STARTED-REFRESH_BALLOT_ITEMS_FROM_VOTERS-ANALYZE_ROW_COUNT_ZERO "
+                            results = mark_batch_process_as_complete(batch_process, batch_process_ballot_item_chunk,
+                                                                     google_civic_election_id=google_civic_election_id,
+                                                                     kind_of_process=kind_of_process,
+                                                                     state_code=state_code,
+                                                                     status=status)
+                            status += results['status']
+                            results = {
+                                'success': success,
+                                'status': status,
+                            }
+                            return results
+                    try:
+                        batch_process_ballot_item_chunk.analyze_row_count = analyze_row_count
+                        batch_process_ballot_item_chunk.analyze_date_completed = now()
+                        batch_process_ballot_item_chunk.save()
+                        status += "ANALYZE_DATE_STARTED-ANALYZE_DATE_COMPLETED_SAVED "
+                        batch_process_manager.create_batch_process_log_entry(
+                            batch_process_id=batch_process.id,
+                            batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
+                            google_civic_election_id=google_civic_election_id,
+                            kind_of_process=kind_of_process,
+                            state_code=state_code,
+                            status=status,
+                        )
+                    except Exception as e:
+                        status += "ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " + str(e) + " "
+                        results = {
+                            'success': success,
+                            'status': status,
+                        }
+                        return results
+                else:
+                    status += "PROCESS_BATCH_SET-FALSE "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
+                        critical_failure=True,
+                        google_civic_election_id=google_civic_election_id,
+                        kind_of_process=kind_of_process,
+                        state_code=state_code,
+                        status=status,
+                    )
+                    results = {
+                        'success': success,
+                        'status': status,
+                    }
+                    return results
         else:
             # Wait
             results = {

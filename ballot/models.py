@@ -923,12 +923,42 @@ class BallotItemListManager(models.Model):
         }
         return results
 
+    def count_ballot_items(self, google_civic_election_id, state_code=""):
+        ballot_item_list_count = 0
+        success = False
+        status = ''
+        try:
+            ballot_item_queryset = BallotItem.objects.all()
+            ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                ballot_item_queryset = ballot_item_queryset.filter(state_code__iexact=state_code)
+            else:
+                ballot_item_queryset = ballot_item_queryset.filter(Q(state_code=None) | Q(state_code=""))
+            ballot_item_list_count = ballot_item_queryset.count()
+
+            status += 'COUNT_BALLOT_ITEMS_COMPLETE '
+            success = True
+        except BallotItem.DoesNotExist:
+            # No ballot items found. Not a problem.
+            status += 'NO_BALLOT_ITEMS_COUNT_FOUND '
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status += 'FAILED count_ballot_items ' + str(e) + ' '
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'ballot_item_list_count':   ballot_item_list_count,
+        }
+        return results
+
     def count_ballot_items_for_election_lacking_state(self, google_civic_election_id):
         ballot_item_list_count = 0
         success = False
         status = ''
         try:
-            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
+            ballot_item_queryset = BallotItem.objects.all()
             ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
             ballot_item_queryset = ballot_item_queryset.filter(Q(state_code=None) | Q(state_code=""))
             ballot_item_list_count = ballot_item_queryset.count()

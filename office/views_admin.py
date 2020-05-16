@@ -118,7 +118,7 @@ def offices_sync_out_view(request):  # officesSyncOut
 
     json_data = {
         'success': False,
-        'status': 'CONTEST_OFFICE_MISSING'
+        'status': 'OFFICES_SYNC_OUT_VIEW-CONTEST_OFFICE_LIST_MISSING '
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -143,7 +143,7 @@ def offices_visiting_sync_out_view(request):  # officesVisitingSyncOut
 
     json_data = {
         'success': False,
-        'status': 'CONTEST_OFFICE_MISSING'
+        'status': 'OFFICES_VISITING_SYNC_OUT_VIEW-CONTEST_OFFICE_LIST_MISSING '
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
