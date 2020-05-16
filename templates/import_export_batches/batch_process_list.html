@@ -300,6 +300,8 @@
     });
     $(function() {
         $('#show_active_processes_only_id').change(function() {
+            this.form.show_paused_processes_only_id.checked = false;
+            this.form.show_checked_out_processes_only_id.checked = false;
             this.form.submit();
         });
     });
@@ -310,11 +312,15 @@
     });
     $(function() {
         $('#show_paused_processes_only_id').change(function() {
+            this.form.show_active_processes_only_id.checked = false;
+            this.form.show_checked_out_processes_only_id.checked = false;
             this.form.submit();
         });
     });
     $(function() {
         $('#show_checked_out_processes_only_id').change(function() {
+            this.form.show_active_processes_only_id.checked = false;
+            this.form.show_paused_processes_only_id.checked = false;
             this.form.submit();
         });
     });
