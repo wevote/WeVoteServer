@@ -79,9 +79,14 @@
             Search Twitter</option>
     </select>
 &nbsp;&nbsp;&nbsp;
+    <label for="show_checked_out_processes_only_id">
+      <input type="checkbox" name="show_checked_out_processes_only" id="show_checked_out_processes_only_id" value="1"
+             {% if show_checked_out_processes_only %}checked{% endif %} /> Only Show Running Processes
+    </label>
+&nbsp;&nbsp;&nbsp;
     <label for="show_active_processes_only_id">
       <input type="checkbox" name="show_active_processes_only" id="show_active_processes_only_id" value="1"
-             {% if show_active_processes_only %}checked{% endif %} /> Only Show Active Processes
+             {% if show_active_processes_only %}checked{% endif %} /> Only Show Queued Processes
     </label>
 &nbsp;&nbsp;&nbsp;
     <label for="show_paused_processes_only_id">
@@ -305,6 +310,11 @@
     });
     $(function() {
         $('#show_paused_processes_only_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_checked_out_processes_only_id').change(function() {
             this.form.submit();
         });
     });
