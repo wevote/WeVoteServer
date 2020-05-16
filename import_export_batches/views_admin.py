@@ -1363,6 +1363,7 @@ def batch_process_list_view(request):
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_active_processes_only = request.GET.get('show_active_processes_only', False)
     show_paused_processes_only = request.GET.get('show_paused_processes_only', False)
+    show_checked_out_processes_only = request.GET.get('show_checked_out_processes_only', False)
     batch_process_search = request.GET.get('batch_process_search', '')
 
     batch_process_list = []
@@ -1397,6 +1398,8 @@ def batch_process_list_view(request):
             batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
         if positive_value_exists(show_paused_processes_only):
             batch_process_queryset = batch_process_queryset.filter(batch_process_paused=True)
+        if positive_value_exists(show_checked_out_processes_only):
+            batch_process_queryset = batch_process_queryset.filter(date_checked_out__isnull=False)
         if positive_value_exists(kind_of_processes_to_show):
             if kind_of_processes_to_show == "BALLOT_ITEMS":
                 ballot_item_processes = [
@@ -1547,6 +1550,7 @@ def batch_process_list_view(request):
         'show_all_elections':       show_all_elections,
         'show_active_processes_only':   show_active_processes_only,
         'show_paused_processes_only':   show_paused_processes_only,
+        'show_checked_out_processes_only':   show_checked_out_processes_only,
         'state_list':               sorted_state_list,
         'google_civic_election_id': google_civic_election_id,
     }
