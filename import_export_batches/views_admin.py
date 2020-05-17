@@ -1181,6 +1181,7 @@ def batch_set_list_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     batch_set_id = convert_to_int(request.GET.get('batch_set_id', 0))
     limit = request.GET.get('limit', 25)
+    state_code = request.GET.get('state_code', '')
 
     messages_on_stage = get_messages(request)
     batch_set_list_found = False
@@ -1191,6 +1192,8 @@ def batch_set_list_view(request):
             batch_set_query = batch_set_query.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(batch_set_id):
             batch_set_query = batch_set_query.filter(id=batch_set_id)
+        if positive_value_exists(state_code):
+            batch_set_query = batch_set_query.filter(state_code__iexact=state_code)
 
         batch_set_list = batch_set_query[:limit]
         if len(batch_set_list):
@@ -1233,22 +1236,24 @@ def batch_set_list_view(request):
 
     if batch_set_list_found:
         template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'batch_set_list':           batch_set_list,
-            'election_list':            election_list,
             'batch_file':               batch_file,
             'batch_set_id':             batch_set_id,
+            'batch_set_list':           batch_set_list,
             'batch_uri':                batch_uri,
             'google_civic_election_id': google_civic_election_id,
+            'election_list':            election_list,
+            'messages_on_stage':        messages_on_stage,
+            'state_code':               state_code,
         }
     else:
         template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'election_list':            election_list,
             'batch_file':               batch_file,
             'batch_set_id':             batch_set_id,
             'batch_uri':                batch_uri,
+            'election_list':            election_list,
             'google_civic_election_id': google_civic_election_id,
+            'messages_on_stage':        messages_on_stage,
+            'state_code':               state_code,
         }
     return render(request, 'import_export_batches/batch_set_list.html', template_values)
 
@@ -1270,6 +1275,7 @@ def batch_set_list_process_view(request):
     organization_we_vote_id = request.POST.get('organization_we_vote_id', '')
     # Was form submitted, or was election just changed?
     import_batch_button = request.POST.get('import_batch_button', '')
+    state_code = request.POST.get('state_code', '')
 
     batch_uri_encoded = urlquote(batch_uri) if positive_value_exists(batch_uri) else ""
     batch_file = None
@@ -1324,6 +1330,7 @@ def batch_set_list_process_view(request):
     return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
                                 "&batch_set_id=" + str(batch_set_id) +
+                                "&state_code=" + str(state_code) +
                                 "&batch_uri=" + batch_uri_encoded)
 
 

@@ -22,6 +22,11 @@
                 {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
         {% endfor %}
         </select>
+        {% if google_civic_election_id %}
+        <a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?state_code={{ state_code }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}&batch_process_id={{ batch_process_id }}&batch_process_chunk_id={{ batch_process_chunk_id }}">
+            clear</a>
+          &nbsp;&nbsp;&nbsp;
+        {% endif %}
     {% endif %}{# End of if election_list #}
 
     {# Default to showing only upcoming elections #}
@@ -29,6 +34,7 @@
       <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
              {% if show_all_elections %}checked{% endif %} /> Include Past Elections
     </label>
+    &nbsp;&nbsp;&nbsp;
 
     {% if state_list %}
         <select id="state_code_id" name="state_code">
@@ -41,7 +47,7 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
+        <a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}&batch_process_id={{ batch_process_id }}&batch_process_chunk_id={{ batch_process_chunk_id }}">
             show all states</a>
         {% endif %}
     {% endif %}
@@ -53,12 +59,21 @@
         {% endif %}
         <input type="text" name="batch_process_log_entry_search" id="batch_process_log_entry_search_id" value="{{ batch_process_log_entry_search }}" style="width: 450px" />
         <input type="submit" value="Search Batch Log" />
+        &nbsp;&nbsp;&nbsp;
         {# Limit to on Batch Process ID #}
         <input type="text" name="batch_process_id" id="batch_process_id" value="{{ batch_process_id }}" style="width: 80px" />
-        <input type="submit" value="Find Batch Process Id" />
+        <input type="submit" value="Batch Process Id" />
+        &nbsp;&nbsp;&nbsp;
         {# Limit to on Batch Process Chunk ID #}
         <input type="text" name="batch_process_chunk_id" id="batch_process_chunk_id" value="{{ batch_process_chunk_id }}" style="width: 80px" />
-        <input type="submit" value="Find Batch Process Chunk Id" />
+        <input type="submit" value="Batch Process Chunk Id" />
+        &nbsp;&nbsp;&nbsp;
+
+        {% if batch_process_log_entry_search or batch_process_id or batch_process_chunk_id %}
+        <a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
+            clear</a>
+        {% endif %}
+
 </form>{#  End of organization_position_choose_election form #}
 
 {% if batch_process_log_entry_list %}
@@ -95,6 +110,7 @@
             <th>Date</th>
             <th>Process ID</th>
             <th>Chunk ID</th>
+            <th>Set ID</th>
             <th>Kind of Process</th>
             <th>Election</th>
             <th>State</th>
@@ -106,6 +122,7 @@
             <td style="white-space: nowrap">{{ batch_process_log_entry.date_added|localtime|default_if_none:"" }}</td>
             <td>{{ batch_process_log_entry.batch_process_id|default_if_none:"" }}</td>
             <td>{{ batch_process_log_entry.batch_process_ballot_item_chunk_id|default_if_none:"" }}</td>
+            <td>{{ batch_process_log_entry.batch_set_id|default_if_none:"" }}</td>
             <td>{{ batch_process_log_entry.kind_of_process }}</td>
             <td>{{ batch_process_log_entry.google_civic_election_id|default_if_none:"" }}</td>
             <td>{{ batch_process_log_entry.state_code|default_if_none:"" }}</td>

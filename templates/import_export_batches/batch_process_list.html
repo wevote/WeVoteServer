@@ -161,7 +161,7 @@
             </td>
             <td>
               {{ batch_process.kind_of_process }}
-              (<a href="{% url 'import_export_batches:batch_set_list' %}?batch_process_id={{ batch_process.id }}"
+              (<a href="{% url 'import_export_batches:batch_set_list' %}?batch_process_id={{ batch_process.id }}&state_code={{ batch_process.state_code }}"
                   target="_blank">batch set list</a>)
               (<a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?batch_process_id={{ batch_process.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}"
                  target="_blank">batch log</a>)
@@ -197,6 +197,7 @@
                     <thead>
                         <tr>
                             <th>Chunk ID</th>
+                            <th>Set ID</th>
                             <th>Retrieve Start</th>
                             <th>Completed</th>
                             <th>Count</th>
@@ -214,6 +215,11 @@
                           {{ batch_process_ballot_item_chunk.id }}
                           (<a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?batch_process_id={{ batch_process.id }}&batch_process_chunk_id={{ batch_process_ballot_item_chunk.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}"
                               target="_blank">log</a>)
+                        </td>
+                        <td>
+                          {{ batch_process_ballot_item_chunk.batch_set_id }}
+                          (<a href="{% url 'import_export_batches:batch_set_list' %}?batch_process_id={{ batch_process.id }}&batch_set_id={{ batch_process_ballot_item_chunk.batch_set_id }}&batch_process_chunk_id={{ batch_process_ballot_item_chunk.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}"
+                              target="_blank">go</a>)
                         </td>
                         <td>{{ batch_process_ballot_item_chunk.retrieve_date_started|localtime|default_if_none:"" }}</td>
                         <td>

@@ -4551,7 +4551,7 @@ class BatchProcessManager(models.Model):
         }
         return results
 
-    def create_batch_process_ballot_item_chunk(self, batch_process_id=0):
+    def create_batch_process_ballot_item_chunk(self, batch_process_id=0, batch_set_id=0):
         status = ""
         success = True
         batch_process_ballot_item_chunk = None
@@ -4573,6 +4573,8 @@ class BatchProcessManager(models.Model):
         try:
             batch_process_ballot_item_chunk = BatchProcessBallotItemChunk.objects.create(
                 batch_process_id=batch_process.id,
+                batch_set_id=batch_set_id,
+                google_civic_election_id=batch_process.google_civic_election_id,
                 state_code=batch_process.state_code,
             )
             if batch_process_ballot_item_chunk:
@@ -4656,6 +4658,7 @@ class BatchProcessManager(models.Model):
             self,
             batch_process_id=0,
             batch_process_ballot_item_chunk_id=0,
+            batch_set_id=0,
             critical_failure=False,
             google_civic_election_id=0,
             kind_of_process="",
@@ -4682,6 +4685,9 @@ class BatchProcessManager(models.Model):
             save_changes = False
             if positive_value_exists(google_civic_election_id):
                 batch_process_log_entry.google_civic_election_id = convert_to_int(google_civic_election_id)
+                save_changes = True
+            if positive_value_exists(batch_set_id):
+                batch_process_log_entry.batch_set_id = convert_to_int(batch_set_id)
                 save_changes = True
             if positive_value_exists(voter_id):
                 batch_process_log_entry.voter_id = convert_to_int(voter_id)
@@ -5048,6 +5054,7 @@ class BatchProcessLogEntry(models.Model):
     """
     batch_process_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
     batch_process_ballot_item_chunk_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
+    batch_set_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False)

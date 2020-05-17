@@ -527,7 +527,8 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
             election_name = election_on_stage.election_name
             is_national_election = election_on_stage.is_national_election
         else:
-            message = 'Could not retrieve Ballotpedia ballots. Missing google_civic_election_id. '
+            message = 'Could not retrieve (as opposed to refresh) Ballotpedia ballots. ' \
+                      'Missing google_civic_election_id. '
             if from_browser:
                 messages.add_message(request, messages.ERROR, message)
                 return HttpResponseRedirect(reverse('election:election_list', args=()))
@@ -542,7 +543,8 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                 }
                 return results
     except Election.MultipleObjectsReturned as e:
-        message = 'Could not retrieve Ballotpedia ballots. More than one election found. '
+        message = 'Could not retrieve (as opposed to refresh) Ballotpedia ballots. ' \
+                  'More than one election found. ' + str(e) + ' '
         if from_browser:
             messages.add_message(request, messages.ERROR, message)
             return HttpResponseRedirect(reverse('election:election_list', args=()))
@@ -557,7 +559,22 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
             }
             return results
     except Election.DoesNotExist:
-        message = 'Could not retrieve Ballotpedia ballots. Election could not be found. '
+        message = 'Could not retrieve (as opposed to refresh) Ballotpedia ballots. Election could not be found. '
+        if from_browser:
+            messages.add_message(request, messages.ERROR, message)
+            return HttpResponseRedirect(reverse('election:election_list', args=()))
+        else:
+            success = False
+            status += message + " "
+            results = {
+                'status': status,
+                'success': success,
+                'batch_set_id': batch_set_id,
+                'retrieve_row_count': retrieve_row_count,
+            }
+            return results
+    except Exception as e:
+        message = 'Could not retrieve (as opposed to refresh) Ballotpedia ballots. ERROR: ' + str(e) + ' '
         if from_browser:
             messages.add_message(request, messages.ERROR, message)
             return HttpResponseRedirect(reverse('election:election_list', args=()))
@@ -657,7 +674,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                 status += "RANDOM_SORTING-CITY-DESC: " + str(random_sorting) + " "
             polling_location_count = len(polling_location_list)
     except PollingLocation.DoesNotExist:
-        message = 'Could not retrieve ballot data for the {election_name}. ' \
+        message = 'Could not retrieve (as opposed to refresh) ballot data for the {election_name}. ' \
                   'Ballotpedia Ballots-No polling locations exist for the state \'{state}\'. ' \
                   ''.format(
                      election_name=election_name,
@@ -675,9 +692,29 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                 'retrieve_row_count': retrieve_row_count,
             }
             return results
+    except Exception as e:
+        message = 'Could not retrieve (as opposed to refresh) ballot data for the {election_name}. ' \
+                  'Ballotpedia Ballots-No polling locations exist for the state \'{state}\'. ERROR: {error}' \
+                  ''.format(
+                     election_name=election_name,
+                     error=str(e),
+                     state=state_code)
+        if from_browser:
+            messages.add_message(request, messages.ERROR, message)
+            return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+        else:
+            success = False
+            status += message + " "
+            results = {
+                'status': status,
+                'success': success,
+                'batch_set_id': batch_set_id,
+                'retrieve_row_count': retrieve_row_count,
+            }
+            return results
 
     if polling_location_count == 0:
-        message = 'Did not retrieve ballot data for the {election_name}. ' \
+        message = 'Did not retrieve (as opposed to refresh) ballot data for the {election_name}. ' \
                   'Data for all polling locations for the state \'{state}\' has been retrieved once ' \
                   'date_last_updated_should_not_exceed: \'{date_last_updated_should_not_exceed}\'. ' \
                   '(result 2 - retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view)'.format(
@@ -730,46 +767,48 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                                                 import_date=import_date,
                                                 state_code=state_code)
             batch_set_id = batch_set.id
-            if positive_value_exists(batch_set_id):
-                status += " BATCH_SET_SAVED-BALLOTS_FOR_POLLING_LOCATIONS "
+            status += " BATCH_SET_CREATED-BALLOTS_FOR_POLLING_LOCATIONS "
         except Exception as e:
             # Stop trying to save rows -- break out of the for loop
             status += " EXCEPTION_BATCH_SET " + str(e) + " "
+            success = False
 
-    for polling_location in polling_location_list:
-        one_ballot_results = retrieve_ballot_items_from_polling_location_api_v4(
-            google_civic_election_id,
-            election_day_text=election_day_text,
-            polling_location_we_vote_id=polling_location.we_vote_id,
-            polling_location=polling_location,
-            state_code=state_code,
-            batch_set_id=batch_set_id,
-            existing_office_objects_dict=existing_office_objects_dict,
-            existing_candidate_objects_dict=existing_candidate_objects_dict,
-            existing_measure_objects_dict=existing_measure_objects_dict,
-            new_office_we_vote_ids_list=new_office_we_vote_ids_list,
-            new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
-            new_measure_we_vote_ids_list=new_measure_we_vote_ids_list
-        )
-        success = False
-        if one_ballot_results['success']:
-            success = True
+    if success:
+        for polling_location in polling_location_list:
+            one_ballot_results = retrieve_ballot_items_from_polling_location_api_v4(
+                google_civic_election_id,
+                election_day_text=election_day_text,
+                polling_location_we_vote_id=polling_location.we_vote_id,
+                polling_location=polling_location,
+                state_code=state_code,
+                batch_set_id=batch_set_id,
+                existing_office_objects_dict=existing_office_objects_dict,
+                existing_candidate_objects_dict=existing_candidate_objects_dict,
+                existing_measure_objects_dict=existing_measure_objects_dict,
+                new_office_we_vote_ids_list=new_office_we_vote_ids_list,
+                new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
+                new_measure_we_vote_ids_list=new_measure_we_vote_ids_list
+            )
+            success = False
+            if one_ballot_results['success']:
+                success = True
 
-        if len(status) < 1024:
-            status += one_ballot_results['status']
+            if len(status) < 1024:
+                status += one_ballot_results['status']
 
-        existing_office_objects_dict = one_ballot_results['existing_office_objects_dict']
-        existing_candidate_objects_dict = one_ballot_results['existing_candidate_objects_dict']
-        existing_measure_objects_dict = one_ballot_results['existing_measure_objects_dict']
-        new_office_we_vote_ids_list = one_ballot_results['new_office_we_vote_ids_list']
-        new_candidate_we_vote_ids_list = one_ballot_results['new_candidate_we_vote_ids_list']
-        new_measure_we_vote_ids_list = one_ballot_results['new_measure_we_vote_ids_list']
+            existing_office_objects_dict = one_ballot_results['existing_office_objects_dict']
+            existing_candidate_objects_dict = one_ballot_results['existing_candidate_objects_dict']
+            existing_measure_objects_dict = one_ballot_results['existing_measure_objects_dict']
+            new_office_we_vote_ids_list = one_ballot_results['new_office_we_vote_ids_list']
+            new_candidate_we_vote_ids_list = one_ballot_results['new_candidate_we_vote_ids_list']
+            new_measure_we_vote_ids_list = one_ballot_results['new_measure_we_vote_ids_list']
 
-        if one_ballot_results['batch_header_id']:
-            ballots_retrieved += 1
-        else:
-            ballots_not_retrieved += 1
-
+            if one_ballot_results['batch_header_id']:
+                ballots_retrieved += 1
+            else:
+                ballots_not_retrieved += 1
+    else:
+        status += "CANNOT_CALL_RETRIEVE_BECAUSE_OF_ERRORS [retrieve_ballot_items_from_polling_location_api_v4] "
     retrieve_row_count = ballots_retrieved
 
     existing_offices_found = len(existing_office_objects_dict)
