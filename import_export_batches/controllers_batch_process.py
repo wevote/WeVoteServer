@@ -768,8 +768,9 @@ def process_one_ballot_item_batch_process(batch_process):
                 )
                 # But proceed so we can mark the retrieve part of batch_process_ballot_item_chunk as complete
             try:
-                # Make sure to store the retrieve_row_count if it wasn't already stored
-                batch_process_ballot_item_chunk.retrieve_row_count = number_of_batches
+                if not positive_value_exists(batch_process_ballot_item_chunk.retrieve_row_count):
+                    # Make sure to store the retrieve_row_count if it wasn't already stored
+                    batch_process_ballot_item_chunk.retrieve_row_count = number_of_batches
                 batch_process_ballot_item_chunk.retrieve_date_completed = now()
                 batch_process_ballot_item_chunk.retrieve_timed_out = True
                 batch_process_ballot_item_chunk.save()
@@ -835,14 +836,15 @@ def process_one_ballot_item_batch_process(batch_process):
 
         # If here, we know that the retrieve_date_completed has a value
         number_of_batches = 0
-        if not positive_value_exists(batch_process_ballot_item_chunk.retrieve_row_count):
-            # Were there batches created in the batch set from the retrieve?
-            number_of_batches = batch_manager.count_number_of_batches_in_batch_set(
-                batch_set_id=batch_process_ballot_item_chunk.batch_set_id)
-            # 2020-03-29 We are going to let these run all the way instead of stopping with retrieve_row_count of 0
         try:
+
             # If here we know we have batches that need to be analyzed
-            batch_process_ballot_item_chunk.retrieve_row_count = number_of_batches
+            if not positive_value_exists(batch_process_ballot_item_chunk.retrieve_row_count):
+                # Were there batches created in the batch set from the retrieve?
+                number_of_batches = batch_manager.count_number_of_batches_in_batch_set(
+                    batch_set_id=batch_process_ballot_item_chunk.batch_set_id)
+                # Were there batches created in the batch set from the retrieve?
+                batch_process_ballot_item_chunk.retrieve_row_count = number_of_batches
             batch_process_ballot_item_chunk.analyze_date_started = now()
             batch_process_ballot_item_chunk.save()
             status += "ANALYZE_DATE_STARTED-ANALYZE_DATE_STARTED_SAVED "
