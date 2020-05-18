@@ -509,11 +509,18 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
 
 
 def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
-        request=None, from_browser=False, google_civic_election_id="", state_code="", refresh_ballot_returned=False,
-        date_last_updated_should_not_exceed=None):
+        request=None,
+        from_browser=False,
+        google_civic_election_id="",
+        state_code="",
+        refresh_ballot_returned=False,
+        date_last_updated_should_not_exceed=None,
+        batch_process_ballot_item_chunk=None):
     status = ""
     success = True
 
+    batch_process_id = 0
+    batch_process_ballot_item_chunk_id = 0
     batch_set_id = 0
     retrieve_row_count = 0
 
@@ -758,20 +765,39 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
             batch_set_name += " - ballotpedia: " + str(ballotpedia_election_id)
         batch_set_name += " - " + str(import_date)
 
-        # create batch_set object
         try:
-            batch_set = BatchSet.objects.create(batch_set_description_text="", batch_set_name=batch_set_name,
-                                                batch_set_source=BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS,
-                                                google_civic_election_id=google_civic_election_id,
-                                                source_uri=BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL,
-                                                import_date=import_date,
-                                                state_code=state_code)
-            batch_set_id = batch_set.id
-            status += " BATCH_SET_CREATED-BALLOTS_FOR_POLLING_LOCATIONS "
+            batch_process_ballot_item_chunk_id = batch_process_ballot_item_chunk.id
+            batch_process_id = batch_process_ballot_item_chunk.batch_process_id
+            batch_set_id = batch_process_ballot_item_chunk.batch_set_id
         except Exception as e:
-            # Stop trying to save rows -- break out of the for loop
-            status += " EXCEPTION_BATCH_SET " + str(e) + " "
-            success = False
+            pass
+
+        if not positive_value_exists(batch_set_id):
+            # create batch_set object
+            try:
+                batch_set = BatchSet.objects.create(
+                    batch_set_description_text="", batch_set_name=batch_set_name,
+                    batch_set_source=BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS,
+                    batch_process_id=batch_process_id,
+                    batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk_id,
+                    google_civic_election_id=google_civic_election_id,
+                    source_uri=BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL,
+                    import_date=import_date,
+                    state_code=state_code)
+                batch_set_id = batch_set.id
+                status += " BATCH_SET_CREATED-BALLOTS_FOR_POLLING_LOCATIONS "
+            except Exception as e:
+                # Stop trying to save rows -- break out of the for loop
+                status += " EXCEPTION_BATCH_SET " + str(e) + " "
+                success = False
+
+            try:
+                if positive_value_exists(batch_process_ballot_item_chunk_id):
+                    batch_process_ballot_item_chunk.batch_set_id = batch_set_id
+                    batch_process_ballot_item_chunk.save()
+            except Exception as e:
+                status += "UNABLE_TO_SAVE_BATCH_SET_ID_EARLY " + str(e) + " "
+                pass
 
     if success:
         for polling_location in polling_location_list:
@@ -861,10 +887,11 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                 new_measures_found=new_measures_found,
             )
         results = {
-            'status': status,
-            'success': success,
-            'batch_set_id': batch_set_id,
-            'retrieve_row_count': retrieve_row_count,
+            'status':               status,
+            'success':              success,
+            'batch_set_id':         batch_set_id,
+            'retrieve_row_count':   retrieve_row_count,
+            'batch_process_ballot_item_chunk':  batch_process_ballot_item_chunk,
         }
         return results
 
@@ -899,10 +926,16 @@ def refresh_ballotpedia_ballots_for_voters_api_v4_view(request):
 
 
 def refresh_ballotpedia_ballots_for_voters_api_v4_internal_view(
-        request=None, from_browser=False, google_civic_election_id="", state_code="",
-        date_last_updated_should_not_exceed=None):
+        request=None,
+        from_browser=False,
+        google_civic_election_id="",
+        state_code="",
+        date_last_updated_should_not_exceed=None,
+        batch_process_ballot_item_chunk=None):
     status = ""
     success = True
+    batch_process_id = 0
+    batch_process_ballot_item_chunk_id = 0
     batch_set_id = 0
     retrieve_row_count = 0
 
@@ -1037,20 +1070,37 @@ def refresh_ballotpedia_ballots_for_voters_api_v4_internal_view(
         batch_set_name += " - ballotpedia: " + str(ballotpedia_election_id)
     batch_set_name += " - " + str(import_date)
 
-    # create batch_set object
     try:
-        batch_set = BatchSet.objects.create(batch_set_description_text="", batch_set_name=batch_set_name,
-                                            batch_set_source=BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS,
-                                            google_civic_election_id=google_civic_election_id,
-                                            source_uri=BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL,
-                                            import_date=import_date,
-                                            state_code=state_code)
-        batch_set_id = batch_set.id
-        if positive_value_exists(batch_set_id):
-            status += " BATCH_SET_SAVED-BALLOTS_FOR_VOTERS "
+        batch_process_ballot_item_chunk_id = batch_process_ballot_item_chunk.id
+        batch_process_id = batch_process_ballot_item_chunk.batch_process_id
+        batch_set_id = batch_process_ballot_item_chunk.batch_set_id
     except Exception as e:
-        # Stop trying to save rows -- break out of the for loop
-        status += " EXCEPTION_BATCH_SET " + str(e) + " "
+        pass
+
+    if not positive_value_exists(batch_set_id):
+        # create batch_set object
+        try:
+            batch_set = BatchSet.objects.create(batch_set_description_text="", batch_set_name=batch_set_name,
+                                                batch_set_source=BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS,
+                                                batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk_id,
+                                                batch_process_id=batch_process_id,
+                                                google_civic_election_id=google_civic_election_id,
+                                                source_uri=BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL,
+                                                import_date=import_date,
+                                                state_code=state_code)
+            batch_set_id = batch_set.id
+            if positive_value_exists(batch_set_id):
+                status += " BATCH_SET_SAVED-BALLOTS_FOR_VOTERS "
+        except Exception as e:
+            # Stop trying to save rows -- break out of the for loop
+            status += " EXCEPTION_BATCH_SET " + str(e) + " "
+
+        try:
+            if positive_value_exists(batch_process_ballot_item_chunk_id):
+                batch_process_ballot_item_chunk.batch_set_id = batch_set_id
+                batch_process_ballot_item_chunk.save()
+        except Exception as e:
+            status += "UNABLE_TO_SAVE_BATCH_SET_ID_EARLY " + str(e) + " "
 
     for ballot_returned in ballot_returned_list:
         one_ballot_results = retrieve_ballot_items_for_one_voter_api_v4(
@@ -1126,6 +1176,7 @@ def refresh_ballotpedia_ballots_for_voters_api_v4_internal_view(
             'success':              success,
             'batch_set_id':         batch_set_id,
             'retrieve_row_count':   retrieve_row_count,
+            'batch_process_ballot_item_chunk':  batch_process_ballot_item_chunk,
         }
         return results
 

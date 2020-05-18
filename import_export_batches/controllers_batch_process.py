@@ -575,11 +575,16 @@ def process_one_ballot_item_batch_process(batch_process):
                 state_code=batch_process.state_code,
                 refresh_ballot_returned=True,
                 date_last_updated_should_not_exceed=batch_process.date_started,
+                batch_process_ballot_item_chunk=batch_process_ballot_item_chunk,
             )
             retrieve_success = positive_value_exists(results['success'])
             batch_set_id = results['batch_set_id']
             retrieve_row_count = results['retrieve_row_count']
             status += results['status']
+            if 'batch_process_ballot_item_chunk' in results:
+                if results['batch_process_ballot_item_chunk'] and \
+                        hasattr(results['batch_process_ballot_item_chunk'], 'batch_set_id'):
+                    batch_process_ballot_item_chunk = results['batch_process_ballot_item_chunk']
         elif batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_VOTERS:
             # Retrieving ballot items and cache in import_export_batches tables
             from import_export_ballotpedia.views_admin import \
@@ -588,11 +593,16 @@ def process_one_ballot_item_batch_process(batch_process):
                 google_civic_election_id=batch_process.google_civic_election_id,
                 state_code=batch_process.state_code,
                 date_last_updated_should_not_exceed=batch_process.date_started,
+                batch_process_ballot_item_chunk=batch_process_ballot_item_chunk,
             )
             retrieve_success = positive_value_exists(results['success'])
             batch_set_id = results['batch_set_id']
             retrieve_row_count = results['retrieve_row_count']
             status += results['status']
+            if 'batch_process_ballot_item_chunk' in results:
+                if results['batch_process_ballot_item_chunk'] and \
+                        hasattr(results['batch_process_ballot_item_chunk'], 'batch_set_id'):
+                    batch_process_ballot_item_chunk = results['batch_process_ballot_item_chunk']
         elif batch_process.kind_of_process == RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS:
             from import_export_ballotpedia.views_admin import \
                 retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view
@@ -600,11 +610,16 @@ def process_one_ballot_item_batch_process(batch_process):
                 google_civic_election_id=batch_process.google_civic_election_id,
                 state_code=batch_process.state_code,
                 refresh_ballot_returned=False,
+                batch_process_ballot_item_chunk=batch_process_ballot_item_chunk,
             )
             retrieve_success = positive_value_exists(results['success'])
             batch_set_id = results['batch_set_id']
             retrieve_row_count = results['retrieve_row_count']
             status += results['status']
+            if 'batch_process_ballot_item_chunk' in results:
+                if results['batch_process_ballot_item_chunk'] and \
+                        hasattr(results['batch_process_ballot_item_chunk'], 'batch_set_id'):
+                    batch_process_ballot_item_chunk = results['batch_process_ballot_item_chunk']
 
         if batch_process.kind_of_process in \
                 [REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_VOTERS,

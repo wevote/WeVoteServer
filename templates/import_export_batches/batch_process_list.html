@@ -63,12 +63,21 @@
     {% endif %}
 
     <br />
-    {% if batch_process_search %}
-        <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-             clear search</a>&nbsp;
-    {% endif %}
     <input type="text" name="batch_process_search" id="batch_process_search_id" value="{{ batch_process_search }}" style="width: 450px" />
     <input type="submit" value="Search Batches" />
+    {% if batch_process_search %}
+        <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&batch_process_id={{ batch_process_id }}">
+             clear search</a>&nbsp;
+    {% endif %}
+    &nbsp;&nbsp;&nbsp;
+    {# Limit to on Batch Process ID #}
+    <input type="text" name="batch_process_id" id="batch_process_id" value="{{ batch_process_id }}" style="width: 80px" />
+    <input type="submit" value="Batch Process Id" />
+    {% if batch_process_id %}
+        <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+            clear</a>
+    {% endif %}
+    &nbsp;&nbsp;&nbsp;
 
     <br />
     <select id="kind_of_processes_to_show_id" name="kind_of_processes_to_show">
