@@ -4279,6 +4279,8 @@ class BatchSet(models.Model):
     batch_set_name = models.CharField(max_length=255)
     batch_set_description_text = models.CharField(max_length=255)
     batch_set_source = models.CharField(max_length=255)
+    batch_process_id = models.PositiveIntegerField(default=0, null=True, blank=True, db_index=True)
+    batch_process_ballot_item_chunk_id = models.PositiveIntegerField(default=0, null=True, blank=True, db_index=True)
     source_uri = models.URLField(max_length=255, blank=True, null=True, verbose_name='uri where data is coming from')
     import_date = models.DateTimeField(verbose_name="date when batch set was imported", null=True, auto_now=True)
 

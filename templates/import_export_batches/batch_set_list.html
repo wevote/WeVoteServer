@@ -30,9 +30,27 @@
                 {# Limit to on Batch Set ID #}
                 <input type="text" name="batch_set_id" id="batch_set_id" value="{{ batch_set_id }}" style="width: 80px" />
                 <input type="submit" value="Batch Set Id" />
+                {% if batch_set_id %}
+                    <a href="{% url 'import_export_batches:batch_set_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&batch_process_id={{ batch_process_id }}">
+                        clear</a>
+                {% endif %}
+                &nbsp;&nbsp;&nbsp;
+                {# Limit to on Batch Process ID #}
+                <input type="text" name="batch_process_id" id="batch_process_id" value="{{ batch_process_id }}" style="width: 80px" />
+                <input type="submit" value="Batch Process Id" />
+                {% if batch_process_id %}
+                    <a href="{% url 'import_export_batches:batch_set_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&batch_set_id={{ batch_set_id }}">
+                        clear</a>
+                {% endif %}
+                &nbsp;&nbsp;&nbsp;
                 {# Limit to on State Code #}
                 <input type="text" name="state_code" id="state_code_id" value="{{ state_code }}" style="width: 60px" />
                 <input type="submit" value="State Code" />
+                {% if state_code %}
+                    <a href="{% url 'import_export_batches:batch_set_list' %}?google_civic_election_id={{ google_civic_election_id }}&batch_process_id={{ batch_process_id }}&batch_set_id={{ batch_set_id }}">
+                        clear</a>
+                {% endif %}
+                &nbsp;&nbsp;&nbsp;
             </div>
         </div>
         {% endif %}{# End of if election_list #}
@@ -70,7 +88,7 @@
             <th>#</th>
             <th>Batch Name</th>
             <th>Batch Set ID</th>
-            <th>Action</th>
+            <th>Process ID</th>
             <th>Election</th>
             <th>To be Analyzed</th>
             <th>To be Created</th>
@@ -82,9 +100,15 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ one_batch_set.batch_set_name }}</td>
-            <td>{{ one_batch_set.id }}</td>
-            <td><a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ one_batch_set.id }}&google_civic_election_id={{ google_civic_election_id }}">
-            review</a></td>
+            <td>{{ one_batch_set.id }}<br />
+              <a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ one_batch_set.id }}&google_civic_election_id={{ google_civic_election_id }}"
+                 target="_blank">review</a>
+            </td>
+            <td>
+              {{ one_batch_set.batch_process_id }}<br />
+              <a href="{% url 'import_export_batches:batch_process_list' %}?batch_process_id={{ one_batch_set.batch_process_id }}"
+                 target="_blank">review</a>
+            </td>
             <td>
                 {% for election in election_list %}
                     {% if election.google_civic_election_id|slugify == one_batch_set.google_civic_election_id|slugify %}
