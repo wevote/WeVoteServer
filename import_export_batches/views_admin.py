@@ -1422,7 +1422,9 @@ def batch_process_list_view(request):
         if positive_value_exists(show_paused_processes_only):
             batch_process_queryset = batch_process_queryset.filter(batch_process_paused=True)
         if positive_value_exists(show_checked_out_processes_only):
-            batch_process_queryset = batch_process_queryset.filter(date_checked_out__isnull=False)
+            batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+            batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
+            batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
         if positive_value_exists(kind_of_processes_to_show):
             if kind_of_processes_to_show == "BALLOT_ITEMS":
                 ballot_item_processes = [
