@@ -1057,7 +1057,7 @@ def process_one_ballot_item_batch_process(batch_process):
                         batch_process_ballot_item_chunk.analyze_row_count = analyze_row_count
                         batch_process_ballot_item_chunk.analyze_date_completed = now()
                         batch_process_ballot_item_chunk.save()
-                        status += "ANALYZE_DATE_STARTED-ANALYZE_DATE_COMPLETED_SAVED "
+                        status += "ANALYZE_DATE_COMPLETED-ANALYZE_DATE_COMPLETED_SAVED "
                         batch_process_manager.create_batch_process_log_entry(
                             batch_process_id=batch_process.id,
                             batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
@@ -1464,6 +1464,7 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False, delet
         # Note that this needs to be read_only=False
         batch_list = list(batch_description_query)
 
+        batch_description_rows_reviewed = 0
         for one_batch_description in batch_list:
             results = create_batch_row_actions(
                 one_batch_description.batch_header_id,
@@ -1472,14 +1473,17 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False, delet
                 measure_objects_dict=measure_objects_dict,
                 office_objects_dict=office_objects_dict,
             )
+            batch_description_rows_reviewed += 1
             if results['batch_actions_created']:
                 batch_rows_analyzed += 1
                 batch_header_id_created_list.append(one_batch_description.batch_header_id)
-
+            if not results['success']:
+                status += results['status']
             election_objects_dict = results['election_objects_dict']
             measure_objects_dict = results['measure_objects_dict']
             office_objects_dict = results['office_objects_dict']
-        status += "BATCH_ROWS_ANALYZED: " + str(batch_rows_analyzed) + ", "
+        status += "CREATE_BATCH_ROW_ACTIONS_BATCH_ROWS_ANALYZED: " + str(batch_rows_analyzed) + \
+                  " OUT_OF " + str(batch_description_rows_reviewed) + ", "
     elif positive_value_exists(create_all):
         batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
         batch_description_query = batch_description_query.filter(batch_description_analyzed=True)
