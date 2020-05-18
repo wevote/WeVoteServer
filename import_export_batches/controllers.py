@@ -121,7 +121,7 @@ def create_batch_row_actions(
         kind_of_batch = batch_description.kind_of_batch
 
         try:
-            batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
+            batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
             batch_header_map_found = True
         except BatchHeaderMap.DoesNotExist:
             # This is fine
@@ -298,7 +298,7 @@ def create_batch_row_actions(
                     results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
                         polling_location_we_vote_id,
                         batch_description.google_civic_election_id,
-                        read_only=True)
+                        read_only=False)
                     if results['ballot_item_list_found']:
                         existing_ballot_item_list = results['ballot_item_list']
             else:
@@ -356,7 +356,7 @@ def create_batch_row_actions(
             if batch_description_changed:
                 batch_description.save()
         except Exception as e:
-            status += "ANALYZE-COULD_NOT_SAVE_BATCH_DESCRIPTION " + str(e) + " "
+            status += "ANALYZE-COULD_NOT_SAVE_BATCH_DESCRIPTION: " + str(e) + " "
     else:
         status += "BATCH_DESCRIPTION_NOT_FOUND_OR_NOT_SUCCESS-CANNOT_LABEL_ANALYZED "
 
@@ -1054,7 +1054,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
     if not positive_value_exists(google_civic_election_id):
         election_day = batch_manager.retrieve_value_from_batch_row("election_day", batch_header_map, one_batch_row)
         election_results = batch_manager.retrieve_election_details_from_election_day_or_state_code(
-            election_day, state_code, read_only=True)
+            election_day, state_code, read_only=False)
         if election_results['success']:
             google_civic_election_id = election_results['google_civic_election_id']
 
@@ -1805,7 +1805,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     if keep_looking_for_duplicates and positive_value_exists(ballotpedia_candidate_id):
         candidate_campaign_manager = CandidateCampaignManager()
         matching_results = candidate_campaign_manager.retrieve_candidate_campaign_from_ballotpedia_candidate_id(
-            ballotpedia_candidate_id, read_only=True)
+            ballotpedia_candidate_id, read_only=False)
         if matching_results['candidate_campaign_found']:
             candidate = matching_results['candidate_campaign']
             candidate_found = True
@@ -1967,7 +1967,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.save()
     except Exception as e:
         success = False
-        status += "BATCH_ROW_ACTION_CANDIDATE_UNABLE_TO_SAVE " + str(e) + " "
+        status += "BATCH_ROW_ACTION_CANDIDATE_UNABLE_TO_SAVE: " + str(e) + " "
 
     # If a state was figured out, then update the batch_row with the state_code so we can use that for filtering
     if positive_value_exists(state_code):
@@ -2096,7 +2096,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         # look up google_civic_election_id using state and election_day
         election_day = batch_manager.retrieve_value_from_batch_row("election_day", batch_header_map, one_batch_row)
         election_results = batch_manager.retrieve_election_details_from_election_day_or_state_code(
-            election_day, state_code, read_only=True)
+            election_day, state_code, read_only=False)
         if election_results['success']:
             google_civic_election_id = election_results['google_civic_election_id']
             # election_name = election_results['election_name']
@@ -2468,7 +2468,7 @@ def create_batch_row_action_ballot_item(batch_description,
             batch_row_action_created = False
             batch_row_action_ballot_item = None
             success = False
-            status += "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_CREATED " + str(e) + " "
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_CREATED: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
             results = {
@@ -2550,8 +2550,9 @@ def create_batch_row_action_ballot_item(batch_description,
                 contest_office_name = contest_office.office_name
         else:
             status += "RETRIEVING_OFFICE_FROM_WE_VOTE_ID "
+            # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
             results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id,
-                                                                                     read_only=True)
+                                                                                     read_only=False)
             if results['contest_office_found']:
                 contest_office = results['contest_office']
                 contest_office_name = contest_office.office_name
@@ -2563,8 +2564,9 @@ def create_batch_row_action_ballot_item(batch_description,
     if keep_looking_for_duplicates and not positive_value_exists(contest_office_name):
         # See if we have an office name
         contest_office_list_manager = ContestOfficeListManager()
+        # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
         matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
-            contest_office_name, google_civic_election_id, state_code, read_only=True)
+            contest_office_name, google_civic_election_id, state_code, read_only=False)
         if matching_results['contest_office_found']:
             keep_looking_for_duplicates = False
             contest_office = matching_results['contest_office']
@@ -2582,8 +2584,9 @@ def create_batch_row_action_ballot_item(batch_description,
     if keep_looking_for_duplicates:
         candidate_campaign_list_manager = CandidateCampaignListManager()
         google_civic_election_id_list = [google_civic_election_id]
+        # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
         matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name, read_only=True)
+            google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name, read_only=False)
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
             keep_looking_for_duplicates = False
@@ -2600,8 +2603,9 @@ def create_batch_row_action_ballot_item(batch_description,
                 if contest_measure:
                     contest_measure_name = contest_measure.measure_title
             else:
+                # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery"
                 results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
-                    contest_measure_we_vote_id, read_only=True)
+                    contest_measure_we_vote_id, read_only=False)
                 if results['contest_measure_found']:
                     keep_looking_for_duplicates = False
                     contest_measure = results['contest_measure']
@@ -2616,8 +2620,9 @@ def create_batch_row_action_ballot_item(batch_description,
         contest_measure_list = ContestMeasureListManager()
         keep_looking_for_duplicates = True
         google_civic_election_id_list = [google_civic_election_id]
+        # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
         matching_results = contest_measure_list.retrieve_contest_measures_from_non_unique_identifiers(
-            google_civic_election_id_list, state_code, contest_measure_name, read_only=True)
+            google_civic_election_id_list, state_code, contest_measure_name, read_only=False)
         if matching_results['contest_measure_found']:
             contest_measure = matching_results['contest_measure']
             contest_measure_found = True
@@ -2640,8 +2645,9 @@ def create_batch_row_action_ballot_item(batch_description,
             contest_measure = measure_objects_dict[contest_measure_we_vote_id]
             contest_measure_found = True
         else:
+            # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
             results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
-                contest_measure_we_vote_id, read_only=True)
+                contest_measure_we_vote_id, read_only=False)
             if results['contest_measure_found']:
                 contest_measure = results['contest_measure']
                 measure_objects_dict[contest_measure_we_vote_id] = contest_measure
@@ -2654,9 +2660,11 @@ def create_batch_row_action_ballot_item(batch_description,
             no_vote_description = contest_measure.ballotpedia_no_vote_description
 
     # check for duplicate entries in the live ballot_item data
+    existing_ballot_item_query_completed = False
     if positive_value_exists(contest_office_we_vote_id) or positive_value_exists(contest_measure_we_vote_id):
         try:
-            existing_ballot_item_query = BallotItem.objects.using('readonly').all()
+            # This used to retrieve from using('readonly') but the query gets interrupted from updates from master
+            existing_ballot_item_query = BallotItem.objects.all()
             existing_ballot_item_query = existing_ballot_item_query.filter(
                 google_civic_election_id=google_civic_election_id,
                 polling_location_we_vote_id__iexact=polling_location_we_vote_id
@@ -2669,6 +2677,7 @@ def create_batch_row_action_ballot_item(batch_description,
                     contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
 
             existing_entry_list = existing_ballot_item_query[:1]
+            existing_ballot_item_query_completed = True
             if len(existing_entry_list):
                 existing_ballot_item = existing_entry_list[0]
                 existing_ballot_item_id = existing_ballot_item.id
@@ -2676,13 +2685,14 @@ def create_batch_row_action_ballot_item(batch_description,
             else:
                 existing_ballot_item_found = False
         except Exception as e:
-            status += "CREATE_BATCH_ROW_ACTION_BALLOT_ITEM-BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR " + str(e) + " "
+            status += "CREATE_BATCH_ROW_ACTION_BALLOT_ITEM-BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
     # Do we have the minimum required variables?
     polling_location_or_voter = positive_value_exists(polling_location_we_vote_id) or positive_value_exists(voter_id)
-    office_or_measure = positive_value_exists(contest_office_we_vote_id) \
-        or positive_value_exists(contest_measure_we_vote_id)
+    office_or_measure = \
+        (positive_value_exists(contest_office_we_vote_id) or positive_value_exists(contest_measure_we_vote_id)) \
+        and existing_ballot_item_query_completed
     if polling_location_or_voter and office_or_measure and google_civic_election_id:
         if positive_value_exists(existing_ballot_item_found):
             # Update existing ballot item
@@ -2725,7 +2735,7 @@ def create_batch_row_action_ballot_item(batch_description,
         status += "BATCH_ROW_ACTION_BALLOT_ITEM_SAVED "
     except Exception as e:
         success = False
-        status += "BATCH_ROW_ACTION_BALLOT_ITEM_UNABLE_TO_SAVE " + str(e) + " "
+        status += "BATCH_ROW_ACTION_BALLOT_ITEM_UNABLE_TO_SAVE: " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)
 
     try:
@@ -2738,7 +2748,7 @@ def create_batch_row_action_ballot_item(batch_description,
             one_batch_row.batch_row_analyzed = True
             one_batch_row.save()
     except Exception as e:
-        status += "COULD_NOT_SAVE_BATCH_ROW " + str(e) + " "
+        status += "COULD_NOT_SAVE_BATCH_ROW: " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
@@ -2795,9 +2805,9 @@ def create_batch_row_action_ballot_item_delete(batch_description, existing_ballo
             status += "BATCH_ROW_ACTION_BALLOT_ITEM_DELETE_CREATED "
         except Exception as e:
             batch_row_action_delete_exists = False
-            batch_row_action_ballot_item = BatchRowActionBallotItem()
+            batch_row_action_ballot_item = None
             success = False
-            status += "BATCH_ROW_ACTION_BALLOT_ITEM_DELETE_NOT_CREATED " + str(e) + " "
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_DELETE_NOT_CREATED: " + str(e) + " "
 
             results = {
                 'success':                          success,
@@ -4735,7 +4745,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                         one_batch_row_action.save()
                     except Exception as e:
                         success = False
-                        status += "BALLOT_ITEM_RETRIEVE_ERROR " + str(e) + " "
+                        status += "BALLOT_ITEM_RETRIEVE_ERROR: " + str(e) + " "
                         handle_exception(e, logger=logger, exception_message=status)
                 else:
                     status += results['status']
@@ -4897,7 +4907,7 @@ def delete_ballot_item_data_from_batch_row_actions(batch_header_id, ballot_item_
             batch_row_action_list_found = True
 
     except Exception as e:
-        status += "FAILED_RETRIEVE " + str(e) + " "
+        status += "FAILED_BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE: " + str(e) + " "
         batch_row_action_list = []
         batch_row_action_list_found = False
 
