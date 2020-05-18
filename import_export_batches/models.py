@@ -1671,6 +1671,7 @@ class BatchManager(models.Model):
             batch_row_action_found = False
             success = False
             status += "BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
 
         results = {
             'success':                      success,

@@ -87,8 +87,8 @@
         <tr>
             <th>#</th>
             <th>Batch Name</th>
-            <th>Batch Set ID</th>
             <th>Process ID</th>
+            <th>Batch Set ID</th>
             <th>Election</th>
             <th>To be Analyzed</th>
             <th>To be Created</th>
@@ -100,14 +100,14 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ one_batch_set.batch_set_name }}</td>
-            <td>{{ one_batch_set.id }}
-              <a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ one_batch_set.id }}&google_civic_election_id={{ google_civic_election_id }}"
-                 target="_blank">details</a>
-            </td>
             <td>
               {{ one_batch_set.batch_process_id }}
               <a href="{% url 'import_export_batches:batch_process_list' %}?batch_process_id={{ one_batch_set.batch_process_id }}"
                  target="_blank">go</a>
+            </td>
+            <td>{{ one_batch_set.id }}
+              <a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ one_batch_set.id }}&google_civic_election_id={{ google_civic_election_id }}"
+                 target="_blank">details</a>
             </td>
             <td>
                 {% for election in election_list %}
