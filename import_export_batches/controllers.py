@@ -19,7 +19,7 @@ from django.db.models import Q
 from elected_office.models import ElectedOffice, ElectedOfficeManager
 from electoral_district.controllers import retrieve_electoral_district
 from election.models import ElectionManager
-from exception.models import handle_exception
+from exception.models import handle_exception, print_to_log
 from image.controllers import retrieve_and_save_ballotpedia_candidate_images
 from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasureListManager
 from office.models import ContestOffice, ContestOfficeListManager, ContestOfficeManager
@@ -111,6 +111,7 @@ def create_batch_row_actions(
         batch_description_found = False
     except Exception as e:
         status += "FAILURE_RETRIEVING_BATCH_DESCRIPTION: " + str(e) + " "
+        handle_exception(e, logger=logger, exception_message=status)
         batch_description = None
         batch_description_found = False
 
@@ -127,6 +128,7 @@ def create_batch_row_actions(
             pass
         except Exception as e:
             status += "FAILURE_RETRIEVING_BATCH_HEADER_MAP: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
 
     batch_row_list = []
     batch_row_action_list_found = False
@@ -152,6 +154,7 @@ def create_batch_row_actions(
             status += "COULD_NOT_FIND_ANY_BATCH_ROW_ENTRY "
         except Exception as e:
             status += "ERROR_RETRIEVING_BATCH_ROW_ENTRIES: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
     else:
         status += "ELSE [if batch_description_found and batch_header_map_found and not delete_analysis_only] "
 
@@ -238,7 +241,9 @@ def create_batch_row_actions(
                     success = True
             elif kind_of_batch == IMPORT_BALLOT_ITEM:
                 results = create_batch_row_action_ballot_item(
-                    batch_description, batch_header_map, one_batch_row,
+                    batch_description=batch_description,
+                    batch_header_map=batch_header_map,
+                    one_batch_row=one_batch_row,
                     election_objects_dict=election_objects_dict,
                     measure_objects_dict=measure_objects_dict,
                     office_objects_dict=office_objects_dict,
@@ -2405,7 +2410,9 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     return results
 
 
-def create_batch_row_action_ballot_item(batch_description, batch_header_map, one_batch_row,
+def create_batch_row_action_ballot_item(batch_description,
+                                        batch_header_map,
+                                        one_batch_row,
                                         election_objects_dict={},
                                         measure_objects_dict={},
                                         office_objects_dict={}):
@@ -2459,9 +2466,10 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             status += "BATCH_ROW_ACTION_BALLOT_ITEM_CREATED "
         except Exception as e:
             batch_row_action_created = False
-            batch_row_action_ballot_item = BatchRowActionBallotItem()
+            batch_row_action_ballot_item = None
             success = False
             status += "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_CREATED " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
 
             results = {
                 'success':                      success,
@@ -2669,6 +2677,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
                 existing_ballot_item_found = False
         except Exception as e:
             status += "CREATE_BATCH_ROW_ACTION_BALLOT_ITEM-BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
 
     # Do we have the minimum required variables?
     polling_location_or_voter = positive_value_exists(polling_location_we_vote_id) or positive_value_exists(voter_id)
@@ -2689,6 +2698,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         if not google_civic_election_id:
             status += "MISSING_GOOGLE_CIVIC_ELECTION_ID "
         kind_of_action = IMPORT_TO_BE_DETERMINED
+        print_to_log(logger=logger, exception_message=status)
 
     # Update the BatchRowActionBallotItem
     try:
@@ -2716,6 +2726,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
     except Exception as e:
         success = False
         status += "BATCH_ROW_ACTION_BALLOT_ITEM_UNABLE_TO_SAVE " + str(e) + " "
+        handle_exception(e, logger=logger, exception_message=status)
 
     try:
         if batch_row_action_created or batch_row_action_updated:
@@ -2728,6 +2739,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             one_batch_row.save()
     except Exception as e:
         status += "COULD_NOT_SAVE_BATCH_ROW " + str(e) + " "
+        handle_exception(e, logger=logger, exception_message=status)
 
     results = {
         'success':                      success,

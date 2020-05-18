@@ -646,8 +646,7 @@ def retrieve_ballot_items_from_polling_location(
                     batch_header_id = results['batch_header_id']
         except Exception as e:
             success = False
-            status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATION-ERROR: ' + str(e) + ' '
             handle_exception(e, logger=logger, exception_message=status)
 
     results = {
@@ -952,8 +951,7 @@ def retrieve_ballot_items_from_polling_location_api_v4(
                 batch_header_id = results['batch_header_id']
         except Exception as e:
             success = False
-            status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS_API_V4-ERROR: ' + str(e) + ' '
             handle_exception(e, logger=logger, exception_message=status)
 
     results = {
@@ -1185,8 +1183,7 @@ def retrieve_ballot_items_for_one_voter_api_v4(
             status += "NO_BALLOT_ITEMS_SAVED "
     except Exception as e:
         success = False
-        status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \
-                  '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+        status += 'RETRIEVE_BALLOT_ITEMS_FOR_ONE_VOTER-ERROR: ' + str(e) + ' '
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
@@ -3232,8 +3229,7 @@ def retrieve_one_ballot_from_ballotpedia_api_v4(latitude, longitude, google_civi
             status += results['status']
     except Exception as e:
         success = False
-        status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \
-                  '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+        status += 'RETRIEVE_ONE_FROM_BALLOTPEDIA_API-ERROR: ' + str(e) + ' '
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {

@@ -28,6 +28,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.utils.http import urlquote
 from election.models import Election, ElectionManager
+from exception.models import handle_exception
 from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_processing, \
     process_ballotpedia_voter_districts
 import json
@@ -36,11 +37,10 @@ from position.models import POSITION
 import requests
 from voter.models import voter_has_authority
 from voter_guide.models import ORGANIZATION_WORD
-# import wevote_functions.admin
+import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
-
-# logger = wevote_functions.admin.get_logger(__name__)
+logger = wevote_functions.admin.get_logger(__name__)
 
 
 @login_required
@@ -1644,7 +1644,6 @@ def batch_process_log_entry_list_view(request):
     batch_process_log_entry_list = []
 
     election_manager = ElectionManager()
-    batch_process_manager = BatchProcessManager()
     if positive_value_exists(show_all_elections):
         results = election_manager.retrieve_elections()
         election_list = results['election_list']
@@ -1679,19 +1678,22 @@ def batch_process_log_entry_list_view(request):
             search_words = batch_process_log_entry_search.split()
             for one_word in search_words:
                 filters = []  # Reset for each search word
-                new_filter = Q(office_name__icontains=one_word)
+                new_filter = Q(batch_process_id__iexact=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__icontains=one_word)
+                new_filter = Q(batch_set_id__iexact=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(wikipedia_id__icontains=one_word)
+                new_filter = Q(google_civic_election_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(ballotpedia_office_id__iexact=one_word)
+                new_filter = Q(polling_location_we_vote_id__iexact=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(ballotpedia_race_id__iexact=one_word)
+                new_filter = Q(state_code__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(status__icontains=one_word)
                 filters.append(new_filter)
 
                 # Add the first query
@@ -1719,9 +1721,9 @@ def batch_process_log_entry_list_view(request):
         status += 'BATCH_PROCESS_LOG_ENTRY_DoesNotExist '
         batch_process_log_entry_list = []
     except Exception as e:
-        status += 'FAILED retrieve_all_offices_for_upcoming_election ' \
-                 '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+        status += 'FAILED-[retrieve_all_offices_for_upcoming_election]-ERROR ' + str(e) + " "
         success = False
+        handle_exception(e, logger=logger, exception_message=status)
 
     # Make sure we always include the current election in the election_list, even if it is older
     if positive_value_exists(google_civic_election_id):

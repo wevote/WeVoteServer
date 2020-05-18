@@ -19,6 +19,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from election.models import Election, ElectionManager
+from exception.models import handle_exception
 from import_export_batches.controllers_batch_process import \
     schedule_retrieve_ballotpedia_ballots_for_polling_locations_api_v4, \
     schedule_refresh_ballotpedia_ballots_for_voters_api_v4
@@ -789,15 +790,16 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
             except Exception as e:
                 # Stop trying to save rows -- break out of the for loop
                 status += " EXCEPTION_BATCH_SET " + str(e) + " "
+                handle_exception(e, logger=logger, exception_message=status)
                 success = False
 
             try:
-                if positive_value_exists(batch_process_ballot_item_chunk_id):
+                if positive_value_exists(batch_process_ballot_item_chunk_id) and positive_value_exists(batch_set_id):
                     batch_process_ballot_item_chunk.batch_set_id = batch_set_id
                     batch_process_ballot_item_chunk.save()
             except Exception as e:
                 status += "UNABLE_TO_SAVE_BATCH_SET_ID_EARLY " + str(e) + " "
-                pass
+                handle_exception(e, logger=logger, exception_message=status)
 
     if success:
         for polling_location in polling_location_list:
@@ -815,7 +817,6 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                 new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
                 new_measure_we_vote_ids_list=new_measure_we_vote_ids_list
             )
-            success = False
             if one_ballot_results['success']:
                 success = True
 
