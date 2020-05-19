@@ -32,6 +32,12 @@
     </label>
 
     &nbsp;&nbsp;&nbsp;
+    <label for="is_analytics_admin_id">
+      <input type="checkbox" name="is_analytics_admin" id="is_analytics_admin_id" value="1"
+             {% if is_analytics_admin %}checked{% endif %} /> Is Analytics Admin
+    </label>
+
+    &nbsp;&nbsp;&nbsp;
     <label for="is_partner_organization_id">
       <input type="checkbox" name="is_partner_organization" id="is_partner_organization_id" value="1"
              {% if is_partner_organization %}checked{% endif %} /> Is Partner Organization
@@ -119,7 +125,7 @@
             </td>
             <!-- Opt In //-->
             <td>
-            {% if voter.is_opt_in_newsletter %}Y{% else %}{% endif %}
+            {% if voter.is_opt_in_newsletter %}Yes{% else %}{% endif %}
             </td>
             <!-- Voter Linked Org //-->
             <td>
@@ -127,11 +133,12 @@
             </td>
             <!-- Is site administrator? //-->
             <td>
-            {% if voter.is_admin %}Y{% else %}{% endif %}
+            {% if voter.is_admin %}Yes{% else %}{% endif %}
+            {% if voter.is_analytics_admin %}Analytics Yes{% else %}{% endif %}
             </td>
             <!-- Is partner organization? //-->
             <td>
-            {% if voter.is_partner_organization %}Y{% else %}{% endif %}
+            {% if voter.is_partner_organization %}Yes{% else %}{% endif %}
             </td>
             <!-- Political data authority? //-->
             <td>
@@ -139,7 +146,7 @@
             </td>
             <!-- Is verified volunteer? //-->
             <td>
-            {% if voter.is_verified_volunteer %}Y{% else %}{% endif %}
+            {% if voter.is_verified_volunteer %}Yes{% else %}{% endif %}
             </td>
             <!-- See images //-->
             <td>
@@ -158,6 +165,12 @@
 <script>
     $(function() {
         $('#is_admin_id').change(function() {
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#is_analytics_admin_id').change(function() {
             {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
             this.form.submit();
         });

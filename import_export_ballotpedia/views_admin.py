@@ -52,7 +52,7 @@ def import_ballot_items_for_location_view(request):
     status = ""
     success = True
 
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -145,7 +145,7 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
     :param election_local_id:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -288,7 +288,7 @@ def refresh_ballotpedia_districts_for_polling_locations_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -411,7 +411,7 @@ def retrieve_ballotpedia_candidates_by_district_from_api_view(request):
     """
     Reach out to Ballotpedia API to retrieve candidates.
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -483,7 +483,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
     """
     status = ""
 
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -903,7 +903,7 @@ def refresh_ballotpedia_ballots_for_voters_api_v4_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1192,7 +1192,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
     :param election_local_id:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1478,7 +1478,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
 #     """
 #     Reach out to Ballotpedia API to retrieve offices.
 #     """
-#     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+#     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
 #     authority_required = {'political_data_manager'}
 #     if not voter_has_authority(request, authority_required):
 #         return redirect_to_sign_in_page(request, authority_required)

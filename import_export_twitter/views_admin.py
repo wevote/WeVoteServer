@@ -32,7 +32,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 @login_required
 def delete_possible_twitter_handles_view(request, candidate_campaign_we_vote_id):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -55,7 +55,7 @@ def delete_possible_twitter_handles_view(request, candidate_campaign_we_vote_id)
 
 @login_required
 def retrieve_possible_twitter_handles_view(request, candidate_campaign_we_vote_id):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -79,7 +79,7 @@ def retrieve_possible_twitter_handles_view(request, candidate_campaign_we_vote_i
 
 @login_required
 def bulk_retrieve_possible_twitter_handles_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -154,7 +154,7 @@ def bulk_retrieve_possible_twitter_handles_view(request):
 
 @login_required
 def delete_images_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -210,7 +210,7 @@ def delete_images_view(request):
 
 @login_required
 def refresh_twitter_candidate_details_view(request, candidate_id):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -231,7 +231,7 @@ def refresh_twitter_candidate_details_view(request, candidate_id):
 
 @login_required
 def refresh_twitter_organization_details_view(request, organization_id):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -256,7 +256,7 @@ def refresh_twitter_organization_details_view(request, organization_id):
 
 @login_required
 def refresh_twitter_politician_details_view(request, politician_id):  # TODO DALE Get this working for politicians
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -278,7 +278,7 @@ def refresh_twitter_politician_details_view(request, politician_id):  # TODO DAL
 @login_required
 def refresh_twitter_elected_official_details_view(request, elected_official_id):
     # TODO DALE Get this working for politicians
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -299,7 +299,7 @@ def refresh_twitter_elected_official_details_view(request, elected_official_id):
 
 @login_required
 def scrape_website_for_social_media_view(request, organization_id, force_retrieve=False):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -361,7 +361,7 @@ def scrape_website_for_social_media_view(request, organization_id, force_retriev
 
 @login_required
 def refresh_twitter_data_for_organizations_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -396,7 +396,7 @@ def refresh_twitter_data_for_organizations_view(request):
 
 @login_required
 def scrape_social_media_from_all_organizations_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -421,7 +421,7 @@ def scrape_social_media_from_all_organizations_view(request):
 
 @login_required
 def scrape_social_media_for_candidates_in_one_election_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -445,7 +445,7 @@ def scrape_social_media_for_candidates_in_one_election_view(request):
 
 @login_required
 def refresh_twitter_candidate_details_for_election_view(request, election_id):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -474,7 +474,7 @@ def refresh_twitter_candidate_details_for_election_view(request, election_id):
 
 @login_required
 def transfer_candidate_twitter_handles_from_google_civic_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)

@@ -59,6 +59,7 @@ def voter_retrieve_doc_template_values(url_root):
                    '  "twitter_screen_name": string,\n' \
                    '  "is_signed_in": boolean,\n' \
                    '  "is_admin": boolean,\n' \
+                   '  "is_analytics_admin": boolean,\n' \
                    '  "is_partner_organization": boolean,\n' \
                    '  "is_political_data_manager": boolean,\n' \
                    '  "is_political_data_viewer": boolean,\n' \

@@ -178,7 +178,7 @@ def voter_edit_process_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -266,7 +266,7 @@ def voter_edit_process_view(request):
 
 @login_required
 def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -707,7 +707,7 @@ def voter_change_authority_process_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -735,6 +735,9 @@ def voter_change_authority_process_view(request):
             if authority_granted == 'admin':
                 voter_on_stage.is_admin = True
                 authority_changed = True
+            elif authority_granted == 'analytics_admin':
+                voter_on_stage.is_analytics_admin = True
+                authority_changed = True
             elif authority_granted == 'partner_organization':
                 voter_on_stage.is_partner_organization = True
                 authority_changed = True
@@ -750,6 +753,9 @@ def voter_change_authority_process_view(request):
 
             if authority_removed == 'admin':
                 voter_on_stage.is_admin = False
+                authority_changed = True
+            elif authority_removed == 'analytics_admin':
+                voter_on_stage.is_analytics_admin = False
                 authority_changed = True
             elif authority_removed == 'partner_organization':
                 voter_on_stage.is_partner_organization = False
@@ -816,13 +822,14 @@ def voter_remove_facebook_auth_process_view(request, voter_id=0, voter_we_vote_i
 
 @login_required
 def voter_list_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
     voter_search = request.GET.get('voter_search', '')
     is_admin = request.GET.get('is_admin', '')
+    is_analytics_admin = request.GET.get('is_analytics_admin', '')
     is_partner_organization = request.GET.get('is_partner_organization', '')
     is_political_data_manager = request.GET.get('is_political_data_manager', '')
     is_political_data_viewer = request.GET.get('is_political_data_viewer', '')
@@ -884,6 +891,8 @@ def voter_list_view(request):
 
     if positive_value_exists(is_admin):
         voter_query = voter_query.filter(is_admin=True)
+    if positive_value_exists(is_analytics_admin):
+        voter_query = voter_query.filter(is_analytics_admin=True)
     if positive_value_exists(is_partner_organization):
         voter_query = voter_query.filter(is_partner_organization=True)
     if positive_value_exists(is_political_data_manager):
@@ -905,6 +914,7 @@ def voter_list_view(request):
 
     template_values = {
         'is_admin':                     is_admin,
+        'is_analytics_admin':           is_analytics_admin,
         'is_partner_organization':      is_partner_organization,
         'is_political_data_manager':    is_political_data_manager,
         'is_political_data_viewer':     is_political_data_viewer,
@@ -919,7 +929,7 @@ def voter_list_view(request):
 
 @login_required
 def voter_summary_view(request, voter_id):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)

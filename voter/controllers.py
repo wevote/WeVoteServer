@@ -279,6 +279,7 @@ def merge_voter_accounts(from_voter, to_voter):
     # last_name
     # interface_status_flags
     # is_admin
+    # is_analytics_admin
     # is_partner_organization
     # is_political_data_manager
     # is_political_data_viewer
@@ -290,6 +291,7 @@ def merge_voter_accounts(from_voter, to_voter):
             or positive_value_exists(from_voter.interface_status_flags) \
             or positive_value_exists(from_voter.notification_settings_flags) \
             or positive_value_exists(from_voter.is_admin) \
+            or positive_value_exists(from_voter.is_analytics_admin) \
             or positive_value_exists(from_voter.is_partner_organization) \
             or positive_value_exists(from_voter.is_political_data_manager) \
             or positive_value_exists(from_voter.is_political_data_viewer) \
@@ -313,6 +315,9 @@ def merge_voter_accounts(from_voter, to_voter):
                 to_voter.notification_settings_flags | from_voter.notification_settings_flags
             if positive_value_exists(from_voter.is_admin) and not positive_value_exists(to_voter.is_admin):
                 to_voter.is_admin = from_voter.is_admin
+            if positive_value_exists(from_voter.is_analytics_admin) \
+                    and not positive_value_exists(to_voter.is_analytics_admin):
+                to_voter.is_analytics_admin = from_voter.is_analytics_admin
             if positive_value_exists(from_voter.is_partner_organization) \
                     and not positive_value_exists(to_voter.is_partner_organization):
                 to_voter.is_partner_organization = from_voter.is_partner_organization
@@ -2299,6 +2304,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             'twitter_screen_name':              voter.twitter_screen_name,
             'is_signed_in':                     voter.is_signed_in(),
             'is_admin':                         voter.is_admin,
+            'is_analytics_admin':               voter.is_analytics_admin,
             'is_partner_organization':          voter.is_partner_organization,
             'is_political_data_manager':        voter.is_political_data_manager,
             'is_political_data_viewer':         voter.is_political_data_viewer,
@@ -2340,6 +2346,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             'twitter_screen_name':              '',
             'is_signed_in':                     False,
             'is_admin':                         False,
+            'is_analytics_admin':               False,
             'is_partner_organization':          False,
             'is_political_data_manager':        False,
             'is_political_data_viewer':         False,

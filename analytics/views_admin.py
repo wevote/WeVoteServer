@@ -6,32 +6,97 @@ from .controllers import augment_one_voter_analytics_action_entries_without_elec
     augment_voter_analytics_action_entries_without_election_id, \
     save_organization_daily_metrics, save_organization_election_metrics, \
     save_sitewide_daily_metrics, save_sitewide_election_metrics, save_sitewide_voter_metrics
-from .models import ACTION_WELCOME_VISIT, AnalyticsAction, AnalyticsManager, \
+from .models import ACTION_WELCOME_VISIT, AnalyticsAction, AnalyticsManager, display_action_constant_human_readable, \
     OrganizationDailyMetrics, OrganizationElectionMetrics, \
     SitewideDailyMetrics, SitewideElectionMetrics, SitewideVoterMetrics
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
-from django.http import HttpResponseRedirect
+from datetime import date, datetime, timedelta
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.db.models import Q
 from django.shortcuts import render
+from django.utils.timezone import now
 from election.models import Election
 from exception.models import print_to_log
+import json
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_date_as_integer_to_date, convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
+    convert_to_int, positive_value_exists
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
+
 logger = wevote_functions.admin.get_logger(__name__)
 
+ANALYTICS_ACTION_SYNC_URL = "https://api.wevoteusa.org/apis/v1/analyticsActionSyncOut/"  # analyticsActionSyncOut
 WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 
 @login_required
+def analytics_action_sync_out_view(request):  # analyticsActionSyncOut
+    status = ''
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'analytics_admin'}
+    if not voter_has_authority(request, authority_required):
+        json_data = {
+            'success': False,
+            'status': 'ANALYTICS_ACTION_SYNC_OUT-NOT_ANALYTICS_ADMIN '
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    starting_date_as_integer = convert_to_int(request.GET.get('starting_date_as_integer', 0))
+    ending_date_as_integer = convert_to_int(request.GET.get('ending_date_as_integer', 0))
+
+    try:
+        analytics_action_query = AnalyticsAction.objects.all().order_by('-id')
+        if positive_value_exists(starting_date_as_integer):
+            analytics_action_query = analytics_action_query.filter(date_as_integer__gte=starting_date_as_integer)
+        else:
+            three_months_ago = now() - timedelta(days=90)
+            generated_starting_date_as_integer = convert_date_to_date_as_integer(three_months_ago)
+            analytics_action_query = analytics_action_query.filter(
+                date_as_integer__gte=generated_starting_date_as_integer)
+        if positive_value_exists(ending_date_as_integer):
+            analytics_action_query = analytics_action_query.filter(date_as_integer__lte=ending_date_as_integer)
+        # else:
+        #     # By default only return up to two days ago, so we are sure that the post-processing is done
+        #     yesterday = now() - timedelta(days=1)
+        #     generated_ending_date_as_integer = convert_date_to_date_as_integer(yesterday)
+        #     analytics_action_query = analytics_action_query.filter(
+        #         date_as_integer__lte=generated_ending_date_as_integer)
+
+        analytics_action_query = analytics_action_query.extra(
+            select={'exact_time': "to_char(exact_time, 'YYYY-MM-DD HH24:MI:SS')"})
+        analytics_action_list_dict = analytics_action_query.values(
+            'id', 'action_constant', 'authentication_failed_twice',
+            'ballot_item_we_vote_id', 'date_as_integer',
+            'exact_time', 'first_visit_today', 'google_civic_election_id',
+            'is_bot', 'is_desktop', 'is_mobile', 'is_signed_in', 'is_tablet',
+            'organization_we_vote_id', 'state_code', 'user_agent', 'voter_we_vote_id')
+        if analytics_action_list_dict:
+            analytics_action_list_raw = list(analytics_action_list_dict)
+            analytics_action_list_json = []
+            for one_dict in analytics_action_list_raw:
+                one_dict['action_constant_text'] = display_action_constant_human_readable(one_dict['action_constant'])
+                analytics_action_list_json.append(one_dict)
+            return HttpResponse(json.dumps(analytics_action_list_json), content_type='application/json')
+    except Exception as e:
+        status += 'QUERY_FAILURE: ' + str(e) + ' '
+
+    status += 'ANALYTICS_ACTION_LIST_EMPTY '
+    json_data = {
+        'success': False,
+        'status': status,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+@login_required
 def analytics_index_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
     voter_allowed_to_see_organization_analytics = True
@@ -115,7 +180,8 @@ def analytics_index_view(request):
 
 @login_required
 def analytics_index_process_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -140,7 +206,8 @@ def analytics_index_process_view(request):
 
 @login_required
 def organization_analytics_index_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -174,6 +241,7 @@ def organization_analytics_index_view(request):
 
     messages_on_stage = get_messages(request)
 
+    voter_allowed_to_see_organization_analytics = False  # To be implemented
     template_values = {
         'messages_on_stage':                            messages_on_stage,
         'organization_election_metrics_list':           organization_election_metrics_list,
@@ -192,7 +260,8 @@ def organization_daily_metrics_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'political_data_manager'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -227,7 +296,8 @@ def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_
     :param organization_we_vote_id:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -322,7 +392,8 @@ def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_
 
 @login_required
 def augment_voter_analytics_process_view(request, voter_we_vote_id):
-    authority_required = {'political_data_manager'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -351,7 +422,8 @@ def organization_daily_metrics_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -387,7 +459,8 @@ def organization_election_metrics_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'political_data_manager'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -425,7 +498,8 @@ def organization_election_metrics_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -470,7 +544,8 @@ def sitewide_daily_metrics_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'political_data_manager'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -513,7 +588,8 @@ def sitewide_daily_metrics_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -564,7 +640,8 @@ def sitewide_election_metrics_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'political_data_manager'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -592,7 +669,8 @@ def sitewide_election_metrics_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -629,7 +707,8 @@ def sitewide_voter_metrics_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'political_data_manager'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -695,7 +774,8 @@ def sitewide_voter_metrics_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

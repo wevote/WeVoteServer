@@ -14,6 +14,7 @@ from apis_v1.views import views_docs, views_analytics, views_ballot, views_candi
     views_election, views_extension, views_facebook, views_friend, \
     views_issues, views_measure, views_misc, views_organization, \
     views_pledge_to_vote, views_position, views_task, views_share, views_twitter, views_voter, views_voter_guide
+from analytics.views_admin import analytics_action_sync_out_view
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view
 from issue.views_admin import issue_descriptions_retrieve_view, issues_followed_retrieve_view,\
@@ -32,6 +33,7 @@ urlpatterns = [
     # Actual API Calls
     url(r'^allBallotItemsRetrieve/', views_ballot.all_ballot_items_retrieve_view,
         name='allBallotItemsRetrieveView'),
+    url(r'^analyticsActionSyncOut/', analytics_action_sync_out_view, name='analyticsActionSyncOutView'),
     url(r'^ballotItemOptionsRetrieve/', views_ballot.ballot_item_options_retrieve_view,
         name='ballotItemOptionsRetrieveView'),
     url(r'^ballotItemRetrieve/', views_ballot.ballot_item_retrieve_view, name='ballotItemRetrieveView'),
@@ -287,6 +289,8 @@ urlpatterns = [
     url(r'^docs/$', views_docs.apis_index_doc_view, name='apisIndex'),
     url(r'^docs/allBallotItemsRetrieve/$',
         views_docs.all_ballot_items_retrieve_doc_view, name='allBallotItemsRetrieveDocs'),
+    url(r'^docs/analyticsActionSyncOut/$',
+        views_docs.analytics_action_sync_out_doc_view, name='analyticsActionSyncOutDocs'),
     url(r'^docs/ballotItemOptionsRetrieve/$',
         views_docs.ballot_item_options_retrieve_doc_view, name='ballotItemOptionsRetrieveDocs'),
     url(r'^docs/ballotItemRetrieve/$', views_docs.ballot_item_retrieve_doc_view, name='ballotItemRetrieveDocs'),

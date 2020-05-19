@@ -276,7 +276,7 @@ def organization_photos_save_view(request):  # organizationPhotosSave
     delete_chosen_social_share_master_image = \
         positive_value_exists(request.POST.get('delete_chosen_social_share_master_image', False))
 
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin', 'political_data_manager'}
     voter_has_staff_authority_required = False
     if voter_has_authority(request, authority_required):
@@ -399,7 +399,7 @@ def organization_save_view(request):  # organizationSave
     chosen_social_share_description = request.GET.get('chosen_social_share_description', False)
     chosen_subscription_plan = request.GET.get('chosen_subscription_plan', False)
 
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin', 'political_data_manager', 'verified_volunteer'}
     voter_has_staff_authority_required = False
     if voter_has_authority(request, authority_required):
