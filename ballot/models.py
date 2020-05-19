@@ -55,7 +55,8 @@ class BallotItem(models.Model):
                                                 max_length=20, null=False, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False)
-    state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
+    state_code = models.CharField(
+        verbose_name="state the ballot item is related to", max_length=2, null=True, db_index=True)
 
     google_ballot_placement = models.BigIntegerField(
         verbose_name="the order this item should appear on the ballot", null=True, blank=True, unique=False)
@@ -1283,7 +1284,7 @@ class BallotItemListManager(models.Model):
         try:
             ballot_item_queryset = BallotItem.objects.using('readonly').all()
             ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
-            ballot_item_queryset = ballot_item_queryset.values('state_code').distinct()
+            ballot_item_queryset = ballot_item_queryset.values('state_code').distinct('state_code')
             ballot_item_list = list(ballot_item_queryset)
 
             status += 'RETRIEVE_STATE_CODES_IN_ELECTION-QUERY_SUCCESSFUL '
