@@ -1270,6 +1270,42 @@ class BallotItemListManager(models.Model):
         }
         return results
 
+    def retrieve_state_codes_in_election(self, google_civic_election_id):
+        """
+        Return a simple list of state_codes that have ballot items in an election.
+        :param google_civic_election_id:
+        :return:
+        """
+        ballot_item_list = []
+        status = ''
+        success = False
+        unique_state_code_list = []
+        try:
+            ballot_item_queryset = BallotItem.objects.using('readonly').all()
+            ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
+            ballot_item_queryset = ballot_item_queryset.values('state_code').distinct()
+            ballot_item_list = list(ballot_item_queryset)
+
+            status += 'RETRIEVE_STATE_CODES_IN_ELECTION-QUERY_SUCCESSFUL '
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status += 'RETRIEVE_STATE_CODES_IN_ELECTION-FAILED: ' + str(e) + ' '
+
+        for ballot_item in ballot_item_list:
+            try:
+                if ballot_item['state_code'] and ballot_item['state_code'].upper() not in unique_state_code_list:
+                    unique_state_code_list.append(ballot_item['state_code'].upper())
+            except Exception as e:
+                pass
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'state_code_list':  unique_state_code_list,
+        }
+        return results
+
     def fetch_most_recent_google_civic_election_id(self):
         election_manager = ElectionManager()
         results = election_manager.retrieve_elections_by_date()

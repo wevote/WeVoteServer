@@ -1632,6 +1632,7 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
     final_ballot_list = []
 
     # Retrieve all of the upcoming elections
+    ballot_item_list_manager = BallotItemListManager()
     ballot_returned_list_manager = BallotReturnedListManager()
     election_manager = ElectionManager()
     results = election_manager.retrieve_listed_elections()
@@ -1646,6 +1647,14 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
         if voter_ballot_list_results['voter_ballot_list_found']:
             voter_ballot_list = voter_ballot_list_results['voter_ballot_list']
             for one_ballot_entry in voter_ballot_list:
+                # State code list
+                state_code_list = []
+                google_civic_election_id = convert_to_int(one_ballot_entry.google_civic_election_id)
+                # Return the states that have ballot items in this election
+                results = ballot_item_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
+                if results['success']:
+                    state_code_list = results['state_code_list']
+
                 election_ids_in_voter_ballot_saved_list.append(one_ballot_entry.google_civic_election_id)
                 ballot_returned_we_vote_id = one_ballot_entry.ballot_returned_we_vote_id \
                     if one_ballot_entry.ballot_returned_we_vote_id else ""
@@ -1656,6 +1665,7 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
                     "original_text_for_map_search": one_ballot_entry.original_text_for_map_search,
                     "ballot_returned_we_vote_id":   ballot_returned_we_vote_id,
                     "ballot_location_shortcut":     one_ballot_entry.ballot_location_shortcut,
+                    "state_code_list":              state_code_list,
                 }
                 voter_ballot_list_for_json.append(one_voter_ballot_list)
                 elections_retrieved_count += 1
@@ -1668,6 +1678,15 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
             # ballot_returned_count = ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
             #     election.google_civic_election_id)
             # if positive_value_exists(ballot_returned_count):
+
+            # State code list
+            state_code_list = []
+            google_civic_election_id = convert_to_int(election.google_civic_election_id)
+            # Return the states that have ballot items in this election
+            results = ballot_item_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
+            if results['success']:
+                state_code_list = results['state_code_list']
+
             one_election = {
                 "google_civic_election_id":         convert_to_int(election.google_civic_election_id),
                 "election_description_text":        election.election_name,
@@ -1675,6 +1694,7 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
                 "original_text_for_map_search":     "",
                 "ballot_returned_we_vote_id":       "",
                 "ballot_location_shortcut":         "",
+                "state_code_list":                  state_code_list,
             }
             final_ballot_list.append(one_election)
             elections_retrieved_count += 1

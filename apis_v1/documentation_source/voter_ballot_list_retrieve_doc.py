@@ -42,10 +42,14 @@ def voter_ballot_list_retrieve_doc_template_values(url_root):
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "voter_ballot_list": list\n' \
                    '   [\n' \
-                   '     "google_civic_election_id": integer,\n' \
+                   '     "ballot_returned_we_vote_id": string,\n' \
+                   '     "ballot_location_shortcut": string,\n' \
                    '     "election_description_text": string,\n' \
-                   '     "election_date": string,\n' \
+                   '     "election_day_text": string,\n' \
+                   '     "google_civic_election_id": integer,\n' \
                    '     "original_text_for_map_search": string,\n' \
+                   '     "state_code_list": list\n' \
+                   '      [],\n' \
                    '   ],\n' \
                    '}'
 

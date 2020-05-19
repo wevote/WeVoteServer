@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import Election, ElectionManager
-from ballot.models import BallotReturned
+from ballot.models import BallotItemListManager, BallotReturned
 from config.base import get_environment_variable
 from import_export_google_civic.controllers import retrieve_from_google_civic_api_election_query, \
     store_results_from_google_civic_api_election_query
@@ -150,8 +150,10 @@ def elections_retrieve_for_api():  # electionsRetrieve
         }
         return results
 
+    ballot_item_list_manager = BallotItemListManager()
     election_list_raw = list(election_list_query)
     for election in election_list_raw:
+        state_code_list = []
         try:
             ballot_location_list = []
             ballot_returned_query = BallotReturned.objects.using('readonly')
@@ -178,21 +180,29 @@ def elections_retrieve_for_api():  # electionsRetrieve
                     'google_civic_election_id':     ballot_returned.google_civic_election_id,
                 }
                 ballot_location_list.append(ballot_location_display_option)
+
+            google_civic_election_id = convert_to_int(election.google_civic_election_id)
+            # Return the states that have ballot items in this election
+            results = ballot_item_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
+            if results['success']:
+                state_code_list = results['state_code_list']
+
             election_json = {
-                'google_civic_election_id':     convert_to_int(election.google_civic_election_id),
-                'election_name':                election.election_name,
-                'election_day_text':            election.election_day_text,
-                'election_is_upcoming':         election.election_is_upcoming(),
-                'get_election_state':           election.get_election_state(),
-                'state_code':                   election.state_code,
-                'ocd_division_id':              election.ocd_division_id,
                 'ballot_location_list':         ballot_location_list,
                 # 'ballot_returned_count':        ballot_returned_count,
+                'election_day_text':            election.election_day_text,
+                'election_is_upcoming':         election.election_is_upcoming(),
+                'election_name':                election.election_name,
+                'google_civic_election_id':     google_civic_election_id,
+                'get_election_state':           election.get_election_state(),
+                'ocd_division_id':              election.ocd_division_id,
+                'state_code':                   election.state_code,
+                'state_code_list':              state_code_list,
             }
             election_list.append(election_json)
 
         except Exception as e:
-            status += "FAILURE: " + str(e) + " "
+            status += "ELECTIONS_RETRIEVE_FAILURE: " + str(e) + " "
 
     results = {
         'success':          success,
