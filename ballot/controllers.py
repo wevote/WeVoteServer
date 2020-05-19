@@ -1651,7 +1651,7 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
                 state_code_list = []
                 google_civic_election_id = convert_to_int(one_ballot_entry.google_civic_election_id)
                 # Return the states that have ballot items in this election
-                results = ballot_item_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
+                results = ballot_returned_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
                 if results['success']:
                     state_code_list = results['state_code_list']
 
@@ -1683,7 +1683,7 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
             state_code_list = []
             google_civic_election_id = convert_to_int(election.google_civic_election_id)
             # Return the states that have ballot items in this election
-            results = ballot_item_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
+            results = ballot_returned_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
             if results['success']:
                 state_code_list = results['state_code_list']
 

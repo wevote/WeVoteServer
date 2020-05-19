@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import Election, ElectionManager
-from ballot.models import BallotItemListManager, BallotReturned
+from ballot.models import BallotReturned, BallotReturnedListManager
 from config.base import get_environment_variable
 from import_export_google_civic.controllers import retrieve_from_google_civic_api_election_query, \
     store_results_from_google_civic_api_election_query
@@ -150,7 +150,7 @@ def elections_retrieve_for_api():  # electionsRetrieve
         }
         return results
 
-    ballot_item_list_manager = BallotItemListManager()
+    ballot_returned_list_manager = BallotReturnedListManager()
     election_list_raw = list(election_list_query)
     for election in election_list_raw:
         state_code_list = []
@@ -183,7 +183,7 @@ def elections_retrieve_for_api():  # electionsRetrieve
 
             google_civic_election_id = convert_to_int(election.google_civic_election_id)
             # Return the states that have ballot items in this election
-            results = ballot_item_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
+            results = ballot_returned_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
             if results['success']:
                 state_code_list = results['state_code_list']
 
