@@ -31,6 +31,13 @@ def elections_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "election_list": list,\n' \
                    '  [{\n' \
+                   '    "ballot_location_list": list\n' \
+                   '    [{\n' \
+                   '      "ballot_location_display_name": string,\n' \
+                   '      "ballot_location_shortcut": string,\n' \
+                   '      "ballot_returned_we_vote_id": string,\n' \
+                   '      "ballot_location_order": integer,\n' \
+                   '    }],\n' \
                    '    "google_civic_election_id": integer,\n' \
                    '    "election_name": string,\n' \
                    '    "election_day_text": string,\n' \
@@ -38,14 +45,8 @@ def elections_retrieve_doc_template_values(url_root):
                    '    "get_election_state": string,\n' \
                    '    "state_code": string,\n' \
                    '    "ocd_division_id": string,\n' \
-                   '    "ballot_returned_count": integer,\n' \
-                   '    "ballot_location_list": list\n' \
-                   '    [\n' \
-                   '      "ballot_location_display_name": string,\n' \
-                   '      "ballot_location_shortcut": string,\n' \
-                   '      "ballot_returned_we_vote_id": string,\n' \
-                   '      "ballot_location_order": integer,\n' \
-                   '    ],\n' \
+                   '    "state_code_list": list\n' \
+                   '    [],\n' \
                    '  }]\n'\
                    '}'
 
