@@ -8,25 +8,24 @@ from .models import BallotItem, BallotItemListManager, BallotItemManager, Ballot
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
-from exception.models import handle_record_not_deleted_exception
-from office.models import ContestOffice, ContestOfficeManager
-from django.http import HttpResponseRedirect
-from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from election.models import Election, ElectionManager
+from exception.models import handle_record_not_deleted_exception
 from geopy.geocoders import get_geocoder_for_service
+import json
 from measure.models import ContestMeasure, ContestMeasureManager
+from office.models import ContestOffice, ContestOfficeManager
 from polling_location.models import PollingLocation, PollingLocationManager
 import time
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
-import json
 
 BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")  # ballotItemsSyncOut
 BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")  # ballotReturnedSyncOut
@@ -206,7 +205,7 @@ def ballot_items_import_from_master_server_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -239,7 +238,7 @@ def ballot_items_import_from_master_server_view(request):
 
 @login_required
 def ballot_returned_import_from_master_server_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -834,7 +833,7 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)

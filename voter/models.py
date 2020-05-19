@@ -919,6 +919,7 @@ class VoterManager(BaseUserManager):
     def retrieve_voter_list_by_permissions(
             self,
             is_admin=False,
+            is_analytics_admin=False,
             is_partner_organization=False,
             is_political_data_manager=False,
             is_political_data_viewer=False,
@@ -933,6 +934,7 @@ class VoterManager(BaseUserManager):
         status = ''
 
         if not positive_value_exists(is_admin) \
+                and not positive_value_exists(is_analytics_admin) \
                 and not positive_value_exists(is_partner_organization) \
                 and not positive_value_exists(is_political_data_manager) \
                 and not positive_value_exists(is_political_data_viewer) \
@@ -950,6 +952,9 @@ class VoterManager(BaseUserManager):
         voter_raw_filters = []
         if positive_value_exists(is_admin):
             new_voter_filter = Q(is_admin=True)
+            voter_raw_filters.append(new_voter_filter)
+        if positive_value_exists(is_analytics_admin):
+            new_voter_filter = Q(is_analytics_admin=True)
             voter_raw_filters.append(new_voter_filter)
         if positive_value_exists(is_partner_organization):
             new_voter_filter = Q(is_partner_organization=True)
@@ -1906,6 +1911,7 @@ class Voter(AbstractBaseUser):
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    is_analytics_admin = models.BooleanField(default=False)
     is_partner_organization = models.BooleanField(default=False)
     is_political_data_manager = models.BooleanField(default=False)
     is_political_data_viewer = models.BooleanField(default=False)
@@ -2793,6 +2799,7 @@ def retrieve_voter_authority(request):
             'voter_found':                  True,
             'is_active':                    positive_value_exists(voter.is_active),
             'is_admin':                     positive_value_exists(voter.is_admin),
+            'is_analytics_admin':           positive_value_exists(voter.is_analytics_admin),
             'is_partner_organization':      positive_value_exists(voter.is_partner_organization),
             'is_political_data_manager':    positive_value_exists(voter.is_political_data_manager),
             'is_political_data_viewer':     positive_value_exists(voter.is_political_data_viewer),
@@ -2804,6 +2811,7 @@ def retrieve_voter_authority(request):
         'voter_found':                  False,
         'is_active':                    False,
         'is_admin':                     False,
+        'is_analytics_admin':           False,
         'is_partner_organization':      False,
         'is_political_data_manager':    False,
         'is_political_data_viewer':     False,
@@ -2820,6 +2828,10 @@ def voter_has_authority(request, authority_required, authority_results=None):
     if 'admin' in authority_required:
         if positive_value_exists(authority_results['is_admin']):
             return True
+    if 'analytics_admin' in authority_required:
+        if positive_value_exists(authority_results['is_analytics_admin']) or \
+                positive_value_exists(authority_results['is_admin']):
+            return True
     if 'partner_organization' in authority_required:
         if positive_value_exists(authority_results['is_partner_organization']) or \
                 positive_value_exists(authority_results['is_political_data_manager']) or \
@@ -2831,12 +2843,14 @@ def voter_has_authority(request, authority_required, authority_results=None):
             return True
     if 'political_data_viewer' in authority_required:
         if positive_value_exists(authority_results['is_political_data_viewer']) or \
+                positive_value_exists(authority_results['is_analytics_admin']) or \
                 positive_value_exists(authority_results['is_verified_volunteer']) or \
                 positive_value_exists(authority_results['is_political_data_manager']) or \
                 positive_value_exists(authority_results['is_admin']):
             return True
     if 'verified_volunteer' in authority_required:
         if positive_value_exists(authority_results['is_verified_volunteer']) or \
+                positive_value_exists(authority_results['is_analytics_admin']) or \
                 positive_value_exists(authority_results['is_political_data_manager']) or \
                 positive_value_exists(authority_results['is_admin']):
             return True
