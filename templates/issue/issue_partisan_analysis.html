@@ -18,7 +18,7 @@
     {% if election_list %}
     <select id="google_civic_election_id" name="google_civic_election_id">
         <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
-            -- Filter by Election --</option>
+            -- All Upcoming Elections --</option>
         {% for election in election_list %}
         <option value="{{ election.google_civic_election_id }}"
                 {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
@@ -59,7 +59,7 @@
     </td>
     <td>&nbsp;</td>
     <td>
-      <h4>{{ endorsement_percent_center|floatformat:1 }}% Center</h4>
+      <h4>{{ endorsement_percent_center|floatformat:1 }}% Other</h4>
       <p><strong>{{ endorsement_count_center }}</strong> out of {{ total_endorsement_count }} Endorsements</p>
     </td>
     <td>&nbsp;</td>
@@ -91,7 +91,7 @@
           These are all of the organizations who have made endorsements in the election(s) you are looking at.
           If they are tagged with a left-leaning value/issue, we put them in the "Left-Leaning" column.
           If they are tagged with a right-leaning value/issue, we put them in the "Right-Leaning" column.
-          All others are in the "Center" column.
+          All others are in the "Other" column.
           We Vote invites all organizations and public figures to <a href="https://api.wevoteusa.org/vg/create/" target="_blank">add their endorsements</a> to We Vote.
         </p>
     </td>
@@ -99,7 +99,7 @@
 <tr>
     <td><h4>{{ organization_percent_left|floatformat:1 }}% Left-Leaning ({{ organization_list_left|length }})</h4></td>
     <td>&nbsp;</td>
-    <td><h4>{{ organization_percent_center|floatformat:1 }}% Center ({{ organization_list_center|length }})</h4></td>
+    <td><h4>{{ organization_percent_center|floatformat:1 }}% Other ({{ organization_list_center|length }})</h4></td>
     <td>&nbsp;</td>
     <td><h4>{{ organization_percent_right|floatformat:1 }}% Right-Leaning ({{ organization_list_right|length }})</h4></td>
 </tr>
@@ -125,7 +125,12 @@
                 {% endif %}
             </td>
             <td>
-                {{ organization.organization_name }}<br />
+                {{ organization.organization_name }}
+                {% if is_political_data_manager %}
+                    <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
+                <br />
                 <span style="color: darkgray">{{ organization.twitter_description }}</span>
                 <span class="u-no-break">
                   {% for one_issue in organization_issues_lists|get_list_from_dict:organization.we_vote_id %}
@@ -146,7 +151,7 @@
     <td>&nbsp;</td>
     <td valign="top">
 
-    {# ################### Center ################### #}
+    {# ################### Other ################### #}
   {% if organization_list_center %}
     <table class="table">
       <thead>
@@ -165,7 +170,12 @@
                 {% endif %}
             </td>
             <td>
-                {{ organization.organization_name }}<br />
+                {{ organization.organization_name }}
+                {% if is_political_data_manager %}
+                    <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
+                <br />
                 <span style="color: darkgray">{{ organization.twitter_description }}</span>
                 <span class="u-no-break">
                   {% for one_issue in organization_issues_lists|get_list_from_dict:organization.we_vote_id %}
@@ -205,7 +215,12 @@
                 {% endif %}
             </td>
             <td>
-                {{ organization.organization_name }}<br />
+                {{ organization.organization_name }}
+                {% if is_political_data_manager %}
+                    <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
+                <br />
                 <span style="color: darkgray">{{ organization.twitter_description }}</span>
                 <span class="u-no-break">
                   {% for one_issue in organization_issues_lists|get_list_from_dict:organization.we_vote_id %}
@@ -247,7 +262,7 @@
 <tr>
     <td style="width: 32%"><h4>Left-Leaning </h4></td>
     <td>&nbsp;</td>
-    <td style="width: 32%"><h4>Center </h4></td>
+    <td style="width: 32%"><h4>Other </h4></td>
     <td>&nbsp;</td>
     <td style="width: 32%"><h4>Right-Leaning</h4></td>
 </tr>
@@ -286,7 +301,7 @@
 
     </td>
     <td>&nbsp;</td>
-    {# ################### Center ################### #}
+    {# ################### Other ################### #}
     <td valign="top">
 
   {% if issue_list_center %}

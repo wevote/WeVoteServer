@@ -16,7 +16,7 @@ from exception.models import handle_exception, handle_record_found_more_than_one
 from follow.models import FollowOrganizationManager, FollowOrganizationList
 from friend.models import FriendManager
 from measure.models import ContestMeasure, ContestMeasureManager
-from office.models import ContestOfficeManager
+from office.models import ContestOffice, ContestOfficeManager
 from organization.models import Organization, OrganizationManager, \
     CORPORATION, GROUP, INDIVIDUAL, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, NEWS_ORGANIZATION, \
     ORGANIZATION, POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, UNKNOWN, VOTER, ORGANIZATION_TYPE_CHOICES
@@ -155,7 +155,7 @@ class PositionEntered(models.Model):
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=255, null=True, blank=False, default=0, db_index=True)
     state_code = models.CharField(verbose_name="us state of the ballot item position is for",
-                                  max_length=2, null=True, blank=True)
+                                  max_length=2, null=True, blank=True, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     # ### Values from Vote Smart ###
@@ -423,6 +423,18 @@ class PositionEntered(models.Model):
         except ContestMeasure.DoesNotExist:
             return
         return contest_measure
+
+    def contest_office(self):
+        if not self.contest_office_id:
+            return
+        try:
+            contest_office = ContestOffice.objects.get(id=self.contest_office_id)
+        except ContestOffice.MultipleObjectsReturned as e:
+            logger.error("position.contest_office Found multiple")
+            return
+        except ContestOffice.DoesNotExist:
+            return
+        return contest_office
 
     def election(self):
         if not self.google_civic_election_id:
@@ -817,11 +829,23 @@ class PositionForFriends(models.Model):
             contest_measure = ContestMeasure.objects.get(id=self.contest_measure_id)
         except ContestMeasure.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("position.candidate_campaign Found multiple")
+            logger.error("position.contest_measure Found multiple")
             return
         except ContestMeasure.DoesNotExist:
             return
         return contest_measure
+
+    def contest_office(self):
+        if not self.contest_office_id:
+            return
+        try:
+            contest_office = ContestOffice.objects.get(id=self.contest_office_id)
+        except ContestOffice.MultipleObjectsReturned as e:
+            logger.error("position.contest_office Found multiple")
+            return
+        except ContestOffice.DoesNotExist:
+            return
+        return contest_office
 
     def election(self):
         if not self.google_civic_election_id:
@@ -1320,6 +1344,7 @@ class PositionListManager(models.Model):
             return 0
 
         position_count = 0
+        office_manager = ContestOfficeManager()
         try:
             if retrieve_public_positions:
                 position_on_stage_starter = PositionEntered
@@ -1333,7 +1358,12 @@ class PositionListManager(models.Model):
             position_query = position_query.exclude(stance__iexact=PERCENT_RATING)
 
             position_query = position_query.filter(organization_we_vote_id__in=organization_we_vote_id_list)
-            position_query = position_query.filter(google_civic_election_id__in=google_civic_election_id_list)
+            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+                host_google_civic_election_id_list=google_civic_election_id_list)
+            position_query = position_query.filter(
+                Q(google_civic_election_id__in=google_civic_election_id_list) |
+                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+
             if positive_value_exists(state_code):
                 position_query = position_query.filter(state_code__iexact=state_code)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
@@ -3478,6 +3508,67 @@ class PositionListManager(models.Model):
                 position_list_filtered.append(one_position)
 
         return position_list_filtered
+
+    def retrieve_position_counts_for_election_and_state(self, google_civic_election_id_list=[], state_code=''):
+        friends_only_count = 0
+        office_manager = ContestOfficeManager()
+        public_count = 0
+        status = ''
+        success = True
+        if not positive_value_exists(google_civic_election_id_list) and not positive_value_exists(state_code):
+            status += 'RETRIEVE_POSITIONS-VALID_ELECTION_ID_AND_STATE_CODE_MISSING '
+            results = {
+                'success':                          False,
+                'status':                           status,
+                'friends_only_count':               0,
+                'google_civic_election_id_list':    google_civic_election_id_list,
+                'public_count':                     0,
+                'state_code': state_code,
+            }
+            return results
+
+        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+            host_google_civic_election_id_list=google_civic_election_id_list)
+
+        try:
+            position_query = PositionEntered.objects.using('readonly').all()
+            position_query = position_query.filter(
+                Q(google_civic_election_id__in=google_civic_election_id_list) |
+                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+            if positive_value_exists(state_code):
+                position_query = position_query.filter(state_code__iexact=state_code)
+            public_count = position_query.count()
+            success = True
+            status += "PUBLIC_COUNT_FOUND "
+        except Exception as e:
+            status += 'FAILED_RETRIEVE_PUBLIC_COUNT ' + str(e) + ' '
+            handle_exception(e, logger=logger)
+            success = False
+
+        try:
+            position_query = PositionForFriends.objects.using('readonly').all()
+            position_query = position_query.filter(
+                Q(google_civic_election_id__in=google_civic_election_id_list) |
+                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+            if positive_value_exists(state_code):
+                position_query = position_query.filter(state_code__iexact=state_code)
+            friends_only_count = position_query.count()
+            success = True
+            status += "FRIENDS_ONLY_COUNT_FOUND "
+        except Exception as e:
+            status += 'FAILED_RETRIEVE_FRIENDS_ONLY_COUNT ' + str(e) + ' '
+            handle_exception(e, logger=logger)
+            success = False
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'friends_only_count':               friends_only_count,
+            'google_civic_election_id_list':    google_civic_election_id_list,
+            'public_count':                     public_count,
+            'state_code':                       state_code,
+        }
+        return results
 
     def fetch_public_positions_count_for_candidate_campaign(self, candidate_campaign_id,
                                                             candidate_campaign_we_vote_id,
