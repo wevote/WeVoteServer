@@ -3282,7 +3282,7 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
         voter_guide_list = []
         voter_guide_results = retrieve_voter_guides_from_friends(
             voter_we_vote_id=voter_we_vote_id,
-            maximum_number_to_retrieve=500,
+            maximum_number_to_retrieve=200,
             sort_by='twitter_followers_count',
             sort_order='desc',
             google_civic_election_id_list=google_civic_election_id_list,
@@ -3296,7 +3296,7 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
         # From SharedItems
         voter_guide_shared_results = retrieve_voter_guides_from_shared_items(
             voter_we_vote_id=voter_we_vote_id,
-            maximum_number_to_retrieve=500,
+            maximum_number_to_retrieve=200,
             google_civic_election_id_list=google_civic_election_id_list,
             read_only=True)
         status += voter_guide_shared_results['status']
@@ -3308,8 +3308,9 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
                     voter_guide.from_shared_item = True
                     voter_guide_list.append(voter_guide)
     else:
+        # Dale 2020-05-19 maximum_number_to_retrieve=500 took too long for CDN timeout
         voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_generic(
-            maximum_number_to_retrieve=500, sort_by='twitter_followers_count', sort_order='desc',
+            maximum_number_to_retrieve=200, sort_by='twitter_followers_count', sort_order='desc',
             google_civic_election_id_list=google_civic_election_id_list, read_only=True)
         if voter_guide_results['voter_guide_list_found']:
             voter_guide_list = voter_guide_results['voter_guide_list']

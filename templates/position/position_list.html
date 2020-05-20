@@ -7,7 +7,7 @@
 <p>
   <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a>&nbsp;&nbsp;&nbsp;
   <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-     target="_blank">Import New Positions ></a> (open in new window)
+     target="_blank">Import New Positions <span class="glyphicon glyphicon-new-window"></span></a>
 </p>
 <p>Jump to:
     <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elections</a> -
@@ -34,15 +34,18 @@
 
 <ul>
     <li><strong><a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}"
-                    target="_blank" >Review Voter Guide Possibilities</a></strong> (in new window)</li>
-    <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-        Suggest a Voter Guide</a></strong> (in a new window). Quick public tools that feeds into import_export_batch system.</li>
+                   target="_blank" >Review Voter Guide Possibilities <span class="glyphicon glyphicon-new-window"></span></a></strong></li>
+    <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">Suggest a Voter Guide <span class="glyphicon glyphicon-new-window"></span></a></strong>. Quick public tools that feeds into import_export_batch system.</li>
 {% if position_list and google_civic_election_id %}
-    <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >Generate Voter Guides</a> (in new window)</li>
-    <li>Prepare: <a href="{% url 'position:refresh_cached_position_info_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
-        Refresh All Cached Positions for this Election</a> (about 5 minutes - in new window)</li>
-    <li>Prepare: <a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
-        Retrieve Positions from Vote Smart for this Election</a> (in new window)</li>
+    <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}"
+                    target="_blank" >Generate Voter Guides <span class="glyphicon glyphicon-new-window"></span></a></li>
+    <li>Prepare: <a href="{% url 'position:refresh_cached_position_info_for_election' %}?google_civic_election_id={{ google_civic_election_id }}"
+                    target="_blank" >
+        Refresh All Cached Positions for this Election <span class="glyphicon glyphicon-new-window"></span></a> (about 5 minutes)</li>
+    <li>Prepare: <a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}"
+                    target="_blank" >
+        Retrieve Positions from Vote Smart for this Election <span class="glyphicon glyphicon-new-window"></span></a></li>
 {% endif %}
 </ul>
 
@@ -67,8 +70,30 @@
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
 
+    {% if state_list %}
+        <select id="state_code_id" name="state_code">
+            <option value="">
+                -- Filter by State Served --</option>
+        {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                {{ state }}</option>
+        {% endfor %}
+        </select>
+        {% if state_code != "" %}
+        <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
+            show all states</a>
+        {% endif %}
+    {% endif %}{# End of if state_list #}
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="show_statistics_id">
+      <input type="checkbox" name="show_statistics" id="show_statistics_id" value="1"
+             {% if show_statistics %}checked{% endif %} /> Show Statistics
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+
     {% if position_search %}
-        <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}">
+        <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
              clear search</a>&nbsp;
     {% endif %}
     <input type="text" name="position_search" id="position_search_id" value="{{ position_search }}" />
@@ -84,9 +109,8 @@
             <th>Organization</th>
             <th>Visibility?</th>
             <th>Stance</th>
-            <th>Rating</th>
+            <th>Office</th>
             <th>Candidate/Measure</th>
-            <th>Election</th>
         </tr>
       </thead>
     {% for position in position_list %}
@@ -94,13 +118,18 @@
             <td>{{ forloop.counter }}</td>
             <td>{% if position.organization %}
                 <a href="{% url 'organization:organization_position_edit' position.organization.id position.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">{{ position.we_vote_id }}</a>
+                   target="_blank">
+                <span class="u-no-break">
+                  {{ position.we_vote_id }} <span class="glyphicon glyphicon-new-window"></span>
+                </span>
+                </a>
                 {% endif %}
             </td>
             <td>{% if position.organization %}
                 <a href="{% url 'organization:organization_position_list' position.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">
                 {% if position.organization.organization_name %}{{ position.organization.organization_name }}{% else %}(no org name){% endif %}
+                <span class="glyphicon glyphicon-new-window"></span>
                 </a>
                 {% else %}
                     (organization name missing)
@@ -108,36 +137,46 @@
             </td>
             <td>{% if position.is_public_position %}<strong>Public</strong>{% else %}Friends&nbsp;Only{% endif %}</td>
             <td>
+                <span class="u-no-break">
             {% if position.organization %}
                 <a href="{% url 'organization:organization_position_edit' position.organization.id position.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">{{ position.get_stance_display }}</a>
+                   target="_blank">{{ position.get_stance_display }} <span class="glyphicon glyphicon-new-window"></span></a>
             {% else %}
                 {{ position.get_stance_display }}
             {% endif %}
+                </span>
             </td>
             <td>
-            {% if position.vote_smart_rating or position.vote_smart_rating_integer or position.vote_smart_time_span %}
-              {{ position.vote_smart_rating_integer }}%{% if position.vote_smart_time_span %}, {{ position.vote_smart_time_span }}{% endif %}
-            {% endif %}
+                {% if position.contest_office %}
+                <a href="{% url 'office:office_summary' position.contest_office.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   target="_blank">
+                  {{ position.contest_office.office_name }}
+                  <span class="glyphicon glyphicon-new-window"></span>
+                </a>
+                {% endif %}
             </td>
             <td>
                 {% if position.candidate_campaign %}
-                {{ position.candidate_campaign.candidate_name }}
+                <a href="{% url 'candidate:candidate_summary' position.candidate_campaign.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   target="_blank">
+                  {{ position.candidate_campaign.candidate_name }}
+                  <span class="glyphicon glyphicon-new-window"></span>
+                </a>
                 {% elif position.contest_measure %}
                 {{ position.contest_measure.measure_title }}
                 {% else %}
                     (name unknown)
                 {% endif %}
-                <span style="color: darkgray">&nbsp;{{ position.statement_text|default_if_none:""|truncatechars:450 }}</span>
+                <span style="color: darkgray">&nbsp;{{ position.statement_text|default_if_none:""|truncatechars:250 }}</span>
             </td>
-            <td>{% if position.election.election_day_text %}<span class="u-no-break">{{ position.election.election_day_text }}</span>{% endif %}</td>
         </tr>
     {% endfor %}
     </table>
 
     <p></p>
     <p>
-        <a href="{% url 'apis_v1:positionsSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" >Export Positions</a>
+        <a href="{% url 'apis_v1:positionsSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+           target="_blank" >Export Positions <span class="glyphicon glyphicon-new-window"></span></a>
     </p>
     <p><a href="{% url 'position:relink_candidates_measures' %}" >Re-link Positions with Candidates or Measures</a></p>
 {% else %}
@@ -153,6 +192,16 @@
     });
     $(function() {
         $('#show_all_elections_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_statistics_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#state_code_id').change(function() {
             this.form.submit();
         });
     });

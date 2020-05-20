@@ -2774,6 +2774,22 @@ def fetch_voter_we_vote_id_from_voter_id(voter_id):
 #         return ""
 
 
+def fetch_voter_from_request(request):
+    """
+    For use on API server only
+    :param request:
+    :return:
+    """
+    voter_api_device_id = get_voter_api_device_id(request)
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id, read_only=True)
+    if results['voter_found']:
+        voter = results['voter']
+        return voter
+
+    return None
+
+
 def fetch_voter_we_vote_id_from_voter_device_link(voter_device_id):
     voter_device_link_manager = VoterDeviceLinkManager()
     results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id,
