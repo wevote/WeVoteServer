@@ -118,7 +118,7 @@
       </thead>
     {% for organization in organization_list_left %}
         <tr>
-            <td>{{ forloop.counter }}</td>
+            <td><span style="color: lightgray;">{{ forloop.counter }}</span></td>
             <td>
                 {% if organization.we_vote_hosted_profile_image_url_medium %}
                     <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}" width="48" height="48" />
@@ -126,7 +126,7 @@
             </td>
             <td>
                 {{ organization.organization_name }}
-                {% if is_political_data_manager %}
+                {% if is_admin or is_political_data_manager %}
                     <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
                        target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
                 {% endif %}
@@ -163,7 +163,7 @@
       </thead>
     {% for organization in organization_list_center %}
         <tr>
-            <td>{{ forloop.counter }}</td>
+            <td><span style="color: lightgray;">{{ forloop.counter }}</span></td>
             <td>
                 {% if organization.we_vote_hosted_profile_image_url_medium %}
                     <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}" width="48" height="48" />
@@ -171,7 +171,7 @@
             </td>
             <td>
                 {{ organization.organization_name }}
-                {% if is_political_data_manager %}
+                {% if is_admin or is_political_data_manager %}
                     <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
                        target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
                 {% endif %}
@@ -208,7 +208,7 @@
       </thead>
     {% for organization in organization_list_right %}
         <tr>
-            <td>{{ forloop.counter }}</td>
+            <td><span style="color: lightgray;">{{ forloop.counter }}</span></td>
             <td>
                 {% if organization.we_vote_hosted_profile_image_url_medium %}
                     <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}" width="48" height="48" />
@@ -216,7 +216,7 @@
             </td>
             <td>
                 {{ organization.organization_name }}
-                {% if is_political_data_manager %}
+                {% if is_admin or is_political_data_manager %}
                     <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
                        target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
                 {% endif %}

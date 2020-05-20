@@ -822,8 +822,10 @@ def issue_partisan_analysis_view(request):
 
     voter = fetch_voter_from_request(request)
     try:
+        is_admin = voter.is_admin
         is_political_data_manager = voter.is_political_data_manager
     except Exception as e:
+        is_admin = False
         is_political_data_manager = False
 
     organization_manager = OrganizationManager()
@@ -1031,6 +1033,7 @@ def issue_partisan_analysis_view(request):
         'endorsement_percent_center':   endorsement_percent_center,
         'endorsement_percent_right':    endorsement_percent_right,
         'google_civic_election_id':     google_civic_election_id,
+        'is_admin':                     is_admin,
         'is_political_data_manager':    is_political_data_manager,
         'issue_list':                   altered_issue_list,
         'issue_list_left':              issue_list_left,
