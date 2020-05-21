@@ -41,8 +41,8 @@ class PollingLocation(models.Model):
                              db_index=True)
     zip_long = models.CharField(max_length=255, blank=True, null=True,
                                 verbose_name='raw text zip returned from VIP, 9 characters', db_index=True)
-    # county_name = models.CharField(default=None, max_length=255, null=True)
-    # precinct_name = models.CharField(default=None, max_length=255, null=True)
+    county_name = models.CharField(default=None, max_length=255, null=True)
+    precinct_name = models.CharField(default=None, max_length=255, null=True)
     # We write latitude/longitude back to the PollingLocation table when we get it for the BallotReturned table
     latitude = models.FloatField(null=True, verbose_name='latitude returned from Google')
     longitude = models.FloatField(null=True, verbose_name='longitude returned from Google')
