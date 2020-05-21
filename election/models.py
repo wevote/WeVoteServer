@@ -113,6 +113,8 @@ class Election(models.Model):
     # entering elections manually.
     state_code = models.CharField(verbose_name="state code for the election",
                                   max_length=2, null=True, blank=True, db_index=True)
+    # We generate a string with all of the state codes. Ex/ CA,CO,UT
+    state_code_list_raw = models.CharField(max_length=255, null=True, blank=True)
     include_in_list_for_voters = models.BooleanField(default=False)
 
     # For internal notes regarding gathering data for this election
@@ -149,6 +151,15 @@ class Election(models.Model):
                 return extract_state_from_ocd_division_id(ocd_division_id)
             else:
                 return ''
+
+    def state_code_list(self):
+        if not positive_value_exists(self.state_code_list_raw):
+            return []
+        else:
+            try:
+                return self.state_code_list_raw.split(",")
+            except Exception as e:
+                return []
 
 
 class ElectionManager(models.Model):

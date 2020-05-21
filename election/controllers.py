@@ -182,10 +182,11 @@ def elections_retrieve_for_api():  # electionsRetrieve
                 ballot_location_list.append(ballot_location_display_option)
 
             google_civic_election_id = convert_to_int(election.google_civic_election_id)
-            # Return the states that have ballot items in this election
-            results = ballot_returned_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
-            if results['success']:
-                state_code_list = results['state_code_list']
+            state_code_list = election.state_code_list()
+            # # Return the states that have ballot items in this election
+            # results = ballot_returned_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
+            # if results['success']:
+            #     state_code_list = results['state_code_list']
 
             election_json = {
                 'ballot_location_list':         ballot_location_list,

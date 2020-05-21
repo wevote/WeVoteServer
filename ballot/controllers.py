@@ -1632,13 +1632,13 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
     final_ballot_list = []
 
     # Retrieve all of the upcoming elections
-    ballot_item_list_manager = BallotItemListManager()
-    ballot_returned_list_manager = BallotReturnedListManager()
     election_manager = ElectionManager()
     results = election_manager.retrieve_listed_elections()
     election_list = results['election_list']
+    election_list_by_election_id = {}
+    for one_election in election_list:
+        election_list_by_election_id[one_election.google_civic_election_id] = one_election
     elections_retrieved_count = 0
-    maximum_number_of_elections_to_retrieve = 10
 
     # If a voter_id was passed in, return a list of elections the voter has looked at
     if positive_value_exists(voter_id):
@@ -1647,13 +1647,20 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
         if voter_ballot_list_results['voter_ballot_list_found']:
             voter_ballot_list = voter_ballot_list_results['voter_ballot_list']
             for one_ballot_entry in voter_ballot_list:
-                # State code list
-                state_code_list = []
                 google_civic_election_id = convert_to_int(one_ballot_entry.google_civic_election_id)
-                # Return the states that have ballot items in this election
-                results = ballot_returned_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
-                if results['success']:
-                    state_code_list = results['state_code_list']
+                if google_civic_election_id not in election_list_by_election_id:
+                    results = election_manager.retrieve_election(google_civic_election_id)
+                    if results['election_found']:
+                        election_list_by_election_id[google_civic_election_id] = results['election']
+                try:
+                    election = election_list_by_election_id[google_civic_election_id]
+                    state_code_list = election.state_code_list()
+                except Exception as e:
+                    state_code_list = []
+                # # Return the states that have ballot items in this election
+                # results = ballot_returned_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
+                # if results['success']:
+                #     state_code_list = results['state_code_list']
 
                 election_ids_in_voter_ballot_saved_list.append(one_ballot_entry.google_civic_election_id)
                 ballot_returned_we_vote_id = one_ballot_entry.ballot_returned_we_vote_id \
@@ -1680,12 +1687,11 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
             # if positive_value_exists(ballot_returned_count):
 
             # State code list
-            state_code_list = []
-            google_civic_election_id = convert_to_int(election.google_civic_election_id)
-            # Return the states that have ballot items in this election
-            results = ballot_returned_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
-            if results['success']:
-                state_code_list = results['state_code_list']
+            state_code_list = election.state_code_list()
+            # # Return the states that have ballot items in this election
+            # results = ballot_returned_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
+            # if results['success']:
+            #     state_code_list = results['state_code_list']
 
             one_election = {
                 "google_civic_election_id":         convert_to_int(election.google_civic_election_id),
