@@ -29,7 +29,7 @@ from exception.models import handle_record_found_more_than_one_exception, handle
 from image.models import WeVoteImageManager
 from import_export_ballotpedia.models import BallotpediaApiCounter, BallotpediaApiCounterDailySummary, \
     BallotpediaApiCounterWeeklySummary, BallotpediaApiCounterMonthlySummary
-from import_export_batches.models import BatchDescription, BatchManager, IMPORT_BALLOT_ITEM, \
+from import_export_batches.models import BatchDescription, BatchManager, \
     BatchRowActionBallotItem, \
     BatchRowActionCandidate, BatchRowActionContestOffice, BatchRowActionMeasure, BatchRowActionPosition,  \
     BatchRowTranslationMap, BatchSet
