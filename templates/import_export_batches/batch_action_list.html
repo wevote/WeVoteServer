@@ -2,22 +2,24 @@
 {% extends "template_base.html" %}
 
 {% block title %}
-    {% if kind_of_batch == "MEASURE" %}
-        Process Measure Data
-    {% elif kind_of_batch == "ELECTED_OFFICE" %}
-        Process Elected Office Data
+    {% if kind_of_batch == "CANDIDATE" %}
+        Process Candidate Data
     {% elif kind_of_batch == "CONTEST_OFFICE" %}
         Process Contest Office Data
-    {% elif kind_of_batch == "CANDIDATE" %}
-        Process Candidate Data
-    {% elif kind_of_batch == "ORGANIZATION" %}
-        Process Organization Data
-    {% elif kind_of_batch == "POSITION" %}
-        Process Position Data
-    {% elif kind_of_batch == "POLITICIAN" %}
-        Process Politician Data
+    {% elif kind_of_batch == "ELECTED_OFFICE" %}
+        Process Elected Office Data
     {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
         Import Ballot at One Location
+    {% elif kind_of_batch == "IMPORT_POLLING_LOCATION" %}
+        Import Polling Location
+    {% elif kind_of_batch == "MEASURE" %}
+        Process Measure Data
+    {% elif kind_of_batch == "ORGANIZATION" %}
+        Process Organization Data
+    {% elif kind_of_batch == "POLITICIAN" %}
+        Process Politician Data
+    {% elif kind_of_batch == "POSITION" %}
+        Process Position Data
     {% else %}
         Process Data
     {% endif %}
@@ -36,24 +38,27 @@
 
 {% if kind_of_batch == "CANDIDATE" %}
     <p><a href="{% url 'candidate:candidate_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-          target="_blank">Current Candidates{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
+          target="_blank">Current Candidates{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
 {% elif kind_of_batch == "CONTEST_OFFICE" %}
     <p><a href="{% url 'office:office_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-          target="_blank">Current Offices{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
+          target="_blank">Current Offices{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
 {% elif kind_of_batch == "ELECTED_OFFICE" %}
+{% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
+    <p><a href="{% url 'election:election_summary' 0 %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+          target="_blank">Current Ballots{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
+{% elif kind_of_batch == "IMPORT_POLLING_LOCATION" %}
+    <p><a href="{% url 'polling_location:polling_location_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+          target="_blank">Polling Locations <span class="glyphicon glyphicon-new-window"></span></a></p>
 {% elif kind_of_batch == "MEASURE" %}
     <p><a href="{% url 'measure:measure_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-          target="_blank">Current Measures{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
+          target="_blank">Current Measures{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
 {% elif kind_of_batch == "ORGANIZATION" %}
     <p><a href="{% url 'organization:organization_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-          target="_blank">Current Organizations{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
+          target="_blank">Current Organizations{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
 {% elif kind_of_batch == "POLITICIAN" %}
 {% elif kind_of_batch == "POSITION" %}
     <p><a href="{% url 'position:position_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-          target="_blank">Current Positions{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
-{% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
-    <p><a href="{% url 'election:election_summary' 0 %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-          target="_blank">Current Ballots{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
+          target="_blank">Current Positions{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
 {% endif %}
 
 
@@ -61,43 +66,47 @@
 <h1>Import Batches</h1>
     To import, you must choose the kind of data you are importing:
 
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}">
-        Measure</a> -
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}">
-        Elected Office</a> -
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}">
-        Contest Office</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        Ballot at One Location</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ google_civic_election_id }}">
         Candidate</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}">
+        Contest Office</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}">
+        Elected Office</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}">
+        Measure</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}">
         Organization</a> -
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}">
-        Position</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POLITICIAN&google_civic_election_id={{ google_civic_election_id }}">
         Politician</a> -
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-        Ballot at One Location</a>
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_POLLING_LOCATION&google_civic_election_id={{ google_civic_election_id }}">
+        Polling Location</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}">
+        Position</a>
 
 {% else %}
     <h1>
-    {% if kind_of_batch == "MEASURE" %}
-        Process Measure Data:
+    {% if kind_of_batch == "IMPORT_BALLOT_ITEM" %}
+        Ballot at One Location:
+    {% elif kind_of_batch == "CANDIDATE" %}
+        Process Candidate Data:
     {% elif kind_of_batch == "ELECTED_OFFICE" %}
         Process Elected Office Data:
     {% elif kind_of_batch == "CONTEST_OFFICE" %}
         Process Contest Office Data:
-    {% elif kind_of_batch == "CANDIDATE" %}
-        Process Candidate Data:
-    {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
-        Ballot at One Location:
     {% elif kind_of_batch == "IMPORT_VOTER" %}
         Import/Export Voter:
+    {% elif kind_of_batch == "MEASURE" %}
+        Process Measure Data:
     {% elif kind_of_batch == "ORGANIZATION" %}
         Process Organization Data:
-    {% elif kind_of_batch == "POSITION" %}
-        Process Position Data:
     {% elif kind_of_batch == "POLITICIAN" %}
         Process Politician Data:
+    {% elif kind_of_batch == "IMPORT_POLLING_LOCATION" %}
+        Process Polling Location Data:
+    {% elif kind_of_batch == "POSITION" %}
+        Process Position Data:
     {% else %}
         Kind of batch_action_list data not recognized: Please STOP
     {% endif %}
@@ -385,8 +394,9 @@
                                 <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default"
                                         value={{ one_batch_row.batch_row_action.id }}>UPDATE</button>
 
-                                <a href="{% url 'candidate:candidate_edit_we_vote_id' one_batch_row.batch_row_action.candidate_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
-                                {{ one_batch_row.batch_row_action.candidate_we_vote_id }}
+                                <a href="{% url 'candidate:candidate_edit_we_vote_id' one_batch_row.batch_row_action.candidate_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                                   target="_blank">
+                                {{ one_batch_row.batch_row_action.candidate_we_vote_id }} <span class="glyphicon glyphicon-new-window"></span>
                                 </a>
                             </form>
                             {% else %}
@@ -412,7 +422,7 @@
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
                                 <br />
                                 <a href="{% url 'office:office_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&office_search={{ one_batch_row.batch_row_action.contest_office_name|default_if_none:"" }}"
-                                   target="_blank">Search for Office</a>
+                                   target="_blank">Search for Office <span class="glyphicon glyphicon-new-window"></span></a>
                             {% endif %}
                             {% if one_batch_row.batch_row_action.batch_row_action_office_ctcl_uuid %}
                             <br /><span>office: {{ one_batch_row.batch_row_action.batch_row_action_office_ctcl_uuid|default_if_none:"" }}</span>
@@ -514,7 +524,8 @@
                         </td>
                         <td>{{ one_batch_row.batch_row_action.contest_office_name|default_if_none:"" }}
                             {% if one_batch_row.batch_row_action.contest_office_we_vote_id %}
-                            <span> (<a href="{% url 'office:office_edit_we_vote_id' one_batch_row.batch_row_action.contest_office_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">{{ one_batch_row.batch_row_action.contest_office_we_vote_id|default_if_none:"" }}</a>)</span>
+                            <span> (<a href="{% url 'office:office_edit_we_vote_id' one_batch_row.batch_row_action.contest_office_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                                       target="_blank">{{ one_batch_row.batch_row_action.contest_office_we_vote_id|default_if_none:"" }} <span class="glyphicon glyphicon-new-window"></span></a>)</span>
                             {% endif %}
                         </td>
                         <td>
@@ -685,7 +696,8 @@
                         </td>
                         <td>{{ one_batch_row.batch_row_action.measure_title|default_if_none:"" }}
                             {% if one_batch_row.batch_row_action.measure_we_vote_id %}
-                            <span> (<a href="{% url 'measure:measure_edit_we_vote_id' one_batch_row.batch_row_action.measure_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">{{ one_batch_row.batch_row_action.measure_we_vote_id|default_if_none:"" }}</a>)</span>
+                            <span> (<a href="{% url 'measure:measure_edit_we_vote_id' one_batch_row.batch_row_action.measure_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                                       target="_blank">{{ one_batch_row.batch_row_action.measure_we_vote_id|default_if_none:"" }} <span class="glyphicon glyphicon-new-window"></span></a>)</span>
                             {% endif %}
                             {% if one_batch_row.batch_row_action.ballotpedia_measure_id %}
                             <br /><span>ballotpedia_measure_id: {{ one_batch_row.batch_row_action.ballotpedia_measure_id|default_if_none:"" }}</span>
@@ -905,6 +917,91 @@
                     </tr>
                     {% endif %}
                 </tbody>
+            {% elif one_batch_row.kind_of_batch == "IMPORT_POLLING_LOCATION" %}
+            {# ####################################### #}
+            {# ### IMPORT_POLLING_LOCATION ### #}
+            {# ####################################### #}
+                <thead>
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
+                        <th></th>
+                        <th>location</th>
+                        <th>line1</th>
+                        <th>city</th>
+                        <th>state</th>
+                        <th>ZIP</th>
+                        <th>county</th>
+                        <th>precinct</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
+                        <td>
+                            {# Based on the results of analysis, show button to do the action #}
+                            {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
+                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                                {% csrf_token %}
+                                <input type="hidden" name="kind_of_batch" value="IMPORT_POLLING_LOCATION">
+                                <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
+                                <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
+                                <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
+                                <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+                                <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default"
+                                        value={{ one_batch_row.batch_row_action.id }}>Create</button>
+                            </form>
+                            {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                                {% csrf_token %}
+                                <input type="hidden" name="kind_of_batch" value="IMPORT_POLLING_LOCATION">
+                                <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
+                                <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
+                                <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
+                                <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+                                <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default"
+                                        value={{ one_batch_row.batch_row_action.id }}>UPDATE</button>
+                                {{ one_batch_row.batch_row_action.contest_office_we_vote_id }}
+                            </form>
+                            {% else %}
+                                {{ one_batch_row.batch_row_action.kind_of_action }}
+                            {% endif %}
+                        </td>
+                        <td>{{ one_batch_row.batch_row_action.location_name|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.line1|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.city|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.state|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.zip_long|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.county_name|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.precinct_name|default_if_none:"" }}</td>
+                    </tr>
+                    {% if one_batch_row.batch_row_action.status %}
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
+                        <td colspan="20">STATUS: {{ one_batch_row.batch_row_action.status }}</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
             {% elif one_batch_row.kind_of_batch == "POSITION" %}
             {# ####################################### #}
             {# ### POSITION ### #}
@@ -971,11 +1068,13 @@
                                 (<a href="{% url 'candidate:candidate_edit_we_vote_id' one_batch_row.batch_row_action.candidate_campaign_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}#positions"
                                     target="_blank">
                                 {{ one_batch_row.batch_row_action.candidate_campaign_we_vote_id }}
+                                <span class="glyphicon glyphicon-new-window"></span>
                                 </a>)
                             {% elif one_batch_row.batch_row_action.contest_measure_we_vote_id %}
                                 (<a href="{% url 'measure:measure_edit_we_vote_id' one_batch_row.batch_row_action.contest_measure_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}#positions"
                                     target="_blank">
                                 {{ one_batch_row.batch_row_action.contest_measure_we_vote_id }}
+                                <span class="glyphicon glyphicon-new-window"></span>
                                 </a>)
                             {% endif %}
                         </td>
@@ -988,6 +1087,7 @@
                         <td><a href="{% url 'organization:organization_we_vote_id_position_list' one_batch_row.batch_row_action.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                                target="_blank">
                             {{ one_batch_row.batch_row_action.speaker_display_name|default_if_none:"" }}
+                            <span class="glyphicon glyphicon-new-window"></span>
                             </a></td>
                         <td>{{ one_batch_row.batch_row_action.speaker_twitter_handle|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.stance|default_if_none:"" }}</td>

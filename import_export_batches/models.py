@@ -50,6 +50,7 @@ CANDIDATE = 'CANDIDATE'
 CONTEST_OFFICE = 'CONTEST_OFFICE'
 ELECTED_OFFICE = 'ELECTED_OFFICE'
 IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'
+IMPORT_POLLING_LOCATION = 'IMPORT_POLLING_LOCATION'
 IMPORT_VOTER = 'IMPORT_VOTER'
 MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
@@ -59,10 +60,11 @@ KIND_OF_BATCH_CHOICES = (
     (ELECTED_OFFICE,    'ElectedOffice'),
     (CONTEST_OFFICE,    'ContestOffice'),
     (CANDIDATE,         'Candidate'),
+    (IMPORT_BALLOT_ITEM,   'Ballot Returned'),
+    (IMPORT_POLLING_LOCATION,   'Polling Location'),
     (ORGANIZATION_WORD, 'Organization'),
     (POSITION,          'Position'),
     (POLITICIAN,        'Politician'),
-    (IMPORT_BALLOT_ITEM,   'Ballot Returned'),
 )
 
 IMPORT_TO_BE_DETERMINED = 'IMPORT_TO_BE_DETERMINED'
@@ -274,6 +276,37 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS = {
     'organization_type': 'organization_type',
     'state_served_code': 'state_served_code',
 }
+
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLLING_LOCATIONS = {
+    'city': 'city',
+    'county_name': 'county_name',
+    'full_address': 'full_address',
+    'line1': 'line1',
+    'line2': 'line2',
+    'location_name': 'location_name',
+    'polling_location_deleted': 'polling_location_deleted',
+    'polling_location_we_vote_id': 'polling_location_we_vote_id',
+    'precinct_name': 'precinct_name',
+    'state': 'state',
+    'use_for_bulk_retrieve': 'use_for_bulk_retrieve',
+    'zip_long': 'zip_long',
+}
+
+BATCH_HEADER_MAP_FOR_POLLING_LOCATIONS = {
+    'city': 'city',
+    'county_name': 'county_name',
+    'full_address': 'full_address',
+    'line1': 'line1',
+    'line2': 'line2',
+    'location_name': 'location_name',
+    'polling_location_deleted': 'polling_location_deleted',
+    'polling_location_we_vote_id': 'polling_location_we_vote_id',
+    'precinct_name': 'precinct_name',
+    'state': 'state',
+    'use_for_bulk_retrieve': 'use_for_bulk_retrieve',
+    'zip_long': 'zip_long',
+}
+
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS = {
     'politician_full_name': 'politician_full_name',
     'politician_ctcl_uuid': 'politician_ctcl_uuid',
@@ -473,7 +506,7 @@ class BatchManager(models.Model):
                 batch_file_name, csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id,
                 polling_location_we_vote_id)
 
-        status = "CREATE_BATCH_FILETYPE_NOT_RECOGNIZED"
+        status = "CREATE_BATCH_FILE_TYPE_NOT_RECOGNIZED"
         results = {
             'success': False,
             'status': status,
@@ -1132,6 +1165,8 @@ class BatchManager(models.Model):
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
         elif kind_of_batch == IMPORT_BALLOT_ITEM:
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
+        elif kind_of_batch == IMPORT_POLLING_LOCATION:
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
         elif kind_of_batch == IMPORT_VOTER:
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS
         else:
@@ -1214,6 +1249,11 @@ class BatchManager(models.Model):
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == IMPORT_POLLING_LOCATION:
+                batch_row_action_query = BatchRowActionPollingLocation.objects.filter(batch_header_id=batch_header_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == MEASURE:
                 batch_row_action_query = BatchRowActionMeasure.objects.filter(batch_header_id=batch_header_id)
                 if positive_value_exists(kind_of_action):
@@ -1266,6 +1306,11 @@ class BatchManager(models.Model):
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == IMPORT_BALLOT_ITEM:
                 batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_set_id=batch_set_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == IMPORT_POLLING_LOCATION:
+                batch_row_action_query = BatchRowActionPollingLocation.objects.filter(batch_set_id=batch_set_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
@@ -1598,6 +1643,39 @@ class BatchManager(models.Model):
             'status':                       status,
             'batch_row_action_found':       batch_row_action_found,
             'batch_row_action_politician':  batch_row_action_politician,
+        }
+        return results
+
+    def retrieve_batch_row_action_polling_location(self, batch_header_id, batch_row_id):
+        """
+        Retrieves data from BatchRowActionPollingLocation table
+        :param batch_header_id:
+        :param batch_row_id:
+        :return:
+        """
+        status = ""
+        try:
+            batch_row_action_polling_location = \
+                BatchRowActionPollingLocation.objects.get(batch_header_id=batch_header_id, batch_row_id=batch_row_id)
+            batch_row_action_found = True
+            success = True
+            status += "BATCH_ROW_ACTION_POLLING_LOCATION_RETRIEVED "
+        except BatchRowActionPollingLocation.DoesNotExist:
+            batch_row_action_polling_location = None
+            batch_row_action_found = False
+            success = True
+            status += "BATCH_ROW_ACTION_POLLING_LOCATION_NOT_FOUND "
+        except Exception as e:
+            batch_row_action_polling_location = None
+            batch_row_action_found = False
+            success = False
+            status += "BATCH_ROW_ACTION_POLLING_LOCATION_RETRIEVE_ERROR " + str(e) + " "
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'batch_row_action_found':       batch_row_action_found,
+            'batch_row_action_polling_location':    batch_row_action_polling_location,
         }
         return results
 
@@ -5712,6 +5790,33 @@ class BatchRowActionOrganization(models.Model):
         verbose_name="type of org", max_length=1, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
 
     status = models.TextField(verbose_name="batch row action organization status", null=True, blank=True, default="")
+
+
+class BatchRowActionPollingLocation(models.Model):
+    """
+    The definition of the action for importing one ballot item.
+    """
+    batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
+    batch_header_id = models.PositiveIntegerField(
+        verbose_name="unique id of header row", unique=False, null=False, db_index=True)
+    batch_row_id = models.PositiveIntegerField(
+        verbose_name="unique id of batch row", null=True, default=None, db_index=True)
+    kind_of_action = models.CharField(
+        max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
+
+    polling_location_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    location_name = models.CharField(max_length=255, null=True, blank=True)
+    polling_hours_text = models.CharField(max_length=255, null=True, blank=True)
+    directions_text = models.TextField(null=True, blank=True)
+    line1 = models.CharField(max_length=255, blank=True, null=True)
+    line2 = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=255, blank=True, null=True)
+    state = models.CharField(max_length=255, blank=True, null=True)
+    zip_long = models.CharField(max_length=255, blank=True, null=True)
+    county_name = models.CharField(default=None, max_length=255, null=True)
+    precinct_name = models.CharField(default=None, max_length=255, null=True)
+    use_for_bulk_retrieve = models.BooleanField(default=False)
+    polling_location_deleted = models.BooleanField(default=False)
 
 
 class BatchRowActionPosition(models.Model):
