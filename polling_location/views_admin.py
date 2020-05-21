@@ -480,6 +480,9 @@ def polling_location_list_view(request):
             new_filter = Q(city__icontains=one_word)
             filters.append(new_filter)
 
+            new_filter = Q(county_name__icontains=one_word)
+            filters.append(new_filter)
+
             new_filter = Q(zip_long__icontains=one_word)
             filters.append(new_filter)
 
@@ -487,6 +490,9 @@ def polling_location_list_view(request):
             filters.append(new_filter)
 
             new_filter = Q(line2__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(precinct_name__icontains=one_word)
             filters.append(new_filter)
 
             # Add the first query

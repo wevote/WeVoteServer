@@ -107,7 +107,9 @@
             <th>Address</th>
             <th>we_vote_id</th>
             <th>lat/long</th>
-            <th>Use for bulk retrieve</th>
+            <th>County</th>
+            <th>Precinct</th>
+            <th>For bulk retrieve?</th>
             <th></th>
         </tr>
     </thead>
@@ -119,13 +121,22 @@
             {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}(missing location name)&nbsp;&nbsp;{% endif %}</a>
             </td>
             <td>
-                {{ polling_location.get_text_for_map_search }} (<a href="https://www.google.com/maps/place/{{ polling_location.get_text_for_map_search|iriencode }}" target="_blank">map</a>)&nbsp;&nbsp;
-                (<a href="{% url 'electoral_district:electoral_district_list' %}?polling_location_we_vote_id={{ polling_location.we_vote_id }}&state_code={{ polling_location.state }}" target="_blank">show districts</a>)
+                {{ polling_location.get_text_for_map_search }}
+                (<a href="https://www.google.com/maps/place/{{ polling_location.get_text_for_map_search|iriencode }}"
+                    target="_blank">map <span class="glyphicon glyphicon-new-window"></span></a>)&nbsp;&nbsp;
+                (<a href="{% url 'electoral_district:electoral_district_list' %}?polling_location_we_vote_id={{ polling_location.we_vote_id }}&state_code={{ polling_location.state }}"
+                    target="_blank">show districts <span class="glyphicon glyphicon-new-window"></span></a>)
             </td>
             <td>
                 {% if polling_location.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ polling_location.we_vote_id }}{% endif %}
             </td>
-            <td>{% if polling_location.latitude %}&nbsp;&nbsp;Lat/Long: yes{% endif %}</td>
+            <td>{% if polling_location.latitude %}&nbsp;&nbsp;Lat/Long:&nbsp;yes{% endif %}</td>
+            <td>
+                {{ polling_location.county_name|default_if_none:"" }}
+            </td>
+            <td>
+                {{ polling_location.precinct_name|default_if_none:"" }}
+            </td>
             <td>
               {% if polling_location.use_for_bulk_retrieve %}bulk{% endif %}
               {% if polling_location.polling_location_deleted %} <strong>DELETED</strong>{% endif %}
