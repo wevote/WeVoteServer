@@ -25,6 +25,9 @@
 <p>
   <a href="{% url 'election:elections_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
     Retrieve All Elections from Master API Server <span class="glyphicon glyphicon-new-window"></span></a> (Meta information only)
+  &nbsp;&nbsp;&nbsp;
+  <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&refresh_states=1">
+    Refresh States</a>
 </p>
 
 {#Pinging API Server <span id="testDots" >.</span>#}
@@ -92,7 +95,7 @@
             <th></th>
             <th>Live?</th>
             <th>{% if is_national_election %}Notes{% else %}Election Name{% endif %}</th>
-            <th>State</th>
+            <th>State(s)</th>
         {% if not is_national_election %}
             <th>Date</th>
             <th>Google Civic ID</th>
@@ -135,8 +138,15 @@
             </td>
             <td align="middle">
               {% if election.is_national_election and not is_national_election %}
-                  (<a href="{% url 'election:nationwide_election_list' %}?google_civic_election_id={{ election.google_civic_election_id }}"
-                      target="_blank">see all states <span class="glyphicon glyphicon-new-window"></span></a>)
+                  <a href="{% url 'election:nationwide_election_list' %}?google_civic_election_id={{ election.google_civic_election_id }}"
+                      target="_blank">
+                      {% if election.state_code_list_raw %}
+                        {{ election.state_code_list_raw }}
+                      {% else %}
+                        see all states
+                      {% endif %}
+                      <span class="glyphicon glyphicon-new-window"></span>
+                  </a>
               {% else %}
                   <a href="{% url 'election:election_summary' election.id %}?state_code={{ election.state_code }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                      target="_blank">
