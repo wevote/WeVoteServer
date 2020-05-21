@@ -5792,31 +5792,31 @@ class BatchRowActionOrganization(models.Model):
     status = models.TextField(verbose_name="batch row action organization status", null=True, blank=True, default="")
 
 
-class BatchRowActionPollingLocation(models.Model):
-    """
-    The definition of the action for importing one ballot item.
-    """
-    batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
-    batch_header_id = models.PositiveIntegerField(
-        verbose_name="unique id of header row", unique=False, null=False, db_index=True)
-    batch_row_id = models.PositiveIntegerField(
-        verbose_name="unique id of batch row", null=True, default=None, db_index=True)
-    kind_of_action = models.CharField(
-        max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
-
-    polling_location_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-    location_name = models.CharField(max_length=255, null=True, blank=True)
-    polling_hours_text = models.CharField(max_length=255, null=True, blank=True)
-    directions_text = models.TextField(null=True, blank=True)
-    line1 = models.CharField(max_length=255, blank=True, null=True)
-    line2 = models.CharField(max_length=255, blank=True, null=True)
-    city = models.CharField(max_length=255, blank=True, null=True)
-    state = models.CharField(max_length=255, blank=True, null=True)
-    zip_long = models.CharField(max_length=255, blank=True, null=True)
-    county_name = models.CharField(default=None, max_length=255, null=True)
-    precinct_name = models.CharField(default=None, max_length=255, null=True)
-    use_for_bulk_retrieve = models.BooleanField(default=False)
-    polling_location_deleted = models.BooleanField(default=False)
+# class BatchRowActionPollingLocation(models.Model):
+#     """
+#     The definition of the action for importing one ballot item.
+#     """
+#     batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
+#     batch_header_id = models.PositiveIntegerField(
+#         verbose_name="unique id of header row", unique=False, null=False, db_index=True)
+#     batch_row_id = models.PositiveIntegerField(
+#         verbose_name="unique id of batch row", null=True, default=None, db_index=True)
+#     kind_of_action = models.CharField(
+#         max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
+#
+#     polling_location_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+#     location_name = models.CharField(max_length=255, null=True, blank=True)
+#     polling_hours_text = models.CharField(max_length=255, null=True, blank=True)
+#     directions_text = models.TextField(null=True, blank=True)
+#     line1 = models.CharField(max_length=255, blank=True, null=True)
+#     line2 = models.CharField(max_length=255, blank=True, null=True)
+#     city = models.CharField(max_length=255, blank=True, null=True)
+#     state = models.CharField(max_length=255, blank=True, null=True)
+#     zip_long = models.CharField(max_length=255, blank=True, null=True)
+#     county_name = models.CharField(default=None, max_length=255, null=True)
+#     precinct_name = models.CharField(default=None, max_length=255, null=True)
+#     use_for_bulk_retrieve = models.BooleanField(default=False)
+#     polling_location_deleted = models.BooleanField(default=False)
 
 
 class BatchRowActionPosition(models.Model):
