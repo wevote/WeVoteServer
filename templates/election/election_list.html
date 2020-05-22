@@ -95,9 +95,11 @@
             <th></th>
             <th>Live?</th>
             <th>{% if is_national_election %}Notes{% else %}Election Name{% endif %}</th>
-            <th>State(s)</th>
         {% if not is_national_election %}
             <th>Date</th>
+        {% endif %}
+            <th>State(s)</th>
+        {% if not is_national_election %}
             <th>Google Civic ID</th>
         {% endif %}
             <th align="middle">Offices
@@ -136,6 +138,12 @@
                 <br /><span style="color: darkgray">{{ election.internal_notes|default_if_none:""|truncatechars:50 }}</span>
                 {% endif %}
             </td>
+        {% if not is_national_election %}
+            <td>
+                <span class="u-no-break">{{ election.election_day_text }}</span>
+                {% if election.days_until_election > 0 %} <span class="u-no-break {% if election.days_until_election < 46 %}font-weight-bold text-danger{% endif %}">(in {{ election.days_until_election }} days)</span>{% endif %}
+            </td>
+        {% endif %}
             <td align="middle">
               {% if election.is_national_election and not is_national_election %}
                 <div style="overflow-wrap: anywhere;">
@@ -157,10 +165,6 @@
               {% endif %}
             </td>
         {% if not is_national_election %}
-            <td>
-                {{ election.election_day_text }}
-                {% if election.days_until_election > 0 %} <span class="{% if election.days_until_election < 46 %}font-weight-bold text-danger{% endif %}">(in {{ election.days_until_election }} days)</span>{% endif %}
-            </td>
             <td align="middle">{{ election.google_civic_election_id }}</td>
         {% endif %}
             <td align="middle">
