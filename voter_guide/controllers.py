@@ -1185,7 +1185,7 @@ def take_in_possible_endorsement_list_from_form(request):
                 'organization_we_vote_id': request.POST.get('organization_we_vote_id_' + str(number_index), ""),
                 'more_info_url': request.POST.get('more_info_url_' + str(number_index), ""),
                 'statement_text': request.POST.get('statement_text_' + str(number_index), ""),
-                'position_stance': request.POST.get('position_stance_' + str(number_index), ""),
+                'position_stance': request.POST.get('position_stance_' + str(number_index), "SUPPORT"),
                 'possibility_should_be_deleted':
                     positive_value_exists(request.POST.get('possibility_should_be_deleted_' + str(number_index),
                                                            False)),
