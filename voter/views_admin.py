@@ -19,7 +19,7 @@ from organization.models import Organization, OrganizationManager, INDIVIDUAL
 from position.controllers import merge_duplicate_positions_for_voter
 from position.models import PositionEntered, PositionForFriends
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
-from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority, voter_setup
+from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority, VoterManager, voter_setup
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_api_device_id, set_voter_api_device_id, \
     positive_value_exists
@@ -178,7 +178,8 @@ def voter_edit_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -265,7 +266,8 @@ def voter_edit_process_view(request):
 
 @login_required
 def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -705,7 +707,8 @@ def voter_change_authority_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -732,6 +735,9 @@ def voter_change_authority_process_view(request):
             if authority_granted == 'admin':
                 voter_on_stage.is_admin = True
                 authority_changed = True
+            elif authority_granted == 'analytics_admin':
+                voter_on_stage.is_analytics_admin = True
+                authority_changed = True
             elif authority_granted == 'partner_organization':
                 voter_on_stage.is_partner_organization = True
                 authority_changed = True
@@ -747,6 +753,9 @@ def voter_change_authority_process_view(request):
 
             if authority_removed == 'admin':
                 voter_on_stage.is_admin = False
+                authority_changed = True
+            elif authority_removed == 'analytics_admin':
+                voter_on_stage.is_analytics_admin = False
                 authority_changed = True
             elif authority_removed == 'partner_organization':
                 voter_on_stage.is_partner_organization = False
@@ -813,18 +822,31 @@ def voter_remove_facebook_auth_process_view(request, voter_id=0, voter_we_vote_i
 
 @login_required
 def voter_list_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
     voter_search = request.GET.get('voter_search', '')
+    is_admin = request.GET.get('is_admin', '')
+    is_analytics_admin = request.GET.get('is_analytics_admin', '')
+    is_partner_organization = request.GET.get('is_partner_organization', '')
+    is_political_data_manager = request.GET.get('is_political_data_manager', '')
+    is_political_data_viewer = request.GET.get('is_political_data_viewer', '')
+    is_verified_volunteer = request.GET.get('is_verified_volunteer', '')
+
     voter_api_device_id = get_voter_api_device_id(request)  # We look in the cookies for voter_api_device_id
-    voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
-    voter_id = convert_to_int(voter_id)
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id)
+    voter_id = 0
+    if results['voter_found']:
+        voter = results['voter']
+        voter_id = voter.id
+        voter_id = convert_to_int(voter_id)
 
     messages_on_stage = get_messages(request)
     if positive_value_exists(voter_search):
-        voter_list = Voter.objects.all()
+        voter_query = Voter.objects.all()
         filters = []
         new_filter = Q(first_name__icontains=voter_search)
         filters.append(new_filter)
@@ -861,25 +883,54 @@ def voter_list_view(request):
             for item in filters:
                 final_filters |= item
 
-            voter_list = voter_list.filter(final_filters)
+            voter_query = voter_query.filter(final_filters)
     else:
-        voter_list = Voter.objects.order_by('-is_admin', '-is_verified_volunteer', 'email', 'twitter_screen_name',
+        voter_query = Voter.objects.order_by('-is_admin', '-is_verified_volunteer', 'email', 'twitter_screen_name',
                                             'linked_organization_we_vote_id', 'facebook_email',
                                             'last_name', 'first_name')
-    voter_list = voter_list[:200]
+
+    if positive_value_exists(is_admin):
+        voter_query = voter_query.filter(is_admin=True)
+    if positive_value_exists(is_analytics_admin):
+        voter_query = voter_query.filter(is_analytics_admin=True)
+    if positive_value_exists(is_partner_organization):
+        voter_query = voter_query.filter(is_partner_organization=True)
+    if positive_value_exists(is_political_data_manager):
+        voter_query = voter_query.filter(is_political_data_manager=True)
+    if positive_value_exists(is_political_data_viewer):
+        voter_query = voter_query.filter(is_political_data_viewer=True)
+    if positive_value_exists(is_verified_volunteer):
+        voter_query = voter_query.filter(is_verified_volunteer=True)
+
+    voter_list = voter_query[:50]
+    modified_voter_list = []
+
+    facebook_manager = FacebookManager()
+    twitter_user_manager = TwitterUserManager()
+    for one_voter in voter_list:
+        one_voter.twitter_handle = twitter_user_manager.fetch_twitter_handle_from_voter_we_vote_id(one_voter.we_vote_id)
+        one_voter.retrieved_facebook_id = facebook_manager.fetch_facebook_id_from_voter_we_vote_id(one_voter.we_vote_id)
+        modified_voter_list.append(one_voter)
 
     template_values = {
-        'messages_on_stage': messages_on_stage,
-        'voter_list': voter_list,
-        'voter_id_signed_in': voter_id,
-        'voter_search': voter_search,
+        'is_admin':                     is_admin,
+        'is_analytics_admin':           is_analytics_admin,
+        'is_partner_organization':      is_partner_organization,
+        'is_political_data_manager':    is_political_data_manager,
+        'is_political_data_viewer':     is_political_data_viewer,
+        'is_verified_volunteer':        is_verified_volunteer,
+        'messages_on_stage':            messages_on_stage,
+        'voter_list':                   modified_voter_list,
+        'voter_id_signed_in':           voter_id,
+        'voter_search':                 voter_search,
     }
     return render(request, 'voter/voter_list.html', template_values)
 
 
 @login_required
 def voter_summary_view(request, voter_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

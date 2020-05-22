@@ -17,7 +17,7 @@ from polling_location.models import PollingLocationManager
 import sys
 import wevote_functions.admin
 from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
-    extract_state_code_from_address_string, positive_value_exists
+    extract_state_code_from_address_string, positive_value_exists, STATE_CODE_MAP
 from wevote_settings.models import fetch_next_we_vote_id_ballot_returned_integer, fetch_site_unique_id_prefix
 
 OFFICE = 'OFFICE'
@@ -55,7 +55,8 @@ class BallotItem(models.Model):
                                                 max_length=20, null=False, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False)
-    state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
+    state_code = models.CharField(
+        verbose_name="state the ballot item is related to", max_length=2, null=True, db_index=True)
 
     google_ballot_placement = models.BigIntegerField(
         verbose_name="the order this item should appear on the ballot", null=True, blank=True, unique=False)
@@ -923,12 +924,42 @@ class BallotItemListManager(models.Model):
         }
         return results
 
+    def count_ballot_items(self, google_civic_election_id, state_code=""):
+        ballot_item_list_count = 0
+        success = False
+        status = ''
+        try:
+            ballot_item_queryset = BallotItem.objects.all()
+            ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                ballot_item_queryset = ballot_item_queryset.filter(state_code__iexact=state_code)
+            else:
+                ballot_item_queryset = ballot_item_queryset.filter(Q(state_code=None) | Q(state_code=""))
+            ballot_item_list_count = ballot_item_queryset.count()
+
+            status += 'COUNT_BALLOT_ITEMS_COMPLETE '
+            success = True
+        except BallotItem.DoesNotExist:
+            # No ballot items found. Not a problem.
+            status += 'NO_BALLOT_ITEMS_COUNT_FOUND '
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status += 'FAILED count_ballot_items ' + str(e) + ' '
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'ballot_item_list_count':   ballot_item_list_count,
+        }
+        return results
+
     def count_ballot_items_for_election_lacking_state(self, google_civic_election_id):
         ballot_item_list_count = 0
         success = False
         status = ''
         try:
-            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
+            ballot_item_queryset = BallotItem.objects.all()
             ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
             ballot_item_queryset = ballot_item_queryset.filter(Q(state_code=None) | Q(state_code=""))
             ballot_item_list_count = ballot_item_queryset.count()
@@ -1593,7 +1624,8 @@ class BallotReturned(models.Model):
 
     latitude = models.FloatField(null=True, verbose_name='latitude returned from Google')
     longitude = models.FloatField(null=True, verbose_name='longitude returned from Google')
-    state_code = models.CharField(verbose_name="state code returned or calculated", max_length=2, null=True)
+    state_code = models.CharField(
+        verbose_name="state code returned or calculated", max_length=2, null=True, db_index=True)
 
     normalized_line1 = models.CharField(max_length=255, blank=True, null=True,
                                         verbose_name='normalized address line 1 returned from Google')
@@ -2289,9 +2321,14 @@ class BallotReturnedManager(models.Model):
                         ballot_returned_query = ballot_returned_query.filter(
                             google_civic_election_id=past_google_civic_election_id)
 
-            ballot_returned_list = list(ballot_returned_query)
-            if len(ballot_returned_list):
-                ballot = ballot_returned_list[0]
+            try:
+                ballot = ballot_returned_query.first()
+            except Exception as e:
+                ballot = None
+                status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+            # ballot_returned_list = list(ballot_returned_query)
+            # if len(ballot_returned_list):
+            #     ballot = ballot_returned_list[0]
         else:
             # If here, then the geocoder successfully found the address
             status += 'GEOCODER_FOUND_LOCATION '
@@ -2324,9 +2361,14 @@ class BallotReturnedManager(models.Model):
             if positive_value_exists(google_civic_election_id):
                 status += "SEARCHING_BY_GOOGLE_CIVIC_ID "
                 ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
-                ballot_returned_list = list(ballot_returned_query)
-                if len(ballot_returned_list):
-                    ballot = ballot_returned_list[0]
+                try:
+                    ballot = ballot_returned_query.first()
+                except Exception as e:
+                    ballot = None
+                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                # ballot_returned_list = list(ballot_returned_query)
+                # if len(ballot_returned_list):
+                #     ballot = ballot_returned_list[0]
             else:
                 # If we have an active election coming up, including today
                 # fetch_next_upcoming_election_in_this_state returns next election with ballot items
@@ -2336,9 +2378,14 @@ class BallotReturnedManager(models.Model):
                     ballot_returned_query_without_election_id = ballot_returned_query
                     ballot_returned_query = ballot_returned_query.filter(
                         google_civic_election_id=upcoming_google_civic_election_id)
-                    ballot_returned_list = list(ballot_returned_query)
-                    if len(ballot_returned_list):
-                        ballot = ballot_returned_list[0]
+                    try:
+                        ballot = ballot_returned_query.first()
+                    except Exception as e:
+                        ballot = None
+                        status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                    # ballot_returned_list = list(ballot_returned_query)
+                    # if len(ballot_returned_list):
+                    #     ballot = ballot_returned_list[0]
                     # What if this is a National election, but there aren't any races in the state the voter is in?
                     # We want to find the *next* upcoming election
                     if ballot is None:
@@ -2356,9 +2403,14 @@ class BallotReturnedManager(models.Model):
                             if positive_value_exists(upcoming_google_civic_election_id):
                                 ballot_returned_query = ballot_returned_query.filter(
                                     google_civic_election_id=upcoming_google_civic_election_id)
-                                ballot_returned_list = list(ballot_returned_query)
-                                if len(ballot_returned_list):
-                                    ballot = ballot_returned_list[0]
+                                try:
+                                    ballot = ballot_returned_query.first()
+                                except Exception as e:
+                                    ballot = None
+                                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                                # ballot_returned_list = list(ballot_returned_query)
+                                # if len(ballot_returned_list):
+                                #     ballot = ballot_returned_list[0]
                                 if ballot is not None:
                                     ballot_not_found = False
                             else:
@@ -2369,9 +2421,14 @@ class BallotReturnedManager(models.Model):
                         # Limit the search to the most recent election with ballot items
                         ballot_returned_query = ballot_returned_query.filter(
                             google_civic_election_id=past_google_civic_election_id)
-                    ballot_returned_list = list(ballot_returned_query)
-                    if len(ballot_returned_list):
-                        ballot = ballot_returned_list[0]
+                    try:
+                        ballot = ballot_returned_query.first()
+                    except Exception as e:
+                        ballot = None
+                        status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                    # ballot_returned_list = list(ballot_returned_query)
+                    # if len(ballot_returned_list):
+                    #     ballot = ballot_returned_list[0]
 
         if ballot is not None:
             ballot_returned = ballot
@@ -2405,9 +2462,14 @@ class BallotReturnedManager(models.Model):
                 status += "SEARCHING_BY_GOOGLE_CIVIC_ID-ATTEMPT2 "
                 ballot_returned_query = ballot_returned_query.filter(
                     google_civic_election_id=google_civic_election_id)
-                ballot_returned_list = list(ballot_returned_query)
-                if len(ballot_returned_list):
-                    ballot_returned = ballot_returned_list[0]
+                try:
+                    ballot_returned = ballot_returned_query.first()
+                except Exception as e:
+                    ballot_returned = None
+                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                # ballot_returned_list = list(ballot_returned_query)
+                # if len(ballot_returned_list):
+                #     ballot_returned = ballot_returned_list[0]
                 if ballot_returned is not None:
                     ballot_returned_found = True
                     status += 'BALLOT_RETURNED_FOUND-ATTEMPT2 '
@@ -2908,6 +2970,42 @@ class BallotReturnedListManager(models.Model):
             'status':                       status,
             'ballot_returned_list_found':   ballot_returned_list_found,
             'ballot_returned_list':         ballot_returned_list,
+        }
+        return results
+
+    def retrieve_state_codes_in_election(self, google_civic_election_id):
+        """
+        Return a simple list of state_codes that have ballot items in an election.
+        :param google_civic_election_id:
+        :return:
+        """
+        status = ''
+        success = False
+        unique_state_code_list = []
+        try:
+            # Make sure there is at least one BallotReturned for this election. If so, then check for each state
+            queryset = BallotReturned.objects.using('readonly').all()
+            queryset = queryset.filter(google_civic_election_id=google_civic_election_id)
+            one_found = queryset[:1]
+            if len(one_found):
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    if state_code.upper() not in unique_state_code_list:
+                        queryset = BallotReturned.objects.using('readonly').all()
+                        queryset = queryset.filter(google_civic_election_id=google_civic_election_id)
+                        queryset = queryset.filter(state_code__iexact=state_code)
+                        one_found = queryset[:1]
+                        if len(one_found):
+                            unique_state_code_list.append(state_code.upper())
+            status += 'RETRIEVE_STATE_CODES_IN_ELECTION-QUERY_SUCCESSFUL '
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status += 'RETRIEVE_STATE_CODES_IN_ELECTION-FAILED: ' + str(e) + ' '
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'state_code_list':  unique_state_code_list,
         }
         return results
 

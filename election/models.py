@@ -113,6 +113,8 @@ class Election(models.Model):
     # entering elections manually.
     state_code = models.CharField(verbose_name="state code for the election",
                                   max_length=2, null=True, blank=True, db_index=True)
+    # We generate a string with all of the state codes. Ex/ CA,CO,UT
+    state_code_list_raw = models.CharField(max_length=255, null=True, blank=True)
     include_in_list_for_voters = models.BooleanField(default=False)
 
     # For internal notes regarding gathering data for this election
@@ -149,6 +151,15 @@ class Election(models.Model):
                 return extract_state_from_ocd_division_id(ocd_division_id)
             else:
                 return ''
+
+    def state_code_list(self):
+        if not positive_value_exists(self.state_code_list_raw):
+            return []
+        else:
+            try:
+                return self.state_code_list_raw.split(",")
+            except Exception as e:
+                return []
 
 
 class ElectionManager(models.Model):
@@ -391,7 +402,13 @@ class ElectionManager(models.Model):
         }
         return results
 
-    def retrieve_upcoming_elections(self, state_code="", without_state_code=False, include_test_election=False):
+    def retrieve_upcoming_elections(
+            self,
+            state_code="",
+            without_state_code=False,
+            require_include_in_list_for_voters=False,
+            include_test_election=False):
+        status = ''
         election_list_found = False
         upcoming_election_list = []
         today = datetime.now().date()
@@ -399,6 +416,9 @@ class ElectionManager(models.Model):
         try:
             election_list_query = Election.objects.using('readonly').all()
             election_list_query = election_list_query.filter(election_day_text__gte=we_vote_date_string)
+            election_list_query = election_list_query.exclude(ignore_this_election=True)
+            if positive_value_exists(require_include_in_list_for_voters):
+                election_list_query = election_list_query.filter(include_in_list_for_voters=True)
             if positive_value_exists(without_state_code):
                 election_list_query = election_list_query.filter(Q(state_code__isnull=True) | Q(state_code__exact=''))
             elif positive_value_exists(state_code):
@@ -409,7 +429,7 @@ class ElectionManager(models.Model):
 
             upcoming_election_list = list(election_list_query)
 
-            status = 'ELECTIONS_FOUND '
+            status += 'ELECTION_QUERY_COMPLETE '
             election_list_found = positive_value_exists(len(upcoming_election_list))
             success = True
         except Election.DoesNotExist as e:
@@ -417,7 +437,7 @@ class ElectionManager(models.Model):
             success = True
             election_list_found = False
         except Exception as e:
-            status = "RETRIEVE_UPCOMING_ELECTIONS_QUERY_FAILURE "
+            status = "RETRIEVE_UPCOMING_ELECTIONS_QUERY_FAILURE " + str(e) + " "
             success = False
 
         results = {
@@ -428,12 +448,17 @@ class ElectionManager(models.Model):
         }
         return results
 
-    def retrieve_upcoming_google_civic_election_id_list(self, limit_to_this_state_code=''):
+    def retrieve_upcoming_google_civic_election_id_list(
+            self,
+            limit_to_this_state_code='',
+            require_include_in_list_for_voters=False):
         # There is a parallel function in controllers retrieve_upcoming_election_id_list(
         status = ""
         success = True
         upcoming_google_civic_election_id_list = []
-        results = self.retrieve_upcoming_elections(state_code=limit_to_this_state_code)
+        results = self.retrieve_upcoming_elections(
+            state_code=limit_to_this_state_code,
+            require_include_in_list_for_voters=require_include_in_list_for_voters)
         if results['election_list_found']:
             election_list = results['election_list']
             for one_election in election_list:
@@ -445,7 +470,8 @@ class ElectionManager(models.Model):
 
         # If a state code IS included, then the above retrieve_upcoming_elections will have missed the national election
         if positive_value_exists(limit_to_this_state_code):
-            results = self.retrieve_upcoming_national_elections()
+            results = self.retrieve_upcoming_national_elections(
+                require_include_in_list_for_voters=require_include_in_list_for_voters)
             if results['election_list_found']:
                 election_list = results['election_list']
                 for one_election in election_list:
@@ -541,52 +567,69 @@ class ElectionManager(models.Model):
         }
         return results
 
-    def retrieve_next_election_for_state(self, state_code):
+    def retrieve_next_election_for_state(self, state_code, require_include_in_list_for_voters=True):
         """
         We want either the next election in this state, or the next national election, whichever comes first
         :param state_code:
+        :param require_include_in_list_for_voters:
         :return:
         """
         status = ""
-        upcoming_state_elections_results = self.retrieve_upcoming_elections(state_code)
-        election_list = upcoming_state_elections_results['election_list']
-        if not len(election_list):
-            status += upcoming_state_elections_results['status']
-            without_state_code = True
-            upcoming_national_elections_results = self.retrieve_upcoming_elections("", without_state_code)
-            election_list = upcoming_national_elections_results['election_list']
+        from ballot.models import BallotItemListManager
+        ballot_item_list_manager = BallotItemListManager()
+        # Find state-specific elections
+        upcoming_state_elections_results = self.retrieve_upcoming_elections(
+            state_code, require_include_in_list_for_voters=require_include_in_list_for_voters)
+        state_election_list = upcoming_state_elections_results['election_list']
+        status += upcoming_state_elections_results['status']
 
-            if not len(election_list):
-                status += upcoming_national_elections_results['status']
-                success = True
-                status += "RETRIEVE_NEXT_ELECTION_FOR_STATE-NOT_FOUND: "
-                results = {
-                    'success':          success,
-                    'status':           status,
-                    'election_found':   False,
-                    'election':         Election(),
-                }
-                return results
+        # Find national elections with data from this state
+        without_state_code = True
+        upcoming_national_elections_results = self.retrieve_upcoming_elections(
+            "", without_state_code=without_state_code,
+            require_include_in_list_for_voters=require_include_in_list_for_voters)
+        national_election_list = upcoming_national_elections_results['election_list']
+        filtered_national_election_list = []
+        for national_election in national_election_list:
+            # Does this national election have any ballot items for state_code?
+            results = ballot_item_list_manager.count_ballot_items(
+                national_election.google_civic_election_id, state_code)
+            ballot_item_count = results['ballot_item_list_count']
+            if positive_value_exists(ballot_item_count):
+                filtered_national_election_list.append(national_election)
+
+        combined_election_list = state_election_list + filtered_national_election_list
+        # Find earliest election (next election)
+        election = None
+        election_found = False
+        earliest_election_day_text = None
+        for one_election in combined_election_list:
+            if not positive_value_exists(earliest_election_day_text):
+                earliest_election_day_text = one_election.election_day_text
+            if one_election.election_day_text <= earliest_election_day_text:
+                earliest_election_day_text = one_election.election_day_text
+                election = one_election
+                election_found = True
 
         success = True
-        status += "RETRIEVE_NEXT_ELECTION_FOR_STATE-FOUND "
-        election = election_list[0]
+        status += "RETRIEVE_NEXT_ELECTION_FOR_STATE_COMPLETED "
         results = {
             'success':          success,
             'status':           status,
-            'election_found':   True,
+            'election_found':   election_found,
             'election':         election,
         }
         return results
 
-    def retrieve_next_national_election(self):
+    def retrieve_next_national_election(self, require_include_in_list_for_voters=False):
         """
         We want the next national election
         :return:
         """
         status = ""
         without_state_code = True
-        upcoming_national_elections_results = self.retrieve_upcoming_elections("", without_state_code)
+        upcoming_national_elections_results = self.retrieve_upcoming_elections(
+            "", without_state_code, require_include_in_list_for_voters=require_include_in_list_for_voters)
         election_list = upcoming_national_elections_results['election_list']
 
         if not len(election_list):
@@ -612,14 +655,17 @@ class ElectionManager(models.Model):
         }
         return results
 
-    def retrieve_upcoming_national_elections(self):
+    def retrieve_upcoming_national_elections(
+            self, require_include_in_list_for_voters=False):
         """
-        We want all upcoming national election
+        We want all upcoming national elections
+        :param require_include_in_list_for_voters:
         :return:
         """
         status = ""
         without_state_code = True
-        upcoming_national_elections_results = self.retrieve_upcoming_elections("", without_state_code)
+        upcoming_national_elections_results = self.retrieve_upcoming_elections(
+            "", without_state_code, require_include_in_list_for_voters=require_include_in_list_for_voters)
         election_list = upcoming_national_elections_results['election_list']
 
         if not len(election_list):
@@ -644,21 +690,24 @@ class ElectionManager(models.Model):
         }
         return results
 
-    def retrieve_next_election_with_state_optional(self, state_code=""):
+    def retrieve_next_election_with_state_optional(self, state_code="", require_include_in_list_for_voters=True):
         """
         We want either the next election in this state, or the next national election, whichever comes first
         :param state_code:
+        :param require_include_in_list_for_voters:
         :return:
         """
         status = ""
         election_list = []
         if positive_value_exists(state_code):
-            upcoming_state_elections_results = self.retrieve_upcoming_elections(state_code)
+            upcoming_state_elections_results = self.retrieve_upcoming_elections(
+                state_code, require_include_in_list_for_voters=require_include_in_list_for_voters)
             election_list = upcoming_state_elections_results['election_list']
             status += upcoming_state_elections_results['status']
         if not len(election_list):
             without_state_code = True
-            upcoming_national_elections_results = self.retrieve_upcoming_elections("", without_state_code)
+            upcoming_national_elections_results = self.retrieve_upcoming_elections(
+                "", without_state_code, require_include_in_list_for_voters=require_include_in_list_for_voters)
             election_list = upcoming_national_elections_results['election_list']
 
             if not len(election_list):
@@ -928,14 +977,16 @@ def fetch_election_state(google_civic_election_id):
         return ''
 
 
-def fetch_next_election_for_state(state_code):
+def fetch_next_election_for_state(state_code, require_include_in_list_for_voters=True):
     """
     Before using election returned, check for google_civic_election_id
     :param state_code:
+    :param require_include_in_list_for_voters:
     :return:
     """
     election_manager = ElectionManager()
-    results = election_manager.retrieve_next_election_for_state(state_code)
+    results = election_manager.retrieve_next_election_for_state(
+        state_code, require_include_in_list_for_voters=require_include_in_list_for_voters)
     if results['election_found']:
         election = results['election']
         return election

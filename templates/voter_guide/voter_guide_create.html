@@ -7,7 +7,13 @@
 {% load template_filters %}
 
 
-<form id="the_form" action="{% url "voter_guide:voter_guide_create_process" %}" method="post" class="form-horizontal">
+<form
+  id="the_form"
+  action="{% url "voter_guide:voter_guide_create_process" %}"
+  method="post"
+  class="form-horizontal"
+  onsubmit="dontSendUnnecessaryFormValues(this)"
+>
 {% csrf_token %}
 
 <script>
@@ -584,6 +590,21 @@
 
 </form>
 
-
+<script>
+function dontSendUnnecessaryFormValues(form) {
+  // We disable some of the input fields to avoid hitting a exceeded settings.DATA_UPLOAD_MAX_NUMBER_FIELDS server error
+  let controls = form.elements;
+  for (let i=0, controlsLength=controls.length; i<controlsLength; i++) {
+    if (controls[i].value == '') {
+      controls[i].disabled = true;
+      // console.log('disabled-name:', controls[i].name, 'type:', controls[i].type, 'value:', controls[i].value);
+    } else if (controls[i].value == 'SUPPORT') {
+      // On the server, we default to SUPPORT if no value passed in
+      controls[i].disabled = true;
+      // console.log('support-name:', controls[i].name, 'type:', controls[i].type, 'value:', controls[i].value);
+    }
+  }
+}
+</script>
 
 {% endblock %}

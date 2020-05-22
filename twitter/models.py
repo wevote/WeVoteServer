@@ -220,17 +220,57 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def update_or_create_twitter_link_possibility(self, candidate_campaign_we_vote_id, twitter_json, search_term,
-                                                  likelihood_score):
+    def update_or_create_twitter_link_possibility(
+            self,
+            twitter_link_possibility_id=0,
+            candidate_campaign_we_vote_id='',
+            twitter_handle='',
+            defaults={}):
+        status = ""
         try:
-            TwitterLinkPossibility.objects.update_or_create(
+            if positive_value_exists(twitter_link_possibility_id):
+                twitter_link_possibility = TwitterLinkPossibility.objects.get(id=twitter_link_possibility_id)
+                change_to_save = False
+                if 'not_a_match' in defaults:
+                    change_to_save = True
+                    twitter_link_possibility.not_a_match = defaults['not_a_match']
+                if positive_value_exists(change_to_save):
+                    twitter_link_possibility.save()
+            else:
+                TwitterLinkPossibility.objects.update_or_create(
+                    candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                    twitter_handle__iexact=twitter_handle,
+                    defaults=defaults,
+                    )
+            status += "TWITTER_LINK_TO_POSSIBILITY_UPDATE_OR_CREATED "
+            success = True
+
+        except Exception as e:
+            status += "TWITTER_LINK_TO_POSSIBILITY_NOT_UPDATE_OR_CREATED " + str(e) + ' '
+            success = False
+
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    def update_or_create_twitter_link_possibility_from_twitter_json(
+            self, candidate_campaign_we_vote_id, twitter_json, search_term, likelihood_score):
+        created = False
+        status = ""
+        multiple_objects_returned = False
+        twitter_link_possibility = None
+        try:
+            twitter_link_possibility, created = TwitterLinkPossibility.objects.update_or_create(
                 candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
                 twitter_id=twitter_json['id'],
-                twitter_handle=twitter_json['screen_name'],
                 defaults={
                     'likelihood_score': likelihood_score,
                     'search_term_used': search_term,
                     'twitter_name': twitter_json['name'],
+                    'twitter_handle': twitter_json['screen_name'],
+                    'twitter_id': twitter_json['id'],
                     'twitter_description': twitter_json['description'],
                     'twitter_profile_image_url_https': twitter_json['profile_image_url_https'],
                     'twitter_url': twitter_json['url'],
@@ -239,16 +279,26 @@ class TwitterUserManager(models.Model):
                     'twitter_utc_offset': twitter_json['utc_offset'],
                     }
                 )
-            status = "TWITTER_LINK_TO_POSSIBILITY_CREATED"
+            status += "TWITTER_LINK_TO_POSSIBILITY_CREATED "
             success = True
-
-        except Exception as e:
-            status = "TWITTER_LINK_TO_POSSIBILITY_NOT_CREATED"
+            twitter_link_possibility_found = True
+        except TwitterLinkPossibility.MultipleObjectsReturned as e:
+            status += "MORE_THAN_ONE_FOUND "
             success = False
+            twitter_link_possibility_found = False
+            multiple_objects_returned = True
+        except Exception as e:
+            status += "TWITTER_LINK_TO_POSSIBILITY_NOT_CREATED " + str(e) + ' '
+            success = False
+            twitter_link_possibility_found = False
 
         results = {
-            'success': success,
-            'status': status,
+            'success':                          success,
+            'status':                           status,
+            'multiple_objects_returned':        multiple_objects_returned,
+            'twitter_link_possibility':         twitter_link_possibility,
+            'twitter_link_possibility_created': created,
+            'twitter_link_possibility_found':   twitter_link_possibility_found,
         }
         return results
 
@@ -324,6 +374,25 @@ class TwitterUserManager(models.Model):
             success = True
         except Exception as e:
             status = "TWITTER_LINK_TO_POSSIBILITY_NOT_DELETED"
+            success = False
+
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    def delete_twitter_link_possibility(self, candidate_campaign_we_vote_id, twitter_id):
+        status = ""
+        try:
+            TwitterLinkPossibility.objects.filter(
+                candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                twitter_id=twitter_id,
+            ).delete()
+            status += "TWITTER_LINK_TO_POSSIBILITY_DELETED "
+            success = True
+        except Exception as e:
+            status += "TWITTER_LINK_TO_POSSIBILITY_NOT_DELETED " + str(e) + ' '
             success = False
 
         results = {

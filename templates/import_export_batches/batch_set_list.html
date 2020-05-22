@@ -1,7 +1,7 @@
 {# templates/import_export_batches/batch_set_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}List of Batches{% endblock %}
+{% block title %}Batch Set List{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
@@ -9,7 +9,7 @@
 <p><a href="{% url 'import_export_batches:batches_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Import Batches Index</a></p>
 
 
-    <h1>Batch Set Data</h1>
+    <h1>Batch Set List</h1>
     <p>We have a design that shows all of the import steps in this
         process. <a href="https://docs.google.com/drawings/d/1P2CV5ttH9InmPdwB03dM_I8jlEUU7Kks2UIseb1yu0s/edit" target="_blank">See chart here</a>.</p>
     <form action="{% url "import_export_batches:batch_set_list_process" %}" method="post" class="form-horizontal" enctype="multipart/form-data">
@@ -27,6 +27,30 @@
                         {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
                 {% endfor %}
                 </select>
+                {# Limit to on Batch Set ID #}
+                <input type="text" name="batch_set_id" id="batch_set_id" value="{{ batch_set_id }}" style="width: 80px" />
+                <input type="submit" value="Batch Set Id" />
+                {% if batch_set_id %}
+                    <a href="{% url 'import_export_batches:batch_set_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&batch_process_id={{ batch_process_id }}">
+                        clear</a>
+                {% endif %}
+                &nbsp;&nbsp;&nbsp;
+                {# Limit to on Batch Process ID #}
+                <input type="text" name="batch_process_id" id="batch_process_id" value="{{ batch_process_id }}" style="width: 80px" />
+                <input type="submit" value="Batch Process Id" />
+                {% if batch_process_id %}
+                    <a href="{% url 'import_export_batches:batch_set_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&batch_set_id={{ batch_set_id }}">
+                        clear</a>
+                {% endif %}
+                &nbsp;&nbsp;&nbsp;
+                {# Limit to on State Code #}
+                <input type="text" name="state_code" id="state_code_id" value="{{ state_code }}" style="width: 60px" />
+                <input type="submit" value="State Code" />
+                {% if state_code %}
+                    <a href="{% url 'import_export_batches:batch_set_list' %}?google_civic_election_id={{ google_civic_election_id }}&batch_process_id={{ batch_process_id }}&batch_set_id={{ batch_set_id }}">
+                        clear</a>
+                {% endif %}
+                &nbsp;&nbsp;&nbsp;
             </div>
         </div>
         {% endif %}{# End of if election_list #}
@@ -63,7 +87,8 @@
         <tr>
             <th>#</th>
             <th>Batch Name</th>
-            <th>Action</th>
+            <th>Process ID</th>
+            <th>Batch Set ID</th>
             <th>Election</th>
             <th>To be Analyzed</th>
             <th>To be Created</th>
@@ -75,8 +100,15 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ one_batch_set.batch_set_name }}</td>
-            <td><a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ one_batch_set.id }}&google_civic_election_id={{ google_civic_election_id }}">
-            review</a></td>
+            <td>
+              {{ one_batch_set.batch_process_id }}
+              <a href="{% url 'import_export_batches:batch_process_list' %}?batch_process_id={{ one_batch_set.batch_process_id }}"
+                 target="_blank">go</a>
+            </td>
+            <td>{{ one_batch_set.id }}
+              <a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ one_batch_set.id }}&google_civic_election_id={{ google_civic_election_id }}"
+                 target="_blank">details</a>
+            </td>
             <td>
                 {% for election in election_list %}
                     {% if election.google_civic_election_id|slugify == one_batch_set.google_civic_election_id|slugify %}

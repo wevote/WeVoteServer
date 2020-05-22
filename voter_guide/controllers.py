@@ -1185,7 +1185,7 @@ def take_in_possible_endorsement_list_from_form(request):
                 'organization_we_vote_id': request.POST.get('organization_we_vote_id_' + str(number_index), ""),
                 'more_info_url': request.POST.get('more_info_url_' + str(number_index), ""),
                 'statement_text': request.POST.get('statement_text_' + str(number_index), ""),
-                'position_stance': request.POST.get('position_stance_' + str(number_index), ""),
+                'position_stance': request.POST.get('position_stance_' + str(number_index), "SUPPORT"),
                 'possibility_should_be_deleted':
                     positive_value_exists(request.POST.get('possibility_should_be_deleted_' + str(number_index),
                                                            False)),
@@ -1624,7 +1624,22 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     # if not results['success']:
     #     return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    voter_id = 0
+    voter_who_submitted_we_vote_id = ''
+    voter_who_submitted_name = ''
+    assigned_to_voter_we_vote_id = ''
+    assigned_to_name = ''
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if results['voter_found']:
+        voter = results['voter']
+        voter_id = voter.id
+        voter_who_submitted_we_vote_id = voter.we_vote_id
+        voter_who_submitted_name = voter.get_full_name(real_name_only=True)
+        if voter.is_admin or voter.is_political_data_manager or voter.is_verified_volunteer:
+            assigned_to_voter_we_vote_id = voter.we_vote_id
+            assigned_to_name = voter.get_full_name(real_name_only=True)
+
     if not positive_value_exists(voter_id):
         status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
         # json_data = {
@@ -1633,9 +1648,6 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
         #     'voter_device_id': voter_device_id,
         # }
         # return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-    voter_who_submitted_we_vote_id = fetch_voter_we_vote_id_from_voter_id(voter_id)
-    # TODO We will need the voter_id here so we can control volunteer actions
 
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     voter_guide_possibility = VoterGuidePossibility()
@@ -1679,7 +1691,11 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
         else:
             voter_guide_possibility_type = ORGANIZATION_ENDORSING_CANDIDATES
         updated_values = {
-            'voter_guide_possibility_type': voter_guide_possibility_type,
+            'voter_guide_possibility_type':     voter_guide_possibility_type,
+            'voter_who_submitted_name':         voter_who_submitted_name,
+            'voter_who_submitted_we_vote_id':   voter_who_submitted_we_vote_id,
+            'assigned_to_voter_we_vote_id':     assigned_to_voter_we_vote_id,
+            'assigned_to_name':                 assigned_to_name,
         }
         create_results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
             url_to_scan, pdf_url, voter_who_submitted_we_vote_id, updated_values=updated_values)
@@ -3266,7 +3282,7 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
         voter_guide_list = []
         voter_guide_results = retrieve_voter_guides_from_friends(
             voter_we_vote_id=voter_we_vote_id,
-            maximum_number_to_retrieve=500,
+            maximum_number_to_retrieve=200,
             sort_by='twitter_followers_count',
             sort_order='desc',
             google_civic_election_id_list=google_civic_election_id_list,
@@ -3280,7 +3296,7 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
         # From SharedItems
         voter_guide_shared_results = retrieve_voter_guides_from_shared_items(
             voter_we_vote_id=voter_we_vote_id,
-            maximum_number_to_retrieve=500,
+            maximum_number_to_retrieve=200,
             google_civic_election_id_list=google_civic_election_id_list,
             read_only=True)
         status += voter_guide_shared_results['status']
@@ -3292,8 +3308,9 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
                     voter_guide.from_shared_item = True
                     voter_guide_list.append(voter_guide)
     else:
+        # Dale 2020-05-19 maximum_number_to_retrieve=500 took too long for CDN timeout
         voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_generic(
-            maximum_number_to_retrieve=500, sort_by='twitter_followers_count', sort_order='desc',
+            maximum_number_to_retrieve=200, sort_by='twitter_followers_count', sort_order='desc',
             google_civic_election_id_list=google_civic_election_id_list, read_only=True)
         if voter_guide_results['voter_guide_list_found']:
             voter_guide_list = voter_guide_results['voter_guide_list']
@@ -4345,7 +4362,8 @@ def refresh_existing_voter_guides(google_civic_election_id, organization_we_vote
             voter_guide_list_found = True
             voter_guide_list = results['voter_guide_list']
     elif positive_value_exists(google_civic_election_id):
-        results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id)
+        google_civic_election_id_list = [google_civic_election_id]
+        results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id_list)
         if results['voter_guide_list_found']:
             voter_guide_list_found = True
             voter_guide_list = results['voter_guide_list']

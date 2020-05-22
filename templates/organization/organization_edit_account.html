@@ -52,7 +52,7 @@ span.nobr { white-space: nowrap; }
 
 
 <div class="form-group">
-    <label for="chosen_subdomain_string_id" class="col-sm-3 control-label">We Vote Sudomain String</label>
+    <label for="chosen_subdomain_string_id" class="col-sm-3 control-label">We Vote Subdomain String</label>
     <div class="col-sm-8">
         <input type="text" name="chosen_subdomain_string" id="chosen_subdomain_string_id" class="form-control"
                value="{{ organization.chosen_subdomain_string|default_if_none:"" }}" />
@@ -73,6 +73,20 @@ span.nobr { white-space: nowrap; }
         <input type="text" name="chosen_favicon_url_https" id="chosen_favicon_url_https_id" class="form-control"
                value="{{ organization.chosen_favicon_url_https|default_if_none:"" }}"
         />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="chosen_prevent_sharing_opinions_id" class="col-sm-3 control-label">Prevent Voters from Sharing Opinions</label>
+    <div class="col-sm-8">
+        <label for="allow_sharing_id">
+            <input type="radio" name="chosen_prevent_sharing_opinions" value="0"{% if organization.chosen_prevent_sharing_opinions %}{% else %} checked{% endif %} id="allow_sharing_id" >
+            Allow Voters to Share Opinions
+        </label>
+        <label for="prevent_sharing_id">
+            <input type="radio" name="chosen_prevent_sharing_opinions" value="1"{% if organization.chosen_prevent_sharing_opinions %} checked{% endif %} id="prevent_sharing_id" >
+            Prevent Voters from Sharing Opinions
+        </label>
     </div>
 </div>
 

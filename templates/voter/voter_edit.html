@@ -88,6 +88,14 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
   Grant Admin Rights</a></p>
     {% endif %}
 
+    {% if voter.is_analytics_admin %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_removed=analytics_admin">
+  Remove Analytics Admin Rights</a></p>
+    {% else %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_granted=analytics_admin">
+  Grant Analytics Admin Rights</a></p>
+    {% endif %}
+
     {% if voter.is_partner_organization %}
 <p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_removed=partner_organization">
   Remove Partner Organization Rights</a></p>

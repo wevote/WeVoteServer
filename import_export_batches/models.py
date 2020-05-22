@@ -50,6 +50,7 @@ CANDIDATE = 'CANDIDATE'
 CONTEST_OFFICE = 'CONTEST_OFFICE'
 ELECTED_OFFICE = 'ELECTED_OFFICE'
 IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'
+IMPORT_POLLING_LOCATION = 'IMPORT_POLLING_LOCATION'
 IMPORT_VOTER = 'IMPORT_VOTER'
 MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
@@ -59,10 +60,11 @@ KIND_OF_BATCH_CHOICES = (
     (ELECTED_OFFICE,    'ElectedOffice'),
     (CONTEST_OFFICE,    'ContestOffice'),
     (CANDIDATE,         'Candidate'),
+    (IMPORT_BALLOT_ITEM,   'Ballot Returned'),
+    (IMPORT_POLLING_LOCATION,   'Polling Location'),
     (ORGANIZATION_WORD, 'Organization'),
     (POSITION,          'Position'),
     (POLITICIAN,        'Politician'),
-    (IMPORT_BALLOT_ITEM,   'Ballot Returned'),
 )
 
 IMPORT_TO_BE_DETERMINED = 'IMPORT_TO_BE_DETERMINED'
@@ -274,6 +276,37 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS = {
     'organization_type': 'organization_type',
     'state_served_code': 'state_served_code',
 }
+
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLLING_LOCATIONS = {
+    'city': 'city',
+    'county_name': 'county_name',
+    'full_address': 'full_address',
+    'line1': 'line1',
+    'line2': 'line2',
+    'location_name': 'location_name',
+    'polling_location_deleted': 'polling_location_deleted',
+    'polling_location_we_vote_id': 'polling_location_we_vote_id',
+    'precinct_name': 'precinct_name',
+    'state': 'state',
+    'use_for_bulk_retrieve': 'use_for_bulk_retrieve',
+    'zip_long': 'zip_long',
+}
+
+BATCH_HEADER_MAP_FOR_POLLING_LOCATIONS = {
+    'city': 'city',
+    'county_name': 'county_name',
+    'full_address': 'full_address',
+    'line1': 'line1',
+    'line2': 'line2',
+    'location_name': 'location_name',
+    'polling_location_deleted': 'polling_location_deleted',
+    'polling_location_we_vote_id': 'polling_location_we_vote_id',
+    'precinct_name': 'precinct_name',
+    'state': 'state',
+    'use_for_bulk_retrieve': 'use_for_bulk_retrieve',
+    'zip_long': 'zip_long',
+}
+
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS = {
     'politician_full_name': 'politician_full_name',
     'politician_ctcl_uuid': 'politician_ctcl_uuid',
@@ -473,7 +506,7 @@ class BatchManager(models.Model):
                 batch_file_name, csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id,
                 polling_location_we_vote_id)
 
-        status = "CREATE_BATCH_FILETYPE_NOT_RECOGNIZED"
+        status = "CREATE_BATCH_FILE_TYPE_NOT_RECOGNIZED"
         results = {
             'success': False,
             'status': status,
@@ -1132,6 +1165,8 @@ class BatchManager(models.Model):
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
         elif kind_of_batch == IMPORT_BALLOT_ITEM:
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
+        elif kind_of_batch == IMPORT_POLLING_LOCATION:
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
         elif kind_of_batch == IMPORT_VOTER:
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS
         else:
@@ -1158,7 +1193,7 @@ class BatchManager(models.Model):
             status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVED "
         except Exception as e:
             success = False
-            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVE_FAILED "
+            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVE_FAILED " + str(e) + " "
 
         results = {
             'success':              success,
@@ -1214,6 +1249,11 @@ class BatchManager(models.Model):
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == IMPORT_POLLING_LOCATION:
+                batch_row_action_query = BatchRowActionPollingLocation.objects.filter(batch_header_id=batch_header_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == MEASURE:
                 batch_row_action_query = BatchRowActionMeasure.objects.filter(batch_header_id=batch_header_id)
                 if positive_value_exists(kind_of_action):
@@ -1266,6 +1306,11 @@ class BatchManager(models.Model):
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == IMPORT_BALLOT_ITEM:
                 batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_set_id=batch_set_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == IMPORT_POLLING_LOCATION:
+                batch_row_action_query = BatchRowActionPollingLocation.objects.filter(batch_set_id=batch_set_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
@@ -1364,9 +1409,10 @@ class BatchManager(models.Model):
             success = True
             status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVED "
         except Exception as e:
-            batch_header_translation_suggestion = BatchHeaderTranslationSuggestion()
+            batch_header_translation_suggestion = None
+            batch_header_translation_suggestion_found = False
             success = False
-            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVE_FAILED "
+            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVE_FAILED " + str(e) + " "
 
         results = {
             'success':                                      success,
@@ -1401,7 +1447,7 @@ class BatchManager(models.Model):
             status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVED "
         except Exception as e:
             success = False
-            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVE_FAILED "
+            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVE_FAILED " + str(e) + " "
 
         results = {
             'success': success,
@@ -1434,9 +1480,10 @@ class BatchManager(models.Model):
             success = True
             status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVED "
         except Exception as e:
-            batch_header_translation_suggestion = BatchHeaderTranslationSuggestion()
+            batch_header_translation_suggestion = None
+            batch_header_translation_suggestion_found = False
             success = False
-            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVE_FAILED "
+            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVE_FAILED " + str(e) + " "
 
         results = {
             'success':                                      success,
@@ -1447,22 +1494,23 @@ class BatchManager(models.Model):
         return results
 
     def retrieve_batch_row_action_organization(self, batch_header_id, batch_row_id):
+        status = ""
         try:
             batch_row_action_organization = BatchRowActionOrganization.objects.get(batch_header_id=batch_header_id,
                                                                                    batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
-            status = "BATCH_ROW_ACTION_ORGANIZATION_RETRIEVED"
+            status += "BATCH_ROW_ACTION_ORGANIZATION_RETRIEVED "
         except BatchRowActionOrganization.DoesNotExist:
-            batch_row_action_organization = BatchRowActionOrganization()
+            batch_row_action_organization = None
             batch_row_action_found = False
             success = True
-            status = "BATCH_ROW_ACTION_ORGANIZATION_NOT_FOUND"
+            status += "BATCH_ROW_ACTION_ORGANIZATION_NOT_FOUND "
         except Exception as e:
-            batch_row_action_organization = BatchRowActionOrganization()
+            batch_row_action_organization = None
             batch_row_action_found = False
             success = False
-            status = "BATCH_ROW_ACTION_ORGANIZATION_RETRIEVE_ERROR"
+            status += "BATCH_ROW_ACTION_ORGANIZATION_RETRIEVE_ERROR " + str(e) + " "
 
         results = {
             'success':                          success,
@@ -1473,22 +1521,23 @@ class BatchManager(models.Model):
         return results
 
     def retrieve_batch_row_action_measure(self, batch_header_id, batch_row_id):
+        status = ""
         try:
             batch_row_action_measure = BatchRowActionMeasure.objects.get(batch_header_id=batch_header_id,
                                                                          batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
-            status = "BATCH_ROW_ACTION_MEASURE_RETRIEVED "
+            status += "BATCH_ROW_ACTION_MEASURE_RETRIEVED "
         except BatchRowActionMeasure.DoesNotExist:
-            batch_row_action_measure = BatchRowActionMeasure()
+            batch_row_action_measure = None
             batch_row_action_found = False
             success = True
-            status = "BATCH_ROW_ACTION_MEASURE_NOT_FOUND "
+            status += "BATCH_ROW_ACTION_MEASURE_NOT_FOUND "
         except Exception as e:
-            batch_row_action_measure = BatchRowActionMeasure()
+            batch_row_action_measure = None
             batch_row_action_found = False
             success = False
-            status = "BATCH_ROW_ACTION_MEASURE_RETRIEVE_ERROR "
+            status += "BATCH_ROW_ACTION_MEASURE_RETRIEVE_ERROR " + str(e) + " "
 
         results = {
             'success':                  success,
@@ -1505,23 +1554,23 @@ class BatchManager(models.Model):
         :param batch_row_id:
         :return:
         """
-
+        status = ""
         try:
             batch_row_action_elected_office = BatchRowActionElectedOffice.objects.get(batch_header_id=batch_header_id,
                                                                                       batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
-            status = "BATCH_ROW_ACTION_ELECTED_OFFICE_RETRIEVED"
+            status += "BATCH_ROW_ACTION_ELECTED_OFFICE_RETRIEVED "
         except BatchRowActionElectedOffice.DoesNotExist:
-            batch_row_action_elected_office = BatchRowActionElectedOffice()
+            batch_row_action_elected_office = None
             batch_row_action_found = False
             success = True
-            status = "BATCH_ROW_ACTION_ELECTED_OFFICE_NOT_FOUND"
+            status += "BATCH_ROW_ACTION_ELECTED_OFFICE_NOT_FOUND "
         except Exception as e:
-            batch_row_action_elected_office = BatchRowActionElectedOffice()
+            batch_row_action_elected_office = None
             batch_row_action_found = False
             success = False
-            status = "BATCH_ROW_ACTION_ELECTED_OFFICE_RETRIEVE_ERROR"
+            status += "BATCH_ROW_ACTION_ELECTED_OFFICE_RETRIEVE_ERROR " + str(e) + " "
 
         results = {
             'success':                          success,
@@ -1538,23 +1587,23 @@ class BatchManager(models.Model):
         :param batch_row_id:
         :return:
         """
-
+        status = ""
         try:
             batch_row_action_contest_office = BatchRowActionContestOffice.objects.get(batch_header_id=batch_header_id,
                                                                                       batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
-            status = "BATCH_ROW_ACTION_CONTEST_OFFICE_RETRIEVED"
+            status += "BATCH_ROW_ACTION_CONTEST_OFFICE_RETRIEVED "
         except BatchRowActionContestOffice.DoesNotExist:
-            batch_row_action_contest_office = BatchRowActionContestOffice()
+            batch_row_action_contest_office = None
             batch_row_action_found = False
             success = True
-            status = "BATCH_ROW_ACTION_CONTEST_OFFICE_NOT_FOUND"
+            status += "BATCH_ROW_ACTION_CONTEST_OFFICE_NOT_FOUND "
         except Exception as e:
-            batch_row_action_contest_office = BatchRowActionContestOffice()
+            batch_row_action_contest_office = None
             batch_row_action_found = False
             success = False
-            status = "BATCH_ROW_ACTION_CONTEST_OFFICE_RETRIEVE_ERROR"
+            status += "BATCH_ROW_ACTION_CONTEST_OFFICE_RETRIEVE_ERROR " + str(e) + " "
 
         results = {
             'success':                          success,
@@ -1571,29 +1620,62 @@ class BatchManager(models.Model):
         :param batch_row_id:
         :return:
         """
-
+        status = ""
         try:
             batch_row_action_politician = BatchRowActionPolitician.objects.get(batch_header_id=batch_header_id,
                                                                                batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
-            status = "BATCH_ROW_ACTION_POLITICIAN_RETRIEVED"
+            status += "BATCH_ROW_ACTION_POLITICIAN_RETRIEVED "
         except BatchRowActionPolitician.DoesNotExist:
-            batch_row_action_politician = BatchRowActionPolitician()
+            batch_row_action_politician = None
             batch_row_action_found = False
             success = True
-            status = "BATCH_ROW_ACTION_POLITICIAN_NOT_FOUND"
+            status += "BATCH_ROW_ACTION_POLITICIAN_NOT_FOUND "
         except Exception as e:
-            batch_row_action_politician = BatchRowActionPolitician()
+            batch_row_action_politician = None
             batch_row_action_found = False
             success = False
-            status = "BATCH_ROW_ACTION_POLITICIAN_RETRIEVE_ERROR"
+            status += "BATCH_ROW_ACTION_POLITICIAN_RETRIEVE_ERROR " + str(e) + " "
 
         results = {
             'success':                      success,
             'status':                       status,
             'batch_row_action_found':       batch_row_action_found,
             'batch_row_action_politician':  batch_row_action_politician,
+        }
+        return results
+
+    def retrieve_batch_row_action_polling_location(self, batch_header_id, batch_row_id):
+        """
+        Retrieves data from BatchRowActionPollingLocation table
+        :param batch_header_id:
+        :param batch_row_id:
+        :return:
+        """
+        status = ""
+        try:
+            batch_row_action_polling_location = \
+                BatchRowActionPollingLocation.objects.get(batch_header_id=batch_header_id, batch_row_id=batch_row_id)
+            batch_row_action_found = True
+            success = True
+            status += "BATCH_ROW_ACTION_POLLING_LOCATION_RETRIEVED "
+        except BatchRowActionPollingLocation.DoesNotExist:
+            batch_row_action_polling_location = None
+            batch_row_action_found = False
+            success = True
+            status += "BATCH_ROW_ACTION_POLLING_LOCATION_NOT_FOUND "
+        except Exception as e:
+            batch_row_action_polling_location = None
+            batch_row_action_found = False
+            success = False
+            status += "BATCH_ROW_ACTION_POLLING_LOCATION_RETRIEVE_ERROR " + str(e) + " "
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'batch_row_action_found':       batch_row_action_found,
+            'batch_row_action_polling_location':    batch_row_action_polling_location,
         }
         return results
 
@@ -1604,23 +1686,23 @@ class BatchManager(models.Model):
         :param batch_row_id:
         :return:
         """
-
+        status = ""
         try:
             batch_row_action_position = BatchRowActionPosition.objects.get(batch_header_id=batch_header_id,
                                                                            batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
-            status = "BATCH_ROW_ACTION_POSITION_RETRIEVED"
+            status += "BATCH_ROW_ACTION_POSITION_RETRIEVED "
         except BatchRowActionPosition.DoesNotExist:
-            batch_row_action_position = BatchRowActionPosition()
+            batch_row_action_position = None
             batch_row_action_found = False
             success = True
-            status = "BATCH_ROW_ACTION_POSITION_NOT_FOUND"
+            status += "BATCH_ROW_ACTION_POSITION_NOT_FOUND "
         except Exception as e:
-            batch_row_action_position = BatchRowActionPosition()
+            batch_row_action_position = None
             batch_row_action_found = False
             success = False
-            status = "BATCH_ROW_ACTION_POSITION_RETRIEVE_ERROR"
+            status += "BATCH_ROW_ACTION_POSITION_RETRIEVE_ERROR " + str(e) + " "
 
         results = {
             'success':                      success,
@@ -1658,15 +1740,16 @@ class BatchManager(models.Model):
                 success = False
                 status += "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_RETRIEVED-MISSING_REQUIRED_VARIABLE "
         except BatchRowActionBallotItem.DoesNotExist:
-            batch_row_action_ballot_item = BatchRowActionBallotItem()
+            batch_row_action_ballot_item = None
             batch_row_action_found = False
             success = True
-            status = "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_FOUND "
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_FOUND "
         except Exception as e:
-            batch_row_action_ballot_item = BatchRowActionBallotItem()
+            batch_row_action_ballot_item = None
             batch_row_action_found = False
             success = False
-            status = "BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR " + str(e) + " "
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
 
         results = {
             'success':                      success,
@@ -1698,7 +1781,7 @@ class BatchManager(models.Model):
         except Exception as e:
             batch_row_action_list_found = False
             success = False
-            status = "BATCH_ROW_ACTION_BALLOT_ITEM_LIST_RETRIEVE_ERROR " + str(e) + " "
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_LIST_RETRIEVE_ERROR " + str(e) + " "
 
         results = {
             'success':                      success,
@@ -1715,23 +1798,23 @@ class BatchManager(models.Model):
         :param batch_row_id:
         :return:
         """
-
+        status = ""
         try:
             batch_row_action_candidate = BatchRowActionCandidate.objects.get(batch_header_id=batch_header_id,
                                                                              batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
-            status = "BATCH_ROW_ACTION_CANDIDATE_RETRIEVED"
+            status += "BATCH_ROW_ACTION_CANDIDATE_RETRIEVED "
         except BatchRowActionCandidate.DoesNotExist:
-            batch_row_action_candidate = BatchRowActionCandidate()
+            batch_row_action_candidate = None
             batch_row_action_found = False
             success = True
-            status = "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND"
+            status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND "
         except Exception as e:
-            batch_row_action_candidate = BatchRowActionCandidate()
+            batch_row_action_candidate = None
             batch_row_action_found = False
             success = False
-            status = "BATCH_ROW_ACTION_CANDIDATE_RETRIEVE_ERROR"
+            status += "BATCH_ROW_ACTION_CANDIDATE_RETRIEVE_ERROR " + str(e) + " "
 
         results = {
             'success':                      success,
@@ -1961,7 +2044,7 @@ class BatchManager(models.Model):
                             batch_header_map_005='measure_name'
                         )
                         batch_header_map_id = batch_header_map.id
-                        status += " BATCH_HEADER_MAP_SAVED"
+                        status += " BATCH_HEADER_MAP_SAVED "
 
                     if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
                         # Now save the BatchDescription
@@ -1978,12 +2061,12 @@ class BatchManager(models.Model):
                             source_uri=batch_uri,
                             batch_set_id=batch_set_id,
                         )
-                        status += " BATCH_DESCRIPTION_SAVED"
+                        status += " BATCH_DESCRIPTION_SAVED "
                         success = True
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
                     batch_header_id = 0
-                    status += " EXCEPTION_BATCH_HEADER"
+                    status += " EXCEPTION_BATCH_HEADER "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             if not positive_value_exists(batch_header_id):
@@ -2007,7 +2090,7 @@ class BatchManager(models.Model):
                     number_of_batch_rows += 1
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
-                    status += " EXCEPTION_BATCH_ROW"
+                    status += " EXCEPTION_BATCH_ROW " + str(e) + " "
                     break
         results = {
             'success': success,
@@ -2145,7 +2228,7 @@ class BatchManager(models.Model):
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
                     batch_header_id = 0
-                    status += " EXCEPTION_BATCH_HEADER"
+                    status += " EXCEPTION_BATCH_HEADER " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             if not positive_value_exists(batch_header_id):
@@ -2170,7 +2253,7 @@ class BatchManager(models.Model):
                     number_of_batch_rows += 1
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
-                    status += " EXCEPTION_BATCH_ROW"
+                    status += " EXCEPTION_BATCH_ROW " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
         results = {
@@ -2340,12 +2423,12 @@ class BatchManager(models.Model):
                             source_uri=batch_uri,
                             batch_set_id=batch_set_id,
                         )
-                        status += " BATCH_DESCRIPTION_SAVED"
+                        status += " BATCH_DESCRIPTION_SAVED "
                         success = True
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
                     batch_header_id = 0
-                    status += " EXCEPTION_BATCH_HEADER"
+                    status += " EXCEPTION_BATCH_HEADER " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             if not positive_value_exists(batch_header_id):
@@ -2378,7 +2461,7 @@ class BatchManager(models.Model):
                     number_of_batch_rows += 1
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
-                    status += " EXCEPTION_BATCH_ROW"
+                    status += " EXCEPTION_BATCH_ROW " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
         results = {
@@ -2571,12 +2654,12 @@ class BatchManager(models.Model):
                             source_uri=batch_uri,
                             batch_set_id=batch_set_id,
                         )
-                        status += " BATCH_DESCRIPTION_SAVED"
+                        status += " BATCH_DESCRIPTION_SAVED "
                         success = True
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
                     batch_header_id = 0
-                    status += " EXCEPTION_BATCH_HEADER"
+                    status += " EXCEPTION_BATCH_HEADER " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             if not positive_value_exists(batch_header_id):
@@ -2608,7 +2691,7 @@ class BatchManager(models.Model):
                     number_of_batch_rows += 1
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
-                    status += " EXCEPTION_BATCH_ROW"
+                    status += " EXCEPTION_BATCH_ROW " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
         results = {
@@ -2743,7 +2826,7 @@ class BatchManager(models.Model):
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
                     batch_header_id = 0
-                    status += " EXCEPTION_BATCH_HEADER"
+                    status += " EXCEPTION_BATCH_HEADER " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             if not positive_value_exists(batch_header_id):
@@ -2766,7 +2849,7 @@ class BatchManager(models.Model):
                     number_of_batch_rows += 1
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
-                    status += " EXCEPTION_BATCH_ROW"
+                    status += " EXCEPTION_BATCH_ROW " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     success = False
 
@@ -2862,7 +2945,7 @@ class BatchManager(models.Model):
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
                     batch_header_id = 0
-                    status += " EXCEPTION_BATCH_HEADER"
+                    status += " EXCEPTION_BATCH_HEADER " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             if not positive_value_exists(batch_header_id):
@@ -2880,7 +2963,7 @@ class BatchManager(models.Model):
                     number_of_batch_rows += 1
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
-                    status += " EXCEPTION_BATCH_ROW"
+                    status += " EXCEPTION_BATCH_ROW " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     success = False
 
@@ -2971,12 +3054,12 @@ class BatchManager(models.Model):
                     source_uri=batch_uri,
                     batch_set_id=batch_set_id,
                 )
-                status += " BATCH_DESCRIPTION_SAVED"
+                status += " BATCH_DESCRIPTION_SAVED "
                 success = True
         except Exception as e:
             # Stop trying to save rows -- break out of the for loop
             batch_header_id = 0
-            status += " EXCEPTION_BATCH_HEADER"
+            status += " EXCEPTION_BATCH_HEADER " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         # check for state_id or name AND ocd_id
@@ -2991,7 +3074,7 @@ class BatchManager(models.Model):
                 )
             except Exception as e:
                 # Stop trying to save rows -- break out of the for loop
-                status += " EXCEPTION_BATCH_ROW"
+                status += " EXCEPTION_BATCH_ROW " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 success = False
 
@@ -3094,12 +3177,12 @@ class BatchManager(models.Model):
                     source_uri=batch_uri,
                     batch_set_id=batch_set_id,
                 )
-                status += " BATCH_DESCRIPTION_SAVED"
+                status += " BATCH_DESCRIPTION_SAVED "
                 success = True
         except Exception as e:
             # Stop trying to save rows -- break out of the for loop
             batch_header_id = 0
-            status += " EXCEPTION_BATCH_HEADER"
+            status += " EXCEPTION_BATCH_HEADER " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         # check for state_id or name AND ocd_id
@@ -3116,7 +3199,7 @@ class BatchManager(models.Model):
                 )
             except Exception as e:
                 # Stop trying to save rows -- break out of the for loop
-                status += " EXCEPTION_BATCH_ROW"
+                status += " EXCEPTION_BATCH_ROW " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 success = False
 
@@ -3181,7 +3264,7 @@ class BatchManager(models.Model):
                 # Stop trying to save rows -- break out of the for loop
                 continue_batch_set_processing = False
                 batch_set_id = 0
-                status += " EXCEPTION_BATCH_SET-VIP_XML "
+                status += " EXCEPTION_BATCH_SET-VIP_XML " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
 
             # import Electoral District
@@ -3596,7 +3679,7 @@ class BatchManager(models.Model):
             batch_set_name_url = urlquote(organization_endorsements_api_url)
         except Exception as e:
             batch_set_id = 0
-            status += " EXCEPTION_BATCH_SET "
+            status += " EXCEPTION_BATCH_SET " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         if not structured_organization_endorsement_json:
@@ -3628,7 +3711,7 @@ class BatchManager(models.Model):
         except Exception as e:
             # Stop trying to save rows -- break out of the for loop
             batch_set_id = 0
-            status += " EXCEPTION_BATCH_SET-ORG_ENDORSEMENTS "
+            status += " EXCEPTION_BATCH_SET-ORG_ENDORSEMENTS " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         # import metadata like organization name, url, endorsement url, twitter url, org image url, email
@@ -3779,11 +3862,11 @@ class BatchManager(models.Model):
                             source_uri=batch_uri,
                             batch_set_id=batch_set_id,
                         )
-                        status += " BATCH_DESCRIPTION_SAVED"
+                        status += " BATCH_DESCRIPTION_SAVED "
                         success = True
                 except Exception as e:
                     batch_header_id = 0
-                    status += " EXCEPTION_BATCH_HEADER"
+                    status += " EXCEPTION_BATCH_HEADER " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             if not positive_value_exists(batch_header_id):
@@ -3803,7 +3886,7 @@ class BatchManager(models.Model):
                 number_of_offices += 1
             except Exception as e:
                 # Stop trying to save rows -- break out of the for loop
-                status += " EXCEPTION_BATCH_ROW"
+                status += " EXCEPTION_BATCH_ROW " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 break
         results = {
@@ -3917,11 +4000,11 @@ class BatchManager(models.Model):
                             source_uri=batch_uri,
                             batch_set_id=batch_set_id,
                         )
-                        status += " BATCH_DESCRIPTION_SAVED"
+                        status += " BATCH_DESCRIPTION_SAVED "
                         success = True
                 except Exception as e:
                     batch_header_id = 0
-                    status += " EXCEPTION_BATCH_HEADER"
+                    status += " EXCEPTION_BATCH_HEADER " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             if not positive_value_exists(batch_header_id):
@@ -3945,7 +4028,7 @@ class BatchManager(models.Model):
                 number_of_candidates += 1
             except Exception as e:
                 # Stop trying to save rows -- break out of the for loop
-                status += " EXCEPTION_BATCH_ROW"
+                status += " EXCEPTION_BATCH_ROW " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 break
         results = {
@@ -4066,11 +4149,11 @@ class BatchManager(models.Model):
                             source_uri=batch_uri,
                             batch_set_id=batch_set_id,
                         )
-                        status += " BATCH_DESCRIPTION_SAVED"
+                        status += " BATCH_DESCRIPTION_SAVED "
                         success = True
                 except Exception as e:
                     batch_header_id = 0
-                    status += " EXCEPTION_BATCH_HEADER"
+                    status += " EXCEPTION_BATCH_HEADER " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             if not positive_value_exists(batch_header_id):
@@ -4098,7 +4181,7 @@ class BatchManager(models.Model):
                 number_of_candidate_positions += 1
             except Exception as e:
                 # Stop trying to save rows -- break out of the for loop
-                status += " EXCEPTION_BATCH_ROW"
+                status += " EXCEPTION_BATCH_ROW " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 break
         results = {
@@ -4217,11 +4300,11 @@ class BatchManager(models.Model):
                             source_uri=batch_uri,
                             batch_set_id=batch_set_id,
                         )
-                        status += " BATCH_DESCRIPTION_SAVED"
+                        status += " BATCH_DESCRIPTION_SAVED "
                         success = True
                 except Exception as e:
                     batch_header_id = 0
-                    status += " EXCEPTION_BATCH_HEADER"
+                    status += " EXCEPTION_BATCH_HEADER " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             if not positive_value_exists(batch_header_id):
@@ -4248,7 +4331,7 @@ class BatchManager(models.Model):
                 number_of_measure_positions += 1
             except Exception as e:
                 # Stop trying to save rows -- break out of the for loop
-                status += " EXCEPTION_BATCH_ROW"
+                status += " EXCEPTION_BATCH_ROW " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 break
         results = {
@@ -4275,6 +4358,8 @@ class BatchSet(models.Model):
     batch_set_name = models.CharField(max_length=255)
     batch_set_description_text = models.CharField(max_length=255)
     batch_set_source = models.CharField(max_length=255)
+    batch_process_id = models.PositiveIntegerField(default=0, null=True, blank=True, db_index=True)
+    batch_process_ballot_item_chunk_id = models.PositiveIntegerField(default=0, null=True, blank=True, db_index=True)
     source_uri = models.URLField(max_length=255, blank=True, null=True, verbose_name='uri where data is coming from')
     import_date = models.DateTimeField(verbose_name="date when batch set was imported", null=True, auto_now=True)
 
@@ -4547,7 +4632,7 @@ class BatchProcessManager(models.Model):
         }
         return results
 
-    def create_batch_process_ballot_item_chunk(self, batch_process_id=0):
+    def create_batch_process_ballot_item_chunk(self, batch_process_id=0, batch_set_id=0):
         status = ""
         success = True
         batch_process_ballot_item_chunk = None
@@ -4569,6 +4654,8 @@ class BatchProcessManager(models.Model):
         try:
             batch_process_ballot_item_chunk = BatchProcessBallotItemChunk.objects.create(
                 batch_process_id=batch_process.id,
+                batch_set_id=batch_set_id,
+                google_civic_election_id=batch_process.google_civic_election_id,
                 state_code=batch_process.state_code,
             )
             if batch_process_ballot_item_chunk:
@@ -4652,6 +4739,7 @@ class BatchProcessManager(models.Model):
             self,
             batch_process_id=0,
             batch_process_ballot_item_chunk_id=0,
+            batch_set_id=0,
             critical_failure=False,
             google_civic_election_id=0,
             kind_of_process="",
@@ -4678,6 +4766,9 @@ class BatchProcessManager(models.Model):
             save_changes = False
             if positive_value_exists(google_civic_election_id):
                 batch_process_log_entry.google_civic_election_id = convert_to_int(google_civic_election_id)
+                save_changes = True
+            if positive_value_exists(batch_set_id):
+                batch_process_log_entry.batch_set_id = convert_to_int(batch_set_id)
                 save_changes = True
             if positive_value_exists(voter_id):
                 batch_process_log_entry.voter_id = convert_to_int(voter_id)
@@ -4721,8 +4812,7 @@ class BatchProcessManager(models.Model):
             # No batch_process found. Not a problem.
             status += 'NO_BATCH_PROCESS_FOUND_DoesNotExist '
         except Exception as e:
-            status += 'FAILED_BATCH_PROCESS_RETRIEVE ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+            status += 'FAILED_BATCH_PROCESS_RETRIEVE ' + str(e) + " "
             success = False
 
         results = {
@@ -4864,8 +4954,7 @@ class BatchProcessManager(models.Model):
             # No batch_process found. Not a problem.
             status += 'NO_BATCH_PROCESS_FOUND_DoesNotExist '
         except Exception as e:
-            status += 'FAILED_BATCH_PROCESS_LIST_RETRIEVE ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+            status += 'FAILED_BATCH_PROCESS_LIST_RETRIEVE ' + str(e) + " "
             success = False
 
         results = {
@@ -4914,8 +5003,7 @@ class BatchProcessManager(models.Model):
             # No chunk found. Not a problem.
             status += 'BATCH_PROCESS_BALLOT_ITEM_CHUNK_NOT_FOUND_DoesNotExist '
         except Exception as e:
-            status += 'FAILED_BATCH_PROCESS_BALLOT_ITEM_CHUNK_RETRIEVE ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+            status += 'FAILED_BATCH_PROCESS_BALLOT_ITEM_CHUNK_RETRIEVE ' + str(e) + " "
             success = False
 
         results = {
@@ -4958,8 +5046,7 @@ class BatchProcessManager(models.Model):
             # No chunk found. Not a problem.
             status += 'BATCH_PROCESS_ANALYTICS_CHUNK_NOT_FOUND_DoesNotExist '
         except Exception as e:
-            status += 'FAILED_BATCH_PROCESS_ANALYTICS_CHUNK_RETRIEVE ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+            status += 'FAILED_BATCH_PROCESS_ANALYTICS_CHUNK_RETRIEVE ' + str(e) + " "
             success = False
 
         results = {
@@ -5048,6 +5135,7 @@ class BatchProcessLogEntry(models.Model):
     """
     batch_process_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
     batch_process_ballot_item_chunk_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
+    batch_set_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False)
@@ -5702,6 +5790,33 @@ class BatchRowActionOrganization(models.Model):
         verbose_name="type of org", max_length=1, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
 
     status = models.TextField(verbose_name="batch row action organization status", null=True, blank=True, default="")
+
+
+class BatchRowActionPollingLocation(models.Model):
+    """
+    The definition of the action for importing one ballot item.
+    """
+    batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
+    batch_header_id = models.PositiveIntegerField(
+        verbose_name="unique id of header row", unique=False, null=False, db_index=True)
+    batch_row_id = models.PositiveIntegerField(
+        verbose_name="unique id of batch row", null=True, default=None, db_index=True)
+    kind_of_action = models.CharField(
+        max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
+
+    polling_location_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    location_name = models.CharField(max_length=255, null=True, blank=True)
+    polling_hours_text = models.CharField(max_length=255, null=True, blank=True)
+    directions_text = models.TextField(null=True, blank=True)
+    line1 = models.CharField(max_length=255, blank=True, null=True)
+    line2 = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=255, blank=True, null=True)
+    state = models.CharField(max_length=255, blank=True, null=True)
+    zip_long = models.CharField(max_length=255, blank=True, null=True)
+    county_name = models.CharField(default=None, max_length=255, null=True)
+    precinct_name = models.CharField(default=None, max_length=255, null=True)
+    use_for_bulk_retrieve = models.BooleanField(default=False)
+    polling_location_deleted = models.BooleanField(default=False)
 
 
 class BatchRowActionPosition(models.Model):

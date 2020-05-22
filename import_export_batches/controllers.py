@@ -4,14 +4,15 @@
 
 from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, BatchRowActionOrganization, \
     BatchRowActionMeasure, BatchRowActionElectedOffice, BatchRowActionContestOffice, BatchRowActionPolitician, \
-    BatchRowActionCandidate, BatchRowActionPosition, BatchRowActionBallotItem, \
+    BatchRowActionCandidate, BatchRowActionPollingLocation, BatchRowActionPosition, BatchRowActionBallotItem, \
     CLEAN_DATA_MANUALLY, POSITION, IMPORT_DELETE, IMPORT_ALREADY_DELETED, \
     IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_DATA_ALREADY_MATCHING, IMPORT_QUERY_ERROR, \
     IMPORT_TO_BE_DETERMINED, DO_NOT_PROCESS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
-    BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
+    BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLLING_LOCATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, \
+    BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
 from ballot.models import BallotItem, BallotItemListManager, BallotItemManager, BallotReturnedManager
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 # from django.db import transaction
@@ -19,7 +20,7 @@ from django.db.models import Q
 from elected_office.models import ElectedOffice, ElectedOfficeManager
 from electoral_district.controllers import retrieve_electoral_district
 from election.models import ElectionManager
-from exception.models import handle_exception
+from exception.models import handle_exception, print_to_log
 from image.controllers import retrieve_and_save_ballotpedia_candidate_images
 from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasureListManager
 from office.models import ContestOffice, ContestOfficeListManager, ContestOfficeManager
@@ -27,7 +28,7 @@ from organization.models import Organization, OrganizationListManager, Organizat
     NONPROFIT_501C3, NONPROFIT_501C4, POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, \
     CORPORATION, NEWS_ORGANIZATION, UNKNOWN
 from politician.models import Politician, PoliticianManager
-from polling_location.models import PollingLocationManager
+from polling_location.models import PollingLocationListManager, PollingLocationManager
 from position.models import PositionManager, INFORMATION_ONLY, OPPOSE, SUPPORT
 from twitter.models import TwitterUserManager
 from voter.models import VoterManager
@@ -43,6 +44,7 @@ CANDIDATE = 'CANDIDATE'
 CONTEST_OFFICE = 'CONTEST_OFFICE'
 ELECTED_OFFICE = 'ELECTED_OFFICE'
 IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'
+IMPORT_POLLING_LOCATION = 'IMPORT_POLLING_LOCATION'
 IMPORT_VOTER = 'IMPORT_VOTER'
 MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
@@ -107,20 +109,28 @@ def create_batch_row_actions(
             batch_description_found = True
     except BatchDescription.DoesNotExist:
         # This is fine
-        batch_description = BatchDescription()
+        batch_description = None
+        batch_description_found = False
+    except Exception as e:
+        status += "FAILURE_RETRIEVING_BATCH_DESCRIPTION: " + str(e) + " "
+        handle_exception(e, logger=logger, exception_message=status)
+        batch_description = None
         batch_description_found = False
 
     batch_header_map_found = False
-    batch_header_map = BatchHeaderMap()
+    batch_header_map = None
     if batch_description_found:
         kind_of_batch = batch_description.kind_of_batch
 
         try:
-            batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
+            batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
             batch_header_map_found = True
         except BatchHeaderMap.DoesNotExist:
             # This is fine
             pass
+        except Exception as e:
+            status += "FAILURE_RETRIEVING_BATCH_HEADER_MAP: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
 
     batch_row_list = []
     batch_row_action_list_found = False
@@ -143,7 +153,12 @@ def create_batch_row_actions(
                 batch_row_action_list_found = True
         except BatchRow.DoesNotExist:
             # This is fine
-            pass
+            status += "COULD_NOT_FIND_ANY_BATCH_ROW_ENTRY "
+        except Exception as e:
+            status += "ERROR_RETRIEVING_BATCH_ROW_ENTRIES: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
+    else:
+        status += "ELSE [if batch_description_found and batch_header_map_found and not delete_analysis_only] "
 
     batch_row_action_list = []
     if batch_description_found and batch_header_map_found and batch_row_action_list_found and not delete_analysis_only:
@@ -215,6 +230,15 @@ def create_batch_row_actions(
                     # batch_row_action_politician = results['batch_row_action_politician']
                     number_of_batch_actions_created += 1
                     success = True
+            elif kind_of_batch == IMPORT_POLLING_LOCATION:
+                results = create_batch_row_action_polling_location(batch_description, batch_header_map, one_batch_row)
+
+                if results['batch_row_action_updated']:
+                    number_of_batch_actions_updated += 1
+                    success = True
+                elif results['batch_row_action_created']:
+                    number_of_batch_actions_created += 1
+                    success = True
             elif kind_of_batch == POSITION:
                 results = create_batch_row_action_position(batch_description, batch_header_map, one_batch_row)
 
@@ -228,7 +252,9 @@ def create_batch_row_actions(
                     success = True
             elif kind_of_batch == IMPORT_BALLOT_ITEM:
                 results = create_batch_row_action_ballot_item(
-                    batch_description, batch_header_map, one_batch_row,
+                    batch_description=batch_description,
+                    batch_header_map=batch_header_map,
+                    one_batch_row=one_batch_row,
                     election_objects_dict=election_objects_dict,
                     measure_objects_dict=measure_objects_dict,
                     office_objects_dict=office_objects_dict,
@@ -252,63 +278,73 @@ def create_batch_row_actions(
                 voter_id = batch_row_action_ballot_item.voter_id
 
                 batch_row_action_list.append(batch_row_action_ballot_item)
+    else:
+        status += "CREATE_BATCH_ROW_CONDITIONS_NOT_MET " \
+                  "[batch_description_found and batch_header_map_found and batch_row_action_list_found " \
+                  "and not delete_analysis_only] "
 
     existing_ballot_item_list = []
-    if kind_of_batch == IMPORT_BALLOT_ITEM:
-        if delete_analysis_only and not positive_value_exists(batch_row_id):
-            # If here we need to retrieve existing batch_row_actions
-            batch_manager = BatchManager()
-            results = batch_manager.retrieve_batch_row_action_ballot_item_list(
-                batch_header_id, limit_to_kind_of_action_list=[IMPORT_CREATE, IMPORT_ADD_TO_EXISTING])
-            if results['batch_row_action_list_found']:
-                batch_row_action_list = results['batch_row_action_list']
-                if positive_value_exists(batch_description.polling_location_we_vote_id):
-                    polling_location_we_vote_id = batch_description.polling_location_we_vote_id
-                elif len(batch_row_action_list):
-                    batch_row_action_ballot_item = batch_row_action_list[0]
-                    polling_location_we_vote_id = batch_row_action_ballot_item.polling_location_we_vote_id
-                    voter_id = batch_row_action_ballot_item.voter_id
-
-        # Don't deal with deleting ballot items if we are only looking at one batch row
-        if batch_description_found and batch_header_map_found and not positive_value_exists(batch_row_id):
-            # Start by retrieving existing ballot items for this polling location
-            if positive_value_exists(polling_location_we_vote_id) and \
-                    positive_value_exists(batch_description.google_civic_election_id):
-                ballot_item_list_manager = BallotItemListManager()
-                results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
-                    polling_location_we_vote_id,
-                    batch_description.google_civic_election_id,
-                    read_only=True)
-                if results['ballot_item_list_found']:
-                    existing_ballot_item_list = results['ballot_item_list']
-
     number_of_batch_action_deletes_created = 0
-    if existing_ballot_item_list and len(existing_ballot_item_list):
-        # If we are here, then we are checking to see if there were previous ballot items that have since been deleted
-        # Note that we should not be here if we are looking at only one batch row
-        for existing_ballot_item in existing_ballot_item_list:
-            batch_row_action_found = False
-            batch_row_action_delete_exists = False
-            for batch_row_action in batch_row_action_list:
-                if batch_row_action_found:
-                    continue
-                elif positive_value_exists(batch_row_action.contest_measure_we_vote_id) and \
-                        batch_row_action.contest_measure_we_vote_id == existing_ballot_item.contest_measure_we_vote_id:
-                    batch_row_action_found = True
-                elif positive_value_exists(batch_row_action.contest_office_we_vote_id) and \
-                        batch_row_action.contest_office_we_vote_id == existing_ballot_item.contest_office_we_vote_id:
-                    batch_row_action_found = True
-                else:
-                    # Doesn't match this existing_ballot_item
-                    pass
-            if not positive_value_exists(batch_row_action_found):
-                # If here we know that a ballot item already exists, and the current data would NOT be
-                #  creating/updating a ballot item. Create a delete action.
-                results = create_batch_row_action_ballot_item_delete(batch_description, existing_ballot_item)
-                batch_row_action_delete_exists = results['batch_row_action_delete_exists']
+    if kind_of_batch == IMPORT_BALLOT_ITEM:
+        # Only deal with deleting ballot items if we are NOT looking at just one batch row
+        if not positive_value_exists(batch_row_id):
+            if delete_analysis_only:
+                # If here we need to retrieve existing batch_row_actions
+                batch_manager = BatchManager()
+                results = batch_manager.retrieve_batch_row_action_ballot_item_list(
+                    batch_header_id, limit_to_kind_of_action_list=[IMPORT_CREATE, IMPORT_ADD_TO_EXISTING])
+                if results['batch_row_action_list_found']:
+                    batch_row_action_list = results['batch_row_action_list']
+                    if positive_value_exists(batch_description.polling_location_we_vote_id):
+                        polling_location_we_vote_id = batch_description.polling_location_we_vote_id
+                    elif len(batch_row_action_list):
+                        batch_row_action_ballot_item = batch_row_action_list[0]
+                        polling_location_we_vote_id = batch_row_action_ballot_item.polling_location_we_vote_id
+                        voter_id = batch_row_action_ballot_item.voter_id
 
-            if positive_value_exists(batch_row_action_delete_exists):
-                number_of_batch_action_deletes_created += 1
+            if batch_description_found and batch_header_map_found:
+                # Start by retrieving existing ballot items for this polling location
+                if positive_value_exists(polling_location_we_vote_id) and \
+                        positive_value_exists(batch_description.google_civic_election_id):
+                    ballot_item_list_manager = BallotItemListManager()
+                    results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
+                        polling_location_we_vote_id,
+                        batch_description.google_civic_election_id,
+                        read_only=False)
+                    if results['ballot_item_list_found']:
+                        existing_ballot_item_list = results['ballot_item_list']
+            else:
+                status += "COULD_NOT_RETRIEVE_EXISTING_BALLOT_ITEMS " \
+                          "[ELSE if batch_description_found and batch_header_map_found] "
+
+        if existing_ballot_item_list and len(existing_ballot_item_list):
+            # If we are here, then we are checking to see if there were previous ballot items that have since been deleted
+            # Note that we should not be here if we are looking at only one batch row
+            for existing_ballot_item in existing_ballot_item_list:
+                batch_row_action_found = False
+                batch_row_action_delete_exists = False
+                for batch_row_action in batch_row_action_list:
+                    if batch_row_action_found:
+                        continue
+                    elif positive_value_exists(batch_row_action.contest_measure_we_vote_id) and \
+                            batch_row_action.contest_measure_we_vote_id == existing_ballot_item.contest_measure_we_vote_id:
+                        batch_row_action_found = True
+                    elif positive_value_exists(batch_row_action.contest_office_we_vote_id) and \
+                            batch_row_action.contest_office_we_vote_id == existing_ballot_item.contest_office_we_vote_id:
+                        batch_row_action_found = True
+                    else:
+                        # Doesn't match this existing_ballot_item
+                        pass
+                if not positive_value_exists(batch_row_action_found):
+                    # If here we know that a ballot item already exists, and the current data would NOT be
+                    #  creating/updating a ballot item. Create a delete action.
+                    results = create_batch_row_action_ballot_item_delete(batch_description, existing_ballot_item)
+                    batch_row_action_delete_exists = results['batch_row_action_delete_exists']
+
+                if positive_value_exists(batch_row_action_delete_exists):
+                    number_of_batch_action_deletes_created += 1
+        else:
+            status += "EXISTING_BALLOT_ITEM_LIST_EMPTY "
 
     # Record that this batch_description has been analyzed, and the source for the ballot_item
     if batch_description_found and success:
@@ -331,7 +367,9 @@ def create_batch_row_actions(
             if batch_description_changed:
                 batch_description.save()
         except Exception as e:
-            status += "ANALYZE-COULD_NOT_SAVE_BATCH_DESCRIPTION " + str(e) + " "
+            status += "ANALYZE-COULD_NOT_SAVE_BATCH_DESCRIPTION: " + str(e) + " "
+    else:
+        status += "BATCH_DESCRIPTION_NOT_FOUND_OR_NOT_SUCCESS-CANNOT_LABEL_ANALYZED "
 
     results = {
         'success':                          success,
@@ -1027,7 +1065,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
     if not positive_value_exists(google_civic_election_id):
         election_day = batch_manager.retrieve_value_from_batch_row("election_day", batch_header_map, one_batch_row)
         election_results = batch_manager.retrieve_election_details_from_election_day_or_state_code(
-            election_day, state_code, read_only=True)
+            election_day, state_code, read_only=False)
         if election_results['success']:
             google_civic_election_id = election_results['google_civic_election_id']
 
@@ -1598,6 +1636,165 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
     return results
 
 
+def create_batch_row_action_polling_location(batch_description, batch_header_map, one_batch_row):
+    """
+
+    :param batch_description:
+    :param batch_header_map:
+    :param one_batch_row:
+    :return:
+    """
+    batch_manager = BatchManager()
+    success = False
+    status = ""
+    batch_row_action_updated = False
+    batch_row_action_created = False
+    kind_of_action = ""
+
+    # Does a BatchRowActionPollingLocation entry already exist?
+    # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
+    #  we are checking for existing duplicate data
+    existing_results = batch_manager.retrieve_batch_row_action_polling_location(
+        batch_description.batch_header_id, one_batch_row.id)
+    if existing_results['batch_row_action_found']:
+        batch_row_action_polling_location = existing_results['batch_row_action_polling_location']
+        batch_row_action_updated = True
+        status += "BATCH_ROW_ACTION_POLLING_LOCATION_UPDATE "
+    else:
+        # If a BatchRowActionPollingLocation entry does not exist, create one
+        try:
+            batch_row_action_polling_location = BatchRowActionPollingLocation.objects.create(
+                batch_header_id=batch_description.batch_header_id,
+                batch_row_id=one_batch_row.id,
+                batch_set_id=batch_description.batch_set_id,
+            )
+            batch_row_action_created = True
+            success = True
+            status += "BATCH_ROW_ACTION_POLLING_LOCATION_CREATE "
+        except Exception as e:
+            batch_row_action_created = False
+            batch_row_action_polling_location = None
+            success = False
+            status += "BATCH_ROW_ACTION_POLLING_LOCATION_NOT_CREATED " + str(e) + ' '
+
+            results = {
+                'success': success,
+                'status': status,
+                'batch_row_action_updated': batch_row_action_updated,
+                'batch_row_action_created': batch_row_action_created,
+                'batch_row_action_polling_location': batch_row_action_polling_location,
+            }
+            return results
+
+    # NOTE: If you add incoming header names here, make sure to update BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS
+
+    # Find the column in the incoming batch_row with the header title specified (ex/ "organization_name"
+    city = batch_manager.retrieve_value_from_batch_row(
+        "city", batch_header_map, one_batch_row)
+    county_name = batch_manager.retrieve_value_from_batch_row(
+        "county_name", batch_header_map, one_batch_row)
+    line1 = batch_manager.retrieve_value_from_batch_row(
+        "line1", batch_header_map, one_batch_row)
+    line2 = batch_manager.retrieve_value_from_batch_row(
+        "line2", batch_header_map, one_batch_row)
+    location_name = batch_manager.retrieve_value_from_batch_row(
+        "location_name", batch_header_map, one_batch_row)
+    polling_location_deleted = batch_manager.retrieve_value_from_batch_row(
+        "polling_location_deleted", batch_header_map, one_batch_row)
+    precinct_name = batch_manager.retrieve_value_from_batch_row(
+        "precinct_name", batch_header_map, one_batch_row)
+    state = batch_manager.retrieve_value_from_batch_row(
+        "state", batch_header_map, one_batch_row)
+    use_for_bulk_retrieve = batch_manager.retrieve_value_from_batch_row(
+        "use_for_bulk_retrieve", batch_header_map, one_batch_row)
+    polling_location_we_vote_id = batch_manager.retrieve_value_from_batch_row(
+        "polling_location_we_vote_id", batch_header_map, one_batch_row)
+    zip_long = batch_manager.retrieve_value_from_batch_row(
+        "zip_long", batch_header_map, one_batch_row)
+
+    keep_looking_for_duplicates = True
+    kind_of_action = IMPORT_TO_BE_DETERMINED
+    if positive_value_exists(polling_location_we_vote_id):
+        # If here, then we are updating an existing known record
+        polling_location_manager = PollingLocationManager()
+        results = \
+            polling_location_manager.retrieve_polling_location_by_we_vote_id(polling_location_we_vote_id)
+        if results['polling_location_found']:
+            polling_location = results['polling_location']
+            keep_looking_for_duplicates = False
+            kind_of_action = IMPORT_ADD_TO_EXISTING
+        else:
+            kind_of_action = CLEAN_DATA_MANUALLY
+            keep_looking_for_duplicates = False
+            status += "POLLING_LOCATION_NOT_FOUND_BY_WE_VOTE_ID "
+
+    if keep_looking_for_duplicates:
+        polling_location_list_manager = PollingLocationListManager()
+        matching_results = polling_location_list_manager.retrieve_duplicate_polling_locations(
+            state=state,
+            line1=line1,
+            zip_long=zip_long,
+        )
+        if matching_results['polling_location_list_found']:
+            polling_location_list = matching_results['polling_location_list']
+            keep_looking_for_duplicates = False
+            if len(polling_location_list) == 1:
+                kind_of_action = IMPORT_ADD_TO_EXISTING
+                matching_polling_location = polling_location_list[0]
+                polling_location_we_vote_id = matching_polling_location.we_vote_id
+            else:
+                kind_of_action = CLEAN_DATA_MANUALLY
+            status += "CREATE_BATCH_ROW_ACTION_POLLING_LOCATION-DUPLICATE_FOUND: " + matching_results['status'] + " "
+        elif not matching_results['success']:
+            keep_looking_for_duplicates = False
+            kind_of_action = IMPORT_QUERY_ERROR
+        else:
+            keep_looking_for_duplicates = False
+            kind_of_action = IMPORT_CREATE
+
+    if keep_looking_for_duplicates:
+        # If here we have exhausted all of the ways we look for matches, so we can assume we need to
+        #  create a new entry
+        kind_of_action = IMPORT_CREATE
+
+    try:
+        batch_row_action_polling_location.batch_set_id = batch_description.batch_set_id
+        batch_row_action_polling_location.polling_location_we_vote_id = polling_location_we_vote_id
+        batch_row_action_polling_location.city = city
+        batch_row_action_polling_location.county_name = county_name
+        batch_row_action_polling_location.line1 = line1
+        batch_row_action_polling_location.line2 = line2
+        batch_row_action_polling_location.location_name = location_name
+        batch_row_action_polling_location.polling_location_deleted = positive_value_exists(polling_location_deleted)
+        batch_row_action_polling_location.precinct_name = precinct_name
+        batch_row_action_polling_location.state = state
+        batch_row_action_polling_location.use_for_bulk_retrieve = positive_value_exists(use_for_bulk_retrieve)
+        batch_row_action_polling_location.zip_long = zip_long
+        batch_row_action_polling_location.kind_of_action = kind_of_action
+        batch_row_action_polling_location.save()
+        success = True
+    except Exception as e:
+        success = False
+        status += "BATCH_ROW_ACTION_POLLING_LOCATION_UNABLE_TO_SAVE: " + str(e) + " "
+
+    try:
+        if batch_row_action_created or batch_row_action_updated:
+            # If BatchRowAction was created, this batch_row was analyzed
+            one_batch_row.batch_row_analyzed = True
+            one_batch_row.save()
+    except Exception as e:
+        status += "BATCH_ROW_ACTION_POLLING_LOCATION-UNABLE_TO_SAVE_BATCH_ROW: " + str(e) + " "
+
+    results = {
+        'success': success,
+        'status': status,
+        'batch_row_action_created': batch_row_action_created,
+        'batch_row_action_updated': batch_row_action_updated,
+        'batch_row_action_polling_location': batch_row_action_polling_location,
+    }
+    return results
+
+
 def create_batch_row_action_candidate(batch_description, batch_header_map, one_batch_row):
     """
     Handle batch_row for candidate
@@ -1639,7 +1836,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             batch_row_action_created = False
             batch_row_action_candidate = BatchRowActionCandidate()
             success = False
-            status += "BATCH_ROW_ACTION_CANDIDATE_NOT_CREATED "
+            status += "BATCH_ROW_ACTION_CANDIDATE_NOT_CREATED " + str(e) + " "
 
             results = {
                 'success': success,
@@ -1778,7 +1975,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     if keep_looking_for_duplicates and positive_value_exists(ballotpedia_candidate_id):
         candidate_campaign_manager = CandidateCampaignManager()
         matching_results = candidate_campaign_manager.retrieve_candidate_campaign_from_ballotpedia_candidate_id(
-            ballotpedia_candidate_id, read_only=True)
+            ballotpedia_candidate_id, read_only=False)
         if matching_results['candidate_campaign_found']:
             candidate = matching_results['candidate_campaign']
             candidate_found = True
@@ -1940,7 +2137,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.save()
     except Exception as e:
         success = False
-        status += "BATCH_ROW_ACTION_CANDIDATE_UNABLE_TO_SAVE " + str(e) + " "
+        status += "BATCH_ROW_ACTION_CANDIDATE_UNABLE_TO_SAVE: " + str(e) + " "
 
     # If a state was figured out, then update the batch_row with the state_code so we can use that for filtering
     if positive_value_exists(state_code):
@@ -2002,12 +2199,12 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             )
             batch_row_action_created = True
             success = True
-            status = "BATCH_ROW_ACTION_ORGANIZATION_CREATED "
+            status = "BATCH_ROW_ACTION_POSITION_CREATED "
         except Exception as e:
             batch_row_action_created = False
-            batch_row_action_position = BatchRowActionPosition()
+            batch_row_action_position = None
             success = False
-            status = "BATCH_ROW_ACTION_ORGANIZATION_NOT_CREATED "
+            status = "BATCH_ROW_ACTION_POSITION_NOT_CREATED: " + str(e) + " "
 
             results = {
                 'success': success,
@@ -2069,7 +2266,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         # look up google_civic_election_id using state and election_day
         election_day = batch_manager.retrieve_value_from_batch_row("election_day", batch_header_map, one_batch_row)
         election_results = batch_manager.retrieve_election_details_from_election_day_or_state_code(
-            election_day, state_code, read_only=True)
+            election_day, state_code, read_only=False)
         if election_results['success']:
             google_civic_election_id = election_results['google_civic_election_id']
             # election_name = election_results['election_name']
@@ -2383,7 +2580,9 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     return results
 
 
-def create_batch_row_action_ballot_item(batch_description, batch_header_map, one_batch_row,
+def create_batch_row_action_ballot_item(batch_description,
+                                        batch_header_map,
+                                        one_batch_row,
                                         election_objects_dict={},
                                         measure_objects_dict={},
                                         office_objects_dict={}):
@@ -2423,8 +2622,10 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
     if existing_results['batch_row_action_found']:
         batch_row_action_ballot_item = existing_results['batch_row_action_ballot_item']
         batch_row_action_updated = True
+        status += "EXISTING_BATCH_ROW_ACTION_BALLOT_ITEM_FOUND "
     else:
         # If a BatchRowActionBallotItem entry does not exist, create one
+        status += "[BatchRowActionBallotItem.objects.create]"
         try:
             batch_row_action_ballot_item = BatchRowActionBallotItem.objects.create(
                 batch_header_id=batch_description.batch_header_id,
@@ -2435,9 +2636,10 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             status += "BATCH_ROW_ACTION_BALLOT_ITEM_CREATED "
         except Exception as e:
             batch_row_action_created = False
-            batch_row_action_ballot_item = BatchRowActionBallotItem()
+            batch_row_action_ballot_item = None
             success = False
-            status += "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_CREATED " + str(e) + " "
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_CREATED: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
 
             results = {
                 'success':                      success,
@@ -2517,18 +2719,24 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             if contest_office:
                 contest_office_name = contest_office.office_name
         else:
+            status += "RETRIEVING_OFFICE_FROM_WE_VOTE_ID "
+            # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
             results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id,
-                                                                                     read_only=True)
+                                                                                     read_only=False)
             if results['contest_office_found']:
                 contest_office = results['contest_office']
                 contest_office_name = contest_office.office_name
                 office_objects_dict[contest_office_we_vote_id] = contest_office
+            else:
+                status += "COULD_NOT_RETRIEVE_OFFICE_FROM_WE_VOTE_ID: "
+                status += results['status']
 
     if keep_looking_for_duplicates and not positive_value_exists(contest_office_name):
         # See if we have an office name
         contest_office_list_manager = ContestOfficeListManager()
+        # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
         matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
-            contest_office_name, google_civic_election_id, state_code, read_only=True)
+            contest_office_name, google_civic_election_id, state_code, read_only=False)
         if matching_results['contest_office_found']:
             keep_looking_for_duplicates = False
             contest_office = matching_results['contest_office']
@@ -2546,8 +2754,9 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
     if keep_looking_for_duplicates:
         candidate_campaign_list_manager = CandidateCampaignListManager()
         google_civic_election_id_list = [google_civic_election_id]
+        # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
         matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name, read_only=True)
+            google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name, read_only=False)
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
             keep_looking_for_duplicates = False
@@ -2564,8 +2773,9 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
                 if contest_measure:
                     contest_measure_name = contest_measure.measure_title
             else:
+                # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery"
                 results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
-                    contest_measure_we_vote_id, read_only=True)
+                    contest_measure_we_vote_id, read_only=False)
                 if results['contest_measure_found']:
                     keep_looking_for_duplicates = False
                     contest_measure = results['contest_measure']
@@ -2580,8 +2790,9 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         contest_measure_list = ContestMeasureListManager()
         keep_looking_for_duplicates = True
         google_civic_election_id_list = [google_civic_election_id]
+        # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
         matching_results = contest_measure_list.retrieve_contest_measures_from_non_unique_identifiers(
-            google_civic_election_id_list, state_code, contest_measure_name, read_only=True)
+            google_civic_election_id_list, state_code, contest_measure_name, read_only=False)
         if matching_results['contest_measure_found']:
             contest_measure = matching_results['contest_measure']
             contest_measure_found = True
@@ -2604,8 +2815,9 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             contest_measure = measure_objects_dict[contest_measure_we_vote_id]
             contest_measure_found = True
         else:
+            # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
             results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
-                contest_measure_we_vote_id, read_only=True)
+                contest_measure_we_vote_id, read_only=False)
             if results['contest_measure_found']:
                 contest_measure = results['contest_measure']
                 measure_objects_dict[contest_measure_we_vote_id] = contest_measure
@@ -2618,9 +2830,11 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             no_vote_description = contest_measure.ballotpedia_no_vote_description
 
     # check for duplicate entries in the live ballot_item data
+    existing_ballot_item_query_completed = False
     if positive_value_exists(contest_office_we_vote_id) or positive_value_exists(contest_measure_we_vote_id):
         try:
-            existing_ballot_item_query = BallotItem.objects.using('readonly').all()
+            # This used to retrieve from using('readonly') but the query gets interrupted from updates from master
+            existing_ballot_item_query = BallotItem.objects.all()
             existing_ballot_item_query = existing_ballot_item_query.filter(
                 google_civic_election_id=google_civic_election_id,
                 polling_location_we_vote_id__iexact=polling_location_we_vote_id
@@ -2633,6 +2847,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
                     contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
 
             existing_entry_list = existing_ballot_item_query[:1]
+            existing_ballot_item_query_completed = True
             if len(existing_entry_list):
                 existing_ballot_item = existing_entry_list[0]
                 existing_ballot_item_id = existing_ballot_item.id
@@ -2640,12 +2855,14 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             else:
                 existing_ballot_item_found = False
         except Exception as e:
-            status += "CREATE_BATCH_ROW_ACTION_BALLOT_ITEM-BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR " + str(e) + " "
+            status += "CREATE_BATCH_ROW_ACTION_BALLOT_ITEM-BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
 
     # Do we have the minimum required variables?
     polling_location_or_voter = positive_value_exists(polling_location_we_vote_id) or positive_value_exists(voter_id)
-    office_or_measure = positive_value_exists(contest_office_we_vote_id) \
-        or positive_value_exists(contest_measure_we_vote_id)
+    office_or_measure = \
+        (positive_value_exists(contest_office_we_vote_id) or positive_value_exists(contest_measure_we_vote_id)) \
+        and existing_ballot_item_query_completed
     if polling_location_or_voter and office_or_measure and google_civic_election_id:
         if positive_value_exists(existing_ballot_item_found):
             # Update existing ballot item
@@ -2661,6 +2878,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         if not google_civic_election_id:
             status += "MISSING_GOOGLE_CIVIC_ELECTION_ID "
         kind_of_action = IMPORT_TO_BE_DETERMINED
+        print_to_log(logger=logger, exception_message=status)
 
     # Update the BatchRowActionBallotItem
     try:
@@ -2687,7 +2905,8 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         status += "BATCH_ROW_ACTION_BALLOT_ITEM_SAVED "
     except Exception as e:
         success = False
-        status += "BATCH_ROW_ACTION_BALLOT_ITEM_UNABLE_TO_SAVE " + str(e) + " "
+        status += "BATCH_ROW_ACTION_BALLOT_ITEM_UNABLE_TO_SAVE: " + str(e) + " "
+        handle_exception(e, logger=logger, exception_message=status)
 
     try:
         if batch_row_action_created or batch_row_action_updated:
@@ -2699,7 +2918,8 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             one_batch_row.batch_row_analyzed = True
             one_batch_row.save()
     except Exception as e:
-        status += "COULD_NOT_SAVE_BATCH_ROW " + str(e) + " "
+        status += "COULD_NOT_SAVE_BATCH_ROW: " + str(e) + " "
+        handle_exception(e, logger=logger, exception_message=status)
 
     results = {
         'success':                      success,
@@ -2755,9 +2975,9 @@ def create_batch_row_action_ballot_item_delete(batch_description, existing_ballo
             status += "BATCH_ROW_ACTION_BALLOT_ITEM_DELETE_CREATED "
         except Exception as e:
             batch_row_action_delete_exists = False
-            batch_row_action_ballot_item = BatchRowActionBallotItem()
+            batch_row_action_ballot_item = None
             success = False
-            status += "BATCH_ROW_ACTION_BALLOT_ITEM_DELETE_NOT_CREATED " + str(e) + " "
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_DELETE_NOT_CREATED: " + str(e) + " "
 
             results = {
                 'success':                          success,
@@ -3029,6 +3249,12 @@ def create_batch_header_translation_suggestions(batch_header, kind_of_batch, inc
     elif kind_of_batch == ELECTED_OFFICE:
         kind_of_batch_recognized = True
         batch_import_keys_accepted_dict = BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES
+    elif kind_of_batch == IMPORT_BALLOT_ITEM:
+        kind_of_batch_recognized = True
+        batch_import_keys_accepted_dict = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
+    elif kind_of_batch == IMPORT_POLLING_LOCATION:
+        kind_of_batch_recognized = True
+        batch_import_keys_accepted_dict = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLLING_LOCATIONS
     elif kind_of_batch == MEASURE:
         kind_of_batch_recognized = True
         batch_import_keys_accepted_dict = BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES
@@ -3041,9 +3267,6 @@ def create_batch_header_translation_suggestions(batch_header, kind_of_batch, inc
     elif kind_of_batch == POSITION:
         kind_of_batch_recognized = True
         batch_import_keys_accepted_dict = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
-    elif kind_of_batch == IMPORT_BALLOT_ITEM:
-        kind_of_batch_recognized = True
-        batch_import_keys_accepted_dict = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
     else:
         kind_of_batch_recognized = False
         batch_import_keys_accepted_dict = {}
@@ -4162,6 +4385,145 @@ def import_organization_data_from_batch_row_actions(
     return results
 
 
+def import_polling_location_data_from_batch_row_actions(
+        batch_header_id, batch_row_id, create_entry_flag=False, update_entry_flag=False):
+    success = False
+    status = ""
+    number_created = 0
+    number_updated = 0
+    batch_row_action_list_found = False
+
+    if not positive_value_exists(batch_header_id):
+        status = "IMPORT_POLLING_LOCATION_ENTRY-BATCH_HEADER_ID_MISSING"
+        results = {
+            'success':           success,
+            'status':            status,
+            'number_created':    number_created,
+            'number_updated':    number_updated
+        }
+        return results
+
+    try:
+        batch_row_action_list = BatchRowActionPollingLocation.objects.all()
+        batch_row_action_list = batch_row_action_list.filter(batch_header_id=batch_header_id)
+        if positive_value_exists(batch_row_id):
+            batch_row_action_list = batch_row_action_list.filter(batch_row_id=batch_row_id)
+
+        if positive_value_exists(create_entry_flag):
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_CREATE)
+        elif positive_value_exists(update_entry_flag):
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_ADD_TO_EXISTING)
+        else:
+            # error handling
+            status += "IMPORT_POLLING_LOCATION_ENTRY-KIND_OF_ACTION_MISSING"
+            results = {
+                'success':         success,
+                'status':          status,
+                'number_created':  number_created,
+                'number_updated':  number_updated
+            }
+            return results
+
+        if len(batch_row_action_list):
+            batch_row_action_list_found = True
+
+    except BatchRowActionPollingLocation.DoesNotExist:
+        batch_row_action_list = []
+        batch_row_action_list_found = False
+        pass
+
+    if not batch_row_action_list_found:
+        status += "IMPORT_POLLING_LOCATION_ENTRY-BATCH_ROW_ACTION_LIST_MISSING"
+        results = {
+            'success':                       success,
+            'status':                        status,
+            'number_created':    number_created,
+            'number_updated':    number_updated
+        }
+        return results
+
+    if update_entry_flag:
+        status += "POLLING_LOCATION_UPDATE_NOT_WORKING YET "
+
+    polling_location_manager = PollingLocationManager()
+    for one_batch_row_action in batch_row_action_list:
+        if create_entry_flag:
+            results = polling_location_manager.update_or_create_polling_location(
+                one_batch_row_action.polling_location_we_vote_id, '',
+                one_batch_row_action.location_name, '', '',
+                one_batch_row_action.line1, one_batch_row_action.line2,
+                one_batch_row_action.city, one_batch_row_action.state, one_batch_row_action.zip_long,
+                county_name=one_batch_row_action.county_name,
+                precinct_name=one_batch_row_action.precinct_name,
+                use_for_bulk_retrieve=one_batch_row_action.use_for_bulk_retrieve,
+                polling_location_deleted=one_batch_row_action.polling_location_deleted)
+
+            if not results['polling_location_created']:
+                continue
+
+            number_created += 1
+            polling_location = results['polling_location']
+            success = True
+
+            # now update BatchRowActionPollingLocation table entry
+            try:
+                one_batch_row_action.kind_of_action = IMPORT_ADD_TO_EXISTING
+                one_batch_row_action.polling_location_we_vote_id = polling_location.we_vote_id
+                one_batch_row_action.save()
+            except Exception as e:
+                success = False
+                status += "BATCH_ROW_ACTION_POLLING_LOCATION_SAVE_ERROR " + str(e) + " "
+                handle_exception(e, logger=logger, exception_message=status)
+
+            try:
+                # Now update organization with additional fields
+                polling_location.city = one_batch_row_action.city
+                polling_location.county_name = one_batch_row_action.county_name
+                polling_location.line1 = one_batch_row_action.line1
+                polling_location.line2 = one_batch_row_action.line2
+                polling_location.location_name = one_batch_row_action.location_name
+                polling_location.polling_location_deleted = one_batch_row_action.polling_location_deleted
+                polling_location.precinct_name = one_batch_row_action.precinct_name
+                polling_location.state = one_batch_row_action.state
+                polling_location.use_for_bulk_retrieve = one_batch_row_action.use_for_bulk_retrieve
+                polling_location.zip_long = one_batch_row_action.zip_long
+                polling_location.save()
+            except Exception as e:
+                status += "FAILED_SAVING_POLLING_LOCATION: " + str(e) + " "
+        elif update_entry_flag:
+            pass
+            # organization_we_vote_id = one_batch_row_action.organization_we_vote_id
+            # results = organization_manager.update_organization_row_entry(organization_title, organization_subtitle,
+            #                                                            organization_text, state_code, ctcl_uuid,
+            #                                                         google_civic_election_id, organization_we_vote_id)
+            # if results['organization_updated']:
+            #     number_updated += 1
+            #     success = True
+        else:
+            # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
+            status += "IMPORT_POLLING_LOCATION_ENTRY:NO_CREATE_OR_UPDATE_ERROR "
+            results = {
+                'success':         success,
+                'status':          status,
+                'number_created':  number_created,
+                'number_updated':  number_updated,
+            }
+            return results
+
+    if number_created:
+        status += "IMPORT_POLLING_LOCATION_ENTRY-CREATED "
+    elif number_updated:
+        status += "IMPORT_POLLING_LOCATION_ENTRY-UPDATED "
+
+    results = {
+        'success':           success,
+        'status':            status,
+        'number_created':    number_created,
+        'number_updated':    number_updated,
+    }
+    return results
+
+
 def import_position_data_from_batch_row_actions(
         batch_header_id, batch_row_id, create_entry_flag=False, update_entry_flag=False):
     success = False
@@ -4531,8 +4893,6 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
     number_of_ballot_items_created = 0
     number_of_ballot_items_updated = 0
     new_ballot_item = ''
-    polling_location_we_vote_id = ""
-    google_civic_election_id = 0
 
     if not positive_value_exists(batch_header_id):
         status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_HEADER_ID_MISSING "
@@ -4549,12 +4909,14 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
         batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
         batch_description_found = True
     except BatchDescription.DoesNotExist:
-        # This is fine
         batch_description = BatchDescription()
         batch_description_found = False
+        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_DESCRIPTION_MISSING "
+    except Exception as e:
+        batch_description_found = False
+        status += "IMPORT_BALLOT_ITEM_ENTRY-ERROR_RETRIEVING_BATCH_DESCRIPTION: " + str(e) + " "
 
     if not batch_description_found:
-        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_DESCRIPTION_MISSING "
         success = False
         results = {
             'success':                          success,
@@ -4570,12 +4932,13 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
         batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
         batch_header_map_found = True
     except BatchHeaderMap.DoesNotExist:
-        # This is fine
-        batch_header_map = BatchHeaderMap()
         batch_header_map_found = False
+        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_HEADER_MAP_MISSING "
+    except Exception as e:
+        batch_header_map_found = False
+        status += "ERROR_RETRIEVING_BATCH_HEADER_MAP: " + str(e) + " "
 
     if not batch_header_map_found:
-        status += "IMPORT_BALLOT_ITEM_ENTRY-BATCH_HEADER_MAP_MISSING "
         success = False
         results = {
             'success':                          success,
@@ -4694,7 +5057,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                         one_batch_row_action.save()
                     except Exception as e:
                         success = False
-                        status += "BALLOT_ITEM_RETRIEVE_ERROR " + str(e) + " "
+                        status += "BALLOT_ITEM_RETRIEVE_ERROR: " + str(e) + " "
                         handle_exception(e, logger=logger, exception_message=status)
                 else:
                     status += results['status']
@@ -4856,7 +5219,7 @@ def delete_ballot_item_data_from_batch_row_actions(batch_header_id, ballot_item_
             batch_row_action_list_found = True
 
     except Exception as e:
-        status += "FAILED_RETRIEVE " + str(e) + " "
+        status += "FAILED_BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE: " + str(e) + " "
         batch_row_action_list = []
         batch_row_action_list_found = False
 
@@ -5002,6 +5365,16 @@ def import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_head
                 number_of_table_rows_created = results['number_of_politicians_created']
             elif results['number_of_politicians_updated']:
                 number_of_table_rows_updated = results['number_of_politicians_updated']
+            success = True
+    elif kind_of_batch == IMPORT_POLLING_LOCATION:
+        results = import_polling_location_data_from_batch_row_actions(
+            batch_header_id, batch_row_id, create_flag, update_flag)
+        status += results['status']
+        if results['success']:
+            if results['number_created']:
+                number_of_table_rows_created = results['number_created']
+            elif results['number_updated']:
+                number_of_table_rows_updated = results['number_updated']
             success = True
     elif kind_of_batch == POSITION:
         results = import_position_data_from_batch_row_actions(batch_header_id, batch_row_id, create_flag, update_flag)

@@ -41,6 +41,8 @@ class PollingLocation(models.Model):
                              db_index=True)
     zip_long = models.CharField(max_length=255, blank=True, null=True,
                                 verbose_name='raw text zip returned from VIP, 9 characters', db_index=True)
+    county_name = models.CharField(default=None, max_length=255, null=True)
+    precinct_name = models.CharField(default=None, max_length=255, null=True)
     # We write latitude/longitude back to the PollingLocation table when we get it for the BallotReturned table
     latitude = models.FloatField(null=True, verbose_name='latitude returned from Google')
     longitude = models.FloatField(null=True, verbose_name='longitude returned from Google')
@@ -103,16 +105,30 @@ class PollingLocation(models.Model):
 
 class PollingLocationManager(models.Model):
 
-    def update_or_create_polling_location(self, we_vote_id,
-                                          polling_location_id, location_name, polling_hours_text, directions_text,
-                                          line1, line2, city, state, zip_long, latitude='', longitude='',
-                                          use_for_bulk_retrieve=False, polling_location_deleted=False):
+    def update_or_create_polling_location(
+            self,
+            we_vote_id,
+            polling_location_id,
+            location_name,
+            polling_hours_text,
+            directions_text,
+            line1,
+            line2,
+            city,
+            state,
+            zip_long,
+            county_name='',
+            precinct_name='',
+            latitude='',
+            longitude='',
+            use_for_bulk_retrieve=False,
+            polling_location_deleted=False):
         """
         Either update or create an polling_location entry.
         """
         exception_multiple_object_returned = False
-        new_polling_location_created = False
-        new_polling_location = PollingLocation()
+        polling_location_created = False
+        polling_location = None
         proceed_to_update_or_save = True
         success = False
         status = ''
@@ -122,11 +138,7 @@ class PollingLocationManager(models.Model):
             # If here we are dealing with an existing polling_location
             pass
         else:
-            if not polling_location_id:
-                success = False
-                status += 'MISSING_POLLING_LOCATION_ID '
-                proceed_to_update_or_save = False
-            elif not line1:
+            if not line1:
                 success = False
                 status += 'MISSING_POLLING_LOCATION_LINE1 '
                 proceed_to_update_or_save = False
@@ -147,14 +159,13 @@ class PollingLocationManager(models.Model):
             try:
                 if positive_value_exists(we_vote_id):
                     updated_values = {
-                        # Values we search against
-                        # No need to include we_vote_id here
-                        # The rest of the values
                         'we_vote_id': we_vote_id,
+                        'county_name': county_name.strip() if county_name else '',
                         'polling_location_id': polling_location_id,
                         'state': state,
                         'location_name': location_name.strip() if location_name else '',
                         'polling_hours_text': polling_hours_text.strip() if polling_hours_text else '',
+                        'precinct_name': precinct_name.strip() if precinct_name else '',
                         'directions_text': directions_text.strip() if directions_text else '',
                         'line1': line1.strip() if line1 else '',
                         'line2': line2,
@@ -168,45 +179,38 @@ class PollingLocationManager(models.Model):
                         updated_values['longitude'] = longitude
                     if positive_value_exists(use_for_bulk_retrieve):
                         updated_values['use_for_bulk_retrieve'] = use_for_bulk_retrieve
-                    new_polling_location, new_polling_location_created = PollingLocation.objects.update_or_create(
+                    polling_location, polling_location_created = PollingLocation.objects.update_or_create(
                         we_vote_id__iexact=we_vote_id, defaults=updated_values)
                 else:
-                    updated_values = {
-                        'polling_location_id': polling_location_id,
-                        'state': state,
-                        'location_name': location_name.strip() if location_name else '',
-                        'polling_hours_text': polling_hours_text.strip() if polling_hours_text else '',
-                        'directions_text': directions_text.strip() if directions_text else '',
-                        'line1': line1.strip() if line1 else '',
-                        'line2': line2,
-                        'city': city.strip() if city else '',
-                        'polling_location_deleted': polling_location_deleted,
-                        'zip_long': zip_long,
-                    }
-                    # We use polling_location_id + state to find prior entries since I am not sure polling_location_id's
-                    #  are unique from state-to-state
-                    if latitude:
-                        updated_values['latitude'] = latitude
-                    if longitude:
-                        updated_values['longitude'] = longitude
-                    if positive_value_exists(use_for_bulk_retrieve):
-                        updated_values['use_for_bulk_retrieve'] = use_for_bulk_retrieve
-                    new_polling_location, new_polling_location_created = PollingLocation.objects.update_or_create(
-                        polling_location_id__exact=polling_location_id, state=state, defaults=updated_values)
+                    polling_location = PollingLocation.objects.create(
+                        polling_location_id=polling_location_id,
+                        county_name=county_name.strip() if county_name else '',
+                        state=state,
+                        location_name=location_name.strip() if location_name else '',
+                        polling_hours_text=polling_hours_text.strip() if polling_hours_text else '',
+                        precinct_name=precinct_name.strip() if precinct_name else '',
+                        directions_text=directions_text.strip() if directions_text else '',
+                        line1=line1.strip() if line1 else '',
+                        line2=line2,
+                        city=city.strip() if city else '',
+                        polling_location_deleted=polling_location_deleted,
+                        use_for_bulk_retrieve=use_for_bulk_retrieve,
+                        zip_long=zip_long,
+                    )
+                polling_location_created = True
                 success = True
-                status += 'POLLING_LOCATION_SAVED '
-            except PollingLocation.MultipleObjectsReturned as e:
-                handle_record_found_more_than_one_exception(e, logger=logger)
+                status += 'POLLING_LOCATION_CREATED '
+            except Exception as e:
                 success = False
-                status += 'MULTIPLE_MATCHING_ADDRESSES_FOUND '
+                status += 'POLLING_LOCATION_CREATED_EXCEPTION: ' + str(e) + ' '
                 exception_multiple_object_returned = True
 
         results = {
             'success':                      success,
             'status':                       status,
             'MultipleObjectsReturned':      exception_multiple_object_returned,
-            'new_polling_location':         new_polling_location,
-            'new_polling_location_created': new_polling_location_created,
+            'polling_location':             polling_location,
+            'polling_location_created':     polling_location_created,
         }
         return results
 
@@ -322,8 +326,13 @@ class PollingLocationManager(models.Model):
         }
         return results
 
+    def retrieve_polling_location_by_we_vote_id(self, polling_location_we_vote_id=''):
+        return self.retrieve_polling_location_by_id(polling_location_we_vote_id=polling_location_we_vote_id)
+
     def retrieve_polling_location_by_id(self, polling_location_id=0, polling_location_we_vote_id=''):
         # Retrieve a polling_location entry
+        polling_location = None
+        status = ""
         try:
             if positive_value_exists(polling_location_id):
                 polling_location = PollingLocation.objects.get(id=polling_location_id)
@@ -333,7 +342,9 @@ class PollingLocationManager(models.Model):
                 polling_location_found = True if polling_location.id else False
             else:
                 polling_location_found = False
+            success = True
         except PollingLocation.MultipleObjectsReturned as e:
+            status += "RETRIEVE_POLLING_LOCATION-MultipleObjectsReturned: " + str(e) + " "
             success = False
             polling_location_found = False
         except PollingLocation.DoesNotExist:
@@ -341,21 +352,24 @@ class PollingLocationManager(models.Model):
             polling_location_found = False
         except Exception as e:
             polling_location_found = False
-            pass
+            status += "RETRIEVE_POLLING_LOCATION-COULD_NOT_RETRIEVE: " + str(e) + " "
+            success = False
 
         if polling_location_found:
+            status += "POLLING_LOCATION_FOUND "
             results = {
-                'status':                   "POLLING_LOCATION_FOUND",
-                'success':                  True,
+                'status':                   status,
+                'success':                  success,
                 'polling_location_found':   polling_location_found,
                 'polling_location':         polling_location,
             }
             return results
         else:
-            polling_location = PollingLocation()
+            status += "POLLING_LOCATION_NOT_FOUND "
+            polling_location = None
             results = {
-                'status':                  "POLLING_LOCATION_NOT_FOUND",
-                'success':                 True,
+                'status':                  status,
+                'success':                 success,
                 'polling_location_found':  False,
                 'polling_location':        polling_location,
             }
@@ -412,8 +426,94 @@ class PollingLocationManager(models.Model):
 
 class PollingLocationListManager(models.Model):
 
-    def retrieve_possible_duplicate_polling_locations(self, polling_location_id, state, location_name, line1, zip_long,
-                                                      we_vote_id_from_master=''):
+    def retrieve_duplicate_polling_locations(
+            self,
+            polling_location_id='',
+            state='',
+            location_name='',
+            line1='',
+            zip_long='',
+            we_vote_id_from_master=''):
+        """
+        :param polling_location_id:
+        :param state:
+        :param location_name:
+        :param line1:
+        :param zip_long:
+        :param we_vote_id_from_master:
+        :return:
+        """
+        polling_location_list_objects = []
+        polling_location_list_found = False
+        status = ''
+
+        # If we don't have the right variables required for the filters below, exit
+        if not positive_value_exists(polling_location_id) \
+                and not positive_value_exists(state) \
+                and not positive_value_exists(line1) \
+                and not positive_value_exists(zip_long):
+
+            results = {
+                'success':                      False,
+                'status':                       "MISSING_REQUIRED_VARIABLES_TO_LOOK_FOR_POLLING_LOCATIONS_DUPLICATES",
+                'polling_location_list_found':  polling_location_list_found,
+                'polling_location_list':        polling_location_list_objects,
+            }
+            return results
+
+        try:
+            polling_location_queryset = PollingLocation.objects.all()
+
+            # Ignore entries with we_vote_id coming in from master server
+            if positive_value_exists(we_vote_id_from_master):
+                polling_location_queryset = polling_location_queryset.exclude(we_vote_id__iexact=we_vote_id_from_master)
+
+            if positive_value_exists(polling_location_id):
+                # This is not the built in id, but an external ID
+                polling_location_queryset = polling_location_queryset.filter(polling_location_id=polling_location_id)
+            if positive_value_exists(location_name):
+                polling_location_queryset = polling_location_queryset.filter(location_name__iexact=location_name)
+            if positive_value_exists(state):
+                polling_location_queryset = polling_location_queryset.filter(state__iexact=state)
+            if positive_value_exists(line1):
+                polling_location_queryset = polling_location_queryset.filter(line1__iexact=line1)
+            if positive_value_exists(zip_long):
+                polling_location_queryset = polling_location_queryset.filter(zip_long__iexact=zip_long)
+
+            polling_location_list_objects = list(polling_location_queryset)
+
+            if len(polling_location_list_objects):
+                polling_location_list_found = True
+                status += 'DUPLICATE_POLLING_LOCATIONS_RETRIEVED '
+                success = True
+            else:
+                status += 'NO_DUPLICATE_POLLING_LOCATIONS_RETRIEVED '
+                success = True
+        except PollingLocation.DoesNotExist:
+            # No candidates found. Not a problem.
+            status += 'NO_DUPLICATE_POLLING_LOCATIONS_FOUND_DoesNotExist '
+            polling_location_list_objects = []
+            success = True
+        except Exception as e:
+            status += 'RETRIEVE_DUPLICATE_POLLING_LOCATIONS_FAILED: ' + str(e) + ' '
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'polling_location_list_found':  polling_location_list_found,
+            'polling_location_list':        polling_location_list_objects,
+        }
+        return results
+
+    def retrieve_possible_duplicate_polling_locations(
+            self,
+            polling_location_id,
+            state,
+            location_name,
+            line1,
+            zip_long,
+            we_vote_id_from_master=''):
         """
         Note that we bring in multiple polling_locations with the same street address line1 and zip.
          This is because the source data seems to have multiple entries per physical address, perhaps due to assigning
@@ -429,6 +529,7 @@ class PollingLocationListManager(models.Model):
         polling_location_list_objects = []
         filters = []
         polling_location_list_found = False
+        status = ''
 
         # If we don't have the right variables required for the filters below, exit
         if not (positive_value_exists(polling_location_id) or positive_value_exists(location_name)) \
@@ -487,19 +588,18 @@ class PollingLocationListManager(models.Model):
 
             if len(polling_location_list_objects):
                 polling_location_list_found = True
-                status = 'DUPLICATE_POLLING_LOCATIONS_RETRIEVED'
+                status += 'DUPLICATE_POLLING_LOCATIONS_RETRIEVED '
                 success = True
             else:
-                status = 'NO_DUPLICATE_POLLING_LOCATIONS_RETRIEVED'
+                status += 'NO_DUPLICATE_POLLING_LOCATIONS_RETRIEVED '
                 success = True
         except PollingLocation.DoesNotExist:
             # No candidates found. Not a problem.
-            status = 'NO_DUPLICATE_POLLING_LOCATIONS_FOUND_DoesNotExist'
+            status += 'NO_DUPLICATE_POLLING_LOCATIONS_FOUND_DoesNotExist '
             polling_location_list_objects = []
             success = True
         except Exception as e:
-            status = 'FAILED retrieve_possible_duplicate_polling_locations ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED retrieve_possible_duplicate_polling_locations ' + str(e) + ' '
             success = False
 
         results = {
@@ -509,4 +609,3 @@ class PollingLocationListManager(models.Model):
             'polling_location_list':        polling_location_list_objects,
         }
         return results
-

@@ -604,10 +604,12 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
     friend_we_vote_id = ''
     friend_organization_we_vote_id = ''
     invitation_message = ''
+    invitation_secret_key_belongs_to_this_voter = ''
 
     # If a voter_device_id is passed in that isn't valid, we want to throw an error
     device_id_results = is_voter_device_id_valid(voter_device_id)
     if not device_id_results['success']:
+        status += "friendInvitationInformation-MISSING_VOTER_DEVICE_ID:"
         status += device_id_results['status']
         json_data = {
             'status':                   status,
@@ -622,11 +624,12 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
             'invitation_found':         False,
             'invitation_message':       '',
             'invitation_secret_key':    invitation_secret_key,
+            'invitation_secret_key_belongs_to_this_voter': False,
         }
         return json_data
 
     if not positive_value_exists(invitation_secret_key):
-        status += "VOTER_EMAIL_ADDRESS_VERIFY_MISSING_SECRET_KEY "
+        status += "friendInvitationInformation_MISSING_SECRET_KEY "
         error_results = {
             'status':                                       status,
             'success':                                      False,
@@ -640,6 +643,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
             'invitation_found':         False,
             'invitation_message':       '',
             'invitation_secret_key':                        invitation_secret_key,
+            'invitation_secret_key_belongs_to_this_voter': False,
         }
         return error_results
 
@@ -647,7 +651,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
-        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
+        status += "friendInvitationInformation_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
         error_results = {
             'status':                                       status,
             'success':                                      False,
@@ -661,6 +665,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
             'invitation_found':         False,
             'invitation_message':       '',
             'invitation_secret_key':                        invitation_secret_key,
+            'invitation_secret_key_belongs_to_this_voter': False,
         }
         return error_results
     voter = voter_results['voter']
@@ -684,6 +689,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
             'invitation_found':         False,
             'invitation_message':       '',
             'invitation_secret_key':    invitation_secret_key,
+            'invitation_secret_key_belongs_to_this_voter': False,
         }
         return error_results
 
@@ -708,6 +714,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
                 'invitation_found':         invitation_found,
                 'invitation_message':       '',
                 'invitation_secret_key':    invitation_secret_key,
+                'invitation_secret_key_belongs_to_this_voter': False,
             }
             return error_results
 
@@ -726,9 +733,11 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
                 'invitation_found':         invitation_found,
                 'invitation_message':       '',
                 'invitation_secret_key':    invitation_secret_key,
+                'invitation_secret_key_belongs_to_this_voter': False,
             }
             return error_results
 
+        invitation_secret_key_belongs_to_this_voter = True
         sender_voter_we_vote_id = friend_invitation_voter_link.sender_voter_we_vote_id
         invitation_message = friend_invitation_voter_link.invitation_message
     elif friend_invitation_results['friend_invitation_email_link_found']:
@@ -750,6 +759,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
                 'invitation_found': invitation_found,
                 'invitation_message': '',
                 'invitation_secret_key': invitation_secret_key,
+                'invitation_secret_key_belongs_to_this_voter': False,
             }
             return error_results
 
@@ -768,9 +778,11 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
                 'invitation_found':         invitation_found,
                 'invitation_message':       '',
                 'invitation_secret_key':    invitation_secret_key,
+                'invitation_secret_key_belongs_to_this_voter': False,
             }
             return error_results
 
+        invitation_secret_key_belongs_to_this_voter = True
         sender_voter_we_vote_id = friend_invitation_email_link.sender_voter_we_vote_id
         invitation_message = friend_invitation_email_link.invitation_message
 
@@ -807,6 +819,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
         'invitation_found':                 invitation_found,
         'invitation_message':               invitation_message,
         'invitation_secret_key':            invitation_secret_key,
+        'invitation_secret_key_belongs_to_this_voter':  invitation_secret_key_belongs_to_this_voter,
     }
     return json_data
 
@@ -835,7 +848,6 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
             'invitation_found':                             False,
             'attempted_to_approve_own_invitation':          False,
             'invitation_secret_key':                        invitation_secret_key,
-            'invitation_secret_key_belongs_to_this_voter':  False,
         }
         return json_data
 
@@ -849,7 +861,6 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
             'invitation_found':                             False,
             'attempted_to_approve_own_invitation':          False,
             'invitation_secret_key':                        invitation_secret_key,
-            'invitation_secret_key_belongs_to_this_voter':  False,
         }
         return error_results
 
@@ -866,7 +877,6 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
             'invitation_found':                             False,
             'attempted_to_approve_own_invitation':          False,
             'invitation_secret_key':                        invitation_secret_key,
-            'invitation_secret_key_belongs_to_this_voter':  False,
         }
         return error_results
     voter = voter_results['voter']
@@ -886,7 +896,6 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
             'invitation_found':                             False,
             'attempted_to_approve_own_invitation':          False,
             'invitation_secret_key':                        invitation_secret_key,
-            'invitation_secret_key_belongs_to_this_voter':  False,
         }
         return error_results
 
@@ -907,7 +916,6 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
                 'invitation_found':                             True,
                 'attempted_to_approve_own_invitation':          True,
                 'invitation_secret_key':                        invitation_secret_key,
-                'invitation_secret_key_belongs_to_this_voter':  True,
             }
             return error_results
 
@@ -966,7 +974,6 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
                 'invitation_found':                             True,
                 'attempted_to_approve_own_invitation':          True,
                 'invitation_secret_key':                        invitation_secret_key,
-                'invitation_secret_key_belongs_to_this_voter':  False,
             }
             return error_results
 
@@ -1108,9 +1115,6 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
             except Exception as e:
                 status += "UNABLE_CREATE_AND_LINK_VOTER_FROM_FRIEND_INVITATION " + str(e) + ' '
 
-    invitation_secret_key_belongs_to_this_voter = \
-        voter_we_vote_id == voter_we_vote_id_accepting_invitation
-
     json_data = {
         'status':                                       status,
         'success':                                      success,
@@ -1119,7 +1123,6 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
         'invitation_found':                             invitation_found,
         'attempted_to_approve_own_invitation':          False,
         'invitation_secret_key':                        invitation_secret_key,
-        'invitation_secret_key_belongs_to_this_voter':  invitation_secret_key_belongs_to_this_voter,
     }
     return json_data
 
@@ -1230,11 +1233,11 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
         json_data = {
             'status':                                       device_id_results['status'],
             'success':                                      False,
-            'voter_device_id':                              voter_device_id,
-            'voter_has_data_to_preserve':                   False,
-            'invitation_found':                             False,
             'attempted_to_approve_own_invitation':          False,
             'facebook_request_id':                          facebook_request_id,
+            'invitation_found':                             False,
+            'voter_device_id':                              voter_device_id,
+            'voter_has_data_to_preserve':                   False,
         }
         return json_data
 
@@ -1242,11 +1245,11 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
         error_results = {
             'status':                                       "MISSING_FACEBOOK_REQUEST_ID",
             'success':                                      False,
-            'voter_device_id':                              voter_device_id,
-            'voter_has_data_to_preserve':                   False,
-            'invitation_found':                             False,
             'attempted_to_approve_own_invitation':          False,
             'facebook_request_id':                          facebook_request_id,
+            'invitation_found':                             False,
+            'voter_device_id':                              voter_device_id,
+            'voter_has_data_to_preserve':                   False,
         }
         return error_results
 
@@ -1257,11 +1260,11 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
         error_results = {
             'status':                                       "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
             'success':                                      False,
-            'voter_device_id':                              voter_device_id,
-            'voter_has_data_to_preserve':                   False,
-            'invitation_found':                             False,
             'attempted_to_approve_own_invitation':          False,
             'facebook_request_id':                          facebook_request_id,
+            'invitation_found':                             False,
+            'voter_device_id':                              voter_device_id,
+            'voter_has_data_to_preserve':                   False,
         }
         return error_results
     voter = voter_results['voter']
@@ -1277,11 +1280,11 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
         error_results = {
             'status':                                       "FACEBOOK_LINK_TO_SENDER_NOT_FOUND",
             'success':                                      False,
-            'voter_device_id':                              voter_device_id,
-            'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
-            'invitation_found':                             False,
             'attempted_to_approve_own_invitation':          False,
             'facebook_request_id':                          facebook_request_id,
+            'invitation_found':                             False,
+            'voter_device_id':                              voter_device_id,
+            'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
         }
         return error_results
 
@@ -1294,11 +1297,11 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
         error_results = {
             'status':                                       "INVITATION_NOT_FOUND_FROM_FACEBOOK",
             'success':                                      False,
-            'voter_device_id':                              voter_device_id,
-            'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
-            'invitation_found':                             False,
             'attempted_to_approve_own_invitation':          False,
             'facebook_request_id':                          facebook_request_id,
+            'invitation_found':                             False,
+            'voter_device_id':                              voter_device_id,
+            'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
         }
         return error_results
 
@@ -1310,11 +1313,11 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
         error_results = {
             'status':                                       "SENDER_AND_RECIPIENT_ARE_IDENTICAL_FAILED",
             'success':                                      False,
-            'voter_device_id':                              voter_device_id,
-            'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
-            'invitation_found':                             True,
             'attempted_to_approve_own_invitation':          True,
             'facebook_request_id':                          facebook_request_id,
+            'invitation_found':                             True,
+            'voter_device_id':                              voter_device_id,
+            'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
         }
         return error_results
 
@@ -1358,11 +1361,11 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
     json_data = {
         'status':                                       status,
         'success':                                      success,
-        'voter_device_id':                              voter_device_id,
-        'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
-        'invitation_found':                             invitation_found,
         'attempted_to_approve_own_invitation':          False,
         'facebook_request_id':                          facebook_request_id,
+        'invitation_found':                             invitation_found,
+        'voter_device_id':                              voter_device_id,
+        'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
     }
     return json_data
 

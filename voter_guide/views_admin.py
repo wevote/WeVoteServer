@@ -58,10 +58,42 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 @login_required
 def create_possible_voter_guides_from_prior_elections_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
+
+    # From Prior Elections - from_prior_election
+    # Endorsements from these urls are not the same from election to election, so bringing them forward
+    # to the current election is not helpful to the political data team
+    domains_to_not_consider = [
+        'adirondackdailyenterprise.com', 'about:blank', 'alternet.org', 'apnews.com', 'apple.com',
+        'baltimoresun.com', 'billboard.com', 'bloomberg.com', 'boston.com', 'bostonglobe.com',
+        'broadwayworld.com', 'buffalonews.com', 'businessinsider.com', 'buzzfeed.com',
+        'charlotteobserver.com', 'chicagotibune.com', 'cnbc.com', 'cnn.com',
+        'dailydot.com', 'dailykos.com', 'dallasnews.com', 'democracynow.org', 'denverpost.com',
+        'desmoinesregister.com', 'dispatch.com',
+        'docs.google.com', 'drive.google.com',
+        'essence.com',
+        'facebook.com', 'foxbusiness.com', 'foxnews.com',
+        'hollywoodreporter.com', 'houstonchronicle.com', 'huffpost.com',
+        'indystar.com', 'instagram.com',
+        'gayly.com',
+        'kansascity.com', 'kentucky.com', 'ksat.com',
+        'latimes.com', 'localhost:8000',
+        'mercurynews.com', 'miaminewtimes.com', 'motherjones.com', 'msnbc.com',
+        'nationalreview.com', 'nbcnews.com', 'newsweek.com', 'npr.org', 'nydailynews.com', 'nypost.com', 'nytimes.com',
+        'ocregister.org', 'opensecrets.org', 'orlandosentinel.com',
+        'palmbeachpost.com', 'people.com', 'politico.com',
+        'reviewjournal.com', 'rollingstone.com',
+        'sacbee.com', 'sfchronicle.com', 'snewsnet.com', 'spectator.us', 'sun-sentinel.com', 'suntimes.com',
+        'http://t.co', 'https://t.co', 'tampabay.com', 'techcrunch.com', 'texastribune.com', 'thehill.com',
+        'thenation.com', 'thestate.com', 'twitter.com',
+        'usatoday.com',
+        'vox.com',
+        'wapo.st', 'washingtonpost.com', 'westword.com', 'wsj.com',
+        'youtu.be', 'youtube.com',
+    ]
 
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_api_device_id
     voter_manager = VoterManager()
@@ -149,7 +181,6 @@ def create_possible_voter_guides_from_prior_elections_view(request):
                 voter_guide_list = list(voter_guide_query)
             else:
                 status += "UPCOMING_ELECTION_NOT_FOUND "
-
     if positive_value_exists(len(voter_guide_list)):
         for voter_guide in voter_guide_list:
             # Check to see if suggested entry has already been created for that org + election
@@ -178,7 +209,11 @@ def create_possible_voter_guides_from_prior_elections_view(request):
                         voter_guide_possibility_url = one_position.more_info_url
                         break  # Break out of this position loop
             if positive_value_exists(voter_guide_possibility_url):
+                if any(domain in voter_guide_possibility_url.lower() for domain in domains_to_not_consider):
+                    # If this URL is for a domain that always contains "single use" endorsements, don't suggest again
+                    continue
                 if voter_guide_possibility_url in urls_already_stored:
+                    # Has this URL already been suggested in urls_already_stored
                     continue
                 updated_values = {
                     'from_prior_election':  True,  # Mark as a possible entry, but don't show on "To Review" page yet
@@ -1371,7 +1406,7 @@ def voter_guides_sync_out_view(request):  # voterGuidesSyncOut
 
 @login_required
 def voter_guides_import_from_master_server_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1409,7 +1444,7 @@ def generate_voter_guide_possibility_batch_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1547,7 +1582,7 @@ def generate_voter_guides_view(request):
 
 @login_required
 def label_vote_smart_voter_guides_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1593,7 +1628,7 @@ def label_vote_smart_voter_guides_view(request):
 
 @login_required
 def generate_voter_guides_for_one_election_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1649,7 +1684,7 @@ def generate_voter_guides_for_one_election_view(request):
 
 @login_required
 def refresh_existing_voter_guides_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1677,7 +1712,7 @@ def refresh_existing_voter_guides_view(request):
 
 @login_required
 def voter_guide_edit_view(request, voter_guide_id=0, voter_guide_we_vote_id=""):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1738,7 +1773,7 @@ def voter_guide_edit_process_view(request):  # NOTE: THIS FORM DOESN'T SAVE YET 
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1851,7 +1886,7 @@ def voter_guide_edit_process_view(request):  # NOTE: THIS FORM DOESN'T SAVE YET 
 
 @login_required
 def voter_guide_list_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'partner_organization', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -2005,14 +2040,15 @@ def voter_guide_list_view(request):
 
 @login_required
 def voter_guide_possibility_list_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    assigned_to_voter_we_vote_id = request.GET.get('assigned_to_voter_we_vote_id', False)
+    from_prior_election = positive_value_exists(request.GET.get('from_prior_election', False))
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
-    from_prior_election = positive_value_exists(request.GET.get('from_prior_election', False))
     show_candidates_missing_from_we_vote = \
         positive_value_exists(request.GET.get('show_candidates_missing_from_we_vote', False))
     show_cannot_find_endorsements = positive_value_exists(request.GET.get('show_cannot_find_endorsements', False))
@@ -2023,12 +2059,85 @@ def voter_guide_possibility_list_view(request):
     state_code = request.GET.get('state_code', '')
     voter_guide_possibility_search = request.GET.get('voter_guide_possibility_search', '')
 
+    show_number_of_ballot_items = positive_value_exists(request.GET.get('show_number_of_ballot_items', False))
+
+    current_page_url = request.get_full_path()
+    page = convert_to_int(request.GET.get('page', 0))
+    page = page if positive_value_exists(page) else 0  # Prevent negative pages
+    if "&page=" in current_page_url:
+        # This will leave harmless number in URL
+        current_page_url = current_page_url.replace("&page=", "&")
+    # Remove "&hide_candidate_tools=1"
+    # if current_page_url:
+    #     current_page_minus_candidate_tools_url = current_page_url.replace("&hide_candidate_tools=1", "")
+    #     current_page_minus_candidate_tools_url = current_page_minus_candidate_tools_url.replace(
+    #         "&hide_candidate_tools=0", "")
+    # else:
+    #     current_page_minus_candidate_tools_url = current_page_url
+    previous_page = page - 1
+    previous_page_url = current_page_url + "&page=" + str(previous_page)
+    next_page = page + 1
+    next_page_url = current_page_url + "&page=" + str(next_page)
+
     voter_guide_possibility_archive_list = []
     voter_guide_possibility_list = []
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     election_manager = ElectionManager()
 
-    limit_number = 75
+    # ######################
+    # Calculate all of the counts
+    # To Review Count
+    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+        search_string=voter_guide_possibility_search,
+        google_civic_election_id=google_civic_election_id,
+        show_prior_years=show_all_elections,
+        assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
+        return_count_only=True)
+    to_review_count = results['voter_guide_possibility_list_count']
+
+    # From Prior Elections Count
+    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+        from_prior_election=True,
+        search_string=voter_guide_possibility_search,
+        google_civic_election_id=google_civic_election_id,
+        show_prior_years=show_all_elections,
+        assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
+        return_count_only=True)
+    from_prior_election_count = results['voter_guide_possibility_list_count']
+
+    # Endorsements Not Available Count
+    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+        cannot_find_endorsements=True,
+        search_string=voter_guide_possibility_search,
+        google_civic_election_id=google_civic_election_id,
+        show_prior_years=show_all_elections,
+        assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
+        return_count_only=True)
+    cannot_find_endorsements_count = results['voter_guide_possibility_list_count']
+
+    # Candidates/Measures Missing Count
+    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+        candidates_missing_from_we_vote=True,
+        search_string=voter_guide_possibility_search,
+        google_civic_election_id=google_civic_election_id,
+        show_prior_years=show_all_elections,
+        assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
+        return_count_only=True)
+    candidates_missing_count = results['voter_guide_possibility_list_count']
+
+    # Capture Detailed Comments Count
+    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+        capture_detailed_comments=True,
+        search_string=voter_guide_possibility_search,
+        google_civic_election_id=google_civic_election_id,
+        show_prior_years=show_all_elections,
+        assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
+        return_count_only=True)
+    capture_detailed_comments_count = results['voter_guide_possibility_list_count']
+
+    number_to_show = 25
+    start_number = number_to_show * page
+    end_number = start_number + number_to_show
 
     # Possibilities to review
     if positive_value_exists(from_prior_election):
@@ -2036,7 +2145,13 @@ def voter_guide_possibility_list_view(request):
         from_prior_election = True
         order_by = "-id"
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
-            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
+            order_by=order_by,
+            start_number=start_number,
+            end_number=end_number,
+            search_string=voter_guide_possibility_search,
+            google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
+            assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             from_prior_election=from_prior_election)
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
@@ -2045,7 +2160,13 @@ def voter_guide_possibility_list_view(request):
         cannot_find_endorsements = True
         order_by = "-id"
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
-            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
+            order_by=order_by,
+            start_number=start_number,
+            end_number=end_number,
+            search_string=voter_guide_possibility_search,
+            google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
+            assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             cannot_find_endorsements=cannot_find_endorsements)
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
@@ -2054,7 +2175,13 @@ def voter_guide_possibility_list_view(request):
         candidates_missing_from_we_vote = True
         order_by = "-id"
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
-            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
+            order_by=order_by,
+            start_number=start_number,
+            end_number=end_number,
+            search_string=voter_guide_possibility_search,
+            google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
+            assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             candidates_missing_from_we_vote=candidates_missing_from_we_vote)
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
@@ -2063,7 +2190,13 @@ def voter_guide_possibility_list_view(request):
         capture_detailed_comments = True
         order_by = "-id"
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
-            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
+            order_by=order_by,
+            start_number=start_number,
+            end_number=end_number,
+            search_string=voter_guide_possibility_search,
+            google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
+            assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             capture_detailed_comments=capture_detailed_comments)
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
@@ -2073,7 +2206,13 @@ def voter_guide_possibility_list_view(request):
         hide_from_active_review = True
         order_by = "-date_last_changed"
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
-            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
+            order_by=order_by,
+            start_number=start_number,
+            end_number=end_number,
+            search_string=voter_guide_possibility_search,
+            google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
+            assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             hide_from_active_review=hide_from_active_review)
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
@@ -2082,7 +2221,13 @@ def voter_guide_possibility_list_view(request):
         ignore_this_source = True
         order_by = "-id"
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
-            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
+            order_by=order_by,
+            start_number=start_number,
+            end_number=end_number,
+            search_string=voter_guide_possibility_search,
+            google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
+            assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             ignore_this_source=ignore_this_source)
         print(f"show_ignore_this_source results {results}")
         if results['success']:
@@ -2092,15 +2237,21 @@ def voter_guide_possibility_list_view(request):
         filtered_by_title = "To Review"
         order_by = "-id"
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
-            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id)
+            order_by=order_by,
+            start_number=start_number,
+            end_number=end_number,
+            search_string=voter_guide_possibility_search,
+            google_civic_election_id=google_civic_election_id,
+            assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
+            show_prior_years=show_all_elections,
+        )
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
 
-    if positive_value_exists(len(voter_guide_possibility_list)):
+    if show_number_of_ballot_items and positive_value_exists(len(voter_guide_possibility_list)):
         # Add VoterGuidePossibilityPosition data. Don't scan for new possibilities.
         voter_guide_possibility_list = \
             augment_with_voter_guide_possibility_position_data(voter_guide_possibility_list)
-        pass
 
     # Now populate the election drop down
     if positive_value_exists(show_all_elections):
@@ -2122,28 +2273,40 @@ def voter_guide_possibility_list_view(request):
                     one_election = results['election']
                     election_list.append(one_election)
 
-    # voter_guide_possibilities_count = len(voter_guide_possibility_list)
-    #
-    # messages.add_message(request, messages.INFO,
-    #                      'We found {voter_guide_possibilities_count} existing voter guide possibilities. '
-    #                      ''.format(voter_guide_possibilities_count=voter_guide_possibilities_count))
+    # And now populate the Political data managers dropdown
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_list_by_permissions(is_political_data_manager=True)
+    political_data_managers_list = results['voter_list']
 
     messages_on_stage = get_messages(request)
     template_values = {
         'ENDORSEMENTS_FOR_CANDIDATE':           ENDORSEMENTS_FOR_CANDIDATE,
         'ORGANIZATION_ENDORSING_CANDIDATES':    ORGANIZATION_ENDORSING_CANDIDATES,
         'UNKNOWN_TYPE':                         UNKNOWN_TYPE,
+        'assigned_to_voter_we_vote_id':         assigned_to_voter_we_vote_id,
+        'candidates_missing_count':             candidates_missing_count,
+        'cannot_find_endorsements_count':       cannot_find_endorsements_count,
+        'capture_detailed_comments_count':      capture_detailed_comments_count,
+        'current_page_number':                  page,
         'election_list':                        election_list,
         'filtered_by_title':                    filtered_by_title,
-        'google_civic_election_id':             google_civic_election_id,
-        'show_all_elections':                   show_all_elections,
         'from_prior_election':                  from_prior_election,
+        'from_prior_election_count':            from_prior_election_count,
+        'google_civic_election_id':             google_civic_election_id,
+        'next_page_url':                        next_page_url,
+        'number_to_show':                       number_to_show,
+        'political_data_managers_list':         political_data_managers_list,
+        'previous_page_url':                    previous_page_url,
+        'show_all_elections':                   show_all_elections,
         'show_candidates_missing_from_we_vote': show_candidates_missing_from_we_vote,
         'show_cannot_find_endorsements':        show_cannot_find_endorsements,
         'show_capture_detailed_comments':       show_capture_detailed_comments,
         'show_ignore_this_source':              show_ignore_this_source,
+        'show_number_of_ballot_items':          show_number_of_ballot_items,
         'show_only_hide_from_active_review':    show_only_hide_from_active_review,
+        'starting_counter_number':              page * number_to_show,
         'state_code':                           state_code,
+        'to_review_count':                      to_review_count,
         'messages_on_stage':                    messages_on_stage,
         'voter_guide_possibility_list':         voter_guide_possibility_list,
         'voter_guide_possibility_search':       voter_guide_possibility_search,
@@ -2153,15 +2316,17 @@ def voter_guide_possibility_list_view(request):
 
 @login_required
 def voter_guide_possibility_list_process_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'verified_volunteer'}
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
     # Capture the current filter view of the page and other settings, so we can pass along url_variables at the end
-    google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
-    show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
+    assigned_to_voter_we_vote_id = request.POST.get('assigned_to_voter_we_vote_id', False)
     from_prior_election = request.POST.get('from_prior_election', False)
+    google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+    reassign_to_voter_we_vote_id = request.POST.get('reassign_to_voter_we_vote_id', False)
+    show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
     show_candidates_missing_from_we_vote = request.POST.get('show_candidates_missing_from_we_vote', False)
     show_cannot_find_endorsements = request.POST.get('show_cannot_find_endorsements', False)
     show_capture_detailed_comments = request.POST.get('show_capture_detailed_comments', False)
@@ -2191,13 +2356,14 @@ def voter_guide_possibility_list_process_view(request):
     if positive_value_exists(voter_guide_possibility_search):
         url_variables += "&voter_guide_possibility_search=" + str(voter_guide_possibility_search)
 
-    select_for_marking_organization_ids = request.POST.getlist('select_for_marking_checks[]')
+    select_for_marking_voter_guide_possibility_ids = request.POST.getlist('select_for_marking_checks[]')
     which_marking = request.POST.get("which_marking")
 
     # Make sure 'which_marking' is one of the allowed Filter fields
-    if which_marking not in ("add_to_active_review", "candidates_missing_from_we_vote",
-                             "cannot_find_endorsements", "capture_detailed_comments",
-                             "hide_from_active_review", "ignore_this_source"):
+    if positive_value_exists(which_marking) \
+            and which_marking not in ("add_to_active_review", "candidates_missing_from_we_vote",
+                                      "cannot_find_endorsements", "capture_detailed_comments",
+                                      "hide_from_active_review", "ignore_this_source"):
         messages.add_message(request, messages.ERROR,
                              'The filter you are trying to update is not recognized: {which_marking}'
                              ''.format(which_marking=which_marking))
@@ -2205,13 +2371,62 @@ def voter_guide_possibility_list_process_view(request):
                                     url_variables)
 
     # print(f"voter_guide_possibility_list_process_view {which_marking}")
-    # print(f"marked:{select_for_marking_organization_ids}")
+    # print(f"marked:{select_for_marking_voter_guide_possibility_ids}")
+
+    # Make sure we have selected items for the modes that require them
+    if positive_value_exists(assigned_to_voter_we_vote_id):
+        # If just trying to see all voter guide possibilities assigned to one person, no check marks required
+        pass
+    elif positive_value_exists(which_marking) or positive_value_exists(reassign_to_voter_we_vote_id):
+        if not positive_value_exists(select_for_marking_voter_guide_possibility_ids):
+            messages.add_message(request, messages.ERROR, 'Please select some voter guide possibilities.')
+            return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()) +
+                                        url_variables)
 
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
 
-    if which_marking and select_for_marking_organization_ids:
+    if positive_value_exists(assigned_to_voter_we_vote_id):
+        # Show voter guide possibilities assigned to on person
+        url_variables += "&assigned_to_voter_we_vote_id=" + str(assigned_to_voter_we_vote_id)
+    elif positive_value_exists(reassign_to_voter_we_vote_id):
+        voter_manager = VoterManager()
+        results = voter_manager.retrieve_voter_by_we_vote_id(reassign_to_voter_we_vote_id)
+        if results['voter_found']:
+            voter = results['voter']
+            assigned_to_name = voter.get_full_name()
+        else:
+            messages.add_message(request, messages.ERROR, 'Could not find that voter.')
+            return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()) +
+                                        url_variables)
+
         items_processed_successfully = 0
-        for voter_guide_possibility_id_string in select_for_marking_organization_ids:
+        for voter_guide_possibility_id_string in select_for_marking_voter_guide_possibility_ids:
+            try:
+                voter_guide_possibility_id = int(voter_guide_possibility_id_string)
+                results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
+                    voter_guide_possibility_id=voter_guide_possibility_id,
+                    updated_values={
+                        'assigned_to_name':             assigned_to_name,
+                        'assigned_to_voter_we_vote_id': reassign_to_voter_we_vote_id,
+                    }
+                )
+                if results['success']:
+                    items_processed_successfully += 1
+            except Exception as e:
+                messages.add_message(request, messages.ERROR,
+                                     'Problem with: {voter_guide_possibility_id_string}'
+                                     ''.format(voter_guide_possibility_id_string=voter_guide_possibility_id_string))
+
+        messages.add_message(request, messages.INFO,
+                             '{number_reassigned} voter guide possibilities reassigned to: '
+                             '{assigned_to_name} ({reassign_to_voter_we_vote_id})'
+                             ''.format(
+                                 assigned_to_name=assigned_to_name,
+                                 number_reassigned=items_processed_successfully,
+                                 reassign_to_voter_we_vote_id=reassign_to_voter_we_vote_id))
+    elif positive_value_exists(which_marking):
+        items_processed_successfully = 0
+        for voter_guide_possibility_id_string in select_for_marking_voter_guide_possibility_ids:
             try:
                 voter_guide_possibility_id = int(voter_guide_possibility_id_string)
                 if which_marking == "add_to_active_review":
@@ -2243,14 +2458,13 @@ def voter_guide_possibility_list_process_view(request):
         messages.add_message(request, messages.INFO,
                              'Voter guides processed successfully: {items_processed_successfully}'
                              ''.format(items_processed_successfully=items_processed_successfully))
-
     return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()) +
                                 url_variables)
 
 
 @login_required
 def voter_guide_possibility_list_migration_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -2304,7 +2518,7 @@ def voter_guide_search_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -2354,7 +2568,7 @@ def voter_guide_search_process_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)

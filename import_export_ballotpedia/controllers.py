@@ -646,8 +646,7 @@ def retrieve_ballot_items_from_polling_location(
                     batch_header_id = results['batch_header_id']
         except Exception as e:
             success = False
-            status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATION-ERROR: ' + str(e) + ' '
             handle_exception(e, logger=logger, exception_message=status)
 
     results = {
@@ -952,8 +951,7 @@ def retrieve_ballot_items_from_polling_location_api_v4(
                 batch_header_id = results['batch_header_id']
         except Exception as e:
             success = False
-            status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS_API_V4-ERROR: ' + str(e) + ' '
             handle_exception(e, logger=logger, exception_message=status)
 
     results = {
@@ -1185,8 +1183,7 @@ def retrieve_ballot_items_for_one_voter_api_v4(
             status += "NO_BALLOT_ITEMS_SAVED "
     except Exception as e:
         success = False
-        status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \
-                  '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+        status += 'RETRIEVE_BALLOT_ITEMS_FOR_ONE_VOTER-ERROR: ' + str(e) + ' '
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
@@ -2815,7 +2812,8 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api_v4(
     else:
         # We need to figure out next upcoming election for this person based on the state_code in text_for_map_search
         if positive_value_exists(state_code):
-            election_results = election_manager.retrieve_next_election_for_state(state_code)
+            election_results = election_manager.retrieve_next_election_for_state(
+                state_code, require_include_in_list_for_voters=True)
             if election_results['election_found']:
                 election_data_retrieved = True
                 election = election_results['election']
@@ -3231,8 +3229,7 @@ def retrieve_one_ballot_from_ballotpedia_api_v4(latitude, longitude, google_civi
             status += results['status']
     except Exception as e:
         success = False
-        status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \
-                  '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+        status += 'RETRIEVE_ONE_FROM_BALLOTPEDIA_API-ERROR: ' + str(e) + ' '
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {

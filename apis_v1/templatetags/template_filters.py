@@ -18,3 +18,11 @@ def convert_to_int(value):
 @register.filter(name="get_value_from_dict")
 def get_value_from_dict(dict_variable, dict_key):
     return dict_variable[dict_key]
+
+
+@register.filter(name="get_list_from_dict")
+def get_list_from_dict(dict_variable, dict_key):
+    try:
+        return dict_variable[dict_key]
+    except Exception as e:
+        return []

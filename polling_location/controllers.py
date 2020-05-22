@@ -125,8 +125,11 @@ def polling_locations_import_from_structured_json(structured_json):
 
             results = polling_location_manager.update_or_create_polling_location(
                 we_vote_id, polling_location_id, location_name, polling_hours_text, directions_text,
-                line1, line2, city, state, zip_long, latitude, longitude, use_for_bulk_retrieve,
-                polling_location_deleted)
+                line1, line2, city, state, zip_long,
+                latitude=latitude,
+                longitude=longitude,
+                use_for_bulk_retrieve=use_for_bulk_retrieve,
+                polling_location_deleted=polling_location_deleted)
         else:
             polling_locations_not_processed += 1
             results = {
@@ -135,7 +138,7 @@ def polling_locations_import_from_structured_json(structured_json):
             }
 
         if results['success']:
-            if results['new_polling_location_created']:
+            if results['polling_location_created']:
                 polling_locations_saved += 1
             else:
                 polling_locations_updated += 1
@@ -321,13 +324,12 @@ def save_polling_locations_from_list(polling_locations_list):
             polling_location['city'],
             polling_location['state'],
             polling_location['zip_long'],
-            latitude,
-            longitude,
-            use_for_bulk_retrieve,
-            polling_location_deleted
-        )
+            latitude=latitude,
+            longitude=longitude,
+            use_for_bulk_retrieve=use_for_bulk_retrieve,
+            polling_location_deleted=polling_location_deleted)
         if results['success']:
-            if results['new_polling_location_created']:
+            if results['polling_location_created']:
                 polling_locations_saved += 1
             else:
                 polling_locations_updated += 1

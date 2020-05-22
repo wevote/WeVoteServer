@@ -45,10 +45,10 @@ See [Instructions for Scheduled Tasks](docs/README_SCHEDULED_TASKS.md)
 
 [How to run the WeVoteServer tests](docs/README_DJANGO_TESTS.md)
 
+[How to run the WeVoteServer Locust Load Tests](loadtest/README.md)
+
 ## Join Us
 
-We meet weekly on Wednesday nights at the 
-[Code for San Francisco brigade of Code for America](http://www.meetup.com/Code-for-San-Francisco-Civic-Hack-Night/), 
-daily on a Google hangout, and have mini-hackathons on many weekends. Please contact Dale.McGrew@WeVote.US for more information.
+We meet weekly on Google hangouts, and on a team Slack. Please contact Dale.McGrew@WeVote.US for more information.
 
 

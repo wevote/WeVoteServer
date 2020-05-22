@@ -27,7 +27,7 @@ from organization.models import OrganizationManager
 from politician.models import PoliticianManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 from django.http import HttpResponse
 import json
 
@@ -98,7 +98,7 @@ def positions_sync_out_view(request):  # positionsSyncOut
 
 @login_required
 def positions_import_from_master_server_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -234,7 +234,7 @@ def position_list_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'partner_organization', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -242,7 +242,10 @@ def position_list_view(request):
     messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
+    show_statistics = positive_value_exists(request.GET.get('show_statistics', False))
     state_code = request.GET.get('state_code', '')
+    state_list = STATE_CODE_MAP
+    state_list_modified = {}
 
     position_search = request.GET.get('position_search', '')
 
@@ -271,64 +274,64 @@ def position_list_view(request):
         for one_election in election_list:
             google_civic_election_id_list.append(one_election.google_civic_election_id)
 
-    # Make sure all positions in this election have a speaker_type
     public_position_list_clean_count = 0
     friend_position_list_clean_count = 0
-    if positive_value_exists(google_civic_election_id):
-        public_position_list_clean_query = PositionEntered.objects.all()
-        public_position_list_clean_query = public_position_list_clean_query.filter(
-            google_civic_election_id=google_civic_election_id,
-            speaker_type=UNKNOWN,
-        )
-        public_position_list_clean_count_query = public_position_list_clean_query
-        public_position_list_clean_count = public_position_list_clean_count_query.count()
-        public_position_list_clean = list(public_position_list_clean_count_query)
-        update_position_list_with_speaker_type(public_position_list_clean)
+    if positive_value_exists(show_statistics):
+        # Make sure all positions in this election have a speaker_type
+        if positive_value_exists(google_civic_election_id):
+            public_position_list_clean_query = PositionEntered.objects.all()
+            public_position_list_clean_query = public_position_list_clean_query.filter(
+                google_civic_election_id=google_civic_election_id,
+                speaker_type=UNKNOWN,
+            )
+            public_position_list_clean_count_query = public_position_list_clean_query
+            public_position_list_clean_count = public_position_list_clean_count_query.count()
+            public_position_list_clean = list(public_position_list_clean_count_query)
+            update_position_list_with_speaker_type(public_position_list_clean)
 
-        friend_position_list_clean_query = PositionForFriends.objects.all()
-        friend_position_list_clean_query = friend_position_list_clean_query.filter(
-            google_civic_election_id=google_civic_election_id,
-            speaker_type=UNKNOWN,
-        )
-        friend_position_list_clean_count_query = friend_position_list_clean_query
-        friend_position_list_clean_count = friend_position_list_clean_count_query.count()
-        friend_position_list_clean = list(friend_position_list_clean_count_query)
-        update_position_list_with_speaker_type(friend_position_list_clean)
+            friend_position_list_clean_query = PositionForFriends.objects.all()
+            friend_position_list_clean_query = friend_position_list_clean_query.filter(
+                google_civic_election_id=google_civic_election_id,
+                speaker_type=UNKNOWN,
+            )
+            friend_position_list_clean_count_query = friend_position_list_clean_query
+            friend_position_list_clean_count = friend_position_list_clean_count_query.count()
+            friend_position_list_clean = list(friend_position_list_clean_count_query)
+            update_position_list_with_speaker_type(friend_position_list_clean)
 
-    # Make sure all candidate-related positions in this election have a contest_office information and politician info
     public_position_list_candidate_clean_count = 0
     friend_position_list_candidate_clean_count = 0
-    if positive_value_exists(google_civic_election_id):
-        public_position_list_candidate_clean_query = PositionEntered.objects.all()
-        public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.filter(
-            google_civic_election_id=google_civic_election_id,
-        )
-        public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.exclude(
-            Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
-        public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.filter(
-            Q(contest_office_we_vote_id__isnull=True) | Q(contest_office_we_vote_id=""))
-        public_position_list_candidate_clean_count_query = public_position_list_candidate_clean_query
-        public_position_list_candidate_clean_count = public_position_list_candidate_clean_count_query.count()
-        public_position_list_candidate_clean = list(public_position_list_candidate_clean_count_query)
-        update_position_list_with_contest_office_info(public_position_list_candidate_clean)
+    if positive_value_exists(show_statistics):
+        # Make sure all candidate-related positions in this election have a contest_office information and politician info
+        if positive_value_exists(google_civic_election_id):
+            public_position_list_candidate_clean_query = PositionEntered.objects.all()
+            public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.filter(
+                google_civic_election_id=google_civic_election_id,
+            )
+            public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.exclude(
+                Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
+            public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.filter(
+                Q(contest_office_we_vote_id__isnull=True) | Q(contest_office_we_vote_id=""))
+            public_position_list_candidate_clean_count_query = public_position_list_candidate_clean_query
+            public_position_list_candidate_clean_count = public_position_list_candidate_clean_count_query.count()
+            public_position_list_candidate_clean = list(public_position_list_candidate_clean_count_query)
+            update_position_list_with_contest_office_info(public_position_list_candidate_clean)
 
-        friend_position_list_candidate_clean_query = PositionForFriends.objects.all()
-        friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.filter(
-            google_civic_election_id=google_civic_election_id,
-        )
-        friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.exclude(
-            Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
-        friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.filter(
-            Q(contest_office_we_vote_id__isnull=True) | Q(contest_office_we_vote_id=""))
-        friend_position_list_candidate_clean_count_query = friend_position_list_candidate_clean_query
-        friend_position_list_candidate_clean_count = friend_position_list_candidate_clean_count_query.count()
-        friend_position_list_candidate_clean = list(friend_position_list_candidate_clean_count_query)
-        update_position_list_with_contest_office_info(friend_position_list_candidate_clean)
+            friend_position_list_candidate_clean_query = PositionForFriends.objects.all()
+            friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.filter(
+                google_civic_election_id=google_civic_election_id,
+            )
+            friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.exclude(
+                Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
+            friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.filter(
+                Q(contest_office_we_vote_id__isnull=True) | Q(contest_office_we_vote_id=""))
+            friend_position_list_candidate_clean_count_query = friend_position_list_candidate_clean_query
+            friend_position_list_candidate_clean_count = friend_position_list_candidate_clean_count_query.count()
+            friend_position_list_candidate_clean = list(friend_position_list_candidate_clean_count_query)
+            update_position_list_with_contest_office_info(friend_position_list_candidate_clean)
 
     # Publicly visible positions
     public_position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
-
-    # As of Aug 2018 we are no longer using PERCENT_RATING
     public_position_list_query = public_position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
     if positive_value_exists(google_civic_election_id):
@@ -347,6 +350,8 @@ def position_list_view(request):
         public_position_list_query = public_position_list_query.filter(
             Q(google_civic_election_id__in=google_civic_election_id_list) |
             Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+    if positive_value_exists(state_code):
+        public_position_list_query = public_position_list_query.filter(state_code__iexact=state_code)
 
     if positive_value_exists(position_search):
         search_words = position_search.split()
@@ -391,15 +396,18 @@ def position_list_view(request):
 
                 public_position_list_query = public_position_list_query.filter(final_filters)
 
-    public_position_list_count_query = public_position_list_query
-    public_position_list_count = public_position_list_count_query.count()
+    public_position_list_count = 0
+    public_position_list_comments_count = 0
+    if positive_value_exists(show_statistics):
+        public_position_list_count_query = public_position_list_query
+        public_position_list_count = public_position_list_count_query.count()
 
-    public_position_list_comments_count_query = public_position_list_query
-    public_position_list_comments_count_query = public_position_list_comments_count_query.exclude(
-        (Q(statement_text__isnull=True) | Q(statement_text__exact='')))
-    public_position_list_comments_count = public_position_list_comments_count_query.count()
+        public_position_list_comments_count_query = public_position_list_query
+        public_position_list_comments_count_query = public_position_list_comments_count_query.exclude(
+            (Q(statement_text__isnull=True) | Q(statement_text__exact='')))
+        public_position_list_comments_count = public_position_list_comments_count_query.count()
 
-    public_position_list_query = public_position_list_query[:50]
+    public_position_list_query = public_position_list_query[:10]
     public_position_list = list(public_position_list_query)
 
     # Friends-only visible positions
@@ -422,6 +430,8 @@ def position_list_view(request):
         friends_only_position_list_query = friends_only_position_list_query.filter(
             Q(google_civic_election_id__in=google_civic_election_id_list) |
             Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+    if positive_value_exists(state_code):
+        friends_only_position_list_query = friends_only_position_list_query.filter(state_code__iexact=state_code)
 
     if positive_value_exists(position_search):
         search_words = position_search.split()
@@ -469,40 +479,60 @@ def position_list_view(request):
 
                 friends_only_position_list_query = friends_only_position_list_query.filter(final_filters)
 
-    friends_only_position_list_count_query = friends_only_position_list_query
-    friends_only_position_list_comments_count_query = friends_only_position_list_query
-    friends_only_position_list_count = friends_only_position_list_count_query.count()
+    friends_only_position_list_count = 0
+    friends_only_position_list_comments_count = 0
+    if positive_value_exists(show_statistics):
+        friends_only_position_list_count_query = friends_only_position_list_query
+        friends_only_position_list_comments_count_query = friends_only_position_list_query
+        friends_only_position_list_count = friends_only_position_list_count_query.count()
 
-    friends_only_position_list_comments_count_query = friends_only_position_list_comments_count_query.exclude(
-        (Q(statement_text__isnull=True) | Q(statement_text__exact='')))
-    friends_only_position_list_comments_count = friends_only_position_list_comments_count_query.count()
+        friends_only_position_list_comments_count_query = friends_only_position_list_comments_count_query.exclude(
+            (Q(statement_text__isnull=True) | Q(statement_text__exact='')))
+        friends_only_position_list_comments_count = friends_only_position_list_comments_count_query.count()
 
-    friends_only_position_list_query = friends_only_position_list_query[:50]
+    friends_only_position_list_query = friends_only_position_list_query[:10]
     friends_only_position_list = list(friends_only_position_list_query)
 
     position_list = public_position_list + friends_only_position_list
 
-    messages.add_message(
-        request, messages.INFO,
-        str(public_position_list_count) + ' public positions found ' +
-        '(' + str(public_position_list_comments_count) + ' with commentary). ' +
-        str(friends_only_position_list_count) + ' friends-only positions found ' +
-        '(' + str(friends_only_position_list_comments_count) + ' with commentary). '
-        )
-
-    if public_position_list_clean_count or friend_position_list_clean_count:
+    if positive_value_exists(show_statistics):
         messages.add_message(
             request, messages.INFO,
-            str(public_position_list_clean_count) + ' public positions updated with speaker_type. ' +
-            str(friend_position_list_clean_count) + ' friends-only positions updated with speaker_type. '
-        )
+            str(public_position_list_count) + ' public positions found ' +
+            '(' + str(public_position_list_comments_count) + ' with commentary). ' +
+            str(friends_only_position_list_count) + ' friends-only positions found ' +
+            '(' + str(friends_only_position_list_comments_count) + ' with commentary). '
+            )
 
-    if public_position_list_candidate_clean_count or friend_position_list_candidate_clean_count:
-        messages.add_message(
-            request, messages.INFO,
-            str(public_position_list_candidate_clean_count) + ' public positions updated with office info. ' +
-            str(friend_position_list_candidate_clean_count) + ' friends-only positions updated with office info. '
-        )
+        if public_position_list_clean_count or friend_position_list_clean_count:
+            messages.add_message(
+                request, messages.INFO,
+                str(public_position_list_clean_count) + ' public positions updated with speaker_type. ' +
+                str(friend_position_list_clean_count) + ' friends-only positions updated with speaker_type. '
+            )
+
+        if public_position_list_candidate_clean_count or friend_position_list_candidate_clean_count:
+            messages.add_message(
+                request, messages.INFO,
+                str(public_position_list_candidate_clean_count) + ' public positions updated with office info. ' +
+                str(friend_position_list_candidate_clean_count) + ' friends-only positions updated with office info. '
+            )
+
+    position_list_manager = PositionListManager()
+    for one_state_code, one_state_name in state_list.items():
+        state_name_modified = one_state_name
+        if positive_value_exists(show_statistics):
+            count_result = position_list_manager.retrieve_position_counts_for_election_and_state(
+                google_civic_election_id_list, one_state_code)
+            if positive_value_exists(count_result['public_count']) \
+                    or positive_value_exists(count_result['friends_only_count']):
+                state_name_modified += " - " + str(count_result['public_count']) + \
+                                       '/' + str(count_result['friends_only_count'])
+            else:
+                state_name_modified += ""
+        state_list_modified[one_state_code] = state_name_modified
+
+    sorted_state_list = sorted(state_list_modified.items())
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
@@ -511,7 +541,9 @@ def position_list_view(request):
         'election_list':            election_list,
         'google_civic_election_id': google_civic_election_id,
         'show_all_elections':       show_all_elections,
+        'show_statistics':          show_statistics,
         'state_code':               state_code,
+        'state_list':               sorted_state_list,
     }
     return render(request, 'position/position_list.html', template_values)
 
@@ -610,7 +642,7 @@ def position_edit_process_view(request):  # TODO DALE I don't think this is in u
 
 @login_required
 def position_summary_view(request, position_we_vote_id):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'partner_organization', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)

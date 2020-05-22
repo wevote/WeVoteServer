@@ -2,22 +2,24 @@
 {% extends "template_base.html" %}
 
 {% block title %}
-    {% if kind_of_batch == "MEASURE" %}
-        Measure Header Mapping
-    {% elif kind_of_batch == "ELECTED_OFFICE" %}
-        Elected Office Header Mapping
+    {% if kind_of_batch == "CANDIDATE" %}
+        Candidate Header Mapping
     {% elif kind_of_batch == "CONTEST_OFFICE" %}
         Contest Office Header Mapping
-    {% elif kind_of_batch == "CANDIDATE" %}
-        Candidate Header Mapping
-    {% elif kind_of_batch == "ORGANIZATION" %}
-        Organization Header Mapping
-    {% elif kind_of_batch == "POSITION" %}
-        Position Header Mapping
-    {% elif kind_of_batch == "POLITICIAN" %}
-        Politician Header Mapping
+    {% elif kind_of_batch == "ELECTED_OFFICE" %}
+        Elected Office Header Mapping
     {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
         Ballot Item Header Mapping
+    {% elif kind_of_batch == "IMPORT_POLLING_LOCATION" %}
+        Polling Location Header Mapping
+    {% elif kind_of_batch == "MEASURE" %}
+        Measure Header Mapping
+    {% elif kind_of_batch == "ORGANIZATION" %}
+        Organization Header Mapping
+    {% elif kind_of_batch == "POLITICIAN" %}
+        Politician Header Mapping
+    {% elif kind_of_batch == "POSITION" %}
+        Position Header Mapping
     {% else %}
         Header Mapping
     {% endif %}
@@ -33,22 +35,24 @@
 {% endif %}
 
 <h1>
-{% if kind_of_batch == "MEASURE" %}
-    Measure Header Mapping
-{% elif kind_of_batch == "ELECTED_OFFICE" %}
-    Elected Office Header Mapping
+{% if kind_of_batch == "CANDIDATE" %}
+    Candidate Header Mapping
 {% elif kind_of_batch == "CONTEST_OFFICE" %}
     Contest Office Header Mapping
-{% elif kind_of_batch == "CANDIDATE" %}
-    Candidate Header Mapping
-{% elif kind_of_batch == "ORGANIZATION" %}
-    Organization Header Mapping
-{% elif kind_of_batch == "POSITION" %}
-    Position Header Mapping
-{% elif kind_of_batch == "POLITICIAN" %}
-    Politician Header Mapping
+{% elif kind_of_batch == "ELECTED_OFFICE" %}
+    Elected Office Header Mapping
 {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
     Ballot Item Header Mapping
+{% elif kind_of_batch == "IMPORT_POLLING_LOCATION" %}
+    Polling Location Header Mapping
+{% elif kind_of_batch == "MEASURE" %}
+    Measure Header Mapping
+{% elif kind_of_batch == "ORGANIZATION" %}
+    Organization Header Mapping
+{% elif kind_of_batch == "POLITICIAN" %}
+    Politician Header Mapping
+{% elif kind_of_batch == "POSITION" %}
+    Position Header Mapping
 {% else %}
     Kind of data not recognized: Please STOP
 {% endif %}

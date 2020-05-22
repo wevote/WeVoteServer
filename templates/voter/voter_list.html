@@ -24,6 +24,43 @@
 {% endif %}
     <input type="text" name="voter_search" id="voter_search_id" value="{{ voter_search }}" />
     <input type="submit" value="Search for Voter" />
+
+<div>
+    <label for="is_admin_id">
+      <input type="checkbox" name="is_admin" id="is_admin_id" value="1"
+             {% if is_admin %}checked{% endif %} /> Is Admin
+    </label>
+
+    &nbsp;&nbsp;&nbsp;
+    <label for="is_analytics_admin_id">
+      <input type="checkbox" name="is_analytics_admin" id="is_analytics_admin_id" value="1"
+             {% if is_analytics_admin %}checked{% endif %} /> Is Analytics Admin
+    </label>
+
+    &nbsp;&nbsp;&nbsp;
+    <label for="is_partner_organization_id">
+      <input type="checkbox" name="is_partner_organization" id="is_partner_organization_id" value="1"
+             {% if is_partner_organization %}checked{% endif %} /> Is Partner Organization
+    </label>
+
+    &nbsp;&nbsp;&nbsp;
+    <label for="is_political_data_manager_id">
+      <input type="checkbox" name="is_political_data_manager" id="is_political_data_manager_id" value="1"
+             {% if is_political_data_manager %}checked{% endif %} /> Is Political Data Manager
+    </label>
+
+    &nbsp;&nbsp;&nbsp;
+    <label for="is_political_data_viewer_id">
+      <input type="checkbox" name="is_political_data_viewer" id="is_political_data_viewer_id" value="1"
+             {% if is_political_data_viewer %}checked{% endif %} /> Is Political Data Viewer
+    </label>
+
+    &nbsp;&nbsp;&nbsp;
+    <label for="is_verified_volunteer_id">
+      <input type="checkbox" name="is_verified_volunteer" id="is_verified_volunteer_id" value="1"
+             {% if is_verified_volunteer %}checked{% endif %} /> Is Verified Volunteer
+    </label>
+</div>
 </form>
 
 
@@ -36,12 +73,9 @@
             <th>&nbsp;</th>
             <th>We Vote ID</th>
             <th>You</th>
-            <th>Where</th>
-            <th>FB ID (cached)</th>
-            <th>FB username</th>
-            <th>Tw (cached)</th>
-{#            <th>TwitterLinkToVoter</th> 2017-3-29 Not working#}
-            <th>Email</th>
+            <th>Facebook</th>
+            <th>Tw</th>
+            <th>Email / Phone</th>
             <th>Opt In</th>
             <th>Org we_vote_id</th>
             <th>Admin</th>
@@ -66,40 +100,32 @@
             <td>
             {% if voter.id == voter_id_signed_in %}*ME*{% else %}{% endif %}
             </td>
-            <td>
-                &nbsp;
-            </td>
             <!-- Facebook? //-->
             <td>
-            {{ voter.facebook_id|default_if_none:"" }}
-            </td>
-            <td>
+            <!-- {% if voter.facebook_id %}{{ voter.facebook_id|default_if_none:"" }}<br />{% endif %} //-->
+            {% if voter.retrieved_facebook_id %}{{ voter.retrieved_facebook_id|default_if_none:"" }}<br />{% endif %}
             <!-- If we don't have a cached facebook_id, then fb_username is leftover //-->
                 <span {% if not voter.facebook_id %}style="text-decoration: line-through"{% endif %}>
                 {% if voter.fb_username %}{{ voter.fb_username }}{% else %}{% endif %}
+                {% if voter.signed_in_facebook %} (fb account){% endif %}
                 </span>
             </td>
-            <!-- Twitter? OLD //-->
+            <!-- From TwitterLinkToVoter //-->
             <td>
-            {% if voter.twitter_id %}@{{ voter.twitter_screen_name }}<br />
-                {{ voter.twitter_id }}
+            {% if voter.twitter_handle %}
+              @{{ voter.twitter_handle }}
             {% else %}{% endif %}
             </td>
-            <!-- TwitterLinkToVoter //-->
-{#            <td> 2017-3-29 Not working#}
-{#            {% if voter.twitter_id_from_link_to_voter %}#}
-{#                @{{ voter.twitter_screen_name_from_link_to_voter }}<br />#}
-{#                {{ voter.twitter_id_from_link_to_voter }}#}
-{#            {% endif %}#}
-{#            </td>#}
-            <!-- Email //-->
             <td>
+            <!-- Email //-->
             {% if voter.email %}{{ voter.email }}{% else %}{% endif %}
             {% if voter.facebook_email %}fb:&nbsp;{{ voter.facebook_email|default_if_none:"" }}{% else %}{% endif %}
+            <!-- SMS //-->
+            {% if voter.normalized_sms_phone_number %} {{ voter.normalized_sms_phone_number }}{% else %}{% endif %}
             </td>
             <!-- Opt In //-->
             <td>
-            {% if voter.is_opt_in_newsletter %}Y{% else %}{% endif %}
+            {% if voter.is_opt_in_newsletter %}Yes{% else %}{% endif %}
             </td>
             <!-- Voter Linked Org //-->
             <td>
@@ -107,11 +133,12 @@
             </td>
             <!-- Is site administrator? //-->
             <td>
-            {% if voter.is_admin %}Y{% else %}{% endif %}
+            {% if voter.is_admin %}Yes{% else %}{% endif %}
+            {% if voter.is_analytics_admin %}Analytics Yes{% else %}{% endif %}
             </td>
             <!-- Is partner organization? //-->
             <td>
-            {% if voter.is_partner_organization %}Y{% else %}{% endif %}
+            {% if voter.is_partner_organization %}Yes{% else %}{% endif %}
             </td>
             <!-- Political data authority? //-->
             <td>
@@ -119,7 +146,7 @@
             </td>
             <!-- Is verified volunteer? //-->
             <td>
-            {% if voter.is_verified_volunteer %}Y{% else %}{% endif %}
+            {% if voter.is_verified_volunteer %}Yes{% else %}{% endif %}
             </td>
             <!-- See images //-->
             <td>
@@ -135,4 +162,42 @@
 {% endif %}
 <br />
 
+<script>
+    $(function() {
+        $('#is_admin_id').change(function() {
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#is_analytics_admin_id').change(function() {
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#is_partner_organization_id').change(function() {
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#is_political_data_manager_id').change(function() {
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#is_political_data_viewer_id').change(function() {
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#is_verified_volunteer_id').change(function() {
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            this.form.submit();
+        });
+    });
+</script>
 {% endblock %}

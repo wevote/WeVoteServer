@@ -29,7 +29,7 @@ from exception.models import handle_record_found_more_than_one_exception, handle
 from image.models import WeVoteImageManager
 from import_export_ballotpedia.models import BallotpediaApiCounter, BallotpediaApiCounterDailySummary, \
     BallotpediaApiCounterWeeklySummary, BallotpediaApiCounterMonthlySummary
-from import_export_batches.models import BatchDescription, BatchManager, IMPORT_BALLOT_ITEM, \
+from import_export_batches.models import BatchDescription, BatchManager, \
     BatchRowActionBallotItem, \
     BatchRowActionCandidate, BatchRowActionContestOffice, BatchRowActionMeasure, BatchRowActionPosition,  \
     BatchRowTranslationMap, BatchSet
@@ -82,7 +82,7 @@ def ballotpedia_election_delete_process_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -143,7 +143,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     :param election_local_id:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -338,7 +338,7 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
     :param election_local_id:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -506,7 +506,7 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
 
 @login_required
 def election_edit_view(request, election_local_id):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -559,7 +559,7 @@ def election_delete_process_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -609,7 +609,7 @@ def election_edit_process_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -754,12 +754,25 @@ def election_edit_process_view(request):
                                  str(google_civic_election_id) +
                                  '. ' + status)
 
+    if election_on_stage and positive_value_exists(google_civic_election_id) \
+            and hasattr(election_on_stage, 'state_code_list_raw'):
+        ballot_returned_list_manager = BallotReturnedListManager()
+        results = ballot_returned_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
+        if results['success']:
+            state_code_list = results['state_code_list']
+            try:
+                state_code_list_raw = ','.join(state_code_list)
+                election_on_stage.state_code_list_raw = state_code_list_raw
+                election_on_stage.save()
+            except Exception as e:
+                pass
+
     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
 
 @login_required()
 def election_list_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'partner_organization', 'political_data_manager', 'political_data_viewer',
                           'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -768,6 +781,7 @@ def election_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     election_search = request.GET.get('election_search', '')
+    refresh_states = positive_value_exists(request.GET.get('refresh_states', False))
     show_all_elections_this_year = request.GET.get('show_all_elections_this_year', False)
     show_election_statistics = request.GET.get('show_election_statistics', False)
     show_ignored_elections = request.GET.get('show_ignored_elections', False)
@@ -921,7 +935,19 @@ def election_list_view(request):
             # As of Aug 2018 we are no longer using PERCENT_RATING
             position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
             election.public_positions_count = position_query.count()
-
+        if positive_value_exists(refresh_states):
+            if election and positive_value_exists(election.google_civic_election_id) \
+                    and hasattr(election, 'state_code_list_raw'):
+                results = \
+                    ballot_returned_list_manager.retrieve_state_codes_in_election(election.google_civic_election_id)
+                if results['success']:
+                    state_code_list = results['state_code_list']
+                    try:
+                        state_code_list_raw = ','.join(state_code_list)
+                        election.state_code_list_raw = state_code_list_raw
+                        election.save()
+                    except Exception as e:
+                        pass
         election_list_modified.append(election)
 
     template_values = {
@@ -940,7 +966,7 @@ def election_list_view(request):
 
 @login_required()
 def nationwide_election_list_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'partner_organization', 'political_data_manager', 'political_data_viewer',
                           'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -1165,7 +1191,7 @@ def election_remote_retrieve_view(request):
     :param request:
     :return:
     """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1181,7 +1207,7 @@ def election_remote_retrieve_view(request):
 
 @login_required()
 def election_summary_view(request, election_local_id=0, google_civic_election_id=''):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'partner_organization', 'political_data_manager', 'political_data_viewer',
                           'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -1492,7 +1518,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
 
 @login_required
 def elections_import_from_master_server_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1522,8 +1548,8 @@ def elections_import_from_master_server_view(request):
 
 @login_required()
 def election_migration_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -2222,7 +2248,8 @@ def election_migration_view(request):
     from_election_voter_guide_count = 0
     if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
         voter_guide_manager = VoterGuideListManager()
-        voter_guide_results = voter_guide_manager.retrieve_voter_guides_for_election(from_election_id)
+        google_civic_election_id_list = [from_election_id]
+        voter_guide_results = voter_guide_manager.retrieve_voter_guides_for_election(google_civic_election_id_list)
         if voter_guide_results['voter_guide_list_found']:
             from_election_voter_guide_list = voter_guide_results['voter_guide_list']
             from_election_voter_guide_count = len(from_election_voter_guide_list)

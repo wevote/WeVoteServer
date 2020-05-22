@@ -16,6 +16,8 @@
     <li><a href="{% url 'import_export_batches:batch_process_system_toggle' %}" >
        {% if batch_process_system_on %}Turn Batch System Off{% else %}Turn Batch System On{% endif %}
        </a></li>
+    <li><a href="{% url 'import_export_batches:batch_set_list' %}" target="_blank" >
+      Batch Set List <span class="glyphicon glyphicon-new-window"></span></a></li>
     <li><a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
       Batch Process Log <span class="glyphicon glyphicon-new-window"></span></a></li>
     <li><a href="{% url 'import_export_batches:batch_process_next_steps' %}" target="_blank" >
@@ -61,12 +63,21 @@
     {% endif %}
 
     <br />
-    {% if batch_process_search %}
-        <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-             clear search</a>&nbsp;
-    {% endif %}
     <input type="text" name="batch_process_search" id="batch_process_search_id" value="{{ batch_process_search }}" style="width: 450px" />
     <input type="submit" value="Search Batches" />
+    {% if batch_process_search %}
+        <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&batch_process_id={{ batch_process_id }}">
+             clear search</a>&nbsp;
+    {% endif %}
+    &nbsp;&nbsp;&nbsp;
+    {# Limit to on Batch Process ID #}
+    <input type="text" name="batch_process_id" id="batch_process_id" value="{{ batch_process_id }}" style="width: 80px" />
+    <input type="submit" value="Batch Process Id" />
+    {% if batch_process_id %}
+        <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+            clear</a>
+    {% endif %}
+    &nbsp;&nbsp;&nbsp;
 
     <br />
     <select id="kind_of_processes_to_show_id" name="kind_of_processes_to_show">
@@ -79,9 +90,14 @@
             Search Twitter</option>
     </select>
 &nbsp;&nbsp;&nbsp;
+    <label for="show_checked_out_processes_only_id">
+      <input type="checkbox" name="show_checked_out_processes_only" id="show_checked_out_processes_only_id" value="1"
+             {% if show_checked_out_processes_only %}checked{% endif %} /> Only Show Running Processes
+    </label>
+&nbsp;&nbsp;&nbsp;
     <label for="show_active_processes_only_id">
       <input type="checkbox" name="show_active_processes_only" id="show_active_processes_only_id" value="1"
-             {% if show_active_processes_only %}checked{% endif %} /> Only Show Active Processes
+             {% if show_active_processes_only %}checked{% endif %} /> Only Show Queued Processes
     </label>
 &nbsp;&nbsp;&nbsp;
     <label for="show_paused_processes_only_id">
@@ -143,17 +159,21 @@
             <td>
               {{ batch_process.id }}
               {% if batch_process.batch_process_paused %}
-              <a href="{% url 'import_export_batches:batch_process_pause_toggle' %}?batch_process_id={{ batch_process.id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+              <a href="{% url 'import_export_batches:batch_process_pause_toggle' %}?batch_process_id={{ batch_process.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}">
                 activate
               </a>
               {% else %}
-              <a href="{% url 'import_export_batches:batch_process_pause_toggle' %}?batch_process_id={{ batch_process.id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+              <a href="{% url 'import_export_batches:batch_process_pause_toggle' %}?batch_process_id={{ batch_process.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}">
                 pause
               </a>
               {% endif %}
             </td>
             <td>
               {{ batch_process.kind_of_process }}
+              (<a href="{% url 'import_export_batches:batch_set_list' %}?batch_process_id={{ batch_process.id }}&state_code={{ batch_process.state_code }}"
+                  target="_blank">batch set list</a>)
+              (<a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?batch_process_id={{ batch_process.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}"
+                 target="_blank">batch log</a>)
               {% if batch_process.completion_summary or batch_process.analytics_date_as_integer %}
                 <br />
                 {% if batch_process.analytics_date_as_integer %}
@@ -186,6 +206,7 @@
                     <thead>
                         <tr>
                             <th>Chunk ID</th>
+                            <th>Set ID</th>
                             <th>Retrieve Start</th>
                             <th>Completed</th>
                             <th>Count</th>
@@ -199,7 +220,16 @@
                     </thead>
                     {% for batch_process_ballot_item_chunk in batch_process.batch_process_ballot_item_chunk_list %}
                     <tr>
-                        <td>{{ batch_process_ballot_item_chunk.id }}</td>
+                        <td>
+                          {{ batch_process_ballot_item_chunk.id }}
+                          (<a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?batch_process_id={{ batch_process.id }}&batch_process_chunk_id={{ batch_process_ballot_item_chunk.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}"
+                              target="_blank">log</a>)
+                        </td>
+                        <td>
+                          {{ batch_process_ballot_item_chunk.batch_set_id }}
+                          (<a href="{% url 'import_export_batches:batch_set_list' %}?batch_process_id={{ batch_process.id }}&batch_set_id={{ batch_process_ballot_item_chunk.batch_set_id }}&batch_process_chunk_id={{ batch_process_ballot_item_chunk.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}"
+                              target="_blank">go</a>)
+                        </td>
                         <td>{{ batch_process_ballot_item_chunk.retrieve_date_started|localtime|default_if_none:"" }}</td>
                         <td>
                           {{ batch_process_ballot_item_chunk.retrieve_date_completed|localtime|default_if_none:"" }}
@@ -292,6 +322,8 @@
     });
     $(function() {
         $('#show_active_processes_only_id').change(function() {
+            this.form.show_paused_processes_only_id.checked = false;
+            this.form.show_checked_out_processes_only_id.checked = false;
             this.form.submit();
         });
     });
@@ -302,6 +334,15 @@
     });
     $(function() {
         $('#show_paused_processes_only_id').change(function() {
+            this.form.show_active_processes_only_id.checked = false;
+            this.form.show_checked_out_processes_only_id.checked = false;
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_checked_out_processes_only_id').change(function() {
+            this.form.show_active_processes_only_id.checked = false;
+            this.form.show_paused_processes_only_id.checked = false;
             this.form.submit();
         });
     });

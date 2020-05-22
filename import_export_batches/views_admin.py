@@ -11,7 +11,7 @@ from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager,
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS, \
-    IMPORT_CREATE, IMPORT_DELETE, IMPORT_ALREADY_DELETED, IMPORT_ADD_TO_EXISTING, IMPORT_VOTER
+    IMPORT_CREATE, IMPORT_DELETE, IMPORT_ALREADY_DELETED, IMPORT_ADD_TO_EXISTING, IMPORT_POLLING_LOCATION, IMPORT_VOTER
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     create_or_update_batch_header_mapping, export_voter_list_with_emails, import_data_from_batch_row_actions
 from .controllers_batch_process import batch_process_next_steps
@@ -28,6 +28,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.utils.http import urlquote
 from election.models import Election, ElectionManager
+from exception.models import handle_exception
 from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_processing, \
     process_ballotpedia_voter_districts
 import json
@@ -36,11 +37,10 @@ from position.models import POSITION
 import requests
 from voter.models import voter_has_authority
 from voter_guide.models import ORGANIZATION_WORD
-# import wevote_functions.admin
+import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
-
-# logger = wevote_functions.admin.get_logger(__name__)
+logger = wevote_functions.admin.get_logger(__name__)
 
 
 @login_required
@@ -136,7 +136,8 @@ def batch_list_view(request):
     if results['polling_location_list_found']:
         polling_location_list = results['polling_location_list']
 
-    if kind_of_batch == ORGANIZATION_WORD or kind_of_batch == ELECTED_OFFICE or kind_of_batch == POLITICIAN:
+    if kind_of_batch == ORGANIZATION_WORD or kind_of_batch == ELECTED_OFFICE \
+            or kind_of_batch == POLITICIAN or kind_of_batch == IMPORT_POLLING_LOCATION:
         # We do not want to ask the person importing the file for an election, because it isn't used
         ask_for_election = False
         election_list = []
@@ -201,8 +202,8 @@ def batch_list_process_view(request):
     polling_location_zip = request.POST.get('polling_location_zip', '')
     show_all_elections = positive_value_exists(request.POST.get('show_all_elections', ""))
     state_code = request.POST.get('state_code', "")
-    if kind_of_batch not in (MEASURE, ELECTED_OFFICE, CONTEST_OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION,
-                             POLITICIAN, IMPORT_BALLOT_ITEM):
+    if kind_of_batch not in (CANDIDATE, CONTEST_OFFICE, ELECTED_OFFICE, IMPORT_BALLOT_ITEM, IMPORT_POLLING_LOCATION,
+                             MEASURE, ORGANIZATION_WORD, POSITION, POLITICIAN):
         messages.add_message(request, messages.ERROR, 'The kind_of_batch is required for a batch import.')
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?kind_of_batch=" + str(kind_of_batch) +
@@ -227,7 +228,7 @@ def batch_list_process_view(request):
             pass
 
     # Make sure we have a file to process  // Used to only be able to import IMPORT_BALLOT_ITEM from file
-    if kind_of_batch in ORGANIZATION_WORD and not batch_file:
+    if kind_of_batch in [IMPORT_POLLING_LOCATION, ORGANIZATION_WORD] and not batch_file:
         messages.add_message(request, messages.ERROR, 'Please select a file to import.')
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?kind_of_batch=" + str(kind_of_batch) +
@@ -239,7 +240,8 @@ def batch_list_process_view(request):
                                     "&batch_uri=" + batch_uri_encoded)
 
     # Make sure we have a Google Civic Election ID *unless* we are uploading an organization
-    if kind_of_batch not in ORGANIZATION_WORD and not positive_value_exists(google_civic_election_id):
+    if kind_of_batch not in [IMPORT_POLLING_LOCATION, ORGANIZATION_WORD] \
+            and not positive_value_exists(google_civic_election_id):
         messages.add_message(request, messages.ERROR, 'This kind_of_batch (\"{kind_of_batch}\") requires you '
                                                       'to choose an election.'.format(kind_of_batch=kind_of_batch))
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
@@ -489,6 +491,17 @@ def batch_action_list_view(request):
                     one_batch_row.batch_row_action_exists = False
                 modified_batch_row_list.append(one_batch_row)
                 # Retrieve Deletes
+            elif kind_of_batch == IMPORT_POLLING_LOCATION:
+                # Retrieve Creates and Updates
+                existing_results = \
+                    batch_manager.retrieve_batch_row_action_polling_location(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_polling_location']
+                    one_batch_row.kind_of_batch = IMPORT_POLLING_LOCATION
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
             elif kind_of_batch == IMPORT_VOTER:
                 existing_results = \
                     batch_manager.retrieve_batch_row_action_ballot_item(batch_header_id, one_batch_row.id)
@@ -1179,7 +1192,10 @@ def batch_set_list_view(request):
     batch_file = request.GET.get('batch_file', '')
     batch_uri = request.GET.get('batch_uri', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    batch_set_id = convert_to_int(request.GET.get('batch_set_id', 0))
+    batch_process_id = convert_to_int(request.GET.get('batch_process_id', 0))
     limit = request.GET.get('limit', 25)
+    state_code = request.GET.get('state_code', '')
 
     messages_on_stage = get_messages(request)
     batch_set_list_found = False
@@ -1188,6 +1204,12 @@ def batch_set_list_view(request):
         # batch_set_list = batch_set_list.exclude(batch_set_id__isnull=True)
         if positive_value_exists(google_civic_election_id):
             batch_set_query = batch_set_query.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(batch_process_id):
+            batch_set_query = batch_set_query.filter(batch_process_id=batch_process_id)
+        if positive_value_exists(batch_set_id):
+            batch_set_query = batch_set_query.filter(id=batch_set_id)
+        if positive_value_exists(state_code):
+            batch_set_query = batch_set_query.filter(state_code__iexact=state_code)
 
         batch_set_list = batch_set_query[:limit]
         if len(batch_set_list):
@@ -1230,20 +1252,26 @@ def batch_set_list_view(request):
 
     if batch_set_list_found:
         template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'batch_set_list':           batch_set_list,
-            'election_list':            election_list,
             'batch_file':               batch_file,
+            'batch_process_id':         batch_process_id,
+            'batch_set_id':             batch_set_id,
+            'batch_set_list':           batch_set_list,
             'batch_uri':                batch_uri,
             'google_civic_election_id': google_civic_election_id,
+            'election_list':            election_list,
+            'messages_on_stage':        messages_on_stage,
+            'state_code':               state_code,
         }
     else:
         template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'election_list':            election_list,
             'batch_file':               batch_file,
+            'batch_process_id':         batch_process_id,
+            'batch_set_id':             batch_set_id,
             'batch_uri':                batch_uri,
+            'election_list':            election_list,
             'google_civic_election_id': google_civic_election_id,
+            'messages_on_stage':        messages_on_stage,
+            'state_code':               state_code,
         }
     return render(request, 'import_export_batches/batch_set_list.html', template_values)
 
@@ -1260,10 +1288,13 @@ def batch_set_list_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     batch_uri = request.POST.get('batch_uri', '')
+    batch_process_id = convert_to_int(request.PROCESS.get('batch_process_id', 0))
+    batch_set_id = convert_to_int(request.POST.get('batch_set_id', 0))
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     organization_we_vote_id = request.POST.get('organization_we_vote_id', '')
     # Was form submitted, or was election just changed?
     import_batch_button = request.POST.get('import_batch_button', '')
+    state_code = request.POST.get('state_code', '')
 
     batch_uri_encoded = urlquote(batch_uri) if positive_value_exists(batch_uri) else ""
     batch_file = None
@@ -1317,12 +1348,15 @@ def batch_set_list_process_view(request):
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&batch_process_id=" + str(batch_process_id) +
+                                "&batch_set_id=" + str(batch_set_id) +
+                                "&state_code=" + str(state_code) +
                                 "&batch_uri=" + batch_uri_encoded)
 
 
 @login_required
 def batch_process_system_toggle_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1349,7 +1383,7 @@ def batch_process_system_toggle_view(request):
 
 @login_required
 def batch_process_list_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1363,12 +1397,13 @@ def batch_process_list_view(request):
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_active_processes_only = request.GET.get('show_active_processes_only', False)
     show_paused_processes_only = request.GET.get('show_paused_processes_only', False)
+    show_checked_out_processes_only = request.GET.get('show_checked_out_processes_only', False)
+    batch_process_id = convert_to_int(request.GET.get('batch_process_id', 0))
     batch_process_search = request.GET.get('batch_process_search', '')
 
     batch_process_list = []
 
     election_manager = ElectionManager()
-    batch_process_manager = BatchProcessManager()
     if positive_value_exists(show_all_elections):
         results = election_manager.retrieve_elections()
         election_list = results['election_list']
@@ -1378,6 +1413,8 @@ def batch_process_list_view(request):
 
     try:
         batch_process_queryset = BatchProcess.objects.all()
+        if positive_value_exists(batch_process_id):
+            batch_process_queryset = batch_process_queryset.filter(id=batch_process_id)
         if positive_value_exists(google_civic_election_id):
             batch_process_queryset = batch_process_queryset.filter(google_civic_election_id=google_civic_election_id)
         elif positive_value_exists(show_all_elections):
@@ -1397,6 +1434,10 @@ def batch_process_list_view(request):
             batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
         if positive_value_exists(show_paused_processes_only):
             batch_process_queryset = batch_process_queryset.filter(batch_process_paused=True)
+        if positive_value_exists(show_checked_out_processes_only):
+            batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+            batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
+            batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
         if positive_value_exists(kind_of_processes_to_show):
             if kind_of_processes_to_show == "BALLOT_ITEMS":
                 ballot_item_processes = [
@@ -1538,6 +1579,7 @@ def batch_process_list_view(request):
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
+        'batch_process_id':         batch_process_id,
         'batch_process_list':       batch_process_list,
         'batch_process_system_on':  batch_process_system_on,
         'batch_process_search':     batch_process_search,
@@ -1547,6 +1589,7 @@ def batch_process_list_view(request):
         'show_all_elections':       show_all_elections,
         'show_active_processes_only':   show_active_processes_only,
         'show_paused_processes_only':   show_paused_processes_only,
+        'show_checked_out_processes_only':   show_checked_out_processes_only,
         'state_list':               sorted_state_list,
         'google_civic_election_id': google_civic_election_id,
     }
@@ -1562,7 +1605,7 @@ def batch_process_next_steps_view(request):
 
 @login_required
 def batch_process_pause_toggle_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1595,7 +1638,7 @@ def batch_process_pause_toggle_view(request):
 
 @login_required
 def batch_process_log_entry_list_view(request):
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1607,12 +1650,13 @@ def batch_process_log_entry_list_view(request):
     state_code = request.GET.get('state_code', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     batch_process_log_entry_search = request.GET.get('batch_process_log_entry_search', '')
+    batch_process_id = convert_to_int(request.GET.get('batch_process_id', 0))
+    batch_process_chunk_id = convert_to_int(request.GET.get('batch_process_chunk_id', 0))
 
     batch_process_log_entry_list_found = False
     batch_process_log_entry_list = []
 
     election_manager = ElectionManager()
-    batch_process_manager = BatchProcessManager()
     if positive_value_exists(show_all_elections):
         results = election_manager.retrieve_elections()
         election_list = results['election_list']
@@ -1622,6 +1666,11 @@ def batch_process_log_entry_list_view(request):
 
     try:
         batch_process_queryset = BatchProcessLogEntry.objects.all()
+        if positive_value_exists(batch_process_id):
+            batch_process_queryset = batch_process_queryset.filter(batch_process_id=batch_process_id)
+        if positive_value_exists(batch_process_chunk_id):
+            batch_process_queryset = batch_process_queryset.filter(
+                batch_process_ballot_item_chunk_id=batch_process_chunk_id)
         if positive_value_exists(google_civic_election_id):
             batch_process_queryset = batch_process_queryset.filter(google_civic_election_id=google_civic_election_id)
         elif positive_value_exists(show_all_elections):
@@ -1642,19 +1691,22 @@ def batch_process_log_entry_list_view(request):
             search_words = batch_process_log_entry_search.split()
             for one_word in search_words:
                 filters = []  # Reset for each search word
-                new_filter = Q(office_name__icontains=one_word)
+                new_filter = Q(batch_process_id__iexact=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__icontains=one_word)
+                new_filter = Q(batch_set_id__iexact=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(wikipedia_id__icontains=one_word)
+                new_filter = Q(google_civic_election_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(ballotpedia_office_id__iexact=one_word)
+                new_filter = Q(polling_location_we_vote_id__iexact=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(ballotpedia_race_id__iexact=one_word)
+                new_filter = Q(state_code__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(status__icontains=one_word)
                 filters.append(new_filter)
 
                 # Add the first query
@@ -1682,9 +1734,9 @@ def batch_process_log_entry_list_view(request):
         status += 'BATCH_PROCESS_LOG_ENTRY_DoesNotExist '
         batch_process_log_entry_list = []
     except Exception as e:
-        status += 'FAILED retrieve_all_offices_for_upcoming_election ' \
-                 '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+        status += 'FAILED-[retrieve_all_offices_for_upcoming_election]-ERROR ' + str(e) + " "
         success = False
+        handle_exception(e, logger=logger, exception_message=status)
 
     # Make sure we always include the current election in the election_list, even if it is older
     if positive_value_exists(google_civic_election_id):
@@ -1717,6 +1769,8 @@ def batch_process_log_entry_list_view(request):
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
+        'batch_process_id':         batch_process_id,
+        'batch_process_chunk_id':   batch_process_chunk_id,
         'batch_process_log_entry_list':       batch_process_log_entry_list,
         'batch_process_log_entry_search':     batch_process_log_entry_search,
         'election_list':            election_list,
@@ -1794,7 +1848,7 @@ def batch_set_batch_list_view(request):
                         pass
                 else:
                     batch_actions_not_analyzed += 1
-
+                # Keep building up these dicts so we don't have to retrieve data again-and-again from the database
                 election_objects_dict = results['election_objects_dict']
                 measure_objects_dict = results['measure_objects_dict']
                 office_objects_dict = results['office_objects_dict']
@@ -1809,7 +1863,12 @@ def batch_set_batch_list_view(request):
 
                 for one_batch_description in batch_list:
                     results = create_batch_row_actions(
-                        one_batch_description.batch_header_id, batch_description=one_batch_description)
+                        one_batch_description.batch_header_id,
+                        batch_description=one_batch_description,
+                        election_objects_dict=election_objects_dict,
+                        measure_objects_dict=measure_objects_dict,
+                        office_objects_dict=office_objects_dict,
+                    )
                     if results['batch_actions_created']:
                         batch_actions_analyzed += 1
                         try:
@@ -1820,6 +1879,10 @@ def batch_set_batch_list_view(request):
                             pass
                     else:
                         batch_actions_not_analyzed += 1
+                    # Keep building up these dicts so we don't have to retrieve data again-and-again from the database
+                    election_objects_dict = results['election_objects_dict']
+                    measure_objects_dict = results['measure_objects_dict']
+                    office_objects_dict = results['office_objects_dict']
 
             if positive_value_exists(batch_actions_analyzed):
                 messages.add_message(request, messages.INFO, "Analyze All, BatchRows Analyzed: "

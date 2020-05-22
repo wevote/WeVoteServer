@@ -29,6 +29,8 @@
     Import Positions</a></p>
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POLITICIAN&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     Import Politicians</a></p>
+<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_POLLING_LOCATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Import Polling Locations</a></p>
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     Import One Ballot at Polling Location</a></p>
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_VOTER&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">

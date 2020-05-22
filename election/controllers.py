@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import Election, ElectionManager
-from ballot.models import BallotReturned
+from ballot.models import BallotReturned, BallotReturnedListManager
 from config.base import get_environment_variable
 from import_export_google_civic.controllers import retrieve_from_google_civic_api_election_query, \
     store_results_from_google_civic_api_election_query
@@ -150,8 +150,10 @@ def elections_retrieve_for_api():  # electionsRetrieve
         }
         return results
 
+    ballot_returned_list_manager = BallotReturnedListManager()
     election_list_raw = list(election_list_query)
     for election in election_list_raw:
+        state_code_list = []
         try:
             ballot_location_list = []
             ballot_returned_query = BallotReturned.objects.using('readonly')
@@ -178,21 +180,30 @@ def elections_retrieve_for_api():  # electionsRetrieve
                     'google_civic_election_id':     ballot_returned.google_civic_election_id,
                 }
                 ballot_location_list.append(ballot_location_display_option)
+
+            google_civic_election_id = convert_to_int(election.google_civic_election_id)
+            state_code_list = election.state_code_list()
+            # # Return the states that have ballot items in this election
+            # results = ballot_returned_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
+            # if results['success']:
+            #     state_code_list = results['state_code_list']
+
             election_json = {
-                'google_civic_election_id':     convert_to_int(election.google_civic_election_id),
-                'election_name':                election.election_name,
-                'election_day_text':            election.election_day_text,
-                'election_is_upcoming':         election.election_is_upcoming(),
-                'get_election_state':           election.get_election_state(),
-                'state_code':                   election.state_code,
-                'ocd_division_id':              election.ocd_division_id,
                 'ballot_location_list':         ballot_location_list,
                 # 'ballot_returned_count':        ballot_returned_count,
+                'election_day_text':            election.election_day_text,
+                'election_is_upcoming':         election.election_is_upcoming(),
+                'election_name':                election.election_name,
+                'google_civic_election_id':     google_civic_election_id,
+                'get_election_state':           election.get_election_state(),
+                'ocd_division_id':              election.ocd_division_id,
+                'state_code':                   election.state_code,
+                'state_code_list':              state_code_list,
             }
             election_list.append(election_json)
 
         except Exception as e:
-            status += "FAILURE: " + str(e) + " "
+            status += "ELECTIONS_RETRIEVE_FAILURE: " + str(e) + " "
 
     results = {
         'success':          success,
@@ -274,14 +285,16 @@ def elections_sync_out_list_for_api(voter_device_id):
     return results
 
 
-def retrieve_upcoming_election_id_list(limit_to_this_state_code=''):
+def retrieve_upcoming_election_id_list(limit_to_this_state_code='', require_include_in_list_for_voters=False):
     # There is a parallel function in election_manager.retrieve_upcoming_google_civic_election_id_list(
     # Figure out the elections we care about
     google_civic_election_id_list = []
     election_manager = ElectionManager()
     # If a state_code is included, national elections will NOT be returned
     # If a state_code is NOT included, the national election WILL be returned with this query
-    results = election_manager.retrieve_upcoming_elections(state_code=limit_to_this_state_code)
+    results = election_manager.retrieve_upcoming_elections(
+        state_code=limit_to_this_state_code,
+        require_include_in_list_for_voters=require_include_in_list_for_voters)
     if results['election_list_found']:
         upcoming_election_list = results['election_list']
         for one_election in upcoming_election_list:
@@ -291,7 +304,8 @@ def retrieve_upcoming_election_id_list(limit_to_this_state_code=''):
     # If a state code IS included, then the above retrieve_upcoming_elections will have missed the national election
     # so we want to return it here
     if positive_value_exists(limit_to_this_state_code):
-        results = election_manager.retrieve_next_national_election()
+        results = election_manager.retrieve_next_national_election(
+            require_include_in_list_for_voters=require_include_in_list_for_voters)
         if results['election_found']:
             one_election = results['election']
             if positive_value_exists(one_election.google_civic_election_id) \
