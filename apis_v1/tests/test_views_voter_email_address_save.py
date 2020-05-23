@@ -4,6 +4,7 @@
 
 from django.urls import reverse
 from django.test import TestCase
+from email_outbound.models import EmailAddress, EmailManager
 import json
 
 
@@ -19,7 +20,7 @@ class WeVoteAPIsV1TestsVoterEmailAddressSave(TestCase):
     def test_save_with_no_voter_device_id(self):
         response = self.client.post(self.voter_email_address_save_url)
         json_data = json.loads(response.content.decode())
-        print("Inside test_views_voter_email_address_save****************")
+        
         #######################################
         # Without a cookie, we don't expect valid response
         self.assertEqual('status' in json_data, True, "status expected in the json response, and not found")
@@ -103,9 +104,7 @@ class WeVoteAPIsV1TestsVoterEmailAddressSave(TestCase):
         # Test to make sure the email address has been saved in the database
         response4 = self.client.get(self.voter_email_address_retrieve_url, {'voter_device_id': voter_device_id})
         json_data4 = json.loads(response4.content.decode())
-        print("json_data4 **************************************************************************")
-        print(json_data4)
-        print("**************************************************************************")
+
         # Are any expected fields missing?
         self.assertEqual('status' in json_data4, True,
                          "status expected in the voterEmailAddressSaveView json response but not found")
