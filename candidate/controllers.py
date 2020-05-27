@@ -1479,6 +1479,8 @@ def retrieve_candidate_list_for_all_prior_elections_this_year(
 
 
 def save_image_to_candidate_table(candidate, image_url, source_link, url_is_broken, kind_of_source_website=None):
+    status = ''
+    success = True
     cache_results = {
         'we_vote_hosted_profile_image_url_large':   None,
         'we_vote_hosted_profile_image_url_medium':  None,
@@ -1553,7 +1555,13 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
             candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
         candidate.save()
     except Exception as e:
-        pass
+        status += "CANDIDATE_NOT_SAVED: " + str(e) + " "
+
+    results = {
+        'success': success,
+        'status': status,
+    }
+    return results
 
 
 def save_google_search_link_to_candidate_table(candidate, google_search_link):

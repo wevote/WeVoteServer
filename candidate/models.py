@@ -1384,11 +1384,11 @@ class CandidateCampaign(models.Model):
     # The full name of the party the candidate is a member of.
     party = models.CharField(verbose_name="party", max_length=255, null=True, blank=True)
     # A URL for a photo of the candidate.
-    photo_url = models.CharField(verbose_name="photoUrl", max_length=255, null=True, blank=True)
-    photo_url_from_maplight = models.URLField(
-        verbose_name='candidate portrait url of candidate from maplight', max_length=255, blank=True, null=True)
-    photo_url_from_vote_smart = models.URLField(
-        verbose_name='candidate portrait url of candidate from vote smart', max_length=255, blank=True, null=True)
+    photo_url = models.TextField(verbose_name="photoUrl", null=True, blank=True)
+    photo_url_from_maplight = models.TextField(
+        verbose_name='candidate portrait url of candidate from maplight', blank=True, null=True)
+    photo_url_from_vote_smart = models.TextField(
+        verbose_name='candidate portrait url of candidate from vote smart', blank=True, null=True)
     # The order the candidate appears on the ballot relative to other candidates for this contest.
     order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
@@ -1405,10 +1405,10 @@ class CandidateCampaign(models.Model):
         verbose_name='website url of candidate campaign', max_length=255, blank=True, null=True)
     candidate_contact_form_url = models.URLField(
         verbose_name='website url of candidate contact form', max_length=255, blank=True, null=True)
-    facebook_url = models.URLField(verbose_name='facebook url of candidate campaign', blank=True, null=True)
+    facebook_url = models.TextField(verbose_name='facebook url of candidate campaign', blank=True, null=True)
     facebook_url_is_broken = models.BooleanField(verbose_name="facebook url is broken", default=False)
-    facebook_profile_image_url_https = models.URLField(verbose_name='url of profile image from facebook',
-                                                       blank=True, null=True)
+    facebook_profile_image_url_https = models.TextField(verbose_name='url of profile image from facebook',
+                                                        blank=True, null=True)
 
     twitter_url = models.URLField(verbose_name='twitter url of candidate campaign', blank=True, null=True)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
@@ -1420,20 +1420,20 @@ class CandidateCampaign(models.Model):
         verbose_name="candidate location from twitter", max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
                                                   null=False, blank=True, default=0)
-    twitter_profile_image_url_https = models.URLField(
+    twitter_profile_image_url_https = models.TextField(
         verbose_name='locally cached url of candidate profile image from twitter', blank=True, null=True)
-    twitter_profile_background_image_url_https = models.URLField(verbose_name='tile-able background from twitter',
-                                                                 blank=True, null=True)
-    twitter_profile_banner_url_https = models.URLField(verbose_name='profile banner image from twitter',
-                                                       blank=True, null=True)
+    twitter_profile_background_image_url_https = models.TextField(verbose_name='tile-able background from twitter',
+                                                                  blank=True, null=True)
+    twitter_profile_banner_url_https = models.TextField(verbose_name='profile banner image from twitter',
+                                                        blank=True, null=True)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
-    we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
-                                                             blank=True, null=True)
-    we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
+    we_vote_hosted_profile_image_url_large = models.TextField(verbose_name='we vote hosted large image url',
                                                               blank=True, null=True)
-    we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
-                                                            blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(verbose_name='we vote hosted medium image url',
+                                                               blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(verbose_name='we vote hosted tiny image url',
+                                                             blank=True, null=True)
 
     google_plus_url = models.URLField(verbose_name='google plus url of candidate campaign', blank=True, null=True)
     youtube_url = models.URLField(verbose_name='youtube url of candidate campaign', blank=True, null=True)
@@ -1445,8 +1445,8 @@ class CandidateCampaign(models.Model):
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
-    wikipedia_photo_url = models.URLField(
-        verbose_name='url of wikipedia logo', max_length=255, blank=True, null=True)
+    wikipedia_photo_url = models.TextField(
+        verbose_name='url of wikipedia logo', blank=True, null=True)
     linkedin_url = models.CharField(
         verbose_name="linkedin url of candidate", max_length=255, null=True, blank=True)
     linkedin_photo_url = models.URLField(verbose_name='url of linkedin logo', blank=True, null=True)
@@ -1455,7 +1455,7 @@ class CandidateCampaign(models.Model):
     # the other_source_photo_url OR the original url of the photo before we store it locally
     other_source_url = models.CharField(
         verbose_name="other source url of candidate", max_length=255, null=True, blank=True)
-    other_source_photo_url = models.URLField(verbose_name='url of other source image', blank=True, null=True)
+    other_source_photo_url = models.TextField(verbose_name='url of other source image', blank=True, null=True)
 
     ballotpedia_candidate_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
     # The candidate's name as passed over by Ballotpedia
@@ -1478,8 +1478,8 @@ class CandidateCampaign(models.Model):
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     # Equivalent to Politician
     ballotpedia_person_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
-    ballotpedia_photo_url = models.URLField(
-        verbose_name='url of ballotpedia logo', max_length=255, blank=True, null=True)
+    ballotpedia_photo_url = models.TextField(
+        verbose_name='url of ballotpedia logo', blank=True, null=True)
     # Equivalent to Contest Office
     ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia race integer id", null=True, blank=True)
 
