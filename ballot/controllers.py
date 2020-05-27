@@ -2010,7 +2010,7 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                 try:
                     read_only = True
                     results = candidate_list_object.retrieve_all_candidates_for_office(
-                        office_id, office_we_vote_id, read_only=read_only)
+                        office_we_vote_id=office_we_vote_id, read_only=read_only)
                     candidates_to_display = []
                     if results['candidate_list_found']:
                         candidate_list = results['candidate_list']
@@ -2208,6 +2208,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
         status += "BALLOT_ITEM_LIST_FOUND "
         for ballot_item in ballot_item_list:
             if ballot_item.contest_office_we_vote_id:
+                office_name = ""
                 kind_of_ballot_item = OFFICE
                 office_id = ballot_item.contest_office_id
                 office_we_vote_id = ballot_item.contest_office_we_vote_id
@@ -2217,13 +2218,12 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
                         office_we_vote_id, read_only=True)
                     if office_results['contest_office_found']:
                         contest_office = office_results['contest_office']
+                        office_id = contest_office.id
+                        office_name = contest_office.office_name
                         race_office_level = contest_office.ballotpedia_race_office_level
                 try:
                     results = candidate_list_object.retrieve_all_candidates_for_office(
-                        office_id, office_we_vote_id, read_only=True)
-                    # Not needed because we will override the candidate_campaign.google_civic_election_id
-                    # office_visiting_list_we_vote_ids = contest_office_manager.fetch_office_visiting_list_we_vote_ids(
-                    #     host_google_civic_election_id_list=[google_civic_election_id])
+                        office_we_vote_id=office_we_vote_id, read_only=True)
 
                     candidates_to_display = []
                     if results['candidate_list_found']:
@@ -2253,9 +2253,9 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
                                 'candidate_photo_url_tiny': candidate_campaign.we_vote_hosted_profile_image_url_tiny,
                                 'candidate_url':                candidate_campaign.candidate_url,
                                 'candidate_contact_form_url':   candidate_campaign.candidate_contact_form_url,
-                                'contest_office_id':            candidate_campaign.contest_office_id,
-                                'contest_office_name':          candidate_campaign.contest_office_name,
-                                'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
+                                'contest_office_id':            office_id,
+                                'contest_office_name':          office_name,
+                                'contest_office_we_vote_id':    office_we_vote_id,
                                 'facebook_url':                 candidate_campaign.facebook_url,
                                 'google_civic_election_id':     google_civic_election_id,
                                 'kind_of_ballot_item':          CANDIDATE,

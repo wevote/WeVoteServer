@@ -67,16 +67,18 @@ span.wrap_word { word-break: break-word; }
 
 <input type="hidden" name="google_civic_election_id" value="{% if candidate %}{{ candidate.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
 <div class="form-group">
-    <label for="google_civic_election_id_id" class="col-sm-3 control-label">Google Civic Election Id</label>
+    <label for="google_civic_election_id_id" class="col-sm-3 control-label">Candidate to Office Link</label>
     <div class="col-sm-8">
     {% if candidate %}
         {# We don't currently offer a way to edit the google_civic_election_id once a candidate is saved. #}
-        {{ candidate.google_civic_election_id }}{% if candidate.election %} ({{ candidate.election.election_name }}, {{ candidate.election.election_day_text }}){% endif %}<br />
-        bp: {{ candidate.ballotpedia_election_id|default_if_none:"" }}
-    {% else %}
-        <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" class="form-control"
-               value="{{ google_civic_election_id|default_if_none:"" }}" />
+{#        {{ candidate.google_civic_election_id }}{% if candidate.election %} ({{ candidate.election.election_name }}, {{ candidate.election.election_day_text }}){% endif %}<br />#}
+        bp: {{ candidate.ballotpedia_election_id|default_if_none:"" }}<br />
     {% endif %}
+    {% for candidate_to_office_link in candidate_to_office_link_list %}
+        {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
+        ({{ candidate_to_office_link.google_civic_election_id }}) --
+        {{ candidate_to_office_link.office.office_name }} ({{ candidate_to_office_link.contest_office_we_vote_id }})<br />
+    {% endfor %}
     </div>
 </div>
 
@@ -151,37 +153,37 @@ span.wrap_word { word-break: break-word; }
     </div>
 </div>
 
-<div class="form-group">
-    <label for="office_id" class="col-sm-3 control-label">Office</label>
-    <div class="col-sm-8">
-        {% if office_list %}
-            <select id="contest_office_id" name="contest_office_id" class="form-control">
-                <option value="0" {% if 0 == contest_office_id|convert_to_int %} selected="selected"{% endif %}>
-                    -- Offices --</option>
-            {% for office in office_list %}
-                <option value="{{ office.id }}"
-                        {% if office.id|convert_to_int == contest_office_id|convert_to_int %} selected="selected"{% endif %}>
-                    {{ office.office_name }}
-                {% if office.district_id %}
-                    - District {{ office.district_id }}
-                {% endif %}
-                {% if office.state_code %}
-                    - {{ office.state_code }}
-                {% endif %}
-                </option>
-            {% endfor %}
-            </select>
-        {% else %}
-            (no offices found)
-        {% endif %}
-        <a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-            Add New Office</a> (in new window)&nbsp;&nbsp;&nbsp;
-        {% if candidate and candidate.contest_office_id %}
-            <a href="{% url 'office:office_summary' office_id=candidate.contest_office_id %}" target="_blank">
-                View this Office</a> (in new window)
-        {% endif %}
-    </div>
-</div>
+{#<div class="form-group">#}
+{#    <label for="office_id" class="col-sm-3 control-label">Office</label>#}
+{#    <div class="col-sm-8">#}
+{#        {% if office_list %}#}
+{#            <select id="contest_office_id" name="contest_office_id" class="form-control">#}
+{#                <option value="0" {% if 0 == contest_office_id|convert_to_int %} selected="selected"{% endif %}>#}
+{#                    -- Offices --</option>#}
+{#            {% for office in office_list %}#}
+{#                <option value="{{ office.id }}"#}
+{#                        {% if office.id|convert_to_int == contest_office_id|convert_to_int %} selected="selected"{% endif %}>#}
+{#                    {{ office.office_name }}#}
+{#                {% if office.district_id %}#}
+{#                    - District {{ office.district_id }}#}
+{#                {% endif %}#}
+{#                {% if office.state_code %}#}
+{#                    - {{ office.state_code }}#}
+{#                {% endif %}#}
+{#                </option>#}
+{#            {% endfor %}#}
+{#            </select>#}
+{#        {% else %}#}
+{#            (no offices found)#}
+{#        {% endif %}#}
+{#        <a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">#}
+{#            Add New Office</a> (in new window)&nbsp;&nbsp;&nbsp;#}
+{#        {% if candidate and candidate.contest_office_id %}#}
+{#            <a href="{% url 'office:office_summary' office_id=candidate.contest_office_id %}" target="_blank">#}
+{#                View this Office</a> (in new window)#}
+{#        {% endif %}#}
+{#    </div>#}
+{#</div>#}
 
 <div class="form-group">
     <label for="ballotpedia_race_id_id" class="col-sm-3 control-label">Ballotpedia Race Id</label>

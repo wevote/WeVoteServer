@@ -1532,6 +1532,7 @@ def generate_voter_guides_view(request):
     if election_results['election_list_found']:
         election_list = election_results['election_list']
 
+    candidate_list_manager = CandidateCampaignListManager()
     office_manager = ContestOfficeManager()
     voter_guide_manager = VoterGuideManager()
 
@@ -1539,15 +1540,18 @@ def generate_voter_guides_view(request):
     organizations_dict = {}
     voter_we_vote_id_dict = {}
     for election in election_list:
-        # Query PositionEntered table in this election for unique organization_we_vote_ids
-        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-            host_google_civic_election_id_list=[election.google_civic_election_id])
-
-        positions_exist_query = PositionEntered.objects.using('readonly').all()
         google_civic_election_id = str(election.google_civic_election_id)  # Convert to VarChar
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=[google_civic_election_id])
+        if not positive_value_exists(results['success']):
+            success = False
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
+        # Query PositionEntered table in this election for unique organization_we_vote_ids
+        positions_exist_query = PositionEntered.objects.using('readonly').all()
         positions_exist_query = positions_exist_query.filter(
             Q(google_civic_election_id=google_civic_election_id) |
-            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+            Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
         # As of August 2018 exclude Vote Smart ratings (vote_smart_rating__isnull)
         positions_exist_query = positions_exist_query.filter(
             Q(vote_smart_rating__isnull=True) | Q(vote_smart_rating=""))
@@ -1644,14 +1648,17 @@ def generate_voter_guides_for_one_election_view(request):
     voter_guide_updated_count = 0
 
     # Query PositionEntered table in this election for unique organization_we_vote_ids
-    office_manager = ContestOfficeManager()
-    office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-        host_google_civic_election_id_list=[google_civic_election_id])
+    candidate_list_manager = CandidateCampaignListManager()
+    results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+        google_civic_election_id_list=[google_civic_election_id])
+    if not positive_value_exists(results['success']):
+        success = False
+    candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
     positions_exist_query = PositionEntered.objects.using('readonly').all()
     positions_exist_query = positions_exist_query.filter(
         Q(google_civic_election_id=google_civic_election_id) |
-        Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
     # As of August 2018 exclude Vote Smart ratings (vote_smart_rating__isnull)
     positions_exist_query = positions_exist_query.filter(
         Q(vote_smart_rating__isnull=True) | Q(vote_smart_rating=""))
@@ -2004,16 +2011,19 @@ def voter_guide_list_view(request):
     position_list_manager = PositionListManager()
     for one_voter_guide in voter_guide_list:
         # How many Publicly visible positions are there in this election on this voter guide?
-        retrieve_public_positions = True
         organization_we_vote_id_list = [one_voter_guide.organization_we_vote_id]
+        google_civic_election_id_list = [one_voter_guide.google_civic_election_id]
         one_voter_guide.number_of_public_positions = position_list_manager.fetch_positions_count_for_voter_guide(
-            organization_we_vote_id_list, one_voter_guide.google_civic_election_id, state_code,
-            retrieve_public_positions)
+            organization_we_vote_id_list=organization_we_vote_id_list,
+            google_civic_election_id_list=google_civic_election_id_list,
+            state_code=state_code,
+            retrieve_public_positions=True)
         # How many Friends-only visible positions are there in this election on this voter guide?
-        retrieve_public_positions = False
         one_voter_guide.number_of_friends_only_positions = position_list_manager.fetch_positions_count_for_voter_guide(
-            organization_we_vote_id_list, one_voter_guide.google_civic_election_id, state_code,
-            retrieve_public_positions)
+            organization_we_vote_id_list=organization_we_vote_id_list,
+            google_civic_election_id_list=google_civic_election_id_list,
+            state_code=state_code,
+            retrieve_public_positions=False)
         # What Issues are associated with this voter_guide?
         one_voter_guide.issue_list = issue_list_manager.fetch_organization_issue_list(
             one_voter_guide.organization_we_vote_id)

@@ -645,7 +645,7 @@ def offices_import_from_structured_json(structured_json):
     return offices_results
 
 
-def offices_visiting_import_from_structured_json(structured_json):  # officesVisitingSyncOut
+def offices_visiting_import_from_structured_json(structured_json):  # officesVisitingSyncOut # Deprecated
     office_manager = ContestOfficeManager()
     offices_visiting_saved = 0
     offices_visiting_updated = 0

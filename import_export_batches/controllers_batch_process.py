@@ -18,8 +18,10 @@ from analytics.controllers import calculate_sitewide_daily_metrics, \
     process_one_analytics_batch_process_augment_with_first_visit, process_sitewide_voter_metrics, \
     retrieve_analytics_processing_next_step
 from analytics.models import AnalyticsManager
+from ballot.models import BallotReturnedListManager
 from datetime import timedelta
 from django.utils.timezone import now
+from election.models import ElectionManager
 from exception.models import handle_exception
 from import_export_twitter.controllers import fetch_number_of_candidates_needing_twitter_search, \
     retrieve_possible_twitter_handles_in_bulk
@@ -468,6 +470,7 @@ def process_one_ballot_item_batch_process(batch_process):
     success = True
     batch_manager = BatchManager()
     batch_process_manager = BatchProcessManager()
+    election_manager = ElectionManager()
     retrieve_time_out_duration = 30 * 60  # 30 minutes * 60 seconds
     analyze_time_out_duration = 30 * 60  # 30 minutes
     create_time_out_duration = 20 * 60  # 30 minutes
@@ -1175,6 +1178,29 @@ def process_one_ballot_item_batch_process(batch_process):
             batch_process_ballot_item_chunk.create_row_count = create_row_count
             batch_process_ballot_item_chunk.create_date_completed = now()
             batch_process_ballot_item_chunk.save()
+
+            if positive_value_exists(google_civic_election_id):
+                results = election_manager.retrieve_election(
+                    google_civic_election_id=google_civic_election_id, read_only=False)
+                if results['election_found']:
+                    election_on_stage = results['election']
+                    if election_on_stage and hasattr(election_on_stage, 'state_code_list_raw'):
+                        ballot_returned_list_manager = BallotReturnedListManager()
+                        results = \
+                            ballot_returned_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
+                        if results['success']:
+                            state_code_list = results['state_code_list']
+                            try:
+                                state_code_list_raw = ','.join(state_code_list)
+                                election_on_stage.state_code_list_raw = state_code_list_raw
+                                election_on_stage.save()
+                            except Exception as e:
+                                status += "COULD_NOT_SAVE_ELECTION: " + str(e) + " "
+                        else:
+                            status += results['status']
+                else:
+                    status += results['status']
+
             status += "CREATE_DATE_STARTED-CREATE_DATE_COMPLETED_SAVED "
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
@@ -1218,6 +1244,29 @@ def process_one_ballot_item_batch_process(batch_process):
                 batch_process_ballot_item_chunk.create_date_completed = now()
                 batch_process_ballot_item_chunk.create_timed_out = True
                 batch_process_ballot_item_chunk.save()
+
+                if positive_value_exists(google_civic_election_id):
+                    results = election_manager.retrieve_election(
+                        google_civic_election_id=google_civic_election_id, read_only=False)
+                    if results['election_found']:
+                        election_on_stage = results['election']
+                        if election_on_stage and hasattr(election_on_stage, 'state_code_list_raw'):
+                            ballot_returned_list_manager = BallotReturnedListManager()
+                            results = \
+                                ballot_returned_list_manager.retrieve_state_codes_in_election(google_civic_election_id)
+                            if results['success']:
+                                state_code_list = results['state_code_list']
+                                try:
+                                    state_code_list_raw = ','.join(state_code_list)
+                                    election_on_stage.state_code_list_raw = state_code_list_raw
+                                    election_on_stage.save()
+                                except Exception as e:
+                                    status += "COULD_NOT_SAVE_ELECTION: " + str(e) + " "
+                            else:
+                                status += results['status']
+                    else:
+                        status += results['status']
+
                 status += "CREATE_DATE_STARTED-CREATE_DATE_COMPLETED_SAVED "
                 batch_process_manager.create_batch_process_log_entry(
                     batch_process_id=batch_process.id,

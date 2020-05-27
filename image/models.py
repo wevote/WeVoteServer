@@ -53,14 +53,14 @@ class WeVoteImage(models.Model):
         verbose_name="candidate we vote permanent id", max_length=255, null=True, blank=True)
     organization_we_vote_id = models.CharField(
         verbose_name="organization we vote permanent id", max_length=255, null=True, blank=True)
-    issue_we_vote_id = models.CharField (
+    issue_we_vote_id = models.CharField(
         verbose_name="issue we vote permanent id", max_length=255, null=True, blank=True)
 
     google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", default=0,
                                                            null=False, blank=False)
     facebook_user_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
-    facebook_profile_image_url_https = models.URLField(verbose_name='url of profile image from facebook',
-                                                       blank=True, null=True)
+    facebook_profile_image_url_https = models.TextField(
+        verbose_name='url of profile image from facebook', blank=True, null=True)
     facebook_background_image_url_https = models.URLField(verbose_name='url of background image from facebook',
                                                           blank=True, null=True)
     facebook_background_image_offset_x = models.IntegerField(verbose_name="x offset of facebook cover image", default=0,
@@ -323,7 +323,7 @@ class WeVoteImageManager(models.Model):
             success = True
             status = "SAVED_WE_VOTE_IMAGE_FACEBOOK_INFO"
         except Exception as e:
-            status = "UNABLE_TO_SAVE_WE_VOTE_IMAGE_FACEBOOK_INFO"
+            status = "ERROR-UNABLE_TO_SAVE_WE_VOTE_IMAGE_FACEBOOK_INFO"
             success = False
             handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 

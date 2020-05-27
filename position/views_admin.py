@@ -8,7 +8,7 @@ from .controllers import positions_import_from_master_server, refresh_cached_pos
     refresh_positions_with_contest_measure_details_for_election
 from .models import ANY_STANCE, PositionEntered, PositionForFriends, PositionListManager, PERCENT_RATING
 from admin_tools.views import redirect_to_sign_in_page
-from candidate.models import CandidateCampaign, CandidateCampaignManager
+from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from config.base import get_environment_variable
 from django.urls import reverse
 from django.contrib import messages
@@ -249,6 +249,7 @@ def position_list_view(request):
 
     position_search = request.GET.get('position_search', '')
 
+    candidate_list_manager = CandidateCampaignListManager()
     election_manager = ElectionManager()
     office_manager = ContestOfficeManager()
     google_civic_election_id_list = []
@@ -271,8 +272,15 @@ def position_list_view(request):
                 if results['election_found']:
                     one_election = results['election']
                     election_list.append(one_election)
-        for one_election in election_list:
-            google_civic_election_id_list.append(one_election.google_civic_election_id)
+    for one_election in election_list:
+        google_civic_election_id_list.append(one_election.google_civic_election_id)
+
+    results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+        google_civic_election_id_list=google_civic_election_id_list,
+        limit_to_this_state_code=state_code)
+    if not positive_value_exists(results['success']):
+        success = False
+    candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
     public_position_list_clean_count = 0
     friend_position_list_clean_count = 0
@@ -281,7 +289,9 @@ def position_list_view(request):
         if positive_value_exists(google_civic_election_id):
             public_position_list_clean_query = PositionEntered.objects.all()
             public_position_list_clean_query = public_position_list_clean_query.filter(
-                google_civic_election_id=google_civic_election_id,
+                Q(google_civic_election_id__in=google_civic_election_id_list) |
+                Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+            public_position_list_clean_query = public_position_list_clean_query.filter(
                 speaker_type=UNKNOWN,
             )
             public_position_list_clean_count_query = public_position_list_clean_query
@@ -291,7 +301,9 @@ def position_list_view(request):
 
             friend_position_list_clean_query = PositionForFriends.objects.all()
             friend_position_list_clean_query = friend_position_list_clean_query.filter(
-                google_civic_election_id=google_civic_election_id,
+                Q(google_civic_election_id__in=google_civic_election_id_list) |
+                Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+            friend_position_list_clean_query = friend_position_list_clean_query.filter(
                 speaker_type=UNKNOWN,
             )
             friend_position_list_clean_count_query = friend_position_list_clean_query
@@ -302,16 +314,14 @@ def position_list_view(request):
     public_position_list_candidate_clean_count = 0
     friend_position_list_candidate_clean_count = 0
     if positive_value_exists(show_statistics):
-        # Make sure all candidate-related positions in this election have a contest_office information and politician info
+        # Make sure all candidate-related positions in this election have contest_office information and politician info
         if positive_value_exists(google_civic_election_id):
             public_position_list_candidate_clean_query = PositionEntered.objects.all()
             public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.filter(
-                google_civic_election_id=google_civic_election_id,
-            )
+                Q(google_civic_election_id__in=google_civic_election_id_list) |
+                Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
             public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.exclude(
                 Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
-            public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.filter(
-                Q(contest_office_we_vote_id__isnull=True) | Q(contest_office_we_vote_id=""))
             public_position_list_candidate_clean_count_query = public_position_list_candidate_clean_query
             public_position_list_candidate_clean_count = public_position_list_candidate_clean_count_query.count()
             public_position_list_candidate_clean = list(public_position_list_candidate_clean_count_query)
@@ -319,12 +329,10 @@ def position_list_view(request):
 
             friend_position_list_candidate_clean_query = PositionForFriends.objects.all()
             friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.filter(
-                google_civic_election_id=google_civic_election_id,
-            )
+                Q(google_civic_election_id__in=google_civic_election_id_list) |
+                Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
             friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.exclude(
                 Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
-            friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.filter(
-                Q(contest_office_we_vote_id__isnull=True) | Q(contest_office_we_vote_id=""))
             friend_position_list_candidate_clean_count_query = friend_position_list_candidate_clean_query
             friend_position_list_candidate_clean_count = friend_position_list_candidate_clean_count_query.count()
             friend_position_list_candidate_clean = list(friend_position_list_candidate_clean_count_query)
@@ -333,23 +341,9 @@ def position_list_view(request):
     # Publicly visible positions
     public_position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
     public_position_list_query = public_position_list_query.exclude(stance__iexact=PERCENT_RATING)
-
-    if positive_value_exists(google_civic_election_id):
-        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-            host_google_civic_election_id_list=[google_civic_election_id])
-        public_position_list_query = public_position_list_query.filter(
-            Q(google_civic_election_id=google_civic_election_id) |
-            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
-    elif positive_value_exists(show_all_elections):
-        # Return offices from all elections
-        pass
-    else:
-        # Limit this search to upcoming_elections only
-        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-            host_google_civic_election_id_list=google_civic_election_id_list)
-        public_position_list_query = public_position_list_query.filter(
-            Q(google_civic_election_id__in=google_civic_election_id_list) |
-            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+    public_position_list_query = public_position_list_query.filter(
+        Q(google_civic_election_id__in=google_civic_election_id_list) |
+        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
     if positive_value_exists(state_code):
         public_position_list_query = public_position_list_query.filter(state_code__iexact=state_code)
 
@@ -414,22 +408,9 @@ def position_list_view(request):
     friends_only_position_list_query = PositionForFriends.objects.order_by('-id')  # This order_by is temp
     # As of Aug 2018 we are no longer using PERCENT_RATING
     friends_only_position_list_query = friends_only_position_list_query.exclude(stance__iexact=PERCENT_RATING)
-    if positive_value_exists(google_civic_election_id):
-        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-            host_google_civic_election_id_list=[google_civic_election_id])
-        friends_only_position_list_query = friends_only_position_list_query.filter(
-            Q(google_civic_election_id=google_civic_election_id) |
-            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
-    elif positive_value_exists(show_all_elections):
-        # Return offices from all elections
-        pass
-    else:
-        # Limit this search to upcoming_elections only
-        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-            host_google_civic_election_id_list=google_civic_election_id_list)
-        friends_only_position_list_query = friends_only_position_list_query.filter(
-            Q(google_civic_election_id__in=google_civic_election_id_list) |
-            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+    friends_only_position_list_query = friends_only_position_list_query.filter(
+        Q(google_civic_election_id__in=google_civic_election_id_list) |
+        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
     if positive_value_exists(state_code):
         friends_only_position_list_query = friends_only_position_list_query.filter(state_code__iexact=state_code)
 
@@ -449,11 +430,11 @@ def position_list_view(request):
             new_filter = Q(contest_measure_we_vote_id__iexact=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(contest_office_name__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(contest_office_we_vote_id__iexact=one_word)
-            filters.append(new_filter)
+            # new_filter = Q(contest_office_name__icontains=one_word)
+            # filters.append(new_filter)
+            #
+            # new_filter = Q(contest_office_we_vote_id__iexact=one_word)
+            # filters.append(new_filter)
 
             new_filter = Q(organization_we_vote_id__iexact=one_word)
             filters.append(new_filter)

@@ -4,7 +4,7 @@
 
 from django.db import models
 from django.db.models import Q
-from election.models import Election
+from election.models import Election, ElectionManager
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from office.models import ContestOffice, ContestOfficeManager
 import re
@@ -90,9 +90,10 @@ class CandidateCampaignListManager(models.Model):
     This is a class to make it easy to retrieve lists of Candidates
     """
 
-    def retrieve_all_candidates_for_office(self, office_id, office_we_vote_id, read_only=False):
+    def retrieve_all_candidates_for_office(self, office_id='', office_we_vote_id='', read_only=False):
         candidate_list = []
         candidate_list_found = False
+        candidate_we_vote_id_list = []
         status = ""
         success = True
 
@@ -105,21 +106,44 @@ class CandidateCampaignListManager(models.Model):
                 'office_we_vote_id':    office_we_vote_id,
                 'candidate_list_found': candidate_list_found,
                 'candidate_list':       candidate_list,
+                'candidate_we_vote_id_list': candidate_we_vote_id_list,
             }
             return results
 
+        candidate_manager = CandidateCampaignManager()
+        contest_manager = ContestOfficeManager()
+        if positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
+            office_we_vote_id = contest_manager.fetch_contest_office_we_vote_id_from_id(office_id)
+
+        link_results = \
+            candidate_manager.retrieve_candidate_to_office_link(contest_office_we_vote_id=office_we_vote_id)
+        if not positive_value_exists(link_results['success']):
+            status += link_results['status']
+            success = False
+            results = {
+                'success': success,
+                'status': status,
+                'office_id': office_id,
+                'office_we_vote_id': office_we_vote_id,
+                'candidate_list_found': candidate_list_found,
+                'candidate_list': candidate_list,
+                'candidate_we_vote_id_list': candidate_we_vote_id_list,
+            }
+            return results
+        candidate_to_office_link_list = link_results['candidate_to_office_link_list']
+        candidate_we_vote_id_list = []
+        for one_link in candidate_to_office_link_list:
+            if positive_value_exists(one_link.candidate_we_vote_id):
+                candidate_we_vote_id_list.append(one_link.candidate_we_vote_id)
         try:
             if read_only:
-                candidate_queryset = CandidateCampaign.objects.using('readonly').all()
+                candidate_query = CandidateCampaign.objects.using('readonly').all()
             else:
-                candidate_queryset = CandidateCampaign.objects.all()
-            if positive_value_exists(office_id):
-                candidate_queryset = candidate_queryset.filter(contest_office_id=office_id)
-            elif positive_value_exists(office_we_vote_id):
-                candidate_queryset = candidate_queryset.filter(contest_office_we_vote_id=office_we_vote_id)
-            candidate_queryset = candidate_queryset.exclude(do_not_display_on_ballot=True)
-            candidate_queryset = candidate_queryset.order_by('-twitter_followers_count')
-            candidate_list = candidate_queryset
+                candidate_query = CandidateCampaign.objects.all()
+            candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+            candidate_query = candidate_query.exclude(do_not_display_on_ballot=True)
+            candidate_query = candidate_query.order_by('-twitter_followers_count')
+            candidate_list = candidate_query
 
             if len(candidate_list):
                 candidate_list_found = True
@@ -132,9 +156,11 @@ class CandidateCampaignListManager(models.Model):
             candidate_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
-            status += 'FAILED retrieve_all_candidates_for_office ' \
-                      '{error} [type: {error_type}] '.format(error=e.message, error_type=type(e))
+            status += 'FAILED retrieve_all_candidates_for_office ' + str(e) + ' '
             success = False
+
+        for one_candidate in candidate_list:
+            candidate_we_vote_id_list.append(one_candidate.we_vote_id)
 
         results = {
             'success':              success,
@@ -143,6 +169,7 @@ class CandidateCampaignListManager(models.Model):
             'office_we_vote_id':    office_we_vote_id,
             'candidate_list_found': candidate_list_found,
             'candidate_list':       candidate_list,
+            'candidate_we_vote_id_list': candidate_we_vote_id_list,
         }
         return results
 
@@ -151,25 +178,27 @@ class CandidateCampaignListManager(models.Model):
         candidate_list_objects = []
         candidate_list_light = []
         candidate_list_found = False
-        ballotpedia_election_id = 0
         status = ""
 
+        results = self.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=google_civic_election_id_list,
+            limit_to_this_state_code=state_code)
+        if not positive_value_exists(results['success']):
+            status += results['status']
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+        office_we_vote_id_list_by_candidate_we_vote_id = results['office_we_vote_id_list_by_candidate_we_vote_id']
+
         try:
-            candidate_queryset = CandidateCampaign.objects.all()
+            candidate_query = CandidateCampaign.objects.all()
             if positive_value_exists(google_civic_election_id_list) and len(google_civic_election_id_list):
-                candidate_queryset = candidate_queryset.filter(
-                    google_civic_election_id__in=google_civic_election_id_list)
-            elif positive_value_exists(ballotpedia_election_id):
-                candidate_queryset = candidate_queryset.filter(ballotpedia_election_id=ballotpedia_election_id)
-            else:
-                pass
+                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
             if positive_value_exists(state_code):
-                candidate_queryset = candidate_queryset.filter(state_code__iexact=state_code)
-            candidate_queryset = candidate_queryset.order_by("candidate_name")
+                candidate_query = candidate_query.filter(state_code__iexact=state_code)
+            candidate_query = candidate_query.order_by("candidate_name")
             if positive_value_exists(google_civic_election_id_list) and len(google_civic_election_id_list):
-                candidate_list_objects = candidate_queryset
+                candidate_list_objects = list(candidate_query)
             else:
-                candidate_list_objects = candidate_queryset[:300]
+                candidate_list_objects = candidate_query[:300]
 
             if len(candidate_list_objects):
                 candidate_list_found = True
@@ -185,8 +214,7 @@ class CandidateCampaignListManager(models.Model):
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status += 'FAILED retrieve_all_candidates_for_upcoming_election ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            status += 'FAILED retrieve_all_candidates_for_upcoming_election ' + str(e) + ' '
             success = False
 
         if candidate_list_found:
@@ -194,7 +222,8 @@ class CandidateCampaignListManager(models.Model):
                 one_candidate = {
                     'ballot_item_display_name': candidate.display_candidate_name(),
                     'candidate_we_vote_id':     candidate.we_vote_id,
-                    'office_we_vote_id':        candidate.contest_office_we_vote_id,
+                    'office_we_vote_id':
+                        office_we_vote_id_list_by_candidate_we_vote_id[candidate.we_vote_id],
                     'measure_we_vote_id':       '',
                 }
                 candidate_list_light.append(one_candidate.copy())
@@ -225,7 +254,6 @@ class CandidateCampaignListManager(models.Model):
         candidate_list_objects = []
         candidate_list_light = []
         candidate_list_found = False
-        office_manager = ContestOfficeManager()
 
         if not positive_value_exists(google_civic_election_id_list) or not len(google_civic_election_id_list):
             success = False
@@ -240,23 +268,28 @@ class CandidateCampaignListManager(models.Model):
             return results
 
         try:
-            candidate_queryset = CandidateCampaign.objects.using('readonly').all()
-            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                host_google_civic_election_id_list=google_civic_election_id_list)
-            candidate_queryset = candidate_queryset.filter(
-                Q(google_civic_election_id__in=google_civic_election_id_list) |
-                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
-            if positive_value_exists(limit_to_this_state_code):
-                candidate_queryset = candidate_queryset.filter(state_code__iexact=limit_to_this_state_code)
-            candidate_list_objects = list(candidate_queryset)
-
-            if len(candidate_list_objects):
-                candidate_list_found = True
-                status += 'CANDIDATES_RETRIEVED '
-                success = True
+            results = self.retrieve_candidate_we_vote_id_list_from_election_list(
+                google_civic_election_id_list=google_civic_election_id_list,
+                limit_to_this_state_code=limit_to_this_state_code)
+            if not positive_value_exists(results['success']):
+                status += results['status']
+                success = False
             else:
-                status += 'NO_CANDIDATES_RETRIEVED '
-                success = True
+                candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
+                candidate_query = CandidateCampaign.objects.using('readonly').all()
+                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+                if positive_value_exists(limit_to_this_state_code):
+                    candidate_query = candidate_query.filter(state_code__iexact=limit_to_this_state_code)
+                candidate_list_objects = list(candidate_query)
+
+                if len(candidate_list_objects):
+                    candidate_list_found = True
+                    status += 'CANDIDATES_RETRIEVED '
+                    success = True
+                else:
+                    status += 'NO_CANDIDATES_RETRIEVED '
+                    success = True
         except CandidateCampaign.DoesNotExist:
             # No candidates found. Not a problem.
             status += 'NO_CANDIDATES_FOUND_DoesNotExist '
@@ -264,8 +297,7 @@ class CandidateCampaignListManager(models.Model):
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status += 'FAILED retrieve_candidates_for_specific_elections ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            status += 'FAILED-retrieve_candidates_for_specific_elections: ' + str(e) + ' '
             success = False
 
         if candidate_list_found:
@@ -280,15 +312,13 @@ class CandidateCampaignListManager(models.Model):
                         one_candidate['alternate_names'] = alternate_names
                 else:
                     one_candidate = {
-                        'ballot_item_display_name':   candidate.display_candidate_name(),
-                        'alternate_names':   candidate.display_alternate_names_list(),
-                        'ballot_item_website':        candidate.candidate_url,
-                        'candidate_contact_form_url': candidate.candidate_contact_form_url,
-                        'candidate_we_vote_id':       candidate.we_vote_id,
-                        'google_civic_election_id':   candidate.google_civic_election_id,
-                        'office_we_vote_id':          candidate.contest_office_we_vote_id,
-                        'measure_we_vote_id':       '',
-                        'more_info_url':            '',
+                        'ballot_item_display_name':     candidate.display_candidate_name(),
+                        'alternate_names':              candidate.display_alternate_names_list(),
+                        'ballot_item_website':          candidate.candidate_url,
+                        'candidate_contact_form_url':   candidate.candidate_contact_form_url,
+                        'candidate_we_vote_id':         candidate.we_vote_id,
+                        'measure_we_vote_id':           '',
+                        'more_info_url':                '',
                     }
                 candidate_list_light.append(one_candidate)
 
@@ -301,10 +331,23 @@ class CandidateCampaignListManager(models.Model):
         }
         return results
 
-    def retrieve_candidate_count_for_office(self, office_id, office_we_vote_id):
+    def retrieve_candidate_count_for_office(self, office_id='', office_we_vote_id=''):
         status = ""
         if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
             status += 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING '
+            results = {
+                'success':              False,
+                'status':               status,
+                'candidate_count':      0,
+            }
+            return results
+
+        candidate_list_manager = CandidateCampaignListManager()
+        results = candidate_list_manager.retrieve_all_candidates_for_office(
+            office_id=office_id, office_we_vote_id=office_we_vote_id)
+        if not positive_value_exists(results['success']):
+            status += 'RETRIEVE_CANDIDATE_COUNT_FOR_OFFICE_FAILED '
+            status += results['status']
             results = {
                 'success':              False,
                 'status':               status,
@@ -313,16 +356,14 @@ class CandidateCampaignListManager(models.Model):
                 'candidate_count':      0,
             }
             return results
-
+        candidate_we_vote_id_list = []
+        candidate_list = results['candidate_list']
+        for one_candidate in candidate_list:
+            candidate_we_vote_id_list.append(one_candidate.we_vote_id)
         try:
-            candidate_queryset = CandidateCampaign.objects.using('readonly').all()
-            if positive_value_exists(office_id):
-                candidate_queryset = candidate_queryset.filter(contest_office_id=office_id)
-            elif positive_value_exists(office_we_vote_id):
-                candidate_queryset = candidate_queryset.filter(contest_office_we_vote_id=office_we_vote_id)
-            candidate_list = candidate_queryset
-
-            candidate_count = candidate_list.count()
+            candidate_query = CandidateCampaign.objects.using('readonly').all()
+            candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+            candidate_count = candidate_query.count()
             success = True
             status += "CANDIDATE_COUNT_FOUND "
         except CandidateCampaign.DoesNotExist:
@@ -332,23 +373,19 @@ class CandidateCampaignListManager(models.Model):
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status += 'FAILED retrieve_all_candidates_for_office ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED retrieve_all_candidates_for_office ' + str(e) + ' '
             success = False
             candidate_count = 0
 
         results = {
             'success':              success,
             'status':               status,
-            'office_id':            office_id,
-            'office_we_vote_id':    office_we_vote_id,
             'candidate_count':      candidate_count,
         }
         return results
 
     def retrieve_candidate_count_for_election_and_state(self, google_civic_election_id_list=[], state_code=''):
         status = ''
-        office_manager = ContestOfficeManager()
         if not positive_value_exists(google_civic_election_id_list) and not positive_value_exists(state_code):
             status += 'VALID_ELECTION_ID_AND_STATE_CODE_MISSING '
             results = {
@@ -361,20 +398,24 @@ class CandidateCampaignListManager(models.Model):
             return results
 
         try:
-            candidate_queryset = CandidateCampaign.objects.using('readonly').all()
-            if positive_value_exists(google_civic_election_id_list):
-                office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                    host_google_civic_election_id_list=google_civic_election_id_list)
-                candidate_queryset = candidate_queryset.filter(
-                    Q(google_civic_election_id__in=google_civic_election_id_list) |
-                    Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
-            if positive_value_exists(state_code):
-                candidate_queryset = candidate_queryset.filter(state_code__iexact=state_code)
-            candidate_list = candidate_queryset
+            results = self.retrieve_candidate_we_vote_id_list_from_election_list(
+                google_civic_election_id_list=google_civic_election_id_list,
+                limit_to_this_state_code=state_code)
+            if not positive_value_exists(results['success']):
+                candidate_count = 0
+                status += results['status']
+                success = False
+            else:
+                candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
-            candidate_count = candidate_list.count()
-            success = True
-            status += "CANDIDATE_COUNT_FOUND "
+                candidate_query = CandidateCampaign.objects.using('readonly').all()
+                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+                if positive_value_exists(state_code):
+                    candidate_query = candidate_query.filter(state_code__iexact=state_code)
+    
+                candidate_count = candidate_query.count()
+                success = True
+                status += "CANDIDATE_COUNT_FOUND "
         except CandidateCampaign.DoesNotExist:
             # No candidates found. Not a problem.
             status += 'NO_CANDIDATES_FOUND_DoesNotExist '
@@ -382,8 +423,7 @@ class CandidateCampaignListManager(models.Model):
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status += 'FAILED RETRIEVE_CANDIDATE_COUNT ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            status += 'FAILED RETRIEVE_CANDIDATE_COUNT ' + str(e) + ' '
             success = False
             candidate_count = 0
 
@@ -487,17 +527,19 @@ class CandidateCampaignListManager(models.Model):
         office_manager = ContestOfficeManager()
 
         try:
-            candidate_queryset = CandidateCampaign.objects.all()
+            candidate_query = CandidateCampaign.objects.all()
             google_civic_election_id_list = [convert_to_int(google_civic_election_id)]
-            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                host_google_civic_election_id_list=google_civic_election_id_list)
-            candidate_queryset = candidate_queryset.filter(
-                Q(google_civic_election_id__in=google_civic_election_id_list) |
-                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
 
+            results = self.retrieve_candidate_we_vote_id_list_from_election_list(
+                google_civic_election_id_list=google_civic_election_id_list)
+            if not positive_value_exists(results['success']):
+                status += results['status']
+            candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
+            candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                candidate_queryset = candidate_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+                candidate_query = candidate_query.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
 
             # We want to find candidates with *any* of these values
             if positive_value_exists(google_civic_candidate_name):
@@ -717,9 +759,9 @@ class CandidateCampaignListManager(models.Model):
                 for item in filters:
                     final_filters |= item
 
-                candidate_queryset = candidate_queryset.filter(final_filters)
+                candidate_query = candidate_query.filter(final_filters)
 
-            candidate_list_objects = candidate_queryset
+            candidate_list_objects = list(candidate_query)
 
             if len(candidate_list_objects):
                 candidate_list_found = True
@@ -735,8 +777,7 @@ class CandidateCampaignListManager(models.Model):
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status += 'FAILED retrieve_possible_duplicate_candidates ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            status += 'FAILED-retrieve_possible_duplicate_candidates ' + str(e) + ' '
             success = False
 
         results = {
@@ -777,18 +818,23 @@ class CandidateCampaignListManager(models.Model):
         success = True
         status = ""
 
-        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-            host_google_civic_election_id_list=google_civic_election_id_list)
+        results = self.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=google_civic_election_id_list,
+            limit_to_this_state_code=state_code)
+        if not positive_value_exists(results['success']):
+            status += results['status']
+            success = False
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
         if keep_looking_for_duplicates and positive_value_exists(candidate_twitter_handle):
             try:
                 if positive_value_exists(read_only):
                     candidate_query = CandidateCampaign.objects.using('readonly').all()
                 else:
                     candidate_query = CandidateCampaign.objects.all()
+                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+
                 candidate_query = candidate_query.filter(candidate_twitter_handle__iexact=candidate_twitter_handle)
-                candidate_query = candidate_query.filter(
-                    Q(google_civic_election_id__in=google_civic_election_id_list) |
-                    Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
 
@@ -828,12 +874,10 @@ class CandidateCampaignListManager(models.Model):
                     candidate_query = CandidateCampaign.objects.using('readonly').all()
                 else:
                     candidate_query = CandidateCampaign.objects.all()
-                candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name)
-                candidate_query = candidate_query.filter(
-                    Q(google_civic_election_id__in=google_civic_election_id_list) |
-                    Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
+                candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name)
 
                 if positive_value_exists(ignore_candidate_id_list):
                     candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
@@ -871,9 +915,7 @@ class CandidateCampaignListManager(models.Model):
                     candidate_query = CandidateCampaign.objects.using('readonly').all()
                 else:
                     candidate_query = CandidateCampaign.objects.all()
-                candidate_query = candidate_query.filter(
-                    Q(google_civic_election_id__in=google_civic_election_id_list) |
-                    Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
                 first_name = extract_first_name_from_full_name(candidate_name)
@@ -908,67 +950,6 @@ class CandidateCampaignListManager(models.Model):
                 success = True
             except Exception as e:
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED3 " + str(e) + " "
-
-        # 2018-07-09 This is problematic as, it considers very different candidates
-        #  (ex/ "Donna Sheldon" and "Donna McBride") to be possible duplicates.
-        # if keep_looking_for_duplicates and positive_value_exists(candidate_name):
-        #     # Search for Candidate(s) by breaking up candidate_name into search words
-        #     try:
-        #         if positive_value_exists(read_only):
-        #             candidate_query = CandidateCampaign.objects.using('readonly').all()
-        #         else:
-        #             candidate_query = CandidateCampaign.objects.all()
-        #
-        #         if positive_value_exists(google_civic_election_id):
-        #             candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
-        #         if positive_value_exists(state_code):
-        #             candidate_query = candidate_query.filter(state_code__iexact=state_code)
-        #         search_words = candidate_name.split()
-        #
-        #         filters = []
-        #         for one_word in search_words:
-        #             new_filter = Q(candidate_name__icontains=one_word)
-        #             filters.append(new_filter)
-        #
-        #         # Add the first query
-        #         at_least_one_filter_used = False
-        #         if len(filters):
-        #             at_least_one_filter_used = True
-        #             final_filters = filters.pop()
-        #
-        #             # ...and "OR" the remaining items in the list
-        #             for item in filters:
-        #                 final_filters |= item
-        #
-        #             candidate_query = candidate_query.filter(final_filters)
-        #
-        #         if positive_value_exists(ignore_candidate_id_list):
-        #             candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
-        #
-        #         candidate_list = list(candidate_query)
-        #         if len(candidate_list) and at_least_one_filter_used:
-        #             # entry exists
-        #             status += 'CANDIDATE_ENTRY_EXISTS3 '
-        #             success = True
-        #             # if a single entry matches, update that entry
-        #             if len(candidate_list) == 1:
-        #                 candidate = candidate_list[0]
-        #                 candidate_found = True
-        #                 status += candidate.we_vote_id + " office: " + candidate.contest_office_we_vote_id + " "
-        #                 keep_looking_for_duplicates = False
-        #             else:
-        #                 # more than one entry found with a match in CandidateCampaign
-        #                 candidate_list_found = True
-        #                 keep_looking_for_duplicates = False
-        #                 multiple_entries_found = True
-        #         else:
-        #             status += 'RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_ENTRY_NOT_FOUND-KEYWORDS '
-        #             success = True
-        #     except CandidateCampaign.DoesNotExist:
-        #         status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND-KEYWORDS "
-        #         success = True
-        #     except Exception as e:
-        #         status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED4 "
 
         results = {
             'success':                          success,
@@ -1052,6 +1033,122 @@ class CandidateCampaignListManager(models.Model):
 
         return 0
 
+    def retrieve_candidate_to_office_link_list(
+            self,
+            candidate_we_vote_id_list=[],
+            contest_office_we_vote_id_list=[],
+            google_civic_election_id_list=[],
+            state_code='',
+            read_only=True):
+        link_list = []
+        status = ""
+        success = True
+        google_civic_election_id_integer_list = []
+        for google_civic_election_id in google_civic_election_id_list:
+            google_civic_election_id_integer_list.append(convert_to_int(google_civic_election_id))
+
+        try:
+            if positive_value_exists(read_only):
+                query = CandidateToOfficeLink.objects.using('readonly').all()
+            else:
+                query = CandidateToOfficeLink.objects.all()
+            if positive_value_exists(len(candidate_we_vote_id_list)):
+                query = query.filter(candidate_we_vote_id__in=candidate_we_vote_id_list)
+            if positive_value_exists(len(contest_office_we_vote_id_list)):
+                query = query.filter(contest_office_we_vote_id__in=contest_office_we_vote_id_list)
+            if positive_value_exists(len(google_civic_election_id_list)):
+                query = query.filter(google_civic_election_id__in=google_civic_election_id_integer_list)
+            if positive_value_exists(state_code):
+                query = query.filter(state_code__iexact=state_code)
+
+            link_list = list(query)
+        except Exception as e:
+            status += "RETRIEVE_CANDIDATE_TO_OFFICE_LINK_LIST-ERROR: " + str(e) + " "
+            success = False
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'candidate_to_office_link_list':    link_list,
+        }
+        return results
+
+    def retrieve_candidate_we_vote_id_list_from_election_list(
+            self,
+            google_civic_election_id_list=[],
+            limit_to_this_state_code=''):
+        candidate_we_vote_id_list = []
+        office_we_vote_id_list_by_candidate_we_vote_id = {}
+        status = ''
+        success = True
+        results = self.retrieve_candidate_to_office_link_list(
+            google_civic_election_id_list=google_civic_election_id_list,
+            state_code=limit_to_this_state_code)
+        if not positive_value_exists(results['success']):
+            status += results['status']
+            success = False
+        else:
+            candidate_to_office_link_list = results['candidate_to_office_link_list']
+            for candidate_to_office_link in candidate_to_office_link_list:
+                candidate_we_vote_id_list.append(candidate_to_office_link.candidate_we_vote_id)
+                office_we_vote_id_list_by_candidate_we_vote_id[candidate_to_office_link.candidate_we_vote_id]\
+                    = candidate_to_office_link.contest_office_we_vote_id
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'candidate_we_vote_id_list':    candidate_we_vote_id_list,
+            'office_we_vote_id_list_by_candidate_we_vote_id':   office_we_vote_id_list_by_candidate_we_vote_id,
+        }
+        return results
+
+    def retrieve_candidate_we_vote_id_list_from_office_list(
+            self,
+            contest_office_we_vote_id_list=[],
+            limit_to_this_state_code=''):
+        candidate_we_vote_id_list = []
+        office_we_vote_id_list_by_candidate_we_vote_id = {}
+        status = ''
+        success = True
+        results = self.retrieve_candidate_to_office_link_list(
+            contest_office_we_vote_id_list=contest_office_we_vote_id_list,
+            state_code=limit_to_this_state_code)
+        if not positive_value_exists(results['success']):
+            status += results['status']
+            success = False
+        else:
+            candidate_to_office_link_list = results['candidate_to_office_link_list']
+            for candidate_to_office_link in candidate_to_office_link_list:
+                candidate_we_vote_id_list.append(candidate_to_office_link.candidate_we_vote_id)
+                office_we_vote_id_list_by_candidate_we_vote_id[candidate_to_office_link.candidate_we_vote_id]\
+                    = candidate_to_office_link.contest_office_we_vote_id
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'candidate_we_vote_id_list':    candidate_we_vote_id_list,
+            'office_we_vote_id_list_by_candidate_we_vote_id':   office_we_vote_id_list_by_candidate_we_vote_id,
+        }
+        return results
+
+    def fetch_candidate_we_vote_id_list_from_office_we_vote_id(self, office_we_vote_id):
+        results = self.retrieve_all_candidates_for_office(office_we_vote_id=office_we_vote_id)
+        if not positive_value_exists(results['candidate_list_found']):
+            return []
+        candidate_list = results['candidate_list']
+        candidate_we_vote_id_list = []
+        for one_candidate in candidate_list:
+            candidate_we_vote_id_list.append(one_candidate.we_vote_id)
+        return candidate_we_vote_id_list
+
+    def fetch_candidate_we_vote_id_list_from_election_list(
+            self,
+            google_civic_election_id_list=[],
+            limit_to_this_state_code=''):
+        results = self.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=google_civic_election_id_list,
+            limit_to_this_state_code=limit_to_this_state_code)
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+        return candidate_we_vote_id_list
+
     def search_candidates_in_specific_elections(self, google_civic_election_id_list, search_string='', state_code='',
                                                 candidate_name='', candidate_twitter_handle='',
                                                 candidate_website='', candidate_email='',
@@ -1081,7 +1178,6 @@ class CandidateCampaignListManager(models.Model):
         candidate_list_objects = []
         candidate_list_json = []
         candidate_list_found = False
-        office_manager = ContestOfficeManager()
 
         search_words = search_string.split()
 
@@ -1089,15 +1185,19 @@ class CandidateCampaignListManager(models.Model):
         # facebook_page_list = facebook_page_list_modified,
         # twitter_handle_list = twitter_handle_list_modified
         try:
-            candidate_queryset = CandidateCampaign.objects.all()
-            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                host_google_civic_election_id_list=google_civic_election_id_list)
-            candidate_queryset = candidate_queryset.filter(
-                Q(google_civic_election_id__in=google_civic_election_id_list) |
-                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+            results = self.retrieve_candidate_we_vote_id_list_from_election_list(
+                google_civic_election_id_list=google_civic_election_id_list,
+                limit_to_this_state_code=state_code)
+            if not positive_value_exists(results['success']):
+                status += results['status']
+                success = False
+            candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
+            candidate_query = CandidateCampaign.objects.all()
+            candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
             if positive_value_exists(state_code):
-                candidate_queryset = candidate_queryset.filter(state_code__iexact=state_code)
-            candidate_queryset = candidate_queryset.order_by("candidate_name")
+                candidate_query = candidate_query.filter(state_code__iexact=state_code)
+            candidate_query = candidate_query.order_by("candidate_name")
 
             # This is an "OR" search for each term, but an "AND" search across all search_words
             for search_word in search_words:
@@ -1125,7 +1225,7 @@ class CandidateCampaignListManager(models.Model):
                     final_filters |= item
 
                 # Add as new filter for "AND"
-                candidate_queryset = candidate_queryset.filter(final_filters)
+                candidate_query = candidate_query.filter(final_filters)
 
             # Reset filters for next batch of "OR"
             filters = []
@@ -1168,9 +1268,9 @@ class CandidateCampaignListManager(models.Model):
                     final_filters |= item
 
                 # Add as new filter for "AND"
-                candidate_queryset = candidate_queryset.filter(final_filters)
+                candidate_query = candidate_query.filter(final_filters)
 
-            candidate_list_objects = candidate_queryset[:25]
+            candidate_list_objects = candidate_query[:25]
 
             if len(candidate_list_objects):
                 candidate_list_found = True
@@ -1181,8 +1281,7 @@ class CandidateCampaignListManager(models.Model):
                 success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status += 'FAILED_SEARCH_CANDIDATES_FOR_UPCOMING_ELECTION ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            status += 'FAILED_SEARCH_CANDIDATES_FOR_UPCOMING_ELECTION: ' + str(e) + ' '
             success = False
 
         if candidate_list_found:
@@ -1401,6 +1500,8 @@ class CandidateCampaign(models.Model):
     withdrawal_date = models.DateField(verbose_name='Withdrawal date from election', null=True, auto_now=False)
     # Set to true if we don't want to display this candidate for some reason
     do_not_display_on_ballot = models.BooleanField(default=False)
+    # Set this for existing candidates once we have created CandidateToOfficeLink (is temporary variable)
+    migrated_to_link = models.BooleanField(default=False)
 
     def election(self):
         try:
@@ -1975,6 +2076,86 @@ class CandidateCampaignManager(models.Model):
         }
         return results
 
+    def retrieve_candidate_to_office_link(
+            self,
+            candidate_we_vote_id='',
+            contest_office_we_vote_id='',
+            google_civic_election_id=0,
+            state_code='',
+            read_only=True):
+        """
+        See also retrieve_candidate_to_office_link_list
+        :param candidate_we_vote_id:
+        :param contest_office_we_vote_id:
+        :param google_civic_election_id:
+        :param state_code:
+        :param read_only:
+        :return:
+        """
+        candidate_to_office_link = None
+        link_list = []
+        status = ""
+        success = True
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+
+        try:
+            if positive_value_exists(read_only):
+                query = CandidateToOfficeLink.objects.using('readonly').all()
+            else:
+                query = CandidateToOfficeLink.objects.all()
+            if positive_value_exists(candidate_we_vote_id):
+                query = query.filter(candidate_we_vote_id=candidate_we_vote_id)
+            if positive_value_exists(contest_office_we_vote_id):
+                query = query.filter(contest_office_we_vote_id=contest_office_we_vote_id)
+            if positive_value_exists(google_civic_election_id):
+                query = query.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                query = query.filter(state_code=state_code)
+
+            link_list = list(query)
+            if len(link_list) == 1:
+                list_found = True
+                only_one_found = True
+                candidate_to_office_link = link_list[0]
+            elif len(link_list) > 1:
+                list_found = True
+                only_one_found = False
+            else:
+                list_found = False
+                only_one_found = False
+        except Exception as e:
+            list_found = False
+            only_one_found = False
+            status += "RETRIEVE_CANDIDATE_TO_OFFICE_LINK-ERROR: " + str(e) + " "
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'candidate_to_office_link': candidate_to_office_link,
+            'list_found':               list_found,
+            'only_one_found':           only_one_found,
+            'candidate_to_office_link_list':    link_list,
+        }
+        return results
+
+    def fetch_next_upcoming_election_id_for_candidate(self, candidate_we_vote_id):
+        results = self.retrieve_candidate_to_office_link(candidate_we_vote_id=candidate_we_vote_id)
+        if not positive_value_exists(results['success']):
+            return 0
+        if results['only_one_found']:
+            candidate_to_office_link = results['candidate_to_office_link']
+            return candidate_to_office_link.google_civic_election_id
+        if results['list_found']:
+            candidate_to_office_link_list = results['candidate_to_office_link_list']
+            google_civic_election_id_list = []
+            for candidate_to_office_link in candidate_to_office_link_list:
+                if positive_value_exists(candidate_to_office_link.google_civic_election_id):
+                    google_civic_election_id_list.append(candidate_to_office_link.google_civic_election_id)
+            election_manager = ElectionManager()
+            return election_manager.fetch_google_civic_election_id_from_list(google_civic_election_id_list)
+        return 0
+
     def fetch_candidates_are_not_duplicates_list_we_vote_ids(self, candidate_we_vote_id):
         results = self.retrieve_candidates_are_not_duplicates_list(candidate_we_vote_id)
         return results['candidates_are_not_duplicates_list_we_vote_ids']
@@ -2363,6 +2544,54 @@ class CandidateCampaignManager(models.Model):
             'MultipleObjectsReturned':                      exception_multiple_object_returned,
             'new_candidates_are_not_duplicates_created':    new_candidates_are_not_duplicates_created,
             'candidates_are_not_duplicates':                candidates_are_not_duplicates,
+        }
+        return results
+
+    def get_or_create_candidate_to_office_link(
+            self,
+            candidate_we_vote_id='',
+            contest_office_we_vote_id='',
+            google_civic_election_id=0,
+            state_code=''):
+        exception_multiple_object_returned = False
+        success = True
+        new_candidate_to_office_link_created = False
+        candidate_to_office_link = None
+        status = ""
+
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        try:
+            state_code = state_code.upper()
+        except Exception as e:
+            pass
+
+        try:
+            candidate_to_office_link, new_candidate_to_office_link_created = \
+                CandidateToOfficeLink.objects.get_or_create(
+                    candidate_we_vote_id=candidate_we_vote_id,
+                    contest_office_we_vote_id=contest_office_we_vote_id,
+                    google_civic_election_id=google_civic_election_id,
+                    state_code=state_code)
+            status += "CANDIDATE_TO_OFFICE_LINK_GET_OR_CREATE-SUCCESS "
+        except CandidateToOfficeLink.MultipleObjectsReturned as e:
+            success = False
+            status += 'ERROR-MULTIPLE_MATCHING_CANDIDATE_TO_OFFICE_LINK_FOUND: ' + str(e) + ' '
+            status += '[candidate_we_vote_id: ' + str(candidate_we_vote_id) + ' '
+            status += 'contest_office_we_vote_id: ' + str(contest_office_we_vote_id) + ' '
+            status += 'google_civic_election_id: ' + str(google_civic_election_id) + ' '
+            status += 'state_code: ' + str(state_code) + '] '
+            exception_multiple_object_returned = True
+            handle_exception(e, logger=logger, exception_message=status)
+        except Exception as e:
+            status += 'EXCEPTION_UPDATE_OR_CREATE_CANDIDATE_TO_OFFICE_LINK ' + str(e) + ' '
+            success = False
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'MultipleObjectsReturned':              exception_multiple_object_returned,
+            'new_candidate_to_office_link_created': new_candidate_to_office_link_created,
+            'candidate_to_office_link':             candidate_to_office_link,
         }
         return results
 
@@ -3090,4 +3319,43 @@ class CandidatesAreNotDuplicates(models.Model):
         else:
             # If the we_vote_id passed in wasn't found, don't return another we_vote_id
             return ""
+
+
+class CandidateToOfficeLink(models.Model):
+    """
+    Some candidates, like Presidential candidates, are the same across many different states or elections.
+    We also see the same candidates from primaries move into the next election. We make sure
+    to create a unique ContestOffice per election, but we let the Candidate be used in both the primary and
+    General election.
+    With this table, we can allow candidates to be linked to multiple elections
+    This replaces ContestOfficeVisitingOtherElection
+    """
+    candidate_we_vote_id = models.CharField(db_index=True, max_length=255, null=False, unique=False)
+    contest_office_we_vote_id = models.CharField(db_index=True, max_length=255, null=False, unique=False)
+    google_civic_election_id = models.PositiveIntegerField(db_index=True, default=0, null=False, blank=False)
+    state_code = models.CharField(db_index=True, max_length=2, null=True)
+
+    def election(self):
+        try:
+            election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
+        except Election.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            logger.error("candidate.election Found multiple")
+            return
+        except Election.DoesNotExist:
+            logger.error("candidate.election did not find")
+            return
+        return election
+
+    def office(self):
+        try:
+            office = ContestOffice.objects.get(we_vote_id=self.contest_office_we_vote_id)
+        except ContestOffice.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            logger.error("candidate.election Found multiple")
+            return
+        except ContestOffice.DoesNotExist:
+            logger.error("candidate.election did not find")
+            return
+        return office
 

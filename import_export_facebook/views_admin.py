@@ -5,7 +5,7 @@
 from .controllers import get_facebook_photo_url_from_graphapi
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.controllers import FACEBOOK, save_image_to_candidate_table
-from candidate.models import CandidateCampaign
+from candidate.models import CandidateCampaign, CandidateCampaignListManager
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
@@ -102,11 +102,14 @@ def bulk_retrieve_facebook_photos_view(request):
                                     '&hide_candidate_tools=' + str(hide_candidate_tools) +
                                     '&page=' + str(page)
                                     )
-
+    candidate_list_manager = CandidateCampaignListManager()
     try:
         candidate_list = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id):
-            candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+            results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                google_civic_election_id_list=[google_civic_election_id])
+            candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+            candidate_list = candidate_list.filter(we_vote_id__in=candidate_we_vote_id_list)
         if positive_value_exists(state_code):
             candidate_list = candidate_list.filter(state_code__iexact=state_code)
         candidate_list = candidate_list.order_by('candidate_name')

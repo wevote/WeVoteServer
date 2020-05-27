@@ -108,41 +108,6 @@ def bulk_retrieve_possible_twitter_handles_view(request):
     candidates_to_analyze = results['candidates_to_analyze']
     messages.add_message(request, messages.INFO,
                          'candidates_to_analyze:' + str(candidates_to_analyze))
-    # try:
-    #     candidate_list = CandidateCampaign.objects.all()
-    #     if positive_value_exists(google_civic_election_id):
-    #         candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
-    #     if positive_value_exists(state_code):
-    #         candidate_list = candidate_list.filter(state_code__iexact=state_code)
-    #     candidate_list = candidate_list.order_by('candidate_name')
-    #     if positive_value_exists(limit):
-    #         candidate_list = candidate_list[:limit]
-    #     candidate_list_count = candidate_list.count()
-    #
-    #     # Run Twitter account search and analysis on candidates without a linked or possible Twitter account
-    #     number_of_candidates_to_search = 25
-    #     current_candidate_index = 0
-    #     while positive_value_exists(number_of_candidates_to_search) \
-    #             and (current_candidate_index < candidate_list_count):
-    #         one_candidate = candidate_list[current_candidate_index]
-    #         if not positive_value_exists(one_candidate.candidate_twitter_handle):
-    #             # Candidate does not have a Twitter account linked
-    #             # Check to see if we have already tried to find their information from Twitter. We don't want to
-    #             #  search Twitter more than once.
-    #             request_history_query = RemoteRequestHistory.objects.filter(
-    #                 candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
-    #                 kind_of_action=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
-    #             request_history_list = list(request_history_query)
-    #
-    #             if not positive_value_exists(request_history_list):
-    #                 # Twitter account search and analysis has not been run on this candidate yet
-    #                 results = retrieve_possible_twitter_handles(one_candidate)
-    #                 number_of_candidates_to_search -= 1
-    #
-    #         current_candidate_index += 1
-    # except CandidateCampaign.DoesNotExist:
-    #     # This is fine, do nothing
-    #     pass
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                 '?google_civic_election_id=' + str(google_civic_election_id) +
