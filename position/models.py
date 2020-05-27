@@ -4,7 +4,7 @@
 # Diagrams here: https://docs.google.com/drawings/d/1DsPnl97GKe9f14h41RPeZDssDUztRETGkXGaolXCeyo/edit
 
 from analytics.models import ACTION_POSITION_TAKEN, AnalyticsManager
-from candidate.models import CandidateCampaign, CandidateCampaignManager
+from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching, \
     figure_out_google_civic_election_id_voter_is_watching_by_voter_we_vote_id
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
@@ -1330,6 +1330,7 @@ class PositionListManager(models.Model):
                                               state_code,
                                               retrieve_public_positions=True,
                                               stance_we_are_looking_for=ANY_STANCE):
+        status = ''
         # Don't proceed unless we have a correct stance identifier
         if stance_we_are_looking_for not \
                 in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
@@ -1344,25 +1345,27 @@ class PositionListManager(models.Model):
             return 0
 
         position_count = 0
-        office_manager = ContestOfficeManager()
+        candidate_list_manager = CandidateCampaignListManager()
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=google_civic_election_id_list,
+            limit_to_this_state_code=state_code)
+        if not positive_value_exists(results['success']):
+            status += results['status']
+            success = False
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
         try:
             if retrieve_public_positions:
                 position_on_stage_starter = PositionEntered
-                position_on_stage = PositionEntered()
             else:
                 position_on_stage_starter = PositionForFriends
-                position_on_stage = PositionForFriends()
 
             position_query = position_on_stage_starter.objects.using('readonly').all()
+            position_query = position_query.filter(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
+            
             # As of Aug 2018 we are no longer using PERCENT_RATING
             position_query = position_query.exclude(stance__iexact=PERCENT_RATING)
 
             position_query = position_query.filter(organization_we_vote_id__in=organization_we_vote_id_list)
-            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                host_google_civic_election_id_list=google_civic_election_id_list)
-            position_query = position_query.filter(
-                Q(google_civic_election_id__in=google_civic_election_id_list) |
-                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
 
             if positive_value_exists(state_code):
                 position_query = position_query.filter(state_code__iexact=state_code)
@@ -2341,10 +2344,12 @@ class PositionListManager(models.Model):
             position_list_filtered = []
             return position_list_filtered
 
-    def retrieve_all_positions_for_contest_office(self, retrieve_public_positions,
-                                                  contest_office_id, contest_office_we_vote_id,
-                                                  stance_we_are_looking_for,
-                                                  most_recent_only=True, friends_we_vote_id_list=False,
+    def retrieve_all_positions_for_contest_office(self, retrieve_public_positions=True,
+                                                  contest_office_id=0,
+                                                  contest_office_we_vote_id='',
+                                                  stance_we_are_looking_for=ANY_STANCE,
+                                                  most_recent_only=True,
+                                                  friends_we_vote_id_list=False,
                                                   read_only=False):
         status = ""
         if stance_we_are_looking_for not \
@@ -2369,6 +2374,16 @@ class PositionListManager(models.Model):
                 position_list = []
                 return position_list
 
+        if not positive_value_exists(contest_office_we_vote_id) and positive_value_exists(contest_office_id):
+            office_manager = ContestOfficeManager()
+            contest_office_we_vote_id = office_manager.fetch_contest_office_we_vote_id_from_id(contest_office_id)
+
+        candidate_list_manager = CandidateCampaignListManager()
+        results = candidate_list_manager.retrieve_all_candidates_for_office(office_we_vote_id=contest_office_we_vote_id)
+        if not positive_value_exists(results['success']):
+            status += results['status']
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
         # Retrieve the support positions for this contest_office_id
         position_list_found = False
         try:
@@ -2390,11 +2405,8 @@ class PositionListManager(models.Model):
             # As of Aug 2018 we are no longer using PERCENT_RATING
             position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
-            if positive_value_exists(contest_office_we_vote_id):
-                position_list_query = position_list_query.filter(
-                    contest_office_we_vote_id__iexact=contest_office_we_vote_id)
-            else:
-                position_list_query = position_list_query.filter(contest_office_id=contest_office_id)
+            position_list_query = position_list_query.filter(
+                candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY" it means we want to not filter down the list
@@ -2673,6 +2685,7 @@ class PositionListManager(models.Model):
         """
         status = ""
         office_manager = ContestOfficeManager()
+        candidate_list_manager = CandidateCampaignListManager()
         if stance_we_are_looking_for not \
                 in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
@@ -2752,19 +2765,27 @@ class PositionListManager(models.Model):
                         # Please note that this option doesn't catch Vote Smart ratings, which are not
                         # linked by google_civic_election_id
                         google_civic_election_id_list = [str(google_civic_election_id)]
-                        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                            host_google_civic_election_id_list=google_civic_election_id_list)
+                        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                            google_civic_election_id_list=google_civic_election_id_list,
+                            limit_to_this_state_code=state_code)
+                        if not positive_value_exists(results['success']):
+                            status += results['status']
+                            success = False
+                        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
                         public_positions_query = public_positions_query.filter(
-                            Q(google_civic_election_id__in=google_civic_election_id_list) |
-                            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+                            candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
                     elif positive_value_exists(google_civic_election_id_local_scope):
                         # Limit positions we can retrieve for an org to only the items in this election
                         google_civic_election_id_list = [google_civic_election_id_local_scope]
-                        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                            host_google_civic_election_id_list=google_civic_election_id_list)
+                        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                            google_civic_election_id_list=google_civic_election_id_list,
+                            limit_to_this_state_code=state_code)
+                        if not positive_value_exists(results['success']):
+                            status += results['status']
+                            success = False
+                        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
                         public_positions_query = public_positions_query.filter(
-                            Q(google_civic_election_id__in=google_civic_election_id_list) |
-                            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+                            candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
                     else:
                         # Leave the position_list as is for now. TODO: We really should have election_id
                         # # If no election is found for the voter, don't show any positions
@@ -2775,24 +2796,44 @@ class PositionListManager(models.Model):
                     if positive_value_exists(google_civic_election_id):
                         # Please note that this option doesn't catch Vote Smart ratings, which are not
                         # linked by google_civic_election_id
+                        google_civic_election_id_list = [google_civic_election_id]
+                        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                            google_civic_election_id_list=google_civic_election_id_list,
+                            limit_to_this_state_code=state_code)
+                        if not positive_value_exists(results['success']):
+                            status += results['status']
+                            success = False
+                        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
                         public_positions_query = public_positions_query.exclude(
-                            google_civic_election_id=str(google_civic_election_id))
+                            candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
                     elif positive_value_exists(google_civic_election_id_local_scope):
                         # Limit positions we can retrieve for an org to only the items NOT in this election
+                        google_civic_election_id_list = [google_civic_election_id_local_scope]
+                        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                            google_civic_election_id_list=google_civic_election_id_list,
+                            limit_to_this_state_code=state_code)
+                        if not positive_value_exists(results['success']):
+                            status += results['status']
+                            success = False
+                        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
                         public_positions_query = public_positions_query.exclude(
-                            google_civic_election_id=google_civic_election_id_local_scope)
+                            candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
                     else:
                         # Leave the position_list as is.
                         pass
                 elif positive_value_exists(google_civic_election_id):
                     # Please note that this option doesn't catch Vote Smart ratings, which are not
                     # linked by google_civic_election_id
-                    google_civic_election_id_list = [convert_to_int(google_civic_election_id)]
-                    office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                        host_google_civic_election_id_list=google_civic_election_id_list)
+                    google_civic_election_id_list = [google_civic_election_id]
+                    results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                        google_civic_election_id_list=google_civic_election_id_list,
+                        limit_to_this_state_code=state_code)
+                    if not positive_value_exists(results['success']):
+                        status += results['status']
+                        success = False
+                    candidate_we_vote_id_list = results['candidate_we_vote_id_list']
                     public_positions_query = public_positions_query.filter(
-                        Q(google_civic_election_id__in=google_civic_election_id_list) |
-                        Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+                        candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
                 elif positive_value_exists(state_code):
                     public_positions_query = public_positions_query.filter(state_code__iexact=state_code)
 
@@ -2929,19 +2970,27 @@ class PositionListManager(models.Model):
                             # Please note that this option doesn't catch Vote Smart ratings, which are not
                             # linked by google_civic_election_id
                             google_civic_election_id_list = [str(google_civic_election_id)]
-                            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                                host_google_civic_election_id_list=google_civic_election_id_list)
+                            results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                                google_civic_election_id_list=google_civic_election_id_list,
+                                limit_to_this_state_code=state_code)
+                            if not positive_value_exists(results['success']):
+                                status += results['status']
+                                success = False
+                            candidate_we_vote_id_list = results['candidate_we_vote_id_list']
                             friends_positions_query = friends_positions_query.filter(
-                                Q(google_civic_election_id__in=google_civic_election_id_list) |
-                                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+                                candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
                         elif positive_value_exists(google_civic_election_id_local_scope):
                             # Limit positions we can retrieve for an org to only the items in this election
                             google_civic_election_id_list = [str(google_civic_election_id_local_scope)]
-                            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                                host_google_civic_election_id_list=google_civic_election_id_list)
+                            results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                                google_civic_election_id_list=google_civic_election_id_list,
+                                limit_to_this_state_code=state_code)
+                            if not positive_value_exists(results['success']):
+                                status += results['status']
+                                success = False
+                            candidate_we_vote_id_list = results['candidate_we_vote_id_list']
                             friends_positions_query = friends_positions_query.filter(
-                                Q(google_civic_election_id__in=google_civic_election_id_list) |
-                                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+                                candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
                         else:
                             # Leave the position_list as is for now. TODO: We really should have election_id
                             # # If no election is found for the voter, don't show any positions
@@ -2967,11 +3016,15 @@ class PositionListManager(models.Model):
                         # We are only using this if google_civic_election_id was passed
                         # into retrieve_all_positions_for_organization
                         google_civic_election_id_list = [str(google_civic_election_id)]
-                        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                            host_google_civic_election_id_list=google_civic_election_id_list)
+                        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                            google_civic_election_id_list=google_civic_election_id_list,
+                            limit_to_this_state_code=state_code)
+                        if not positive_value_exists(results['success']):
+                            status += results['status']
+                            success = False
+                        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
                         friends_positions_query = friends_positions_query.filter(
-                            Q(google_civic_election_id__in=google_civic_election_id_list) |
-                            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+                            candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
                     elif positive_value_exists(state_code):
                         friends_positions_query = friends_positions_query.filter(state_code__iexact=state_code)
 
@@ -3511,7 +3564,7 @@ class PositionListManager(models.Model):
 
     def retrieve_position_counts_for_election_and_state(self, google_civic_election_id_list=[], state_code=''):
         friends_only_count = 0
-        office_manager = ContestOfficeManager()
+        candidate_list_manager = CandidateCampaignListManager()
         public_count = 0
         status = ''
         success = True
@@ -3527,14 +3580,17 @@ class PositionListManager(models.Model):
             }
             return results
 
-        office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-            host_google_civic_election_id_list=google_civic_election_id_list)
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=google_civic_election_id_list,
+            limit_to_this_state_code=state_code)
+        if not positive_value_exists(results['success']):
+            status += results['status']
+            success = False
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
         try:
             position_query = PositionEntered.objects.using('readonly').all()
-            position_query = position_query.filter(
-                Q(google_civic_election_id__in=google_civic_election_id_list) |
-                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+            position_query = position_query.filter(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
             if positive_value_exists(state_code):
                 position_query = position_query.filter(state_code__iexact=state_code)
             public_count = position_query.count()
@@ -3547,9 +3603,7 @@ class PositionListManager(models.Model):
 
         try:
             position_query = PositionForFriends.objects.using('readonly').all()
-            position_query = position_query.filter(
-                Q(google_civic_election_id__in=google_civic_election_id_list) |
-                Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+            position_query = position_query.filter(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
             if positive_value_exists(state_code):
                 position_query = position_query.filter(state_code__iexact=state_code)
             friends_only_count = position_query.count()
@@ -3709,6 +3763,7 @@ class PositionListManager(models.Model):
                                                  contest_office_we_vote_id,
                                                  stance_we_are_looking_for,
                                                  public_or_private=PUBLIC_ONLY):
+        status = ""
         if stance_we_are_looking_for not \
                 in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             stance_we_are_looking_for = ANY_STANCE
@@ -3727,17 +3782,33 @@ class PositionListManager(models.Model):
         else:
             position_list_query = PositionEntered.objects.using('readonly').all()
 
+        candidate_list_manager = CandidateCampaignListManager()
+        results = candidate_list_manager.retrieve_all_candidates_for_office(
+            office_id=contest_office_id, office_we_vote_id=contest_office_we_vote_id)
+        if not positive_value_exists(results['success']):
+            status += 'RETRIEVE_POSITIONS_COUNT_FOR_OFFICE_FAILED '
+            status += results['status']
+            results = {
+                'success':              False,
+                'status':               status,
+                'office_id':            contest_office_id,
+                'office_we_vote_id':    contest_office_we_vote_id,
+                'candidate_count':      0,
+            }
+            return results
+        candidate_we_vote_id_list = []
+        candidate_list = results['candidate_list']
+        for one_candidate in candidate_list:
+            candidate_we_vote_id_list.append(one_candidate.we_vote_id)
+
         # As of Aug 2018 we are no longer using PERCENT_RATING
         position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
         # Retrieve the support positions for this contest_office_id
         position_count = 0
         try:
-            if positive_value_exists(contest_office_id):
-                position_list_query = position_list_query.filter(contest_office_id=contest_office_id)
-            else:
-                position_list_query = position_list_query.filter(
-                    contest_office_we_vote_id__iexact=contest_office_we_vote_id)
+            position_list_query = position_list_query.filter(
+                candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list

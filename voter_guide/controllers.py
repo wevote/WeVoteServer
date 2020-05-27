@@ -2996,7 +2996,12 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
     elif (kind_of_ballot_item == OFFICE) and positive_value_exists(ballot_item_we_vote_id):
         office_id = 0
         all_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
-                office_id, ballot_item_we_vote_id, ANY_STANCE, read_only=True)
+            retrieve_public_positions=True,
+            contest_office_id=office_id,
+            contest_office_we_vote_id=ballot_item_we_vote_id,
+            stance_we_are_looking_for=ANY_STANCE,
+            most_recent_only=False,
+            read_only=True)
     else:
         voter_guide_list = []
         results = {

@@ -327,7 +327,7 @@ def calculate_positions_count_for_all_ballot_items_for_api(
         # Retrieve all positions for each ballot item
         if one_ballot_item.is_contest_office():
             results = candidate_list_object.retrieve_all_candidates_for_office(
-                0, one_ballot_item.contest_office_we_vote_id)
+                office_we_vote_id=one_ballot_item.contest_office_we_vote_id)
             success = results['success']
             candidate_list = results['candidate_list']
 
@@ -552,11 +552,10 @@ def count_for_all_ballot_items_from_position_network_score_for_api(  # positions
     # Get a list of all candidates and measures from this election (in the active election)
     ballot_item_list_manager = BallotItemListManager()
     candidate_list_manager = CandidateCampaignListManager()
-    read_only = True
     ballot_item_list = []
     if google_civic_election_id:
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
-            voter_id, google_civic_election_id, read_only)
+            voter_id, google_civic_election_id, read_only=True)
         status += results['status']
         ballot_item_list = results['ballot_item_list']
 
@@ -566,7 +565,7 @@ def count_for_all_ballot_items_from_position_network_score_for_api(  # positions
         # Retrieve all positions for each ballot item
         if one_ballot_item.is_contest_office():
             results = candidate_list_manager.retrieve_all_candidates_for_office(
-                0, one_ballot_item.contest_office_we_vote_id, read_only)
+                office_we_vote_id=one_ballot_item.contest_office_we_vote_id, read_only=True)
             success = results['success']
             candidate_list = results['candidate_list']
 
@@ -1138,13 +1137,21 @@ def move_positions_to_another_office(from_contest_office_id, from_contest_office
 
     # Get all positions for the "from_office" that we are moving away from
     from_position_list = position_list_manager.retrieve_all_positions_for_contest_office(
-        public_or_private, from_contest_office_id, from_contest_office_we_vote_id, stance_we_are_looking_for,
-        most_recent_only, friends_we_vote_id_list)
+        retrieve_public_positions=public_or_private,
+        contest_office_id=from_contest_office_id,
+        contest_office_we_vote_id=from_contest_office_we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        most_recent_only=most_recent_only,
+        friends_we_vote_id_list=friends_we_vote_id_list)
 
     # Get all positions for the "to_office" that we need to check
     to_position_list = position_list_manager.retrieve_all_positions_for_contest_office(
-        public_or_private, to_contest_office_id, to_contest_office_we_vote_id, stance_we_are_looking_for,
-        most_recent_only, friends_we_vote_id_list)
+        retrieve_public_positions=public_or_private,
+        contest_office_id=to_contest_office_id,
+        contest_office_we_vote_id=to_contest_office_we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        most_recent_only=most_recent_only,
+        friends_we_vote_id_list=friends_we_vote_id_list)
 
     # Put the organization_we_vote_id's of the orgs that have opinions about this contest office in a simple array
     # These are existing positions attached to the contest office we are going to keep
@@ -2220,8 +2227,12 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
         retrieve_public_positions_now = True  # The alternate is positions for friends-only
         return_only_latest_position_per_speaker = True
         position_objects = position_list_manager.retrieve_all_positions_for_contest_office(
-            retrieve_public_positions_now, office_id, office_we_vote_id, stance_we_are_looking_for,
-            return_only_latest_position_per_speaker, read_only=False)
+            retrieve_public_positions=retrieve_public_positions_now,
+            contest_office_id=office_id,
+            contest_office_we_vote_id=office_we_vote_id,
+            stance_we_are_looking_for=stance_we_are_looking_for,
+            most_recent_only=return_only_latest_position_per_speaker,
+            read_only=False)
         # is_public_position_setting = True
         # public_positions_list = position_list_manager.add_is_public_position(public_positions_list,
         #                                                                      is_public_position_setting)
@@ -2700,8 +2711,12 @@ def retrieve_position_list_for_ballot_item_from_friends(
             retrieve_public_positions_now = True  # The alternate is positions for friends-only
             return_only_latest_position_per_speaker = True
             public_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
-                retrieve_public_positions_now, office_id, office_we_vote_id, stance_we_are_looking_for,
-                return_only_latest_position_per_speaker, friends_we_vote_id_list=friends_we_vote_id_list,
+                retrieve_public_positions=retrieve_public_positions_now,
+                contest_office_id=office_id,
+                contest_office_we_vote_id=office_we_vote_id,
+                stance_we_are_looking_for=stance_we_are_looking_for,
+                most_recent_only=return_only_latest_position_per_speaker,
+                friends_we_vote_id_list=friends_we_vote_id_list,
                 read_only=True)
             # is_public_position_setting = True
             # public_positions_list = position_list_manager.add_is_public_position(public_positions_list,
@@ -2715,8 +2730,12 @@ def retrieve_position_list_for_ballot_item_from_friends(
             retrieve_public_positions_now = False  # This being False means: "Positions from friends-only"
             return_only_latest_position_per_speaker = True
             friends_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
-                retrieve_public_positions_now, office_id, office_we_vote_id, stance_we_are_looking_for,
-                return_only_latest_position_per_speaker, friends_we_vote_id_list=friends_we_vote_id_list,
+                retrieve_public_positions=retrieve_public_positions_now,
+                contest_office_id=office_id,
+                contest_office_we_vote_id=office_we_vote_id,
+                stance_we_are_looking_for=stance_we_are_looking_for,
+                most_recent_only=return_only_latest_position_per_speaker,
+                friends_we_vote_id_list=friends_we_vote_id_list,
                 read_only=True)
             # Now add is_public_position to each value
             # is_public_position_setting = False
@@ -4959,7 +4978,7 @@ def update_all_position_details_from_candidate(candidate_campaign):
 
 def update_all_position_details_from_contest_office(contest_office):
     """
-    Update all position office name in PositionEntered and PositionForFriends from contest office details
+    Update ballotpedia_race_office_level in PositionEntered and PositionForFriends from contest office details
     :param contest_office:
     :return:
     """
@@ -4969,11 +4988,13 @@ def update_all_position_details_from_contest_office(contest_office):
     positions_not_updated_count = 0
     update_all_position_office_data_results = []
 
-    retrieve_public_positions = True
     stance_we_are_looking_for = ANY_STANCE
     public_position_list = position_list_manager.retrieve_all_positions_for_contest_office(
-        retrieve_public_positions, contest_office.id, contest_office.we_vote_id,
-        stance_we_are_looking_for, most_recent_only=True)
+        retrieve_public_positions=True,
+        contest_office_id=contest_office.id,
+        contest_office_we_vote_id=contest_office.we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        most_recent_only=True)
     for position_object in public_position_list:
         update_position_office_data_results = position_manager.update_position_office_data_from_contest_office(
             position_object, contest_office)
@@ -4983,10 +5004,12 @@ def update_all_position_details_from_contest_office(contest_office):
             positions_not_updated_count += 1
         update_all_position_office_data_results.append(update_position_office_data_results)
 
-    retrieve_public_positions = False
     friends_position_list = position_list_manager.retrieve_all_positions_for_contest_office(
-        retrieve_public_positions, contest_office.id, contest_office.we_vote_id,
-        stance_we_are_looking_for, most_recent_only=True)
+        retrieve_public_positions=False,
+        contest_office_id=contest_office.id,
+        contest_office_we_vote_id=contest_office.we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        most_recent_only=True)
     for position_object in friends_position_list:
         update_position_office_data_results = position_manager.update_position_office_data_from_contest_office(
             position_object, contest_office)

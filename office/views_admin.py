@@ -227,11 +227,7 @@ def office_list_view(request):
         office_queryset = ContestOffice.objects.all()
 
         if positive_value_exists(google_civic_election_id):
-            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                host_google_civic_election_id_list=[google_civic_election_id])
-            office_queryset = office_queryset.filter(
-                Q(google_civic_election_id=google_civic_election_id) |
-                Q(we_vote_id__in=office_visiting_list_we_vote_ids))
+            office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
         elif positive_value_exists(show_all_elections):
             # Return offices from all elections
             pass
@@ -240,11 +236,7 @@ def office_list_view(request):
             google_civic_election_id_list = []
             for one_election in election_list:
                 google_civic_election_id_list.append(one_election.google_civic_election_id)
-            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                host_google_civic_election_id_list=google_civic_election_id_list)
-            office_queryset = office_queryset.filter(
-                Q(google_civic_election_id__in=google_civic_election_id_list) |
-                Q(we_vote_id__in=office_visiting_list_we_vote_ids))
+            office_queryset = office_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
         if positive_value_exists(state_code):
             office_queryset = office_queryset.filter(state_code__iexact=state_code)
         if positive_value_exists(show_marquee_or_battleground):
@@ -668,9 +660,10 @@ def office_summary_view(request, office_id):
         # This is fine, create new
         pass
 
+    # DALE 2020 We are going to leave this in place during the transition for debugging
     contest_office_visiting_election_list = []
     results = office_manager.retrieve_election_ids_office_is_visiting(
-        contest_office_we_vote_id=contest_office.we_vote_id)
+        contest_office_we_vote_id=office_we_vote_id)
     if results['contest_office_visiting_list_found']:
         contest_office_visiting_election_id_list = results['contest_office_visiting_election_id_list']
         election_query = Election.objects.filter(google_civic_election_id__in=contest_office_visiting_election_id_list)\
@@ -682,11 +675,15 @@ def office_summary_view(request, office_id):
     # Cache the full names of candidates for the root contest_office so we can check to see if possible duplicate
     # offices share the same candidates
     root_office_candidate_last_names = ""
+    candidate_list_manager = CandidateCampaignListManager()
+    results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_office_list(
+        contest_office_we_vote_id_list=[office_we_vote_id])
+    candidate_we_vote_id_list = results['candidate_we_vote_id_list']
     try:
-        candidate_list = CandidateCampaign.objects.filter(contest_office_id=office_id)
-        if positive_value_exists(google_civic_election_id):
-            candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
-        candidate_list = candidate_list.order_by('candidate_name')
+        candidate_query = CandidateCampaign.objects.all()
+        candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+        candidate_query = candidate_query.order_by('candidate_name')
+        candidate_list = list(candidate_query)
         support_total = 0
         for one_candidate in candidate_list:
             # Find the count of Voters that support this candidate (Organizations are not included in this)
@@ -755,14 +752,12 @@ def office_summary_view(request, office_id):
             office_search_results_list = results['contest_office_list']
 
     # Show the candidates under each office
-    candidate_list_read_only = True
     candidate_list_manager = CandidateCampaignListManager()
     office_search_results_list_modified = []
     for one_office in office_search_results_list:
-        office_id = 0
         if positive_value_exists(one_office.we_vote_id):
             contest_office_option1_results = candidate_list_manager.retrieve_all_candidates_for_office(
-                office_id, one_office.we_vote_id, candidate_list_read_only)
+                office_we_vote_id=one_office.we_vote_id, read_only=True)
             if contest_office_option1_results['candidate_list_found']:
                 one_office.candidates_string = ""
                 candidate_list = contest_office_option1_results['candidate_list']
@@ -1073,12 +1068,10 @@ def render_contest_office_merge_form(
     contest_office_option2_for_template.bookmarks_count = contest_office_option2_bookmark_count
 
     # Show the candidates under each office
-    office_id = 0
-    candidate_list_read_only = True
     candidate_list_manager = CandidateCampaignListManager()
     if positive_value_exists(contest_office_option1_for_template.we_vote_id):
         contest_office_option1_results = candidate_list_manager.retrieve_all_candidates_for_office(
-            office_id, contest_office_option1_for_template.we_vote_id, candidate_list_read_only)
+            office_we_vote_id=contest_office_option1_for_template.we_vote_id, read_only=True)
         if contest_office_option1_results['candidate_list_found']:
             contest_office_option1_for_template.candidates_string = ""
             candidate_list = contest_office_option1_results['candidate_list']
@@ -1087,7 +1080,7 @@ def render_contest_office_merge_form(
 
     if positive_value_exists(contest_office_option2_for_template.we_vote_id):
         contest_office_option2_results = candidate_list_manager.retrieve_all_candidates_for_office(
-            office_id, contest_office_option2_for_template.we_vote_id, candidate_list_read_only)
+            office_we_vote_id=contest_office_option2_for_template.we_vote_id, read_only=True)
         if contest_office_option2_results['candidate_list_found']:
             contest_office_option2_for_template.candidates_string = ""
             candidate_list = contest_office_option2_results['candidate_list']

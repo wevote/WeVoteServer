@@ -16,7 +16,7 @@ from apis_v1.views import views_docs, views_analytics, views_ballot, views_candi
     views_pledge_to_vote, views_position, views_task, views_share, views_twitter, views_voter, views_voter_guide
 from analytics.views_admin import analytics_action_sync_out_view
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
-from candidate.views_admin import candidates_sync_out_view
+from candidate.views_admin import candidates_sync_out_view, candidate_to_office_link_sync_out_view
 from issue.views_admin import issue_descriptions_retrieve_view, issues_followed_retrieve_view,\
     issues_sync_out_view, issues_retrieve_view, issues_under_ballot_items_retrieve_view, \
     retrieve_issues_to_follow_view, organization_link_to_issue_sync_out_view, test_real_time_update
@@ -45,6 +45,7 @@ urlpatterns = [
         name='candidateListForUpcomingElectionsRetrieveView'),
     url(r'^candidatesRetrieve/', views_candidate.candidates_retrieve_view, name='candidatesRetrieveView'),
     url(r'^candidatesSyncOut/', candidates_sync_out_view, name='candidatesSyncOutView'),
+    url(r'^candidateToOfficeLinkSyncOut/', candidate_to_office_link_sync_out_view, name='candidateToOfficeLinkSyncOutView'),
     url(r'^couponSummaryRetrieve',
         views_donation.coupon_summary_retrieve_for_api_view, name='couponSummaryRetrieve'),  # No doc yet
     url(r'^defaultPricing', views_donation.default_pricing_for_api_view, name='defaultPricing'),  # No doc yet
@@ -303,6 +304,8 @@ urlpatterns = [
         name='candidateListForUpcomingElectionsRetrieveDocs'),
     url(r'^docs/candidatesRetrieve/$', views_docs.candidates_retrieve_doc_view, name='candidatesRetrieveDocs'),
     url(r'^docs/candidatesSyncOut/$', views_docs.candidates_sync_out_doc_view, name='candidatesSyncOutDocs'),
+    url(r'^docs/candidateToOfficeLinkSyncOut/$',
+        views_docs.candidate_to_office_link_sync_out_doc_view, name='candidateToOfficeLinkSyncOutDocs'),
     url(r'^docs/deviceIdGenerate/$', views_docs.device_id_generate_doc_view, name='deviceIdGenerateDocs'),
     url(r'^docs/donationWithStripe/$', views_docs.donation_with_stripe_doc_view, name='donationWithStripeDocs'),
     url(r'^docs/electionsRetrieve/$', views_docs.elections_retrieve_doc_view, name='electionsRetrieveDocs'),

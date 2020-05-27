@@ -16,6 +16,8 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 import django.utils.html
+from math import *
+
 
 # We don't want to include the actual constants from organization/models.py, since that can cause include conflicts
 CORPORATION = 'C'
@@ -800,6 +802,17 @@ def convert_date_to_we_vote_date_string(date):
     return day_as_string
 
 
+def digit_count(number):
+    if number > 1 and round(log10(number)) >= log10(number) and number % 10 != 0:
+        return round(log10(number))
+    elif number > 1 and round(log10(number)) < log10(number) and number % 10 != 0:
+        return round(log10(number)) + 1
+    elif number % 10 == 0 and number != 0:
+        return int(log10(number) + 1)
+    elif number == 1 or number == 0:
+        return 1
+
+
 def extract_state_from_ocd_division_id(ocd_division_id):
     # Pull this from ocdDivisionId
     pieces = [piece.split(':', 1) for piece in ocd_division_id.split('/')]
@@ -1079,6 +1092,35 @@ def extract_facebook_username_from_text_string(facebook_text_string):
     return facebook_text_string
 
 
+def extract_and_replace_facebook_page_id(facebook_full_graph_url):
+    # Find the page name from the facebook_full_graph_url
+    list_of_integers = [int(x) for x in re.findall('\d+', facebook_full_graph_url)]
+    # Pop off the last integer
+
+    if len(list_of_integers) > 0:
+        # Take the last number
+        possible_page_id = list_of_integers.pop()
+        if digit_count(possible_page_id) > 8:
+            reassembled_url = str('')
+            facebook_page_id = possible_page_id
+            parts = facebook_full_graph_url.split('/')
+            for one_part in parts:
+                if str(facebook_page_id) in one_part:
+                    reassembled_url += str(facebook_page_id) + '/'
+                else:
+                    reassembled_url += str(one_part) + '/'
+        else:
+            reassembled_url = facebook_full_graph_url
+    else:
+        reassembled_url = facebook_full_graph_url
+
+    if reassembled_url.endswith("//"):
+        reassembled_url = reassembled_url[:-1]
+    if reassembled_url.endswith("//"):
+        reassembled_url = reassembled_url[:-1]
+    return reassembled_url
+
+
 def extract_twitter_handle_from_text_string(twitter_text_string):
     """
 
@@ -1327,6 +1369,9 @@ def generate_voter_device_id():
     # We do not currently check that this device_id is already in the database because it is such a large number space
     return new_device_id
 
+
+def list_intersection(list1, list2):
+    return list(set(list1) & set(list2))
 
 def positive_value_exists(value):
     """

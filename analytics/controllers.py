@@ -139,10 +139,8 @@ def process_one_analytics_batch_process_augment_with_election_id(batch_process, 
         except Exception as e:
             status += "NUMBER_OF_ROWS_BEING_REVIEWED_NOT_SAVED " + str(e) + " "
 
-    candidate_cache = {}
-    candidate_ids_visiting_other_elections = []
+    candidate_election_cache = {}
     origin_elections_reviewed = []
-    office_we_vote_ids_visiting_other_elections = []
     measure_cache = {}
     analytics_updated_count = 0
     number_of_rows_successfully_reviewed = 0
@@ -150,16 +148,12 @@ def process_one_analytics_batch_process_augment_with_election_id(batch_process, 
         retrieve_results = augment_analytics_action_with_election_id_one_voter(
             voter_we_vote_id,
             analytics_date_as_integer=batch_process.analytics_date_as_integer,
-            candidate_cache=candidate_cache,
-            candidate_ids_visiting_other_elections=candidate_ids_visiting_other_elections,
+            candidate_election_cache=candidate_election_cache,
             origin_elections_reviewed=origin_elections_reviewed,
-            office_we_vote_ids_visiting_other_elections=office_we_vote_ids_visiting_other_elections,
             measure_cache=measure_cache,
         )
-        candidate_cache = retrieve_results['candidate_cache']
-        candidate_ids_visiting_other_elections = retrieve_results['candidate_ids_visiting_other_elections']
+        candidate_election_cache = retrieve_results['candidate_election_cache']
         origin_elections_reviewed = retrieve_results['origin_elections_reviewed']
-        office_we_vote_ids_visiting_other_elections = retrieve_results['office_we_vote_ids_visiting_other_elections']
         measure_cache = retrieve_results['measure_cache']
 
         status += retrieve_results['status']
@@ -352,10 +346,8 @@ def process_one_analytics_batch_process_augment_with_first_visit(batch_process, 
 
 def augment_analytics_action_with_election_id_one_voter(
         voter_we_vote_id, analytics_date_as_integer=0,
-        candidate_cache={},
-        candidate_ids_visiting_other_elections=[],
+        candidate_election_cache={},
         origin_elections_reviewed=[],
-        office_we_vote_ids_visiting_other_elections=[],
         measure_cache={}):
     success = True
     status = ""
@@ -372,49 +364,24 @@ def augment_analytics_action_with_election_id_one_voter(
 
     # First loop through and assign election for candidates and measures associated with specific election
     analytics_manager = AnalyticsManager()
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateCampaignManager()
     contest_measure_manager = ContestMeasureManager()
-    contest_office_manager = ContestOfficeManager()
     for analytics_action in voter_history_list:
         analysis_success = True
         if positive_value_exists(analytics_action.ballot_item_we_vote_id) \
                 and not positive_value_exists(analytics_action.google_civic_election_id):
             if "cand" in analytics_action.ballot_item_we_vote_id:
-                # If we are looking at a candidate without a google_civic_election_id
-                candidate_found = False
-                candidate_campaign_google_civic_election_id = 0
-                if analytics_action.ballot_item_we_vote_id in candidate_ids_visiting_other_elections:
-                    # If here, it means that the google_civic_election_id for this candidate doesn't necessarily
-                    #  match the election the voter is actually looking at, so we don't want to risk it
-                    pass
-                elif analytics_action.ballot_item_we_vote_id in candidate_cache:
-                    candidate_found = True
-                    candidate_campaign = candidate_cache[analytics_action.ballot_item_we_vote_id]
-                    candidate_campaign_google_civic_election_id = candidate_campaign.google_civic_election_id
+                # If we are looking at a candidate without a google_civic_election_id...
+                if analytics_action.ballot_item_we_vote_id in candidate_election_cache:
+                    candidate_campaign_google_civic_election_id = \
+                        candidate_election_cache[analytics_action.ballot_item_we_vote_id]
                 else:
-                    results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
-                        analytics_action.ballot_item_we_vote_id)
-                    if results['candidate_campaign_found']:
-                        candidate_campaign = results['candidate_campaign']
-                        if candidate_campaign.google_civic_election_id not in origin_elections_reviewed:
-                            # Find the office_we_vote_ids that originate from this election
-                            # (origin_google_civic_election_id) and
-                            # "visit" other elections (host_google_civic_election_id). If this candidate's origin
-                            # is another election, do not use its google_civic_election_id for the analytics update
-                            # use the google_civic_election_id in the candidate_campaign if it from a previous election
-                            new_office_we_vote_ids = \
-                                contest_office_manager.fetch_office_visiting_list_we_vote_ids_from_origin_list(
-                                    origin_google_civic_election_id_list=[candidate_campaign.google_civic_election_id])
-                            origin_elections_reviewed.append(candidate_campaign.google_civic_election_id)
-                            for office_we_vote_id in new_office_we_vote_ids:
-                                office_we_vote_ids_visiting_other_elections.append(office_we_vote_id)
-                        if candidate_campaign.contest_office_we_vote_id in office_we_vote_ids_visiting_other_elections:
-                            candidate_ids_visiting_other_elections.append(analytics_action.ballot_item_we_vote_id)
-                        else:
-                            candidate_cache[analytics_action.ballot_item_we_vote_id] = candidate_campaign
-                            candidate_found = True
-                            candidate_campaign_google_civic_election_id = candidate_campaign.google_civic_election_id
-                if candidate_found and positive_value_exists(candidate_campaign_google_civic_election_id):
+                    candidate_campaign_google_civic_election_id = \
+                        candidate_manager.fetch_next_upcoming_election_id_for_candidate(
+                            analytics_action.ballot_item_we_vote_id)
+                    candidate_election_cache[analytics_action.ballot_item_we_vote_id] = \
+                        candidate_campaign_google_civic_election_id
+                if positive_value_exists(candidate_campaign_google_civic_election_id):
                     try:
                         analytics_action.google_civic_election_id = candidate_campaign_google_civic_election_id
                         analytics_action.save()
@@ -518,10 +485,8 @@ def augment_analytics_action_with_election_id_one_voter(
         'success': success,
         'status': status,
         'analytics_updated_count': analytics_updated_count,
-        'candidate_cache': candidate_cache,
-        'candidate_ids_visiting_other_elections': candidate_ids_visiting_other_elections,
+        'candidate_election_cache': candidate_election_cache,
         'origin_elections_reviewed': origin_elections_reviewed,
-        'office_we_vote_ids_visiting_other_elections': office_we_vote_ids_visiting_other_elections,
         'measure_cache': measure_cache,
     }
     return results
@@ -543,33 +508,26 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
         status += "COULD_NOT_RETRIEVE_ANALYTICS_FOR_VOTER-gte=starting_analytics_action: " + str(e) + " "
 
     # First loop through and assign election for candidates and measures associated with specific election
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateCampaignManager()
     contest_measure_manager = ContestMeasureManager()
-    candidate_found_list = []
-    candidate_cache = {}
+    candidate_election_cache = {}
     measure_found_list = []
     measure_cache = {}
     for analytics_action in voter_history_list:
         if positive_value_exists(analytics_action.ballot_item_we_vote_id) \
                 and not positive_value_exists(analytics_action.google_civic_election_id):
             if "cand" in analytics_action.ballot_item_we_vote_id:
-                # If we are looking at a candidate without a google_civic_election_id
-                candidate_found = False
-                candidate_campaign_google_civic_election_id = 0
-                if analytics_action.ballot_item_we_vote_id in candidate_found_list:
-                    candidate_found = True
-                    candidate_campaign = candidate_cache[analytics_action.ballot_item_we_vote_id]
-                    candidate_campaign_google_civic_election_id = candidate_campaign.google_civic_election_id
+                # If we are looking at a candidate without a google_civic_election_id...
+                if analytics_action.ballot_item_we_vote_id in candidate_election_cache:
+                    candidate_campaign_google_civic_election_id = \
+                        candidate_election_cache[analytics_action.ballot_item_we_vote_id]
                 else:
-                    results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
-                        analytics_action.ballot_item_we_vote_id)
-                    if results['candidate_campaign_found']:
-                        candidate_campaign = results['candidate_campaign']
-                        candidate_cache[analytics_action.ballot_item_we_vote_id] = candidate_campaign
-                        candidate_found_list.append(analytics_action.ballot_item_we_vote_id)
-                        candidate_found = True
-                        candidate_campaign_google_civic_election_id = candidate_campaign.google_civic_election_id
-                if candidate_found and positive_value_exists(candidate_campaign_google_civic_election_id):
+                    candidate_campaign_google_civic_election_id = \
+                        candidate_manager.fetch_next_upcoming_election_id_for_candidate(
+                            analytics_action.ballot_item_we_vote_id)
+                    candidate_election_cache[analytics_action.ballot_item_we_vote_id] = \
+                        candidate_campaign_google_civic_election_id
+                if positive_value_exists(candidate_campaign_google_civic_election_id):
                     try:
                         analytics_action.google_civic_election_id = candidate_campaign_google_civic_election_id
                         analytics_action.save()

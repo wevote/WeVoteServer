@@ -623,14 +623,15 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
         ballot_returned_list_manager = BallotReturnedListManager()
 
         if positive_value_exists(refresh_ballot_returned):
-            limit_polling_locations_retrieved = 111  # Odd number so we can find it with search - formerly 250
+            limit_polling_locations_retrieved = 125  # Odd number so we can find it with search - formerly 250
         else:
             limit_polling_locations_retrieved = 0
 
         # Retrieve polling locations already in ballot_returned table
         if positive_value_exists(is_national_election) and positive_value_exists(state_code):
             results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
-                google_civic_election_id=google_civic_election_id, state_code=state_code,
+                google_civic_election_id=google_civic_election_id,
+                state_code=state_code,
                 limit=limit_polling_locations_retrieved,
                 date_last_updated_should_not_exceed=date_last_updated_should_not_exceed,
             )
@@ -665,7 +666,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
 
             # Randomly change the sort order so we over time load different polling locations (before timeout)
             random_sorting = random.randint(1, 5)
-            first_retrieve_limit = 111  # Odd number so we can find it with search - formerly 250
+            first_retrieve_limit = 125  # Odd number so we can find it with search - formerly 250
             # first_retrieve_limit = 10  # For Testing
             if random_sorting == 1:
                 # Ordering by "line1" creates a bit of (locational) random order
@@ -748,6 +749,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
 
     # If here, we assume we have already retrieved races for this election, and now we want to
     # put ballot items for this location onto a ballot
+    existing_offices_by_election_dict = {}
     existing_office_objects_dict = {}
     existing_candidate_objects_dict = {}
     existing_measure_objects_dict = {}
@@ -810,6 +812,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                 polling_location=polling_location,
                 state_code=state_code,
                 batch_set_id=batch_set_id,
+                existing_offices_by_election_dict=existing_offices_by_election_dict,
                 existing_office_objects_dict=existing_office_objects_dict,
                 existing_candidate_objects_dict=existing_candidate_objects_dict,
                 existing_measure_objects_dict=existing_measure_objects_dict,
@@ -823,6 +826,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
             if len(status) < 1024:
                 status += one_ballot_results['status']
 
+            existing_offices_by_election_dict = one_ballot_results['existing_offices_by_election_dict']
             existing_office_objects_dict = one_ballot_results['existing_office_objects_dict']
             existing_candidate_objects_dict = one_ballot_results['existing_candidate_objects_dict']
             existing_measure_objects_dict = one_ballot_results['existing_measure_objects_dict']
@@ -838,6 +842,9 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
         status += "CANNOT_CALL_RETRIEVE_BECAUSE_OF_ERRORS [retrieve_ballot_items_from_polling_location_api_v4] "
     retrieve_row_count = ballots_retrieved
 
+    existing_offices_found = 0
+    if google_civic_election_id in existing_offices_by_election_dict:
+        existing_offices_found = len(existing_offices_by_election_dict[google_civic_election_id])
     existing_offices_found = len(existing_office_objects_dict)
     existing_candidates_found = len(existing_candidate_objects_dict)
     existing_measures_found = len(existing_measure_objects_dict)
@@ -1007,7 +1014,7 @@ def refresh_ballotpedia_ballots_for_voters_api_v4_internal_view(
     #     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
     ballot_returned_list_manager = BallotReturnedListManager()
-    limit_voters_retrieved = 111  # Odd number so we can find it with search - formerly 250
+    limit_voters_retrieved = 125  # Odd number so we can find it with search - formerly 250
 
     # Retrieve voter_id entries from ballot_returned table, from oldest to newest
     if positive_value_exists(is_national_election) and positive_value_exists(state_code):
@@ -1054,6 +1061,7 @@ def refresh_ballotpedia_ballots_for_voters_api_v4_internal_view(
 
     # If here, we assume we have already retrieved races for this election, and now we want to
     # put ballot items for this location onto a ballot
+    existing_offices_by_election_dict = {}
     existing_office_objects_dict = {}
     existing_candidate_objects_dict = {}
     existing_measure_objects_dict = {}
@@ -1110,6 +1118,7 @@ def refresh_ballotpedia_ballots_for_voters_api_v4_internal_view(
             ballot_returned=ballot_returned,
             state_code=state_code,
             batch_set_id=batch_set_id,
+            existing_offices_by_election_dict=existing_offices_by_election_dict,
             existing_office_objects_dict=existing_office_objects_dict,
             existing_candidate_objects_dict=existing_candidate_objects_dict,
             existing_measure_objects_dict=existing_measure_objects_dict,
@@ -1124,6 +1133,7 @@ def refresh_ballotpedia_ballots_for_voters_api_v4_internal_view(
         if len(status) < 1024:
             status += one_ballot_results['status']
 
+        existing_offices_by_election_dict = one_ballot_results['existing_offices_by_election_dict']
         existing_office_objects_dict = one_ballot_results['existing_office_objects_dict']
         existing_candidate_objects_dict = one_ballot_results['existing_candidate_objects_dict']
         existing_measure_objects_dict = one_ballot_results['existing_measure_objects_dict']
@@ -1136,6 +1146,9 @@ def refresh_ballotpedia_ballots_for_voters_api_v4_internal_view(
         else:
             ballots_not_retrieved += 1
 
+    existing_offices_found = 0
+    if google_civic_election_id in existing_offices_by_election_dict:
+        existing_offices_found = len(existing_offices_by_election_dict[google_civic_election_id])
     existing_offices_found = len(existing_office_objects_dict)
     existing_candidates_found = len(existing_candidate_objects_dict)
     existing_measures_found = len(existing_measure_objects_dict)

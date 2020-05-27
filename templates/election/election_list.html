@@ -26,7 +26,7 @@
   <a href="{% url 'election:elections_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
     Retrieve All Elections from Master API Server <span class="glyphicon glyphicon-new-window"></span></a> (Meta information only)
   &nbsp;&nbsp;&nbsp;
-  <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&refresh_states=1">
+  <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&refresh_states=1&show_all_elections=1">
     Refresh States</a>
 </p>
 

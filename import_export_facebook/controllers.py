@@ -14,7 +14,7 @@ import urllib.request
 from urllib.error import HTTPError
 from voter.models import VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions import extract_and_replace_facebook_page_id, is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -832,12 +832,14 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
             'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'
            }
 
+    attempt_to_retrieve_by_page_id = False
     try:
         graphapi_url = graphapi_url.replace("http://", "https://")
         graphapi_url = graphapi_url.replace("www.facebook.com", "graph.facebook.com")
         graphapi_url = graphapi_url.strip()
         if not graphapi_url.endswith("/"):
             graphapi_url += "/"
+
         graphapi_url += "picture?type=large"
         logger.info("API call: " + graphapi_url)
         request = urllib.request.Request(graphapi_url, None, headers)
@@ -846,28 +848,68 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
         if http_response_code is 200:
             photo_url = response.url
             success = True
-            status += "FINISHED_QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE "
+            status += "FINISHED_QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE1 "
         else:
             logger.error("get_facebook_photo_url_from_graphapi, failed to read url: " + graphapi_url +
                          "  , username must be an alias for this to work")
             success = False
-            status += "QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE_FAILED "
+            status += "QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE_FAILED1 "
 
     except timeout:
-        status += "CANDIDATE_QUERYING_GRAPHAPI_TIMEOUT_ERROR "
+        status += "CANDIDATE_QUERYING_GRAPHAPI_TIMEOUT_ERROR1 "
         success = False
     except HTTPError as http_error:
         # HTTP Error 404: Not Found
         http_response_code = http_error.code
+        attempt_to_retrieve_by_page_id = True
         success = True
     except IOError as error_instance:
         error_message = error_instance
-        status += "QUERYING_GRAPHAPI_IO_ERROR: {error_message}".format(error_message=error_message)
+        status += "QUERYING_GRAPHAPI_IO_ERROR1: {error_message}".format(error_message=error_message)
         success = False
     except Exception as error_instance:
         error_message = error_instance
-        status += "QUERYING_GRAPHAPI_GENERAL_EXCEPTION_ERROR: {error_message}".format(error_message=error_message)
+        status += "QUERYING_GRAPHAPI_GENERAL_EXCEPTION_ERROR1: {error_message}".format(error_message=error_message)
         success = False
+
+    if attempt_to_retrieve_by_page_id:
+        try:
+            graphapi_url = facebook_candidate_url.replace("http://", "https://")
+            graphapi_url = graphapi_url.replace("www.facebook.com", "graph.facebook.com")
+            graphapi_url = graphapi_url.strip()
+            if not graphapi_url.endswith("/"):
+                graphapi_url += "/"
+            graphapi_url = extract_and_replace_facebook_page_id(graphapi_url)
+            graphapi_url += "picture?type=large"
+            logger.info("API call: " + graphapi_url)
+            request = urllib.request.Request(graphapi_url, None, headers)
+            response = urllib.request.urlopen(request, timeout=10)
+            http_response_code = response.code
+            if http_response_code is 200:
+                photo_url = response.url
+                success = True
+                status += "FINISHED_QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE2 "
+            else:
+                logger.error("get_facebook_photo_url_from_graphapi, failed to read url: " + graphapi_url +
+                             "  , username must be an alias for this to work")
+                success = False
+                status += "QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE_FAILED2 "
+
+        except timeout:
+            status += "CANDIDATE_QUERYING_GRAPHAPI_TIMEOUT_ERROR2 "
+            success = False
+        except HTTPError as http_error:
+            # HTTP Error 404: Not Found
+            http_response_code = http_error.code
+            success = True
+        except IOError as error_instance:
+            error_message = error_instance
+            status += "QUERYING_GRAPHAPI_IO_ERROR2: {error_message}".format(error_message=error_message)
+            success = False
+        except Exception as error_instance:
+            error_message = error_instance
+            status += "QUERYING_GRAPHAPI_GENERAL_EXCEPTION_ERROR2: {error_message}".format(error_message=error_message)
+            success = False
 
     results = {
         'status':               status,

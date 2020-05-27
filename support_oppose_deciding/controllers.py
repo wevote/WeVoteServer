@@ -347,16 +347,15 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
 
     follow_organization_list_manager = FollowOrganizationList()
     return_we_vote_id = True
-    read_only = True
     organizations_followed_by_voter_by_we_vote_id = \
         follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
-            voter_id, return_we_vote_id, read_only=read_only)
+            voter_id, return_we_vote_id, read_only=True)
 
     # Get a list of all candidates and measures from this election (in the active election)
     ballot_item_list_manager = BallotItemListManager()
     if positive_value_exists(google_civic_election_id):
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
-            voter_id, google_civic_election_id, read_only)
+            voter_id, google_civic_election_id, read_only=True)
         status += results['status']
         ballot_item_list = results['ballot_item_list']
     else:
@@ -376,7 +375,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
             return json_data
 
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
-            voter_id, google_civic_election_id_local_scope, read_only)
+            voter_id, google_civic_election_id_local_scope, read_only=True)
         status += results['status']
         ballot_item_list = results['ballot_item_list']
         google_civic_election_id = google_civic_election_id_local_scope
@@ -399,7 +398,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
         # Retrieve all positions for each ballot item
         if one_ballot_item.is_contest_office():
             results = candidate_list_object.retrieve_all_candidates_for_office(
-                0, one_ballot_item.contest_office_we_vote_id, read_only)
+                office_we_vote_id=one_ballot_item.contest_office_we_vote_id, read_only=True)
             success = results['success']
             candidate_list = results['candidate_list']
 

@@ -1069,18 +1069,17 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         handle_record_not_found_exception(e, logger=logger)
         organization_on_stage_found = False
 
+    candidate_list_manager = CandidateCampaignListManager()
     if not organization_on_stage_found:
         messages.add_message(request, messages.ERROR,
                              'Could not find organization when trying to retrieve positions.')
         return HttpResponseRedirect(reverse('organization:organization_list', args=()))
     else:
-        office_visiting_list_we_vote_ids = []
-        if positive_value_exists(google_civic_election_id):
-            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                host_google_civic_election_id_list=[google_civic_election_id])
-        elif len(google_civic_election_id_list):
-            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                host_google_civic_election_id_list=google_civic_election_id_list)
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list)
+        if not positive_value_exists(results['success']):
+            status += results['status']
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
         try:
             public_position_query = PositionEntered.objects.all()
@@ -1090,11 +1089,11 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             if positive_value_exists(google_civic_election_id):
                 public_position_query = public_position_query\
                     .filter(Q(google_civic_election_id=google_civic_election_id) |
-                            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+                            Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
             elif len(google_civic_election_id_list):
                 public_position_query = public_position_query\
                     .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
-                            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+                            Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
             public_position_query = public_position_query.order_by('-id')
             public_position_list = list(public_position_query)
 
@@ -1105,11 +1104,11 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             if positive_value_exists(google_civic_election_id):
                 friends_only_position_query = friends_only_position_query\
                     .filter(Q(google_civic_election_id=google_civic_election_id) |
-                            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+                            Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
             elif len(google_civic_election_id_list):
                 friends_only_position_query = friends_only_position_query\
                     .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
-                            Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
+                            Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
             friends_only_position_query = friends_only_position_query.order_by('-id')
             friends_only_position_list = list(friends_only_position_query)
 

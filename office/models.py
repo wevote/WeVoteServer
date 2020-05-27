@@ -229,11 +229,13 @@ class ContestOfficeManager(models.Model):
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id, maplight_id)
 
-    def retrieve_contest_office_from_ballotpedia_race_id(self, ballotpedia_race_id, read_only=False):
+    def retrieve_contest_office_from_ballotpedia_race_id(
+            self, ballotpedia_race_id, google_civic_election_id, read_only=False):
         contest_office_id = 0
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id,
                                                               ballotpedia_race_id=ballotpedia_race_id,
+                                                              google_civic_election_id=google_civic_election_id,
                                                               read_only=read_only)
 
     def retrieve_contest_office_from_ballotpedia_office_id(self, ballotpedia_office_id, google_civic_election_id):
@@ -852,14 +854,18 @@ class ContestOfficeManager(models.Model):
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 contest_office_found = True
                 status += "RETRIEVE_OFFICE_FOUND_BY_MAPLIGHT_ID "
-            elif positive_value_exists(ballotpedia_race_id):
+            elif positive_value_exists(ballotpedia_race_id) and positive_value_exists(google_civic_election_id):
                 ballotpedia_race_id_integer = convert_to_int(ballotpedia_race_id)
                 if positive_value_exists(read_only):
                     contest_office_on_stage = ContestOffice.objects.using('readonly').get(
-                        ballotpedia_race_id=ballotpedia_race_id_integer)
+                        ballotpedia_race_id=ballotpedia_race_id_integer,
+                        google_civic_election_id=google_civic_election_id,
+                    )
                 else:
                     contest_office_on_stage = ContestOffice.objects.get(
-                        ballotpedia_race_id=ballotpedia_race_id_integer)
+                        ballotpedia_race_id=ballotpedia_race_id_integer,
+                        google_civic_election_id=google_civic_election_id,
+                    )
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 contest_office_found = True
@@ -1207,14 +1213,7 @@ class ContestOfficeListManager(models.Model):
         try:
             office_queryset = ContestOffice.objects.using('readonly').all()
             if positive_value_exists(google_civic_election_id):
-                if ignore_office_visiting_list:
-                    office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
-                else:
-                    office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                        host_google_civic_election_id_list=[google_civic_election_id])
-                    office_queryset = office_queryset.filter(
-                        Q(google_civic_election_id=google_civic_election_id) |
-                        Q(we_vote_id__in=office_visiting_list_we_vote_ids))
+                office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(state_code):
                 office_queryset = office_queryset.filter(state_code__iexact=state_code)
 
@@ -1268,11 +1267,7 @@ class ContestOfficeListManager(models.Model):
             else:
                 office_queryset = ContestOffice.objects.all()
             if positive_value_exists(google_civic_election_id):
-                office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                    host_google_civic_election_id_list=[google_civic_election_id])
-                office_queryset = office_queryset.filter(
-                    Q(google_civic_election_id=google_civic_election_id) |
-                    Q(we_vote_id__in=office_visiting_list_we_vote_ids))
+                office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
             elif len(retrieve_from_this_office_we_vote_id_list) == 0:
                 status += "RETRIEVE_OFFICES-REQUIRES_GOOGLE_CIVIC_ELECTION_ID_OR_OFFICE_LIST "
                 results = {
@@ -1355,11 +1350,7 @@ class ContestOfficeListManager(models.Model):
 
         try:
             office_queryset = ContestOffice.objects.all()
-            office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-                host_google_civic_election_id_list=[google_civic_election_id])
-            office_queryset = office_queryset.filter(
-                Q(google_civic_election_id=google_civic_election_id) |
-                Q(we_vote_id__in=office_visiting_list_we_vote_ids))
+            office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
             office_queryset = office_queryset.filter(office_name__iexact=office_name)  # Case doesn't matter
             if positive_value_exists(state_code):
                 office_queryset = office_queryset.filter(state_code__iexact=state_code)  # Case doesn't matter
@@ -1709,6 +1700,7 @@ class ContestOfficeVisitingOtherElection(models.Model):
     """
     Some races, like the Presidential, are the same across many different states or elections.
     With this table, we can allow certain offices to "visit" other elections
+    2020-05-22 We are deprecating this in favor of CandidateToOfficeLink
     """
     contest_office_we_vote_id = models.CharField(
         verbose_name="contest office we are tracking", max_length=255, null=True, unique=False)

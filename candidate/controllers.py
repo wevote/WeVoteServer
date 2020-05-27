@@ -165,6 +165,19 @@ def candidates_import_from_master_server(request, google_civic_election_id='', s
         import_results = candidates_import_from_structured_json(filtered_structured_json)
         import_results['duplicates_removed'] = duplicates_removed
 
+    import2_results, structured_json = process_request_from_master(
+        request, "Loading Candidate to Office Links from We Vote Master servers",
+        "https://api.wevoteusa.org/apis/v1/candidateToOfficeLinkSyncOut/",
+        {
+            "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+            "google_civic_election_id": str(google_civic_election_id),
+            "state_code": state_code,
+        }
+    )
+
+    if import2_results['success']:
+        import2_results = candidate_to_office_link_import_from_structured_json(structured_json)
+
     return import_results
 
 
@@ -521,7 +534,7 @@ def move_candidates_to_another_office(from_contest_office_id, from_contest_offic
     # We search on both from_office_id and from_office_we_vote_id in case there is some data that needs
     # to be healed
     all_candidates_results = candidate_campaign_list_manager.retrieve_all_candidates_for_office(
-        from_contest_office_id, from_contest_office_we_vote_id)
+        office_we_vote_id=from_contest_office_we_vote_id)
     from_candidate_list = all_candidates_results['candidate_list']
     for from_candidate_entry in from_candidate_list:
         try:
@@ -795,6 +808,54 @@ def candidates_import_from_structured_json(structured_json):
     return candidates_results
 
 
+def candidate_to_office_link_import_from_structured_json(structured_json):
+    candidate_campaign_manager = CandidateCampaignManager()
+    entries_saved = 0
+    entries_updated = 0
+    entries_not_processed = 0
+    for one_candidate in structured_json:
+        candidate_we_vote_id = one_candidate['candidate_we_vote_id'] if 'candidate_we_vote_id' in one_candidate else ''
+        contest_office_we_vote_id = \
+            one_candidate['contest_office_we_vote_id'] if 'contest_office_we_vote_id' in one_candidate else ''
+        google_civic_election_id = \
+            one_candidate['google_civic_election_id'] if 'google_civic_election_id' in one_candidate else ''
+        state_code = one_candidate['state_code'] if 'state_code' in one_candidate else ''
+        if positive_value_exists(candidate_we_vote_id) \
+                and positive_value_exists(contest_office_we_vote_id) \
+                and positive_value_exists(google_civic_election_id):
+            results = candidate_campaign_manager.get_or_create_candidate_to_office_link(
+                candidate_we_vote_id,
+                contest_office_we_vote_id,
+                google_civic_election_id,
+                state_code)
+        else:
+            entries_not_processed += 1
+            results = {
+                'success': False,
+                'status': 'Required value missing, cannot update or create'
+            }
+
+        if results['success']:
+            if results['new_candidate_to_office_link_created']:
+                entries_saved += 1
+            else:
+                entries_updated += 1
+
+        processed = entries_not_processed + entries_saved + entries_updated
+        if not processed % 10000:
+            print("... candidate to office link processed for update/create: " + str(processed) +
+                  " of " + str(len(structured_json)))
+
+    entries_results = {
+        'success':          True,
+        'status':           "CANDIDATE_TO_OFFICE_IMPORT_PROCESS_COMPLETE",
+        'saved':            entries_saved,
+        'updated':          entries_updated,
+        'not_processed':    entries_not_processed,
+    }
+    return entries_results
+
+
 def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidateRetrieve
     """
     Used by the api
@@ -899,7 +960,7 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def candidates_retrieve_for_api(office_id, office_we_vote_id):  # candidatesRetrieve
+def candidates_retrieve_for_api(office_id=0, office_we_vote_id=''):  # candidatesRetrieve
     """
     Used by the api
     :param office_id:
@@ -926,7 +987,9 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):  # candidatesRetr
     google_civic_election_id = 0
     try:
         candidate_list_object = CandidateCampaignListManager()
-        results = candidate_list_object.retrieve_all_candidates_for_office(office_id, office_we_vote_id)
+        results = candidate_list_object.retrieve_all_candidates_for_office(
+            office_id=office_id,
+            office_we_vote_id=office_we_vote_id)
         success = results['success']
         status = results['status']
         candidate_list = results['candidate_list']
@@ -968,11 +1031,11 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):  # candidatesRetr
                 'candidate_photo_url_tiny':     candidate_campaign.we_vote_hosted_profile_image_url_tiny,
                 'candidate_url':                candidate_campaign.candidate_url,
                 'candidate_contact_form_url':   candidate_campaign.candidate_contact_form_url,
-                'contest_office_id':            candidate_campaign.contest_office_id,
-                'contest_office_name':          candidate_campaign.contest_office_name,
-                'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
+                'contest_office_id':            candidate_campaign.contest_office_id,  # Deprecate
+                'contest_office_name':          candidate_campaign.contest_office_name,  # Deprecate
+                'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,  # Deprecate
                 'facebook_url':                 candidate_campaign.facebook_url,
-                'google_civic_election_id':     candidate_campaign.google_civic_election_id,
+                'google_civic_election_id':     candidate_campaign.google_civic_election_id,  # Deprecate
                 'kind_of_ballot_item':          CANDIDATE,
                 'maplight_id':                  candidate_campaign.maplight_id,
                 'ocd_division_id':              candidate_campaign.ocd_division_id,
@@ -990,6 +1053,7 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):  # candidatesRetr
                 'withdrawal_date':              wdate,
             }
             candidates_to_display.append(one_candidate.copy())
+            # Deprecate all of these
             # Capture the office_we_vote_id and google_civic_election_id so we can return
             if not positive_value_exists(office_id) and candidate_campaign.contest_office_id:
                 office_id = candidate_campaign.contest_office_id
@@ -1006,9 +1070,9 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):  # candidatesRetr
     json_data = {
         'status':                   status,
         'success':                  success,
-        'contest_office_id':        office_id,
-        'contest_office_we_vote_id': office_we_vote_id,
-        'google_civic_election_id': google_civic_election_id,
+        'contest_office_id':        office_id,  # Deprecate
+        'contest_office_we_vote_id': office_we_vote_id,  # Deprecate
+        'google_civic_election_id': google_civic_election_id,  # Deprecate
         'candidate_list':           candidates_to_display,
     }
 

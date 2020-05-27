@@ -406,7 +406,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
                     if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
                         contest_office_we_vote_ids_already_on_ballot.append(one_ballot_item.contest_office_we_vote_id)
                         candidate_results = candidate_campaign_list_manager.retrieve_all_candidates_for_office(
-                            0, one_ballot_item.contest_office_we_vote_id)
+                            office_we_vote_id=one_ballot_item.contest_office_we_vote_id)
                         if candidate_results['candidate_list_found']:
                             candidate_list = candidate_results['candidate_list']
                             for one_candidate in candidate_list:
@@ -423,7 +423,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
                     if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
                         contest_office_we_vote_ids_already_on_ballot.append(one_ballot_item.contest_office_we_vote_id)
                         candidate_results = candidate_campaign_list_manager.retrieve_all_candidates_for_office(
-                            0, one_ballot_item.contest_office_we_vote_id)
+                            office_we_vote_id=one_ballot_item.contest_office_we_vote_id)
                         if candidate_results['candidate_list_found']:
                             candidate_list = candidate_results['candidate_list']
                             for one_candidate in candidate_list:

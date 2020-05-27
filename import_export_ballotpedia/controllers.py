@@ -758,6 +758,7 @@ def retrieve_ballot_items_from_polling_location_api_v4(
         polling_location=None,
         state_code="",
         batch_set_id=0,
+        existing_offices_by_election_dict={},
         existing_office_objects_dict={},
         existing_candidate_objects_dict={},
         existing_measure_objects_dict={},
@@ -774,6 +775,7 @@ def retrieve_ballot_items_from_polling_location_api_v4(
             'success': False,
             'status': "Error: Missing election id",
             'batch_header_id':  batch_header_id,
+            'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_office_objects_dict': existing_office_objects_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
             'existing_measure_objects_dict': existing_measure_objects_dict,
@@ -788,6 +790,7 @@ def retrieve_ballot_items_from_polling_location_api_v4(
             'success': False,
             'status': "Error: Missing polling location we vote id and polling_location_object",
             'batch_header_id':  batch_header_id,
+            'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_office_objects_dict': existing_office_objects_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
             'existing_measure_objects_dict': existing_measure_objects_dict,
@@ -815,6 +818,7 @@ def retrieve_ballot_items_from_polling_location_api_v4(
                 'success': success,
                 'status': status,
                 'batch_header_id': batch_header_id,
+                'existing_offices_by_election_dict': existing_offices_by_election_dict,
                 'existing_office_objects_dict': existing_office_objects_dict,
                 'existing_candidate_objects_dict': existing_candidate_objects_dict,
                 'existing_measure_objects_dict': existing_measure_objects_dict,
@@ -855,6 +859,7 @@ def retrieve_ballot_items_from_polling_location_api_v4(
                     'success': success,
                     'status': status,
                     'batch_header_id': batch_header_id,
+                    'existing_offices_by_election_dict': existing_offices_by_election_dict,
                     'existing_office_objects_dict': existing_office_objects_dict,
                     'existing_candidate_objects_dict': existing_candidate_objects_dict,
                     'existing_measure_objects_dict': existing_measure_objects_dict,
@@ -902,6 +907,7 @@ def retrieve_ballot_items_from_polling_location_api_v4(
                 state_code=state_code,
                 polling_location_we_vote_id=polling_location_we_vote_id,
                 election_day_text=election_day_text,
+                existing_offices_by_election_dict=existing_offices_by_election_dict,
                 existing_office_objects_dict=existing_office_objects_dict,
                 existing_candidate_objects_dict=existing_candidate_objects_dict,
                 existing_measure_objects_dict=existing_measure_objects_dict,
@@ -911,6 +917,7 @@ def retrieve_ballot_items_from_polling_location_api_v4(
                 )
             status += groom_results['status']
             ballot_item_dict_list = groom_results['ballot_item_dict_list']
+            existing_offices_by_election_dict = groom_results['existing_offices_by_election_dict']
             existing_office_objects_dict = groom_results['existing_office_objects_dict']
             existing_candidate_objects_dict = groom_results['existing_candidate_objects_dict']
             existing_measure_objects_dict = groom_results['existing_measure_objects_dict']
@@ -958,6 +965,7 @@ def retrieve_ballot_items_from_polling_location_api_v4(
         'success': success,
         'status': status,
         'batch_header_id': batch_header_id,
+        'existing_offices_by_election_dict': existing_offices_by_election_dict,
         'existing_office_objects_dict': existing_office_objects_dict,
         'existing_candidate_objects_dict': existing_candidate_objects_dict,
         'existing_measure_objects_dict': existing_measure_objects_dict,
@@ -974,6 +982,7 @@ def retrieve_ballot_items_for_one_voter_api_v4(
         ballot_returned=None,
         state_code="",
         batch_set_id=0,
+        existing_offices_by_election_dict={},
         existing_office_objects_dict={},
         existing_candidate_objects_dict={},
         existing_measure_objects_dict={},
@@ -989,6 +998,7 @@ def retrieve_ballot_items_for_one_voter_api_v4(
         results = {
             'success': success,
             'status': status,
+            'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_office_objects_dict': existing_office_objects_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
             'existing_measure_objects_dict': existing_measure_objects_dict,
@@ -1004,6 +1014,7 @@ def retrieve_ballot_items_for_one_voter_api_v4(
         results = {
             'success': success,
             'status': status,
+            'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_office_objects_dict': existing_office_objects_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
             'existing_measure_objects_dict': existing_measure_objects_dict,
@@ -1019,6 +1030,7 @@ def retrieve_ballot_items_for_one_voter_api_v4(
         results = {
             'success': success,
             'status': status,
+            'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_office_objects_dict': existing_office_objects_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
             'existing_measure_objects_dict': existing_measure_objects_dict,
@@ -1053,6 +1065,7 @@ def retrieve_ballot_items_for_one_voter_api_v4(
         results = {
             'success': success,
             'status': status,
+            'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_office_objects_dict': existing_office_objects_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
             'existing_measure_objects_dict': existing_measure_objects_dict,
@@ -1102,6 +1115,7 @@ def retrieve_ballot_items_for_one_voter_api_v4(
                 'success': success,
                 'status': status,
                 'batch_header_id': batch_header_id,
+                'existing_offices_by_election_dict': existing_offices_by_election_dict,
                 'existing_office_objects_dict': existing_office_objects_dict,
                 'existing_candidate_objects_dict': existing_candidate_objects_dict,
                 'existing_measure_objects_dict': existing_measure_objects_dict,
@@ -1149,6 +1163,7 @@ def retrieve_ballot_items_for_one_voter_api_v4(
             state_code=state_code,
             voter_id=ballot_returned.voter_id,
             election_day_text=election_day_text,
+            existing_offices_by_election_dict=existing_offices_by_election_dict,
             existing_office_objects_dict=existing_office_objects_dict,
             existing_candidate_objects_dict=existing_candidate_objects_dict,
             existing_measure_objects_dict=existing_measure_objects_dict,
@@ -1158,6 +1173,7 @@ def retrieve_ballot_items_for_one_voter_api_v4(
             )
         status += groom_results['status']
         ballot_item_dict_list = groom_results['ballot_item_dict_list']
+        existing_offices_by_election_dict = groom_results['existing_offices_by_election_dict']
         existing_office_objects_dict = groom_results['existing_office_objects_dict']
         existing_candidate_objects_dict = groom_results['existing_candidate_objects_dict']
         existing_measure_objects_dict = groom_results['existing_measure_objects_dict']
@@ -1189,6 +1205,7 @@ def retrieve_ballot_items_for_one_voter_api_v4(
     results = {
         'success': success,
         'status': status,
+        'existing_offices_by_election_dict': existing_offices_by_election_dict,
         'existing_office_objects_dict': existing_office_objects_dict,
         'existing_candidate_objects_dict': existing_candidate_objects_dict,
         'existing_measure_objects_dict': existing_measure_objects_dict,
@@ -1878,6 +1895,7 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
                                                  election_day_text='',
                                                  voter_id=0,
                                                  existing_office_objects_dict={},
+                                                 existing_offices_by_election_dict={},
                                                  existing_candidate_objects_dict={},
                                                  existing_measure_objects_dict={},
                                                  new_office_we_vote_ids_list=[],
@@ -1959,41 +1977,27 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
                             number_of_seats = one_race_json['number_of_seats']
 
                     # Check to see if this is a new office or if we have any new data
+                    if google_civic_election_id not in existing_offices_by_election_dict:
+                        existing_offices_by_election_dict[google_civic_election_id] = {}
                     if positive_value_exists(ballotpedia_race_id):
-                        if ballotpedia_race_id in existing_office_objects_dict:
-                            contest_office = existing_office_objects_dict[ballotpedia_race_id]
+                        if ballotpedia_race_id in existing_offices_by_election_dict[google_civic_election_id]:
+                            contest_office = \
+                                existing_offices_by_election_dict[google_civic_election_id][ballotpedia_race_id]
                             contest_office_we_vote_id = contest_office.we_vote_id
                             contest_office_id = contest_office.id
                             office_name = contest_office.office_name
                         else:
                             office_results = contest_office_manager.retrieve_contest_office_from_ballotpedia_race_id(
                                 ballotpedia_race_id=ballotpedia_race_id,
+                                google_civic_election_id=google_civic_election_id,
                                 read_only=True)
                             if office_results['contest_office_found']:
                                 contest_office = office_results['contest_office']
                                 contest_office_we_vote_id = contest_office.we_vote_id
                                 contest_office_id = contest_office.id
                                 office_name = contest_office.office_name
-                                if convert_to_int(contest_office.google_civic_election_id) != \
-                                        convert_to_int(google_civic_election_id):
-                                    # We need to record that his office (and all positions under it) came from
-                                    #  another election
-                                    origin_google_civic_election_id = 0
-                                    try:
-                                        origin_google_civic_election_id = \
-                                            convert_to_int(contest_office.google_civic_election_id)
-                                    except Exception as e:
-                                        status += "ORIGIN_GOOGLE_CIVIC_ELECTION_ID: " + str(e) + " "
-                                    visiting_results = contest_office_manager.update_or_create_visiting_link(
-                                        contest_office_we_vote_id=contest_office_we_vote_id,
-                                        ballotpedia_race_id=ballotpedia_race_id,
-                                        host_google_civic_election_id=google_civic_election_id,
-                                        origin_google_civic_election_id=origin_google_civic_election_id,
-                                    )
-                                    if not visiting_results['success']:
-                                        status += visiting_results['status']
-
-                                existing_office_objects_dict[ballotpedia_race_id] = contest_office
+                                existing_offices_by_election_dict[google_civic_election_id][ballotpedia_race_id] = \
+                                    contest_office
                                 # In the future, we will want to look for updated data to save
                             elif office_results['MultipleObjectsReturned']:
                                 status += "MORE_THAN_ONE_OFFICE_WITH_SAME_BALLOTPEDIA_RACE_ID: " \
@@ -2058,6 +2062,10 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
                                 contest_office = create_results['contest_office']
                                 contest_office_id = contest_office.id
                                 contest_office_we_vote_id = contest_office.we_vote_id
+
+                                existing_offices_by_election_dict[google_civic_election_id][ballotpedia_race_id] = \
+                                    contest_office
+
                                 generated_ballot_order += 1
                                 office_json = {
                                     'ballot_item_display_name': contest_office.office_name,
@@ -2203,6 +2211,7 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
                                         candidate_campaign_we_vote_id = candidate_campaign.we_vote_id
                                         if candidate_campaign_we_vote_id not in new_candidate_we_vote_ids_list:
                                             new_candidate_we_vote_ids_list.append(candidate_campaign_we_vote_id)
+                                        existing_candidate_objects_dict[ballotpedia_candidate_id] = candidate_campaign
 
                                     if new_candidate_created and save_ballotpedia_image:
                                         cache_results = cache_master_and_resized_image(
@@ -2235,6 +2244,13 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
                                     #         politician_manager.update_politician_details_from_candidate(
                                     #             candidate_campaign)
 
+                                # Now make sure we have a CandidateToOfficeLink
+                                if positive_value_exists(candidate_campaign_we_vote_id):
+                                    results = candidate_manager.get_or_create_candidate_to_office_link(
+                                        candidate_we_vote_id=candidate_campaign_we_vote_id,
+                                        contest_office_we_vote_id=contest_office_we_vote_id,
+                                        google_civic_election_id=google_civic_election_id,
+                                        state_code=state_code)
             if 'ballot_measures' in one_district_json and positive_value_exists(one_district_json['ballot_measures']):
                 ballot_measures_json_list = one_district_json['ballot_measures']
                 for measure_dict in ballot_measures_json_list:
@@ -2357,6 +2373,7 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
         'google_civic_election_id':             google_civic_election_id,
         'ballot_item_dict_list':                ballot_item_dict_list,
         'existing_office_objects_dict':         existing_office_objects_dict,
+        'existing_offices_by_election_dict':    existing_offices_by_election_dict,
         'existing_candidate_objects_dict':      existing_candidate_objects_dict,
         'existing_measure_objects_dict':        existing_measure_objects_dict,
         'new_office_we_vote_ids_list':          new_office_we_vote_ids_list,
@@ -2827,24 +2844,24 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api_v4(
         status += 'MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH_FOR_ELECTION_ID '
         success = False
         results = {
-            'success': success,
-            'status': status,
-            'voter_device_id': voter_device_id,
-            'google_civic_election_id': google_civic_election_id,
-            'state_code': state_code,
-            'election_day_text': election_day_text,
-            'election_description_text': election_description_text,
-            'election_data_retrieved': election_data_retrieved,
+            'success':                      success,
+            'status':                       status,
+            'voter_device_id':              voter_device_id,
+            'google_civic_election_id':     google_civic_election_id,
+            'state_code':                   state_code,
+            'election_day_text':            election_day_text,
+            'election_description_text':    election_description_text,
+            'election_data_retrieved':      election_data_retrieved,
             'text_for_map_search':          text_for_map_search,
             'original_text_city':           original_text_city,
             'original_text_state':          original_text_state,
             'original_text_zip':            original_text_zip,
-            'polling_location_retrieved': polling_location_retrieved,
-            'ballot_returned_found': ballot_returned_found,
+            'polling_location_retrieved':   polling_location_retrieved,
+            'ballot_returned_found':        ballot_returned_found,
             'ballot_location_display_name': ballot_location_display_name,
-            'ballot_location_shortcut': ballot_location_shortcut,
-            'ballot_returned': ballot_returned,
-            'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
+            'ballot_location_shortcut':     ballot_location_shortcut,
+            'ballot_returned':              ballot_returned,
+            'ballot_returned_we_vote_id':   ballot_returned_we_vote_id,
         }
         return results
 
@@ -2882,24 +2899,24 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api_v4(
 
     if not lat_long_found:
         results = {
-            'success': success,
-            'status': status,
-            'voter_device_id': voter_device_id,
-            'google_civic_election_id': google_civic_election_id,
-            'state_code': state_code,
-            'election_day_text': election_day_text,
-            'election_description_text': election_description_text,
-            'election_data_retrieved': election_data_retrieved,
+            'success':                      success,
+            'status':                       status,
+            'voter_device_id':              voter_device_id,
+            'google_civic_election_id':     google_civic_election_id,
+            'state_code':                   state_code,
+            'election_day_text':            election_day_text,
+            'election_description_text':    election_description_text,
+            'election_data_retrieved':      election_data_retrieved,
             'text_for_map_search':          text_for_map_search,
             'original_text_city':           original_text_city,
             'original_text_state':          original_text_state,
             'original_text_zip':            original_text_zip,
-            'polling_location_retrieved': polling_location_retrieved,
-            'ballot_returned_found': ballot_returned_found,
+            'polling_location_retrieved':   polling_location_retrieved,
+            'ballot_returned_found':        ballot_returned_found,
             'ballot_location_display_name': ballot_location_display_name,
-            'ballot_location_shortcut': ballot_location_shortcut,
-            'ballot_returned': ballot_returned,
-            'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
+            'ballot_location_shortcut':     ballot_location_shortcut,
+            'ballot_returned':              ballot_returned,
+            'ballot_returned_we_vote_id':   ballot_returned_we_vote_id,
         }
         return results
 
@@ -3072,7 +3089,7 @@ def retrieve_one_ballot_from_ballotpedia_api_v4(latitude, longitude, google_civi
         return results
 
     election_day_text = ""
-
+    election_name = ""
     try:
         election_on_stage = Election.objects.using('readonly').get(google_civic_election_id=google_civic_election_id)
         election_day_text = election_on_stage.election_day_text
@@ -3145,8 +3162,10 @@ def retrieve_one_ballot_from_ballotpedia_api_v4(latitude, longitude, google_civi
                                                              ballotpedia_election_id=0)
 
         groom_results = groom_and_store_sample_ballot_results_api_v4(
-            structured_json, google_civic_election_id=google_civic_election_id,
-            state_code=state_code, voter_id=voter_id,
+            structured_json,
+            google_civic_election_id=google_civic_election_id,
+            state_code=state_code,
+            voter_id=voter_id,
             election_day_text=election_day_text,
         )
         status += groom_results['status']

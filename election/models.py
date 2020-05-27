@@ -184,6 +184,17 @@ class ElectionManager(models.Model):
             last_integer = 1000000
         return last_integer
 
+    def fetch_google_civic_election_id_from_list(self, google_civic_election_id_list):
+        try:
+            election_query = Election.objects.all()
+            election_query = election_query.order_by('election_day_text')
+            election_query = election_query.filter(google_civic_election_id__in=google_civic_election_id_list)
+            election = election_query[:1]
+            return election.google_civic_election_id
+        except Exception as e:
+            pass
+        return 0
+
     def update_or_create_election(
             self, google_civic_election_id, election_name, election_day_text, ocd_division_id,
             ballotpedia_election_id=None, ballotpedia_kind_of_election=None, candidate_photos_finished=None,
@@ -466,7 +477,7 @@ class ElectionManager(models.Model):
                     upcoming_google_civic_election_id_list.append(one_election.google_civic_election_id)
         else:
             status += results['status']
-            # success = results['success']
+            success = results['success']
 
         # If a state code IS included, then the above retrieve_upcoming_elections will have missed the national election
         if positive_value_exists(limit_to_this_state_code):
@@ -480,6 +491,7 @@ class ElectionManager(models.Model):
                         upcoming_google_civic_election_id_list.append(one_election.google_civic_election_id)
             else:
                 status += results['status']
+                success = results['success']
 
         upcoming_google_civic_election_id_list_found = len(upcoming_google_civic_election_id_list)
 

@@ -31,9 +31,11 @@
         <strong>{{ election.election_name }} - {{ office.google_civic_election_id }}, <span class="u-no-break">{{ election.election_day_text }}</span></strong>
         {% for other_election in contest_office_visiting_election_list %}
           <br />
+          <span style="text-decoration: line-through;">
           Linked to:
           <strong>{{ other_election.election_name }} - {{ other_election.google_civic_election_id }}, <span class="u-no-break">{{ other_election.election_day_text }}</span></strong>
           (<a href="{% url 'office:delete_office_visiting_process' %}?office_id={{ office.id }}&office_we_vote_id={{ office.we_vote_id }}&host_google_civic_election_id={{ other_election.google_civic_election_id }}">delete link</a>)
+          </span>
         {% endfor %}
       </td>
     </tr>
