@@ -93,10 +93,12 @@ def convert_candidate_endorsement_list_light_to_possible_endorsement_list(endors
     for one_endorsement in endorsement_list_light:
         if not positive_value_exists(one_endorsement['ballot_item_display_name']):
             continue
+        google_civic_election_id = one_endorsement['google_civic_election_id'] \
+            if 'google_civic_election_id' in one_endorsement else ''
         possible_endorsement = {
             'ballot_item_name': one_endorsement['ballot_item_display_name'],
             'candidate_we_vote_id': one_endorsement['candidate_we_vote_id'],
-            'google_civic_election_id': one_endorsement['google_civic_election_id'],
+            'google_civic_election_id': google_civic_election_id,
             'measure_we_vote_id': one_endorsement['measure_we_vote_id'],
             'more_info_url': "",
             'organization_we_vote_id': "",
