@@ -23,7 +23,10 @@ from exception.models import handle_exception
 from import_export_batches.controllers_batch_process import \
     schedule_retrieve_ballotpedia_ballots_for_polling_locations_api_v4, \
     schedule_refresh_ballotpedia_ballots_for_voters_api_v4
-from import_export_batches.models import BatchSet, BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS
+from import_export_batches.models import BatchProcessManager, BatchSet, \
+    BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, \
+    REFRESH_BALLOT_ITEMS_FROM_VOTERS, RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
+
 from polling_location.models import PollingLocation
 import random
 from voter.models import voter_has_authority
@@ -468,6 +471,81 @@ def retrieve_ballotpedia_candidates_by_district_from_api_view(request):
         # Go to the office listing page
         return HttpResponseRedirect(reverse('office:office_list', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id))
+
+
+@login_required
+def retrieve_ballotpedia_ballots_for_entire_election_api_v4_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code_list = []
+    status = ''
+    batch_process_manager = BatchProcessManager()
+
+    if not positive_value_exists(google_civic_election_id):
+        status += "GOOGLE_CIVIC_ELECTION_ID_MISSING "
+        messages.add_message(request, messages.INFO, status)
+        return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()))
+
+    # Retrieve list of states in this election, and then loop through each state
+    election_manager = ElectionManager()
+    election_results = election_manager.retrieve_election(google_civic_election_id)
+    if election_results['election_found']:
+        election = election_results['election']
+        state_code_list = election.state_code_list()
+        status += "STATE_CODE_LIST: " + str(state_code_list) + " "
+
+    if not positive_value_exists(len(state_code_list)):
+        status += "STATE_CODE_LIST_MISSING "
+        messages.add_message(request, messages.INFO, status)
+        return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()))
+
+    for state_code in state_code_list:
+        # Refresh based on polling locations
+        if batch_process_manager.is_batch_process_currently_scheduled(
+                google_civic_election_id=google_civic_election_id,
+                state_code=state_code,
+                kind_of_process=REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS):
+            status += "(" + str(state_code) + ")-ALREADY_SCHEDULED_REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS "
+        else:
+            results = schedule_retrieve_ballotpedia_ballots_for_polling_locations_api_v4(
+                google_civic_election_id=google_civic_election_id,
+                state_code=state_code,
+                refresh_ballot_returned=True)
+            if not positive_value_exists(results['success']):
+                status += results['status']
+
+        # Refresh based on voter's who requested their own address
+        if batch_process_manager.is_batch_process_currently_scheduled(
+                google_civic_election_id=google_civic_election_id,
+                state_code=state_code,
+                kind_of_process=REFRESH_BALLOT_ITEMS_FROM_VOTERS):
+            status += "(" + str(state_code) + ")-ALREADY_SCHEDULED_REFRESH_BALLOT_ITEMS_FROM_VOTERS "
+        else:
+            results = schedule_refresh_ballotpedia_ballots_for_voters_api_v4(
+                google_civic_election_id=google_civic_election_id,
+                state_code=state_code)
+            if not positive_value_exists(results['success']):
+                status += results['status']
+
+        # Retrieve first time for each polling location
+        if batch_process_manager.is_batch_process_currently_scheduled(
+                google_civic_election_id=google_civic_election_id,
+                state_code=state_code,
+                kind_of_process=RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS):
+            status += "(" + str(state_code) + ")-ALREADY_SCHEDULED_RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS "
+        else:
+            results = schedule_retrieve_ballotpedia_ballots_for_polling_locations_api_v4(
+                google_civic_election_id=google_civic_election_id, state_code=state_code,
+                refresh_ballot_returned=False)
+            if not positive_value_exists(results['success']):
+                status += results['status']
+
+    messages.add_message(request, messages.INFO, status)
+    return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()))
 
 
 @login_required

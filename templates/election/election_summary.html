@@ -349,6 +349,11 @@
 <strong>Steps to Prepare for Election</strong><br />
 
 <ol>
+  <li>
+    <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_entire_election_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}" target="_blank">
+        Ballotpedia: Schedule Batch Processes to Retrieve Ballots for this Election (All States), up to 125 at a time
+        <span class="glyphicon glyphicon-new-window"></span></a>
+  </li>
 {% if not is_national_election or is_national_election and state_code %}
   <li>
     <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1" target="_blank">

@@ -61,42 +61,42 @@ class WeVoteImage(models.Model):
     facebook_user_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
     facebook_profile_image_url_https = models.TextField(
         verbose_name='url of profile image from facebook', blank=True, null=True)
-    facebook_background_image_url_https = models.URLField(verbose_name='url of background image from facebook',
-                                                          blank=True, null=True)
+    facebook_background_image_url_https = models.TextField(
+        verbose_name='url of background image from facebook', blank=True, null=True)
     facebook_background_image_offset_x = models.IntegerField(verbose_name="x offset of facebook cover image", default=0,
                                                              null=True, blank=True)
     facebook_background_image_offset_y = models.IntegerField(verbose_name="y offset of facebook cover image", default=0,
                                                              null=True, blank=True)
     maplight_id = models.BigIntegerField(verbose_name="maplight big integer id", null=True, blank=True)
-    maplight_image_url_https = models.URLField(verbose_name='image url from maplight',
-                                               blank=True, null=True)
+    maplight_image_url_https = models.TextField(
+        verbose_name='image url from maplight', blank=True, null=True)
     vote_smart_id = models.BigIntegerField(verbose_name="vote smart big integer id", null=True, blank=True)
-    vote_smart_image_url_https = models.URLField(verbose_name='image url from vote smart',
-                                                 blank=True, null=True)
+    vote_smart_image_url_https = models.TextField(
+        verbose_name='image url from vote smart', blank=True, null=True)
     twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, blank=True)
-    twitter_profile_banner_url_https = models.URLField(verbose_name='profile banner image from twitter',
-                                                       blank=True, null=True)
-    twitter_profile_background_image_url_https = models.URLField(verbose_name='tile-able background from twitter',
-                                                                 blank=True, null=True)
-    twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
+    twitter_profile_banner_url_https = models.TextField(
+        verbose_name='profile banner image from twitter', blank=True, null=True)
+    twitter_profile_background_image_url_https = models.TextField(
+        verbose_name='tile-able background from twitter', blank=True, null=True)
+    twitter_profile_image_url_https = models.TextField(verbose_name='url of logo from twitter', blank=True, null=True)
     issue_image_url_https = models.URLField(verbose_name='url of issue image', blank=True, null=True)
-    ballotpedia_profile_image_url = models.URLField(
-        verbose_name='profile image from ballotpedia', max_length=255, blank=True, null=True)
+    ballotpedia_profile_image_url = models.TextField(
+        verbose_name='profile image from ballotpedia', blank=True, null=True)
     chosen_favicon_image_url_https = models.URLField(verbose_name='org favicon image', blank=True, null=True)
     chosen_logo_image_url_https = models.URLField(verbose_name='org logo image', blank=True, null=True)
     chosen_social_share_master_image_url_https = models.URLField(
         verbose_name='org master share image', blank=True, null=True)
-    linkedin_profile_image_url = models.URLField(verbose_name='profile image from linkedin', blank=True, null=True)
-    wikipedia_profile_image_url = models.URLField(
-        verbose_name='profile image from wikipedia', max_length=255, blank=True, null=True)
-    other_source = models.CharField(verbose_name="other source of image", max_length=255, null=True, blank=True)
-    other_source_image_url = models.URLField(verbose_name='other source url of image', blank=True, null=True)
+    linkedin_profile_image_url = models.TextField(
+        verbose_name='profile image from linkedin', blank=True, null=True)
+    wikipedia_profile_image_url = models.TextField(
+        verbose_name='profile image from wikipedia', blank=True, null=True)
+    other_source = models.TextField(verbose_name="other source of image", null=True, blank=True)
+    other_source_image_url = models.TextField(verbose_name='other source url of image', blank=True, null=True)
     source_image_still_valid = models.BooleanField(verbose_name="is the url of source image still valid", default=False)
     image_height = models.BigIntegerField(verbose_name="height of image in pixel", null=True, blank=True)
     image_width = models.BigIntegerField(verbose_name="width of image in pixel", null=True, blank=True)
-    we_vote_image_url = models.URLField(verbose_name="url of image on AWS", blank=True, null=True)
-    we_vote_image_file_location = models.CharField(verbose_name="image file path on AWS", max_length=255,
-                                                   null=True, blank=True)
+    we_vote_image_url = models.TextField(verbose_name="url of image on AWS", blank=True, null=True)
+    we_vote_image_file_location = models.TextField(verbose_name="image file path on AWS", null=True, blank=True)
     we_vote_parent_image_id = models.BigIntegerField(verbose_name="Local id of parent image", null=True, blank=True)
     date_image_saved = models.DateTimeField(verbose_name="date when image saved on wevote", auto_now_add=True)
     same_day_image_version = models.BigIntegerField(verbose_name="image version on same day", null=True, blank=True)

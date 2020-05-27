@@ -4871,6 +4871,23 @@ class BatchProcessManager(models.Model):
             status += 'FAILED_COUNT_CHECKED_OUT_BATCH_PROCESSES ' + str(e) + ' '
         return batch_process_count
 
+    def is_batch_process_currently_scheduled(
+            self, google_civic_election_id=0, state_code="", kind_of_process=""):
+        status = ""
+        try:
+            batch_process_queryset = BatchProcess.objects.all()
+            batch_process_queryset = batch_process_queryset.filter(google_civic_election_id=google_civic_election_id)
+            batch_process_queryset = batch_process_queryset.filter(state_code=state_code)
+            batch_process_queryset = batch_process_queryset.filter(kind_of_process=kind_of_process)
+            batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+            batch_process_queryset = batch_process_queryset.filter(batch_process_paused=False)
+
+            batch_process_count = batch_process_queryset.count()
+            return positive_value_exists(batch_process_count)
+        except Exception as e:
+            status += 'FAILED_COUNT_IS_BATCH_PROCESS_CURRENTLY_SCHEDULED ' + str(e) + ' '
+            return True
+
     def is_analytics_process_currently_running(self):
         status = ""
         analytics_kind_of_process_list = [
