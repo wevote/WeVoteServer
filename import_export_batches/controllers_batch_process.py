@@ -229,6 +229,12 @@ def batch_process_next_steps():
             # When a batch_process is running, we mark when it was "taken off the shelf" to be worked on.
             #  When the process is complete, we should reset this to "NULL"
             try:
+                # Before saving batch_process, make sure we have the latest version. (For example, it might have been
+                #  paused since it was first retrieved.)
+                batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+                if positive_value_exists(batch_process_results['batch_process_found']):
+                    batch_process = batch_process_results['batch_process']
+
                 batch_process.date_checked_out = None
                 batch_process.save()
             except Exception as e:
@@ -372,6 +378,12 @@ def process_one_analytics_batch_process(batch_process):
 
         # Now free up the batch_process to process in the next loop
         try:
+            # Before saving batch_process, make sure we have the latest version. (For example, it might have been
+            #  paused since it was first retrieved.)
+            batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+            if positive_value_exists(batch_process_results['batch_process_found']):
+                batch_process = batch_process_results['batch_process']
+
             batch_process.date_checked_out = None
             batch_process.save()
             batch_process_manager.create_batch_process_log_entry(
@@ -443,6 +455,12 @@ def process_one_analytics_batch_process(batch_process):
         status += "MISSING_KIND_OF_PROCESS "
 
     try:
+        # Before saving batch_process, make sure we have the latest version. (For example, it might have been
+        #  paused since it was first retrieved.)
+        batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+        if positive_value_exists(batch_process_results['batch_process_found']):
+            batch_process = batch_process_results['batch_process']
+
         if mark_as_completed:
             # Not implemented yet -- mark as completed
             batch_process.date_completed = now()
@@ -486,6 +504,12 @@ def process_one_ballot_item_batch_process(batch_process):
     # When a batch_process is running, we mark when it was "taken off the shelf" to be worked on.
     #  When the process is complete, we should reset this to "NULL"
     try:
+        # Before saving batch_process, make sure we have the latest version. (For example, it might have been
+        #  paused since it was first retrieved.)
+        batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+        if positive_value_exists(batch_process_results['batch_process_found']):
+            batch_process = batch_process_results['batch_process']
+
         batch_process.date_checked_out = now()
         batch_process.save()
     except Exception as e:
@@ -1592,6 +1616,12 @@ def mark_batch_process_as_complete(batch_process=None,
 
     if batch_process:
         try:
+            # Before saving batch_process, make sure we have the latest version. (For example, it might have been
+            #  paused since it was first retrieved.)
+            batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+            if positive_value_exists(batch_process_results['batch_process_found']):
+                batch_process = batch_process_results['batch_process']
+
             batch_process_id = batch_process.id
             if batch_process.date_started is None:
                 batch_process.date_started = now()
