@@ -3125,19 +3125,19 @@ class BallotReturnedListManager(models.Model):
             if not positive_value_exists(polling_location_we_vote_id):
                 status += "POLLING_LOCATION_WE_VOTE_ID-EMPTY "
                 continue
-            status += " " + str(polling_location_we_vote_id) + " "
+            # status += " " + str(polling_location_we_vote_id) + " "
             duplicate_query = BallotReturned.objects.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(state_code):
                 duplicate_query = duplicate_query.filter(state_code__iexact=state_code)
             duplicate_query = duplicate_query.filter(
                 polling_location_we_vote_id=polling_location_we_vote_id)
             duplicate_list = list(duplicate_query)
-            status += "DUP_LIST_COUNT: " + str(len(duplicate_list)) + " "
+            # status += "DUP_LIST_COUNT: " + str(len(duplicate_list)) + " "
             is_first = True
             to_ballot_returned_we_vote_id = ''
             for ballot_returned in duplicate_list:
                 ballot_returned_we_vote_id = ballot_returned.we_vote_id
-                status += " " + str(ballot_returned_we_vote_id) + " "
+                # status += " " + str(ballot_returned_we_vote_id) + " "
                 if is_first:
                     to_ballot_returned_we_vote_id = ballot_returned.we_vote_id
                     is_first = False
@@ -3145,16 +3145,16 @@ class BallotReturnedListManager(models.Model):
                         and positive_value_exists(to_ballot_returned_we_vote_id) \
                         and ballot_returned_we_vote_id != to_ballot_returned_we_vote_id:
                     # Find Voter Ballot Saved entries that are copied from this polling_location
-                    number_query = VoterBallotSaved.objects.filter(
-                        ballot_returned_we_vote_id__iexact=ballot_returned_we_vote_id)
-                    number_updated = number_query.count()
+                    # number_query = VoterBallotSaved.objects.filter(
+                    #     ballot_returned_we_vote_id__iexact=ballot_returned_we_vote_id)
+                    # number_updated = number_query.count()
 
-                    # number_updated = VoterBallotSaved.objects.filter(
-                    #     ballot_returned_we_vote_id__iexact=ballot_returned_we_vote_id)\
-                    #     .update(ballot_returned_we_vote_id=to_ballot_returned_we_vote_id)
+                    number_updated = VoterBallotSaved.objects.filter(
+                        ballot_returned_we_vote_id__iexact=ballot_returned_we_vote_id)\
+                        .update(ballot_returned_we_vote_id=to_ballot_returned_we_vote_id)
                     total_updated += number_updated
                     # If still here, delete the ballot_returned we are looking at
-                    # ballot_returned.delete()
+                    ballot_returned.delete()
 
         results = {
             'success':          success,
