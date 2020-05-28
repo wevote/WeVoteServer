@@ -288,10 +288,10 @@ def candidate_list_view(request):
     candidate_manager = CandidateCampaignManager()
     candidate_campaign_list_manager = CandidateCampaignListManager()
 
-    # positive_value_exists(migrate_to_candidate_link)
-    if positive_value_exists(google_civic_election_id):
+    if positive_value_exists(google_civic_election_id) or positive_value_exists(migrate_to_candidate_link):
         candidate_query = CandidateCampaign.objects.all()
-        candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(google_civic_election_id):
+            candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
         candidate_query = candidate_query.filter(migrated_to_link=False)
         candidate_list = list(candidate_query)
         candidates_migrated = 0
@@ -310,7 +310,8 @@ def candidate_list_view(request):
                 one_candidate.migrated_to_link = True
                 one_candidate.save()
                 candidates_migrated += 1
-        messages.add_message(request, messages.INFO, "candidates_migrated: " + str(candidates_migrated))
+        if positive_value_exists(candidates_migrated):
+            messages.add_message(request, messages.INFO, "candidates_migrated: " + str(candidates_migrated))
 
     google_civic_election_id_list_generated = False
     if positive_value_exists(google_civic_election_id):
