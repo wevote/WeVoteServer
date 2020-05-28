@@ -227,7 +227,8 @@ MEDIA_URL = '/media/'  # Django Cookbook
 MEDIA_ROOT = os.path.join(PROJECT_PATH, "static", "media")  # Django Cookbook
 
 # We want to default to cookie storage of messages so we don't overload our app servers with session data
-MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
+# MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
+MESSAGE_STORAGE = 'django.contrib.messages.storage.fallback.FallbackStorage'
 
 # Default settings described here: http://django-bootstrap3.readthedocs.org/en/latest/settings.html
 BOOTSTRAP3 = {

@@ -107,6 +107,7 @@ def get_one_picture_from_facebook_graphapi(one_candidate, request, remote_reques
 
 @login_required
 def bulk_retrieve_facebook_photos_view(request):
+    number_of_candidates_to_search = 75
     status = ""
     remote_request_history_manager = RemoteRequestHistoryManager()
 
@@ -148,7 +149,6 @@ def bulk_retrieve_facebook_photos_view(request):
         candidate_list_count = candidate_list.count()
 
         # Run Facebook account search and analysis on candidates with a linked or possible Facebook account
-        number_of_candidates_to_search = 100
         current_candidate_index = 0
         while positive_value_exists(number_of_candidates_to_search) \
                 and (current_candidate_index < candidate_list_count):
