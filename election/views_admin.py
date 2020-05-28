@@ -1219,6 +1219,8 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
     election_local_id = convert_to_int(election_local_id)
     ballot_returned_search = request.GET.get('ballot_returned_search', '')
     voter_ballot_saved_search = request.GET.get('voter_ballot_saved_search', '')
+    merge_ballot_returned_duplicates = \
+        positive_value_exists(request.GET.get('merge_ballot_returned_duplicates', False))
 
     election_found = False
     election = Election()
@@ -1281,6 +1283,12 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             state_list_modified[one_state_code] = state_name_modified
 
         sorted_state_list = sorted(state_list_modified.items())
+
+        if positive_value_exists(merge_ballot_returned_duplicates):
+            results = ballot_returned_list_manager.merge_ballot_returned_duplicates(
+                google_civic_election_id=election.google_civic_election_id, state_code=state_code)
+            message_to_print = "MERGE_BALLOT_RETURNED_DUPLICATES: " + str(results['total_updated']) + " "
+            messages.add_message(request, messages.INFO, message_to_print)
 
         limit = 20  # Since this is a summary page, we don't need to show very many ballot_returned entries
         ballot_returned_list_results = ballot_returned_list_manager.retrieve_ballot_returned_list_for_election(

@@ -442,8 +442,13 @@
   </li>
 
   <li>
-  <a href="{% url 'ballot:ballot_items_repair' %}?local_election_id={{ election.id }}&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_from_google=1">
-      Refresh Voter Ballot Items From Google for Voter-specific Addresses</a>
+      <a href="{% url 'election:election_summary' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&merge_ballot_returned_duplicates=1">
+          Find and Merge Ballot Returned Duplicates</a>
+  </li>
+
+  <li>
+      <a href="{% url 'ballot:ballot_items_repair' %}?local_election_id={{ election.id }}&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_from_google=1">
+          Refresh Voter Ballot Items From Google for Voter-specific Addresses</a>
   </li>
 
 {% if election.google_civic_election_id|convert_to_int >= 1000000 %}
