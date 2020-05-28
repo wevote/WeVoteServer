@@ -2531,7 +2531,7 @@ class BallotReturnedManager(models.Model):
                     ballot_returned_found = True
 
             except BallotReturned.MultipleObjectsReturned as e:
-                status += 'MULTIPLE_MATCHING_BALLOT_RETURNED_FOUND '
+                status += 'MULTIPLE_MATCHING_BALLOT_RETURNED_FOUND ' + str(e) + ' '
                 status += 'google_civic_election_id: ' + str(google_civic_election_id) + " "
                 status += 'polling_location_we_vote_id: ' + str(polling_location_we_vote_id) + " "
                 status += 'voter_id: ' + str(voter_id) + " "
@@ -3115,12 +3115,15 @@ class BallotReturnedListManager(models.Model):
         duplicates = duplicate_query.values('polling_location_we_vote_id')\
             .annotate(entry_count=Count('polling_location_we_vote_id'))\
             .filter(entry_count__gt=1)
+        duplicates_count = len(duplicates)
+        status += "DUPLICATES_COUNT: " + str(duplicates_count) + " "
 
         # duplicates = [{'polling_location_we_vote_id': 'wv02ploc54063', 'entry_count': 2}]
         total_updated = 0
         for one_duplicate in duplicates:
             polling_location_we_vote_id = one_duplicate['polling_location_we_vote_id']
             if not positive_value_exists(polling_location_we_vote_id):
+                status += "POLLING_LOCATION_WE_VOTE_ID-EMPTY "
                 continue
             duplicate_query = BallotReturned.objects.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(state_code):
@@ -3128,10 +3131,12 @@ class BallotReturnedListManager(models.Model):
             duplicate_query = duplicate_query.filter(
                 polling_location_we_vote_id__in=polling_location_we_vote_id)
             duplicate_list = list(duplicate_query)
+            status += "DUPLICATE_LIST_COUNT: " + str(len(duplicate_list)) + " "
             is_first = True
             to_ballot_returned_we_vote_id = ''
             for ballot_returned in duplicate_list:
                 ballot_returned_we_vote_id = ballot_returned.we_vote_id
+                status += "BALLOT_RETURNED_WE_VOTE_ID: " + str(ballot_returned_we_vote_id) + " "
                 if is_first:
                     to_ballot_returned_we_vote_id = ballot_returned.we_vote_id
                     is_first = False
