@@ -3125,18 +3125,19 @@ class BallotReturnedListManager(models.Model):
             if not positive_value_exists(polling_location_we_vote_id):
                 status += "POLLING_LOCATION_WE_VOTE_ID-EMPTY "
                 continue
+            status += " " + str(polling_location_we_vote_id) + " "
             duplicate_query = BallotReturned.objects.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(state_code):
                 duplicate_query = duplicate_query.filter(state_code__iexact=state_code)
             duplicate_query = duplicate_query.filter(
-                polling_location_we_vote_id__in=polling_location_we_vote_id)
+                polling_location_we_vote_id=polling_location_we_vote_id)
             duplicate_list = list(duplicate_query)
-            status += "DUPLICATE_LIST_COUNT: " + str(len(duplicate_list)) + " "
+            status += "DUP_LIST_COUNT: " + str(len(duplicate_list)) + " "
             is_first = True
             to_ballot_returned_we_vote_id = ''
             for ballot_returned in duplicate_list:
                 ballot_returned_we_vote_id = ballot_returned.we_vote_id
-                status += "BALLOT_RETURNED_WE_VOTE_ID: " + str(ballot_returned_we_vote_id) + " "
+                status += " " + str(ballot_returned_we_vote_id) + " "
                 if is_first:
                     to_ballot_returned_we_vote_id = ballot_returned.we_vote_id
                     is_first = False
