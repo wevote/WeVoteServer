@@ -2251,6 +2251,12 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
                                         contest_office_we_vote_id=contest_office_we_vote_id,
                                         google_civic_election_id=google_civic_election_id,
                                         state_code=state_code)
+                                    if positive_value_exists(results['success']):
+                                        try:
+                                            candidate_campaign.migrated_to_link = True
+                                            candidate_campaign.save()
+                                        except Exception as e:
+                                            pass
             if 'ballot_measures' in one_district_json and positive_value_exists(one_district_json['ballot_measures']):
                 ballot_measures_json_list = one_district_json['ballot_measures']
                 for measure_dict in ballot_measures_json_list:
