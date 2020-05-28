@@ -3093,6 +3093,70 @@ class BallotReturnedListManager(models.Model):
 
         return 0
 
+    def merge_ballot_returned_duplicates(self, google_civic_election_id=0, state_code=''):
+        status = ''
+        success = True
+
+        if not positive_value_exists(google_civic_election_id):
+            status += "MISSING_GOOGLE_CIVIC_ELECTION_ID "
+            results = {
+                'success':          False,
+                'status':           status,
+                'total_updated':    0,
+            }
+            return results
+
+        # We don't put the following in a try block, because we want it to fail immediately if there is a problem
+
+        # Get a list of all of the polling_location_we_vote_id's that have duplicate entries for this election
+        duplicate_query = BallotReturned.objects.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(state_code):
+            duplicate_query = duplicate_query.filter(state_code__iexact=state_code)
+        duplicates = duplicate_query.values('polling_location_we_vote_id')\
+            .annotate(entry_count=Count('polling_location_we_vote_id'))\
+            .filter(entry_count__gt=1)
+
+        # duplicates = [{'polling_location_we_vote_id': 'wv02ploc54063', 'entry_count': 2}]
+        total_updated = 0
+        for one_duplicate in duplicates:
+            polling_location_we_vote_id = one_duplicate['polling_location_we_vote_id']
+            if not positive_value_exists(polling_location_we_vote_id):
+                continue
+            duplicate_query = BallotReturned.objects.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                duplicate_query = duplicate_query.filter(state_code__iexact=state_code)
+            duplicate_query = duplicate_query.filter(
+                polling_location_we_vote_id__in=polling_location_we_vote_id)
+            duplicate_list = list(duplicate_query)
+            is_first = True
+            to_ballot_returned_we_vote_id = ''
+            for ballot_returned in duplicate_list:
+                ballot_returned_we_vote_id = ballot_returned.we_vote_id
+                if is_first:
+                    to_ballot_returned_we_vote_id = ballot_returned.we_vote_id
+                    is_first = False
+                if positive_value_exists(ballot_returned_we_vote_id) \
+                        and positive_value_exists(to_ballot_returned_we_vote_id) \
+                        and ballot_returned_we_vote_id != to_ballot_returned_we_vote_id:
+                    # Find Voter Ballot Saved entries that are copied from this polling_location
+                    number_query = VoterBallotSaved.objects.filter(
+                        ballot_returned_we_vote_id__iexact=ballot_returned_we_vote_id)
+                    number_updated = number_query.count()
+
+                    # number_updated = VoterBallotSaved.objects.filter(
+                    #     ballot_returned_we_vote_id__iexact=ballot_returned_we_vote_id)\
+                    #     .update(ballot_returned_we_vote_id=to_ballot_returned_we_vote_id)
+                    total_updated += number_updated
+                    # If still here, delete the ballot_returned we are looking at
+                    # ballot_returned.delete()
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'total_updated':    total_updated,
+        }
+        return results
+
     def retrieve_possible_duplicate_ballot_returned(self, google_civic_election_id, normalized_line1, normalized_zip,
                                                     polling_location_we_vote_id):
         ballot_returned_list_objects = []
