@@ -163,6 +163,7 @@ class Election(models.Model):
 
 
 class ElectionManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def fetch_next_local_google_civic_election_id_integer(self):
         highest_id = 0

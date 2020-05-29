@@ -67,6 +67,7 @@ class GoogleSearchUser(models.Model):
     facebook_posts = models.CharField(verbose_name="posts from facebook", max_length=1024, null=True, blank=True)
 
 class GoogleSearchUserManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def __unicode__(self):
         return "TwitterUserManager"

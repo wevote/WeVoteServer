@@ -31,6 +31,7 @@ class PositionLike(models.Model):
 
 
 class PositionLikeManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def __unicode__(self):
         return "PositionLikeManager"
@@ -157,6 +158,7 @@ class PositionLikeManager(models.Model):
 
 class PositionLikeListManager(models.Model):
     """
+    Note: Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     A way to retrieve all of the position_like information
     """
     def retrieve_position_like_list_for_voter(self, voter_id):

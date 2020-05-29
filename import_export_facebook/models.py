@@ -150,6 +150,7 @@ class FacebookFriendsUsingWeVote(models.Model):
 
 
 class FacebookManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     def __unicode__(self):
         return "FacebookManager"
 

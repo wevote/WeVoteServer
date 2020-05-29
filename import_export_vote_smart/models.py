@@ -60,6 +60,8 @@ class VoteSmartApiCounterMonthlySummary(models.Model):
 
 # noinspection PyBroadException
 class VoteSmartApiCounterManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+
     def create_counter_entry(self, kind_of_action, google_civic_election_id=0):
         """
         Create an entry that records that a call to the Vote Smart Api was made.
@@ -124,6 +126,7 @@ class VoteSmartApiCounterManager(models.Model):
 
 
 class VoteSmartCandidateManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def __unicode__(self):
         return "VoteSmartCandidateManager"
@@ -431,6 +434,7 @@ def vote_smart_candidate_bio_object_filter(one_candidate_bio):
 
 
 class VoteSmartOfficialManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def __unicode__(self):
         return "VoteSmartOfficialManager"
@@ -584,6 +588,7 @@ def vote_smart_official_object_filter(one_official):
 
 
 class VoteSmartRatingManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def __unicode__(self):
         return "VoteSmartRatingManager"
@@ -863,6 +868,7 @@ def vote_smart_special_interest_group_filter(special_interest_group):
 
 
 class VoteSmartSpecialInterestGroupManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def __unicode__(self):
         return "VoteSmartSpecialInterestGroupManager"

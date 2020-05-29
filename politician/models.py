@@ -182,6 +182,7 @@ class Politician(models.Model):
 
 
 class PoliticianManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     def __init__(self):
         # TODO Recommend by Hy Carrel
         pass

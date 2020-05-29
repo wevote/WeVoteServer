@@ -97,6 +97,7 @@ INSTALLED_APPS = (
     'admin_tools',
     'analytics',
     'apis_v1',
+    'apple',
     'ballot',
     'bookmark',
     'candidate',

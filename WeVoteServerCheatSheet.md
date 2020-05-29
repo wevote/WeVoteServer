@@ -105,26 +105,22 @@ postgres  13139 stevepodell   10u  IPv6 0x9139afcc016b2ecf      0t0  UDP localho
 postgres  13140 stevepodell   10u  IPv6 0x9139afcc016b2ecf      0t0  UDP localhost:57308->localhost:57308
 (WeVoteServerPy3.7) stevepodell@Steves-MacBook-Pro-32GB-Oct-2018 var % 
 
------------------
+#### Adding a new "app" (directory of Python classes) to the WeVoteServer
 
-(WeVoteServerPy3.7) stevepodell@Steves-MacBook-Pro-32GB-Oct-2018 var % /usr/local/Cellar/postgresql/12.2/bin/pg_ctl -D /usr/local/var/postgres -l logfile start
-pg_ctl: another server might be running; trying to start server anyway
-waiting for server to start..../bin/sh: logfile: Permission denied
- stopped waiting
-pg_ctl: could not start server
-Examine the log output.
-(WeVoteServerPy3.7) stevepodell@Steves-MacBook-Pro-32GB-Oct-2018 var % tail  /usr/local/var/log/postgres.log 
-2020-04-04 09:21:51.288 PDT [1135] LOG:  starting PostgreSQL 12.2 on x86_64-apple-darwin19.3.0, compiled by Apple clang version 11.0.0 (clang-1100.0.33.17), 64-bit
-2020-04-04 09:21:51.289 PDT [1135] LOG:  listening on IPv6 address "::1", port 5432
-2020-04-04 09:21:51.289 PDT [1135] LOG:  listening on IPv4 address "127.0.0.1", port 5432
-2020-04-04 09:21:51.290 PDT [1135] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
-2020-04-04 09:21:51.305 PDT [1204] LOG:  database system was interrupted; last known up at 2020-04-03 21:35:28 PDT
-2020-04-04 09:21:52.069 PDT [1204] LOG:  database system was not properly shut down; automatic recovery in progress
-2020-04-04 09:21:52.077 PDT [1204] LOG:  redo starts at 0/166B300
-2020-04-04 09:21:52.077 PDT [1204] LOG:  invalid record length at 0/166B3E8: wanted 24, got 0
-2020-04-04 09:21:52.077 PDT [1204] LOG:  redo done at 0/166B3B0
-2020-04-04 09:21:52.091 PDT [1135] LOG:  database system is ready to accept connections
-(WeVoteServerPy3.7) stevepodell@Steves-MacBook-Pro-32GB-Oct-2018 var % 
-
-pgadmin4 localhost/5432   postgres/postgres
-```
+For example to add the apple "app" at WeVoteServer/apple
+1) Make the subdirectory, and copy or create preliminary files in the directory
+2) Make sure that there is __init__.py, it can be completely empty. In this example it would be at WeVoteServer/apple/__init__.py
+3) Assuming that the "app" has a database table, create the column layout in the models file in a class that extends "models.Model"
+We have dozens of Manager files and dozens of Model files that have classes that unnecessarily 
+extend 'model.Models' and for each of these classes Django's ORM creates a useless empty table with
+just an id field.  Consider extending 'models.Manager' or in almost all cases the class can be defined without
+extending anything... 'class ClassName:'
+4) Add your new app to the list in INSTALLED_APPS (within WeVoteServer/config/base.py)
+5) Generate the Migrations directory for your app, (in this example it is at WeVoteServer/apple/migrations) by typing in a terminal window ... (substitue your app name for apple!)
+    ```
+     python manage.py makemigrations apple
+    ```
+6) And finally, update the local database with your new table by typing
+    ```
+    python manage.py migrate
+    ```

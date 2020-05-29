@@ -190,6 +190,7 @@ def send_scheduled_sms_via_twilio(sms_scheduled):
 
 
 class SMSManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     def __unicode__(self):
         return "SMSManager"
 
