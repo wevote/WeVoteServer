@@ -66,8 +66,9 @@ def sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name,
         status += "CREATE_APPLE_LINK_MISSING_REQUIRED_VARIABLE_USER_CODE_OR_EMAIL "
         print_to_log(logger=logger, exception_message_optional=status)
         results = {
-            'success': success,
-            'status': status,
+            'success':          success,
+            'status':           status,
+            'voter_we_vote_id': voter_we_vote_id,
         }
         return results
 
@@ -104,9 +105,8 @@ def sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name,
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
-        'success': success,
-        'status': status,
+        'success':          success,
+        'status':           status,
         'voter_we_vote_id': voter_we_vote_id,
     }
     return results
-
