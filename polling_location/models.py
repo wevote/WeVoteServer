@@ -104,6 +104,7 @@ class PollingLocation(models.Model):
 
 
 class PollingLocationManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def update_or_create_polling_location(
             self,
@@ -425,6 +426,7 @@ class PollingLocationManager(models.Model):
 
 
 class PollingLocationListManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def retrieve_duplicate_polling_locations(
             self,

@@ -10,6 +10,9 @@ from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls.static import static
 
+from apis_v1.views import views_apple, views_docs, views_analytics, views_ballot, views_candidate, views_donation, \
+    views_election, views_extension, views_facebook, views_friend, views_issues, views_measure, views_misc, \
+    views_organization, views_pledge_to_vote, views_position, views_task, views_twitter, views_voter, views_voter_guide
 from apis_v1.views import views_docs, views_analytics, views_ballot, views_candidate, views_donation, \
     views_election, views_extension, views_facebook, views_friend, \
     views_issues, views_measure, views_misc, views_organization, \
@@ -60,6 +63,7 @@ urlpatterns = [
     url(r'^electionsSyncOut/', views_election.elections_sync_out_view, name='electionsSyncOutView'),
     url(r'^emailBallotData/', views_ballot.email_ballot_data_view, name='emailBallotDataView'),
     url(r'^facebookDisconnect/', views_facebook.facebook_disconnect_view, name='facebookDisconnectView'),
+    url(r'^appleSignInSave/$', views_apple.sign_in_with_apple_view, name='appleSignInSaveView'),
     url(r'^facebookFriendsAction/', views_facebook.facebook_friends_action_view, name='facebookFriendsActionView'),
     url(r'^friendInvitationByEmailSend/',
         views_friend.friend_invitation_by_email_send_view, name='friendInvitationByEmailSendView'),
@@ -155,6 +159,8 @@ urlpatterns = [
         views_position.position_support_count_for_ballot_item_view, name='positionSupportCountForBallotItemView'),
     url(r'^quickInfoRetrieve/', views_misc.quick_info_retrieve_view, name='quickInfoRetrieveView'),
     url(r'^retrieveIssuesToFollow/', retrieve_issues_to_follow_view, name='retrieveIssuesToFollowView'),
+    url(r'^siteConfigurationRetrieve/',
+        views_organization.site_configuration_retrieve_view, name='siteConfigurationRetrieveView'),
     url(r'^saveAnalyticsAction/', views_analytics.save_analytics_action_view, name='saveAnalyticsActionView'),
     url(r'^searchAll/', views_misc.search_all_view, name='searchAllView'),
     url(r'^sharedItemRetrieve/', views_share.shared_item_retrieve_view, name='sharedItemRetrieveView'),
@@ -311,6 +317,7 @@ urlpatterns = [
     url(r'^docs/electionsRetrieve/$', views_docs.elections_retrieve_doc_view, name='electionsRetrieveDocs'),
     url(r'^docs/electionsSyncOut/$', views_docs.elections_sync_out_doc_view, name='electionsSyncOutDocs'),
     url(r'^docs/facebookDisconnect/$', views_docs.facebook_disconnect_doc_view, name='facebookDisconnectDocs'),
+    url(r'^docs/appleSignInSave/$', views_docs.apple_sign_in_save_doc_view, name='appleSignInSaveDocs'),
     url(r'^docs/emailBallotData/$', views_docs.email_ballot_data_doc_view, name='emailBallotDataDocs'),
     url(r'^docs/facebookFriendsAction/$',
         views_docs.facebook_friends_action_doc_view, name='facebookFriendsActionDocs'),

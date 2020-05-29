@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
 from django.core.validators import RegexValidator
 from datetime import datetime, timedelta
+from apple.models import AppleUser
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_saved_exception
 from import_export_facebook.models import FacebookManager
@@ -990,6 +991,27 @@ class VoterManager(BaseUserManager):
             'voter_list':   voter_list,
         }
         return result
+
+    def retrieve_voter_list_by_name(self, first_name, last_name):
+        """
+        Retrieve list of voters based on name match
+
+        :return result: dictionary with status and list of voters
+        """
+        voter_list = list()
+        status = 'LIST'
+
+        voter_queryset = Voter.objects.all().filter(first_name=first_name).filter(last_name=last_name)
+
+        if voter_queryset.exists():
+            voter_list.extend(voter_queryset)
+
+        result = {
+            'status':       status,
+            'voter_list':   voter_list,
+        }
+        return result
+
 
     def create_voter_with_voter_device_id(self, voter_device_id):
         logger.info("create_voter_with_voter_device_id(voter_device_id)")
@@ -2093,6 +2115,7 @@ class Voter(AbstractBaseUser):
         return ''
 
     def is_signed_in(self):
+        # Can't include signed_in_with_apple here since, the iOS version should be specific to one device
         if self.signed_in_with_email() or self.signed_in_facebook() or self.signed_in_with_sms_phone_number() \
                 or self.signed_in_twitter():
             return True
@@ -2118,6 +2141,14 @@ class Voter(AbstractBaseUser):
             if positive_value_exists(twitter_link_to_voter.twitter_id):
                 return True
         return False
+
+    def signed_in_with_apple(self, voter_device_id):
+        # Signed in with apple is only for iOS under Cordova at this point, and is tied to one voter_device_id
+        try:
+            apple_object = AppleUser.objects.get(voter_device_id__iexact=voter_device_id)
+            return True
+        except AppleUser.DoesNotExist:
+            return False
 
     def signed_in_with_email(self):
         # TODO DALE Consider merging with has_email_with_verified_ownership
@@ -2239,6 +2270,7 @@ class VoterDeviceLinkManager(models.Model):
 
     Since (prior to authentication) every voter_device_id will have its own voter_id record, we merge and delete Voter
     records whenever we can.
+    Note:  Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     """
 
     def __str__(self):              # __unicode__ on Python 2
@@ -2945,6 +2977,7 @@ class VoterAddress(models.Model):
 
 
 class VoterAddressManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def __unicode__(self):
         return "VoterAddressManager"
@@ -3371,6 +3404,7 @@ def voter_setup(request):
 
 
 class VoterMetricsManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def fetch_voter_count_with_sign_in(self):
         return self.fetch_voter_count(

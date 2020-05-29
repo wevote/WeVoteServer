@@ -167,6 +167,7 @@ class AnalyticsAction(models.Model):
 
 
 class AnalyticsCountManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def fetch_ballot_views(self, google_civic_election_id=0, limit_to_one_date_as_integer=0):
         """
@@ -487,6 +488,7 @@ class AnalyticsCountManager(models.Model):
 
 
 class AnalyticsManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def create_action_type1(
             self, action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,

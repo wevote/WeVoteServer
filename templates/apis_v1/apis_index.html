@@ -152,7 +152,7 @@
 
         {###  ###}
         <tr>
-          <td colspan="3"><strong>Twitter, Facebook, Google</strong></td>
+          <td colspan="3"><strong>Twitter, Facebook, Google, Apple</strong></td>
         </tr>
         <tr>
           <td><a href="{% url 'apis_v1:voterFacebookSignInRetrieveDocs' %}">voterFacebookSignInRetrieve</a></td>
@@ -183,6 +183,15 @@
           <td><a href="{% url 'apis_v1:facebookDisconnectDocs' %}">facebookDisconnect</a></td>
           <td></td>
           <td>Disconnect Voter's facebook account from We Vote account.
+          </td>
+        </tr>
+        <tr>
+          <td><a href="{% url 'apis_v1:appleSignInSaveDocs' %}">appleSignInSave</a></td>
+          <td></td>
+          <td>Save the Apple "user" code, returned by the <em>Sign In With Apple</em> api response for a given Apple ID -- the
+            Apple ID is phone owner's email address and password used to sign into iCloud, the App Store, etc.  WeVote
+            never "sees" the Apple ID password, only the "user" code returned by the API and the user's email address
+            (which unfortunately can be an Apple aliased email address).
           </td>
         </tr>
         <tr>

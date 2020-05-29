@@ -932,6 +932,7 @@ class PositionNetworkScore(models.Model):
 
 
 class PositionListManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     # 2018-05 We now have an "is_public_position()" function
     # def add_is_public_position(self, incoming_position_list, is_public_position):
     #     outgoing_position_list = []
@@ -4277,6 +4278,7 @@ class PositionListManager(models.Model):
 
 
 class PositionManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def __unicode__(self):
         return "PositionManager"
@@ -8338,6 +8340,7 @@ class PositionManager(models.Model):
 
 
 class PositionMetricsManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def __unicode__(self):
         return "PositionMetricsManager"

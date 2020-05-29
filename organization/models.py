@@ -611,9 +611,20 @@ class OrganizationManager(models.Manager):
             results = {
                 'success': success,
                 'status': status,
-                'hostname_is_reserved': hostname_is_reserved,
+                'hostname_is_reserved':     hostname_is_reserved,
                 'reserved_domain':          reserved_domain,
                 'reserved_domain_found':    reserved_domain_found,
+            }
+            return results
+
+        if incoming_hostname == 'localhost':
+            status += "INCOMING_HOSTNAME_IS_LOCALHOST "
+            results = {
+                'success': True,
+                'status': True,
+                'hostname_is_reserved': True,
+                'reserved_domain': False,
+                'reserved_domain_found': False,
             }
             return results
 

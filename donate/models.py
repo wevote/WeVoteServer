@@ -272,6 +272,7 @@ class DonationInvoice(models.Model):
 
 
 class DonationManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     @staticmethod
     def create_donate_link_to_voter(stripe_customer_id, voter_we_vote_id):
         """"

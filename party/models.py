@@ -54,6 +54,7 @@ class Party(models.Model):
 
 
 class PartyManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def update_or_create_party(self, party_id_temp='', ctcl_uuid='', party_name='', updated_values={}):
         """

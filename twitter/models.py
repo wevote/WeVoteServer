@@ -151,6 +151,7 @@ class TwitterUser(models.Model):
 
 
 class TwitterUserManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def __unicode__(self):
         return "TwitterUserManager"

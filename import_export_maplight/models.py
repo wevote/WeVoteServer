@@ -37,6 +37,7 @@ class MapLightContestOffice(models.Model):
 
 
 class MapLightContestOfficeManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def __unicode__(self):
         return "MapLightContestOfficeManager"
@@ -132,6 +133,7 @@ class MapLightCandidate(models.Model):
 
 
 class MapLightCandidateManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def __unicode__(self):
         return "MapLightCandidateManager"

@@ -53,6 +53,8 @@ class WeVoteSettingsManager(models.Model):
     """
     Manage all of the site settings
     """
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+
     def fetch_setting(self, setting_name):
         setting_name = setting_name.strip()
         try:
@@ -372,6 +374,7 @@ class RemoteRequestHistory(models.Model):
 
 
 class RemoteRequestHistoryManager(models.Model):
+    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def __unicode__(self):
         return "RemoteRequestHistoryManager"
