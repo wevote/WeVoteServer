@@ -1084,11 +1084,15 @@
                                 ({{ one_batch_row.batch_row_action.contest_office_we_vote_id }})
                             {% endif %}
                         </td>
-                        <td><a href="{% url 'organization:organization_we_vote_id_position_list' one_batch_row.batch_row_action.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                        <td>
+                            {% if one_batch_row.batch_row_action.organization_we_vote_id %}
+                            <a href="{% url 'organization:organization_we_vote_id_position_list' one_batch_row.batch_row_action.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                                target="_blank">
                             {{ one_batch_row.batch_row_action.speaker_display_name|default_if_none:"" }}
                             <span class="glyphicon glyphicon-new-window"></span>
-                            </a></td>
+                            </a>
+                            {% endif %}
+                        </td>
                         <td>{{ one_batch_row.batch_row_action.speaker_twitter_handle|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.stance|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.statement_text|default_if_none:""|truncatechars:125 }}</td>

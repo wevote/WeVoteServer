@@ -37,8 +37,9 @@ from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
     voter_merge_two_accounts_action, voter_photo_save_for_api, voter_retrieve_for_api, voter_sign_out_for_api, \
     voter_split_into_two_accounts_for_api
-from voter.models import BALLOT_ADDRESS, VoterAddress, \
-    VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager, fetch_voter_id_from_voter_we_vote_id
+from voter.models import BALLOT_ADDRESS, fetch_voter_we_vote_id_from_voter_device_link, VoterAddress, \
+    VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager
+
 from voter_guide.controllers import voter_follow_all_organizations_followed_by_organization_for_api
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_maximum_number_to_retrieve_from_request, \
@@ -1092,6 +1093,193 @@ def voter_photo_save_view(request):  # voterPhotoSave
     response = HttpResponse(json.dumps(json_data), content_type='application/json')
 
     return response
+
+
+def voter_plan_list_retrieve_view(request):  # voterPlanListRetrieve
+    """
+    Retrieve voter plans so we can show off examples from other voters
+    :param request:
+    :return:
+    """
+    status = ''
+    voter_plan_list = []
+    voter_manager = VoterManager()
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
+    results = voter_manager.retrieve_voter_plan_list(google_civic_election_id=google_civic_election_id)
+    if not results['success']:
+        status += results['status']
+        status += "RETRIEVE_VOTER_PLAN_LIST_FAILED "
+        json_data = {
+            'status': status,
+            'success': False,
+            'voter_plan_list': voter_plan_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    modified_voter_plan_list = []
+    voter_plan_list = results['voter_plan_list']
+    for voter_plan in voter_plan_list:
+        voter_plan_dict = {
+            'date_entered':             voter_plan.date_entered.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_last_changed':        voter_plan.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'google_civic_election_id': voter_plan.google_civic_election_id,
+            'show_to_public':           voter_plan.show_to_public,
+            'state_code':               voter_plan.state_code,
+            'voter_plan_data_serialized':     voter_plan.voter_plan_data_serialized,
+            'voter_plan_text':          voter_plan.voter_plan_text,
+            'voter_we_vote_id':         voter_plan.voter_we_vote_id,
+        }
+        modified_voter_plan_list.append(voter_plan_dict)
+    json_data = {
+        'status': status,
+        'success': True,
+        'voter_plan_list': modified_voter_plan_list,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_plans_for_voter_retrieve_view(request):  # voterPlansForVoterRetrieve
+    """
+    Retrieve all voter plans for signed in voter
+    :param request:
+    :return:
+    """
+    status = ''
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    voter_we_vote_id = ''
+    voter_plan_list = []
+    voter_manager = VoterManager()
+
+    if positive_value_exists(voter_device_id):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+
+    if not positive_value_exists(voter_we_vote_id):
+        status += "VOTER_PLANS_RETRIEVE_MISSING_VOTER_WE_VOTE_ID "
+        json_data = {
+            'status': status,
+            'success': False,
+            'voter_plan_list': voter_plan_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    results = voter_manager.retrieve_voter_plan_list(voter_we_vote_id=voter_we_vote_id)
+    if not results['success']:
+        status += results['status']
+        status += "RETRIEVE_VOTER_PLAN_LIST_FAILED "
+        json_data = {
+            'status': status,
+            'success': False,
+            'voter_plan_list': voter_plan_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    modified_voter_plan_list = []
+    voter_plan_list = results['voter_plan_list']
+    for voter_plan in voter_plan_list:
+        voter_plan_dict = {
+            'date_entered':             voter_plan.date_entered.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_last_changed':        voter_plan.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'google_civic_election_id': voter_plan.google_civic_election_id,
+            'show_to_public':           voter_plan.show_to_public,
+            'state_code':               voter_plan.state_code,
+            'voter_plan_data_serialized':     voter_plan.voter_plan_data_serialized,
+            'voter_plan_text':          voter_plan.voter_plan_text,
+            'voter_we_vote_id':         voter_plan.voter_we_vote_id,
+        }
+        modified_voter_plan_list.append(voter_plan_dict)
+
+    json_data = {
+        'status': status,
+        'success': True,
+        'voter_plan_list': modified_voter_plan_list,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_plan_save_view(request):  # voterPlanSave
+    """
+    Save current voter plan for this voter
+    :param request:
+    :return:
+    """
+    status = ''
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    show_to_public = positive_value_exists(request.GET.get('show_to_public', False))
+    state_code = request.GET.get('state_code', '')
+    voter_plan_data_serialized = request.GET.get('voter_plan_data_serialized', '')
+    # voter_plan_data_serialized = json.loads(voter_plan_data_serialized)  # Leave as a string
+    voter_plan_text = request.GET.get('voter_plan_text', '')
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    voter_we_vote_id = ''
+    voter_plan_list = []
+    voter_manager = VoterManager()
+
+    if positive_value_exists(voter_device_id):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+
+    if not positive_value_exists(voter_we_vote_id):
+        status += "VOTER_PLAN_SAVE_MISSING_VOTER_WE_VOTE_ID "
+        json_data = {
+            'status': status,
+            'success': False,
+            'voter_plan_list': voter_plan_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    if not positive_value_exists(google_civic_election_id):
+        status += "VOTER_PLAN_SAVE_MISSING_GOOGLE_CIVIC_ELECTION_ID "
+        json_data = {
+            'status': status,
+            'success': False,
+            'voter_plan_list': voter_plan_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    results = voter_manager.create_or_update_voter_plan(
+        voter_we_vote_id=voter_we_vote_id,
+        google_civic_election_id=google_civic_election_id,
+        show_to_public=show_to_public,
+        state_code=state_code,
+        voter_plan_data_serialized=voter_plan_data_serialized,
+        voter_plan_text=voter_plan_text,
+    )
+    if not results['success']:
+        status += results['status']
+        status += "COULD_NOT_SAVE_VOTER_PLAN "
+
+    results = voter_manager.retrieve_voter_plan_list(voter_we_vote_id=voter_we_vote_id)
+    if not results['success']:
+        status += results['status']
+        status += "RETRIEVE_VOTER_PLAN_LIST_FAILED "
+        json_data = {
+            'status': status,
+            'success': False,
+            'voter_plan_list': voter_plan_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    modified_voter_plan_list = []
+    voter_plan_list = results['voter_plan_list']
+    for voter_plan in voter_plan_list:
+        voter_plan_dict = {
+            'date_entered':             voter_plan.date_entered.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_last_changed':        voter_plan.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'google_civic_election_id': voter_plan.google_civic_election_id,
+            'show_to_public':           voter_plan.show_to_public,
+            'state_code':               voter_plan.state_code,
+            'voter_plan_data_serialized':     voter_plan.voter_plan_data_serialized,
+            'voter_plan_text':          voter_plan.voter_plan_text,
+            'voter_we_vote_id':         voter_plan.voter_we_vote_id,
+        }
+        modified_voter_plan_list.append(voter_plan_dict)
+
+    json_data = {
+        'status': status,
+        'success': True,
+        'voter_plan_list': modified_voter_plan_list,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_position_retrieve_view(request):

@@ -104,6 +104,111 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def create_or_update_voter_plan(
+            self,
+            voter_we_vote_id='',
+            google_civic_election_id=0,
+            show_to_public=None,
+            state_code=None,
+            voter_plan_data_serialized=None,
+            voter_plan_text=None):
+        status = ""
+        success = True
+        voter_plan_found = False
+        voter_plan_created = False
+        voter_plan = None
+
+        if positive_value_exists(google_civic_election_id):
+            google_civic_election_id = convert_to_int(google_civic_election_id)
+        else:
+            google_civic_election_id = 0
+        if not positive_value_exists(google_civic_election_id) \
+                or not positive_value_exists(voter_we_vote_id) \
+                or not positive_value_exists(voter_plan_text):
+            status += "CREATE_OR_UPDATE_VOTER_PLAN-MISSING_REQUIRED_VARIABLES "
+            results = {
+                'success':              False,
+                'status':               status,
+                'voter_plan_found':     voter_plan_found,
+                'voter_plan_created':   voter_plan_created,
+                'voter_plan':           None,
+            }
+            return results
+
+        results = self.retrieve_voter_plan_list(
+            google_civic_election_id=google_civic_election_id,
+            voter_we_vote_id=voter_we_vote_id,
+            read_only=False)
+        voter_plan_list = results['voter_plan_list']
+        if positive_value_exists(len(voter_plan_list)):
+            voter_plan = voter_plan_list[0]
+            voter_plan_found = True
+        success = results['success']
+        status += results['status']
+        if not positive_value_exists(success):
+            status += "CREATE_OR_UPDATE_VOTER_PLAN-PROBLEM_RETRIEVING_EXISTING "
+            results = {
+                'success': False,
+                'status': status,
+                'voter_plan_found': voter_plan_found,
+                'voter_plan_created': voter_plan_created,
+                'voter_plan': None,
+            }
+            return results
+
+        if voter_plan_found:
+            try:
+                change_to_save = False
+                if show_to_public is not None:
+                    voter_plan.show_to_public = show_to_public
+                    change_to_save = True
+                if state_code is not None:
+                    voter_plan.state_code = state_code
+                    change_to_save = True
+                if voter_plan_data_serialized is not None:
+                    voter_plan.voter_plan_data_serialized = voter_plan_data_serialized
+                    change_to_save = True
+                if voter_plan_text is not None:
+                    voter_plan.voter_plan_text = voter_plan_text
+                    change_to_save = True
+                if change_to_save:
+                    voter_plan.save()
+                    voter_plan_created = True
+                    success = True
+                    status += "VOTER_PLAN_UPDATED "
+            except Exception as e:
+                voter_plan_created = False
+                voter_plan = None
+                success = False
+                status += "VOTER_PLAN_NOT_UPDATED " + str(e) + " "
+        else:
+            try:
+                voter_plan = VoterPlan.objects.create(
+                    google_civic_election_id=google_civic_election_id,
+                    voter_we_vote_id=voter_we_vote_id,
+                    show_to_public=show_to_public,
+                    state_code=state_code,
+                    voter_plan_data_serialized=voter_plan_data_serialized,
+                    voter_plan_text=voter_plan_text,
+                )
+                voter_plan_created = True
+                voter_plan_found = True
+                status += "VOTER_PLAN_CREATED "
+            except Exception as e:
+                voter_plan_created = False
+                voter_plan = None
+                success = False
+                status += "VOTER_PLAN_NOT_CREATED " + str(e) + " "
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'voter_plan_found':     voter_plan_found,
+            'voter_plan_created':   voter_plan_created,
+            'voter_plan':           voter_plan,
+        }
+        return results
+
     def create_user(self, email=None, username=None, password=None):
         """
         Creates and saves a User with the given email and password.
@@ -1012,6 +1117,38 @@ class VoterManager(BaseUserManager):
         }
         return result
 
+    def retrieve_voter_plan_list(self, google_civic_election_id=0, voter_we_vote_id='', read_only=True):
+        success = True
+        status = ""
+        voter_plan_list = []
+
+        try:
+            if positive_value_exists(read_only):
+                list_query = VoterPlan.objects.using('readonly').all()
+            else:
+                list_query = VoterPlan.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(voter_we_vote_id):
+                list_query = list_query.filter(voter_we_vote_id=voter_we_vote_id)
+            else:
+                list_query = list_query.filter(show_to_public=True)
+            list_query = list_query.order_by('-date_last_changed')
+            voter_plan_list = list_query[:25]
+            voter_plan_list_found = True
+            status += "VOTER_PLAN_LIST_FOUND "
+        except Exception as e:
+            voter_plan_list_found = False
+            status += "VOTER_PLAN_LIST_NOT_FOUND-EXCEPTION: " + str(e) + ' '
+            success = False
+
+        results = {
+            'success': success,
+            'status': status,
+            'voter_plan_list': voter_plan_list,
+            'voter_plan_list_found': voter_plan_list_found,
+        }
+        return results
 
     def create_voter_with_voter_device_id(self, voter_device_id):
         logger.info("create_voter_with_voter_device_id(voter_device_id)")
@@ -3080,7 +3217,7 @@ class VoterAddressManager(models.Model):
         return ballot_map_text
 
     def retrieve_voter_address_list(self, google_civic_election_id=0, voter_id=0):
-        success = False
+        success = True
         status = ""
         voter_address_list = []
 
@@ -3095,7 +3232,8 @@ class VoterAddressManager(models.Model):
             status += "VOTER_ADDRESS_LIST_FOUND "
         except Exception as e:
             voter_address_list_found = False
-            status += "VOTER_ADDRESS_LIST_NOT_FOUND-EXCEPTION "
+            status += "VOTER_ADDRESS_LIST_NOT_FOUND-EXCEPTION: " + str(e) + ' '
+            success = False
 
         results = {
             'success': success,
@@ -3483,3 +3621,21 @@ class VoterMetricsManager(models.Model):
         except Exception as e:
             pass
         return positive_value_exists(count_result)
+
+
+class VoterPlan(models.Model):
+    """
+    One voter's plan for when they will cast their vote for one election.
+    """
+    google_civic_election_id = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=None, null=True, db_index=True)
+    state_code = models.CharField(verbose_name="us state code", max_length=2, null=True)
+    voter_display_name = models.CharField(max_length=255, default=None, null=True)
+    voter_display_city_state = models.CharField(max_length=255, default=None, null=True)
+    voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    voter_plan_data_serialized = models.TextField(null=True, blank=True)
+    voter_plan_text = models.TextField(null=True, blank=True)
+    show_to_public = models.BooleanField(default=False)
+    date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now_add=True, db_index=True)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
+
