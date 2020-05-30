@@ -125,6 +125,16 @@
           <td>Save photo (pulled from Facebook or Twitter) for an existing voter.</td>
         </tr>
         <tr>
+          <td><a href="{% url 'apis_v1:voterPlanListRetrieveDocs' %}">voterPlanListRetrieve</a></td>
+          <td></td>
+          <td>Retrieve public voter plans so we can show off examples from other voters.</td>
+        </tr>
+        <tr>
+          <td><a href="{% url 'apis_v1:voterPlanSaveDocs' %}">voterPlanSave</a></td>
+          <td></td>
+          <td>Save one voter's plan-to-vote (when, where, etc.), and return a list of all previously saved plans for that voter.</td>
+        </tr>
+        <tr>
           <td><a href="{% url 'apis_v1:voterRetrieveDocs' %}">voterRetrieve</a></td>
           <td></td>
           <td>Export key voter data to JSON format</td>

@@ -2996,7 +2996,8 @@ class BallotReturnedListManager(models.Model):
                     if state_code.upper() not in unique_state_code_list:
                         queryset = BallotReturned.objects.using('readonly').all()
                         queryset = queryset.filter(google_civic_election_id=google_civic_election_id)
-                        queryset = queryset.filter(state_code__iexact=state_code)
+                        queryset = queryset.filter(
+                            Q(state_code__iexact=state_code) | Q(normalized_state__iexact=state_code))
                         one_found = queryset[:1]
                         if len(one_found):
                             unique_state_code_list.append(state_code.upper())
