@@ -566,6 +566,70 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
     return results
 
 
+def move_voter_plan_to_another_voter(from_voter, to_voter):
+    status = "MOVE_VOTER_PLAN "
+    success = False
+    entries_moved = 0
+    entries_not_moved = 0
+
+    if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
+            or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
+        status += "MOVE_VOTER_PLAN_MISSING_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'entries_moved': entries_moved,
+            'entries_not_moved': entries_not_moved,
+        }
+        return results
+
+    if from_voter.we_vote_id == to_voter.we_vote_id:
+        status += "MOVE_VOTER_PLAN_TO_ANOTHER_VOTER-from_voter.we_vote_id and to_voter.we_vote_id identical "
+        results = {
+            'status': status,
+            'success': success,
+            'entries_moved': entries_moved,
+            'entries_not_moved': entries_not_moved,
+        }
+        return results
+
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_plan_list(voter_we_vote_id=from_voter.we_vote_id, read_only=False)
+    from_voter_plan_list = results['voter_plan_list']
+
+    results = voter_manager.retrieve_voter_plan_list(voter_we_vote_id=to_voter.we_vote_id, read_only=False)
+    to_voter_plan_list = results['voter_plan_list']
+
+    from_voter_plan_ids_matched_list = []
+    for from_voter_plan in from_voter_plan_list:
+        for to_voter_plan in to_voter_plan_list:
+            if from_voter_plan.google_civic_election_id == to_voter_plan.google_civic_election_id:
+                from_voter_plan_ids_matched_list.append(from_voter_plan.id)
+        if from_voter_plan.id in from_voter_plan_ids_matched_list:
+            # Delete the from_voter_plan since there is already a to_voter_plan
+            try:
+                from_voter_plan.delete()
+            except Exception as e:
+                status += "FAILED_DELETE_VOTER_PLAN: " + str(e) + " "
+        else:
+            # Change the from_voter_we_vote_id to to_voter_we_vote_id
+            try:
+                from_voter_plan.voter_we_vote_id = to_voter.we_vote_id
+                from_voter_plan.save()
+                entries_moved += 1
+            except Exception as e:
+                entries_not_moved += 1
+                status += "FAILED_MOVE_VOTER_PLAN: " + str(e) + " "
+
+    results = {
+        'status': status,
+        'success': success,
+        'entries_moved': entries_moved,
+        'entries_not_moved': entries_not_moved,
+    }
+    return results
+
+
 def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_address,
                       sender_email_with_ownership_verified, one_normalized_raw_email, first_name, last_name,
                       invitation_message, ballot_link, web_app_root_url=''):
@@ -1719,6 +1783,10 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     # Bring over Twitter information
     move_twitter_results = move_twitter_info_to_another_voter(voter, new_owner_voter)
     status += " " + move_twitter_results['status']
+
+    # Bring over the voter's plans to vote
+    move_voter_plan_results = move_voter_plan_to_another_voter(voter, new_owner_voter)
+    status += " " + move_voter_plan_results['status']
 
     # Bring over any donations that have been made in this session by the new_owner_voter to the voter, subscriptions
     # are complicated.  See the comments in the donate/controllers.py
