@@ -56,6 +56,24 @@ ACTION_TWITTER_AUTHENTICATION_EXISTS = 38
 ACTION_EMAIL_AUTHENTICATION_EXISTS = 39
 ACTION_ELECTIONS = 40
 ACTION_ORGANIZATION_STOP_IGNORING = 41
+ACTION_MODAL_VOTER_PLAN = 42
+ACTION_READY_VISIT = 43
+ACTION_SELECT_BALLOT_MODAL = 44
+ACTION_SHARE_BUTTON_COPY = 45
+ACTION_SHARE_BUTTON_EMAIL = 46
+ACTION_SHARE_BUTTON_FACEBOOK = 47
+ACTION_SHARE_BUTTON_FRIENDS = 48
+ACTION_SHARE_BUTTON_TWITTER = 49
+ACTION_SHARE_BALLOT = 50
+ACTION_SHARE_BALLOT_ALL_OPINIONS = 51
+ACTION_SHARE_CANDIDATE = 52
+ACTION_SHARE_CANDIDATE_ALL_OPINIONS = 53
+ACTION_SHARE_MEASURE = 54
+ACTION_SHARE_MEASURE_ALL_OPINIONS = 55
+ACTION_SHARE_OFFICE = 56
+ACTION_SHARE_OFFICE_ALL_OPINIONS = 57
+ACTION_SHARE_READY = 58
+ACTION_SHARE_READY_ALL_OPINIONS = 59
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
@@ -1907,6 +1925,8 @@ def display_action_constant_human_readable(action_constant):
         return "MODAL_SHARE"
     if action_constant == ACTION_MODAL_VOTE:
         return "MODAL_VOTE"
+    if action_constant == ACTION_MODAL_VOTER_PLAN:
+        return "MODAL_VOTER_PLAN"
     if action_constant == ACTION_NETWORK:
         return "NETWORK"
     if action_constant == ACTION_OFFICE:
@@ -1923,6 +1943,40 @@ def display_action_constant_human_readable(action_constant):
         return "ORGANIZATION_STOP_IGNORING"
     if action_constant == ACTION_POSITION_TAKEN:
         return "POSITION_TAKEN"
+    if action_constant == ACTION_READY_VISIT:
+        return "READY_VISIT"
+    if action_constant == ACTION_SELECT_BALLOT_MODAL:
+        return "SELECT_BALLOT_MODAL"
+    if action_constant == ACTION_SHARE_BUTTON_COPY:
+        return "SHARE_BUTTON_COPY"
+    if action_constant == ACTION_SHARE_BUTTON_EMAIL:
+        return "SHARE_BUTTON_EMAIL"
+    if action_constant == ACTION_SHARE_BUTTON_FACEBOOK:
+        return "SHARE_BUTTON_FACEBOOK"
+    if action_constant == ACTION_SHARE_BUTTON_FRIENDS:
+        return "SHARE_BUTTON_FRIENDS"
+    if action_constant == ACTION_SHARE_BUTTON_TWITTER:
+        return "SHARE_BUTTON_TWITTER"
+    if action_constant == ACTION_SHARE_BALLOT:
+        return "SHARE_BALLOT"
+    if action_constant == ACTION_SHARE_BALLOT_ALL_OPINIONS:
+        return "SHARE_BALLOT_ALL_OPINIONS"
+    if action_constant == ACTION_SHARE_CANDIDATE:
+        return "SHARE_CANDIDATE"
+    if action_constant == ACTION_SHARE_CANDIDATE_ALL_OPINIONS:
+        return "SHARE_CANDIDATE_ALL_OPINIONS"
+    if action_constant == ACTION_SHARE_MEASURE:
+        return "SHARE_MEASURE"
+    if action_constant == ACTION_SHARE_MEASURE_ALL_OPINIONS:
+        return "SHARE_MEASURE_ALL_OPINIONS"
+    if action_constant == ACTION_SHARE_OFFICE:
+        return "SHARE_OFFICE"
+    if action_constant == ACTION_SHARE_OFFICE_ALL_OPINIONS:
+        return "SHARE_OFFICE_ALL_OPINIONS"
+    if action_constant == ACTION_SHARE_READY:
+        return "SHARE_READY"
+    if action_constant == ACTION_SHARE_READY_ALL_OPINIONS:
+        return "SHARE_READY_ALL_OPINIONS"
     if action_constant == ACTION_TWITTER_AUTHENTICATION_EXISTS:
         return "TWITTER_AUTHENTICATION_EXISTS"
     if action_constant == ACTION_VOTER_FACEBOOK_AUTH:
