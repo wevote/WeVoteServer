@@ -435,6 +435,13 @@ def office_new_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     state_code = request.GET.get('state_code', "")
 
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.ERROR,
+                             'Could not find election -- required to save office.')
+        url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+                        "&state_code=" + str(state_code)
+        return HttpResponseRedirect(reverse('office:office_list', args=()) + url_variables)
+
     office_list_manager = ContestOfficeListManager()
     updated_office_list = []
     return_list_of_objects = True
@@ -451,6 +458,7 @@ def office_new_view(request):
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'google_civic_election_id': google_civic_election_id,
+        'state_code':               state_code,
         'office_list':              updated_office_list,
     }
     return render(request, 'office/office_edit.html', template_values)

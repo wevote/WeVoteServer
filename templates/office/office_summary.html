@@ -130,7 +130,7 @@
       <br />
       <a href="{% url 'office:office_edit' office.id %}">edit</a><br />
       <br />
-      <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}&contest_office_id={{ office.id }}">
+      <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}&contest_office_id={{ office.id }}&state_code={{ state_code }}">
             Add New Candidate</a>,
       <a href="{% url 'position:refresh_positions_with_contest_office_details_for_election' %}?office_id={{ office.id }}&office_we_vote_id={{ office.we_vote_id }}">
             Refresh Positions</a><br />
@@ -205,9 +205,6 @@
     <p></p>
 {% else %}
     <p>(no candidates found)</p>
-    <p>
-        <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
-    </p>
 {% endif %}
 
 {% if office %}

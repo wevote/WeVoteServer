@@ -105,8 +105,7 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
         {% endif %}
         </select>
         {% if voter_authority.is_admin or voter_authority.is_political_data_manager or voter_authority.is_verified_volunteer %}
-            <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}"
-               target="_blank">Add new candidate</a> (open in new window)
+            <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">To Add New Candidate Start from Office Page</a>,
             <br />
         {% endif %}
     </div>
