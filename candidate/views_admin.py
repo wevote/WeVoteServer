@@ -1152,15 +1152,13 @@ def candidate_edit_process_view(request):
                 messages.add_message(request, messages.ERROR, 'Could not save candidate.')
 
     contest_office_we_vote_id = ''
-    contest_office_name = ''
-    contest_office_state_code = ''
     office_manager = ContestOfficeManager()
+    state_code_from_office = ''
     if positive_value_exists(contest_office_id):
         results = office_manager.retrieve_contest_office_from_id(contest_office_id)
         if results['contest_office_found']:
             contest_office = results['contest_office']
             contest_office_we_vote_id = contest_office.we_vote_id
-            contest_office_name = contest_office.office_name
             state_code_from_office = contest_office.state_code
 
     election_manager = ElectionManager()
