@@ -1656,7 +1656,8 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                                  'nationbuilder.com',
                                  'secure.actblue.com',
                                  'tinyurl.com',
-                                 'twitter.com'):
+                                 'twitter.com',
+                                 'youtube.com'):
                             if organization_website_stripped in all_html_lower_case:
                                 organization_we_vote_ids_list.append(
                                     one_ballot_item_dict['organization_we_vote_id'])
@@ -1757,13 +1758,16 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                         # Remove the http... from the candidate website
                         organization_website_stripped = extract_website_from_url(organization_website)
                         if organization_website_stripped not in \
-                                ('en.wikipedia.org',
+                                ('bit.ly',
+                                 'en.wikipedia.org',
                                  'facebook.com',
                                  'instagram.com',
                                  'linkedin.com',
                                  'nationbuilder.com',
                                  'secure.actblue.com',
-                                 'twitter.com'):
+                                 'tinyurl.com',
+                                 'twitter.com',
+                                 'youtube.com'):
                             if organization_website_stripped in all_html_lower_case:
                                 organization_we_vote_ids_list.append(
                                     one_ballot_item_dict['organization_we_vote_id'])
@@ -1918,7 +1922,8 @@ def organization_endorsements_scanner(endorsement_list_light, text_to_search_low
                              'nationbuilder.com',
                              'secure.actblue.com',
                              'tinyurl.com',
-                             'twitter.com'):
+                             'twitter.com',
+                             'youtube.com'):
                         if ballot_item_website_stripped in text_to_search_lower_case:
                             candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
                             endorsement_list_light_modified.append(one_ballot_item_dict)

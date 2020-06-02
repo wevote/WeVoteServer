@@ -256,7 +256,7 @@
     <a href="{{ current_page_minus_candidate_tools_url }}&hide_candidate_tools=0">(Show Candidate Tools)</a><br />
 {% endif %}
 
-<a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a>,
+<a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">To Add New Candidate Start from Office Page</a>,
 <a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" target="_blank" >Export Candidates</a>
 <br />
 
@@ -608,11 +608,6 @@
 {% else %}
     {# The following is shown if there is no candidate list #}
     <p>(no candidates found)</p>
-    <p>
-        <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a>,
-        <a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" target="_blank" >Export Candidates</a><br />
-        <br />
-    </p>
 {% endif %}
 <br />
 <br />

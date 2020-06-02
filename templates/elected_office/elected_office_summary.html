@@ -101,10 +101,7 @@
 
     <p></p>
 {% else %}
-    <p>(no candidates found)</p>
-    <p>
-        <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
-    </p>
+    <p>(no elected offices found)</p>
 {% endif %}
 
 {% endblock %}

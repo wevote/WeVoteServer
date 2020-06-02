@@ -761,11 +761,17 @@ def candidate_new_view(request):
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     contest_office_id = request.GET.get('contest_office_id', 0)
+    state_code = request.GET.get('state_code', "")
+
+    if not positive_value_exists(contest_office_id):
+        # If election id is missing, ...
+        url_variables = "?google_civic_election_id=" + google_civic_election_id + "&state_code=" + state_code
+        messages.add_message(request, messages.ERROR, 'To create a new candidate, please add from an existing office.')
+        return HttpResponseRedirect(reverse('office:office_list', args=()) + url_variables)
 
     # These variables are here because there was an error on the edit_process_view and the voter needs to try again
     candidate_name = request.GET.get('candidate_name', "")
     google_civic_candidate_name = request.GET.get('google_civic_candidate_name', "")
-    state_code = request.GET.get('state_code', "")
     candidate_twitter_handle = request.GET.get('candidate_twitter_handle', "")
     candidate_url = request.GET.get('candidate_url', "")
     candidate_contact_form_url = request.GET.get('candidate_contact_form_url', "")
@@ -789,26 +795,25 @@ def candidate_new_view(request):
         handle_record_not_found_exception(e, logger=logger)
         contest_office_list = []
 
+    # No try/except because we want it to fail if query fails
+    candidate_query = CandidateCampaign.objects.all()
+    results = office_manager.retrieve_contest_office_from_id(contest_office_id)
+    if not positive_value_exists(results['contest_office_found']):
+        url_variables = "?google_civic_election_id=" + google_civic_election_id + "&state_code=" + state_code
+        messages.add_message(request, messages.ERROR,
+                             'Office could not be found in database.')
+        return HttpResponseRedirect(reverse('office:office_list', args=()) + url_variables)
+
+    office = results['contest_office']
+    office_name = office.office_name
+    office_we_vote_id = office.we_vote_id
+    state_code_from_office = office.state_code
+
     # Its helpful to see existing candidates when entering a new candidate
-    candidate_list = []
-    try:
-        candidate_query = CandidateCampaign.objects.all()
-        if positive_value_exists(google_civic_election_id):
-            google_civic_election_id_list = [google_civic_election_id]
-            results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
-                google_civic_election_id_list=google_civic_election_id_list,
-                limit_to_this_state_code=state_code)
-            candidate_we_vote_id_list = results['candidate_we_vote_id_list']
-            candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
-        if positive_value_exists(contest_office_id):
-            office_we_vote_id = office_manager.fetch_contest_office_we_vote_id_from_id(contest_office_id)
-            candidate_we_vote_id_list = candidate_list_manager.fetch_candidate_we_vote_id_list_from_office_we_vote_id(
-                office_we_vote_id=office_we_vote_id)
-            candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
-        candidate_list = candidate_query.order_by('candidate_name')[:500]
-    except CandidateCampaign.DoesNotExist:
-        # This is fine, create new
-        pass
+    candidate_we_vote_id_list = candidate_list_manager.fetch_candidate_we_vote_id_list_from_office_we_vote_id(
+        office_we_vote_id=office_we_vote_id)
+    candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+    candidate_list = candidate_query.order_by('candidate_name')[:500]
 
     election_manager = ElectionManager()
     election_results = election_manager.retrieve_election(google_civic_election_id)
@@ -817,6 +822,14 @@ def candidate_new_view(request):
         election = election_results['election']
         election_found = election_results['election_found']
         state_code_from_election = election.get_election_state()
+
+    best_state_code = ''
+    if positive_value_exists(state_code_from_office):
+        best_state_code = state_code_from_office
+    elif positive_value_exists(state_code):
+        best_state_code = state_code
+    elif positive_value_exists(state_code_from_election):
+        best_state_code = state_code_from_election
 
     messages_on_stage = get_messages(request)
     template_values = {
@@ -829,7 +842,7 @@ def candidate_new_view(request):
         # Incoming variables, not saved yet
         'candidate_name':                   candidate_name,
         'google_civic_candidate_name':      google_civic_candidate_name,
-        'state_code':                       state_code,
+        'state_code':                       best_state_code,
         'candidate_twitter_handle':         candidate_twitter_handle,
         'candidate_url':                    candidate_url,
         'candidate_contact_form_url':       candidate_contact_form_url,
@@ -837,6 +850,7 @@ def candidate_new_view(request):
         'ballot_guide_official_statement':  ballot_guide_official_statement,
         'vote_smart_id':                    vote_smart_id,
         'maplight_id':                      maplight_id,
+        'office_name':                      office_name,
         'page':                             page,
         'politician_we_vote_id':            politician_we_vote_id,
     }
@@ -1114,14 +1128,12 @@ def candidate_edit_process_view(request):
     candidate_on_stage = CandidateCampaign()
     state_code_from_candidate = ''
     if positive_value_exists(candidate_id):
-        try:
-            candidate_query = CandidateCampaign.objects.filter(id=candidate_id)
-            if len(candidate_query):
-                candidate_on_stage = candidate_query[0]
-                state_code_from_candidate = candidate_on_stage.state_code
-                candidate_on_stage_found = True
-        except Exception as e:
-            pass
+        # We don't put this in a try/except block because we want the page to fail if there's an error
+        candidate_query = CandidateCampaign.objects.filter(id=candidate_id)
+        if len(candidate_query):
+            candidate_on_stage = candidate_query[0]
+            state_code_from_candidate = candidate_on_stage.state_code
+            candidate_on_stage_found = True
 
     # If linked to a Politician, make sure that both politician_id and politician_we_vote_id exist
     if candidate_on_stage_found:
@@ -1141,13 +1153,15 @@ def candidate_edit_process_view(request):
 
     contest_office_we_vote_id = ''
     contest_office_name = ''
+    contest_office_state_code = ''
     office_manager = ContestOfficeManager()
-    # if positive_value_exists(contest_office_id):
-    #     results = office_manager.retrieve_contest_office_from_id(contest_office_id)
-    #     if results['contest_office_found']:
-    #         contest_office = results['contest_office']
-    #         contest_office_we_vote_id = contest_office.we_vote_id
-    #         contest_office_name = contest_office.office_name
+    if positive_value_exists(contest_office_id):
+        results = office_manager.retrieve_contest_office_from_id(contest_office_id)
+        if results['contest_office_found']:
+            contest_office = results['contest_office']
+            contest_office_we_vote_id = contest_office.we_vote_id
+            contest_office_name = contest_office.office_name
+            state_code_from_office = contest_office.state_code
 
     election_manager = ElectionManager()
     # Needed for new candidates
@@ -1159,7 +1173,9 @@ def candidate_edit_process_view(request):
         election_found = election_results['election_found']
         state_code_from_election = election.get_election_state()
 
-    if positive_value_exists(state_code_from_candidate):
+    if positive_value_exists(state_code_from_office):
+        best_state_code = state_code_from_office
+    elif positive_value_exists(state_code_from_candidate):
         best_state_code = state_code_from_candidate
     elif positive_value_exists(state_code_from_election):
         best_state_code = state_code_from_election
@@ -1364,9 +1380,12 @@ def candidate_edit_process_view(request):
         else:
             # Create new
             # election must be found
-            if not election_found:
-                messages.add_message(request, messages.ERROR, 'Could not find election -- required to save candidate.')
-                return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+            if not election_found or not positive_value_exists(contest_office_we_vote_id):
+                messages.add_message(request, messages.ERROR,
+                                     'Could not find election or office -- required to save candidate.')
+                url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+                                "&state_code=" + str(state_code)
+                return HttpResponseRedirect(reverse('office:office_list', args=()) + url_variables)
 
             required_candidate_variables = True \
                 if positive_value_exists(candidate_name) and positive_value_exists(contest_office_id) \
@@ -1374,9 +1393,6 @@ def candidate_edit_process_view(request):
             if required_candidate_variables:
                 candidate_on_stage = CandidateCampaign(
                     candidate_name=candidate_name,
-                    # google_civic_election_id=google_civic_election_id,
-                    # contest_office_id=contest_office_id,
-                    # contest_office_we_vote_id=contest_office_we_vote_id,
                     state_code=best_state_code,
                 )
                 if google_civic_candidate_name is not False:
@@ -1431,14 +1447,23 @@ def candidate_edit_process_view(request):
 
                 candidate_on_stage.save()
                 candidate_id = candidate_on_stage.id
+                candidate_we_vote_id = candidate_on_stage.we_vote_id
                 ballotpedia_image_id = candidate_on_stage.ballotpedia_image_id
                 ballotpedia_profile_image_url_https = candidate_on_stage.ballotpedia_profile_image_url_https
                 messages.add_message(request, messages.INFO, 'New candidate saved.')
+
+                # Now add Candidate to Office Link
+                candidate_campaign_manager = CandidateCampaignManager()
+                candidate_campaign_manager.get_or_create_candidate_to_office_link(
+                    candidate_we_vote_id=candidate_we_vote_id,
+                    contest_office_we_vote_id=contest_office_we_vote_id,
+                    google_civic_election_id=google_civic_election_id,
+                    state_code=best_state_code)
             else:
                 # messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
                 url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
                                 "&candidate_name=" + str(candidate_name) + \
-                                "&state_code=" + str(state_code) + \
+                                "&state_code=" + str(best_state_code) + \
                                 "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
                                 "&google_civic_candidate_name2=" + str(google_civic_candidate_name2) + \
                                 "&google_civic_candidate_name3=" + str(google_civic_candidate_name3) + \

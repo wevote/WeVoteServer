@@ -69,6 +69,10 @@ span.wrap_word { word-break: break-word; }
 <div class="form-group">
     <label for="google_civic_election_id_id" class="col-sm-3 control-label">Candidate to Office Link</label>
     <div class="col-sm-8">
+    {% if office_name %}
+        Adding Candidate to: {{ office_name }}
+        <input type="hidden" name="contest_office_id" value="{{ contest_office_id }}">
+    {% endif %}
     {% if candidate %}
         {# We don't currently offer a way to edit the google_civic_election_id once a candidate is saved. #}
 {#        {{ candidate.google_civic_election_id }}{% if candidate.election %} ({{ candidate.election.election_name }}, {{ candidate.election.election_day_text }}){% endif %}<br />#}
@@ -152,38 +156,6 @@ span.wrap_word { word-break: break-word; }
                value="{% if candidate %}{{ candidate.ballotpedia_candidate_name|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
-
-{#<div class="form-group">#}
-{#    <label for="office_id" class="col-sm-3 control-label">Office</label>#}
-{#    <div class="col-sm-8">#}
-{#        {% if office_list %}#}
-{#            <select id="contest_office_id" name="contest_office_id" class="form-control">#}
-{#                <option value="0" {% if 0 == contest_office_id|convert_to_int %} selected="selected"{% endif %}>#}
-{#                    -- Offices --</option>#}
-{#            {% for office in office_list %}#}
-{#                <option value="{{ office.id }}"#}
-{#                        {% if office.id|convert_to_int == contest_office_id|convert_to_int %} selected="selected"{% endif %}>#}
-{#                    {{ office.office_name }}#}
-{#                {% if office.district_id %}#}
-{#                    - District {{ office.district_id }}#}
-{#                {% endif %}#}
-{#                {% if office.state_code %}#}
-{#                    - {{ office.state_code }}#}
-{#                {% endif %}#}
-{#                </option>#}
-{#            {% endfor %}#}
-{#            </select>#}
-{#        {% else %}#}
-{#            (no offices found)#}
-{#        {% endif %}#}
-{#        <a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">#}
-{#            Add New Office</a> (in new window)&nbsp;&nbsp;&nbsp;#}
-{#        {% if candidate and candidate.contest_office_id %}#}
-{#            <a href="{% url 'office:office_summary' office_id=candidate.contest_office_id %}" target="_blank">#}
-{#                View this Office</a> (in new window)#}
-{#        {% endif %}#}
-{#    </div>#}
-{#</div>#}
 
 <div class="form-group">
     <label for="ballotpedia_race_id_id" class="col-sm-3 control-label">Ballotpedia Race Id</label>
@@ -641,11 +613,6 @@ span.wrap_word { word-break: break-word; }
 {% endif %}{# End of if candidate #}
 
 <script>
-    $(function() {
-        $('#contest_office_id').change(function() {
-            this.form.submit();
-        });
-    });
     $(function() {
         $('#toggle_all_id').change(function() {
             var inputs = document.getElementsByName("select_for_marking_checks[]");
