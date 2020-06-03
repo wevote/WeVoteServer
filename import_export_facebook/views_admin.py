@@ -111,7 +111,8 @@ def bulk_retrieve_facebook_photos_view(request):
     status = ""
     remote_request_history_manager = RemoteRequestHistoryManager()
 
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -200,7 +201,8 @@ def bulk_retrieve_facebook_photos_view(request):
 def get_and_save_facebook_photo_view(request):
     remote_request_history_manager = RemoteRequestHistoryManager()
 
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

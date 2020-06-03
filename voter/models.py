@@ -3010,6 +3010,7 @@ def voter_has_authority(request, authority_required, authority_results=None):
         authority_results = retrieve_voter_authority(request)
     if not positive_value_exists(authority_results['is_active']):
         return False
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     if 'admin' in authority_required:
         if positive_value_exists(authority_results['is_admin']):
             return True

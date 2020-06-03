@@ -81,7 +81,8 @@ def ballot_items_sync_out_view(request):  # ballotItemsSyncOut
 
 @login_required
 def ballot_returned_delete_process_view(request, ballot_returned_id):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -279,7 +280,8 @@ def ballot_item_list_by_polling_location_edit_view(request, polling_location_we_
 @login_required
 def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we_vote_id='',
                                polling_location_we_vote_id_from_path=''):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -472,7 +474,8 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
 
 @login_required
 def ballot_item_delete_process_view(request, ballot_item_id):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -529,7 +532,8 @@ def ballot_item_list_edit_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -800,7 +804,8 @@ def ballot_item_list_edit_process_view(request):
 
 @login_required
 def ballot_items_repair_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

@@ -22,7 +22,8 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 @login_required
 def cache_images_locally_for_all_organizations_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -39,7 +40,8 @@ def cache_images_locally_for_all_organizations_view(request):
 
 @login_required
 def cache_images_locally_for_all_voters_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -61,7 +63,8 @@ def cache_images_locally_for_all_voters_view(request):
 
 @login_required
 def create_resized_images_for_all_organizations_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -77,7 +80,8 @@ def create_resized_images_for_all_organizations_view(request):
 
 @login_required
 def create_resized_images_for_organization_view(request, organization_we_vote_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -102,7 +106,8 @@ def create_resized_images_for_organization_view(request, organization_we_vote_id
 
 @login_required
 def create_resized_images_for_voters_view(request, voter_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -122,7 +127,8 @@ def create_resized_images_for_voters_view(request, voter_id):
 
 @login_required
 def images_for_one_voter_view(request, voter_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -139,7 +145,8 @@ def images_for_one_voter_view(request, voter_id):
 
 @login_required
 def images_for_one_candidate_view(request, candidate_we_vote_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -163,7 +170,8 @@ def images_for_one_candidate_view(request, candidate_we_vote_id):
 
 @login_required
 def images_for_one_organization_view(request, organization_we_vote_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

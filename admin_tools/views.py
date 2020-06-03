@@ -1796,16 +1796,29 @@ def logout_we_vote(request):
 
 def redirect_to_sign_in_page(request, authority_required={}):
     authority_required_text = ''
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     for each_authority in authority_required:
         if each_authority == 'admin':
             authority_required_text += ' or ' if len(authority_required_text) > 0 else ''
             authority_required_text += 'has Admin rights'
+        if each_authority == 'analytics_admin':
+            authority_required_text += ' or ' if len(authority_required_text) > 0 else ''
+            authority_required_text += 'has Analytics Admin rights'
+        if each_authority == 'partner_organization':
+            authority_required_text += ' or ' if len(authority_required_text) > 0 else ''
+            authority_required_text += 'has Partner Organization rights'
+        if each_authority == 'political_data_manager':
+            authority_required_text += ' or ' if len(authority_required_text) > 0 else ''
+            authority_required_text += 'has Political Data Manager rights'
+        if each_authority == 'political_data_viewer':
+            authority_required_text += ' or ' if len(authority_required_text) > 0 else ''
+            authority_required_text += 'has Political Data Viewer rights'
         if each_authority == 'verified_volunteer':
             authority_required_text += ' or ' if len(authority_required_text) > 0 else ''
             authority_required_text += 'has Verified Volunteer rights'
     error_message = "You must sign in with account that {authority_required_text} to see that page. " \
-                    "-- NOTE: There is a known bug with this check, if you think this message is wrong, Sign Out and try " \
-                    "again".format(authority_required_text=authority_required_text)
+                    "-- NOTE: There is a known bug with this check, if you think this message is wrong, " \
+                    "Sign Out and try again".format(authority_required_text=authority_required_text)
 
     messages.add_message(request, messages.ERROR, error_message)
 

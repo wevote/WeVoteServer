@@ -33,7 +33,8 @@ def import_ctcl_from_xml_view(request):
     Take data from CTCL API Endpoint, (an XML file, for now) and store in the local Voting Info Project database
     """
     # If person isn't signed in, we don't want to let them visit this page yet
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
