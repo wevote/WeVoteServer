@@ -21,7 +21,8 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 @login_required
 def delete_possible_google_search_users_view(request, candidate_campaign_we_vote_id):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -43,7 +44,8 @@ def delete_possible_google_search_users_view(request, candidate_campaign_we_vote
 
 @login_required
 def possible_google_search_user_do_not_match_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -58,7 +60,8 @@ def possible_google_search_user_do_not_match_view(request):
 
 @login_required
 def bulk_possible_google_search_users_do_not_match_view(request, candidate_campaign_we_vote_id):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -80,7 +83,8 @@ def bulk_possible_google_search_users_do_not_match_view(request, candidate_campa
 
 @login_required
 def retrieve_possible_google_search_users_view(request, candidate_campaign_we_vote_id):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -103,7 +107,8 @@ def retrieve_possible_google_search_users_view(request, candidate_campaign_we_vo
 
 @login_required
 def bulk_retrieve_possible_google_search_users_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

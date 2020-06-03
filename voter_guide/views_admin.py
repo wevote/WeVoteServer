@@ -262,6 +262,10 @@ def voter_guide_create_view(request):
     :param request:
     :return:
     """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    has_suggested_voter_guide_rights = voter_has_authority(request, authority_required)
+
     voter_manager = VoterManager()
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
@@ -297,9 +301,6 @@ def voter_guide_create_view(request):
     state_code = request.GET.get('state_code', "")
     target_google_civic_election_id = request.GET.get('target_google_civic_election_id', "")
     voter_guide_possibility_url = request.GET.get('voter_guide_possibility_url', "")
-
-    authority_required = {'verified_volunteer', 'political_data_manager'}  # admin, verified_volunteer
-    has_suggested_voter_guide_rights = voter_has_authority(request, authority_required)
 
     if positive_value_exists(candidate_name) or \
             positive_value_exists(candidate_twitter_handle) or \
@@ -665,6 +666,20 @@ def voter_guide_create_process_view(request):
     :param request:
     :return:
     """
+    confirm_delete = request.POST.get('confirm_delete', 0)
+    voter_guide_possibility_manager = VoterGuidePossibilityManager()
+    voter_guide_possibility_id = request.POST.get('voter_guide_possibility_id', 0)
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    has_suggested_voter_guide_rights = voter_has_authority(request, authority_required)
+    if positive_value_exists(has_suggested_voter_guide_rights):
+        if positive_value_exists(confirm_delete):
+            results = voter_guide_possibility_manager.delete_voter_guide_possibility(
+                voter_guide_possibility_id=voter_guide_possibility_id)
+            if results['success']:
+                return HttpResponseRedirect(reverse('voter_guide:voter_guide_create', args=()))
+
     status = ""
 
     all_done_with_entry = request.POST.get('all_done_with_entry', 0)
@@ -679,7 +694,6 @@ def voter_guide_create_process_view(request):
     capture_detailed_comments = request.POST.get('capture_detailed_comments', False)
     clear_candidate_options = request.POST.get('clear_candidate_options', 0)
     clear_organization_options = request.POST.get('clear_organization_options', 0)
-    confirm_delete = request.POST.get('confirm_delete', 0)
     contributor_comments = request.POST.get('contributor_comments', "")
     contributor_email = request.POST.get('contributor_email', "")
     form_submitted = request.POST.get('form_submitted', False)
@@ -693,7 +707,6 @@ def voter_guide_create_process_view(request):
     scan_url_again = request.POST.get('scan_url_again', False)
     state_code = request.POST.get('state_code', '')
     type_of_website = request.POST.get('type_of_website', 'OrganizationWebsite')
-    voter_guide_possibility_id = request.POST.get('voter_guide_possibility_id', 0)
     voter_guide_possibility_url = request.POST.get('voter_guide_possibility_url', '')
     voter_who_submitted_we_vote_id = request.POST.get('voter_who_submitted_we_vote_id', '')
 
@@ -701,7 +714,6 @@ def voter_guide_create_process_view(request):
     candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
 
-    voter_guide_possibility_manager = VoterGuidePossibilityManager()
     voter_manager = VoterManager()
     voter_who_submitted_name = ""
     voter_found = False
@@ -741,15 +753,6 @@ def voter_guide_create_process_view(request):
 
     if not positive_value_exists(voter_guide_possibility_url) and positive_value_exists(form_submitted):
         messages.add_message(request, messages.ERROR, 'Please include a link to where you found this voter guide.')
-
-    authority_required = {'verified_volunteer', 'political_data_manager'}  # admin, verified_volunteer
-    has_suggested_voter_guide_rights = voter_has_authority(request, authority_required)
-    if positive_value_exists(has_suggested_voter_guide_rights):
-        if positive_value_exists(confirm_delete):
-            results = voter_guide_possibility_manager.delete_voter_guide_possibility(
-                voter_guide_possibility_id=voter_guide_possibility_id)
-            if results['success']:
-                return HttpResponseRedirect(reverse('voter_guide:voter_guide_create', args=()))
 
     if positive_value_exists(clear_organization_options):
         organization_we_vote_id = ""
@@ -1518,7 +1521,8 @@ def generate_voter_guide_possibility_batch_view(request):
 
 @login_required
 def generate_voter_guides_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1894,7 +1898,7 @@ def voter_guide_edit_process_view(request):  # NOTE: THIS FORM DOESN'T SAVE YET 
 @login_required
 def voter_guide_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'partner_organization', 'verified_volunteer'}
+    authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -2051,7 +2055,7 @@ def voter_guide_list_view(request):
 @login_required
 def voter_guide_possibility_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'verified_volunteer'}
+    authority_required = {'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -2529,7 +2533,7 @@ def voter_guide_search_view(request):
     :return:
     """
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'verified_volunteer'}
+    authority_required = {'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -2579,7 +2583,7 @@ def voter_guide_search_process_view(request):
     :return:
     """
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'verified_volunteer'}
+    authority_required = {'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

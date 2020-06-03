@@ -220,7 +220,8 @@ def import_polling_locations_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -254,7 +255,8 @@ def polling_location_edit_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -356,7 +358,8 @@ def polling_location_edit_process_view(request):
 
 @login_required
 def polling_location_edit_view(request, polling_location_local_id=0, polling_location_we_vote_id=""):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -400,7 +403,8 @@ def polling_location_edit_view(request, polling_location_local_id=0, polling_loc
 
 @login_required
 def polling_location_visualize_view(request, polling_location_local_id=0, polling_location_we_vote_id=""):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -426,7 +430,7 @@ def polling_location_visualize_view(request, polling_location_local_id=0, pollin
 @login_required
 def polling_location_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'partner_organization', 'verified_volunteer'}
+    authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -544,7 +548,8 @@ def polling_locations_add_latitude_and_longitude_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -609,7 +614,7 @@ def polling_locations_add_latitude_and_longitude_view(request):
 @login_required
 def polling_location_statistics_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'partner_organization', 'verified_volunteer'}
+    authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -661,7 +666,7 @@ def polling_location_statistics_view(request):
 @login_required
 def polling_location_summary_view(request, polling_location_local_id):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'partner_organization', 'verified_volunteer'}
+    authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -690,7 +695,8 @@ def polling_location_summary_view(request, polling_location_local_id):
 
 @login_required
 def polling_location_summary_by_we_vote_id_view(request, polling_location_we_vote_id):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -740,7 +746,8 @@ def soft_delete_duplicates_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

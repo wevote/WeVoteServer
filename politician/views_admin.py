@@ -74,7 +74,7 @@ def politicians_import_from_master_server_view(request):
 @login_required
 def politician_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'partner_organization', 'verified_volunteer'}
+    authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -186,7 +186,8 @@ def politician_list_view(request):
 
 @login_required
 def politician_new_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -257,7 +258,8 @@ def politician_edit_by_we_vote_id_view(request, politician_we_vote_id):
 
 @login_required
 def politician_edit_view(request, politician_id):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -423,7 +425,8 @@ def politician_edit_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -580,7 +583,8 @@ def politician_edit_process_view(request):
 
 @login_required
 def politician_retrieve_photos_view(request, candidate_id):  # TODO DALE Transition fully to politician
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -612,7 +616,8 @@ def politician_delete_process_view(request):  # TODO DALE Transition fully to po
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

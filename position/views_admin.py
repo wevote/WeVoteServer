@@ -235,7 +235,7 @@ def position_list_view(request):
     :return:
     """
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'partner_organization', 'verified_volunteer'}
+    authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -531,7 +531,8 @@ def position_list_view(request):
 
 @login_required
 def position_new_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -544,7 +545,8 @@ def position_new_view(request):
 
 @login_required
 def position_edit_view(request, position_we_vote_id):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -578,7 +580,8 @@ def position_edit_process_view(request):  # TODO DALE I don't think this is in u
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -624,7 +627,7 @@ def position_edit_process_view(request):  # TODO DALE I don't think this is in u
 @login_required
 def position_summary_view(request, position_we_vote_id):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'partner_organization', 'verified_volunteer'}
+    authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -654,7 +657,8 @@ def position_summary_view(request, position_we_vote_id):
 
 @login_required
 def refresh_cached_position_info_for_election_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -683,7 +687,8 @@ def refresh_positions_with_candidate_details_for_election_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -713,7 +718,8 @@ def refresh_positions_with_contest_office_details_for_election_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -761,7 +767,8 @@ def refresh_positions_with_contest_measure_details_for_election_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -804,7 +811,8 @@ def refresh_positions_with_contest_measure_details_for_election_view(request):
 
 @login_required
 def relink_candidates_measures_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -819,7 +827,8 @@ def position_delete_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

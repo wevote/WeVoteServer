@@ -19,7 +19,8 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 @login_required
 def import_organization_logo_from_wikipedia_view(request, organization_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -66,7 +67,8 @@ def import_organization_logo_from_wikipedia_view(request, organization_id):
 
 @login_required
 def retrieve_all_organizations_logos_from_wikipedia_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

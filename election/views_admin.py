@@ -773,8 +773,8 @@ def election_edit_process_view(request):
 @login_required()
 def election_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'partner_organization', 'political_data_manager', 'political_data_viewer',
-                          'verified_volunteer'}
+    authority_required = \
+        {'partner_organization', 'political_data_manager', 'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -966,8 +966,8 @@ def election_list_view(request):
 @login_required()
 def nationwide_election_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'partner_organization', 'political_data_manager', 'political_data_viewer',
-                          'verified_volunteer'}
+    authority_required = \
+        {'partner_organization', 'political_data_manager', 'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1206,8 +1206,8 @@ def election_remote_retrieve_view(request):
 @login_required()
 def election_summary_view(request, election_local_id=0, google_civic_election_id=''):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'partner_organization', 'political_data_manager', 'political_data_viewer',
-                          'verified_volunteer'}
+    authority_required = \
+        {'partner_organization', 'political_data_manager', 'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

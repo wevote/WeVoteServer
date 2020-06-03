@@ -107,7 +107,7 @@ def electoral_district_import_from_xml_view(request):
 @login_required
 def electoral_district_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'verified_volunteer'}
+    authority_required = {'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -229,7 +229,8 @@ def electoral_district_list_view(request):
 
 @login_required
 def electoral_district_summary_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
