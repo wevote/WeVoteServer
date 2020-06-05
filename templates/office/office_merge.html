@@ -28,6 +28,8 @@
 
 {% include "office/office_merge_one_field_decision.html" with field_name="contest_office_name" field_label="Contest Office Name" conflict_status=conflict_values.office_name contest_office1_field_value=contest_office_option1.office_name contest_office2_field_value=contest_office_option2.office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
+{% include "office/office_merge_one_field_decision.html" with field_name="google_civic_election_id" field_label="Google Civic Election Id" conflict_status=conflict_values.google_civic_election_id contest_office1_field_value=contest_office_option1.google_civic_election_id contest_office2_field_value=contest_office_option2.google_civic_election_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+
     <tr>
         <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;1</td>
         <td>{{ contest_office_option1.google_civic_office_name|default_if_none:"" }}</td>
@@ -97,8 +99,6 @@
 {% include "office/office_merge_one_field_decision.html" with field_name="district_scope" field_label="District Scope" conflict_status=conflict_values.district_scope contest_office1_field_value=contest_office_option1.district_scope contest_office2_field_value=contest_office_option2.district_scope contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
 {% include "office/office_merge_one_field_decision.html" with field_name="elected_office_name" field_label="Elected Office Name" conflict_status=conflict_values.elected_office_name contest_office1_field_value=contest_office_option1.elected_office_name contest_office2_field_value=contest_office_option2.elected_office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
-
-{% include "office/office_merge_one_field_decision.html" with field_name="google_civic_election_id" field_label="Election Id" conflict_status=conflict_values.google_civic_election_id contest_office1_field_value=contest_office_option1.google_civic_election_id contest_office2_field_value=contest_office_option2.google_civic_election_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
 {% include "office/office_merge_one_field_decision.html" with field_name="ctcl_uuid" field_label="Cctl Uuid" conflict_status=conflict_values.ctcl_uuid contest_office1_field_value=contest_office_option1.ctcl_uuid contest_office2_field_value=contest_office_option2.ctcl_uuid contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
