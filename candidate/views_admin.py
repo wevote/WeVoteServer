@@ -1811,8 +1811,7 @@ def candidate_merge_process_view(request):
         elif conflict_value == "CANDIDATE2":
             admin_merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
 
-    merge_results = merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, admin_merge_choices,
-                                               candidate1_on_stage, candidate2_on_stage)
+    merge_results = merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, admin_merge_choices)
 
     if positive_value_exists(merge_results['candidates_merged']):
         candidate = merge_results['candidate']

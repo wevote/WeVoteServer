@@ -336,8 +336,7 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
 
     if not decisions_required:
         status += "NO_DECISIONS_REQUIRED "
-        merge_results = merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, merge_choices,
-                                                   candidate1_on_stage, candidate2_on_stage)
+        merge_results = merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, merge_choices)
 
         if merge_results['candidates_merged']:
             success = True
@@ -353,8 +352,7 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
     return results
 
 
-def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, admin_merge_choices={},
-                               candidate1_on_stage=None, candidate2_on_stage=None):
+def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, admin_merge_choices={}):
     """
     Process the merging of two candidates
     :param candidate1_we_vote_id:
@@ -367,42 +365,34 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
     status = ""
     candidate_campaign_manager = CandidateCampaignManager()
 
-    if candidate1_on_stage and candidate1_on_stage.we_vote_id:
+    # Candidate 1 is the one we keep, and Candidate 2 is the one we will merge into Candidate 1
+    candidate1_results = \
+        candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate1_we_vote_id)
+    if candidate1_results['candidate_campaign_found']:
+        candidate1_on_stage = candidate1_results['candidate_campaign']
         candidate1_id = candidate1_on_stage.id
-        candidate1_we_vote_id = candidate1_on_stage.we_vote_id
     else:
-        # Candidate 1 is the one we keep, and Candidate 2 is the one we will merge into Candidate 1
-        candidate1_results = \
-            candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate1_we_vote_id)
-        if candidate1_results['candidate_campaign_found']:
-            candidate1_on_stage = candidate1_results['candidate_campaign']
-            candidate1_id = candidate1_on_stage.id
-        else:
-            results = {
-                'success': False,
-                'status': "MERGE_THESE_TWO_CANDIDATES-COULD_NOT_RETRIEVE_CANDIDATE1 ",
-                'candidates_merged': False,
-                'candidate': None,
-            }
-            return results
+        results = {
+            'success': False,
+            'status': "MERGE_THESE_TWO_CANDIDATES-COULD_NOT_RETRIEVE_CANDIDATE1 ",
+            'candidates_merged': False,
+            'candidate': None,
+        }
+        return results
 
-    if candidate2_on_stage and candidate2_on_stage.we_vote_id:
+    candidate2_results = \
+        candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate2_we_vote_id)
+    if candidate2_results['candidate_campaign_found']:
+        candidate2_on_stage = candidate2_results['candidate_campaign']
         candidate2_id = candidate2_on_stage.id
-        candidate2_we_vote_id = candidate2_on_stage.we_vote_id
     else:
-        candidate2_results = \
-            candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate2_we_vote_id)
-        if candidate2_results['candidate_campaign_found']:
-            candidate2_on_stage = candidate2_results['candidate_campaign']
-            candidate2_id = candidate2_on_stage.id
-        else:
-            results = {
-                'success': False,
-                'status': "MERGE_THESE_TWO_CANDIDATES-COULD_NOT_RETRIEVE_CANDIDATE2 ",
-                'candidates_merged': False,
-                'candidate': None,
-            }
-            return results
+        results = {
+            'success': False,
+            'status': "MERGE_THESE_TWO_CANDIDATES-COULD_NOT_RETRIEVE_CANDIDATE2 ",
+            'candidates_merged': False,
+            'candidate': None,
+        }
+        return results
 
     # TODO: Migrate images?
 
@@ -452,8 +442,12 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
 
     # Merge attribute values chosen by the admin
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
-        if attribute in admin_merge_choices:
-            setattr(candidate1_on_stage, attribute, admin_merge_choices[attribute])
+        try:
+            if attribute in admin_merge_choices:
+                setattr(candidate1_on_stage, attribute, admin_merge_choices[attribute])
+        except Exception as e:
+            # Don't completely fail if in attribute can't be saved.
+            status += "ATTRIBUTE_SAVE_FAILED (" + str(attribute) + ") " + str(e) + " "
 
     # Preserve unique google_civic_candidate_name, _name2, _name3, _name4, and _name5
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name):
