@@ -390,25 +390,6 @@ def merge_these_two_offices(contest_office1_we_vote_id, contest_office2_we_vote_
         contest_office1_on_stage = add_contest_office_name_to_next_spot(
             contest_office1_on_stage, contest_office2_on_stage.google_civic_office_name5)
 
-    # Now move candidates attached to this office
-    from_contest_office_id = contest_office2_on_stage.id
-    from_contest_office_we_vote_id = contest_office2_on_stage.we_vote_id
-    to_contest_office_id = contest_office1_on_stage.id
-    to_contest_office_we_vote_id = contest_office1_on_stage.we_vote_id
-    updated_contest_office = contest_office1_on_stage
-    results = move_candidates_to_another_office(from_contest_office_id, from_contest_office_we_vote_id,
-                                                to_contest_office_id, to_contest_office_we_vote_id,
-                                                updated_contest_office)
-
-    if not positive_value_exists(results['success']):
-        results = {
-            'success': False,
-            'status': "MERGE_THESE_TWO_OFFICES-COULD_NOT_MOVE_CANDIDATES_TO_OFFICE1 ",
-            'offices_merged': False,
-            'office': None,
-        }
-        return results
-
     # TODO: Merge quick_info's office details in future
 
     # Merge ballot item's office details
@@ -421,7 +402,7 @@ def merge_these_two_offices(contest_office1_we_vote_id, contest_office2_we_vote_
             'success': False,
             'status': status,
             'offices_merged': False,
-            'office': updated_contest_office,
+            'office': contest_office1_on_stage,
         }
         return results
 
@@ -435,7 +416,7 @@ def merge_these_two_offices(contest_office1_we_vote_id, contest_office2_we_vote_
             'success': False,
             'status': status,
             'offices_merged': False,
-            'office': updated_contest_office,
+            'office': contest_office1_on_stage,
         }
         return results
 
@@ -449,11 +430,28 @@ def merge_these_two_offices(contest_office1_we_vote_id, contest_office2_we_vote_
             'success': False,
             'status': status,
             'offices_merged': False,
-            'office': updated_contest_office,
+            'office': contest_office1_on_stage,
         }
         return results
 
     # TODO: Migrate images?
+
+    # Finally, move candidates attached to this office
+    from_contest_office_id = contest_office2_on_stage.id
+    from_contest_office_we_vote_id = contest_office2_on_stage.we_vote_id
+    to_contest_office_id = contest_office1_on_stage.id
+    to_contest_office_we_vote_id = contest_office1_on_stage.we_vote_id
+    results = move_candidates_to_another_office(from_contest_office_id, from_contest_office_we_vote_id,
+                                                to_contest_office_id, to_contest_office_we_vote_id)
+
+    if not positive_value_exists(results['success']):
+        results = {
+            'success': False,
+            'status': "MERGE_THESE_TWO_OFFICES-COULD_NOT_MOVE_CANDIDATES_TO_OFFICE1 ",
+            'offices_merged': False,
+            'office': None,
+        }
+        return results
 
     # Note: wait to wrap in try/except block
     contest_office1_on_stage.save()

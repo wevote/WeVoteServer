@@ -28,4 +28,6 @@ urlpatterns = [
     url(r'^(?P<contest_office_we_vote_id>wv[\w]{2}off[\w]+)/edit/$',
         views_admin.office_edit_view, name='office_edit_we_vote_id'),
     url(r'^(?P<office_id>[0-9]+)/summary/$', views_admin.office_summary_view, name='office_summary'),
+    url(r'^(?P<contest_office_we_vote_id>wv[\w]{2}off[\w]+)/summary/$',
+        views_admin.office_summary_view, name='office_summary_we_vote_id'),
 ]

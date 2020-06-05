@@ -97,7 +97,7 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
             <option value="0">-- select candidate --</option>
             {% for candidate_campaign_from_loop in candidate_campaigns_for_this_election_list %}
             <option value="{{ candidate_campaign_from_loop.id }}"
-                    {% if candidate_campaign_from_loop.id == candidate_campaign_id %} selected="selected"
+                    {% if candidate_campaign_from_loop.id|slugify == candidate_campaign_id|slugify %} selected="selected"
                     {% endif %}>{{ candidate_campaign_from_loop.candidate_name }}</option>
             {% endfor %}
         {% else %}
@@ -201,7 +201,7 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 
 <div class="form-group">
     <div class="col-sm-9">
-        <button type="submit" class="btn btn-default">
+        <button class="btn btn-default" name="save_button" type="submit" value="1">
             {% if organization_position %}Update Position{% else %}Save New Position{% endif %}
         </button>
         or
@@ -236,7 +236,6 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
           <td>Stance</td>
           <td>Election ID</td>
           <td>Election Date</td>
-          <td>Rating Time Span</td>
       </tr>
 
       {% for organization_position in organization_position_list %}
@@ -247,12 +246,12 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
               {% else %}
                   (missing ballot_item_display_name)
               {% endif %}
+            <span style="color: darkgray">{{ organization_position.statement_text|default_if_none:""|truncatechars:125 }}</span>
           </a></td>
           <td>{{ organization_position.get_stance_display }}
               {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}</td>
           <td>{{ organization_position.election.google_civic_election_id }}</td>
           <td>{{ organization_position.election.election_day_text }}</td>
-          <td>{{ organization_position.vote_smart_time_span|default_if_none:"" }}</td>
       </tr>
       {% endfor %}
 

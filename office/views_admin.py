@@ -645,7 +645,7 @@ def office_edit_process_view(request):
 
 
 @login_required
-def office_summary_view(request, office_id):
+def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -653,7 +653,6 @@ def office_summary_view(request, office_id):
 
     messages_on_stage = get_messages(request)
     office_id = convert_to_int(office_id)
-    office_we_vote_id = ""
     contest_office_found = False
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', "")
@@ -661,9 +660,12 @@ def office_summary_view(request, office_id):
     office_manager = ContestOfficeManager()
 
     try:
-        contest_office = ContestOffice.objects.get(id=office_id)
+        if positive_value_exists(office_id):
+            contest_office = ContestOffice.objects.get(id=office_id)
+        else:
+            contest_office = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
         contest_office_found = True
-        office_we_vote_id = contest_office.we_vote_id
+        contest_office_we_vote_id = contest_office.we_vote_id
         google_civic_election_id = contest_office.google_civic_election_id
     except ContestOffice.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
@@ -674,7 +676,7 @@ def office_summary_view(request, office_id):
     # DALE 2020 We are going to leave this in place during the transition for debugging
     contest_office_visiting_election_list = []
     results = office_manager.retrieve_election_ids_office_is_visiting(
-        contest_office_we_vote_id=office_we_vote_id)
+        contest_office_we_vote_id=contest_office_we_vote_id)
     if results['contest_office_visiting_list_found']:
         contest_office_visiting_election_id_list = results['contest_office_visiting_election_id_list']
         election_query = Election.objects.filter(google_civic_election_id__in=contest_office_visiting_election_id_list)\
@@ -688,7 +690,7 @@ def office_summary_view(request, office_id):
     root_office_candidate_last_names = ""
     candidate_list_manager = CandidateCampaignListManager()
     results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_office_list(
-        contest_office_we_vote_id_list=[office_we_vote_id])
+        contest_office_we_vote_id_list=[contest_office_we_vote_id])
     candidate_we_vote_id_list = results['candidate_we_vote_id_list']
     try:
         candidate_query = CandidateCampaign.objects.all()
@@ -727,7 +729,7 @@ def office_summary_view(request, office_id):
     if positive_value_exists(office_search):
         office_queryset = ContestOffice.objects.all()
         office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
-        office_queryset = office_queryset.exclude(we_vote_id__iexact=office_we_vote_id)
+        office_queryset = office_queryset.exclude(we_vote_id__iexact=contest_office_we_vote_id)
 
         if positive_value_exists(state_code):
             office_queryset = office_queryset.filter(state_code__iexact=state_code)
@@ -920,10 +922,10 @@ def find_duplicate_office_view(request, office_id=0):
                                                 results['contest_office_merge_conflict_values'],
                                                 remove_duplicate_process)
 
-    message = "Google Civic Election ID: {election_id}, " \
+    message = "Duplicate Offices: Google Civic Election ID: {election_id}, " \
               "{number_of_duplicate_contest_offices_processed} duplicates processed, " \
               "{number_of_duplicate_contest_offices_failed} duplicate merges failed, " \
-              "{number_of_duplicates_could_not_process} could not be processed because 3 exist " \
+              "{number_of_duplicates_could_not_process} could not be processed " \
               "".format(election_id=google_civic_election_id,
                         number_of_duplicate_contest_offices_processed=number_of_duplicate_contest_offices_processed,
                         number_of_duplicate_contest_offices_failed=number_of_duplicate_contest_offices_failed,
@@ -1206,16 +1208,6 @@ def office_merge_process_view(request):
         contest_office1_on_stage = add_contest_office_name_to_next_spot(
             contest_office1_on_stage, contest_office2_on_stage.google_civic_office_name5)
 
-    # Merge candidate's office details
-    candidates_results = move_candidates_to_another_office(contest_office2_id, contest_office2_we_vote_id,
-                                                           contest_office1_id, contest_office1_we_vote_id,
-                                                           contest_office1_on_stage)
-    if not candidates_results['success']:
-        messages.add_message(request, messages.ERROR, candidates_results['status'])
-        return HttpResponseRedirect(reverse('office:find_and_merge_duplicate_offices', args=()) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                                    "&state_code=" + str(state_code))
-
     # TODO: Merge quick_info's office details in future
 
     # Merge ballot item's office details
@@ -1228,7 +1220,7 @@ def office_merge_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
-    # Merge public positions
+    # Merge public positions - DALE 2020-06-04 I think we will want to alter this soon
     public_positions_results = move_positions_to_another_office(contest_office2_id, contest_office2_we_vote_id,
                                                                 contest_office1_id, contest_office1_we_vote_id,
                                                                 True)
@@ -1238,7 +1230,7 @@ def office_merge_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
-    # Merge friends-only positions
+    # Merge friends-only positions - DALE 2020-06-04 I think we will want to alter this soon
     friends_positions_results = move_positions_to_another_office(contest_office2_id, contest_office2_we_vote_id,
                                                                  contest_office1_id, contest_office1_we_vote_id,
                                                                  False)
@@ -1249,6 +1241,15 @@ def office_merge_process_view(request):
                                     "&state_code=" + str(state_code))
 
     # TODO: Migrate images?
+
+    # Finally, move candidates last
+    candidates_results = move_candidates_to_another_office(contest_office2_id, contest_office2_we_vote_id,
+                                                           contest_office1_id, contest_office1_we_vote_id)
+    if not candidates_results['success']:
+        messages.add_message(request, messages.ERROR, candidates_results['status'])
+        return HttpResponseRedirect(reverse('office:find_and_merge_duplicate_offices', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
 
     # Note: wait to wrap in try/except block
     contest_office1_on_stage.save()

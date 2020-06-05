@@ -81,7 +81,8 @@ span.wrap_word { word-break: break-word; }
     {% for candidate_to_office_link in candidate_to_office_link_list %}
         {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
         ({{ candidate_to_office_link.google_civic_election_id }}) --
-        {{ candidate_to_office_link.office.office_name }} ({{ candidate_to_office_link.contest_office_we_vote_id }})<br />
+      <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
+         target="_blank">{{ candidate_to_office_link.office.office_name }} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a><br />
     {% endfor %}
     </div>
 </div>

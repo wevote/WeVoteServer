@@ -534,7 +534,7 @@ def move_ballot_items_to_another_office(from_contest_office_id, from_contest_off
                 from_ballot_item_entry.delete()
             except Exception as e:
                 success = False
-                status += "MOVE_TO_ANOTHER_CONTEST_OFFICE-UNABLE_TO_DELETE_FROM_BALLOT_ITEM_ENTRY "
+                status += "MOVE_TO_ANOTHER_CONTEST_OFFICE-UNABLE_TO_DELETE_FROM_BALLOT_ITEM_ENTRY " + str(e) + " "
         else:
             # If duplicates weren't found, then update the existing ballot item to use the new contest_office
             try:
@@ -546,7 +546,7 @@ def move_ballot_items_to_another_office(from_contest_office_id, from_contest_off
                     from_ballot_item_entry, updated_contest_office)
             except Exception as e:
                 success = False
-                status += "MOVE_TO_ANOTHER_CONTEST_OFFICE-UNABLE_TO_SAVE_NEW_ballot_item "
+                status += "MOVE_TO_ANOTHER_CONTEST_OFFICE-UNABLE_TO_SAVE_NEW_ballot_item " + str(e) + ' '
                 ballot_item_entries_not_moved += 1
 
     results = {

@@ -892,7 +892,7 @@ class CandidateCampaignListManager(models.Model):
                     if len(candidate_list) == 1:
                         candidate = candidate_list[0]
                         candidate_found = True
-                        status += candidate.we_vote_id + " office: " + candidate.contest_office_we_vote_id + " "
+                        status += candidate.we_vote_id + " "
                         keep_looking_for_duplicates = False
                     else:
                         # more than one entry found with a match in CandidateCampaign
@@ -936,7 +936,7 @@ class CandidateCampaignListManager(models.Model):
                     if len(candidate_list) == 1:
                         candidate = candidate_list[0]
                         candidate_found = True
-                        status += candidate.we_vote_id + " office: " + candidate.contest_office_we_vote_id + " "
+                        status += candidate.we_vote_id + " "
                         keep_looking_for_duplicates = False
                     else:
                         # more than one entry found with a match in CandidateCampaign
@@ -965,17 +965,21 @@ class CandidateCampaignListManager(models.Model):
         return results
 
     def fetch_candidates_from_non_unique_identifiers_count(
-            self, google_civic_election_id, state_code, candidate_twitter_handle, candidate_name,
+            self, google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name,
             ignore_candidate_id_list=[]):
         keep_looking_for_duplicates = True
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
         status = ""
 
+        results = self.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=google_civic_election_id_list)
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
         if keep_looking_for_duplicates and positive_value_exists(candidate_twitter_handle):
             try:
                 candidate_query = CandidateCampaign.objects.all()
-                candidate_query = candidate_query.filter(candidate_twitter_handle__iexact=candidate_twitter_handle,
-                                                         google_civic_election_id=google_civic_election_id)
+                candidate_query = candidate_query.filter(candidate_twitter_handle__iexact=candidate_twitter_handle)
+                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
 
@@ -986,18 +990,15 @@ class CandidateCampaignListManager(models.Model):
                 if positive_value_exists(candidate_count):
                     return candidate_count
             except CandidateCampaign.DoesNotExist:
-                pass
-            except Exception as e:
-                keep_looking_for_duplicates = False
-                pass
-        # twitter handle does not exist, next look up against other data that might match
+                status += "FETCH_CANDIDATES_FROM_NON_UNIQUE_IDENTIFIERS_COUNT1 "
+                # twitter handle does not exist, next look up against other data that might match
 
         if keep_looking_for_duplicates and positive_value_exists(candidate_name):
             # Search by Candidate name exact match
             try:
                 candidate_query = CandidateCampaign.objects.all()
-                candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name,
-                                                         google_civic_election_id=google_civic_election_id)
+                candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name)
+                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
 
@@ -1008,13 +1009,13 @@ class CandidateCampaignListManager(models.Model):
                 if positive_value_exists(candidate_count):
                     return candidate_count
             except CandidateCampaign.DoesNotExist:
-                status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND "
+                status += "FETCH_CANDIDATES_FROM_NON_UNIQUE_IDENTIFIERS_COUNT2 "
 
         if keep_looking_for_duplicates and positive_value_exists(candidate_name):
             # Search for Candidate(s) that contains the same first and last names
             try:
                 candidate_query = CandidateCampaign.objects.all()
-                candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
+                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
                 first_name = extract_first_name_from_full_name(candidate_name)
@@ -1029,8 +1030,7 @@ class CandidateCampaignListManager(models.Model):
                 if positive_value_exists(candidate_count):
                     return candidate_count
             except CandidateCampaign.DoesNotExist:
-                status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND "
-                success = True
+                status += "FETCH_CANDIDATES_FROM_NON_UNIQUE_IDENTIFIERS_COUNT3 "
 
         return 0
 
@@ -1149,6 +1149,34 @@ class CandidateCampaignListManager(models.Model):
             limit_to_this_state_code=limit_to_this_state_code)
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
         return candidate_we_vote_id_list
+
+    def retrieve_google_civic_election_id_list_from_candidate_we_vote_id_list(
+            self,
+            candidate_we_vote_id_list=[],
+            limit_to_this_state_code=''):
+        google_civic_election_id_list = []
+        office_we_vote_id_list_by_google_civic_election_id = {}
+        status = ''
+        success = True
+        results = self.retrieve_candidate_to_office_link_list(
+            candidate_we_vote_id_list=candidate_we_vote_id_list,
+            state_code=limit_to_this_state_code)
+        if not positive_value_exists(results['success']):
+            status += results['status']
+            success = False
+        else:
+            candidate_to_office_link_list = results['candidate_to_office_link_list']
+            for candidate_to_office_link in candidate_to_office_link_list:
+                google_civic_election_id_list.append(candidate_to_office_link.google_civic_election_id)
+                office_we_vote_id_list_by_google_civic_election_id[candidate_to_office_link.google_civic_election_id]\
+                    = candidate_to_office_link.candidate_we_vote_id
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'google_civic_election_id_list':    google_civic_election_id_list,
+            'office_we_vote_id_list_by_google_civic_election_id':   office_we_vote_id_list_by_google_civic_election_id,
+        }
+        return results
 
     def search_candidates_in_specific_elections(self, google_civic_election_id_list, search_string='', state_code='',
                                                 candidate_name='', candidate_twitter_handle='',
