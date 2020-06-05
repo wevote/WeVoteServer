@@ -1497,6 +1497,7 @@ class BallotItemListManager(models.Model):
                 'success':                  False,
                 'status':                   "MISSING_GOOGLE_CIVIC_ELECTION_ID ",
                 'google_civic_election_id': google_civic_election_id,
+                'ballot_item_list_count':   ballot_item_list_count,
                 'ballot_item_list_found':   ballot_item_list_found,
                 'ballot_item_list':         ballot_item_list_objects,
             }
@@ -1508,6 +1509,7 @@ class BallotItemListManager(models.Model):
                 'success':                  False,
                 'status':                   "MISSING_POLLING_LOCATION_WE_VOTE_ID_AND_VOTER_ID ",
                 'google_civic_election_id': google_civic_election_id,
+                'ballot_item_list_count':   ballot_item_list_count,
                 'ballot_item_list_found':   ballot_item_list_found,
                 'ballot_item_list':         ballot_item_list_objects,
             }
@@ -1520,6 +1522,7 @@ class BallotItemListManager(models.Model):
                 'success':                  False,
                 'status':                   "MISSING_MEASURE_AND_OFFICE_WE_VOTE_ID",
                 'google_civic_election_id': google_civic_election_id,
+                'ballot_item_list_count':   ballot_item_list_count,
                 'ballot_item_list_found':   ballot_item_list_found,
                 'ballot_item_list':         ballot_item_list_objects,
             }
