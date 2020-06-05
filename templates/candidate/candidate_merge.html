@@ -22,8 +22,10 @@
     </tr>
     <tr>
         <td>&nbsp;</td>
-        <td><a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_campaign_we_vote_id=candidate_option1.we_vote_id %}" target="_blank">view (in new window)</a></td>
-        <td><a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_campaign_we_vote_id=candidate_option2.we_vote_id %}" target="_blank">view (in new window)</a></td>
+        <td><a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_campaign_we_vote_id=candidate_option1.we_vote_id %}"
+               target="_blank">view <span class="glyphicon glyphicon-new-window"></span></a></td>
+        <td><a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_campaign_we_vote_id=candidate_option2.we_vote_id %}"
+               target="_blank">view <span class="glyphicon glyphicon-new-window"></span></a></td>
     </tr>
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_name" field_label="Candidate Name" conflict_status=conflict_values.candidate_name candidate1_field_value=candidate_option1.candidate_name candidate2_field_value=candidate_option2.candidate_name candidate1=candidate_option1 candidate2=candidate_option2 %}
@@ -50,19 +52,40 @@
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_candidate_name" field_label="Candidate Name (from Ballotpedia)" conflict_status=conflict_values.ballotpedia_candidate_name candidate1_field_value=candidate_option1.ballotpedia_candidate_name candidate2_field_value=candidate_option2.ballotpedia_candidate_name candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% if candidate_option1.contest_office_we_vote_id != candidate_option2.contest_office_we_vote_id %}
+{% if contest_office_mismatch %}
     <tr>
         <td><strong><span style="color: red">Office ***MISMATCH***</span></strong></td>
-        <td><strong><span style="color: red">************************************</span></strong></td>
-        <td><strong><span style="color: red">************************************</span></strong>
-          (<a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_option1.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_option2.contest_office_we_vote_id }}" target="_blank">compare&nbsp;for&nbsp;merge</a>)
-</td>
+        <td><strong><span style="color: red">********* NO OFFICES SHARED - MERGE OFFICES? *********</span></strong></td>
+        <td><strong><span style="color: red">********* NO OFFICES SHARED - MERGE OFFICES? *********</span></strong></td>
     </tr>
 {% endif %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="contest_office_we_vote_id" field_label="Office We Vote Id" conflict_status=conflict_values.contest_office_we_vote_id candidate1_field_value=candidate_option1.contest_office_we_vote_id candidate2_field_value=candidate_option2.contest_office_we_vote_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+    <tr>
+        <td>Office Links</td>
+        <td>
+            {% for candidate_to_office_link in candidate_option1_candidate_to_office_link_list %}
+                {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
+                ({{ candidate_to_office_link.google_civic_election_id }}) --
+                <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
+                   target="_blank">{{ candidate_to_office_link.office.office_name }} ({{ candidate_to_office_link.contest_office_we_vote_id }})
+                  <span class="glyphicon glyphicon-new-window"></span></a><br />
+            {% endfor %}
+        </td>
+        <td>
+            {% for candidate_to_office_link in candidate_option2_candidate_to_office_link_list %}
+                {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
+                ({{ candidate_to_office_link.google_civic_election_id }}) --
+                <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
+                   target="_blank">{{ candidate_to_office_link.office.office_name }} ({{ candidate_to_office_link.contest_office_we_vote_id }})
+                  <span class="glyphicon glyphicon-new-window"></span></a><br />
+            {% endfor %}
+        </td>
+    </tr>
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="contest_office_name" field_label="Office Name" conflict_status=conflict_values.contest_office_name candidate1_field_value=candidate_option1.contest_office_name candidate2_field_value=candidate_option2.contest_office_name candidate1=candidate_option1 candidate2=candidate_option2 %}
+
+{#{% include "candidate/candidate_merge_one_field_decision.html" with field_name="contest_office_we_vote_id" field_label="Office We Vote Id" conflict_status=conflict_values.contest_office_we_vote_id candidate1_field_value=candidate_option1.contest_office_we_vote_id candidate2_field_value=candidate_option2.contest_office_we_vote_id candidate1=candidate_option1 candidate2=candidate_option2 %}#}
+{##}
+{#{% include "candidate/candidate_merge_one_field_decision.html" with field_name="contest_office_name" field_label="Office Name" conflict_status=conflict_values.contest_office_name candidate1_field_value=candidate_option1.contest_office_name candidate2_field_value=candidate_option2.contest_office_name candidate1=candidate_option1 candidate2=candidate_option2 %}#}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="party" field_label="Party" conflict_status=conflict_values.party candidate1_field_value=candidate_option1.party candidate2_field_value=candidate_option2.party candidate1=candidate_option1 candidate2=candidate_option2 %}
 
@@ -81,7 +104,7 @@
     </tr>
     {% endif %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="google_civic_election_id" field_label="Election ID" conflict_status=conflict_values.google_civic_election_id candidate1_field_value=candidate_option1.google_civic_election_id candidate2_field_value=candidate_option2.google_civic_election_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+{#{% include "candidate/candidate_merge_one_field_decision.html" with field_name="google_civic_election_id" field_label="Election ID" conflict_status=conflict_values.google_civic_election_id candidate1_field_value=candidate_option1.google_civic_election_id candidate2_field_value=candidate_option2.google_civic_election_id candidate1=candidate_option1 candidate2=candidate_option2 %}#}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_candidate_id" field_label="Ballotpedia ID" conflict_status=conflict_values.ballotpedia_candidate_id candidate1_field_value=candidate_option1.ballotpedia_candidate_id candidate2_field_value=candidate_option2.ballotpedia_candidate_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 

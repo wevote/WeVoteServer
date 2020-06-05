@@ -1211,6 +1211,7 @@ def move_positions_to_another_office(from_contest_office_id, from_contest_office
                     break  # stop merge, exit for loop
             else:
                 # Update contest_office's ids for this position
+                # DALE 2020-06-04 I think we will want to remove this soon
                 position_object.contest_office_id = to_contest_office_id
                 position_object.contest_office_we_vote_id = to_contest_office_we_vote_id
                 try:

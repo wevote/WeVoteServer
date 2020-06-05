@@ -1007,7 +1007,6 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    office_manager = ContestOfficeManager()
     status = ""
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
@@ -1480,6 +1479,7 @@ def organization_position_edit_process_view(request):
     statement_text = request.POST.get('statement_text', '')  # Set a default if stance comes in empty
     more_info_url = request.POST.get('more_info_url', '')
     show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
+    save_button = positive_value_exists(request.POST.get('save_button', False))
 
     go_back_to_add_new = False
     candidate_campaign_we_vote_id = ""
@@ -1662,93 +1662,102 @@ def organization_position_edit_process_view(request):
             organization_position_found_from_new_form = True
 
     # Now save existing, or create new
-    success = False
-    try:
-        if organization_position_on_stage_found:
-            # Update the position
-            organization_position_on_stage.stance = stance
-            organization_position_on_stage.google_civic_election_id = google_civic_election_id
-            if not organization_position_found_from_new_form or positive_value_exists(more_info_url):
-                # Only update this if we came from update form, or there is a value in the incoming variable
-                organization_position_on_stage.more_info_url = more_info_url
-            if not organization_position_found_from_new_form or positive_value_exists(statement_text):
-                # Only update this if we came from update form, or there is a value in the incoming variable
-                organization_position_on_stage.statement_text = statement_text
-            if not positive_value_exists(organization_position_on_stage.organization_we_vote_id):
-                organization_position_on_stage.organization_we_vote_id = organization_on_stage.we_vote_id
-            organization_position_on_stage.candidate_campaign_id = candidate_campaign_id
-            organization_position_on_stage.candidate_campaign_we_vote_id = candidate_campaign_we_vote_id
-            organization_position_on_stage.google_civic_candidate_name = google_civic_candidate_name
-            organization_position_on_stage.contest_measure_id = contest_measure_id
-            organization_position_on_stage.contest_measure_we_vote_id = contest_measure_we_vote_id
-            organization_position_on_stage.google_civic_measure_title = google_civic_measure_title
-            organization_position_on_stage.state_code = state_code
-            organization_position_on_stage.save()
+    if positive_value_exists(save_button):
+        success = False
+        try:
+            if organization_position_on_stage_found:
+                # Update the position
+                organization_position_on_stage.stance = stance
+                organization_position_on_stage.google_civic_election_id = google_civic_election_id
+                if not organization_position_found_from_new_form or positive_value_exists(more_info_url):
+                    # Only update this if we came from update form, or there is a value in the incoming variable
+                    organization_position_on_stage.more_info_url = more_info_url
+                if not organization_position_found_from_new_form or positive_value_exists(statement_text):
+                    # Only update this if we came from update form, or there is a value in the incoming variable
+                    organization_position_on_stage.statement_text = statement_text
+                if not positive_value_exists(organization_position_on_stage.organization_we_vote_id):
+                    organization_position_on_stage.organization_we_vote_id = organization_on_stage.we_vote_id
+                organization_position_on_stage.candidate_campaign_id = candidate_campaign_id
+                organization_position_on_stage.candidate_campaign_we_vote_id = candidate_campaign_we_vote_id
+                organization_position_on_stage.google_civic_candidate_name = google_civic_candidate_name
+                organization_position_on_stage.contest_measure_id = contest_measure_id
+                organization_position_on_stage.contest_measure_we_vote_id = contest_measure_we_vote_id
+                organization_position_on_stage.google_civic_measure_title = google_civic_measure_title
+                organization_position_on_stage.state_code = state_code
+                organization_position_on_stage.save()
 
-            results = position_manager.refresh_cached_position_info(organization_position_on_stage)
+                results = position_manager.refresh_cached_position_info(organization_position_on_stage)
 
-            success = True
+                success = True
 
-            if positive_value_exists(candidate_campaign_we_vote_id):
-                messages.add_message(
-                    request, messages.INFO,
-                    "Position on {candidate_name} updated.".format(
-                        candidate_name=candidate_campaign_on_stage.display_candidate_name()))
-            elif positive_value_exists(contest_measure_we_vote_id):
-                messages.add_message(
-                    request, messages.INFO,
-                    "Position on {measure_title} updated.".format(
-                        measure_title=contest_measure_on_stage.measure_title))
-        else:
-            # Create new
-            # Note that since we are processing a volunteer/admin entry tool, we can always save the PositionEntered
-            # table, and don't need to worry about PositionForFriends
-            organization_position_on_stage = PositionEntered(
-                organization_id=organization_id,
-                organization_we_vote_id=organization_we_vote_id,
-                candidate_campaign_id=candidate_campaign_id,
-                candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
-                google_civic_candidate_name=google_civic_candidate_name,
-                contest_measure_id=contest_measure_id,
-                contest_measure_we_vote_id=contest_measure_we_vote_id,
-                google_civic_measure_title=google_civic_measure_title,
-                google_civic_election_id=google_civic_election_id,
-                stance=stance,
-                statement_text=statement_text,
-                more_info_url=more_info_url,
-                state_code=state_code,
-            )
-            organization_position_on_stage.save()
+                if positive_value_exists(candidate_campaign_we_vote_id):
+                    messages.add_message(
+                        request, messages.INFO,
+                        "Position on {candidate_name} updated.".format(
+                            candidate_name=candidate_campaign_on_stage.display_candidate_name()))
+                elif positive_value_exists(contest_measure_we_vote_id):
+                    messages.add_message(
+                        request, messages.INFO,
+                        "Position on {measure_title} updated.".format(
+                            measure_title=contest_measure_on_stage.measure_title))
+            else:
+                # Create new
+                # Note that since we are processing a volunteer/admin entry tool, we can always save the PositionEntered
+                # table, and don't need to worry about PositionForFriends
+                organization_position_on_stage = PositionEntered(
+                    organization_id=organization_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    candidate_campaign_id=candidate_campaign_id,
+                    candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                    google_civic_candidate_name=google_civic_candidate_name,
+                    contest_measure_id=contest_measure_id,
+                    contest_measure_we_vote_id=contest_measure_we_vote_id,
+                    google_civic_measure_title=google_civic_measure_title,
+                    google_civic_election_id=google_civic_election_id,
+                    stance=stance,
+                    statement_text=statement_text,
+                    more_info_url=more_info_url,
+                    state_code=state_code,
+                )
+                organization_position_on_stage.save()
 
-            results = position_manager.refresh_cached_position_info(organization_position_on_stage)
-            success = True
+                results = position_manager.refresh_cached_position_info(organization_position_on_stage)
+                success = True
 
-            if positive_value_exists(candidate_campaign_we_vote_id):
-                messages.add_message(
-                    request, messages.INFO,
-                    "New position on {candidate_name} saved.".format(
-                        candidate_name=candidate_campaign_on_stage.display_candidate_name()))
-            elif positive_value_exists(contest_measure_we_vote_id):
-                messages.add_message(
-                    request, messages.INFO,
-                    "New position on {measure_title} saved.".format(
-                        measure_title=contest_measure_on_stage.measure_title))
-            go_back_to_add_new = True
-    except Exception as e:
-        pass
-    # If the position was saved, then update the voter_guide entry
-    if success:
-        voter_guide_manager = VoterGuideManager()
-        voter_guide_we_vote_id = ''
-        results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-            voter_guide_we_vote_id, organization_on_stage.we_vote_id, google_civic_election_id, state_code)
-        # if results['success']:
+                if positive_value_exists(candidate_campaign_we_vote_id):
+                    messages.add_message(
+                        request, messages.INFO,
+                        "New position on {candidate_name} saved.".format(
+                            candidate_name=candidate_campaign_on_stage.display_candidate_name()))
+                elif positive_value_exists(contest_measure_we_vote_id):
+                    messages.add_message(
+                        request, messages.INFO,
+                        "New position on {measure_title} saved.".format(
+                            measure_title=contest_measure_on_stage.measure_title))
+                go_back_to_add_new = True
+        except Exception as e:
+            pass
+        # If the position was saved, then update the voter_guide entry
+        if success:
+            voter_guide_manager = VoterGuideManager()
+            voter_guide_we_vote_id = ''
+            results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+                voter_guide_we_vote_id, organization_on_stage.we_vote_id, google_civic_election_id, state_code)
+            # if results['success']:
+    else:
+        go_back_to_add_new = True
 
     if go_back_to_add_new:
         url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
         url_variables += "&state_code=" + str(state_code)
+        if positive_value_exists(candidate_campaign_id):
+            url_variables += "&candidate_campaign_id=" + str(candidate_campaign_id)
         if positive_value_exists(show_all_elections):
             url_variables += "&show_all_elections=1"
+        url_variables += "&contest_measure_id=" + str(contest_measure_id)
+        url_variables += "&stance=" + str(stance)
+        url_variables += "&statement_text=" + str(statement_text)
+        url_variables += "&more_info_url=" + str(more_info_url)
 
         return HttpResponseRedirect(
             reverse('organization:organization_position_new', args=(organization_on_stage.id,)) +

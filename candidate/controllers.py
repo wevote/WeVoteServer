@@ -188,36 +188,34 @@ def fetch_duplicate_candidate_count(we_vote_candidate, ignore_candidate_id_list)
     if not positive_value_exists(we_vote_candidate.google_civic_election_id):
         return 0
 
-    # Search for other candidates within this election that match name and election
     candidate_campaign_list_manager = CandidateCampaignListManager()
+    results = candidate_campaign_list_manager.retrieve_google_civic_election_id_list_from_candidate_we_vote_id_list(
+        candidate_we_vote_id_list=[we_vote_candidate.we_vote_id])
+    google_civic_election_id_list = results['google_civic_election_id_list']
+
+    # Search for other candidates in any of the elections this candidate is in that match name and election
     return candidate_campaign_list_manager.fetch_candidates_from_non_unique_identifiers_count(
-        we_vote_candidate.google_civic_election_id, we_vote_candidate.state_code,
+        google_civic_election_id_list, we_vote_candidate.state_code,
         we_vote_candidate.candidate_twitter_handle, we_vote_candidate.candidate_name, ignore_candidate_id_list)
 
 
 def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
-    if not hasattr(we_vote_candidate, 'google_civic_election_id'):
+    if not hasattr(we_vote_candidate, 'candidate_name'):
         error_results = {
             'success':                              False,
-            'status':                               "FIND_DUPLICATE_CANDIDATE_MISSING_CANDIDATE_OBJECT",
+            'status':                               "FIND_DUPLICATE_CANDIDATE_MISSING_CANDIDATE_OBJECT ",
             'candidate_merge_possibility_found':    False,
             'candidate_list':                       [],
         }
         return error_results
 
-    if not positive_value_exists(we_vote_candidate.google_civic_election_id):
-        error_results = {
-            'success':                              False,
-            'status':                               "FIND_DUPLICATE_CANDIDATE_MISSING_GOOGLE_CIVIC_ELECTION_ID",
-            'candidate_merge_possibility_found':    False,
-            'candidate_list':                       [],
-        }
-        return error_results
-
-    # Search for other candidates within this election that match name and election
     candidate_campaign_list_manager = CandidateCampaignListManager()
+    results = candidate_campaign_list_manager.retrieve_google_civic_election_id_list_from_candidate_we_vote_id_list(
+        candidate_we_vote_id_list=[we_vote_candidate.we_vote_id])
+    google_civic_election_id_list = results['google_civic_election_id_list']
+
+    # Search for other candidates that share the same elections that match name and election
     try:
-        google_civic_election_id_list = [we_vote_candidate.google_civic_election_id]
         results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id_list, we_vote_candidate.state_code,
             we_vote_candidate.candidate_twitter_handle, we_vote_candidate.candidate_name, ignore_candidate_id_list)
@@ -434,7 +432,7 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
                 politician = results['politician']
                 politician2_id = politician.id
         except Exception as e:
-            status += "COULD_NOT_UPDATE_POLITICIAN_FOR_CANDIDATE2 "
+            status += "COULD_NOT_UPDATE_POLITICIAN_FOR_CANDIDATE2 " + str(e) + " "
         candidate1_on_stage.politician_we_vote_id = politician2_we_vote_id
         candidate1_on_stage.politician_id = politician2_id
     # else do nothing (no parent politician for candidate 2)
@@ -467,13 +465,6 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name3):
         candidate1_on_stage = add_candidate_name_to_next_spot(
             candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name3)
-    # DALE 2018-07-09 We don't offer
-    # if positive_value_exists(candidate2_on_stage.google_civic_candidate_name4):
-    #     candidate1_on_stage = add_candidate_name_to_next_spot(
-    #         candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name4)
-    # if positive_value_exists(candidate2_on_stage.google_civic_candidate_name5):
-    #     candidate1_on_stage = add_candidate_name_to_next_spot(
-    #         candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name5)
 
     # Merge public positions
     public_positions_results = move_positions_to_another_candidate(candidate2_id, candidate2_we_vote_id,
@@ -505,6 +496,37 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
         }
         return results
 
+    # #####################################
+    # Deal with candidate_to_office_link
+    # We are going to keep candidate1 linkages
+    candidate1_office_we_vote_id_list = []
+    candidate1_link_results = candidate_campaign_manager.retrieve_candidate_to_office_link(
+            candidate_we_vote_id=candidate1_we_vote_id, read_only=False)
+    if positive_value_exists(candidate1_link_results['success']):
+        candidate1_to_office_link_list = candidate1_link_results['candidate_to_office_link_list']
+        # Cycle through the candidate1 links and put the contest_office_we_vote_id's into a simple list
+        for link in candidate1_to_office_link_list:
+            candidate1_office_we_vote_id_list.append(link.contest_office_we_vote_id)
+    else:
+        status += candidate1_link_results['status']
+
+    # We need to migrate candidate2 linkages
+    candidate2_to_office_link_list = []
+    candidate2_link_results = candidate_campaign_manager.retrieve_candidate_to_office_link(
+            candidate_we_vote_id=candidate2_we_vote_id, read_only=False)
+    if positive_value_exists(candidate2_link_results['success']):
+        candidate2_to_office_link_list = candidate2_link_results['candidate_to_office_link_list']
+    else:
+        status += candidate1_link_results['status']
+
+    # Cycle through the candidate2 links. Either move them (if "to" link doesn't exist), or delete if a "to" link exists
+    for candidate2_link in candidate2_to_office_link_list:
+        if candidate2_link.contest_office_we_vote_id in candidate1_office_we_vote_id_list:
+            candidate2_link.delete()
+        else:
+            candidate2_link.candidate_we_vote_id = candidate1_we_vote_id
+            candidate2_link.save()
+
     # Note: wait to wrap in try/except block
     candidate1_on_stage.save()
     refresh_candidate_data_from_master_tables(candidate1_on_stage.we_vote_id)
@@ -522,32 +544,76 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
 
 
 def move_candidates_to_another_office(from_contest_office_id, from_contest_office_we_vote_id,
-                                      to_contest_office_id, to_contest_office_we_vote_id,
-                                      updated_contest_office):
+                                      to_contest_office_id, to_contest_office_we_vote_id):
     status = ''
     success = True
     candidate_entries_moved = 0
     candidate_entries_not_moved = 0
-    candidate_campaign_manager = CandidateCampaignManager()
-    candidate_campaign_list_manager = CandidateCampaignListManager()
+    candidate_manager = CandidateCampaignManager()
+    contest_manager = ContestOfficeManager()
 
-    # We search on both from_office_id and from_office_we_vote_id in case there is some data that needs
-    # to be healed
-    all_candidates_results = candidate_campaign_list_manager.retrieve_all_candidates_for_office(
-        office_we_vote_id=from_contest_office_we_vote_id)
-    from_candidate_list = all_candidates_results['candidate_list']
-    for from_candidate_entry in from_candidate_list:
-        try:
-            from_candidate_entry.contest_office_id = to_contest_office_id
-            from_candidate_entry.contest_office_we_vote_id = to_contest_office_we_vote_id
-            from_candidate_entry.save()
-            candidate_entries_moved += 1
-            candidate_campaign_manager.refresh_cached_candidate_office_info(from_candidate_entry,
-                                                                            updated_contest_office)
-        except Exception as e:
-            success = False
-            status += "MOVE_TO_ANOTHER_CONTEST_OFFICE-UNABLE_TO_SAVE_NEW_CANDIDATE "
+    # #####################################
+    # The from office
+    if positive_value_exists(from_contest_office_id) and not positive_value_exists(from_contest_office_we_vote_id):
+        from_contest_office_we_vote_id = contest_manager.fetch_contest_office_we_vote_id_from_id(from_contest_office_id)
+    from_link_results = candidate_manager.retrieve_candidate_to_office_link(
+            contest_office_we_vote_id=from_contest_office_we_vote_id, read_only=False)
+    if not positive_value_exists(from_link_results['success']):
+        status += from_link_results['status']
+        success = False
+        results = {
+            'success': success,
+            'status': status,
+            'from_contest_office_id': from_contest_office_id,
+            'from_contest_office_we_vote_id': from_contest_office_we_vote_id,
+            'to_contest_office_id': to_contest_office_id,
+            'to_contest_office_we_vote_id': to_contest_office_we_vote_id,
+            'candidate_entries_moved': candidate_entries_moved,
+            'candidate_entries_not_moved': candidate_entries_not_moved,
+        }
+        return results
+    from_candidate_to_office_link_list = from_link_results['candidate_to_office_link_list']
+
+    # #####################################
+    # The to office
+    if positive_value_exists(to_contest_office_id) and not positive_value_exists(to_contest_office_we_vote_id):
+        to_contest_office_we_vote_id = contest_manager.fetch_contest_office_we_vote_id_from_id(to_contest_office_id)
+    to_link_results = candidate_manager.retrieve_candidate_to_office_link(
+            contest_office_we_vote_id=to_contest_office_we_vote_id, read_only=False)
+    if not positive_value_exists(to_link_results['success']):
+        status += to_link_results['status']
+        success = False
+        results = {
+            'success': success,
+            'status': status,
+            'from_contest_office_id': from_contest_office_id,
+            'from_contest_office_we_vote_id': from_contest_office_we_vote_id,
+            'to_contest_office_id': to_contest_office_id,
+            'to_contest_office_we_vote_id': to_contest_office_we_vote_id,
+            'candidate_entries_moved': candidate_entries_moved,
+            'candidate_entries_not_moved': candidate_entries_not_moved,
+        }
+        return results
+    to_candidate_to_office_link_list = to_link_results['candidate_to_office_link_list']
+
+    # #####################################
+    # Cycle through the to links and put the candidate_we_vote_id's into a simple list
+    to_candidate_we_vote_id_list = []
+    for to_link in to_candidate_to_office_link_list:
+        to_candidate_we_vote_id_list.append(to_link.candidate_we_vote_id)
+
+    # #####################################
+    # Cycle through the from links and either move them (if a "to" link doesn't exist), or delete if a "to" link exists
+    for from_link in from_candidate_to_office_link_list:
+        if from_link.candidate_we_vote_id in to_candidate_we_vote_id_list:
+            from_link.delete()
             candidate_entries_not_moved += 1
+        else:
+            from_link.contest_office_we_vote_id = to_contest_office_we_vote_id
+            from_link.google_civic_election_id = \
+                contest_manager.fetch_google_civic_election_id_from_office_we_vote_id(to_contest_office_we_vote_id)
+            from_link.save()
+            candidate_entries_moved += 1
 
     results = {
         'status':                           status,
@@ -1648,7 +1714,8 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                         # Remove the http... from the candidate website
                         organization_website_stripped = extract_website_from_url(organization_website)
                         if organization_website_stripped not in \
-                                ('bit.ly',
+                                ('ballotpedia.org',
+                                 'bit.ly',
                                  'en.wikipedia.org',
                                  'facebook.com',
                                  'instagram.com',
@@ -1758,7 +1825,8 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                         # Remove the http... from the candidate website
                         organization_website_stripped = extract_website_from_url(organization_website)
                         if organization_website_stripped not in \
-                                ('bit.ly',
+                                ('ballotpedia.org',
+                                 'bit.ly',
                                  'en.wikipedia.org',
                                  'facebook.com',
                                  'instagram.com',
@@ -1914,7 +1982,8 @@ def organization_endorsements_scanner(endorsement_list_light, text_to_search_low
                     # Remove the http... from the candidate website
                     ballot_item_website_stripped = extract_website_from_url(ballot_item_website)
                     if ballot_item_website_stripped not in \
-                            ('bit.ly',
+                            ('ballotpedia.org',
+                             'bit.ly',
                              'en.wikipedia.org',
                              'facebook.com',
                              'instagram.com',
