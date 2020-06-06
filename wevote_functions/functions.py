@@ -1218,6 +1218,22 @@ def get_voter_api_device_id(request, generate_if_no_cookie=False):
     :return:
     """
     voter_api_device_id = ''
+    # First check the headers
+    voter_device_id = request.META.get('HTTP_X_HEADER_DEVICEID', '')
+    if positive_value_exists(voter_device_id):
+        return voter_device_id
+
+    # Then check for incoming GET value
+    voter_device_id = request.GET.get('voter_device_id', '')
+    if positive_value_exists(voter_device_id):
+        return voter_device_id
+
+    # Then check for incoming POST value
+    voter_device_id = request.POST.get('voter_device_id', '')
+    if positive_value_exists(voter_device_id):
+        return voter_device_id
+
+    # We switch from voter_device_id to voter_api_device_id here
     if 'voter_api_device_id' in request.COOKIES:
         voter_api_device_id = request.COOKIES['voter_api_device_id']
         # logger.debug("from cookie, voter_api_device_id: {voter_api_device_id}".format(

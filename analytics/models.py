@@ -1995,3 +1995,126 @@ def display_action_constant_human_readable(action_constant):
         return "WELCOME_VISIT"
 
     return "ACTION_CONSTANT:" + str(action_constant)
+
+
+def fetch_action_constant_number_from_constant_string(action_constant_string):
+    action_constant_string = action_constant_string.upper()
+    if action_constant_string in 'ACTION_VOTER_GUIDE_VISIT':
+        return 1
+    if action_constant_string in 'ACTION_VOTER_GUIDE_ENTRY':
+        return 2
+    if action_constant_string in 'ACTION_ORGANIZATION_FOLLOW':
+        return 3
+    if action_constant_string in 'ACTION_ORGANIZATION_AUTO_FOLLOW':
+        return 4
+    if action_constant_string in 'ACTION_ISSUE_FOLLOW':
+        return 5
+    if action_constant_string in 'ACTION_BALLOT_VISIT':
+        return 6
+    if action_constant_string in 'ACTION_POSITION_TAKEN':
+        return 7
+    if action_constant_string in 'ACTION_VOTER_TWITTER_AUTH':
+        return 8
+    if action_constant_string in 'ACTION_VOTER_FACEBOOK_AUTH':
+        return 9
+    if action_constant_string in 'ACTION_WELCOME_ENTRY':
+        return 10
+    if action_constant_string in 'ACTION_FRIEND_ENTRY':
+        return 11
+    if action_constant_string in 'ACTION_WELCOME_VISIT':
+        return 12
+    if action_constant_string in 'ACTION_ORGANIZATION_FOLLOW_IGNORE':
+        return 13
+    if action_constant_string in 'ACTION_ORGANIZATION_STOP_FOLLOWING':
+        return 14
+    if action_constant_string in 'ACTION_ISSUE_FOLLOW_IGNORE':
+        return 15
+    if action_constant_string in 'ACTION_ISSUE_STOP_FOLLOWING':
+        return 16
+    if action_constant_string in 'ACTION_MODAL_ISSUES':
+        return 17
+    if action_constant_string in 'ACTION_MODAL_ORGANIZATIONS':
+        return 18
+    if action_constant_string in 'ACTION_MODAL_POSITIONS':
+        return 19
+    if action_constant_string in 'ACTION_MODAL_FRIENDS':
+        return 20
+    if action_constant_string in 'ACTION_MODAL_SHARE':
+        return 21
+    if action_constant_string in 'ACTION_MODAL_VOTE':
+        return 22
+    if action_constant_string in 'ACTION_NETWORK':
+        return 23
+    if action_constant_string in 'ACTION_FACEBOOK_INVITABLE_FRIENDS':
+        return 24
+    if action_constant_string in 'ACTION_DONATE_VISIT':
+        return 25
+    if action_constant_string in 'ACTION_ACCOUNT_PAGE':
+        return 26
+    if action_constant_string in 'ACTION_INVITE_BY_EMAIL':
+        return 27
+    if action_constant_string in 'ACTION_ABOUT_GETTING_STARTED':
+        return 28
+    if action_constant_string in 'ACTION_ABOUT_VISION':
+        return 29
+    if action_constant_string in 'ACTION_ABOUT_ORGANIZATION':
+        return 30
+    if action_constant_string in 'ACTION_ABOUT_TEAM':
+        return 31
+    if action_constant_string in 'ACTION_ABOUT_MOBILE':
+        return 32
+    if action_constant_string in 'ACTION_OFFICE':
+        return 33
+    if action_constant_string in 'ACTION_CANDIDATE':
+        return 34
+    if action_constant_string in 'ACTION_VOTER_GUIDE_GET_STARTED':
+        return 35
+    if action_constant_string in 'ACTION_FACEBOOK_AUTHENTICATION_EXISTS':
+        return 36
+    if action_constant_string in 'ACTION_GOOGLE_AUTHENTICATION_EXISTS':
+        return 37
+    if action_constant_string in 'ACTION_TWITTER_AUTHENTICATION_EXISTS':
+        return 38
+    if action_constant_string in 'ACTION_EMAIL_AUTHENTICATION_EXISTS':
+        return 39
+    if action_constant_string in 'ACTION_ELECTIONS':
+        return 40
+    if action_constant_string in 'ACTION_ORGANIZATION_STOP_IGNORING':
+        return 41
+    if action_constant_string in 'ACTION_MODAL_VOTER_PLAN':
+        return 42
+    if action_constant_string in 'ACTION_READY_VISIT':
+        return 43
+    if action_constant_string in 'ACTION_SELECT_BALLOT_MODAL':
+        return 44
+    if action_constant_string in 'ACTION_SHARE_BUTTON_COPY':
+        return 45
+    if action_constant_string in 'ACTION_SHARE_BUTTON_EMAIL':
+        return 46
+    if action_constant_string in 'ACTION_SHARE_BUTTON_FACEBOOK':
+        return 47
+    if action_constant_string in 'ACTION_SHARE_BUTTON_FRIENDS':
+        return 48
+    if action_constant_string in 'ACTION_SHARE_BUTTON_TWITTER':
+        return 49
+    if action_constant_string in 'ACTION_SHARE_BALLOT':
+        return 50
+    if action_constant_string in 'ACTION_SHARE_BALLOT_ALL_OPINIONS':
+        return 51
+    if action_constant_string in 'ACTION_SHARE_CANDIDATE':
+        return 52
+    if action_constant_string in 'ACTION_SHARE_CANDIDATE_ALL_OPINIONS':
+        return 53
+    if action_constant_string in 'ACTION_SHARE_MEASURE':
+        return 54
+    if action_constant_string in 'ACTION_SHARE_MEASURE_ALL_OPINIONS':
+        return 55
+    if action_constant_string in 'ACTION_SHARE_OFFICE':
+        return 56
+    if action_constant_string in 'ACTION_SHARE_OFFICE_ALL_OPINIONS':
+        return 57
+    if action_constant_string in 'ACTION_SHARE_READY':
+        return 58
+    if action_constant_string in 'ACTION_SHARE_READY_ALL_OPINIONS':
+        return 59
+    return 0

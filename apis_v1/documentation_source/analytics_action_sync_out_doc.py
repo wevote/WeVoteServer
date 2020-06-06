@@ -33,6 +33,11 @@ def analytics_action_sync_out_doc_template_values(url_root):
             'value':        'integer',  # boolean, integer, long, string
             'description':  'Retrieve data through this date. Format: YYYYMMDD (ex/ 20200228) (Default is right now.)'
         },
+        {
+            'name':         'return_csv_format',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'If set to true, return results in CSV format instead of JSON.'
+        },
     ]
 
     potential_status_codes_list = [
