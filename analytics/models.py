@@ -74,6 +74,16 @@ ACTION_SHARE_OFFICE = 56
 ACTION_SHARE_OFFICE_ALL_OPINIONS = 57
 ACTION_SHARE_READY = 58
 ACTION_SHARE_READY_ALL_OPINIONS = 59
+ACTION_VIEW_SHARED_BALLOT = 60
+ACTION_VIEW_SHARED_BALLOT_ALL_OPINIONS = 61
+ACTION_VIEW_SHARED_CANDIDATE = 62
+ACTION_VIEW_SHARED_CANDIDATE_ALL_OPINIONS = 63
+ACTION_VIEW_SHARED_MEASURE = 64
+ACTION_VIEW_SHARED_MEASURE_ALL_OPINIONS = 65
+ACTION_VIEW_SHARED_OFFICE = 66
+ACTION_VIEW_SHARED_OFFICE_ALL_OPINIONS = 67
+ACTION_VIEW_SHARED_READY = 68
+ACTION_VIEW_SHARED_READY_ALL_OPINIONS = 69
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
@@ -1213,7 +1223,8 @@ class AnalyticsManager(models.Model):
         }
         return results
 
-    def save_action(self, action_constant, voter_we_vote_id, voter_id, is_signed_in=False, state_code="",
+    def save_action(self, action_constant="",
+                    voter_we_vote_id="", voter_id=0, is_signed_in=False, state_code="",
                     organization_we_vote_id="", organization_id=0, google_civic_election_id=0,
                     user_agent_string="", is_bot=False, is_mobile=False, is_desktop=False, is_tablet=False,
                     ballot_item_we_vote_id="", voter_device_id=None):
@@ -1979,6 +1990,26 @@ def display_action_constant_human_readable(action_constant):
         return "SHARE_READY_ALL_OPINIONS"
     if action_constant == ACTION_TWITTER_AUTHENTICATION_EXISTS:
         return "TWITTER_AUTHENTICATION_EXISTS"
+    if action_constant == ACTION_VIEW_SHARED_BALLOT:
+        return "VIEW_SHARED_BALLOT"
+    if action_constant == ACTION_VIEW_SHARED_BALLOT_ALL_OPINIONS:
+        return "VIEW_SHARED_BALLOT_ALL_OPINIONS"
+    if action_constant == ACTION_VIEW_SHARED_CANDIDATE:
+        return "VIEW_SHARED_CANDIDATE"
+    if action_constant == ACTION_VIEW_SHARED_CANDIDATE_ALL_OPINIONS:
+        return "VIEW_SHARED_CANDIDATE_ALL_OPINIONS"
+    if action_constant == ACTION_VIEW_SHARED_MEASURE:
+        return "VIEW_SHARED_MEASURE"
+    if action_constant == ACTION_VIEW_SHARED_MEASURE_ALL_OPINIONS:
+        return "VIEW_SHARED_MEASURE_ALL_OPINIONS"
+    if action_constant == ACTION_VIEW_SHARED_OFFICE:
+        return "VIEW_SHARED_OFFICE"
+    if action_constant == ACTION_VIEW_SHARED_OFFICE_ALL_OPINIONS:
+        return "VIEW_SHARED_OFFICE_ALL_OPINIONS"
+    if action_constant == ACTION_VIEW_SHARED_READY:
+        return "VIEW_SHARED_READY"
+    if action_constant == ACTION_VIEW_SHARED_READY_ALL_OPINIONS:
+        return "VIEW_SHARED_READY_ALL_OPINIONS"
     if action_constant == ACTION_VOTER_FACEBOOK_AUTH:
         return "VOTER_FACEBOOK_AUTH"
     if action_constant == ACTION_VOTER_GUIDE_ENTRY:
@@ -2117,4 +2148,24 @@ def fetch_action_constant_number_from_constant_string(action_constant_string):
         return 58
     if action_constant_string in 'ACTION_SHARE_READY_ALL_OPINIONS':
         return 59
+    if action_constant_string in 'ACTION_VIEW_SHARED_BALLOT':
+        return 60
+    if action_constant_string in 'ACTION_VIEW_SHARED_BALLOT_ALL_OPINIONS':
+        return 61
+    if action_constant_string in 'ACTION_VIEW_SHARED_CANDIDATE':
+        return 62
+    if action_constant_string in 'ACTION_VIEW_SHARED_CANDIDATE_ALL_OPINIONS':
+        return 63
+    if action_constant_string in 'ACTION_VIEW_SHARED_MEASURE':
+        return 64
+    if action_constant_string in 'ACTION_VIEW_SHARED_MEASURE_ALL_OPINIONS':
+        return 65
+    if action_constant_string in 'ACTION_VIEW_SHARED_OFFICE':
+        return 66
+    if action_constant_string in 'ACTION_VIEW_SHARED_OFFICE_ALL_OPINIONS':
+        return 67
+    if action_constant_string in 'ACTION_VIEW_SHARED_READY':
+        return 68
+    if action_constant_string in 'ACTION_VIEW_SHARED_READY_ALL_OPINIONS':
+        return 69
     return 0
