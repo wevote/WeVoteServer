@@ -3,10 +3,16 @@
 # -*- coding: UTF-8 -*-
 
 from .models import ShareManager
+from analytics.models import ACTION_VIEW_SHARED_BALLOT, ACTION_VIEW_SHARED_BALLOT_ALL_OPINIONS, \
+    ACTION_VIEW_SHARED_CANDIDATE, ACTION_VIEW_SHARED_CANDIDATE_ALL_OPINIONS, ACTION_VIEW_SHARED_MEASURE, \
+    ACTION_VIEW_SHARED_MEASURE_ALL_OPINIONS, ACTION_VIEW_SHARED_OFFICE, ACTION_VIEW_SHARED_OFFICE_ALL_OPINIONS, \
+    ACTION_VIEW_SHARED_READY, ACTION_VIEW_SHARED_READY_ALL_OPINIONS, \
+    AnalyticsManager
 from follow.models import FOLLOWING, FollowOrganizationManager
 from organization.models import OrganizationManager
+import robot_detection
 from share.models import SharedItem, SharedLinkClicked, SharedPermissionsGranted
-from voter.models import VoterManager
+from voter.models import VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 
@@ -139,7 +145,9 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         voter_device_id='',
         destination_full_url='',
         shared_item_code='',
-        shared_item_clicked=False):
+        shared_item_clicked=False,
+        user_agent_string='',
+        user_agent_object=None):
     status = ''
     success = True
     candidate_we_vote_id = ''
@@ -148,6 +156,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     is_candidate_share = False
     is_measure_share = False
     is_office_share = False
+    is_ready_share = False
     google_civic_election_id = ''
     measure_we_vote_id = ''
     office_we_vote_id = ''
@@ -163,8 +172,9 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     viewed_by_voter_we_vote_id = ''
     viewed_by_organization_we_vote_id = ''
     voter_id = 0
-    share_manager = ShareManager()
+    is_signed_in = False
 
+    share_manager = ShareManager()
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     if voter_results['voter_found']:
@@ -172,6 +182,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         voter_id = voter.id
         viewed_by_voter_we_vote_id = voter.we_vote_id
         viewed_by_organization_we_vote_id = voter.linked_organization_we_vote_id
+        is_signed_in = voter.is_signed_in()
 
     results = share_manager.retrieve_shared_item(
         destination_full_url=destination_full_url,
@@ -192,6 +203,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             'is_candidate_share':           is_candidate_share,
             'is_measure_share':             is_measure_share,
             'is_office_share':              is_office_share,
+            'is_ready_share':               is_ready_share,
             'google_civic_election_id':     google_civic_election_id,
             'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
             'shared_by_voter_we_vote_id':   shared_by_voter_we_vote_id,
@@ -226,6 +238,8 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
 
     # Store that the link was clicked
     if positive_value_exists(shared_item_clicked):
+        # At some point we may allow a distinction between sharing only your public opinions
+        #  (as opposed to public AND friends only opinion). shared_item_code_public_opinions is not implemented yet.
         include_public_positions = shared_item.shared_item_code_all_opinions == shared_item_code
         include_friends_only_positions = shared_item.shared_item_code_all_opinions == shared_item_code
         clicked_results = share_manager.create_shared_link_clicked(
@@ -268,6 +282,69 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
                     following_status=FOLLOWING)
                 status += following_results['status']
 
+        # Store analytics information when a Shared Item Code (sic) link was clicked
+        # Do not store if you are clicking your own link
+        if not api_call_coming_from_voter_who_shared:
+            is_bot = user_agent_object.is_bot or robot_detection.is_robot(user_agent_string)
+            analytics_manager = AnalyticsManager()
+            action_view_type = ''
+
+            # We want to see if we can get the google_civic_election_id from the voter_device_link (no guarantees)
+            voter_device_link_manager = VoterDeviceLinkManager()
+            results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(
+                voter_device_id, read_only=False)  # From the live database since it may be the first link clicked
+            if results['voter_device_link_found']:
+                voter_device_link = results['voter_device_link']
+                clicked_google_civic_election_id = voter_device_link.google_civic_election_id
+            else:
+                clicked_google_civic_election_id = 0
+
+            if shared_item.is_ballot_share:
+                if positive_value_exists(include_friends_only_positions):
+                    action_view_type = ACTION_VIEW_SHARED_BALLOT_ALL_OPINIONS
+                # elif positive_value_exists(include_public_positions):  # Sharing only your public opinions
+                else:
+                    action_view_type = ACTION_VIEW_SHARED_BALLOT
+            elif shared_item.is_candidate_share:
+                if positive_value_exists(include_friends_only_positions):
+                    action_view_type = ACTION_VIEW_SHARED_CANDIDATE_ALL_OPINIONS
+                # elif positive_value_exists(include_public_positions):  # Sharing only your public opinions
+                else:
+                    action_view_type = ACTION_VIEW_SHARED_CANDIDATE
+            elif shared_item.is_measure_share:
+                if positive_value_exists(include_friends_only_positions):
+                    action_view_type = ACTION_VIEW_SHARED_MEASURE_ALL_OPINIONS
+                # elif positive_value_exists(include_public_positions):  # Sharing only your public opinions
+                else:
+                    action_view_type = ACTION_VIEW_SHARED_MEASURE
+            elif shared_item.is_office_share:
+                if positive_value_exists(include_friends_only_positions):
+                    action_view_type = ACTION_VIEW_SHARED_OFFICE_ALL_OPINIONS
+                # elif positive_value_exists(include_public_positions):  # Sharing only your public opinions
+                else:
+                    action_view_type = ACTION_VIEW_SHARED_OFFICE
+            elif shared_item.is_ready_share:
+                if positive_value_exists(include_friends_only_positions):
+                    action_view_type = ACTION_VIEW_SHARED_READY_ALL_OPINIONS
+                # elif positive_value_exists(include_public_positions):  # Sharing only your public opinions
+                else:
+                    action_view_type = ACTION_VIEW_SHARED_READY
+
+            if positive_value_exists(action_view_type):
+                analytics_results = analytics_manager.save_action(
+                    action_constant=action_view_type,
+                    voter_we_vote_id=viewed_by_voter_we_vote_id, voter_id=voter_id, is_signed_in=is_signed_in,
+                    organization_we_vote_id=shared_item.shared_by_organization_we_vote_id,
+                    google_civic_election_id=clicked_google_civic_election_id,
+                    user_agent_string=user_agent_string, is_bot=is_bot,
+                    is_mobile=user_agent_object.is_mobile,
+                    is_desktop=user_agent_object.is_pc,
+                    is_tablet=user_agent_object.is_tablet)
+                status += analytics_results['status']
+    else:
+        # Shared item not clicked
+        pass
+
     results = {
         'status':                       status,
         'success':                      success,
@@ -276,6 +353,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         'is_candidate_share':           shared_item.is_candidate_share,
         'is_measure_share':             shared_item.is_measure_share,
         'is_office_share':              shared_item.is_office_share,
+        'is_ready_share':               shared_item.is_ready_share,
         'google_civic_election_id':     shared_item.google_civic_election_id,
         'shared_by_organization_type':  shared_item.shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_item.shared_by_organization_we_vote_id,
@@ -316,7 +394,8 @@ def shared_item_save_for_api(  # sharedItemSave
         is_ballot_share=False,
         is_candidate_share=False,
         is_measure_share=False,
-        is_office_share=False):
+        is_office_share=False,
+        is_ready_share=False):
     status = ''
     success = True
     candidate_we_vote_id = ''
@@ -383,6 +462,7 @@ def shared_item_save_for_api(  # sharedItemSave
             'is_candidate_share':           is_candidate_share,
             'is_measure_share':             is_measure_share,
             'is_office_share':              is_office_share,
+            'is_ready_share':               is_ready_share,
             'google_civic_election_id':     google_civic_election_id,
             'shared_by_organization_type':  shared_by_organization_type,
             'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
@@ -397,18 +477,19 @@ def shared_item_save_for_api(  # sharedItemSave
 
     share_manager = ShareManager()
     defaults = {
-        'candidate_we_vote_id': candidate_we_vote_id,
-        'google_civic_election_id': google_civic_election_id,
-        'is_ballot_share': is_ballot_share,
-        'is_candidate_share': is_candidate_share,
-        'is_measure_share': is_measure_share,
-        'is_office_share': is_office_share,
-        'measure_we_vote_id': measure_we_vote_id,
-        'office_we_vote_id': office_we_vote_id,
-        'shared_by_organization_type': shared_by_organization_type,
-        'shared_by_organization_we_vote_id': shared_by_organization_we_vote_id,
-        'shared_by_voter_we_vote_id': shared_by_voter_we_vote_id,
-        'site_owner_organization_we_vote_id': site_owner_organization_we_vote_id,
+        'candidate_we_vote_id':                 candidate_we_vote_id,
+        'google_civic_election_id':             google_civic_election_id,
+        'is_ballot_share':                      is_ballot_share,
+        'is_candidate_share':                   is_candidate_share,
+        'is_measure_share':                     is_measure_share,
+        'is_office_share':                      is_office_share,
+        'is_ready_share':                       is_ready_share,
+        'measure_we_vote_id':                   measure_we_vote_id,
+        'office_we_vote_id':                    office_we_vote_id,
+        'shared_by_organization_type':          shared_by_organization_type,
+        'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
+        'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
+        'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
     }
     create_results = share_manager.create_or_update_shared_item(
         destination_full_url=destination_full_url,
@@ -436,6 +517,7 @@ def shared_item_save_for_api(  # sharedItemSave
         'is_candidate_share':           is_candidate_share,
         'is_measure_share':             is_measure_share,
         'is_office_share':              is_office_share,
+        'is_ready_share':               is_ready_share,
         'google_civic_election_id':     google_civic_election_id,
         'shared_by_organization_type':  shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,

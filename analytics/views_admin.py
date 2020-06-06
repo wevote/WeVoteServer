@@ -7,10 +7,11 @@ from .controllers import augment_one_voter_analytics_action_entries_without_elec
     save_organization_daily_metrics, save_organization_election_metrics, \
     save_sitewide_daily_metrics, save_sitewide_election_metrics, save_sitewide_voter_metrics
 from .models import ACTION_WELCOME_VISIT, AnalyticsAction, AnalyticsManager, display_action_constant_human_readable, \
-    OrganizationDailyMetrics, OrganizationElectionMetrics, \
+    fetch_action_constant_number_from_constant_string, OrganizationDailyMetrics, OrganizationElectionMetrics, \
     SitewideDailyMetrics, SitewideElectionMetrics, SitewideVoterMetrics
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
+import csv
 from datetime import date, datetime, timedelta
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
@@ -35,7 +36,6 @@ ANALYTICS_ACTION_SYNC_URL = "https://api.wevoteusa.org/apis/v1/analyticsActionSy
 WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 
-@login_required
 def analytics_action_sync_out_view(request):  # analyticsActionSyncOut
     status = ''
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
@@ -48,14 +48,17 @@ def analytics_action_sync_out_view(request):  # analyticsActionSyncOut
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     starting_date_as_integer = convert_to_int(request.GET.get('starting_date_as_integer', 0))
     ending_date_as_integer = convert_to_int(request.GET.get('ending_date_as_integer', 0))
+    return_csv_format = positive_value_exists(request.GET.get('return_csv_format', False))
+
+    generated_starting_date_as_integer = 0
 
     try:
         analytics_action_query = AnalyticsAction.objects.all().order_by('-id')
         if positive_value_exists(starting_date_as_integer):
             analytics_action_query = analytics_action_query.filter(date_as_integer__gte=starting_date_as_integer)
         else:
-            three_months_ago = now() - timedelta(days=90)
-            generated_starting_date_as_integer = convert_date_to_date_as_integer(three_months_ago)
+            one_month_ago = now() - timedelta(days=30)
+            generated_starting_date_as_integer = convert_date_to_date_as_integer(one_month_ago)
             analytics_action_query = analytics_action_query.filter(
                 date_as_integer__gte=generated_starting_date_as_integer)
         if positive_value_exists(ending_date_as_integer):
@@ -77,11 +80,39 @@ def analytics_action_sync_out_view(request):  # analyticsActionSyncOut
             'organization_we_vote_id', 'state_code', 'user_agent', 'voter_we_vote_id')
         if analytics_action_list_dict:
             analytics_action_list_raw = list(analytics_action_list_dict)
-            analytics_action_list_json = []
-            for one_dict in analytics_action_list_raw:
-                one_dict['action_constant_text'] = display_action_constant_human_readable(one_dict['action_constant'])
-                analytics_action_list_json.append(one_dict)
-            return HttpResponse(json.dumps(analytics_action_list_json), content_type='application/json')
+            if return_csv_format:
+                # Create the HttpResponse object with the appropriate CSV header.
+                filename = "analyticsActionSyncOut"
+                if positive_value_exists(starting_date_as_integer):
+                    filename += "-" + str(starting_date_as_integer)
+                elif positive_value_exists(generated_starting_date_as_integer):
+                    filename += "-" + str(generated_starting_date_as_integer)
+                if positive_value_exists(ending_date_as_integer):
+                    filename += "-" + str(ending_date_as_integer)
+                filename += ".csv"
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+
+                writer = csv.writer(response)
+                writer.writerow(['exact_time', 'id', 'action_constant', 'authentication_failed_twice',
+                                 'ballot_item_we_vote_id', 'date_as_integer',
+                                 'first_visit_today', 'google_civic_election_id',
+                                 'is_bot', 'is_desktop', 'is_mobile', 'is_signed_in', 'is_tablet',
+                                 'organization_we_vote_id', 'state_code', 'user_agent', 'voter_we_vote_id',
+                                 'action_constant_text'])
+                for one_dict in analytics_action_list_raw:
+                    one_row = list(one_dict.values())
+                    one_row.append(display_action_constant_human_readable(one_dict['action_constant']))
+                    writer.writerow(one_row)
+
+                return response
+            else:
+                analytics_action_list_json = []
+                for one_dict in analytics_action_list_raw:
+                    one_dict['action_constant_text'] = display_action_constant_human_readable(
+                        one_dict['action_constant'])
+                    analytics_action_list_json.append(one_dict)
+                return HttpResponse(json.dumps(analytics_action_list_json), content_type='application/json')
     except Exception as e:
         status += 'QUERY_FAILURE: ' + str(e) + ' '
 
@@ -340,17 +371,37 @@ def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_
         if positive_value_exists(analytics_action_search):
             search_words = analytics_action_search.split()
             for one_word in search_words:
-                filters = []
-                new_filter = Q(voter_we_vote_id__icontains=one_word)
-                filters.append(new_filter)
+                one_word_integer = convert_to_int(one_word)
+                action_constant_integer = fetch_action_constant_number_from_constant_string(one_word)
 
-                new_filter = Q(organization_we_vote_id__icontains=one_word)
-                filters.append(new_filter)
+                filters = []
+
+                if positive_value_exists(action_constant_integer):
+                    new_filter = Q(action_constant=action_constant_integer)
+                    filters.append(new_filter)
 
                 new_filter = Q(ballot_item_we_vote_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(google_civic_election_id__icontains=one_word)
+                if positive_value_exists(one_word_integer):
+                    new_filter = Q(date_as_integer=one_word_integer)
+                    filters.append(new_filter)
+
+                if positive_value_exists(one_word_integer):
+                    new_filter = Q(google_civic_election_id=one_word_integer)
+                    filters.append(new_filter)
+
+                if positive_value_exists(one_word_integer):
+                    new_filter = Q(id=one_word_integer)
+                    filters.append(new_filter)
+
+                new_filter = Q(organization_we_vote_id__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(state_code__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(voter_we_vote_id__icontains=one_word)
                 filters.append(new_filter)
 
                 # Add the first query

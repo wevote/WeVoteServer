@@ -4,6 +4,7 @@
 from share.controllers import shared_item_retrieve_for_api, shared_item_save_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse
+from django_user_agents.utils import get_user_agent
 import json
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_bool, get_voter_device_id,  \
@@ -19,11 +20,15 @@ def shared_item_retrieve_view(request):  # sharedItemRetrieve
     destination_full_url = request.GET.get('destination_full_url', '')
     shared_item_code = request.GET.get('shared_item_code', '')
     shared_item_clicked = positive_value_exists(request.GET.get('shared_item_clicked', False))
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     json_data = shared_item_retrieve_for_api(
         voter_device_id=voter_device_id,
         destination_full_url=destination_full_url,
         shared_item_code=shared_item_code,
         shared_item_clicked=shared_item_clicked,
+        user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object
     )
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -37,6 +42,7 @@ def shared_item_save_view(request):  # sharedItemSave
     is_candidate_share = positive_value_exists(request.GET.get('is_candidate_share', False))
     is_measure_share = positive_value_exists(request.GET.get('is_measure_share', False))
     is_office_share = positive_value_exists(request.GET.get('is_office_share', False))
+    is_ready_share = positive_value_exists(request.GET.get('is_ready_share', False))
     json_data = shared_item_save_for_api(
         voter_device_id=voter_device_id,
         destination_full_url=destination_full_url,
@@ -46,6 +52,7 @@ def shared_item_save_view(request):  # sharedItemSave
         is_candidate_share=is_candidate_share,
         is_measure_share=is_measure_share,
         is_office_share=is_office_share,
+        is_ready_share=is_ready_share,
     )
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

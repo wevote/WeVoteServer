@@ -59,6 +59,7 @@ def shared_item_retrieve_doc_template_values(url_root):
                    '  "is_candidate_share": boolean,\n' \
                    '  "is_measure_share": boolean,\n' \
                    '  "is_office_share": boolean,\n' \
+                   '  "is_ready_share": boolean,\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "site_owner_organization_we_vote_id": string,\n' \
                    '  "shared_by_voter_we_vote_id": string,\n' \

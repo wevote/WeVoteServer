@@ -36,6 +36,7 @@ class SharedItem(models.Model):
     is_candidate_share = models.BooleanField(default=False)
     is_measure_share = models.BooleanField(default=False)
     is_office_share = models.BooleanField(default=False)
+    is_ready_share = models.BooleanField(default=False)
     # What is being shared
     candidate_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     measure_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
@@ -257,6 +258,7 @@ class ShareManager(models.Model):
                     is_candidate_share=defaults['is_candidate_share'],
                     is_measure_share=defaults['is_measure_share'],
                     is_office_share=defaults['is_office_share'],
+                    is_ready_share=defaults['is_ready_share'],
                     measure_we_vote_id=defaults['measure_we_vote_id'],
                     office_we_vote_id=defaults['office_we_vote_id'],
                     shared_by_organization_type=defaults['shared_by_organization_type'],
