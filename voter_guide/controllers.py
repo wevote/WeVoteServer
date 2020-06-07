@@ -1667,7 +1667,19 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
             return HttpResponse(json.dumps(json_data), content_type='application/json')
 
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(
-                url_to_scan, pdf_url, voter_who_submitted_we_vote_id)
+            voter_guide_possibility_url=url_to_scan,
+            pdf_url=pdf_url,
+            voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id)
+
+    if not positive_value_exists(results['success']):
+        status += results['status']
+        status += "VOTER_GUIDE_POSSIBILITY_RETRIEVE_SUCCESS_FALSE "
+        json_data = {
+            'status': status,
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     status += results['status']
     voter_guide_possibility_found = False
@@ -1675,6 +1687,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     organization_we_vote_id = ""
     is_candidate_focused_page = False
     if results['voter_guide_possibility_found']:
+        status += "VOTER_GUIDE_POSSIBILITY_FOUND "
         voter_guide_possibility_found = True
         voter_guide_possibility = results['voter_guide_possibility']
         voter_guide_possibility_id = results['voter_guide_possibility_id']
@@ -1685,8 +1698,9 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
             is_candidate_focused_page = True
         else:
             is_candidate_focused_page = False
-    elif positive_value_exists(results['success']):
+    else:
         # Current entry not found. Create new entry.
+        status += "EXISTING_VOTER_GUIDE_POSSIBILITY_NOT_FOUND "
         is_candidate_focused_page = False  # To be extended to also save candidate focused endorsement pages
         if positive_value_exists(is_candidate_focused_page):
             voter_guide_possibility_type = ENDORSEMENTS_FOR_CANDIDATE
@@ -1874,9 +1888,13 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
 
     # Once we know we have a voter_device_id to work with, get this working
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
-    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(url_to_scan, pdf_url,
-                                                                                        voter_we_vote_id,
-                                                                                        google_civic_election_id)
+    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(
+        voter_guide_possibility_url=url_to_scan,
+        pdf_url=pdf_url,
+        # voter_who_submitted_we_vote_id=voter_we_vote_id,
+        # google_civic_election_id=google_civic_election_id
+    )
+    status += results['status']
     if results['voter_guide_possibility_found']:
         voter_guide_possibility_id = results['voter_guide_possibility_id']
         results = voter_guide_possibility_positions_retrieve_for_api(
