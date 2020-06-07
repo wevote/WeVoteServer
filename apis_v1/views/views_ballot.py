@@ -1,7 +1,8 @@
 # apis_v1/views/views_ballot.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from ballot.controllers import all_ballot_items_retrieve_for_api, ballot_item_options_retrieve_for_api
+from ballot.controllers import all_ballot_items_retrieve_for_api, ballot_item_highlights_retrieve_for_api, \
+    ballot_item_options_retrieve_for_api
 from candidate.controllers import candidate_retrieve_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse
@@ -35,6 +36,12 @@ def all_ballot_items_retrieve_view(request):  # allBallotItemsRetrieve
     json_data = all_ballot_items_retrieve_for_api(google_civic_election_id, state_code)
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def ballot_item_highlights_retrieve_view(request):  # ballotItemHighlightsRetrieve
+    json_data = ballot_item_highlights_retrieve_for_api()
+    response = HttpResponse(json.dumps(json_data), content_type='application/json')
+    return response
 
 
 def ballot_item_options_retrieve_view(request):  # ballotItemOptionsRetrieve

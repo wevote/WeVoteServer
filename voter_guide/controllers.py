@@ -1860,7 +1860,11 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
 
 
 def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilityHighlightsRetrieve
-        voter_device_id, url_to_scan, pdf_url, google_civic_election_id):
+        voter_device_id="",
+        url_to_scan="",
+        limit_to_existing=False,
+        pdf_url="",
+        google_civic_election_id=0):
     status = "VOTER_GUIDE_POSSIBILITY_HIGHLIGHTS_RETRIEVE "
     success = True
     highlight_list = []
@@ -1923,60 +1927,61 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                                 }
                                 highlight_list.append(one_highlight)
 
-    super_light_candidate_list = True
-    results = retrieve_candidate_list_for_all_upcoming_elections(
-        super_light_candidate_list=super_light_candidate_list)
-    if results['candidate_list_found']:
-        all_possible_candidates_list_light = results['candidate_list_light']
-        for one_possible_candidate in all_possible_candidates_list_light:
-            if one_possible_candidate['name'] not in names_already_included_list:
-                names_already_included_list.append(one_possible_candidate['name'])
-                one_highlight = {
-                    'name':         one_possible_candidate['name'],
-                    'we_vote_id':   one_possible_candidate['we_vote_id'],
-                    'display':      'DEFAULT',
-                    'stance':       '',
-                }
-                highlight_list.append(one_highlight)
-            if 'alternate_names' in one_possible_candidate:
-                for one_alternate_name in one_possible_candidate['alternate_names']:
-                    if one_alternate_name not in names_already_included_list:
-                        names_already_included_list.append(one_alternate_name)
-                        one_highlight = {
-                            'name':         one_alternate_name,
-                            'we_vote_id':   one_possible_candidate['we_vote_id'],
-                            'display':      'DEFAULT',
-                            'stance':       '',
-                        }
-                        highlight_list.append(one_highlight)
+    if not positive_value_exists(limit_to_existing):
+        super_light_candidate_list = True
+        results = retrieve_candidate_list_for_all_upcoming_elections(
+            super_light_candidate_list=super_light_candidate_list)
+        if results['candidate_list_found']:
+            all_possible_candidates_list_light = results['candidate_list_light']
+            for one_possible_candidate in all_possible_candidates_list_light:
+                if one_possible_candidate['name'] not in names_already_included_list:
+                    names_already_included_list.append(one_possible_candidate['name'])
+                    one_highlight = {
+                        'name':         one_possible_candidate['name'],
+                        'we_vote_id':   one_possible_candidate['we_vote_id'],
+                        'display':      'DEFAULT',
+                        'stance':       '',
+                    }
+                    highlight_list.append(one_highlight)
+                if 'alternate_names' in one_possible_candidate:
+                    for one_alternate_name in one_possible_candidate['alternate_names']:
+                        if one_alternate_name not in names_already_included_list:
+                            names_already_included_list.append(one_alternate_name)
+                            one_highlight = {
+                                'name':         one_alternate_name,
+                                'we_vote_id':   one_possible_candidate['we_vote_id'],
+                                'display':      'DEFAULT',
+                                'stance':       '',
+                            }
+                            highlight_list.append(one_highlight)
 
-    results = retrieve_candidate_list_for_all_prior_elections_this_year(
-        super_light_candidate_list=super_light_candidate_list)
-    if results['candidate_list_found']:
-        all_possible_candidates_list_light = results['candidate_list_light']
-        for one_possible_candidate in all_possible_candidates_list_light:
-            if one_possible_candidate['name'] not in names_already_included_list:
-                names_already_included_list.append(one_possible_candidate['name'])
-                one_highlight = {
-                    'name':         one_possible_candidate['name'],
-                    'we_vote_id':   one_possible_candidate['we_vote_id'],
-                    'display':      'DEFAULT',
-                    'stance':       '',
-                    'prior':        1,
-                }
-                highlight_list.append(one_highlight)
-            if 'alternate_names' in one_possible_candidate:
-                for one_alternate_name in one_possible_candidate['alternate_names']:
-                    if one_alternate_name not in names_already_included_list:
-                        names_already_included_list.append(one_alternate_name)
-                        one_highlight = {
-                            'name':         one_alternate_name,
-                            'we_vote_id':   one_possible_candidate['we_vote_id'],
-                            'display':      'DEFAULT',
-                            'stance':       '',
-                            'prior':        1,
-                        }
-                        highlight_list.append(one_highlight)
+        results = retrieve_candidate_list_for_all_prior_elections_this_year(
+            super_light_candidate_list=super_light_candidate_list)
+        if results['candidate_list_found']:
+            all_possible_candidates_list_light = results['candidate_list_light']
+            for one_possible_candidate in all_possible_candidates_list_light:
+                if one_possible_candidate['name'] not in names_already_included_list:
+                    names_already_included_list.append(one_possible_candidate['name'])
+                    one_highlight = {
+                        'name':         one_possible_candidate['name'],
+                        'we_vote_id':   one_possible_candidate['we_vote_id'],
+                        'display':      'DEFAULT',
+                        'stance':       '',
+                        'prior':        1,
+                    }
+                    highlight_list.append(one_highlight)
+                if 'alternate_names' in one_possible_candidate:
+                    for one_alternate_name in one_possible_candidate['alternate_names']:
+                        if one_alternate_name not in names_already_included_list:
+                            names_already_included_list.append(one_alternate_name)
+                            one_highlight = {
+                                'name':         one_alternate_name,
+                                'we_vote_id':   one_possible_candidate['we_vote_id'],
+                                'display':      'DEFAULT',
+                                'stance':       '',
+                                'prior':        1,
+                            }
+                            highlight_list.append(one_highlight)
 
     json_data = {
         'status':               status,

@@ -98,12 +98,14 @@ def voter_guide_possibility_highlights_retrieve_view(request):  # voterGuidePoss
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    limit_to_existing = request.GET.get('limit_to_existing', '')
     url_to_scan = request.GET.get('url_to_scan', '')
     pdf_url = request.GET.get('pdf_url', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     json_data = voter_guide_possibility_highlights_retrieve_for_api(
         voter_device_id=voter_device_id,
         url_to_scan=url_to_scan,
+        limit_to_existing=limit_to_existing,
         pdf_url=pdf_url,
         google_civic_election_id=google_civic_election_id)
     return HttpResponse(json.dumps(json_data), content_type='application/json')

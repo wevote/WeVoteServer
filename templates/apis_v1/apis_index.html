@@ -288,6 +288,14 @@
           <td colspan="3"><strong>Ballot Contest Data</strong></td>
         </tr>
         <tr>
+          <td><a href="{% url 'apis_v1:ballotItemHighlightsRetrieveDocs' %}">ballotItemHighlightsRetrieve</a></td>
+          <td>static c3</td>
+          <td>Retrieve a complete list of candidates or measures in all elections this year (including prior).
+            This information is not organized in a hierarchy, but is instead provided in a simple list to help
+            us highlight candidates on web pages.
+          </td>
+        </tr>
+        <tr>
           <td><a href="{% url 'apis_v1:ballotItemOptionsRetrieveDocs' %}">ballotItemOptionsRetrieve</a></td>
           <td>static c3</td>
           <td>Retrieve a complete list of offices, candidates or measures in the specified election(s).
