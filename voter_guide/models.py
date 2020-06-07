@@ -2066,17 +2066,28 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_guide_possibility_from_url(self, voter_guide_possibility_url, pdf_url,
-                                                  voter_who_submitted_we_vote_id, google_civic_election_id=0):
+    def retrieve_voter_guide_possibility_from_url(
+            self,
+            voter_guide_possibility_url="",
+            pdf_url="",
+            voter_who_submitted_we_vote_id="",
+            google_civic_election_id=0):
         voter_guide_possibility_id = 0
         return self.retrieve_voter_guide_possibility(
-            voter_guide_possibility_id, google_civic_election_id,
-            voter_guide_possibility_url, pdf_url, voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id)
+            voter_guide_possibility_id=voter_guide_possibility_id,
+            google_civic_election_id=google_civic_election_id,
+            voter_guide_possibility_url=voter_guide_possibility_url,
+            pdf_url=pdf_url,
+            voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id)
 
-    def retrieve_voter_guide_possibility(self, voter_guide_possibility_id=0, google_civic_election_id=0,
-                                         voter_guide_possibility_url='', pdf_url='',
-                                         organization_we_vote_id=None,
-                                         voter_who_submitted_we_vote_id=None):
+    def retrieve_voter_guide_possibility(
+            self,
+            voter_guide_possibility_id=0,
+            google_civic_election_id=0,
+            voter_guide_possibility_url='',
+            pdf_url='',
+            organization_we_vote_id=None,
+            voter_who_submitted_we_vote_id=None):
         status = ""
         voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
         google_civic_election_id = convert_to_int(google_civic_election_id)
@@ -2111,10 +2122,11 @@ class VoterGuidePossibilityManager(models.Manager):
                 voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
                     Q(voter_guide_possibility_url__iexact=voter_guide_possibility_url) |
                     Q(voter_guide_possibility_url__iexact=voter_guide_possibility_url_alternate))
-                voter_guide_possibility_query = voter_guide_possibility_query.filter(hide_from_active_review=False)
+                voter_guide_possibility_query = voter_guide_possibility_query.exclude(hide_from_active_review=True)
 
                 # Only retrieve by URL if it was created this year
                 now = datetime.now()
+                status += "LIMITING_TO_THIS_YEAR: " + str(now.year) + " "
                 voter_guide_possibility_query = voter_guide_possibility_query.filter(date_last_changed__year=now.year)
 
                 voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
@@ -2134,6 +2146,7 @@ class VoterGuidePossibilityManager(models.Manager):
 
                 # Only retrieve by URL if it was created this year
                 now = datetime.now()
+                status += "LIMITING_TO_THIS_YEAR: " + str(now.year) + " "
                 voter_guide_possibility_query = voter_guide_possibility_query.filter(date_last_changed__year=now.year)
 
                 voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
