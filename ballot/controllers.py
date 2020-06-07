@@ -2339,6 +2339,71 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
     return results
 
 
+def ballot_item_highlights_retrieve_for_api():  # ballotItemHighlightsRetrieve
+    from candidate.controllers import retrieve_candidate_list_for_all_prior_elections_this_year, \
+        retrieve_candidate_list_for_all_upcoming_elections
+    from voter_guide.controllers import URLS_TO_NEVER_HIGHLIGHT
+    status = "BALLOT_ITEM_HIGHLIGHTS_RETRIEVE "
+    success = True
+    highlight_list = []
+    names_already_included_list = []
+
+    super_light_candidate_list = True
+    results = retrieve_candidate_list_for_all_upcoming_elections(
+        super_light_candidate_list=super_light_candidate_list)
+    if results['candidate_list_found']:
+        all_possible_candidates_list_light = results['candidate_list_light']
+        for one_possible_candidate in all_possible_candidates_list_light:
+            if one_possible_candidate['name'] not in names_already_included_list:
+                names_already_included_list.append(one_possible_candidate['name'])
+                one_highlight = {
+                    'name':         one_possible_candidate['name'],
+                    'we_vote_id':   one_possible_candidate['we_vote_id'],
+                }
+                highlight_list.append(one_highlight)
+            if 'alternate_names' in one_possible_candidate:
+                for one_alternate_name in one_possible_candidate['alternate_names']:
+                    if one_alternate_name not in names_already_included_list:
+                        names_already_included_list.append(one_alternate_name)
+                        one_highlight = {
+                            'name':         one_alternate_name,
+                            'we_vote_id':   one_possible_candidate['we_vote_id'],
+                        }
+                        highlight_list.append(one_highlight)
+
+    results = retrieve_candidate_list_for_all_prior_elections_this_year(
+        super_light_candidate_list=super_light_candidate_list)
+    if results['candidate_list_found']:
+        all_possible_candidates_list_light = results['candidate_list_light']
+        for one_possible_candidate in all_possible_candidates_list_light:
+            if one_possible_candidate['name'] not in names_already_included_list:
+                names_already_included_list.append(one_possible_candidate['name'])
+                one_highlight = {
+                    'name':         one_possible_candidate['name'],
+                    'we_vote_id':   one_possible_candidate['we_vote_id'],
+                    'prior':        1,
+                }
+                highlight_list.append(one_highlight)
+            if 'alternate_names' in one_possible_candidate:
+                for one_alternate_name in one_possible_candidate['alternate_names']:
+                    if one_alternate_name not in names_already_included_list:
+                        names_already_included_list.append(one_alternate_name)
+                        one_highlight = {
+                            'name':         one_alternate_name,
+                            'we_vote_id':   one_possible_candidate['we_vote_id'],
+                            'prior':        1,
+                        }
+                        highlight_list.append(one_highlight)
+
+    json_data = {
+        'status':               status,
+        'success':              success,
+        'highlight_list':       highlight_list,
+        'never_highlight_on':   URLS_TO_NEVER_HIGHLIGHT,
+    }
+    return json_data
+
+
 def ballot_item_options_retrieve_for_api(google_civic_election_id='', search_string='', state_code=''):
     """
     ballotItemOptionsRetrieve
