@@ -2122,7 +2122,8 @@ class VoterGuidePossibilityManager(models.Manager):
                 voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
                     Q(voter_guide_possibility_url__iexact=voter_guide_possibility_url) |
                     Q(voter_guide_possibility_url__iexact=voter_guide_possibility_url_alternate))
-                voter_guide_possibility_query = voter_guide_possibility_query.exclude(hide_from_active_review=True)
+                # DALE 2020-06-08 After working with this, it is better to include entries hidden from active review
+                # voter_guide_possibility_query = voter_guide_possibility_query.exclude(hide_from_active_review=True)
 
                 # Only retrieve by URL if it was created this year
                 now = datetime.now()
@@ -2142,7 +2143,8 @@ class VoterGuidePossibilityManager(models.Manager):
                 # Search both http and https
                 voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
                     Q(voter_guide_possibility_pdf_url__iexact=pdf_url))
-                voter_guide_possibility_query = voter_guide_possibility_query.filter(hide_from_active_review=False)
+                # DALE 2020-06-08 After working with this, it is better to include entries hidden from active review
+                # voter_guide_possibility_query = voter_guide_possibility_query.exclude(hide_from_active_review=True)
 
                 # Only retrieve by URL if it was created this year
                 now = datetime.now()
