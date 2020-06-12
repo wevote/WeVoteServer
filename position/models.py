@@ -154,6 +154,8 @@ class PositionEntered(models.Model):
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=255, null=True, blank=False, default=0, db_index=True)
+    # The year this endorsement was made
+    position_year = models.PositiveIntegerField(default=None, null=True)
     state_code = models.CharField(verbose_name="us state of the ballot item position is for",
                                   max_length=2, null=True, blank=True, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
@@ -564,6 +566,8 @@ class PositionForFriends(models.Model):
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True, db_index=True)
+    # The year this endorsement was made
+    position_year = models.PositiveIntegerField(default=None, null=True)
     state_code = models.CharField(verbose_name="us state of the ballot item position is for", max_length=2,
                                   null=True, blank=True)
     # ### Values from Vote Smart ###
@@ -5570,6 +5574,7 @@ class PositionManager(models.Model):
                 voter_we_vote_id=existing_position.voter_we_vote_id,
                 voter_id=existing_position.voter_id,
                 google_civic_election_id=existing_position.google_civic_election_id,
+                position_year=existing_position.position_year,
                 state_code=existing_position.state_code,
                 google_civic_candidate_name=existing_position.google_civic_candidate_name,
                 tweet_source_id=existing_position.tweet_source_id,
@@ -5961,10 +5966,21 @@ class PositionManager(models.Model):
                         google_civic_election_id = candidate_campaign.google_civic_election_id
                         voter_position_on_stage.politician_id = candidate_campaign.politician_id
                         voter_position_on_stage.politician_we_vote_id = candidate_campaign.politician_we_vote_id
-                        voter_position_on_stage.google_civic_election_id = \
-                            candidate_campaign.google_civic_election_id
+                        voter_position_on_stage.google_civic_election_id = candidate_campaign.google_civic_election_id
                         voter_position_on_stage.state_code = candidate_campaign.state_code
                         voter_position_on_stage.ballot_item_display_name = candidate_campaign.candidate_name
+                        if positive_value_exists(candidate_campaign.candidate_year):
+                            voter_position_on_stage.position_year = candidate_campaign.candidate_year
+                        else:
+                            candidate_year = \
+                                candidate_campaign_manager.generate_candidate_year(candidate_campaign.we_vote_id)
+                            if positive_value_exists(candidate_year):
+                                try:
+                                    candidate_campaign.candidate_year = candidate_year
+                                    candidate_campaign.save()
+                                except Exception as e:
+                                    status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
+                                voter_position_on_stage.position_year = candidate_year
                     else:
                         candidate_campaign_we_vote_id = voter_position_on_stage.candidate_campaign_we_vote_id
                         google_civic_election_id = voter_position_on_stage.google_civic_election_id
@@ -5986,6 +6002,20 @@ class PositionManager(models.Model):
                             voter_position_on_stage.google_civic_election_id = contest_measure.google_civic_election_id
                             voter_position_on_stage.state_code = contest_measure.state_code
                             voter_position_on_stage.ballot_item_display_name = contest_measure.measure_title
+                            if not positive_value_exists(voter_position_on_stage.position_year):
+                                if positive_value_exists(contest_measure.measure_year):
+                                    voter_position_on_stage.position_year = contest_measure.measure_year
+                                else:
+                                    measure_year = contest_measure_manager.generate_measure_year(
+                                        contest_measure.google_civic_election_id)
+                                    if positive_value_exists(measure_year):
+                                        try:
+                                            contest_measure.measure_year = measure_year
+                                            contest_measure.save()
+                                        except Exception as e:
+                                            status += "FAILED_TO_SAVE_MEASURE: " + str(e) + " "
+                                        voter_position_on_stage.position_year = measure_year
+
                     else:
                         contest_measure_we_vote_id = voter_position_on_stage.contest_measure_we_vote_id
                         google_civic_election_id = voter_position_on_stage.google_civic_election_id
@@ -6048,6 +6078,7 @@ class PositionManager(models.Model):
                 politician_we_vote_id = ''
                 state_code = ''
                 ballot_item_display_name = ""
+                position_year = None
                 if candidate_campaign_id:
                     candidate_campaign_manager = CandidateCampaignManager()
                     results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(
@@ -6062,6 +6093,18 @@ class PositionManager(models.Model):
                         politician_we_vote_id = candidate_campaign.politician_we_vote_id
                         state_code = candidate_campaign.state_code
                         ballot_item_display_name = candidate_campaign.candidate_name
+                        if positive_value_exists(candidate_campaign.candidate_year):
+                            position_year = candidate_campaign.candidate_year
+                        else:
+                            candidate_year = \
+                                candidate_campaign_manager.generate_candidate_year(candidate_campaign.we_vote_id)
+                            if positive_value_exists(candidate_year):
+                                try:
+                                    candidate_campaign.candidate_year = candidate_year
+                                    candidate_campaign.save()
+                                except Exception as e:
+                                    status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
+                                position_year = candidate_year
 
                 contest_measure_we_vote_id = ""
                 if contest_measure_id:
@@ -6073,6 +6116,19 @@ class PositionManager(models.Model):
                         google_civic_election_id = contest_measure.google_civic_election_id
                         state_code = contest_measure.state_code
                         ballot_item_display_name = contest_measure.measure_title
+                        if positive_value_exists(contest_measure.measure_year):
+                            position_year = contest_measure.measure_year
+                        else:
+                            measure_year = \
+                                contest_measure_manager.generate_measure_year(
+                                    contest_measure.google_civic_election_id)
+                            if positive_value_exists(measure_year):
+                                try:
+                                    contest_measure.measure_year = measure_year
+                                    contest_measure.save()
+                                except Exception as e:
+                                    status += "FAILED_TO_SAVE_MEASURE: " + str(e) + " "
+                                position_year = measure_year
 
                 # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
                 # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
@@ -6124,6 +6180,7 @@ class PositionManager(models.Model):
                         politician_we_vote_id=politician_we_vote_id,
                         ballot_item_display_name=ballot_item_display_name,
                         speaker_display_name=speaker_display_name,
+                        position_year=position_year,
                     )
                 else:
                     voter_position_on_stage = PositionForFriends(
@@ -6144,6 +6201,7 @@ class PositionManager(models.Model):
                         politician_we_vote_id=politician_we_vote_id,
                         ballot_item_display_name=ballot_item_display_name,
                         speaker_display_name=speaker_display_name,
+                        position_year=position_year,
                     )
 
                 voter_position_on_stage.save()
@@ -6419,6 +6477,18 @@ class PositionManager(models.Model):
                         voter_position_on_stage.google_civic_election_id = candidate_campaign.google_civic_election_id
                         voter_position_on_stage.state_code = candidate_campaign.state_code
                         voter_position_on_stage.ballot_item_display_name = candidate_campaign.candidate_name
+                        if positive_value_exists(candidate_campaign.candidate_year):
+                            voter_position_on_stage.position_year = candidate_campaign.candidate_year
+                        else:
+                            candidate_year = \
+                                candidate_campaign_manager.generate_candidate_year(candidate_campaign.we_vote_id)
+                            if positive_value_exists(candidate_year):
+                                try:
+                                    candidate_campaign.candidate_year = candidate_year
+                                    candidate_campaign.save()
+                                except Exception as e:
+                                    status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
+                                voter_position_on_stage.position_year = candidate_year
 
                 elif positive_value_exists(voter_position_on_stage.contest_measure_we_vote_id):
                     contest_measure_manager = ContestMeasureManager()
@@ -6431,6 +6501,20 @@ class PositionManager(models.Model):
                             # Heal the data, and fill in the contest_measure_id
                             voter_position_on_stage.contest_measure_id = contest_measure.id
                         voter_position_on_stage.state_code = contest_measure.state_code
+                        if not positive_value_exists(voter_position_on_stage.position_year):
+                            if positive_value_exists(contest_measure.measure_year):
+                                voter_position_on_stage.position_year = contest_measure.measure_year
+                            else:
+                                measure_year = \
+                                    contest_measure_manager.generate_measure_year(
+                                        contest_measure.google_civic_election_id)
+                                if positive_value_exists(measure_year):
+                                    try:
+                                        contest_measure.measure_year = measure_year
+                                        contest_measure.save()
+                                    except Exception as e:
+                                        status += "FAILED_TO_SAVE_MEASURE: " + str(e) + " "
+                                    voter_position_on_stage.position_year = measure_year
                 # elif positive_value_exists(voter_position_on_stage.contest_office_we_vote_id):
                 #     contest_office_manager = ContestOfficeManager()
                 #     results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
@@ -6452,7 +6536,7 @@ class PositionManager(models.Model):
                 voter_position_on_stage_found = True
                 status = 'POSITION_COMMENT_UPDATED'
             except Exception as e:
-                status = 'POSITION_COMMENT_COULD_NOT_BE_UPDATED'
+                status = 'POSITION_COMMENT_COULD_NOT_BE_UPDATED ' + str(e) + ' '
         else:
             try:
                 # Create new
@@ -6465,6 +6549,7 @@ class PositionManager(models.Model):
                 state_code = ''
                 ballot_item_display_name = ""
                 speaker_display_name = ""
+                position_year = None
                 if candidate_we_vote_id:
                     candidate_campaign_manager = CandidateCampaignManager()
                     results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
@@ -6479,6 +6564,18 @@ class PositionManager(models.Model):
                         politician_we_vote_id = candidate_campaign.politician_we_vote_id
                         state_code = candidate_campaign.state_code
                         ballot_item_display_name = candidate_campaign.candidate_name
+                        if positive_value_exists(candidate_campaign.candidate_year):
+                            position_year = candidate_campaign.candidate_year
+                        else:
+                            candidate_year = \
+                                candidate_campaign_manager.generate_candidate_year(candidate_campaign.we_vote_id)
+                            if positive_value_exists(candidate_year):
+                                try:
+                                    candidate_campaign.candidate_year = candidate_year
+                                    candidate_campaign.save()
+                                except Exception as e:
+                                    status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
+                                position_year = candidate_year
 
                 contest_measure_id = None
                 if measure_we_vote_id:
@@ -6490,6 +6587,19 @@ class PositionManager(models.Model):
                         google_civic_election_id = contest_measure.google_civic_election_id
                         state_code = contest_measure.state_code
                         ballot_item_display_name = contest_measure.measure_title
+                        if positive_value_exists(contest_measure.measure_year):
+                            position_year = contest_measure.measure_year
+                        else:
+                            measure_year = \
+                                contest_measure_manager.generate_measure_year(
+                                    contest_measure.google_civic_election_id)
+                            if positive_value_exists(measure_year):
+                                try:
+                                    contest_measure.measure_year = measure_year
+                                    contest_measure.save()
+                                except Exception as e:
+                                    status += "FAILED_TO_SAVE_MEASURE: " + str(e) + " "
+                                position_year = measure_year
 
                 # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
                 # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
@@ -6532,6 +6642,7 @@ class PositionManager(models.Model):
                     statement_text=statement_text,
                     ballot_item_display_name=ballot_item_display_name,
                     speaker_display_name=speaker_display_name,
+                    position_year=position_year,
                 )
 
                 voter_position_on_stage.save()
@@ -7181,14 +7292,43 @@ class PositionManager(models.Model):
                     position_on_stage.candidate_campaign_we_vote_id = candidate_we_vote_id
                     # Lookup candidate_campaign_id based on candidate_campaign_we_vote_id and update
                     candidate_campaign_manager = CandidateCampaignManager()
-                    position_on_stage.candidate_campaign_id = \
-                        candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+                    candidate_results = \
+                        candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+                    if candidate_results['candidate_campaign_found']:
+                        candidate = candidate_results['candidate_campaign']
+                        position_on_stage.candidate_campaign_id = candidate.id
+                        if positive_value_exists(candidate.candidate_year):
+                            position_on_stage.position_year = candidate.candidate_year
+                        else:
+                            candidate_year = \
+                                candidate_campaign_manager.generate_candidate_year(candidate.we_vote_id)
+                            if positive_value_exists(candidate_year):
+                                try:
+                                    candidate.candidate_year = candidate_year
+                                    candidate.save()
+                                except Exception as e:
+                                    status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
+                                position_on_stage.position_year = candidate_year
                 if measure_we_vote_id:
                     position_on_stage.contest_measure_we_vote_id = measure_we_vote_id
                     # Lookup contest_measure_id based on contest_measure_we_vote_id and update
                     contest_measure_manager = ContestMeasureManager()
-                    position_on_stage.contest_measure_id = \
-                        contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
+                    results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(measure_we_vote_id)
+                    if results['contest_measure_found']:
+                        contest_measure = results['contest_measure']
+                        position_on_stage.contest_measure_id = contest_measure.id
+                        if positive_value_exists(contest_measure.measure_year):
+                            position_on_stage.position_year = contest_measure.measure_year
+                        else:
+                            measure_year = \
+                                contest_measure_manager.generate_measure_year(contest_measure.google_civic_election_id)
+                            if positive_value_exists(measure_year):
+                                try:
+                                    contest_measure.measure_year = measure_year
+                                    contest_measure.save()
+                                except Exception as e:
+                                    status += "FAILED_TO_SAVE_MEASURE: " + str(e) + " "
+                                position_on_stage.position_year = measure_year
                 # if positive_value_exists(stance):
                 if stance:
                     # TODO Verify that "stance" contains a legal value
@@ -7700,6 +7840,7 @@ class PositionManager(models.Model):
                 speaker_display_name = ""
 
                 candidate_campaign_id = None
+                position_year = None
                 if candidate_we_vote_id:
                     candidate_campaign_manager = CandidateCampaignManager()
                     results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
@@ -7710,6 +7851,18 @@ class PositionManager(models.Model):
                         google_civic_election_id = candidate_campaign.google_civic_election_id
                         state_code = candidate_campaign.state_code
                         ballot_item_display_name = candidate_campaign.candidate_name
+                        if positive_value_exists(candidate_campaign.candidate_year):
+                            position_year = candidate_campaign.candidate_year
+                        else:
+                            candidate_year = \
+                                candidate_campaign_manager.generate_candidate_year(candidate_campaign.we_vote_id)
+                            if positive_value_exists(candidate_year):
+                                try:
+                                    candidate_campaign.candidate_year = candidate_year
+                                    candidate_campaign.save()
+                                except Exception as e:
+                                    status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
+                                position_year = candidate_year
                 else:
                     # We don't need to ever look up the candidate_we_vote_id from the candidate_campaign_id
                     candidate_we_vote_id = None
@@ -7808,6 +7961,7 @@ class PositionManager(models.Model):
                     voter_we_vote_id=voter_we_vote_id,
                     voter_id=voter_id,
                     google_civic_election_id=google_civic_election_id,
+                    position_year=position_year,
                     state_code=state_code,
                     ballot_item_display_name=ballot_item_display_name,
                     speaker_display_name=speaker_display_name,
@@ -8082,16 +8236,17 @@ class PositionManager(models.Model):
         if positive_value_exists(position_object.candidate_campaign_id) or \
                 positive_value_exists(position_object.candidate_campaign_we_vote_id):
             check_for_missing_office_data = True  # We check separately
+            # REMOVED: or not positive_value_exists(position_object.state_code)
             if not positive_value_exists(position_object.ballot_item_display_name) \
                     or not positive_value_exists(position_object.ballot_item_image_url_https) \
                     or not positive_value_exists(position_object.ballot_item_image_url_https_large) \
                     or not positive_value_exists(position_object.ballot_item_image_url_https_medium) \
                     or not positive_value_exists(position_object.ballot_item_image_url_https_tiny) \
                     or not positive_value_exists(position_object.ballot_item_twitter_handle) \
-                    or not positive_value_exists(position_object.state_code) \
                     or not positive_value_exists(position_object.political_party) \
                     or not positive_value_exists(position_object.politician_id) \
                     or not positive_value_exists(position_object.politician_we_vote_id) \
+                    or not positive_value_exists(position_object.position_year) \
                     or force_update:
                 try:
                     # We need to look in the voter table for speaker_display_name
@@ -8102,7 +8257,9 @@ class PositionManager(models.Model):
                         candidate_found = True
                     else:
                         results = candidate_campaign_manager.retrieve_candidate_campaign(
-                            position_object.candidate_campaign_id, position_object.candidate_campaign_we_vote_id)
+                            position_object.candidate_campaign_id,
+                            position_object.candidate_campaign_we_vote_id,
+                            read_only=False)  # False so we can save the candidate
                         if results['candidate_campaign_found']:
                             candidate = results['candidate_campaign']
                             candidate_found = True
@@ -8149,6 +8306,22 @@ class PositionManager(models.Model):
                             # state_code is missing so look it up from source
                             position_object.state_code = candidate.get_candidate_state()
                             position_change = True
+                        if not positive_value_exists(position_object.position_year) or force_update:
+                            # position_year is missing so look it up from source
+                            if positive_value_exists(candidate.candidate_year):
+                                position_object.position_year = candidate.candidate_year
+                                position_change = True
+                            else:
+                                candidate_year = \
+                                    candidate_campaign_manager.generate_candidate_year(candidate.we_vote_id)
+                                if positive_value_exists(candidate_year):
+                                    try:
+                                        candidate.candidate_year = candidate_year
+                                        candidate.save()
+                                    except Exception as e:
+                                        status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
+                                    position_object.position_year = candidate_year
+                                    position_change = True
                         if not positive_value_exists(position_object.political_party) or force_update:
                             # political_party is missing so look it up from source
                             position_object.political_party = candidate.political_party_display()
@@ -8170,6 +8343,7 @@ class PositionManager(models.Model):
                     or position_object.ballot_item_display_name == "None" \
                     or positive_value_exists(position_object.ballot_item_image_url_https) \
                     or positive_value_exists(position_object.ballot_item_twitter_handle) \
+                    or not positive_value_exists(position_object.position_year) \
                     or not positive_value_exists(position_object.state_code) \
                     or force_update:
                 try:
@@ -8202,6 +8376,23 @@ class PositionManager(models.Model):
                             # ballot_item_image_twitter_handle should not exist for measures
                             position_object.ballot_item_twitter_handle = ""
                             position_change = True
+                        if not positive_value_exists(position_object.position_year) or force_update:
+                            # position_year is missing so look it up from source
+                            if positive_value_exists(contest_measure.measure_year):
+                                position_object.position_year = contest_measure.measure_year
+                                position_change = True
+                            else:
+                                measure_year = \
+                                    contest_measure_manager.generate_measure_year(
+                                        contest_measure.google_civic_election_id)
+                                if positive_value_exists(measure_year):
+                                    try:
+                                        contest_measure.measure_year = measure_year
+                                        contest_measure.save()
+                                    except Exception as e:
+                                        status += "FAILED_TO_SAVE_MEASURE: " + str(e) + " "
+                                    position_object.position_year = measure_year
+                                    position_change = True
                         if not positive_value_exists(position_object.state_code) or force_update:
                             # state_code is missing so look it up from source
                             position_object.state_code = contest_measure.state_code

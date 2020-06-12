@@ -701,8 +701,11 @@ def augment_candidate_possible_position_data(
                 if one_endorsement_light['ballot_item_display_name'] in possible_endorsement['ballot_item_name']:
                     possible_endorsement['candidate_we_vote_id'] = one_endorsement_light['candidate_we_vote_id']
                     possible_endorsement['ballot_item_name'] = one_endorsement_light['ballot_item_display_name']
-                    possible_endorsement['google_civic_election_id'] = \
-                        one_endorsement_light['google_civic_election_id']
+                    if 'google_civic_election_id' in one_endorsement_light:
+                        possible_endorsement['google_civic_election_id'] = \
+                            one_endorsement_light['google_civic_election_id']
+                    else:
+                        possible_endorsement['google_civic_election_id'] = 0
                     matching_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
                         possible_endorsement['candidate_we_vote_id'])
 
@@ -757,8 +760,11 @@ def augment_candidate_possible_position_data(
                             one_endorsement_light['candidate_we_vote_id']
                         possible_endorsement_copy['ballot_item_name'] = \
                             one_endorsement_light['ballot_item_display_name']
-                        possible_endorsement_copy['google_civic_election_id'] = \
-                            one_endorsement_light['google_civic_election_id']
+                        if 'google_civic_election_id' in one_endorsement_light:
+                            possible_endorsement_copy['google_civic_election_id'] = \
+                                one_endorsement_light['google_civic_election_id']
+                        else:
+                            possible_endorsement_copy['google_civic_election_id'] = 0
                         matching_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
                             possible_endorsement_copy['candidate_we_vote_id'])
 
@@ -2015,7 +2021,6 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
         voter_device_id, voter_guide_possibility_id, voter_guide_possibility_position_id=0):
     status = "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE "
     voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
-    possible_endorsement_list = []
 
     # Do not require voter_device_id yet
     # results = is_voter_device_id_valid(voter_device_id)
