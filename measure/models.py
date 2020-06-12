@@ -4,6 +4,7 @@
 
 from django.db import models
 from django.db.models import Q
+from election.models import ElectionManager
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from wevote_settings.models import fetch_next_we_vote_id_contest_measure_integer, \
     fetch_next_we_vote_id_measure_campaign_integer, fetch_site_unique_id_prefix
@@ -109,6 +110,8 @@ class ContestMeasure(models.Model):
     # An identifier for this district, relative to its scope. For example, the 34th State Senate district
     # would have id "34" and a scope of stateUpper.
     district_id = models.CharField(verbose_name="google civic district id", max_length=255, null=True, blank=True)
+    # The year this measure is on the ballot
+    measure_year = models.PositiveIntegerField(default=None, null=True)
     # State code
     state_code = models.CharField(verbose_name="state this measure affects",
                                   max_length=2, null=True, blank=True, db_index=True)
@@ -632,6 +635,16 @@ class ContestMeasureManager(models.Model):
             pass
 
         return state_code
+
+    def generate_measure_year(self, google_civic_election_id):
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_election(google_civic_election_id=google_civic_election_id)
+        if results['election_found']:
+            election = results['election']
+            if positive_value_exists(election.election_day_text):
+                year_string = election.election_day_text[:4]
+                return convert_to_int(year_string)
+        return None
 
     def retrieve_measures_are_not_duplicates_list(self, contest_measure_we_vote_id, read_only=True):
         """

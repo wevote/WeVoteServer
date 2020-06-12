@@ -3315,8 +3315,9 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 force_update = False
             race_office_level_missing = not positive_value_exists(one_position.race_office_level) \
                 and positive_value_exists(one_position.candidate_campaign_we_vote_id)
+            # REMOVED: or not positive_value_exists(one_position.state_code) \
             if force_update or not positive_value_exists(one_position.ballot_item_display_name) \
-                    or not positive_value_exists(one_position.state_code) \
+                    or not positive_value_exists(one_position.position_year) \
                     or not positive_value_exists(one_position.speaker_image_url_https) \
                     or one_position.speaker_type == UNKNOWN \
                     or missing_ballot_item_image \
@@ -3377,6 +3378,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'vote_smart_rating':                    one_position.vote_smart_rating,
                 'vote_smart_time_span':                 one_position.vote_smart_time_span,
                 'google_civic_election_id':             one_position.google_civic_election_id,
+                'position_year':                        one_position.position_year,
                 'state_code':                           one_position.state_code,
                 'more_info_url':                        one_position.more_info_url,
                 'statement_text':                       one_position.statement_text,

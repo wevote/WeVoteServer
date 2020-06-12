@@ -1426,6 +1426,8 @@ class CandidateCampaign(models.Model):
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
+    # The year this candidate is running for office
+    candidate_year = models.PositiveIntegerField(default=None, null=True)
     # State code
     state_code = models.CharField(verbose_name="state this candidate serves",
                                   max_length=2, null=True, blank=True, db_index=True)
@@ -2576,6 +2578,22 @@ class CandidateCampaignManager(models.Model):
             'candidates_are_not_duplicates':                candidates_are_not_duplicates,
         }
         return results
+
+    def generate_candidate_year(self, candidate_we_vote_id):
+        results = self.retrieve_candidate_to_office_link(
+            candidate_we_vote_id=candidate_we_vote_id,
+            read_only=True)
+        candidate_to_office_link_list = results['candidate_to_office_link_list']
+        election_manager = ElectionManager()
+        for one_link in candidate_to_office_link_list:
+            if positive_value_exists(one_link.google_civic_election_id):
+                results = election_manager.retrieve_election(google_civic_election_id=one_link.google_civic_election_id)
+                if results['election_found']:
+                    election = results['election']
+                    if positive_value_exists(election.election_day_text):
+                        year_string = election.election_day_text[:4]
+                        return convert_to_int(year_string)
+        return None
 
     def get_or_create_candidate_to_office_link(
             self,
