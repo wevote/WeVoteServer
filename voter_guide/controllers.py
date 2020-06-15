@@ -3480,7 +3480,7 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
 
     results = {
         'success': success,
-        'status': 'VOTER_GUIDES_TO_FOLLOW_FOR_API_RETRIEVED-FINAL: ' + status,
+        'status': status + 'VOTER_GUIDES_TO_FOLLOW_FOR_API_RETRIEVED-FINISHED ',
         'json_data': json_data,
     }
     return results
