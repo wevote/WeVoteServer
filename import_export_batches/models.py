@@ -422,6 +422,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS = {
 }
 
 # BatchProcess constants
+API_REFRESH_REQUEST = "API_REFRESH_REQUEST"
 AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID = "AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID"
 AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT = "AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT"
 CALCULATE_ORGANIZATION_DAILY_METRICS = "CALCULATE_ORGANIZATION_DAILY_METRICS"
@@ -435,6 +436,7 @@ REFRESH_BALLOT_ITEMS_FROM_VOTERS = "REFRESH_BALLOT_ITEMS_FROM_VOTERS"
 SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE = "SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE"
 
 KIND_OF_PROCESS_CHOICES = (
+    (API_REFRESH_REQUEST,  'Make sure we have cached a recent return from a specific API'),
     (RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,  'Retrieve Ballot Items from Polling Locations'),
     (REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, 'Refresh Ballot Items from BallotReturned Polling Locations'),
     (REFRESH_BALLOT_ITEMS_FROM_VOTERS, 'Refresh Ballot Items from Voter Custom Addresses'),
@@ -4684,23 +4686,26 @@ class BatchProcessManager(models.Model):
             polling_location_we_vote_id=None,
             state_code="",
             voter_id=None,
-            analytics_date_as_integer=None):
+            analytics_date_as_integer=None,
+            api_name=None,
+            election_id_list_serialized=''):
         status = ""
         success = True
         batch_process = None
 
         if kind_of_process not in \
-                [REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
-                 REFRESH_BALLOT_ITEMS_FROM_VOTERS,
-                 RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
-                 SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE,
+                [API_REFRESH_REQUEST,
                  AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID,
                  AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
                  CALCULATE_SITEWIDE_VOTER_METRICS,
                  CALCULATE_SITEWIDE_DAILY_METRICS,
                  CALCULATE_SITEWIDE_ELECTION_METRICS,
                  CALCULATE_ORGANIZATION_DAILY_METRICS,
-                 CALCULATE_ORGANIZATION_ELECTION_METRICS]:
+                 CALCULATE_ORGANIZATION_ELECTION_METRICS,
+                 REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
+                 REFRESH_BALLOT_ITEMS_FROM_VOTERS,
+                 RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
+                 SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
             status += "KIND_OF_PROCESS_NOT_FOUND: " + str(kind_of_process) + " "
             success = False
             results = {
@@ -4716,13 +4721,15 @@ class BatchProcessManager(models.Model):
             if analytics_date_as_integer:
                 analytics_date_as_integer = convert_to_int(analytics_date_as_integer)
             batch_process = BatchProcess.objects.create(
+                analytics_date_as_integer=analytics_date_as_integer,
+                api_name=api_name,
+                election_id_list_serialized=election_id_list_serialized,
+                date_added_to_queue=now(),
                 google_civic_election_id=google_civic_election_id,
                 kind_of_process=kind_of_process,
                 polling_location_we_vote_id=polling_location_we_vote_id,
                 state_code=state_code,
                 voter_id=voter_id,
-                analytics_date_as_integer=analytics_date_as_integer,
-                date_added_to_queue=now(),
             )
             status += 'BATCH_PROCESS_SAVED '
         except Exception as e:
@@ -5101,6 +5108,10 @@ class BatchProcess(models.Model):
     polling_location_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the polling location", max_length=255, default=None, null=True,
         blank=True, unique=False)
+
+    # API Refresh Request
+    api_name = models.CharField(max_length=255, null=True)
+    election_id_list_serialized = models.CharField(max_length=255, null=True)
 
     date_added_to_queue = models.DateTimeField(verbose_name='start', null=True)
     date_started = models.DateTimeField(verbose_name='start', null=True)

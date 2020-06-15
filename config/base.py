@@ -96,6 +96,7 @@ INSTALLED_APPS = (
     # project specific
     'admin_tools',
     'analytics',
+    'api_internal_cache',
     'apis_v1',
     'apple',
     'ballot',

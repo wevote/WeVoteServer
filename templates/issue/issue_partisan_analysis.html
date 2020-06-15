@@ -27,7 +27,7 @@
     </select>
     {% endif %}{# End of if election_list #}
 
-    {% if state_list %}
+    {% if state_list and never_going_to_happen %}
         <select id="state_code_id" name="state_code">
             <option value="">
                 -- Filter by State Served --</option>
@@ -292,7 +292,14 @@
                 {{ issue.issue_name }}<br />
                 <span style="color: darkgray">{{ issue.issue_description }}</span>
             </td>
-            <td><strong>{{ issue.linked_organization_count }}</strong></td>
+            <td>
+              <strong>{{ issue.linked_organization_count }}</strong>
+              {% if is_admin or is_political_data_manager %}
+                  &nbsp;
+                  <a href="{% url 'issue:issue_edit' issue.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                     target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+              {% endif %}
+            </td>
         </tr>
     {% endfor %}
     </table>
@@ -326,7 +333,14 @@
                 {{ issue.issue_name }}<br />
                 <span style="color: darkgray">{{ issue.issue_description }}</span>
             </td>
-            <td><strong>{{ issue.linked_organization_count }}</strong></td>
+            <td>
+              <strong>{{ issue.linked_organization_count }}</strong>
+              {% if is_admin or is_political_data_manager %}
+                  &nbsp;
+                  <a href="{% url 'issue:issue_edit' issue.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                     target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+              {% endif %}
+            </td>
         </tr>
     {% endfor %}
     </table>
@@ -359,7 +373,14 @@
                 {{ issue.issue_name }}<br />
                 <span style="color: darkgray">{{ issue.issue_description }}</span>
             </td>
-            <td><strong>{{ issue.linked_organization_count }}</strong></td>
+            <td>
+              <strong>{{ issue.linked_organization_count }}</strong>
+              {% if is_admin or is_political_data_manager %}
+                  &nbsp;
+                  <a href="{% url 'issue:issue_edit' issue.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                     target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+              {% endif %}
+            </td>
         </tr>
     {% endfor %}
     </table>

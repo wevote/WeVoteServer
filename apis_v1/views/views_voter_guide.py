@@ -5,6 +5,7 @@
 from ballot.controllers import choose_election_from_existing_data
 from django.http import HttpResponse
 import json
+from api_internal_cache.models import ApiInternalCacheManager
 from position.models import FRIENDS_AND_PUBLIC, FRIENDS_ONLY, PUBLIC_ONLY
 from voter.models import VoterAddress, VoterAddressManager, VoterDeviceLinkManager, VoterManager
 from voter_guide.controllers import voter_guide_possibility_highlights_retrieve_for_api, \
@@ -335,6 +336,10 @@ def voter_guides_upcoming_retrieve_view(request):  # voterGuidesUpcomingRetrieve
     :return:
     """
     status = ""
+    api_internal_cache = None
+    api_internal_cache_found = False
+    json_data = {}
+
     google_civic_election_id_list = request.GET.getlist('google_civic_election_id_list[]')
 
     if positive_value_exists(google_civic_election_id_list):
@@ -343,7 +348,29 @@ def voter_guides_upcoming_retrieve_view(request):  # voterGuidesUpcomingRetrieve
     else:
         google_civic_election_id_list = []
 
-    results = voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=google_civic_election_id_list)
-    status += results['status']
+    # Since this API assembles a lot of data, we pre-cache it. Get the data cached most recently.
+    api_internal_cache_manager = ApiInternalCacheManager()
+    election_id_list_serialized = json.dumps(google_civic_election_id_list)
+    results = api_internal_cache_manager.retrieve_latest_api_internal_cache(
+        api_name='voterGuidesUpcoming',
+        election_id_list_serialized=election_id_list_serialized)
+    if results['api_internal_cache_found']:
+        api_internal_cache_found = True
+        api_internal_cache = results['api_internal_cache']
+        json_data = results['cached_api_response_json_data']
 
-    return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+    # Schedule the next retrieve. It is possible for the first retrieve
+    # of the day (above) to be using data from a few days ago.
+    results = api_internal_cache_manager.schedule_refresh_of_api_internal_cache(
+        api_name='voterGuidesUpcoming',
+        election_id_list_serialized=election_id_list_serialized,
+        api_internal_cache=api_internal_cache,
+    )
+    # Add a log entry here
+
+    if not api_internal_cache_found:
+        results = voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=google_civic_election_id_list)
+        status += results['status']
+        json_data = results['json_data']
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
