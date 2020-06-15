@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import create_batch_row_actions, import_data_from_batch_row_actions
-from .models import AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT, \
+from .models import API_REFRESH_REQUEST, \
+    AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT, \
     BatchDescription, BatchManager, BatchProcessManager, \
     CALCULATE_ORGANIZATION_DAILY_METRICS, \
     CALCULATE_ORGANIZATION_ELECTION_METRICS, \
@@ -18,6 +19,7 @@ from analytics.controllers import calculate_sitewide_daily_metrics, \
     process_one_analytics_batch_process_augment_with_first_visit, process_sitewide_voter_metrics, \
     retrieve_analytics_processing_next_step
 from analytics.models import AnalyticsManager
+from api_internal_cache.models import ApiInternalCacheManager
 from ballot.models import BallotReturnedListManager
 from datetime import timedelta
 from django.utils.timezone import now
@@ -25,6 +27,8 @@ from election.models import ElectionManager
 from exception.models import handle_exception
 from import_export_twitter.controllers import fetch_number_of_candidates_needing_twitter_search, \
     retrieve_possible_twitter_handles_in_bulk
+import json
+from voter_guide.controllers import voter_guides_upcoming_retrieve_for_api
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_batch_process_system_on
@@ -87,7 +91,46 @@ def batch_process_next_steps():
             batch_process_list.append(full_batch_process_list[0])
     status += "BATCH_PROCESS_COUNT: " + str(batch_process_list_count) + ", "
 
-    # If less than 1 start a new one
+    # ############################
+    # Are there any Api's that need to have their internal cache updated?
+    api_internal_cache_manager = ApiInternalCacheManager()
+    results = api_internal_cache_manager.retrieve_next_api_refresh_request()
+    if positive_value_exists(results['api_refresh_request_found']):
+        api_refresh_request = results['api_refresh_request']
+        results = batch_process_manager.create_batch_process(
+            kind_of_process=API_REFRESH_REQUEST,
+            api_name=api_refresh_request.api_name,
+            election_id_list_serialized=api_refresh_request.election_id_list_serialized)
+        status += results['status']
+        success = results['success']
+        if results['batch_process_saved']:
+            # Increase these counters so the code below can react correctly
+            batch_process_list_count += 1
+            total_active_batch_processes += 1
+            batch_process = results['batch_process']
+            batch_process_list.append(batch_process)
+            status += "SCHEDULED_API_REFRESH_REQUEST "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=batch_process.kind_of_process,
+                status=status,
+            )
+
+            # Now mark api_refresh_request as checked out
+            try:
+                api_refresh_request.date_checked_out = now()
+                api_refresh_request.save()
+            except Exception as e:
+                status += "COULD_NOT_MARK_API_REFRESH_REQUEST_WITH_DATE_CHECKED_OUT " + str(e) + " "
+        else:
+            status += "FAILED_TO_SCHEDULE-" + str(API_REFRESH_REQUEST) + " "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=0,
+                kind_of_process=API_REFRESH_REQUEST,
+                status=status,
+            )
+
+    # If less than three total active processes, and we aren't working on a current process chunk...
     if total_active_batch_processes < 3 and batch_process_list_count < 1:
         new_batch_process_list_count = 0
         results = batch_process_manager.retrieve_batch_process_list(process_active=False, process_queued=True)
@@ -247,6 +290,9 @@ def batch_process_next_steps():
                     state_code=batch_process.state_code,
                     status=status,
                 )
+        elif batch_process.kind_of_process in [API_REFRESH_REQUEST]:
+            results = process_one_api_refresh_request_batch_process(batch_process)
+            status += results['status']
         elif batch_process.kind_of_process in [
                 AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
                 CALCULATE_SITEWIDE_VOTER_METRICS,
@@ -479,6 +525,116 @@ def process_one_analytics_batch_process(batch_process):
     results = {
         'success': success,
         'status': status,
+    }
+    return results
+
+
+def process_one_api_refresh_request_batch_process(batch_process):
+    status = ""
+    success = True
+    api_internal_cache_manager = ApiInternalCacheManager()
+    batch_process_manager = BatchProcessManager()
+
+    kind_of_process = batch_process.kind_of_process
+
+    # When a batch_process is running, we mark when it was "taken off the shelf" to be worked on.
+    #  When the process is complete, we should reset this to "NULL"
+    try:
+        batch_process.date_started = now()
+        batch_process.date_checked_out = now()
+        batch_process.save()
+    except Exception as e:
+        status += "API_REFRESH_REQUEST-CHECKED_OUT_TIME_NOT_SAVED " + str(e) + " "
+        handle_exception(e, logger=logger, exception_message=status)
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=kind_of_process,
+            status=status,
+        )
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    api_internal_cache_id = 0
+    api_internal_cache_saved = False
+    api_results_retrieved = False
+    if batch_process.api_name == 'voterGuidesUpcoming':
+        google_civic_election_id_list = json.loads(batch_process.election_id_list_serialized)
+        results = voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=google_civic_election_id_list)
+        status += results['status']
+        api_results_retrieved = results['success']
+        json_data = results['json_data']
+        if json_data['success'] and api_results_retrieved:
+            # Save the json in the cache
+            status += "NEW_API_RESULTS_RETRIEVED-CREATING_API_INTERNAL_CACHE "
+            cached_api_response_serialized = json.dumps(json_data)
+            results = api_internal_cache_manager.create_api_internal_cache(
+                api_name=batch_process.api_name,
+                cached_api_response_serialized=cached_api_response_serialized,
+                election_id_list_serialized=batch_process.election_id_list_serialized,
+            )
+            status += results['status']
+            api_internal_cache_saved = results['success']
+            api_internal_cache_id = results['api_internal_cache_id']
+        else:
+            status += "NEW_API_RESULTS_RETRIEVE_FAILED "
+    else:
+        status += "API_NAME_NOT_RECOGNIZED: " + str(batch_process.api_name) + " "
+
+    if api_results_retrieved and api_internal_cache_saved:
+        try:
+            batch_process.completion_summary = status
+            batch_process.date_checked_out = None
+            batch_process.date_completed = now()
+            batch_process.save()
+
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+        except Exception as e:
+            status += "DATE_COMPLETED_TIME_NOT_SAVED " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        # Mark all refresh requests prior to now as satisfied
+        if positive_value_exists(api_internal_cache_id):
+            results = api_internal_cache_manager.mark_prior_api_internal_cache_entries_as_replaced(
+                api_name=batch_process.api_name,
+                election_id_list_serialized=batch_process.election_id_list_serialized,
+                excluded_api_internal_cache_id=api_internal_cache_id)
+            status += results['status']
+
+        # Mark all refresh requests prior to now as satisfied
+        results = api_internal_cache_manager.mark_refresh_completed_for_prior_api_refresh_requested(
+            api_name=batch_process.api_name,
+            election_id_list_serialized=batch_process.election_id_list_serialized)
+        status += results['status']
+    else:
+        status += "API_REFRESH_REQUEST_FAILED "
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=kind_of_process,
+            status=status,
+        )
+
+    results = {
+        'success':              success,
+        'status':               status,
     }
     return results
 

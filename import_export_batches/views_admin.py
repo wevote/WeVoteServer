@@ -1452,6 +1452,9 @@ def batch_process_list_view(request):
             batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
             batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
         if positive_value_exists(kind_of_processes_to_show):
+            if kind_of_processes_to_show == "API_REFRESH_REQUEST":
+                api_refresh_processes = ['API_REFRESH_REQUEST']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=api_refresh_processes)
             if kind_of_processes_to_show == "BALLOT_ITEMS":
                 ballot_item_processes = [
                     'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS',
@@ -1459,8 +1462,7 @@ def batch_process_list_view(request):
                     'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
             if kind_of_processes_to_show == "SEARCH_TWITTER":
-                search_twitter_processes = [
-                    'SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE']
+                search_twitter_processes = ['SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=search_twitter_processes)
         batch_process_queryset = batch_process_queryset.order_by("-id")
 
