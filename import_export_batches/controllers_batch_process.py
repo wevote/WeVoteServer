@@ -562,7 +562,7 @@ def process_one_api_refresh_request_batch_process(batch_process):
     api_internal_cache_saved = False
     api_results_retrieved = False
     if batch_process.api_name == 'voterGuidesUpcoming':
-        status += "STARTING-voterGuidesUpcoming-PROCESS_ONE_API_REFRESH_REQUESTED-" \
+        status += "STARTING_PROCESS_ONE_API_REFRESH_REQUESTED-voterGuidesUpcoming-" \
                   "(" + str(batch_process.election_id_list_serialized) + ") "
         google_civic_election_id_list = json.loads(batch_process.election_id_list_serialized)
         results = voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=google_civic_election_id_list)

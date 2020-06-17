@@ -297,21 +297,24 @@ def candidate_list_view(request):
         candidate_list = list(candidate_query)
         candidates_migrated = 0
         for one_candidate in candidate_list:
-            results = candidate_manager.get_or_create_candidate_to_office_link(
-                candidate_we_vote_id=one_candidate.we_vote_id,
-                contest_office_we_vote_id=one_candidate.contest_office_we_vote_id,
-                google_civic_election_id=convert_to_int(one_candidate.google_civic_election_id),
-                state_code=one_candidate.state_code)
-            if not positive_value_exists(results['success']):
-                # Break out of loop
-                break
-            else:
-                if positive_value_exists(results['new_candidate_to_office_link_created']):
-                    pass
-                one_candidate.migrated_to_link = True
-                one_candidate.save()
-                candidates_migrated += 1
-        if positive_value_exists(candidates_migrated):
+            if positive_value_exists(one_candidate.we_vote_id) \
+                    and positive_value_exists(one_candidate.contest_office_we_vote_id) \
+                    and positive_value_exists(one_candidate.google_civic_election_id):
+                results = candidate_manager.get_or_create_candidate_to_office_link(
+                    candidate_we_vote_id=one_candidate.we_vote_id,
+                    contest_office_we_vote_id=one_candidate.contest_office_we_vote_id,
+                    google_civic_election_id=convert_to_int(one_candidate.google_civic_election_id),
+                    state_code=one_candidate.state_code)
+                if not positive_value_exists(results['success']):
+                    # Break out of loop
+                    messages.add_message(request, messages.ERROR, "Could not migrate: " + str(results['status']))
+                else:
+                    if positive_value_exists(results['new_candidate_to_office_link_created']):
+                        pass
+                    one_candidate.migrated_to_link = True
+                    one_candidate.save()
+                    candidates_migrated += 1
+        if positive_value_exists(candidates_migrated) or positive_value_exists(migrate_to_candidate_link):
             messages.add_message(request, messages.INFO, "candidates_migrated: " + str(candidates_migrated))
 
     google_civic_election_id_list_generated = False
