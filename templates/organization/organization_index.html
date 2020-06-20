@@ -6,9 +6,10 @@
 -->
 <html lang="en">
   <head>
-    <meta name="description"
-          content="{{ chosen_social_share_description|default_if_none:"" }}"
-          />
+    <meta
+      name="description"
+      content="{{ chosen_social_share_description|default_if_none:"" }}"
+    />
     <title>{{ html_title }}</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -28,8 +29,7 @@
     <meta property="og:image"         content="https://WeVote.US/img/global/logos/we-vote-logo-wordmark-vertical-color-on-white-256x256.png" />
   {% endif %}
     <base href="/">
-    <link href="/css/loading-screen.css" rel="stylesheet" type="text/css" />
-    <link href="/css/main.css" rel="stylesheet" type="text/css" />
+
   {% if hide_favicon %}  <!-- Favicon hidden //-->
   {% elif chosen_favicon_url_https %}
     <link rel="icon" sizes="32x32" href="{{ chosen_favicon_url_https }}" >
@@ -41,6 +41,12 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/img/global/icons/favicon-16x16.png" >
     <link rel="icon" sizes="48x48" href="/img/global/icons/favicon.ico" >
   {% endif %}
+
+    <link rel="preload" onload="this.rel='stylesheet'" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" as="style" crossOrigin="anonymous" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" />
+    <link rel="preload" onload="this.rel='stylesheet'" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
+    <link rel="preload" onload="this.rel='stylesheet'" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css" />
+    <link rel="preload" onload="this.rel='stylesheet'" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.12.0/bootstrap-social.min.css" />
+
     <!-- Google Analytics -->
     <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -48,69 +54,50 @@
     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
     })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
+  {% if not chosen_google_analytics_we_vote_account_number_off %}
     ga('create', 'UA-53643204-3', 'auto');
     ga('send', 'pageview');
+  {% endif %}
   {% if chosen_google_analytics_account_number %}
     ga('create', '{{ chosen_google_analytics_account_number }}', 'auto', 'chosenTracker');
     ga('chosenTracker.send', 'pageview');
   {% endif %}
     </script>
     <!-- End Google Analytics -->
-    <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=117d80d3-9e4e-4aac-8a1c-1ca9ade4266d"> </script>
   </head>
   <body>
     <div id="app" class="app-wrapper">
-      <div className="loading-screen">
-        <div className="u-loading-spinner u-loading-spinner--light" style="
+      <div>
+        <div style="
           display: flex;
           position: fixed;
           height: 100vh;
           width: 100vw;
           top: 0;
           left: 0;
-          background-color: #0d5470;
+          background-color: #fff;
           justify-content: center;
           align-items: center;
           font-size: 30px;
           color: #0d5470;
           flex-direction: column;
-          font-family: Source Sans Pro, sans-serif;
-          text-align: center;
           ">
-          <h1 style="
-            font-family: 'Source Sans Pro', sans-serif;
-            font-size: 32px;
-            font-weight: normal;
-            color: #fff;
-            ">Loading {{ html_title }}...
-          </h1>
-          <div class="u-loading-spinner u-loading-spinner--light">Loading {{ html_title }}...</div>
+          <div>Your election is loading...</div>
         </div>
       </div>
     </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
     <script>
-    const cssTags = [
-      '<link href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossOrigin="anonymous" rel="stylesheet" />',
-      '<link href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css" rel="stylesheet"/>',
-      '<link href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css" rel="stylesheet" />',
-      '<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.12.0/bootstrap-social.min.css" rel="stylesheet" />'];
-    (function(rest) {
-      $("head").append(...rest);
-    })(cssTags);
+      function initMap(){
+        //
+      }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCM0vM1mzh56OuA5IfgW_U6Qd9jD99WH6M&libraries=places"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.0/plugins/CSSPlugin.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.0/easing/EasePack.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.0/TweenLite.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.0/TimelineLite.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
-    <script src="https://checkout.stripe.com/checkout.js"></script>
-    <script src="https://js.stripe.com/v3/"></script>
-    <script src="https://tool.votinginfoproject.org/app.js"></script>
-    <script type="text/javascript" async src="//platform.twitter.com/widgets.js"></script>
+<!--    <script type="text/javascript" async defer src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" async defer src="https://platform.twitter.com/widgets.js"></script>
     <script>
+      {/* Zendesk settings */}
       window.zESettings = {
         webWidget: {
           color: {
@@ -118,15 +105,59 @@
             launcher: '#fff',
             launcherText: '#757575',
           },
+          chat: {
+            connectOnPageLoad: false,
+          },
           offset: {
-            vertical: '55px',
+            vertical: '-2px',
+            horizontal: '-10px',
             mobile: {
-              vertical: '50px',
-              horizontal: '-15px',
+              vertical: '-2px',
+              horizontal: '-10px',
             },
           },
         }
       };
+    </script>
+    <script type="text/javascript">
+      let linkElementForMainCss = document.createElement('link');
+      linkElementForMainCss.rel = 'stylesheet';
+      linkElementForMainCss.href = '/css/main.css';
+      linkElementForMainCss.type = 'text/css';
+      let firstExistingLink = document.getElementsByTagName('link')[0];
+      firstExistingLink.parentNode.insertBefore(linkElementForMainCss, firstExistingLink);
+
+      setTimeout(() => {
+        /* ZenDesk load delay so it doesn't block main thread */
+        let scriptElementForZenDesk = document.createElement('script');
+        scriptElementForZenDesk.id = 'ze-snippet';
+        scriptElementForZenDesk.src = 'https://static.zdassets.com/ekr/snippet.js?key=117d80d3-9e4e-4aac-8a1c-1ca9ade4266d';
+        let firstExistingScript = document.getElementsByTagName('script')[0];
+        firstExistingScript.parentNode.insertBefore(scriptElementForZenDesk, firstExistingScript);
+      }, 15000);
+
+      setTimeout(() => {
+        /* Delay Stripe load so it doesn't block main thread */
+        let firstExistingScript = document.getElementsByTagName('script')[0];
+
+        let scriptElement1 = document.createElement('script');
+        scriptElement1.src = 'https://checkout.stripe.com/checkout.js';
+        scriptElement1.type = 'text/javascript';
+        firstExistingScript.parentNode.insertBefore(scriptElement1, firstExistingScript);
+
+        let scriptElement2 = document.createElement('script');
+        scriptElement2.src = 'https://js.stripe.com/v3/';
+        scriptElement2.type = 'text/javascript';
+        firstExistingScript.parentNode.insertBefore(scriptElement2, firstExistingScript);
+      }, 16000);
+
+      setTimeout(() => {
+        /* Maps load so it doesn't block main thread */
+        let scriptElementForMaps = document.createElement('script');
+        scriptElementForMaps.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCM0vM1mzh56OuA5IfgW_U6Qd9jD99WH6M&callback=initMap&libraries=places';
+        let firstExistingScript = document.getElementsByTagName('script')[0];
+        firstExistingScript.parentNode.insertBefore(scriptElementForMaps, firstExistingScript);
+      }, 20000);
     </script>
     <script type="text/javascript" src="bundle.js"></script>
   </body>
