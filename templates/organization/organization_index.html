@@ -29,6 +29,7 @@
     <meta property="og:image"         content="https://WeVote.US/img/global/logos/we-vote-logo-wordmark-vertical-color-on-white-256x256.png" />
   {% endif %}
     <base href="/">
+    <link href="/css/main.css" rel="stylesheet" type="text/css" />
 
   {% if hide_favicon %}  <!-- Favicon hidden //-->
   {% elif chosen_favicon_url_https %}
@@ -120,15 +121,8 @@
       };
     </script>
     <script type="text/javascript">
-      let linkElementForMainCss = document.createElement('link');
-      linkElementForMainCss.rel = 'stylesheet';
-      linkElementForMainCss.href = '/css/main.css';
-      linkElementForMainCss.type = 'text/css';
-      let firstExistingLink = document.getElementsByTagName('link')[0];
-      firstExistingLink.parentNode.insertBefore(linkElementForMainCss, firstExistingLink);
-
       setTimeout(() => {
-        /* ZenDesk load delay so it doesn't block main thread */
+        // ZenDesk load delay so it doesn't block main thread
         let scriptElementForZenDesk = document.createElement('script');
         scriptElementForZenDesk.id = 'ze-snippet';
         scriptElementForZenDesk.src = 'https://static.zdassets.com/ekr/snippet.js?key=117d80d3-9e4e-4aac-8a1c-1ca9ade4266d';
@@ -137,7 +131,7 @@
       }, 15000);
 
       setTimeout(() => {
-        /* Delay Stripe load so it doesn't block main thread */
+        // Delay Stripe load so it doesn't block main thread
         let firstExistingScript = document.getElementsByTagName('script')[0];
 
         let scriptElement1 = document.createElement('script');
@@ -152,13 +146,12 @@
       }, 16000);
 
       setTimeout(() => {
-        /* Maps load so it doesn't block main thread */
+        // Maps load so it doesn't block main thread
         let scriptElementForMaps = document.createElement('script');
         scriptElementForMaps.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCM0vM1mzh56OuA5IfgW_U6Qd9jD99WH6M&callback=initMap&libraries=places';
         let firstExistingScript = document.getElementsByTagName('script')[0];
         firstExistingScript.parentNode.insertBefore(scriptElementForMaps, firstExistingScript);
       }, 20000);
     </script>
-    <script type="text/javascript" src="bundle.js"></script>
-  </body>
+  <script type="text/javascript" src="runtime.bundle.js"></script><script type="text/javascript" src="materialStyle.bundle.js"></script><script type="text/javascript" src="reactCore.bundle.js"></script><script type="text/javascript" src="ready.bundle.js"></script><script type="text/javascript" src="stores.bundle.js"></script><script type="text/javascript" src="defaultVendors.bundle.js"></script><script type="text/javascript" src="components.bundle.js"></script><script type="text/javascript" src="bundle.bundle.js"></script></body>
 </html>
