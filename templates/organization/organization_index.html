@@ -119,19 +119,6 @@
 
       // COMMENT OUT WHEN SPEED TESTING
       setTimeout(() => {
-        let scriptElementForGoogleAnalytics = document.createElement('script');
-        scriptElementForGoogleAnalytics.src = '/javascript/google-analytics.js';
-        firstExistingScript = document.getElementsByTagName('script')[0];
-        firstExistingScript.parentNode.insertBefore(scriptElementForGoogleAnalytics, firstExistingScript);
-
-        let scriptElementForGoogleTagManager = document.createElement('script');
-        scriptElementForGoogleTagManager.src = '/javascript/google-tag-manager.js';
-        firstExistingScript = document.getElementsByTagName('script')[0];
-        firstExistingScript.parentNode.insertBefore(scriptElementForGoogleTagManager, firstExistingScript);
-      }, 2000);
-
-      // COMMENT OUT WHEN SPEED TESTING
-      setTimeout(() => {
         // We don't want Fontawesome blocking DOMContentLoad
         let linkElementForFontAwesome = document.createElement('link');
         linkElementForFontAwesome.rel = 'stylesheet';
