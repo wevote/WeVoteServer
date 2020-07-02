@@ -34,6 +34,8 @@ urlpatterns = [
     url(r'^allBallotItemsRetrieve/', views_ballot.all_ballot_items_retrieve_view,
         name='allBallotItemsRetrieveView'),
     url(r'^analyticsActionSyncOut/', analytics_action_sync_out_view, name='analyticsActionSyncOutView'),
+    url(r'^appleSignInOauthRedirectDestination/', views_apple.sign_in_with_apple_oauth_redirect_view,
+        name='appleSignInOauthRedirectDestination'),
     url(r'^appleSignInSave/$', views_apple.sign_in_with_apple_view, name='appleSignInSaveView'),
     url(r'^ballotItemHighlightsRetrieve/', views_ballot.ballot_item_highlights_retrieve_view,
         name='ballotItemHighlightsRetrieveView'),
