@@ -61,7 +61,7 @@
 </div>
 
 <div class="form-group">
-    <label for="polling_location_we_vote_id_id" class="col-sm-3 control-label">Polling Location We Vote ID</label>
+    <label for="polling_location_we_vote_id_id" class="col-sm-3 control-label">Map Point We Vote ID</label>
     <div class="col-sm-8">
         <input type="text" name="polling_location_we_vote_id" id="polling_location_we_vote_id_id" class="form-control"
                value="{{ ballot_returned.polling_location_we_vote_id }}" />
@@ -194,7 +194,7 @@
         {% if ballot_returned and ballot_returned.polling_location_we_vote_id %}
           &nbsp;&nbsp;&nbsp;&nbsp;
           <a href="{% url 'polling_location:polling_location_we_vote_id_edit' ballot_returned.polling_location_we_vote_id %}" target="_blank">
-            Edit Original Polling Location</a> (in new window)
+            Edit Original Map Point</a> (in new window)
         {% endif %}
     </div>
 </div>
@@ -205,7 +205,7 @@
     local voter guides to candidates and measures.<br />
     <br />
     {% if polling_location_found %}
-      <h3>Creating Ballot Returned at this Polling Location</h3>
+      <h3>Creating Ballot Returned at this Map Point</h3>
         <a href="{% url 'polling_location:polling_location_summary' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
             {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}missing location name{% endif %}</a>
             - {{ polling_location.get_text_for_map_search|title }}
@@ -221,10 +221,10 @@
         <input type="submit" value="Search" />
         <br />
         {% if polling_location_list %}
-            <label for="polling_location_id_id">Polling Locations</label>
+            <label for="polling_location_id_id">Map Points</label>
             <select id="polling_location_id_id" name="polling_location_id">
                 <option value="0" {% if 0 == polling_location_id %} selected="selected"{% endif %}>
-                    -- Polling Locations --</option>
+                    -- Map Points --</option>
             {% for polling_location in polling_location_list %}
                 <option value="{{ polling_location.id }}"
                         {% if polling_location.id|slugify == polling_location_id|slugify %} selected="selected"{% endif %}>
@@ -245,7 +245,7 @@
 
 <ul>
     <li>Prepare: <a href="{% url 'ballotpedia:import_ballot_items_for_location' %}?google_civic_election_id={{ google_civic_election_id }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}&state_code={{ state_code }}" target="_blank" >
-        Ballotpedia: Retrieve Ballot Items for this Polling Location</a> (in new window)</li>
+        Ballotpedia: Retrieve Ballot Items for this Map Point</a> (in new window)</li>
     <li>Prepare: <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}">
         Import Complete Ballot at One Location (Import/Export Batches)</a></li>
 </ul>

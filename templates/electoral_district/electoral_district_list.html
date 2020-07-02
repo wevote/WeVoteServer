@@ -1,7 +1,7 @@
 {# templates/electoral_district/electoral_district_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if state_code%}{{ state_code }} {% endif %}Electoral Districts{% if polling_location_we_vote_id %} for Polling Location {{ polling_location_we_vote_id }} {% endif %}{% endblock %}
+{% block title %}{% if state_code%}{{ state_code }} {% endif %}Electoral Districts{% if polling_location_we_vote_id %} for Map Point {{ polling_location_we_vote_id }} {% endif %}{% endblock %}
 
 {%  block content %}
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
@@ -18,10 +18,10 @@
     <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Opinions/Positions</a> -
     <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guide Possibilities</a> -
-    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Map Points</a>
 </p>
 
-<h1>{% if state_code %}{{ state_code }} {% endif %}Electoral Districts{% if polling_location_we_vote_id %} for Polling Location {{ polling_location_we_vote_id }} {% endif %}</h1>
+<h1>{% if state_code %}{{ state_code }} {% endif %}Electoral Districts{% if polling_location_we_vote_id %} for Map Point {{ polling_location_we_vote_id }} {% endif %}</h1>
 
 
 <a href="{% url 'ballotpedia:refresh_ballotpedia_districts_for_polling_locations' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"

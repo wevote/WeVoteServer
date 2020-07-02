@@ -1,7 +1,7 @@
 {# templates/polling_location/polling_location_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if state_name %}{{ state_name }} {% endif %}Polling Locations{% endblock %}
+{% block title %}{% if state_name %}{{ state_name }} {% endif %}Map Points{% endblock %}
 
 {%  block content %}
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
@@ -18,14 +18,14 @@
     <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Opinions/Positions</a> -
     <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guide Possibilities</a> -
-    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Map Points</a>
 </p>
 
-<h1>{% if state_name %}{{ state_name }} {% endif %}Polling Locations</h1>
+<h1>{% if state_name %}{{ state_name }} {% endif %}Map Points</h1>
 
     <p>
         <a href="{% url 'admin_tools:sync_dashboard' %}?state_code={{ state_code }}" target="_blank">
-        Go to "Import Polling Locations From Master Server" Page
+        Go to "Import Map Points From Master Server" Page
         </a>
     </p>
 
@@ -58,6 +58,9 @@
     {% else %}
         (Choose state to add latitude/longitude to polling locations),
     {% endif %}
+        <a href="{% url 'polling_location:polling_locations_add_address_from_latitude_and_longitude' %}?state_code={{ state_code }}">
+            Add address to polling locations with only latitude/longitude (up to 1000),
+        </a>
 
         <a href="{% url 'polling_location:polling_location_statistics' %}?state_code={{ state_code }}" target="_blank">
             See state-by-state statistics <span class="glyphicon glyphicon-new-window"></span>,
@@ -65,7 +68,7 @@
 
         <a href="{% url 'polling_location:polling_location_visualize' 0 %}?state_code={{ state_code }}"
            target="_blank">
-         Google Maps Polling Locations <span class="glyphicon glyphicon-new-window"></span>
+         Google Maps Map Points <span class="glyphicon glyphicon-new-window"></span>
         </a>
     </p>
 
@@ -90,7 +93,7 @@
          clear search</a>&nbsp;
 {% endif %}
     <input type="text" name="polling_location_search" id="polling_location_id" value="{{ polling_location_search|default_if_none:"" }}" />
-    <input type="submit" value="Search for Polling Location" />&nbsp;&nbsp;&nbsp;
+    <input type="submit" value="Search for Map Point" />&nbsp;&nbsp;&nbsp;
 
     <label for="show_bulk_retrieve_id">
       <input type="checkbox" name="show_bulk_retrieve" id="show_bulk_retrieve_id" value="1" onChange="this.form.submit()"
@@ -107,9 +110,10 @@
             <th>Address</th>
             <th>we_vote_id</th>
             <th>lat/long</th>
+            <th>Source Code</th>
             <th>County</th>
             <th>Precinct</th>
-            <th>For bulk retrieve?</th>
+            <th>Bulk retrieve?</th>
             <th></th>
         </tr>
     </thead>
@@ -118,7 +122,7 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td><a href="{% url 'polling_location:polling_location_summary' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-            {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}(missing location name)&nbsp;&nbsp;{% endif %}</a>
+            {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}(no location name)&nbsp;&nbsp;{% endif %}</a>
             </td>
             <td>
                 {{ polling_location.get_text_for_map_search }}
@@ -131,6 +135,9 @@
                 {% if polling_location.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ polling_location.we_vote_id }}{% endif %}
             </td>
             <td>{% if polling_location.latitude %}&nbsp;&nbsp;Lat/Long:&nbsp;yes{% endif %}</td>
+            <td>
+                {{ polling_location.source_code|default_if_none:"" }}
+            </td>
             <td>
                 {{ polling_location.county_name|default_if_none:"" }}
             </td>

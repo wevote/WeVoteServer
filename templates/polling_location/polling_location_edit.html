@@ -1,17 +1,17 @@
 {# templates/polling_location/polling_location_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if polling_location %}{{ polling_location.location_name|default_if_none:"" }}{% else %}Create Polling Location{% endif %}{% endblock %}
+{% block title %}{% if polling_location %}{{ polling_location.location_name|default_if_none:"" }}{% else %}Create Map Point{% endif %}{% endblock %}
 
 {%  block content %}
 
 {% if polling_location.id %}
-    <a href="{% url 'polling_location:polling_location_summary' polling_location.id %}">< Back to Polling Location Summary</a>
+    <a href="{% url 'polling_location:polling_location_summary' polling_location.id %}">< Back to Map Point Summary</a>
 {% else %}
-    <a href="{% url 'polling_location:polling_location_list' %}?state_code={{ polling_location.state|default_if_none:"" }}">< Back to Polling Locations</a>
+    <a href="{% url 'polling_location:polling_location_list' %}?state_code={{ polling_location.state|default_if_none:"" }}">< Back to Map Points</a>
 {% endif %}
 
-<h1>{% if polling_location %}Update Polling Location: {{ polling_location.location_name|default_if_none:"" }}{% else %}Create Polling Location{% endif %}</h1>
+<h1>{% if polling_location %}Update Map Point: {{ polling_location.location_name|default_if_none:"" }}{% else %}Create Map Point{% endif %}</h1>
 
 <form action="{% url "polling_location:polling_location_edit_process" %}" method="post" class="form-horizontal">
     {% csrf_token %}

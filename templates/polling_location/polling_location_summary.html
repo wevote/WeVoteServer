@@ -1,15 +1,15 @@
 {# templates/polling_location/polling_location_summary.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Polling Location{% if polling_location %}: {{ polling_location.location_name }}{% else %} Not Found{% endif %}{% endblock %}
+{% block title %}Map Point{% if polling_location %}: {{ polling_location.location_name }}{% else %} Not Found{% endif %}{% endblock %}
 
 {%  block content %}
 
-<a href="{% url 'polling_location:polling_location_list' %}?state_code={{ polling_location.state|default_if_none:"" }}">< Back to Polling Locations</a>
+<a href="{% url 'polling_location:polling_location_list' %}?state_code={{ polling_location.state|default_if_none:"" }}">< Back to Map Points</a>
 
 {% if polling_location %}
 
-    <h1>One Polling Location</h1>
+    <h1>One Map Point</h1>
     <p><strong>{{ polling_location.location_name }}</strong><br />
     {% if polling_location.line1 %}{{ polling_location.line1 }},<br />{% endif %}
     {% if polling_location.line2 %}{{ polling_location.line2 }},<br />{% endif %}
@@ -19,11 +19,12 @@
         {% if polling_location.zip_long %}{{ polling_location.get_formatted_zip }}{% endif %}
         <br />
     {% endif %}
-    Hours: {{ polling_location.polling_hours_text }}<br />
-    VIP ID: {{ polling_location.polling_location_id }}<br />
+    {% if polling_location.polling_hours_text %}Hours: {{ polling_location.polling_hours_text }},<br />{% endif %}
+    {% if polling_location.polling_location_id %}VIP ID: {{ polling_location.polling_location_id }}<br />{% endif %}
     we_vote_id: {{ polling_location.we_vote_id }}<br />
     latitude: {{ polling_location.latitude|default_if_none:"" }}<br />
     longitude: {{ polling_location.longitude|default_if_none:"" }}<br />
+    source_code: {{ polling_location.source_code|default_if_none:"" }}<br />
     {% if polling_location.use_for_bulk_retrieve %}Use this location for bulk retrieval of ballots.<br />{% endif %}
     {% if polling_location.polling_location_deleted %}<strong>DELETED</strong><br />{% endif %}
     </p>
@@ -34,15 +35,15 @@
    Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)</p>
 
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&polling_location_we_vote_id={{ polling_location.we_vote_id }}">
-   Import/Export Ballot Items at One Polling Location</a></p>
+   Import/Export Ballot Items at One Map Point</a></p>
 
 <p><a href="{% url 'import_export_google_civic:retrieve_representatives_for_one_address' %}?polling_location_we_vote_id={{ polling_location.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-   Retrieve Representatives for this Polling Location</a></p>
+   Retrieve Representatives for this Map Point</a></p>
 
   <br />
   <br />
 {% if ballot_returned_list %}
-  <h4>Ballot Returned Entries that Rely on this Polling Location</h4>
+  <h4>Ballot Returned Entries that Rely on this Map Point</h4>
 
     <table class="table">
     {% for ballot_returned in ballot_returned_list %}
@@ -58,7 +59,7 @@
             <th>Offices & Candidates</th>
             <th>Ballot Items</th>
             <th>Voter</th>
-{#            <th>Polling Location</th>#}
+{#            <th>Map Point</th>#}
         </tr>
         </thead>
     {% endif %}
@@ -98,8 +99,8 @@
 
 {% else %}
 
-    <h1>No Polling Location Found</h1>
-    Please visit the <a href="{% url 'polling_location:polling_location_list' %}">Polling Location List</a> page.
+    <h1>No Map Point Found</h1>
+    Please visit the <a href="{% url 'polling_location:polling_location_list' %}">Map Point List</a> page.
 
 {% endif %}
 

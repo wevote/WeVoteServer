@@ -61,7 +61,7 @@ KIND_OF_BATCH_CHOICES = (
     (CONTEST_OFFICE,    'ContestOffice'),
     (CANDIDATE,         'Candidate'),
     (IMPORT_BALLOT_ITEM,   'Ballot Returned'),
-    (IMPORT_POLLING_LOCATION,   'Polling Location'),
+    (IMPORT_POLLING_LOCATION,   'Map Point'),
     (ORGANIZATION_WORD, 'Organization'),
     (POSITION,          'Position'),
     (POLITICIAN,        'Politician'),
@@ -281,12 +281,15 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLLING_LOCATIONS = {
     'city': 'city',
     'county_name': 'county_name',
     'full_address': 'full_address',
+    'latitude': 'latitude',
+    'longitude': 'longitude',
     'line1': 'line1',
     'line2': 'line2',
     'location_name': 'location_name',
     'polling_location_deleted': 'polling_location_deleted',
     'polling_location_we_vote_id': 'polling_location_we_vote_id',
     'precinct_name': 'precinct_name',
+    'source_code': 'source_code',
     'state': 'state',
     'use_for_bulk_retrieve': 'use_for_bulk_retrieve',
     'zip_long': 'zip_long',
@@ -296,12 +299,15 @@ BATCH_HEADER_MAP_FOR_POLLING_LOCATIONS = {
     'city': 'city',
     'county_name': 'county_name',
     'full_address': 'full_address',
+    'latitude': 'latitude',
+    'longitude': 'longitude',
     'line1': 'line1',
     'line2': 'line2',
     'location_name': 'location_name',
     'polling_location_deleted': 'polling_location_deleted',
     'polling_location_we_vote_id': 'polling_location_we_vote_id',
     'precinct_name': 'precinct_name',
+    'source_code': 'source_code',
     'state': 'state',
     'use_for_bulk_retrieve': 'use_for_bulk_retrieve',
     'zip_long': 'zip_long',
@@ -437,8 +443,8 @@ SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE = "SEARCH_TWITTER_FOR_CANDIDATE_TWIT
 
 KIND_OF_PROCESS_CHOICES = (
     (API_REFRESH_REQUEST,  'Make sure we have cached a recent return from a specific API'),
-    (RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,  'Retrieve Ballot Items from Polling Locations'),
-    (REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, 'Refresh Ballot Items from BallotReturned Polling Locations'),
+    (RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,  'Retrieve Ballot Items from Map Points'),
+    (REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, 'Refresh Ballot Items from BallotReturned Map Points'),
     (REFRESH_BALLOT_ITEMS_FROM_VOTERS, 'Refresh Ballot Items from Voter Custom Addresses'),
     (SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE, 'Search for Candidate Twitter Handles'),
 )
@@ -1169,7 +1175,7 @@ class BatchManager(models.Model):
         elif kind_of_batch == IMPORT_BALLOT_ITEM:
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
         elif kind_of_batch == IMPORT_POLLING_LOCATION:
-            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLLING_LOCATIONS
         elif kind_of_batch == IMPORT_VOTER:
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS
         else:
@@ -5838,15 +5844,18 @@ class BatchRowActionPollingLocation(models.Model):
     location_name = models.CharField(max_length=255, null=True, blank=True)
     polling_hours_text = models.CharField(max_length=255, null=True, blank=True)
     directions_text = models.TextField(null=True, blank=True)
+    latitude = models.FloatField(default=None, null=True)
+    longitude = models.FloatField(default=None, null=True)
     line1 = models.CharField(max_length=255, blank=True, null=True)
     line2 = models.CharField(max_length=255, blank=True, null=True)
     city = models.CharField(max_length=255, blank=True, null=True)
+    source_code = models.CharField(max_length=255, blank=True, null=True)
     state = models.CharField(max_length=255, blank=True, null=True)
-    zip_long = models.CharField(max_length=255, blank=True, null=True)
     county_name = models.CharField(default=None, max_length=255, null=True)
+    polling_location_deleted = models.BooleanField(default=False)
     precinct_name = models.CharField(default=None, max_length=255, null=True)
     use_for_bulk_retrieve = models.BooleanField(default=False)
-    polling_location_deleted = models.BooleanField(default=False)
+    zip_long = models.CharField(max_length=255, blank=True, null=True)
 
 
 class BatchRowActionPosition(models.Model):

@@ -95,7 +95,7 @@
         <th colspan="{{ election_statistics|length }}">Not Voter Specific</th>
       </tr>
       <tr>
-        <td><strong>Polling Locations with Ballot Data</strong>.</td>
+        <td><strong>Map Points with Ballot Data</strong>.</td>
         {% for one_election in election_statistics %}
         <td>{{ one_election.polling_location_ballot_returned_count }}</td>
         {% endfor %}

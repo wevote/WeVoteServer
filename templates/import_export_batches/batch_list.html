@@ -11,7 +11,7 @@
 {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
     Import Ballot at One Location
 {% elif kind_of_batch == "IMPORT_POLLING_LOCATION" %}
-    Import Polling Location
+    Import Map Point
 {% elif kind_of_batch == "IMPORT_VOTER" %}
     Import Voter
 {% elif kind_of_batch == "MEASURE" %}
@@ -44,7 +44,7 @@
           target="_blank">Current Ballots{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
 {% elif kind_of_batch == "IMPORT_POLLING_LOCATION" %}
     <p><a href="{% url 'polling_location:polling_location_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-          target="_blank">Polling Locations <span class="glyphicon glyphicon-new-window"></span></a></p>
+          target="_blank">Map Points <span class="glyphicon glyphicon-new-window"></span></a></p>
 {% elif kind_of_batch == "MEASURE" %}
     <p><a href="{% url 'measure:measure_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
           target="_blank">Current Measures{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
@@ -77,7 +77,7 @@
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POLITICIAN&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         Politician</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_POLLING_LOCATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-        Polling Location</a> -
+        Map Point</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         Position</a>
 
@@ -90,9 +90,9 @@
     {% elif kind_of_batch == "ELECTED_OFFICE" %}
         Import Elected Office Data in Bulk
     {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
-        Import Ballot Items for One Polling Location
+        Import Ballot Items for One Map Point
     {% elif kind_of_batch == "IMPORT_POLLING_LOCATION" %}
-        Import Polling Location Data in Bulk
+        Import Map Point Data in Bulk
     {% elif kind_of_batch == "IMPORT_VOTER" %}
         Import/Export Voter
     {% elif kind_of_batch == "MEASURE" %}
@@ -148,7 +148,7 @@
 
         {% if kind_of_batch == "IMPORT_BALLOT_ITEM" %}
         <div class="form-group">
-            <label for="polling_location_we_vote_id_id" class="col-sm-3 control-label">Polling Location</label>
+            <label for="polling_location_we_vote_id_id" class="col-sm-3 control-label">Map Point</label>
             <div class="col-sm-8">
             {# Choose polling location for this ballot_returned #}
             Search for City: <input type="text" name="polling_location_city" value="{{ polling_location_city }}" />
@@ -158,7 +158,7 @@
             {% if polling_location_list %}
                 <select id="polling_location_we_vote_id_id" name="polling_location_we_vote_id" class="form-control">
                     <option value="0" {% if 0 == polling_location_we_vote_id %} selected="selected"{% endif %}>
-                        -- Polling Locations --</option>
+                        -- Map Points --</option>
                 {% for polling_location in polling_location_list %}
                     <option value="{{ polling_location.we_vote_id }}"
                             {% if polling_location.we_vote_id|slugify == polling_location_we_vote_id|slugify %} selected="selected"{% endif %}>
@@ -221,8 +221,12 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ one_batch.batch_name }}</td>
-            <td><a href="{% url 'import_export_batches:batch_action_list' %}?batch_header_id={{ one_batch.batch_header_id }}&kind_of_batch={{ one_batch.kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">
-            review</a>  <a href="{% url 'import_export_batches:batch_action_list_export' %}?batch_header_id={{ one_batch.batch_header_id }}&kind_of_batch={{ one_batch.kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">export-csv</a></td>
+            <td>
+                <a href="{% url 'import_export_batches:batch_action_list' %}?batch_header_id={{ one_batch.batch_header_id }}&kind_of_batch={{ one_batch.kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">
+            review</a>,
+                <a href="{% url 'import_export_batches:batch_action_list_export' %}?batch_header_id={{ one_batch.batch_header_id }}&kind_of_batch={{ one_batch.kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">export-csv</a>,
+                <a href="{% url 'import_export_batches:batch_row_action_list_export' %}?batch_header_id={{ one_batch.batch_header_id }}&kind_of_batch={{ one_batch.kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">batch_row-export-csv</a>
+            </td>
             <td>
                 {% for election in election_list %}
                     {% if election.google_civic_election_id|slugify == one_batch.google_civic_election_id|slugify %}

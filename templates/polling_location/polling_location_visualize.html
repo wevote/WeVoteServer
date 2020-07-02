@@ -7,12 +7,12 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCM0vM1mzh56OuA5IfgW_U6Qd9jD99WH6M&callback=initMap" async defer></script>
 {% endblock %}
 
-{% block title %}Map of Polling Locations{% endblock %}
+{% block title %}Map of Map Points{% endblock %}
 
 {% block content %}
   <div id='outer'>
     <a href="{% url 'polling_location:polling_location_list' %}?state_code={{ polling_location.state|default_if_none:"" }}">
-      < Back to Polling Locations
+      < Back to Map Points
     </a>
     <br/><br/>
     <div id='map'></div>

@@ -1645,6 +1645,8 @@ def create_batch_row_action_polling_location(batch_description, batch_header_map
     :return:
     """
     batch_manager = BatchManager()
+    polling_location_manager = PollingLocationManager()
+    polling_location_list_manager = PollingLocationListManager()
     success = False
     status = ""
     batch_row_action_updated = False
@@ -1693,6 +1695,10 @@ def create_batch_row_action_polling_location(batch_description, batch_header_map
         "city", batch_header_map, one_batch_row)
     county_name = batch_manager.retrieve_value_from_batch_row(
         "county_name", batch_header_map, one_batch_row)
+    latitude = batch_manager.retrieve_value_from_batch_row(
+        "latitude", batch_header_map, one_batch_row)
+    longitude = batch_manager.retrieve_value_from_batch_row(
+        "longitude", batch_header_map, one_batch_row)
     line1 = batch_manager.retrieve_value_from_batch_row(
         "line1", batch_header_map, one_batch_row)
     line2 = batch_manager.retrieve_value_from_batch_row(
@@ -1703,6 +1709,8 @@ def create_batch_row_action_polling_location(batch_description, batch_header_map
         "polling_location_deleted", batch_header_map, one_batch_row)
     precinct_name = batch_manager.retrieve_value_from_batch_row(
         "precinct_name", batch_header_map, one_batch_row)
+    source_code = batch_manager.retrieve_value_from_batch_row(
+        "source_code", batch_header_map, one_batch_row)
     state = batch_manager.retrieve_value_from_batch_row(
         "state", batch_header_map, one_batch_row)
     use_for_bulk_retrieve = batch_manager.retrieve_value_from_batch_row(
@@ -1716,7 +1724,6 @@ def create_batch_row_action_polling_location(batch_description, batch_header_map
     kind_of_action = IMPORT_TO_BE_DETERMINED
     if positive_value_exists(polling_location_we_vote_id):
         # If here, then we are updating an existing known record
-        polling_location_manager = PollingLocationManager()
         results = \
             polling_location_manager.retrieve_polling_location_by_we_vote_id(polling_location_we_vote_id)
         if results['polling_location_found']:
@@ -1728,12 +1735,36 @@ def create_batch_row_action_polling_location(batch_description, batch_header_map
             keep_looking_for_duplicates = False
             status += "POLLING_LOCATION_NOT_FOUND_BY_WE_VOTE_ID "
 
-    if keep_looking_for_duplicates:
-        polling_location_list_manager = PollingLocationListManager()
+    address_field_exists = \
+        positive_value_exists(state) or positive_value_exists(line1) or positive_value_exists(zip_long)
+    if keep_looking_for_duplicates and address_field_exists:
         matching_results = polling_location_list_manager.retrieve_duplicate_polling_locations(
             state=state,
             line1=line1,
             zip_long=zip_long,
+        )
+        if matching_results['polling_location_list_found']:
+            polling_location_list = matching_results['polling_location_list']
+            keep_looking_for_duplicates = False
+            if len(polling_location_list) == 1:
+                kind_of_action = IMPORT_ADD_TO_EXISTING
+                matching_polling_location = polling_location_list[0]
+                polling_location_we_vote_id = matching_polling_location.we_vote_id
+            else:
+                kind_of_action = CLEAN_DATA_MANUALLY
+            status += "CREATE_BATCH_ROW_ACTION_POLLING_LOCATION-DUPLICATE_FOUND: " + matching_results['status'] + " "
+        elif not matching_results['success']:
+            keep_looking_for_duplicates = False
+            kind_of_action = IMPORT_QUERY_ERROR
+        else:
+            keep_looking_for_duplicates = False
+            kind_of_action = IMPORT_CREATE
+
+    latitude_and_longitude_exist = positive_value_exists(latitude) and positive_value_exists(longitude)
+    if keep_looking_for_duplicates and latitude_and_longitude_exist:
+        matching_results = polling_location_list_manager.retrieve_duplicate_polling_locations(
+            latitude=latitude,
+            longitude=longitude,
         )
         if matching_results['polling_location_list_found']:
             polling_location_list = matching_results['polling_location_list']
@@ -1757,16 +1788,33 @@ def create_batch_row_action_polling_location(batch_description, batch_header_map
         #  create a new entry
         kind_of_action = IMPORT_CREATE
 
+    if kind_of_action is IMPORT_CREATE:
+        # If we have lat/long, but not the other fields, retrieve the full address from Google
+        if latitude_and_longitude_exist and not address_field_exists:
+            results = polling_location_manager.retrieve_address_from_latitude_and_longitude(
+                latitude=latitude,
+                longitude=longitude)
+            if results['success']:
+                city = results['city']
+                line1 = results['line1']
+                state = results['state_code']
+                zip_long = results['zip_long']
+
     try:
         batch_row_action_polling_location.batch_set_id = batch_description.batch_set_id
         batch_row_action_polling_location.polling_location_we_vote_id = polling_location_we_vote_id
         batch_row_action_polling_location.city = city
         batch_row_action_polling_location.county_name = county_name
+        if positive_value_exists(latitude):
+            batch_row_action_polling_location.latitude = latitude
+        if positive_value_exists(longitude):
+            batch_row_action_polling_location.longitude = longitude
         batch_row_action_polling_location.line1 = line1
         batch_row_action_polling_location.line2 = line2
         batch_row_action_polling_location.location_name = location_name
         batch_row_action_polling_location.polling_location_deleted = positive_value_exists(polling_location_deleted)
         batch_row_action_polling_location.precinct_name = precinct_name
+        batch_row_action_polling_location.source_code = source_code
         batch_row_action_polling_location.state = state
         batch_row_action_polling_location.use_for_bulk_retrieve = positive_value_exists(use_for_bulk_retrieve)
         batch_row_action_polling_location.zip_long = zip_long
@@ -4455,6 +4503,9 @@ def import_polling_location_data_from_batch_row_actions(
                 one_batch_row_action.city, one_batch_row_action.state, one_batch_row_action.zip_long,
                 county_name=one_batch_row_action.county_name,
                 precinct_name=one_batch_row_action.precinct_name,
+                source_code=one_batch_row_action.source_code,
+                latitude=one_batch_row_action.latitude,
+                longitude=one_batch_row_action.longitude,
                 use_for_bulk_retrieve=one_batch_row_action.use_for_bulk_retrieve,
                 polling_location_deleted=one_batch_row_action.polling_location_deleted)
 
@@ -4476,7 +4527,7 @@ def import_polling_location_data_from_batch_row_actions(
                 handle_exception(e, logger=logger, exception_message=status)
 
             try:
-                # Now update organization with additional fields
+                # Now update with additional fields
                 polling_location.city = one_batch_row_action.city
                 polling_location.county_name = one_batch_row_action.county_name
                 polling_location.line1 = one_batch_row_action.line1
@@ -4484,6 +4535,7 @@ def import_polling_location_data_from_batch_row_actions(
                 polling_location.location_name = one_batch_row_action.location_name
                 polling_location.polling_location_deleted = one_batch_row_action.polling_location_deleted
                 polling_location.precinct_name = one_batch_row_action.precinct_name
+                polling_location.source_code = one_batch_row_action.source_code
                 polling_location.state = one_batch_row_action.state
                 polling_location.use_for_bulk_retrieve = one_batch_row_action.use_for_bulk_retrieve
                 polling_location.zip_long = one_batch_row_action.zip_long
