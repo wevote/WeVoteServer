@@ -832,6 +832,8 @@ def soft_delete_duplicates_view(request):
     analyze_limit = convert_to_int(request.GET.get('analyze_limit', 3000))
     analyze_end = analyze_start + analyze_limit
 
+    polling_location_manager = PollingLocationManager()
+
     if not positive_value_exists(state_code):
         messages.add_message(request, messages.ERROR, 'State code required.')
         return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()) +
@@ -857,12 +859,16 @@ def soft_delete_duplicates_view(request):
     previously_deleted_we_vote_ids = []
     with transaction.atomic():
         for polling_location in polling_location_list:
-            try:
-                polling_locations_reviewed += 1
-                current_we_vote_id = polling_location.we_vote_id
-                if current_we_vote_id not in previously_reviewed_we_vote_ids:
-                    previously_reviewed_we_vote_ids.append(current_we_vote_id)
+            current_we_vote_id = polling_location.we_vote_id
+            polling_locations_reviewed += 1
 
+            # Add this polling_location_we_vote_id to the "previously_reviewed" list so we don't find it this pass
+            if current_we_vote_id not in previously_reviewed_we_vote_ids:
+                previously_reviewed_we_vote_ids.append(current_we_vote_id)
+
+            # ############################
+            # Search for matches by address
+            try:
                 duplicate_polling_location_query = PollingLocation.objects.all()
                 duplicate_polling_location_query = duplicate_polling_location_query.filter(state__iexact=state_code)
                 duplicate_polling_location_query = \
@@ -871,12 +877,12 @@ def soft_delete_duplicates_view(request):
                     duplicate_polling_location_query.filter(line1__iexact=polling_location.line1)
                 duplicate_polling_location_query = \
                     duplicate_polling_location_query.filter(zip_long__iexact=polling_location.zip_long)
-                duplicate_polling_location_query = duplicate_polling_location_query.exclude(
-                    polling_location_deleted=True)
-                duplicate_polling_location_query = duplicate_polling_location_query.exclude(
-                    we_vote_id__in=previously_reviewed_we_vote_ids)
-                duplicate_polling_location_query = duplicate_polling_location_query.exclude(
-                    we_vote_id__in=previously_deleted_we_vote_ids)
+                duplicate_polling_location_query = \
+                    duplicate_polling_location_query.exclude(polling_location_deleted=True)
+                duplicate_polling_location_query = \
+                    duplicate_polling_location_query.exclude(we_vote_id__in=previously_reviewed_we_vote_ids)
+                duplicate_polling_location_query = \
+                    duplicate_polling_location_query.exclude(we_vote_id__in=previously_deleted_we_vote_ids)
 
                 mark_as_duplicates_list = list(duplicate_polling_location_query)
 
@@ -889,10 +895,74 @@ def soft_delete_duplicates_view(request):
                             previously_deleted_we_vote_ids.append(duplicate_polling_location.we_vote_id)
                             polling_locations_deleted += 1
                         except Exception as e:
-                            status += "COULD_NOT_SAVE-ERROR:" + str(e) + " "
+                            status += "QUERY_BY_ADDRESS_COULD_NOT_SAVE-ERROR:" + str(e) + " "
 
             except Exception as e:
-                status += "QUERY_PROBLEM:" + str(e) + " "
+                status += "QUERY_BY_ADDRESS_PROBLEM:" + str(e) + " "
+
+            # ############################
+            # Search for matches by lat/long
+            outer_loop_lat_long_changed = False
+            polling_location_lat_long_refreshed = False
+            if polling_location.latitude and polling_location.longitude:
+                try:
+                    duplicate_polling_location_query = PollingLocation.objects.all()
+                    duplicate_polling_location_query = \
+                        duplicate_polling_location_query.filter(latitude=polling_location.latitude)
+                    duplicate_polling_location_query = \
+                        duplicate_polling_location_query.filter(longitude=polling_location.longitude)
+                    duplicate_polling_location_query = \
+                        duplicate_polling_location_query.exclude(polling_location_deleted=True)
+                    duplicate_polling_location_query = \
+                        duplicate_polling_location_query.exclude(we_vote_id__in=previously_reviewed_we_vote_ids)
+                    duplicate_polling_location_query = \
+                        duplicate_polling_location_query.exclude(we_vote_id__in=previously_deleted_we_vote_ids)
+
+                    mark_as_duplicates_list = list(duplicate_polling_location_query)
+
+                    for duplicate_polling_location in mark_as_duplicates_list:
+                        if not polling_location_lat_long_refreshed:
+                            outer_loop_latitude_before = polling_location.latitude
+                            outer_loop_longitude_before = polling_location.longitude
+                            lat_long_results = \
+                                polling_location_manager.populate_latitude_and_longitude_for_polling_location(
+                                    polling_location)
+                            status += lat_long_results['status']
+                            outer_loop_latitude = lat_long_results['latitude']
+                            outer_loop_longitude = lat_long_results['longitude']
+                            polling_location = lat_long_results['polling_location']
+                            outer_loop_lat_long_changed = outer_loop_latitude_before != outer_loop_latitude \
+                                or outer_loop_longitude_before != outer_loop_longitude
+                            polling_location_lat_long_refreshed = True
+
+                        # Since we have seen some bad lat/long data, try to refresh it before deleting the duplicate
+                        original_latitude = duplicate_polling_location.latitude
+                        original_longitude = duplicate_polling_location.longitude
+
+                        lat_long_results = \
+                            polling_location_manager.populate_latitude_and_longitude_for_polling_location(
+                                duplicate_polling_location)
+                        status += lat_long_results['status']
+                        latitude = lat_long_results['latitude']
+                        longitude = lat_long_results['longitude']
+                        duplicate_polling_location = lat_long_results['polling_location']
+
+                        lat_long_same = original_latitude == latitude and original_longitude == longitude
+
+                        if lat_long_same \
+                                and duplicate_polling_location.we_vote_id not in previously_deleted_we_vote_ids \
+                                and not outer_loop_lat_long_changed:
+                            try:
+                                # Mark duplicates as a soft delete
+                                duplicate_polling_location.polling_location_deleted = True
+                                duplicate_polling_location.save()
+                                previously_deleted_we_vote_ids.append(duplicate_polling_location.we_vote_id)
+                                polling_locations_deleted += 1
+                            except Exception as e:
+                                status += "QUERY_BY_LAT_LONG_COULD_NOT_SAVE-ERROR:" + str(e) + " "
+
+                except Exception as e:
+                    status += "QUERY_BY_LAT_LONG_PROBLEM:" + str(e) + " "
 
     messages.add_message(request, messages.INFO,
                          'Polling locations reviewed: ' + str(polling_locations_reviewed) +

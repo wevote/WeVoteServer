@@ -134,7 +134,7 @@
             <td>
                 {% if polling_location.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ polling_location.we_vote_id }}{% endif %}
             </td>
-            <td>{% if polling_location.latitude %}&nbsp;&nbsp;Lat/Long:&nbsp;yes{% endif %}</td>
+            <td>{% if polling_location.latitude %}&nbsp;&nbsp;Lat/Long:&nbsp;{{ polling_location.latitude }}/{{ polling_location.longitude }}{% endif %}</td>
             <td>
                 {{ polling_location.source_code|default_if_none:"" }}
             </td>

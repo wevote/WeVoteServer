@@ -362,6 +362,7 @@ class PollingLocationManager(models.Model):
                 'success':                  False,
                 'latitude':                 latitude,
                 'longitude':                longitude,
+                'polling_location':         polling_location,
             }
             return results
 
@@ -384,6 +385,7 @@ class PollingLocationManager(models.Model):
                     'success':                  False,
                     'latitude':                 latitude,
                     'longitude':                longitude,
+                    'polling_location':         polling_location,
                 }
                 return results
 
@@ -402,6 +404,7 @@ class PollingLocationManager(models.Model):
                 'success':                  False,
                 'latitude':                 latitude,
                 'longitude':                longitude,
+                'polling_location':         polling_location,
             }
             return results
         except Exception as e:
@@ -412,6 +415,7 @@ class PollingLocationManager(models.Model):
                 'success':                  False,
                 'latitude':                 latitude,
                 'longitude':                longitude,
+                'polling_location':         polling_location,
             }
             return results
 
@@ -422,6 +426,7 @@ class PollingLocationManager(models.Model):
                 'success':                  False,
                 'latitude':                 latitude,
                 'longitude':                longitude,
+                'polling_location':         polling_location,
             }
             return results
 
@@ -451,6 +456,7 @@ class PollingLocationManager(models.Model):
             'success':                  success,
             'latitude':                 latitude,
             'longitude':                longitude,
+            'polling_location':         polling_location,
         }
         return results
 
