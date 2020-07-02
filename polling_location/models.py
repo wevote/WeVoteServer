@@ -44,11 +44,14 @@ class PollingLocation(models.Model):
     county_name = models.CharField(default=None, max_length=255, null=True)
     precinct_name = models.CharField(default=None, max_length=255, null=True)
     # We write latitude/longitude back to the PollingLocation table when we get it for the BallotReturned table
-    latitude = models.FloatField(null=True, verbose_name='latitude returned from Google')
-    longitude = models.FloatField(null=True, verbose_name='longitude returned from Google')
+    latitude = models.FloatField(default=None, null=True)
+    longitude = models.FloatField(default=None, null=True)
 
     google_response_address_not_found = models.PositiveIntegerField(
         verbose_name="how many times Google can't find address", default=None, null=True)
+
+    # Where did we get this map point from?
+    source_code = models.CharField(default=None, max_length=50, null=True)
 
     use_for_bulk_retrieve = models.BooleanField(verbose_name="this provides geographical coverage", default=False)
     polling_location_deleted = models.BooleanField(verbose_name="removed from usage", default=False)
@@ -120,8 +123,9 @@ class PollingLocationManager(models.Model):
             zip_long,
             county_name='',
             precinct_name='',
-            latitude='',
-            longitude='',
+            latitude=None,
+            longitude=None,
+            source_code='',
             use_for_bulk_retrieve=False,
             polling_location_deleted=False):
         """
@@ -139,7 +143,10 @@ class PollingLocationManager(models.Model):
             # If here we are dealing with an existing polling_location
             pass
         else:
-            if not line1:
+            if latitude and longitude:
+                status += 'INCOMING_LAT_LONG '
+                proceed_to_update_or_save = True
+            elif not line1:
                 success = False
                 status += 'MISSING_POLLING_LOCATION_LINE1 '
                 proceed_to_update_or_save = False
@@ -172,11 +179,12 @@ class PollingLocationManager(models.Model):
                         'line2': line2,
                         'city': city.strip() if city else '',
                         'polling_location_deleted': polling_location_deleted,
+                        'source_code': source_code.strip() if source_code else '',
                         'zip_long': zip_long,
                     }
-                    if latitude:
+                    if positive_value_exists(latitude):
                         updated_values['latitude'] = latitude
-                    if longitude:
+                    if positive_value_exists(longitude):
                         updated_values['longitude'] = longitude
                     if positive_value_exists(use_for_bulk_retrieve):
                         updated_values['use_for_bulk_retrieve'] = use_for_bulk_retrieve
@@ -191,10 +199,13 @@ class PollingLocationManager(models.Model):
                         polling_hours_text=polling_hours_text.strip() if polling_hours_text else '',
                         precinct_name=precinct_name.strip() if precinct_name else '',
                         directions_text=directions_text.strip() if directions_text else '',
+                        latitude=latitude if latitude else None,
+                        longitude=longitude if longitude else None,
                         line1=line1.strip() if line1 else '',
                         line2=line2,
                         city=city.strip() if city else '',
                         polling_location_deleted=polling_location_deleted,
+                        source_code=source_code,
                         use_for_bulk_retrieve=use_for_bulk_retrieve,
                         zip_long=zip_long,
                     )
@@ -212,6 +223,122 @@ class PollingLocationManager(models.Model):
             'MultipleObjectsReturned':      exception_multiple_object_returned,
             'polling_location':             polling_location,
             'polling_location_created':     polling_location_created,
+        }
+        return results
+
+    def populate_address_from_latitude_and_longitude_for_polling_location(self, polling_location):
+        """
+        We use the google geocoder in partnership with geoip
+        :param polling_location:
+        :return:
+        """
+        status = ""
+        latitude = None
+        longitude = None
+        # We try to use existing google_client
+        if not hasattr(self, 'google_client') or not self.google_client:
+            self.google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
+
+        if not hasattr(polling_location, "line1"):
+            results = {
+                'status':                   "POPULATE_ADDRESS_FROM_LAT_AND_LONG-NOT_A_POLLING_LOCATION_OBJECT ",
+                'geocoder_quota_exceeded':  False,
+                'success':                  False,
+                'latitude':                 latitude,
+                'longitude':                longitude,
+            }
+            return results
+
+        if not polling_location.latitude or not \
+                polling_location.longitude:
+            # We require lat/long to use this function
+            results = {
+                'status':                   "POPULATE_ADDRESS_FROM_LAT_AND_LONG-MISSING_REQUIRED_INFO ",
+                'geocoder_quota_exceeded':  False,
+                'success':                  False,
+                'latitude':                 latitude,
+                'longitude':                longitude,
+            }
+            return results
+
+        lat_long_string = '{}, {}'.format(
+            polling_location.latitude,
+            polling_location.longitude)
+        try:
+            location_list = self.google_client.reverse(lat_long_string, sensor=False, timeout=GEOCODE_TIMEOUT)
+        except GeocoderQuotaExceeded:
+            status += "GeocoderQuotaExceeded "
+            results = {
+                'status':                   status,
+                'geocoder_quota_exceeded':  True,
+                'success':                  False,
+                'latitude':                 latitude,
+                'longitude':                longitude,
+            }
+            return results
+        except Exception as e:
+            status += "Geocoder-Exception: " + str(e) + " "
+            results = {
+                'status':                   status,
+                'geocoder_quota_exceeded':  False,
+                'success':                  False,
+                'latitude':                 latitude,
+                'longitude':                longitude,
+            }
+            return results
+
+        if location_list is None:
+            results = {
+                'status':                   "POPULATE_LATITUDE_AND_LONGITUDE-LOCATION_NOT_RETURNED_FROM_GEOCODER ",
+                'geocoder_quota_exceeded':  False,
+                'success':                  False,
+                'latitude':                 latitude,
+                'longitude':                longitude,
+            }
+            return results
+
+        try:
+            state_code_found = False
+            street_number = ''
+            route = ''
+            for location in location_list:
+                # Repair the polling location to include the ZIP code
+                if hasattr(location, 'raw'):
+                    if 'address_components' in location.raw:
+                        for one_address_component in location.raw['address_components']:
+                            if 'street_number' in one_address_component['types'] \
+                                    and positive_value_exists(one_address_component['long_name']):
+                                street_number = one_address_component['long_name']
+                            if 'route' in one_address_component['types'] \
+                                    and positive_value_exists(one_address_component['long_name']):
+                                route = one_address_component['long_name']
+                            if 'locality' in one_address_component['types'] \
+                                    and positive_value_exists(one_address_component['long_name']):
+                                polling_location.city = one_address_component['long_name']
+                            if 'administrative_area_level_1' in one_address_component['types'] \
+                                    and positive_value_exists(one_address_component['short_name']):
+                                polling_location.state = one_address_component['short_name']
+                                state_code_found = True
+                            if 'postal_code' in one_address_component['types'] \
+                                    and positive_value_exists(one_address_component['long_name']):
+                                polling_location.zip_long = one_address_component['long_name']
+                        if positive_value_exists(street_number) and positive_value_exists(route):
+                            polling_location.line1 = street_number + ' ' + route
+                if state_code_found:
+                    break
+            polling_location.save()
+            status += "POLLING_LOCATION_SAVED_WITH_NEW_ADDRESS "
+            success = True
+        except Exception as e:
+            status += "POLLING_LOCATION_NOT_SAVED_WITH_NEW_ADDRESS " + str(e) + " "
+            success = False
+
+        results = {
+            'status':                   status,
+            'geocoder_quota_exceeded':  False,
+            'success':                  success,
+            'latitude':                 latitude,
+            'longitude':                longitude,
         }
         return results
 
@@ -327,6 +454,128 @@ class PollingLocationManager(models.Model):
         }
         return results
 
+    def retrieve_address_from_latitude_and_longitude(self, latitude, longitude):
+        status = ""
+        city = ''
+        line1 = ''
+        route = ''
+        state_code = ''
+        street_number = ''
+        zip_long = ''
+
+        # We try to use existing google_client
+        if not hasattr(self, 'google_client') or not self.google_client:
+            self.google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
+
+        if not latitude or not longitude:
+            # We require lat/long to use this function
+            results = {
+                'status': "POPULATE_ADDRESS_FROM_LAT_AND_LONG-MISSING_REQUIRED_INFO ",
+                'geocoder_quota_exceeded': False,
+                'success': False,
+                'city': city,
+                'latitude': latitude,
+                'longitude': longitude,
+                'line1': line1,
+                'state_code': state_code,
+                'zip_long': zip_long,
+            }
+            return results
+
+        lat_long_string = '{}, {}'.format(
+            latitude,
+            longitude)
+        try:
+            location_list = self.google_client.reverse(lat_long_string, sensor=False, timeout=GEOCODE_TIMEOUT)
+        except GeocoderQuotaExceeded:
+            status += "GeocoderQuotaExceeded "
+            results = {
+                'status': status,
+                'geocoder_quota_exceeded': True,
+                'success': False,
+                'city': city,
+                'latitude': latitude,
+                'longitude': longitude,
+                'line1': line1,
+                'state_code': state_code,
+                'zip_long': zip_long,
+            }
+            return results
+        except Exception as e:
+            status += "Geocoder-Exception: " + str(e) + " "
+            results = {
+                'status': status,
+                'geocoder_quota_exceeded': False,
+                'success': False,
+                'city': city,
+                'latitude': latitude,
+                'longitude': longitude,
+                'line1': line1,
+                'state_code': state_code,
+                'zip_long': zip_long,
+            }
+            return results
+
+        if location_list is None:
+            results = {
+                'status': "POPULATE_LATITUDE_AND_LONGITUDE-LOCATION_NOT_RETURNED_FROM_GEOCODER ",
+                'geocoder_quota_exceeded': False,
+                'success': False,
+                'city': city,
+                'latitude': latitude,
+                'longitude': longitude,
+                'line1': line1,
+                'state_code': state_code,
+                'zip_long': zip_long,
+            }
+            return results
+
+        try:
+            state_code_found = False
+            for location in location_list:
+                # Repair the polling location to include the ZIP code
+                if hasattr(location, 'raw'):
+                    if 'address_components' in location.raw:
+                        for one_address_component in location.raw['address_components']:
+                            if 'street_number' in one_address_component['types'] \
+                                    and positive_value_exists(one_address_component['long_name']):
+                                street_number = one_address_component['long_name']
+                            if 'route' in one_address_component['types'] \
+                                    and positive_value_exists(one_address_component['long_name']):
+                                route = one_address_component['long_name']
+                            if 'locality' in one_address_component['types'] \
+                                    and positive_value_exists(one_address_component['long_name']):
+                                city = one_address_component['long_name']
+                            if 'administrative_area_level_1' in one_address_component['types'] \
+                                    and positive_value_exists(one_address_component['short_name']):
+                                state_code = one_address_component['short_name']
+                                state_code_found = True
+                            if 'postal_code' in one_address_component['types'] \
+                                    and positive_value_exists(one_address_component['long_name']):
+                                zip_long = one_address_component['long_name']
+                        if positive_value_exists(street_number) and positive_value_exists(route):
+                            line1 = street_number + ' ' + route
+                if state_code_found:
+                    break
+            status += "POLLING_LOCATION_SAVED_WITH_NEW_ADDRESS "
+            success = True
+        except Exception as e:
+            status += "NEW_ADDRESS_ERROR " + str(e) + " "
+            success = False
+
+        results = {
+            'status': status,
+            'geocoder_quota_exceeded': False,
+            'success': success,
+            'city': city,
+            'latitude': latitude,
+            'longitude': longitude,
+            'line1': line1,
+            'state_code': state_code,
+            'zip_long': zip_long,
+        }
+        return results
+
     def retrieve_polling_location_by_we_vote_id(self, polling_location_we_vote_id=''):
         return self.retrieve_polling_location_by_id(polling_location_we_vote_id=polling_location_we_vote_id)
 
@@ -435,6 +684,8 @@ class PollingLocationListManager(models.Model):
             location_name='',
             line1='',
             zip_long='',
+            latitude=None,
+            longitude=None,
             we_vote_id_from_master=''):
         """
         :param polling_location_id:
@@ -443,6 +694,8 @@ class PollingLocationListManager(models.Model):
         :param line1:
         :param zip_long:
         :param we_vote_id_from_master:
+        :param latitude:
+        :param longitude:
         :return:
         """
         polling_location_list_objects = []
@@ -453,6 +706,8 @@ class PollingLocationListManager(models.Model):
         if not positive_value_exists(polling_location_id) \
                 and not positive_value_exists(state) \
                 and not positive_value_exists(line1) \
+                and latitude is None \
+                and longitude is None \
                 and not positive_value_exists(zip_long):
 
             results = {
@@ -477,6 +732,12 @@ class PollingLocationListManager(models.Model):
                 polling_location_queryset = polling_location_queryset.filter(location_name__iexact=location_name)
             if positive_value_exists(state):
                 polling_location_queryset = polling_location_queryset.filter(state__iexact=state)
+            if latitude is not None:
+                latitude_float = float(latitude)
+                polling_location_queryset = polling_location_queryset.filter(latitude=latitude_float)
+            if longitude is not None:
+                longitude_float = float(longitude)
+                polling_location_queryset = polling_location_queryset.filter(longitude=longitude_float)
             if positive_value_exists(line1):
                 polling_location_queryset = polling_location_queryset.filter(line1__iexact=line1)
             if positive_value_exists(zip_long):

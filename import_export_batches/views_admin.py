@@ -4,7 +4,7 @@
 
 from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager, \
     BatchProcess, BatchProcessAnalyticsChunk, BatchProcessBallotItemChunk, BatchProcessLogEntry, BatchProcessManager, \
-    BatchRow, BatchRowActionBallotItem, \
+    BatchRow, BatchRowActionBallotItem, BatchRowActionPollingLocation, \
     BatchSet, \
     CONTEST_OFFICE, ELECTED_OFFICE, IMPORT_BALLOT_ITEM, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
@@ -682,6 +682,7 @@ def batch_action_list_export_view(request):
             header_field_names.append(field.name)
 
     # get row information
+    # Dale 2020-July This isn't very robust. Shifts over the rows when exporting Polling locations.
     row_opts = BatchRow._meta
     row_field_names = []
     for field in row_opts.fields:
@@ -693,7 +694,7 @@ def batch_action_list_export_view(request):
                 row_field_names.append(field.name)
 
     header_list = [getattr(batch_header_map, field) for field in header_field_names]
-    if kind_of_batch != 'IMPORT_VOTER':
+    if kind_of_batch not in ['IMPORT_POLLING_LOCATION', 'IMPORT_VOTER']:
         header_list.insert(0, 'google_civic_election_id')
         header_list.insert(0, 'state_code')
     # - Filter out headers that are None.
@@ -702,6 +703,105 @@ def batch_action_list_export_view(request):
     # create response for csv file
     response = export_csv(batch_row_list, header_list, row_field_names, batch_description)
     
+    return response
+
+
+@login_required
+def batch_row_action_list_export_view(request):
+    """
+    Export the batch_row_action's (as opposed to the raw incoming values) as a csv file.
+
+    :param request: HTTP request object.
+    :return response: HttpResponse object with csv export data.
+    """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    batch_set_list = []
+    batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
+    kind_of_batch = request.GET.get('kind_of_batch', '')
+    state_code = request.GET.get('state_code', '')
+
+    if not positive_value_exists(batch_header_id):
+        messages.add_message(request, messages.ERROR, 'Batch_header_id required.')
+        return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
+                                    "?kind_of_batch=" + str(kind_of_batch))
+
+    batch_set_id = 0
+    try:
+        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
+    except BatchDescription.DoesNotExist:
+        # This is fine
+        batch_description = BatchDescription()
+
+    # if batch_set_id exists, send data sets associated with this batch_set_id
+    if positive_value_exists(batch_set_id):
+        try:
+            batch_set_list = BatchSet.objects.get(id=batch_set_id)
+            if batch_set_list:
+                batch_set_list_found = True
+        except BatchSet.DoesNotExist:
+            # This is fine
+            batch_set_list = BatchSet()
+            batch_set_list_found = False
+
+    try:
+        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+    except BatchHeaderMap.DoesNotExist:
+        # This is fine
+        batch_header_map = BatchHeaderMap()
+
+    batch_list_found = False
+    batch_row_list = []
+    try:
+        if kind_of_batch == 'IMPORT_POLLING_LOCATION':
+            batch_row_action_query = BatchRowActionPollingLocation.objects.order_by('id')
+            batch_row_action_query = batch_row_action_query.filter(batch_header_id=batch_header_id)
+            if positive_value_exists(state_code):
+                batch_row_action_query = batch_row_action_query.filter(state_code__iexact=state_code)
+            batch_row_list = list(batch_row_action_query)
+            if len(batch_row_list):
+                batch_list_found = True
+    except BatchDescription.DoesNotExist:
+        # This is fine
+        batch_row_list = []
+        batch_list_found = False
+
+    if not batch_list_found:
+        messages.add_message(request, messages.ERROR, 'No voters found to export.')
+        return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
+                                    "?kind_of_batch=" + str(kind_of_batch) +
+                                    "&batch_header_id=" + str(batch_header_id)
+                                    )
+
+    # # get header/first row information
+    # header_opts = BatchHeaderMap._meta
+    header_field_names = []
+    # for field in header_opts.fields:
+    #     if field.name not in ['id', 'batch_header_id']:
+    #         header_field_names.append(field.name)
+
+    # get row information
+    header_list = []
+    row_field_names = []
+    if kind_of_batch == 'IMPORT_POLLING_LOCATION':
+        row_opts = BatchRowActionPollingLocation._meta
+        for field in row_opts.fields:
+            row_field_names.append(field.name)
+        header_list = row_field_names
+
+    # header_list = [getattr(batch_header_map, field) for field in header_field_names]
+    # if kind_of_batch not in ['IMPORT_POLLING_LOCATION', 'IMPORT_VOTER']:
+    #     header_list.insert(0, 'google_civic_election_id')
+    #     header_list.insert(0, 'state_code')
+    # # - Filter out headers that are None.
+    # header_list = list(filter(None, header_list))
+
+    # create response for csv file
+    response = export_csv(batch_row_list, header_list, row_field_names, batch_description)
+
     return response
 
 

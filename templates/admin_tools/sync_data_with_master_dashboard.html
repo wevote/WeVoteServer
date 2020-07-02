@@ -146,14 +146,14 @@
         <td>The list of positions on measures and candidates, that organizations have made</td>
     </tr>
 
-    <tr><td><h4>Polling Locations</h4></td></tr>
+    <tr><td><h4>Map Points</h4></td></tr>
     <tr>
         {% if state_code %}
 
         <td>
             <form id="retrieve_polling_locations" name="polling_locations_import_from_master_server" method="get" action="{% url 'polling_location:polling_locations_import_from_master_server' %}">
             {#% csrf_token %#}
-                <input type="submit" value="Retrieve Polling Locations for the State of {{ state_code }}" style="color: #337ab7; margin-left: 12px">
+                <input type="submit" value="Retrieve Map Points for the State of {{ state_code }}" style="color: #337ab7; margin-left: 12px">
 
                 <input type="hidden" id="google_civic_election_id" name="google_civic_election_id" value="{{ google_civic_election_id }}">
                 <input type="hidden" id="started_update" name="started_update" value="stop">
@@ -165,7 +165,7 @@
         {% else %}
        <td>&nbsp;&nbsp;&nbsp;&nbsp;
             <a href="{% url 'polling_location:polling_locations_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                Retrieve Polling Locations</a>
+                Retrieve Map Points</a>
             {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
        </td>
         {% endif %}

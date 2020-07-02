@@ -1,5 +1,5 @@
 // apis_v1/static/js/PollingLocationVisualization.js
-// Draw a Google Map, and overlay it with the Polling Locations.
+// Draw a Google Map, and overlay it with the Map Points.
 
 let map;
 let state = '';

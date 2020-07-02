@@ -25,7 +25,7 @@ POLLING_LOCATIONS_SYNC_URL = get_environment_variable("POLLING_LOCATIONS_SYNC_UR
 #     """
 #
 #     import_results, structured_json = process_request_from_master(
-#         request, "Loading Polling Locations from We Vote Master servers",
+#         request, "Loading Map Points from We Vote Master servers",
 #         POLLING_LOCATIONS_SYNC_URL, {
 #             "key":    WE_VOTE_API_KEY,  # This comes from an environment variable
 #             "state":  state_code,

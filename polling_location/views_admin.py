@@ -150,7 +150,7 @@ def polling_locations_import_from_master_server_view(request):
 
     # results = polling_locations_import_from_master_server(request, state_code)
     import_results, structured_json = process_request_from_master(
-        request, "Loading Polling Locations from We Vote Master servers",
+        request, "Loading Map Points from We Vote Master servers",
         POLLING_LOCATIONS_SYNC_URL, {
             "key":    WE_VOTE_API_KEY,  # This comes from an environment variable
             "state":  state_code,
@@ -184,7 +184,7 @@ def polling_locations_import_from_master_server_view(request):
     if not json_retrieved:
         messages.add_message(request, messages.ERROR, status)
     else:
-        messages.add_message(request, messages.INFO, 'Polling Locations import completed. '
+        messages.add_message(request, messages.INFO, 'Map Points import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
                                                      'Duplicates skipped: '
                                                      '{duplicates_removed}, '
@@ -487,8 +487,15 @@ def polling_location_list_view(request):
             new_filter = Q(county_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(zip_long__icontains=one_word)
-            filters.append(new_filter)
+            try:
+                one_word_float = float(one_word)
+                new_filter = Q(latitude=one_word_float)
+                filters.append(new_filter)
+
+                new_filter = Q(longitude=one_word_float)
+                filters.append(new_filter)
+            except Exception as e:
+                pass
 
             new_filter = Q(line1__icontains=one_word)
             filters.append(new_filter)
@@ -497,6 +504,12 @@ def polling_location_list_view(request):
             filters.append(new_filter)
 
             new_filter = Q(precinct_name__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(source_code__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(zip_long__icontains=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -539,6 +552,67 @@ def polling_location_list_view(request):
         'state_list':               sorted_state_list,
     }
     return render(request, 'polling_location/polling_location_list.html', template_values)
+
+
+@login_required
+def polling_locations_add_address_from_latitude_and_longitude_view(request):
+    """
+    Find polling location entries that don't have state, but do have latitude/longitude, and update them
+    :param request:
+    :return:
+    """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    status = ""
+    limit = request.GET.get('limit', 1000)
+    state_code = request.GET.get('state_code', "")
+    google_civic_election_id = request.GET.get('google_civic_election_id', "")
+
+    polling_location_manager = PollingLocationManager()
+    polling_location_we_vote_id = ""
+    polling_location_list = []
+    polling_locations_saved = 0
+    polling_locations_not_saved = 0
+
+    try:
+        # Find all polling locations with an empty latitude (with limit)
+        polling_location_query = PollingLocation.objects.all()
+        polling_location_query = polling_location_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
+        polling_location_query = polling_location_query.filter(Q(state__isnull=True) | Q(state=''))
+        polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
+        polling_location_query = polling_location_query.order_by('location_name')[:limit]
+        polling_location_list = list(polling_location_query)
+    except Exception as e:
+        messages.add_message(request, messages.ERROR,
+                             'No polling locations found that have lat/long and need state: ' + str(e))
+
+    for polling_location_on_stage in polling_location_list:
+        try:
+            lat_long_results = \
+                polling_location_manager.populate_address_from_latitude_and_longitude_for_polling_location(
+                    polling_location_on_stage)
+            status += lat_long_results['status']
+            if lat_long_results['success']:
+                polling_locations_saved += 1
+            else:
+                polling_locations_not_saved += 1
+
+        except Exception as e:
+            polling_locations_not_saved += 1
+
+    messages.add_message(request, messages.INFO, 'Polling locations saved: ' + str(polling_locations_saved) +
+                         ", not saved: " + str(polling_locations_not_saved))
+
+    url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+                    "&state_code=" + str(state_code)
+    if positive_value_exists(polling_location_we_vote_id):
+        return HttpResponseRedirect(reverse('polling_location:polling_location_summary_by_we_vote_id',
+                                    args=(polling_location_we_vote_id,)) + url_variables)
+    else:
+        return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()) + url_variables)
 
 
 @login_required

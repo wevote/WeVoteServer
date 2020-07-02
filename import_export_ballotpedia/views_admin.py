@@ -250,7 +250,7 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
 
     if positive_value_exists(could_not_retrieve_district_id_list_for_polling_location_count):
         messages.add_message(request, messages.ERROR,
-                             'Could not retrieve district_id list for this many Polling Locations: ' +
+                             'Could not retrieve district_id list for this many Map Points: ' +
                              str(could_not_retrieve_district_id_list_for_polling_location_count))
 
     # Once we have a summary of all ballotpedia districts, we want to request all of the races
@@ -838,7 +838,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
     if len(polling_location_list) > 0:
         # Create Batch Set for ballot items
         import_date = date.today()
-        batch_set_name = "Ballot items (from Polling Locations v4) for " + election_name
+        batch_set_name = "Ballot items (from Map Points v4) for " + election_name
         if positive_value_exists(state_code):
             batch_set_name += " (state " + str(state_code.upper()) + ")"
         if positive_value_exists(ballotpedia_election_id):
@@ -931,7 +931,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
 
     if from_browser:
         messages.add_message(request, messages.INFO,
-                             'Ballot data retrieved from Ballotpedia (Polling Locations) for the {election_name}. '
+                             'Ballot data retrieved from Ballotpedia (Map Points) for the {election_name}. '
                              'ballots retrieved: {ballots_retrieved}. '
                              'new offices: {new_offices_found} (existing: {existing_offices_found}) '
                              'new candidates: {new_candidates_found} (existing: {existing_candidates_found}) '
@@ -955,7 +955,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                                     '&google_civic_election_id=' + str(google_civic_election_id))
     else:
         status += \
-            'Ballot data retrieved from Ballotpedia (Polling Locations) for the {election_name}. ' \
+            'Ballot data retrieved from Ballotpedia (Map Points) for the {election_name}. ' \
             'ballots retrieved: {ballots_retrieved}. ' \
             'new offices: {new_offices_found} (existing: {existing_offices_found}) ' \
             'new candidates: {new_candidates_found} (existing: {existing_candidates_found}) ' \
@@ -1506,7 +1506,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         # Create Batch Set for ballot items
         import_date = date.today()
         batch_set_id = 0
-        batch_set_name = "Ballotpedia ballot items (from Polling Locations v3) for " + election_name
+        batch_set_name = "Ballotpedia ballot items (from Map Points v3) for " + election_name
         if positive_value_exists(state_code):
             batch_set_name += " (state " + str(state_code.upper()) + ")"
         if positive_value_exists(ballotpedia_election_id):
