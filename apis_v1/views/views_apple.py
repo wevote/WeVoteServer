@@ -17,10 +17,9 @@ logger = wevote_functions.admin.get_logger(__name__)
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
-def sign_in_with_apple_view(request):  # appleSignInSave
+def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
     """
-    Step 1 of the Twitter Sign In Process for the WebApp
-    Start off the process of signing in with Twitter (twitterSignInStart)
+    Handle and store the data from a "Sing In With Apple" login in iOS through Cordova
     :param request:
     :return:
     """
@@ -110,3 +109,15 @@ def sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name,
         'voter_we_vote_id': voter_we_vote_id,
     }
     return results
+
+
+def sign_in_with_apple_oauth_redirect_view(request): # appleSignInOauthRedirectDestination
+    # These are going to the error log so that I can see them on Splunk  (for now)
+    logger.error('appleSignInOauthRedirectDestination dump GET: ' + json.dumps(request.GET))
+    logger.error('appleSignInOauthRedirectDestination dump POST: ' + json.dumps(request.POST))
+    logger.error('appleSignInOauthRedirectDestination dump body: ' + request.body.decode('utf-8'))
+
+    json_data = {
+        'status': 'OkeyDokey',
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
