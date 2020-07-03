@@ -4,6 +4,7 @@
 {% block title %}Map Points Statistics{% endblock %}
 
 {%  block content %}
+{% load humanize %}
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
 <p>Jump to:
     <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elections</a> -
@@ -51,6 +52,8 @@
             <th>State</th>
             <th></th>
             <th>Number of Map Points</th>
+            <th>State Population</th>
+            <th>Avg People Per Map Point</th>
             <th>Missing Lat/Long</th>
         </tr>
     </thead>
@@ -70,7 +73,13 @@
               </a>
             </td>
             <td>
-              {{ one_state.polling_location_count }}
+              {{ one_state.polling_location_count|intcomma }}
+            </td>
+            <td>
+              {{ one_state.state_population|intcomma }}
+            </td>
+            <td>
+              {{ one_state.average_people_per_map_point|intcomma }}
             </td>
             <td>
               {{ one_state.polling_location_without_latitude_count }}
