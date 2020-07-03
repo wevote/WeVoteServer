@@ -165,13 +165,18 @@ def polling_locations_sync_out_view(request):  # pollingLocationsSyncOut
         if positive_value_exists(state):
             polling_location_query = polling_location_query.filter(state__iexact=state)
 
-        polling_location_list_dict = polling_location_query.values('we_vote_id', 'city', 'directions_text',
+        polling_location_list_dict = polling_location_query.values('we_vote_id', 'city',
+                                                                   'county_name',
+                                                                   'directions_text',
                                                                    'latitude', 'longitude',
                                                                    'line1', 'line2', 'location_name',
                                                                    'polling_hours_text',
-                                                                   'polling_location_id', 'state',
+                                                                   'polling_location_id',
+                                                                   'precinct_name',
+                                                                   'state',
                                                                    'use_for_bulk_retrieve',
                                                                    'polling_location_deleted',
+                                                                   'source_code',
                                                                    'zip_long', 'id')
         if polling_location_list_dict:
             polling_location_list_json = list(polling_location_list_dict)
@@ -239,7 +244,8 @@ def polling_locations_import_from_master_server_view(request):
         updated = import_results['updated']
         not_processed = import_results['not_processed']
     else:
-        polling_locations_import_status_string = "Not able to retrieve the selected polling data from the Master Server. "
+        polling_locations_import_status_string = \
+            "Not able to retrieve the selected polling data from the Master Server. "
         status += polling_locations_import_status_string + import_results['status']
 
     if not json_retrieved:
