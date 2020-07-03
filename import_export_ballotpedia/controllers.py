@@ -3305,8 +3305,8 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
     ballot_returned = BallotReturned()
 
     # Make sure we have latitude and longitude
-    if positive_value_exists(polling_location_we_vote_id) and not positive_value_exists(latitude) \
-            and not positive_value_exists(longitude):
+    if positive_value_exists(polling_location_we_vote_id) and not latitude \
+            and not longitude:
         polling_location_manager = PollingLocationManager()
         results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
         status += "RETRIEVING_LAT_LONG_FROM_POLLING_LOCATION "
