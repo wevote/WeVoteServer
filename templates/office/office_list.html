@@ -100,12 +100,12 @@
 <form name="office_list_markings" method="post" action="{% url 'office:office_list_process' %}">
     {% csrf_token %}
     <div class="form-group pull-right">
-        <div class="col-xs-4">
+        <div class="col-xs-5">
             <label for="which_marking_id" class="control-label">
               <span class="u-no-break">Mark selected rows as:</span>
             </label>
         </div>
-        <div class="col-xs-6">
+        <div class="col-xs-4">
             <select id="which_marking_id" name="which_marking">
                 {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
                 <option value="is_battleground_race">Battleground Race</option>

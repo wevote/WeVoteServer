@@ -1516,6 +1516,46 @@ def batch_process_list_view(request):
 
     batch_process_list = []
 
+    select_for_changing_batch_process_ids = request.POST.getlist('select_for_marking_checks[]')
+    which_marking = request.POST.get("which_marking", None)
+
+    # Make sure 'which_marking' is one of the allowed Filter fields
+    if which_marking and which_marking not in ["pause_process", "unpause_process", None]:
+        messages.add_message(request, messages.ERROR,
+                             'The filter you are trying to update is not recognized: {which_marking}'
+                             ''.format(which_marking=which_marking))
+        return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()))
+
+    error_count = 0
+    items_processed_successfully = 0
+    if which_marking and select_for_changing_batch_process_ids:
+        for one_batch_process_id in select_for_changing_batch_process_ids:
+            try:
+                one_batch_process = BatchProcess.objects.get(id=one_batch_process_id)
+                if which_marking == "pause_process":
+                    one_batch_process.batch_process_paused = True
+                elif which_marking == "unpause_process":
+                    one_batch_process.batch_process_paused = False
+                one_batch_process.save()
+                items_processed_successfully += 1
+                status += 'BATCH_PROCESS_UPDATED '
+            except BatchProcess.MultipleObjectsReturned as e:
+                status += 'MULTIPLE_MATCHING_BATCH_PROCESSES_FOUND '
+                error_count += 1
+            except BatchProcess.DoesNotExist:
+                status += "RETRIEVE_BATCH_PROCESS_NOT_FOUND "
+                error_count += 1
+            except Exception as e:
+                status += 'BATCH_PROCESS_GENERAL_ERROR ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                error_count += 1
+
+        messages.add_message(request, messages.INFO,
+                             'Batch Processes processed successfully: {items_processed_successfully}, '
+                             'errors: {error_count}'
+                             ''.format(error_count=error_count,
+                                       items_processed_successfully=items_processed_successfully))
+
     election_manager = ElectionManager()
     if positive_value_exists(show_all_elections):
         results = election_manager.retrieve_elections()
