@@ -112,6 +112,8 @@ def polling_locations_import_from_structured_json(structured_json):
             location_name = one_polling_location['location_name'] if 'location_name' in one_polling_location else ''
             polling_hours_text = one_polling_location['polling_hours_text'] \
                 if 'polling_hours_text' in one_polling_location else ''
+            county_name = one_polling_location['county_name'] \
+                if 'county_name' in one_polling_location else ''
             directions_text = one_polling_location['directions_text'] \
                 if 'directions_text' in one_polling_location else ''
             latitude = one_polling_location['latitude'] if 'latitude' in one_polling_location else 0
@@ -119,6 +121,10 @@ def polling_locations_import_from_structured_json(structured_json):
             line2 = one_polling_location['line2'] if 'line2' in one_polling_location else ''
             polling_location_deleted = one_polling_location['polling_location_deleted'] \
                 if 'polling_location_deleted' in one_polling_location else False
+            precinct_name = one_polling_location['precinct_name'] \
+                if 'precinct_name' in one_polling_location else ''
+            source_code = one_polling_location['source_code'] \
+                if 'source_code' in one_polling_location else ''
             use_for_bulk_retrieve = one_polling_location['use_for_bulk_retrieve'] \
                 if 'use_for_bulk_retrieve' in one_polling_location else False
             zip_long = one_polling_location['zip_long'] if 'zip_long' in one_polling_location else ''
@@ -128,6 +134,9 @@ def polling_locations_import_from_structured_json(structured_json):
                 line1, line2, city, state, zip_long,
                 latitude=latitude,
                 longitude=longitude,
+                county_name=county_name,
+                precinct_name=precinct_name,
+                source_code=source_code,
                 use_for_bulk_retrieve=use_for_bulk_retrieve,
                 polling_location_deleted=polling_location_deleted)
         else:
