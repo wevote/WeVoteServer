@@ -182,9 +182,9 @@ class PollingLocationManager(models.Model):
                         'source_code': source_code.strip() if source_code else '',
                         'zip_long': zip_long,
                     }
-                    if positive_value_exists(latitude):
+                    if latitude is not None:
                         updated_values['latitude'] = latitude
-                    if positive_value_exists(longitude):
+                    if longitude is not None:
                         updated_values['longitude'] = longitude
                     if positive_value_exists(use_for_bulk_retrieve):
                         updated_values['use_for_bulk_retrieve'] = use_for_bulk_retrieve

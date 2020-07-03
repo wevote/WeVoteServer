@@ -1760,7 +1760,7 @@ def create_batch_row_action_polling_location(batch_description, batch_header_map
             keep_looking_for_duplicates = False
             kind_of_action = IMPORT_CREATE
 
-    latitude_and_longitude_exist = positive_value_exists(latitude) and positive_value_exists(longitude)
+    latitude_and_longitude_exist = latitude and latitude != "" and longitude and longitude != ""
     if keep_looking_for_duplicates and latitude_and_longitude_exist:
         matching_results = polling_location_list_manager.retrieve_duplicate_polling_locations(
             latitude=latitude,
@@ -1805,10 +1805,12 @@ def create_batch_row_action_polling_location(batch_description, batch_header_map
         batch_row_action_polling_location.polling_location_we_vote_id = polling_location_we_vote_id
         batch_row_action_polling_location.city = city
         batch_row_action_polling_location.county_name = county_name
-        if positive_value_exists(latitude):
-            batch_row_action_polling_location.latitude = latitude
-        if positive_value_exists(longitude):
-            batch_row_action_polling_location.longitude = longitude
+        if latitude and latitude != "":
+            latitude_float = float(latitude)
+            batch_row_action_polling_location.latitude = latitude_float
+        if longitude and longitude != "":
+            longitude_float = float(longitude)
+            batch_row_action_polling_location.longitude = longitude_float
         batch_row_action_polling_location.line1 = line1
         batch_row_action_polling_location.line2 = line2
         batch_row_action_polling_location.location_name = location_name
