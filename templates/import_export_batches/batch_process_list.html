@@ -114,22 +114,23 @@
 {% if batch_process_list %}
 <form name="batch_process_list_markings" method="post" action="{% url 'import_export_batches:batch_process_list' %}">
     {% csrf_token %}
-{#    <div class="form-group pull-right">#}
-{#        <div class="col-xs-4">#}
-{#            <label for="which_marking_id" class="control-label">#}
-{#              <span class="u-no-break">Mark selected rows as:</span>#}
-{#            </label>#}
-{#        </div>#}
-{#        <div class="col-xs-6">#}
-{#            <select id="which_marking_id" name="which_marking">#}
+    <div class="form-group pull-right">
+        <div class="col-xs-5">
+            <label for="which_marking_id" class="control-label">
+              <span class="u-no-break">Mark selected rows as:</span>
+            </label>
+        </div>
+        <div class="col-xs-3">
+            <select id="which_marking_id" name="which_marking">
                 {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
-{#                <option value="is_battleground_race">Battleground Race</option>#}
-{#            </select>#}
-{#        </div>#}
-{#        <div class="col-xs-1">#}
-{#            <input type="submit" value="Save" />#}
-{#        </div>#}
-{#    </div>#}
+                <option value="pause_process">Pause</option>
+                <option value="unpause_process">Un-Pause</option>
+            </select>
+        </div>
+        <div class="col-xs-1">
+            <input type="submit" value="Save" />
+        </div>
+    </div>
     {# Pass along the url_variables this page is using, so we can return to the same page state #}
     <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
     <input type="hidden" name="state_code" value="{{ state_code }}">
@@ -150,7 +151,11 @@
             <th>Started</th>
             <th>Checked Out?</th>
             <th>Completed</th>
-{#            <th>Select</th>#}
+            <th>
+                Select<br />
+                (all
+                <input type="checkbox" name="toggle_all" id="toggle_all_id" value="1"/>)
+            </th>
         </tr>
       </thead>
     {% endif %}
@@ -197,9 +202,9 @@
             <td>{{ batch_process.date_started|localtime|default_if_none:"" }}</td>
             <td>{{ batch_process.date_checked_out|localtime|default_if_none:"" }}</td>
             <td>{{ batch_process.date_completed|localtime|default_if_none:"" }}</td>
-{#            <td>#}
-{#                <input type="checkbox" name="select_for_marking_checks[]" id="select_for_marking_id" value="{{ batch_process.id }}"/>#}
-{#            </td>#}
+            <td>
+                <input type="checkbox" name="select_for_marking_checks[]" id="select_for_marking_id" value="{{ batch_process.id }}"/>
+            </td>
         </tr>
         {% if batch_process.batch_process_ballot_item_chunk_list %}
         <tr style="color: darkgray;">
@@ -312,7 +317,7 @@
     <p>(no batch processes found)</p>
 {% endif %}
 
-    <script>
+<script>
     $(function() {
         $('#google_civic_election_id').change(function() {
             this.form.submit();
@@ -354,6 +359,21 @@
             this.form.submit();
         });
     });
-    </script>
+</script>
+
+<script>
+    $(function() {
+        $('#toggle_all_id').change(function() {
+            var inputs = document.getElementsByName("select_for_marking_checks[]");
+            for(var i = 0; i < inputs.length; i++) {
+              if (inputs[i].checked === false) {
+                inputs[i].checked = true;
+              } else {
+                inputs[i].checked = false;
+              }
+            }
+        });
+    });
+</script>
 
 {% endblock %}
