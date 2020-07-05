@@ -34,7 +34,7 @@ PyJWT==1.7.1
 python-magic==0.4.15  # Requires "brew install libmagic" or "brew upgrade libmagic" or "pip install libmagic"
 python-openid==2.2.5
 # python-social-auth==0.2.21
-pytz==2019.3
+pytz==2020.1
 requests==2.22.0
 requests-oauthlib==1.3.0
 robot-detection==0.4
