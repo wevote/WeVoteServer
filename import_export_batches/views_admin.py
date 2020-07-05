@@ -17,7 +17,7 @@ from .controllers import create_batch_header_translation_suggestions, create_bat
 from .controllers_batch_process import batch_process_next_steps
 from .controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
 from admin_tools.views import redirect_to_sign_in_page
-from ballot.models import MEASURE, CANDIDATE, POLITICIAN
+from ballot.models import BallotReturnedListManager, MEASURE, CANDIDATE, POLITICIAN
 import csv
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -1529,6 +1529,12 @@ def batch_process_list_view(request):
     error_count = 0
     items_processed_successfully = 0
     if which_marking and select_for_changing_batch_process_ids:
+        # Get these values from hidden POST fields
+        batch_process_search = request.POST.get('batch_process_search', '')
+        google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+        show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
+        state_code = request.POST.get('state_code', '')
+
         for one_batch_process_id in select_for_changing_batch_process_ids:
             try:
                 one_batch_process = BatchProcess.objects.get(id=one_batch_process_id)
@@ -1551,7 +1557,7 @@ def batch_process_list_view(request):
                 error_count += 1
 
         messages.add_message(request, messages.INFO,
-                             'Batch Processes processed successfully: {items_processed_successfully}, '
+                             'Batch Processes paused/unpaused successfully: {items_processed_successfully}, '
                              'errors: {error_count}'
                              ''.format(error_count=error_count,
                                        items_processed_successfully=items_processed_successfully))
@@ -1732,21 +1738,33 @@ def batch_process_list_view(request):
     from wevote_settings.models import fetch_batch_process_system_on
     batch_process_system_on = fetch_batch_process_system_on()
 
+    ballot_returned_oldest_date = ""
+    ballot_returned_voter_oldest_date = ""
+    if positive_value_exists(state_code) and positive_value_exists(google_civic_election_id):
+        ballot_returned_list_manager = BallotReturnedListManager()
+        ballot_returned_oldest_date = ballot_returned_list_manager.fetch_oldest_date_last_updated(
+            google_civic_election_id, state_code)
+
+        ballot_returned_voter_oldest_date = ballot_returned_list_manager.fetch_oldest_date_last_updated(
+            google_civic_election_id, state_code, for_voter=True)
+
     template_values = {
-        'messages_on_stage':        messages_on_stage,
-        'batch_process_id':         batch_process_id,
-        'batch_process_list':       batch_process_list,
-        'batch_process_system_on':  batch_process_system_on,
-        'batch_process_search':     batch_process_search,
-        'election_list':            election_list,
-        'kind_of_processes_to_show':    kind_of_processes_to_show,
-        'state_code':               state_code,
-        'show_all_elections':       show_all_elections,
-        'show_active_processes_only':   show_active_processes_only,
-        'show_paused_processes_only':   show_paused_processes_only,
-        'show_checked_out_processes_only':   show_checked_out_processes_only,
-        'state_list':               sorted_state_list,
-        'google_civic_election_id': google_civic_election_id,
+        'messages_on_stage':                    messages_on_stage,
+        'ballot_returned_oldest_date':          ballot_returned_oldest_date,
+        'ballot_returned_voter_oldest_date':    ballot_returned_voter_oldest_date,
+        'batch_process_id':                     batch_process_id,
+        'batch_process_list':                   batch_process_list,
+        'batch_process_system_on':              batch_process_system_on,
+        'batch_process_search':                 batch_process_search,
+        'election_list':                        election_list,
+        'google_civic_election_id':             google_civic_election_id,
+        'kind_of_processes_to_show':            kind_of_processes_to_show,
+        'show_all_elections':                   show_all_elections,
+        'show_active_processes_only':           show_active_processes_only,
+        'show_paused_processes_only':           show_paused_processes_only,
+        'show_checked_out_processes_only':      show_checked_out_processes_only,
+        'state_code':                           state_code,
+        'state_list':                           sorted_state_list,
     }
     return render(request, 'import_export_batches/batch_process_list.html', template_values)
 
