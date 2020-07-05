@@ -110,10 +110,37 @@
 
 
 </form>{#  End of organization_position_choose_election form #}
+{% if google_civic_election_id and state_code %}
+<ol>
+    <li>
+        <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1">
+            <strong>Retrieve New Map Point BallotItems</strong> for this Election, up to 250 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+        </a>
+    </li>
+
+    <li>
+        <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1&use_batch_process=1">
+            <strong>Refresh Map Point BallotItems</strong> from Ballotpedia from existing BallotReturned entries (up to 250 at a time)</a>
+            (Oldest: {{ ballot_returned_oldest_date }})
+    </li>
+
+    <li>
+        <a href="{% url 'ballotpedia:refresh_ballotpedia_ballots_for_voters_api_v4' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1">
+            <strong>Refresh Voter BallotItems</strong> from Ballotpedia from existing BallotReturned entries (up to 250 at a time)</a>
+            (Oldest: {{ ballot_returned_voter_oldest_date }})
+    </li>
+</ol>
+{% endif %}
 
 {% if batch_process_list %}
 <form name="batch_process_list_markings" method="post" action="{% url 'import_export_batches:batch_process_list' %}">
     {% csrf_token %}
+    {# Pass along the url_variables this page is using, so we can return to the same page state #}
+    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+    <input type="hidden" name="state_code" value="{{ state_code }}">
+    <input type="hidden" name="show_all_elections" value="{{ show_all_elections }}">
+    <input type="hidden" name="batch_process_search" value="{{ batch_process_search }}">
+
     <div class="form-group pull-right">
         <div class="col-xs-5">
             <label for="which_marking_id" class="control-label">
@@ -131,11 +158,6 @@
             <input type="submit" value="Save" />
         </div>
     </div>
-    {# Pass along the url_variables this page is using, so we can return to the same page state #}
-    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-    <input type="hidden" name="state_code" value="{{ state_code }}">
-    <input type="hidden" name="show_all_elections" value="{{ show_all_elections }}">
-    <input type="hidden" name="batch_process_search" value="{{ batch_process_search }}">
 
     <table class="table">
     {% for batch_process in batch_process_list %}
