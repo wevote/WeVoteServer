@@ -1,16 +1,17 @@
 # apis_v1/views/views_apple.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from datetime import date, datetime
-
+from apple.AppleOAuth2 import AppleOAuth2
+from apple.controllers import apple_sign_in_retrieve_voter_id
+from apple.models import AppleUser
 from config.base import get_environment_variable
+from datetime import date, datetime
 from django.http import HttpResponse
 from exception.models import print_to_log, handle_exception
-import json
-import wevote_functions.admin
-from apple.models import AppleUser
-from apple.controllers import apple_sign_in_retrieve_voter_id
 from wevote_functions.functions import get_voter_device_id, positive_value_exists
+import json
+import jwt
+import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -56,6 +57,15 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def payload(message, status):
+    return HttpResponse(
+        json.dumps({"status": status, "payload": message} if not message == None else {"status": status})
+    )
+
+
+def success(message=None): return payload(message, "success")
+
+
 def sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name,
                                middle_name, last_name, apple_platform, apple_os_version,
                                apple_model, voter_we_vote_id):
@@ -65,8 +75,8 @@ def sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name,
         status += "CREATE_APPLE_LINK_MISSING_REQUIRED_VARIABLE_USER_CODE_OR_EMAIL "
         print_to_log(logger=logger, exception_message_optional=status)
         results = {
-            'success':          success,
-            'status':           status,
+            'success': success,
+            'status': status,
             'voter_we_vote_id': voter_we_vote_id,
         }
         return results
@@ -104,20 +114,48 @@ def sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name,
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
-        'success':          success,
-        'status':           status,
+        'success': success,
+        'status': status,
         'voter_we_vote_id': voter_we_vote_id,
     }
     return results
 
 
-def sign_in_with_apple_oauth_redirect_view(request): # appleSignInOauthRedirectDestination
+def getKeyFromBody(request, key):
+    try:
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        return body.get(key)
+    except:
+        return None
+
+
+# https://medium.com/@aamishbaloch/sign-in-with-apple-in-your-django-python-backend-b501daa835a9
+# https://github.com/pastre/backend-challenge-python/blob/f387a94cafbec8c404d2d9e0eb05a9cc0eefd208/reflections/views.py
+def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirectDestination
     # These are going to the error log so that I can see them on Splunk  (for now)
     logger.error('appleSignInOauthRedirectDestination dump GET: ' + json.dumps(request.GET))
     logger.error('appleSignInOauthRedirectDestination dump POST: ' + json.dumps(request.POST))
     logger.error('appleSignInOauthRedirectDestination dump body: ' + request.body.decode('utf-8'))
 
+    print("Method is", request.method)
+    if not request.method == 'POST':
+        logger.error('appleSignInOauthRedirectDestination WRONG Method: ' + request.method)
+
+    authCode = getKeyFromBody(request, "authorizationCode")
+    username = getKeyFromBody(request, "username")
+
+    if not authCode:
+        logger.error('appleSignInOauthRedirectDestination Malformed Request ')
+
+    user = AppleOAuth2().do_auth(authCode, username)
+    logger.error("appleSignInOauthRedirectDestination AppleOAuth2 User is", user)
+
     json_data = {
         'status': 'OkeyDokey',
     }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    #myUser = User.objects.get(pk=user.pk)
+    return
+        # success(myUser.toDict())
+
+    # return HttpResponse(json.dumps(json_data), content_type='application/json')

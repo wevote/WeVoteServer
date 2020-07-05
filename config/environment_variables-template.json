@@ -112,6 +112,10 @@
   "LOGIN_REDIRECT_URL":             "http://localhost:8000/admin/",
 
   "_comment":                       "Django social sign in",
+  "SOCIAL_AUTH_APPLE_KEY_ID":       "",
+  "SOCIAL_AUTH_APPLE_TEAM_ID":      "",
+  "SOCIAL_AUTH_APPLE_PRIVATE_KEY":  "",
+  "SOCIAL_AUTH_APPLE_CLIENT_ID":    "us.wevote.webapp",
   "SOCIAL_AUTH_FACEBOOK_KEY":       "",
   "SOCIAL_AUTH_FACEBOOK_SECRET":    "",
   "SOCIAL_AUTH_TWITTER_KEY":        "",
