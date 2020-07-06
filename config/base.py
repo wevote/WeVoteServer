@@ -166,7 +166,6 @@ MIDDLEWARE = [
 ]
 
 AUTHENTICATION_BACKENDS = (
-    'AppleOAuth2',
     'social_core.backends.facebook.FacebookOAuth2',
     'social_core.backends.google.GoogleOAuth2',
     'social_core.backends.twitter.TwitterOAuth',
