@@ -5,6 +5,7 @@
 
 {%  block content %}
 {% load template_filters %}
+{% load humanize %}
 <style>
 span.wrap_word { word-break: break-word; }
 </style>
@@ -221,7 +222,7 @@ span.wrap_word { word-break: break-word; }
         Twitter Name: {{ candidate.twitter_name }}<br />
         Twitter Description: {{ candidate.twitter_description }}<br />
         Twitter Location: {{ candidate.twitter_location }}<br />
-        Twitter Followers: {{ candidate.twitter_followers_count }}<br />
+        Twitter Followers: {{ candidate.twitter_followers_count|intcomma }}<br />
     {% endif %}
     {% if candidate.twitter_url %}Twitter URL (from Google Civic): {{ candidate.twitter_url }}{% endif %}
     {% if candidate %}
@@ -462,10 +463,10 @@ span.wrap_word { word-break: break-word; }
         <tr>
             <th></th>
             <th>Organization Position</th>
-            <th>Stance</th>
+            <th>Stance (w/ source)</th>
             <th>Election</th>
             <th>Election Date</th>
-            <th>Rating Time Span</th>
+{#            <th>Rating Time Span</th>#}
         </tr>
       </thead>
 
@@ -486,15 +487,27 @@ span.wrap_word { word-break: break-word; }
                 {% else %}
                     (not an org)
                 {% endif %}
+                {% if candidate_position.organization.twitter_followers_count %}
+                    <br />
+                    <span style="color: darkgray" class="u-no-break">(<i class="fa fa-twitter"></i> {{ candidate_position.organization.twitter_followers_count|intcomma }} Twitter Followers)</span>
+                {% endif %}
             </td>
             <td>{{ candidate_position.get_stance_display }}
                 {% if candidate_position.statement_text %}
                 <span style="color: darkgray">{{ candidate_position.statement_text }}</span>
                 {% endif %}
-                {% if candidate_position.vote_smart_rating %} {{ candidate_position.vote_smart_rating }}%{% endif %}</td>
+                {% if candidate_position.vote_smart_rating %} {{ candidate_position.vote_smart_rating }}%{% endif %}
+                {% if candidate_position.more_info_url %}
+                    <br />
+                    <a href="{{ candidate_position.more_info_url }}"
+                       target="_blank"
+                       class="u-no-break"
+                    >{{ candidate_position.more_info_url }} <span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
+            </td>
             <td>{{ candidate_position.election.google_civic_election_id }}</td>
             <td>{{ candidate_position.election.election_day_text }}</td>
-            <td>{{ candidate_position.vote_smart_time_span|default_if_none:"" }}</td>
+{#            <td>{{ candidate_position.vote_smart_time_span|default_if_none:"" }}</td>#}
         </tr>
         {% endif %}
         {% endfor %}
@@ -590,8 +603,8 @@ span.wrap_word { word-break: break-word; }
         {% endif %}
             </td>
             <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
-                    target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
-                ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
+                    target="_blank"><i class="fa fa-twitter"></i> {{ candidate.candidate_twitter_handle }}</a><br />
+                ({{ candidate.twitter_followers_count|intcomma }} followers){% endif %}</td>
             <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
             <td>{% if candidate.candidate_contact_form_url %}<a href="{{ candidate.candidate_contact_form_url }}" target="_blank">{{ candidate.candidate_contact_form_url }}</a>{% endif %}</td>
             <td>{{ candidate.id }}</td>
