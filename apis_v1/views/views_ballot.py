@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 from ballot.controllers import all_ballot_items_retrieve_for_api, ballot_item_highlights_retrieve_for_api, \
-    ballot_item_options_retrieve_for_api
+    ballot_item_options_retrieve_for_api, ballot_items_search_retrieve_for_api
 from candidate.controllers import candidate_retrieve_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse
@@ -85,6 +85,22 @@ def ballot_item_retrieve_view(request):  # ballotItemRetrieve
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def ballot_items_search_retrieve_view(request):  # ballotItemsSearchRetrieve
+    """
+    Return ballot search results
+    NOT FULLY IMPLEMENTED -- See ballotItemOptionsRetrieve instead
+    :param request:
+    :return:
+    """
+    # google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))  # Convert to list
+    search_string = request.GET.get('search_string', '')
+    # state_code = request.GET.get('state_code', '')  # Convert to list
+
+    json_data = ballot_items_search_retrieve_for_api(search_string)
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def email_ballot_data_view(request):  # emailBallotData
