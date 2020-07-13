@@ -84,6 +84,7 @@ ACTION_VIEW_SHARED_OFFICE = 66
 ACTION_VIEW_SHARED_OFFICE_ALL_OPINIONS = 67
 ACTION_VIEW_SHARED_READY = 68
 ACTION_VIEW_SHARED_READY_ALL_OPINIONS = 69
+ACTION_SEARCH_OPINIONS = 70
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
@@ -1956,6 +1957,8 @@ def display_action_constant_human_readable(action_constant):
         return "POSITION_TAKEN"
     if action_constant == ACTION_READY_VISIT:
         return "READY_VISIT"
+    if action_constant == ACTION_SEARCH_OPINIONS:
+        return "SEARCH_OPINIONS"
     if action_constant == ACTION_SELECT_BALLOT_MODAL:
         return "SELECT_BALLOT_MODAL"
     if action_constant == ACTION_SHARE_BUTTON_COPY:
@@ -2168,4 +2171,6 @@ def fetch_action_constant_number_from_constant_string(action_constant_string):
         return 68
     if action_constant_string in 'ACTION_VIEW_SHARED_READY_ALL_OPINIONS':
         return 69
+    if action_constant_string in 'ACTION_SEARCH_OPINIONS':
+        return 70
     return 0
