@@ -2082,19 +2082,29 @@ class OrganizationListManager(models.Manager):
                         'organization_id': organization.id,
                         'organization_we_vote_id': organization.we_vote_id,
                         'organization_name':
-                            organization.organization_name if positive_value_exists(
-                                organization.organization_name) else '',
-                        'organization_website': organization.organization_website if positive_value_exists(
-                            organization.organization_website) else '',
+                            organization.organization_name
+                            if positive_value_exists(organization.organization_name) else '',
+                        'organization_type':
+                            organization.organization_type
+                            if positive_value_exists(organization.organization_type) else '',
+                        'organization_twitter_description':
+                            organization.twitter_description
+                            if positive_value_exists(organization.twitter_description) else '',
+                        'organization_twitter_followers_count':
+                            organization.twitter_followers_count
+                            if positive_value_exists(organization.twitter_followers_count) else 0,
+                        'organization_website':
+                            organization.organization_website
+                            if positive_value_exists(organization.organization_website) else '',
                         'organization_twitter_handle':
-                            organization.organization_twitter_handle if positive_value_exists(
-                                organization.organization_twitter_handle) else '',
+                            organization.organization_twitter_handle
+                            if positive_value_exists(organization.organization_twitter_handle) else '',
                         'organization_email':
-                            organization.organization_email if positive_value_exists(
-                                organization.organization_email) else '',
+                            organization.organization_email
+                            if positive_value_exists(organization.organization_email) else '',
                         'organization_facebook':
-                            organization.organization_facebook if positive_value_exists(
-                                organization.organization_facebook) else '',
+                            organization.organization_facebook
+                            if positive_value_exists(organization.organization_facebook) else '',
                         'organization_photo_url_medium': organization.we_vote_hosted_profile_image_url_medium,
                         'organization_photo_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
                     }
