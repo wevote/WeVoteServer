@@ -21,7 +21,7 @@ def save_analytics_action_doc_template_values(url_root):
         {
             'name':         'action_constant',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'There is a constant for each kind of action:\n'
+            'description':  'There is a constant for each kind of action (partial example list):\n'
                             'ACTION_VOTER_GUIDE_VISIT = 1\n'
                             'ACTION_VOTER_GUIDE_ENTRY = 2\n'
                             'ACTION_ORGANIZATION_FOLLOW = 3\n'
