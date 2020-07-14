@@ -334,7 +334,8 @@ def batch_list_process_view(request):
                         batch_uri, kind_of_batch, google_civic_election_id, organization_we_vote_id)
 
             if results['batch_saved']:
-                messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
+                messages.add_message(request, messages.INFO, 'Import batch-batch_saved for '
+                                                             '{election_name} election saved.'
                                                              ''.format(election_name=election_name))
                 batch_header_id = results['batch_header_id']
             else:
@@ -1437,7 +1438,7 @@ def batch_set_list_process_view(request):
             results = batch_manager.create_batch_set_vip_xml(
                 batch_file, batch_uri, google_civic_election_id, organization_we_vote_id)
             if results['batch_saved']:
-                messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
+                messages.add_message(request, messages.INFO, 'Import batch_set_list for {election_name} election saved.'
                                                              ''.format(election_name=election_name))
             else:
                 messages.add_message(request, messages.ERROR, results['status'])
@@ -1454,7 +1455,8 @@ def batch_set_list_process_view(request):
                 # results = batch_manager.create_batch(batch_uri, google_civic_election_id, organization_we_vote_id)
 
         if 'batch_saved' in results and results['batch_saved']:
-            messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
+            messages.add_message(request, messages.INFO, 'Import batch_set_list-batch_saved for '
+                                                         '{election_name} election saved.'
                                                          ''.format(election_name=election_name))
         else:
             messages.add_message(request, messages.ERROR, results['status'])
