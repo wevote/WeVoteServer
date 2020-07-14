@@ -96,7 +96,7 @@ STATE_POPULATION = {
     'AK': 731545,
     'AL': 4903185,
     'AR': 3017825,
-    # 'AS': 55641,
+    'AS': 55641,
     'AZ': 7278717,
     'CA': 39512223,
     'CO': 5758736,
@@ -105,7 +105,7 @@ STATE_POPULATION = {
     'DE': 973764,
     'FL': 21477737,
     'GA': 10617423,
-    # 'GU': 165718,
+    'GU': 165718,
     'HI': 1415872,
     'IA': 3155070,
     'ID': 1787065,
@@ -144,7 +144,7 @@ STATE_POPULATION = {
     'TX': 28995881,
     'UT': 3205958,
     'VA': 8535519,
-    # 'VI': 104914,
+    'VI': 104914,
     'VT': 623989,
     'WA': 7614893,
     'WI': 5822434,
@@ -773,7 +773,10 @@ def polling_location_statistics_view(request):
         state_details['state_code'] = state_code
         state_details['state_name'] = state_name
 
-        state_population = convert_to_int(STATE_POPULATION[state_code])
+        if state_code in STATE_POPULATION:
+            state_population = convert_to_int(STATE_POPULATION[state_code])
+        else:
+            state_population = 1
         state_details['state_population'] = state_population
 
         polling_location_count_query = PollingLocation.objects.all()
