@@ -508,14 +508,17 @@ class BatchManager(models.Model):
     def create_batch_from_local_file_upload(
             self, batch_file, kind_of_batch, google_civic_election_id, organization_we_vote_id,
             polling_location_we_vote_id=""):
+        status = ''
         if (batch_file.content_type == 'text/csv') or (batch_file.content_type == 'application/vnd.ms-excel'):
             csv_data = csv.reader(codecs.iterdecode(batch_file, 'utf-8'), delimiter=',')
             batch_file_name = batch_file.name
             return self.create_batch_from_csv_data(
                 batch_file_name, csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id,
                 polling_location_we_vote_id)
+        else:
+            status += "CONTENT_TYPE: " + str(batch_file.content_type) + " "
 
-        status = "CREATE_BATCH_FILE_TYPE_NOT_RECOGNIZED"
+        status += "CREATE_BATCH_FILE_TYPE_NOT_RECOGNIZED "
         results = {
             'success': False,
             'status': status,
