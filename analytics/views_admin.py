@@ -545,6 +545,8 @@ def sitewide_voter_metrics_sync_out_view(request):  # sitewideVoterMetricsSyncOu
         metrics_query = metrics_query.filter(last_action_date__gte=starting_date)
         metrics_query = metrics_query.filter(last_action_date__lte=ending_date)
 
+        metrics_query = metrics_query.extra(
+            select={'last_action_date': "to_char(last_action_date, 'YYYY-MM-DD HH24:MI:SS')"})
         metrics_list_dict = metrics_query.values(
             'id', 'actions_count', 'ballot_visited',
             'comments_entered_friends_only', 'comments_entered_public',
