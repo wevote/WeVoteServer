@@ -14,7 +14,9 @@ from apis_v1.views import views_apple, views_docs, views_analytics, views_ballot
     views_election, views_extension, views_facebook, views_friend, \
     views_issues, views_measure, views_misc, views_organization, \
     views_pledge_to_vote, views_position, views_task, views_share, views_twitter, views_voter, views_voter_guide
-from analytics.views_admin import analytics_action_sync_out_view
+from analytics.views_admin import analytics_action_sync_out_view, organization_daily_metrics_sync_out_view, \
+    organization_election_metrics_sync_out_view, sitewide_daily_metrics_sync_out_view, \
+    sitewide_election_metrics_sync_out_view, sitewide_voter_metrics_sync_out_view
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view, candidate_to_office_link_sync_out_view
 from issue.views_admin import issue_descriptions_retrieve_view, issues_followed_retrieve_view,\
@@ -104,6 +106,10 @@ urlpatterns = [
     url(r'^organizationAnalyticsByVoter/', views_organization.organization_analytics_by_voter_view,
         name='organizationAnalyticsByVoterView'),
     url(r'^organizationCount/', views_organization.organization_count_view, name='organizationCountView'),
+    url(r'^organizationDailyMetricsSyncOut/',
+        organization_daily_metrics_sync_out_view, name='organizationDailyMetricsSyncOutView'),
+    url(r'^organizationElectionMetricsSyncOut/',
+        organization_election_metrics_sync_out_view, name='organizationElectionMetricsSyncOutView'),
     url(r'^organizationFollow/', views_organization.organization_follow_api_view, name='organizationFollowView'),
     url(r'^organizationFollowIgnore/', views_organization.organization_follow_ignore_api_view,
         name='organizationFollowIgnoreView'),
@@ -168,6 +174,12 @@ urlpatterns = [
     url(r'^sharedItemSave/', views_share.shared_item_save_view, name='sharedItemSaveView'),
     url(r'^siteConfigurationRetrieve/',
         views_organization.site_configuration_retrieve_view, name='siteConfigurationRetrieveView'),
+    url(r'^sitewideDailyMetricsSyncOut/',
+        sitewide_daily_metrics_sync_out_view, name='sitewideDailyMetricsSyncOutView'),
+    url(r'^sitewideElectionMetricsSyncOut/',
+        sitewide_election_metrics_sync_out_view, name='sitewideElectionMetricsSyncOutView'),
+    url(r'^sitewideVoterMetricsSyncOut/',
+        sitewide_voter_metrics_sync_out_view, name='sitewideVoterMetricsSyncOutView'),
     url(r'^taskDelete/', views_task.delete_task, name='taskDelete'),
     url(r'^taskSaveNew/', views_task.save_new_task, name='taskSaveNewView'),
     url(r'^taskCompletedOutput/', views_task.read_output_record, name='taskCompletedOutput'),
@@ -366,6 +378,10 @@ urlpatterns = [
     url(r'^docs/organizationAnalyticsByVoter/$', views_docs.organization_analytics_by_voter_doc_view,
         name='organizationAnalyticsByVoterDocs'),
     url(r'^docs/organizationCount/$', views_docs.organization_count_doc_view, name='organizationCountDocs'),
+    url(r'^docs/organizationDailyMetricsSyncOut/',
+        views_docs.organization_daily_metrics_sync_out_doc_view, name='organizationDailyMetricsSyncOutDocs'),
+    url(r'^docs/organizationElectionMetricsSyncOut/',
+        views_docs.organization_election_metrics_sync_out_doc_view, name='organizationElectionMetricsSyncOutDocs'),
     url(r'^docs/organizationFollow/', views_docs.organization_follow_doc_view, name='organizationFollowDocs'),
     url(r'^docs/organizationFollowIgnore/',
         views_docs.organization_follow_ignore_doc_view, name='organizationFollowIgnoreDocs'),
@@ -433,6 +449,12 @@ urlpatterns = [
         views_docs.shared_item_save_doc_view, name='sharedItemSaveDocs'),
     url(r'^docs/siteConfigurationRetrieve/$',
         views_docs.site_configuration_retrieve_doc_view, name='siteConfigurationRetrieveDocs'),
+    url(r'^docs/sitewideDailyMetricsSyncOut/',
+        views_docs.sitewide_daily_metrics_sync_out_doc_view, name='sitewideDailyMetricsSyncOutDocs'),
+    url(r'^docs/sitewideElectionMetricsSyncOut/',
+        views_docs.sitewide_election_metrics_sync_out_doc_view, name='sitewideElectionMetricsSyncOutDocs'),
+    url(r'^docs/sitewideVoterMetricsSyncOut/',
+        views_docs.sitewide_voter_metrics_sync_out_doc_view, name='sitewideVoterMetricsSyncOutDocs'),
     url(r'^docs/searchAll/$',
         views_docs.search_all_doc_view, name='searchAllDocs'),
     url(r'^docs/twitterIdentityRetrieve/$',

@@ -21,23 +21,28 @@ from django.contrib.messages import get_messages
 from django.db.models import Q
 from django.shortcuts import render
 from django.utils.timezone import now
-from election.models import Election
+from election.models import Election, ElectionManager
 from exception.models import print_to_log
 import json
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
-    convert_to_int, positive_value_exists
+    convert_date_to_we_vote_date_string, convert_to_int, positive_value_exists
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-ANALYTICS_ACTION_SYNC_URL = "https://api.wevoteusa.org/apis/v1/analyticsActionSyncOut/"  # analyticsActionSyncOut
+ANALYTICS_ACTION_SYNC_URL = "https://api.wevoteusa.org/apis/v1/analyticsActionSyncOut/"
+ORGANIZATION_ELECTION_METRICS_SYNC_URL = "https://api.wevoteusa.org/apis/v1/organizationElectionMetricsSyncOut/"
+SITEWIDE_DAILY_METRICS_SYNC_URL = "https://api.wevoteusa.org/apis/v1/sitewideDailyMetricsSyncOut/"
+SITEWIDE_ELECTION_METRICS_SYNC_URL = "https://api.wevoteusa.org/apis/v1/sitewideElectionMetricsSyncOut/"
+SITEWIDE_VOTER_METRICS_SYNC_URL = "https://api.wevoteusa.org/apis/v1/sitewideVoterMetricsSyncOut/"
 WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 
 def analytics_action_sync_out_view(request):  # analyticsActionSyncOut
     status = ''
+    success = True
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'analytics_admin'}
     if not voter_has_authority(request, authority_required):
@@ -115,10 +120,485 @@ def analytics_action_sync_out_view(request):  # analyticsActionSyncOut
                 return HttpResponse(json.dumps(analytics_action_list_json), content_type='application/json')
     except Exception as e:
         status += 'QUERY_FAILURE: ' + str(e) + ' '
+        success = False
 
     status += 'ANALYTICS_ACTION_LIST_EMPTY '
     json_data = {
-        'success': False,
+        'success': success,
+        'status': status,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def organization_daily_metrics_sync_out_view(request):  # organizationDailyMetricsSyncOut
+    status = ''
+    success = True
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'analytics_admin'}
+    if not voter_has_authority(request, authority_required):
+        json_data = {
+            'success': False,
+            'status': 'ORGANIZATION_DAILY_METRICS_SYNC_OUT-NOT_ANALYTICS_ADMIN '
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    starting_date_as_integer = convert_to_int(request.GET.get('starting_date_as_integer', 0))
+    ending_date_as_integer = convert_to_int(request.GET.get('ending_date_as_integer', 0))
+    return_csv_format = positive_value_exists(request.GET.get('return_csv_format', False))
+
+    generated_starting_date_as_integer = 0
+
+    try:
+        metrics_query = OrganizationDailyMetrics.objects.all().order_by('-id')
+        if positive_value_exists(starting_date_as_integer):
+            metrics_query = metrics_query.filter(date_as_integer__gte=starting_date_as_integer)
+        else:
+            one_month_ago = now() - timedelta(days=30)
+            generated_starting_date_as_integer = convert_date_to_date_as_integer(one_month_ago)
+            metrics_query = metrics_query.filter(
+                date_as_integer__gte=generated_starting_date_as_integer)
+        if positive_value_exists(ending_date_as_integer):
+            metrics_query = metrics_query.filter(date_as_integer__lte=ending_date_as_integer)
+
+        metrics_list_dict = metrics_query.values(
+            'id', 'authenticated_visitors_today', 'authenticated_visitors_total', 'auto_followers_total',
+            'date_as_integer', 'entrants_visiting_ballot',
+            'followers_total', 'followers_visiting_ballot',
+            'issues_linked_total', 'new_auto_followers_today', 'new_followers_today', 'new_visitors_today',
+            'organization_public_positions', 'organization_we_vote_id',
+            'visitors_today', 'visitors_total', 'voter_guide_entrants', 'voter_guide_entrants_today'
+        )
+        if metrics_list_dict:
+            metrics_list_raw = list(metrics_list_dict)
+            if return_csv_format:
+                # Create the HttpResponse object with the appropriate CSV header.
+                filename = "organizationDailyMetricsSyncOut"
+                if positive_value_exists(starting_date_as_integer):
+                    filename += "-" + str(starting_date_as_integer)
+                elif positive_value_exists(generated_starting_date_as_integer):
+                    filename += "-" + str(generated_starting_date_as_integer)
+                if positive_value_exists(ending_date_as_integer):
+                    filename += "-" + str(ending_date_as_integer)
+                filename += ".csv"
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+
+                writer = csv.writer(response)
+                writer.writerow(
+                    [
+                        'id', 'authenticated_visitors_today', 'authenticated_visitors_total', 'auto_followers_total',
+                        'date_as_integer', 'entrants_visiting_ballot', 'exact_time',
+                        'followers_total', 'followers_visiting_ballot',
+                        'issues_linked_total', 'new_auto_followers_today', 'new_followers_today', 'new_visitors_today',
+                        'organization_public_positions', 'organization_we_vote_id',
+                        'visitors_today', 'visitors_total', 'voter_guide_entrants', 'voter_guide_entrants_today'
+                    ])
+                for one_dict in metrics_list_raw:
+                    one_row = list(one_dict.values())
+                    writer.writerow(one_row)
+
+                return response
+            else:
+                analytics_action_list_json = []
+                for one_dict in metrics_list_raw:
+                    analytics_action_list_json.append(one_dict)
+                return HttpResponse(json.dumps(analytics_action_list_json), content_type='application/json')
+    except Exception as e:
+        status += 'QUERY_FAILURE: ' + str(e) + ' '
+        success = False
+
+    status += 'ORGANIZATION_DAILY_METRICS_LIST_EMPTY '
+    json_data = {
+        'success': success,
+        'status': status,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def organization_election_metrics_sync_out_view(request):  # organizationElectionMetricsSyncOut
+    status = ''
+    success = True
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'analytics_admin'}
+    if not voter_has_authority(request, authority_required):
+        json_data = {
+            'success': False,
+            'status': 'ORGANIZATION_ELECTION_METRICS_SYNC_OUT-NOT_ANALYTICS_ADMIN '
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    starting_date_as_integer = convert_to_int(request.GET.get('starting_date_as_integer', 0))
+    ending_date_as_integer = convert_to_int(request.GET.get('ending_date_as_integer', 0))
+    return_csv_format = positive_value_exists(request.GET.get('return_csv_format', False))
+
+    if not positive_value_exists(starting_date_as_integer):
+        one_month_ago = now() - timedelta(days=30)
+        starting_date_as_integer = convert_date_to_date_as_integer(one_month_ago)
+
+    if not positive_value_exists(ending_date_as_integer):
+        time_now = now()
+        ending_date_as_integer = convert_date_to_date_as_integer(time_now)
+
+    election_manager = ElectionManager()
+    results = election_manager.retrieve_elections_between_dates(
+        starting_date_as_integer=starting_date_as_integer,
+        ending_date_as_integer=ending_date_as_integer
+    )
+    election_list = results['election_list']
+    google_civic_election_id_list = []
+    for one_election in election_list:
+        google_civic_election_id_list.append(one_election.google_civic_election_id)
+
+    try:
+        metrics_query = OrganizationElectionMetrics.objects.all().order_by('-id')
+        metrics_query = metrics_query.filter(google_civic_election_id__in=google_civic_election_id_list)
+
+        metrics_list_dict = metrics_query.values(
+            'id', 'authenticated_visitors_total', 'election_day_text',
+            'entrants_friends_only_positions', 'entrants_friends_only_positions_with_comments',
+            'entrants_public_positions', 'entrants_public_positions_with_comments',
+            'entrants_took_position', 'entrants_visited_ballot',
+            'followers_at_time_of_election', 'followers_friends_only_positions',
+            'followers_friends_only_positions_with_comments', 'followers_public_positions',
+            'followers_public_positions_with_comments', 'followers_took_position',
+            'followers_visited_ballot', 'google_civic_election_id', 'new_auto_followers', 'new_followers',
+            'organization_we_vote_id', 'visitors_total', 'voter_guide_entrants'
+        )
+        if metrics_list_dict:
+            metrics_list_raw = list(metrics_list_dict)
+            if return_csv_format:
+                # Create the HttpResponse object with the appropriate CSV header.
+                filename = "organizationElectionMetricsSyncOut"
+                filename += "-" + str(starting_date_as_integer)
+                filename += "-" + str(ending_date_as_integer)
+                filename += ".csv"
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+
+                writer = csv.writer(response)
+                writer.writerow(
+                    [
+                        'id', 'authenticated_visitors_total', 'election_day_text',
+                        'entrants_friends_only_positions', 'entrants_friends_only_positions_with_comments',
+                        'entrants_public_positions', 'entrants_public_positions_with_comments',
+                        'entrants_took_position', 'entrants_visited_ballot',
+                        'followers_at_time_of_election', 'followers_friends_only_positions',
+                        'followers_friends_only_positions_with_comments', 'followers_public_positions',
+                        'followers_public_positions_with_comments', 'followers_took_position',
+                        'followers_visited_ballot', 'google_civic_election_id', 'new_auto_followers', 'new_followers',
+                        'organization_we_vote_id', 'visitors_total', 'voter_guide_entrants'
+                    ])
+                for one_dict in metrics_list_raw:
+                    one_row = list(one_dict.values())
+                    writer.writerow(one_row)
+
+                return response
+            else:
+                analytics_action_list_json = []
+                for one_dict in metrics_list_raw:
+                    analytics_action_list_json.append(one_dict)
+                return HttpResponse(json.dumps(analytics_action_list_json), content_type='application/json')
+    except Exception as e:
+        status += 'QUERY_FAILURE: ' + str(e) + ' '
+        success = False
+
+    status += 'ORGANIZATION_ELECTION_METRICS_LIST_EMPTY '
+    json_data = {
+        'success': success,
+        'status': status,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def sitewide_daily_metrics_sync_out_view(request):  # sitewideDailyMetricsSyncOut
+    status = ''
+    success = True
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'analytics_admin'}
+    if not voter_has_authority(request, authority_required):
+        json_data = {
+            'success': False,
+            'status': 'SITEWIDE_DAILY_METRICS_SYNC_OUT-NOT_ANALYTICS_ADMIN '
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    starting_date_as_integer = convert_to_int(request.GET.get('starting_date_as_integer', 0))
+    ending_date_as_integer = convert_to_int(request.GET.get('ending_date_as_integer', 0))
+    return_csv_format = positive_value_exists(request.GET.get('return_csv_format', False))
+
+    generated_starting_date_as_integer = 0
+
+    try:
+        metrics_query = SitewideDailyMetrics.objects.all().order_by('-id')
+        if positive_value_exists(starting_date_as_integer):
+            metrics_query = metrics_query.filter(date_as_integer__gte=starting_date_as_integer)
+        else:
+            one_month_ago = now() - timedelta(days=30)
+            generated_starting_date_as_integer = convert_date_to_date_as_integer(one_month_ago)
+            metrics_query = metrics_query.filter(
+                date_as_integer__gte=generated_starting_date_as_integer)
+        if positive_value_exists(ending_date_as_integer):
+            metrics_query = metrics_query.filter(date_as_integer__lte=ending_date_as_integer)
+
+        metrics_list_dict = metrics_query.values(
+            'id', 'authenticated_visitors_today', 'authenticated_visitors_total',
+            'ballot_views_today', 'date_as_integer', 'entered_full_address',
+            'friend_entrants_today', 'friends_only_positions',
+            'individuals_with_friends_only_positions', 'individuals_with_positions',
+            'individuals_with_public_positions',
+            'issue_follows_today', 'issue_follows_total',
+            'issues_followed_today', 'issues_followed_total',
+            'issues_linked_today', 'issues_linked_total',
+            'new_visitors_today', 'organization_public_positions',
+            'organizations_auto_followed_today', 'organizations_auto_followed_total',
+            'organizations_followed_today', 'organizations_followed_total',
+            'organizations_signed_in_total', 'organizations_with_linked_issues',
+            'organizations_with_new_positions_today', 'organizations_with_positions',
+            'visitors_today', 'visitors_total',
+            'voter_guide_entrants_today', 'voter_guides_viewed_today',
+            'voter_guides_viewed_total', 'welcome_page_entrants_today',
+        )
+        if metrics_list_dict:
+            metrics_list_raw = list(metrics_list_dict)
+            if return_csv_format:
+                # Create the HttpResponse object with the appropriate CSV header.
+                filename = "sitewideDailyMetricsSyncOut"
+                if positive_value_exists(starting_date_as_integer):
+                    filename += "-" + str(starting_date_as_integer)
+                elif positive_value_exists(generated_starting_date_as_integer):
+                    filename += "-" + str(generated_starting_date_as_integer)
+                if positive_value_exists(ending_date_as_integer):
+                    filename += "-" + str(ending_date_as_integer)
+                filename += ".csv"
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+
+                writer = csv.writer(response)
+                writer.writerow(
+                    [
+                        'id', 'authenticated_visitors_today', 'authenticated_visitors_total',
+                        'ballot_views_today', 'date_as_integer', 'entered_full_address',
+                        'friend_entrants_today', 'friends_only_positions',
+                        'individuals_with_friends_only_positions', 'individuals_with_positions',
+                        'individuals_with_public_positions',
+                        'issue_follows_today', 'issue_follows_total',
+                        'issues_followed_today', 'issues_followed_total',
+                        'issues_linked_today', 'issues_linked_total',
+                        'new_visitors_today', 'organization_public_positions',
+                        'organizations_auto_followed_today', 'organizations_auto_followed_total',
+                        'organizations_followed_today', 'organizations_followed_total',
+                        'organizations_signed_in_total', 'organizations_with_linked_issues',
+                        'organizations_with_new_positions_today', 'organizations_with_positions',
+                        'visitors_today', 'visitors_total',
+                        'voter_guide_entrants_today', 'voter_guides_viewed_today',
+                        'voter_guides_viewed_total', 'welcome_page_entrants_today',
+                    ])
+                for one_dict in metrics_list_raw:
+                    one_row = list(one_dict.values())
+                    writer.writerow(one_row)
+
+                return response
+            else:
+                analytics_action_list_json = []
+                for one_dict in metrics_list_raw:
+                    analytics_action_list_json.append(one_dict)
+                return HttpResponse(json.dumps(analytics_action_list_json), content_type='application/json')
+    except Exception as e:
+        status += 'QUERY_FAILURE: ' + str(e) + ' '
+        success = False
+
+    status += 'SITEWIDE_DAILY_METRICS_LIST_EMPTY '
+    json_data = {
+        'success': success,
+        'status': status,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def sitewide_election_metrics_sync_out_view(request):  # sitewideElectionMetricsSyncOut
+    status = ''
+    success = True
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'analytics_admin'}
+    if not voter_has_authority(request, authority_required):
+        json_data = {
+            'success': False,
+            'status': 'SITEWIDE_ELECTION_METRICS_SYNC_OUT-NOT_ANALYTICS_ADMIN '
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    starting_date_as_integer = convert_to_int(request.GET.get('starting_date_as_integer', 0))
+    ending_date_as_integer = convert_to_int(request.GET.get('ending_date_as_integer', 0))
+    return_csv_format = positive_value_exists(request.GET.get('return_csv_format', False))
+
+    if not positive_value_exists(starting_date_as_integer):
+        one_month_ago = now() - timedelta(days=30)
+        starting_date_as_integer = convert_date_to_date_as_integer(one_month_ago)
+
+    if not positive_value_exists(ending_date_as_integer):
+        time_now = now()
+        ending_date_as_integer = convert_date_to_date_as_integer(time_now)
+
+    election_manager = ElectionManager()
+    results = election_manager.retrieve_elections_between_dates(
+        starting_date_as_integer=starting_date_as_integer,
+        ending_date_as_integer=ending_date_as_integer
+    )
+    election_list = results['election_list']
+    google_civic_election_id_list = []
+    for one_election in election_list:
+        google_civic_election_id_list.append(one_election.google_civic_election_id)
+
+    try:
+        metrics_query = SitewideElectionMetrics.objects.all().order_by('-id')
+        metrics_query = metrics_query.filter(google_civic_election_id__in=google_civic_election_id_list)
+
+        metrics_list_dict = metrics_query.values(
+            'id', 'authenticated_visitors_total',
+            'election_day_text', 'entered_full_address',
+            'friends_only_positions', 'friends_only_positions_with_comments', 'google_civic_election_id',
+            'individuals_with_friends_only_positions', 'individuals_with_positions',
+            'individuals_with_public_positions',
+            'issues_followed',
+            'organization_public_positions', 'organizations_auto_followed', 'organizations_followed',
+            'organizations_signed_in', 'organizations_with_positions',
+            'public_positions', 'public_positions_with_comments',
+            'unique_voters_that_auto_followed_organizations', 'unique_voters_that_followed_organizations',
+            'visitors_total', 'voter_guide_entries',
+            'voter_guide_views', 'voter_guides_viewed',
+        )
+        if metrics_list_dict:
+            metrics_list_raw = list(metrics_list_dict)
+            if return_csv_format:
+                # Create the HttpResponse object with the appropriate CSV header.
+                filename = "sitewideElectionMetricsSyncOut"
+                filename += "-" + str(starting_date_as_integer)
+                filename += "-" + str(ending_date_as_integer)
+                filename += ".csv"
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+
+                writer = csv.writer(response)
+                writer.writerow(
+                    [
+                        'id', 'authenticated_visitors_total',
+                        'election_day_text', 'entered_full_address',
+                        'friends_only_positions', 'friends_only_positions_with_comments', 'google_civic_election_id',
+                        'individuals_with_friends_only_positions', 'individuals_with_positions',
+                        'individuals_with_public_positions',
+                        'issues_followed',
+                        'organization_public_positions', 'organizations_auto_followed', 'organizations_followed',
+                        'organizations_signed_in', 'organizations_with_positions',
+                        'public_positions', 'public_positions_with_comments',
+                        'unique_voters_that_auto_followed_organizations', 'unique_voters_that_followed_organizations',
+                        'visitors_total', 'voter_guide_entries',
+                        'voter_guide_views', 'voter_guides_viewed',
+                    ])
+                for one_dict in metrics_list_raw:
+                    one_row = list(one_dict.values())
+                    writer.writerow(one_row)
+
+                return response
+            else:
+                analytics_action_list_json = []
+                for one_dict in metrics_list_raw:
+                    analytics_action_list_json.append(one_dict)
+                return HttpResponse(json.dumps(analytics_action_list_json), content_type='application/json')
+    except Exception as e:
+        status += 'QUERY_FAILURE: ' + str(e) + ' '
+        success = False
+
+    status += 'SITEWIDE_ELECTION_METRICS_LIST_EMPTY '
+    json_data = {
+        'success': success,
+        'status': status,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def sitewide_voter_metrics_sync_out_view(request):  # sitewideVoterMetricsSyncOut
+    status = ''
+    success = True
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'analytics_admin'}
+    if not voter_has_authority(request, authority_required):
+        json_data = {
+            'success': False,
+            'status': 'SITEWIDE_VOTER_METRICS_SYNC_OUT-NOT_ANALYTICS_ADMIN '
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    starting_date_as_integer = convert_to_int(request.GET.get('starting_date_as_integer', 0))
+    ending_date_as_integer = convert_to_int(request.GET.get('ending_date_as_integer', 0))
+    return_csv_format = positive_value_exists(request.GET.get('return_csv_format', False))
+
+    if positive_value_exists(starting_date_as_integer):
+        starting_date = convert_date_as_integer_to_date(starting_date_as_integer)
+    else:
+        starting_date = now() - timedelta(days=30)
+        starting_date_as_integer = convert_date_to_date_as_integer(starting_date)
+
+    if positive_value_exists(ending_date_as_integer):
+        ending_date = convert_date_as_integer_to_date(ending_date_as_integer)
+    else:
+        ending_date = now()
+        ending_date_as_integer = convert_date_to_date_as_integer(ending_date)
+
+    try:
+        metrics_query = SitewideVoterMetrics.objects.all().order_by('-id')
+        metrics_query = metrics_query.filter(last_action_date__gte=starting_date)
+        metrics_query = metrics_query.filter(last_action_date__lte=ending_date)
+
+        metrics_list_dict = metrics_query.values(
+            'id', 'actions_count', 'ballot_visited',
+            'comments_entered_friends_only', 'comments_entered_public',
+            'days_visited', 'elections_viewed',
+            'entered_full_address', 'issues_followed',
+            'last_action_date', 'last_calculated_date_as_integer',
+            'organizations_followed', 'positions_entered_friends_only', 'positions_entered_public',
+            'seconds_on_site', 'signed_in_facebook', 'signed_in_twitter', 'signed_in_with_email',
+            'signed_in_with_sms_phone_number',
+            'time_until_sign_in', 'voter_guides_viewed',
+            'voter_we_vote_id', 'welcome_visited',
+        )
+        if metrics_list_dict:
+            metrics_list_raw = list(metrics_list_dict)
+            if return_csv_format:
+                # Create the HttpResponse object with the appropriate CSV header.
+                filename = "sitewideVoterMetricsSyncOut"
+                filename += "-" + str(starting_date_as_integer)
+                filename += "-" + str(ending_date_as_integer)
+                filename += ".csv"
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+
+                writer = csv.writer(response)
+                writer.writerow(
+                    [
+                        'id', 'actions_count', 'ballot_visited',
+                        'comments_entered_friends_only', 'comments_entered_public',
+                        'days_visited', 'elections_viewed',
+                        'entered_full_address', 'issues_followed',
+                        'last_action_date', 'last_calculated_date_as_integer',
+                        'organizations_followed', 'positions_entered_friends_only', 'positions_entered_public',
+                        'seconds_on_site', 'signed_in_facebook', 'signed_in_twitter', 'signed_in_with_email',
+                        'signed_in_with_sms_phone_number',
+                        'time_until_sign_in', 'voter_guides_viewed',
+                        'voter_we_vote_id', 'welcome_visited',
+                    ])
+                for one_dict in metrics_list_raw:
+                    one_row = list(one_dict.values())
+                    writer.writerow(one_row)
+
+                return response
+            else:
+                analytics_action_list_json = []
+                for one_dict in metrics_list_raw:
+                    analytics_action_list_json.append(one_dict)
+                return HttpResponse(json.dumps(analytics_action_list_json), content_type='application/json')
+    except Exception as e:
+        status += 'QUERY_FAILURE: ' + str(e) + ' '
+        success = False
+
+    status += 'SITEWIDE_VOTER_METRICS_LIST_EMPTY '
+    json_data = {
+        'success': success,
         'status': status,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
