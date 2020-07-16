@@ -6,7 +6,8 @@ from datetime import date, datetime, time
 from django.db import models
 from django.db.models import Max, Q
 import wevote_functions.admin
-from wevote_functions.functions import convert_date_to_date_as_integer, convert_date_to_we_vote_date_string, \
+from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
+    convert_date_to_we_vote_date_string, \
     convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
 
 
@@ -310,6 +311,35 @@ class ElectionManager(models.Model):
             'ballotpedia_election_found':   ballotpedia_election_found,
             'ballotpedia_election_id':      ballotpedia_election_id,
             'ballotpedia_election':         ballotpedia_election,
+        }
+        return results
+
+    def retrieve_elections_between_dates(
+            self,
+            starting_date_as_integer,
+            ending_date_as_integer):
+        status = ""
+
+        starting_date = convert_date_as_integer_to_date(starting_date_as_integer)
+        starting_date_as_we_vote_date = convert_date_to_we_vote_date_string(starting_date)
+        ending_date = convert_date_as_integer_to_date(ending_date_as_integer)
+        ending_date_as_we_vote_date = convert_date_to_we_vote_date_string(ending_date)
+        try:
+            election_list_query = Election.objects.using('readonly').all()
+            election_list_query = election_list_query.filter(election_day_text__gte=starting_date_as_we_vote_date)
+            election_list_query = election_list_query.filter(election_day_text__lte=ending_date_as_we_vote_date)
+            election_list = list(election_list_query)
+            status += 'ELECTIONS_FOUND '
+            success = True
+        except Election.DoesNotExist as e:
+            status += 'NO_ELECTIONS_FOUND '
+            success = True
+            election_list = []
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'election_list':    election_list,
         }
         return results
 

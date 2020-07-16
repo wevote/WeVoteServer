@@ -18,7 +18,8 @@ from apis_v1.documentation_source import all_ballot_items_retrieve_doc, analytic
     issues_linked_to_organization_doc, issues_to_link_to_for_organization_doc, \
     measure_retrieve_doc, measures_sync_out_doc, measure_list_for_upcoming_elections_retrieve_doc, \
     office_retrieve_doc, offices_sync_out_doc, organization_analytics_by_voter_doc, \
-    organization_count_doc, organizations_followed_retrieve_doc, \
+    organization_count_doc, organization_daily_metrics_sync_out_doc, \
+    organization_election_metrics_sync_out_doc, organizations_followed_retrieve_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_index_doc, organizations_found_on_url_doc, \
     organization_link_to_issue_sync_out_doc, organization_link_to_issue_doc, organization_stop_following_doc, \
     organization_stop_ignoring_doc, organization_photos_save_doc, \
@@ -35,7 +36,9 @@ from apis_v1.documentation_source import all_ballot_items_retrieve_doc, analytic
     positions_count_for_all_ballot_items_doc, positions_count_for_one_ballot_item_doc, \
     quick_info_retrieve_doc, retrieve_issues_to_follow_doc, \
     save_analytics_action_doc, search_all_doc, shared_item_retrieve_doc, \
-    shared_item_save_doc, site_configuration_retrieve_doc, twitter_identity_retrieve_doc, \
+    shared_item_save_doc, site_configuration_retrieve_doc, \
+    sitewide_daily_metrics_sync_out_doc, sitewide_election_metrics_sync_out_doc, sitewide_voter_metrics_sync_out_doc, \
+    twitter_identity_retrieve_doc, \
     twitter_sign_in_request_access_token_doc, twitter_sign_in_request_voter_info_doc, twitter_sign_in_retrieve_doc, \
     twitter_sign_in_start_doc, twitter_retrieve_ids_i_follow_doc, voter_address_retrieve_doc, voter_address_save_doc, \
     voter_all_positions_retrieve_doc, voter_all_bookmarks_status_retrieve_doc, \
@@ -546,6 +549,28 @@ def organization_count_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
+def organization_daily_metrics_sync_out_doc_view(request):
+    """
+    Show documentation about organizationDailyMetricsSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = \
+        organization_daily_metrics_sync_out_doc.organization_daily_metrics_sync_out_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def organization_election_metrics_sync_out_doc_view(request):
+    """
+    Show documentation about organizationElectionMetricsSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = \
+        organization_election_metrics_sync_out_doc.organization_election_metrics_sync_out_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
 def organization_follow_doc_view(request):
     """
     Show documentation about organizationFollow
@@ -902,6 +927,39 @@ def site_configuration_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = site_configuration_retrieve_doc.site_configuration_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def sitewide_daily_metrics_sync_out_doc_view(request):
+    """
+    Show documentation about sitewideDailyMetricsSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = \
+        sitewide_daily_metrics_sync_out_doc.sitewide_daily_metrics_sync_out_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def sitewide_election_metrics_sync_out_doc_view(request):
+    """
+    Show documentation about sitewideElectionMetricsSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = \
+        sitewide_election_metrics_sync_out_doc.sitewide_election_metrics_sync_out_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def sitewide_voter_metrics_sync_out_doc_view(request):
+    """
+    Show documentation about sitewideVoterMetricsSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = \
+        sitewide_voter_metrics_sync_out_doc.sitewide_voter_metrics_sync_out_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
