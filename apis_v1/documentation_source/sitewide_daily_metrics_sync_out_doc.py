@@ -50,7 +50,8 @@ def sitewide_daily_metrics_sync_out_doc_template_values(url_root):
                    '  "id": integer,\n' \
                    '  "authenticated_visitors_today": integer,\n' \
                    '  "authenticated_visitors_total": integer,\n' \
-                   '  "ballot_views_today": integer,\n' \
+                   '  "ballot_views_today": integer: ' \
+                   'The number of voters that viewed at least one ballot on one day,\n' \
                    '  "date_as_integer": integer,\n' \
                    '  "entered_full_address": integer,\n' \
                    '  "friend_entrants_today": integer,\n' \
