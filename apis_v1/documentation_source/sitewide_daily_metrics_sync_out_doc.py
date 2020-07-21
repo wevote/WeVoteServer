@@ -60,7 +60,7 @@ def sitewide_daily_metrics_sync_out_doc_template_values(url_root):
                    '  "individuals_with_positions": integer,\n' \
                    '  "individuals_with_public_positions": integer,\n' \
                    '  "issue_follows_today": integer,\n' \
-                   '  "issue_follows_total": integer,\n' \
+                   '  "issue_follows_total": integer: description,\n' \
                    '  "issues_followed_today": integer,\n' \
                    '  "issues_followed_total": integer,\n' \
                    '  "issues_linked_today": integer,\n' \
