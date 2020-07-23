@@ -48,39 +48,39 @@ def sitewide_daily_metrics_sync_out_doc_template_values(url_root):
 
     api_response = '[{\n' \
                    '  "id": integer,\n' \
-                   '  "authenticated_visitors_today": integer,\n' \
-                   '  "authenticated_visitors_total": integer,\n' \
+                   '  "authenticated_visitors_today": integer, Number of visitors, today\n' \
+                   '  "authenticated_visitors_total": integer, Number of visitors, all time\n' \
                    '  "ballot_views_today": integer: ' \
                    'The number of voters that viewed at least one ballot on one day,\n' \
-                   '  "date_as_integer": integer,\n' \
-                   '  "entered_full_address": integer,\n' \
-                   '  "friend_entrants_today": integer,\n' \
+                   '  "date_as_integer": integer, YYYYMMDD of the action \n' \
+                   '  "entered_full_address": integer, \n' \
+                   '  "friend_entrants_today": integer, first touch, response to friend \n' \
                    '  "friends_only_positions": integer,\n' \
                    '  "individuals_with_friends_only_positions": integer,\n' \
                    '  "individuals_with_positions": integer,\n' \
                    '  "individuals_with_public_positions": integer,\n' \
-                   '  "issue_follows_today": integer,\n' \
-                   '  "issue_follows_total": integer,\n' \
-                   '  "issues_followed_today": integer,\n' \
-                   '  "issues_followed_total": integer,\n' \
+                   '  "issue_follows_today": integer,one follow for one issue, today \n' \
+                   '  "issue_follows_total": integer: description, one follow for one issue, all time\n' \
+                   '  "issues_followed_today": integer, issues followed today, today \n' \
+                   '  "issues_followed_total": integer, number of issues followed, all time \n' \
                    '  "issues_linked_today": integer,\n' \
                    '  "issues_linked_total": integer,\n' \
                    '  "new_visitors_today": integer,\n' \
                    '  "organization_public_positions": integer,\n' \
-                   '  "organizations_auto_followed_today": integer,\n' \
-                   '  "organizations_auto_followed_total": integer,\n' \
-                   '  "organizations_followed_today": integer,\n' \
-                   '  "organizations_followed_total": integer,\n' \
-                   '  "organizations_signed_in_total": integer,\n' \
-                   '  "organizations_with_linked_issues": integer,\n' \
-                   '  "organizations_with_new_positions_today": integer,\n' \
+                   '  "organizations_auto_followed_today": integer,auto_follow organizations, today \n' \
+                   '  "organizations_auto_followed_total": integer,auto_follow organizations, all time \n' \
+                   '  "organizations_followed_today": integer, voter follow organizations, today\n' \
+                   '  "organizations_followed_total": integer, voter follow organizations, all \n' \
+                   '  "organizations_signed_in_total": organizations signed in, all time integer,\n' \
+                   '  "organizations_with_linked_issues": integer, organizations linked to issues, all \n' \
+                   '  "organizations_with_new_positions_today": integer, today \n' \
                    '  "organizations_with_positions": integer,\n' \
-                   '  "visitors_today": integer,\n' \
-                   '  "visitors_total": integer,\n' \
-                   '  "voter_guide_entrants_today": integer,\n' \
-                   '  "voter_guides_viewed_today": integer,\n' \
-                   '  "voter_guides_viewed_total": integer,\n' \
-                   '  "welcome_page_entrants_today": integer,\n' \
+                   '  "visitors_today": integer, number of visitors, today \n' \
+                   '  "visitors_total": integer, number of visitors, all time \n' \
+                   '  "voter_guide_entrants_today": integer, first touch, voter guide \n' \
+                   '  "voter_guides_viewed_today": integer, number of voter guides viewed, today\n' \
+                   '  "voter_guides_viewed_total": integer, number of voter guides viewed, today\n' \
+                   '  "welcome_page_entrants_today": integer,first touch, welcome page\n' \
                    '}]'
 
     template_values = {
