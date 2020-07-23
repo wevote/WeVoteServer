@@ -1058,16 +1058,17 @@ def issue_partisan_analysis_view(request):
 
 
 def add_issue_followers(issue_list):
-    follow_models = FollowIssue.objects.all()
-    issue_to_follow_count = {issue.we_vote_id:0 for issue in issue_list}
+    follow_issue_list_manager = FollowIssueList()
 
-    for model in follow_models:
-        we_vote_id = model.issue_we_vote_id
-        if model.is_following():
-            try:
-                issue_to_follow_count[we_vote_id] += 1
-            except KeyError:
-                issue_to_follow_count[we_vote_id] = 1
+    modified_issue_list = []
+    for one_issue in issue_list:
+        try:
+            issue_followers_count = \
+                follow_issue_list_manager.fetch_follow_issue_count_by_issue_we_vote_id(one_issue.we_vote_id)
+            one_issue.issue_followers_count = issue_followers_count
+            one_issue.save()
+        except Exception as e:
+            pass
+        modified_issue_list.append(one_issue)
 
-    for issue in issue_list:
-        issue.issue_followers_count = issue_to_follow_count[issue.we_vote_id]
+    return modified_issue_list
