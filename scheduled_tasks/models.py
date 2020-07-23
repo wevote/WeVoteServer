@@ -23,8 +23,7 @@ class BackgroundTaskOutput(models.Model):
             return 'BackgroundTaskOutput'
 
 
-class BackgroundTaskOutputManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class BackgroundTaskOutputManager(models.Manager):
 
     def __str__(self):              # __unicode__ on Python 2
         return "Background Task Output Manager"

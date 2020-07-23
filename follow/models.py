@@ -472,6 +472,19 @@ class FollowIssueList(models.Model):
     A way to retrieve all of the follow_issue information
     """
 
+    def fetch_follow_issue_count_by_issue_we_vote_id(self, issue_we_vote_id):
+        follow_issue_list_length = 0
+        try:
+            follow_issue_list_query = FollowIssue.objects.using('readonly').all()
+            follow_issue_list_query = follow_issue_list_query.filter(issue_we_vote_id__iexact=issue_we_vote_id)
+            follow_issue_list_query = follow_issue_list_query.filter(following_status=FOLLOWING)
+            follow_issue_list_length = follow_issue_list_query.count()
+
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        return follow_issue_list_length
+
     def fetch_follow_issue_count_by_voter_we_vote_id(self, voter_we_vote_id, following_status=None):
         if following_status is None:
             following_status = FOLLOWING
