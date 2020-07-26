@@ -198,7 +198,7 @@
     </form>
   </div>
   <div>
-    <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+    <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
         <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
@@ -210,7 +210,7 @@
     </form>
   </div>
   <div>
-    <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+    <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
         <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
@@ -239,7 +239,7 @@
     </form>
   </div>
   <div>
-    <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+    <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
         <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
@@ -371,7 +371,7 @@
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="CANDIDATE">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -383,7 +383,7 @@
                                         value={{ one_batch_row.batch_row_action.id }}>Create</button>
                             </form>
                             {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="CANDIDATE">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -496,7 +496,7 @@
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="CONTEST_OFFICE">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -507,7 +507,7 @@
                                         value={{ one_batch_row.batch_row_action.id }}>Create</button>
                             </form>
                             {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="CONTEST_OFFICE">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -590,7 +590,7 @@
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="ELECTED_OFFICE">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -600,7 +600,7 @@
                                 <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>Create</button>
                             </form>
                             {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="ELECTED_OFFICE">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -668,7 +668,7 @@
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="MEASURE">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -679,7 +679,7 @@
                                         value={{ one_batch_row.batch_row_action.id }}>Create</button>
                             </form>
                             {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="MEASURE">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -778,7 +778,7 @@
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="ORGANIZATION">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -788,7 +788,7 @@
                                 <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>Create</button>
                             </form>
                             {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="ORGANIZATION">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -866,7 +866,7 @@
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="POLITICIAN">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -877,7 +877,7 @@
                                         value={{ one_batch_row.batch_row_action.id }}>Create</button>
                             </form>
                             {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="POLITICIAN">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -955,7 +955,7 @@
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="IMPORT_POLLING_LOCATION">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -966,7 +966,7 @@
                                         value={{ one_batch_row.batch_row_action.id }}>Create</button>
                             </form>
                             {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="IMPORT_POLLING_LOCATION">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -1041,7 +1041,7 @@
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="POSITION">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -1051,7 +1051,7 @@
                                 <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>Create</button>
                             </form>
                             {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="POSITION">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
@@ -1158,7 +1158,7 @@
                         {% endif %}">
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
-                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                            <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="kind_of_batch" value="IMPORT_BALLOT_ITEM">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">

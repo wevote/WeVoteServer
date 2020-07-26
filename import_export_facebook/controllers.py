@@ -282,7 +282,7 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
                 already_friend_results = friend_manager.retrieve_current_friend(viewer_voter_we_vote_id,
                                                                                 viewee_voter_we_vote_id)
                 if not already_friend_results['current_friend_found']:
-                    update_suggested_friend_results = friend_manager.create_or_update_suggested_friend(
+                    update_suggested_friend_results = friend_manager.update_or_create_suggested_friend(
                         viewer_voter_we_vote_id, viewee_voter_we_vote_id)
                     facebook_suggested_friend_count += 1
                     facebook_friend_suggestion_found = update_suggested_friend_results['success']

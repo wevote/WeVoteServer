@@ -1716,6 +1716,7 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                                  'linkedin.com',
                                  'nationbuilder.com',
                                  'secure.actblue.com',
+                                 'secure.winred.com',
                                  'tinyurl.com',
                                  'twitter.com',
                                  'youtube.com'):
@@ -1827,6 +1828,7 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                                  'linkedin.com',
                                  'nationbuilder.com',
                                  'secure.actblue.com',
+                                 'secure.winred.com',
                                  'tinyurl.com',
                                  'twitter.com',
                                  'youtube.com'):
@@ -1984,6 +1986,7 @@ def organization_endorsements_scanner(endorsement_list_light, text_to_search_low
                              'linkedin.com',
                              'nationbuilder.com',
                              'secure.actblue.com',
+                             'secure.winred.com',
                              'tinyurl.com',
                              'twitter.com',
                              'youtube.com'):

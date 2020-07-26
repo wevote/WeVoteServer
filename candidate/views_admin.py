@@ -69,12 +69,16 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+    candidate_list_manager = CandidateCampaignListManager()
+    google_civic_election_id_list = [google_civic_election_id]
+    results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+        google_civic_election_id_list=google_civic_election_id_list,
+        limit_to_this_state_code=state_code)
+    candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
     try:
         candidate_list = CandidateCampaign.objects.using('readonly').all()
-        if positive_value_exists(google_civic_election_id):
-            candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
-        if positive_value_exists(state_code):
-            candidate_list = candidate_list.filter(state_code__iexact=state_code)
+        candidate_list = candidate_list.filter(we_vote_id__in=candidate_we_vote_id_list)
         filters = []
         if positive_value_exists(candidate_search):
             new_filter = Q(candidate_name__icontains=candidate_search)

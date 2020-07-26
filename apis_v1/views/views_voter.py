@@ -1236,7 +1236,7 @@ def voter_plan_save_view(request):  # voterPlanSave
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    results = voter_manager.create_or_update_voter_plan(
+    results = voter_manager.update_or_create_voter_plan(
         voter_we_vote_id=voter_we_vote_id,
         google_civic_election_id=google_civic_election_id,
         show_to_public=show_to_public,
@@ -2203,7 +2203,7 @@ def voter_update_view(request):  # voterUpdate
         voter_updated = results['voter_updated']
     if external_voter_id_to_be_saved:
         organization_manager = OrganizationManager()
-        results = organization_manager.create_or_update_organization_membership_link_to_voter(
+        results = organization_manager.update_or_create_organization_membership_link_to_voter(
             membership_organization_we_vote_id, external_voter_id, voter_we_vote_id)
         status += results['status']
         success = results['success']

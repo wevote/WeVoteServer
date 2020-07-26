@@ -46,7 +46,7 @@ class WeVoteSetting(models.Model):
     # Only one of these fields is filled for each entry
     string_value = models.CharField(verbose_name='string value', max_length=255, null=True, blank=True)
     integer_value = models.BigIntegerField(verbose_name='integer value', null=True, blank=True)
-    boolean_value = models.BooleanField(verbose_name='boolean value', blank=True, default=False)
+    boolean_value = models.BooleanField(verbose_name='boolean value', blank=True, default=None, null=True)
 
 
 class WeVoteSettingsManager(models.Model):

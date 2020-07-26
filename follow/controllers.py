@@ -554,7 +554,7 @@ def organization_suggestion_tasks_for_api(voter_device_id,
                     twitter_link_to_organization = twitter_organization_retrieve_results['twitter_link_to_organization']
                     organization_we_vote_id = twitter_link_to_organization.organization_we_vote_id
                     twitter_suggested_organization_updated_results = follow_organization_manager.\
-                        create_or_update_suggested_organization_to_follow(voter_we_vote_id,
+                        update_or_create_suggested_organization_to_follow(voter_we_vote_id,
                                                                           organization_we_vote_id, from_twitter=True)
                     status += ' ' + twitter_suggested_organization_updated_results['status']
                     success = twitter_suggested_organization_updated_results['success']
@@ -581,7 +581,7 @@ def organization_suggestion_tasks_for_api(voter_device_id,
                 for follow_organization_entry in follow_organization_list_results:
                     organization_we_vote_id = follow_organization_entry.organization_we_vote_id
                     suggested_organization_what_friend_follow_list = follow_organization_manager. \
-                        create_or_update_suggested_organization_to_follow(voter_we_vote_id,
+                        update_or_create_suggested_organization_to_follow(voter_we_vote_id,
                                                                           organization_we_vote_id, from_twitter=False)
                     status += ' ' + suggested_organization_what_friend_follow_list['status']
                     success = suggested_organization_what_friend_follow_list['success']
@@ -625,7 +625,7 @@ def organization_suggestion_tasks_for_api(voter_device_id,
                                 'twitter_link_to_organization']
                             organization_we_vote_id = twitter_link_to_organization.organization_we_vote_id
                             twitter_suggested_organization_updated_results = follow_organization_manager. \
-                                create_or_update_suggested_organization_to_follow(voter_we_vote_id,
+                                update_or_create_suggested_organization_to_follow(voter_we_vote_id,
                                                                                   organization_we_vote_id, from_twitter=True)
                             status += ' ' + twitter_suggested_organization_updated_results['status']
                             success = twitter_suggested_organization_updated_results['success']

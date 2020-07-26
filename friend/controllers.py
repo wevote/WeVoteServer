@@ -926,7 +926,7 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
             friend_invitation_voter_link.recipient_voter_we_vote_id)
         if voter_results['voter_found']:
             recipient_organization_we_vote_id = voter_results['voter'].linked_organization_we_vote_id
-        friend_results = friend_manager.create_or_update_current_friend(
+        friend_results = friend_manager.update_or_create_current_friend(
             friend_invitation_voter_link.sender_voter_we_vote_id,
             friend_invitation_voter_link.recipient_voter_we_vote_id,
             voter.linked_organization_we_vote_id,
@@ -1057,7 +1057,7 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
             friend_invitation_email_link.sender_voter_we_vote_id)
         if voter_results['voter_found']:
             sender_organization_we_vote_id = voter_results['voter'].linked_organization_we_vote_id
-        friend_results = friend_manager.create_or_update_current_friend(
+        friend_results = friend_manager.update_or_create_current_friend(
             friend_invitation_email_link.sender_voter_we_vote_id,
             voter_we_vote_id_accepting_invitation,
             sender_organization_we_vote_id,
@@ -1193,7 +1193,7 @@ def friend_invitation_by_facebook_send_for_api(voter_device_id, recipients_faceb
     for friend_facebook_detail in friends_facebook_detail_array:
         recipient_facebook_id = friend_facebook_detail["recipient_facebook_id"]
         recipient_facebook_name = friend_facebook_detail["recipient_facebook_name"]
-        create_results = friend_manager.create_or_update_friend_invitation_facebook_link(
+        create_results = friend_manager.update_or_create_friend_invitation_facebook_link(
             facebook_request_id, sender_facebook_id, recipient_facebook_id, recipient_facebook_name)
         results = {
             'success': create_results['success'],
@@ -1327,7 +1327,7 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
         sender_voter_we_vote_id)
     if voter_results['voter_found']:
         sender_organization_we_vote_id = voter_results['voter'].linked_organization_we_vote_id
-    friend_results = friend_manager.create_or_update_current_friend(
+    friend_results = friend_manager.update_or_create_current_friend(
         sender_voter_we_vote_id,
         voter_we_vote_id_accepting_invitation,
         sender_organization_we_vote_id,
@@ -2565,7 +2565,7 @@ def store_internal_friend_invitation_with_two_voters(voter, invitation_message,
     sender_email_ownership_is_verified = voter.has_email_with_verified_ownership()
     invitation_secret_key = generate_random_string(12)
 
-    create_results = friend_manager.create_or_update_friend_invitation_voter_link(
+    create_results = friend_manager.update_or_create_friend_invitation_voter_link(
         sender_voter_we_vote_id, recipient_voter_we_vote_id, invitation_message, sender_email_ownership_is_verified,
         invitation_secret_key=invitation_secret_key)
     status += create_results['status']
@@ -2588,7 +2588,7 @@ def store_internal_friend_invitation_with_unknown_email(voter, invitation_messag
     sender_email_ownership_is_verified = voter.has_email_with_verified_ownership()
     invitation_secret_key = generate_random_string(12)
 
-    create_results = friend_manager.create_or_update_friend_invitation_email_link(
+    create_results = friend_manager.update_or_create_friend_invitation_email_link(
         sender_voter_we_vote_id,
         recipient_email_we_vote_id,
         recipient_voter_email, first_name, last_name, invitation_message, sender_email_ownership_is_verified,

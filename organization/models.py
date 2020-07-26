@@ -163,7 +163,7 @@ class OrganizationManager(models.Manager):
         }
         return results
 
-    def create_or_update_organization_membership_link_to_voter(
+    def update_or_create_organization_membership_link_to_voter(
             self, organization_we_vote_id, external_voter_id, voter_we_vote_id):
         success = False
         status = ""
