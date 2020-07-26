@@ -23,6 +23,44 @@ ORGANIZATION_LINK_TO_ISSUE_SYNC_URL = \
     get_environment_variable("ORGANIZATION_LINK_TO_ISSUE_SYNC_URL")  # organizationLinkToIssueSyncOut
 
 
+def update_issue_statistics():
+    follow_issue_list_manager = FollowIssueList()
+    organization_link_to_issue_list_manager = OrganizationLinkToIssueList()
+    issues_not_updated_count = 0
+    issues_updated_count = 0
+    status = ''
+
+    try:
+        issue_list_query = Issue.objects.all()
+        issue_list_query = issue_list_query.filter(hide_issue=False)
+        issue_list = list(issue_list_query)
+
+        for one_issue in issue_list:
+            try:
+                one_issue.issue_followers_count = \
+                    follow_issue_list_manager.fetch_follow_issue_count_by_issue_we_vote_id(one_issue.we_vote_id)
+                one_issue.linked_organization_count = \
+                    organization_link_to_issue_list_manager.fetch_linked_organization_count(one_issue.we_vote_id)
+                one_issue.save()
+                issues_updated_count += 1
+            except Exception as e:
+                issues_not_updated_count += 1
+                status += "FAILED: " + str(e) + " "
+    except Exception as e:
+        pass
+
+    status += "ISSUE_IMPORT_PROCESS_COMPLETE, " \
+              "updated: " + str(issues_updated_count) + \
+              ', not_updated: ' + str(issues_not_updated_count) + ' '
+    results = {
+        'success':                  issues_updated_count > 0,
+        'status':                   status,
+        'issues_updated_count':     issues_updated_count,
+        'issues_not_updated_count': issues_not_updated_count,
+    }
+    return results
+
+
 def issues_import_from_master_server(request):
     """
     Get the json data, and either create new entries or update existing

@@ -3237,7 +3237,7 @@ def import_elected_office_data_from_batch_row_actions(batch_header_id, batch_row
     return results
 
 
-def create_or_update_batch_header_mapping(batch_header_id, kind_of_batch, incoming_header_map_values):
+def update_or_create_batch_header_mapping(batch_header_id, kind_of_batch, incoming_header_map_values):
     success = False
     status = ""
 
@@ -4749,7 +4749,7 @@ def import_position_data_from_batch_row_actions(
     return results
 
 
-def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
+def import_update_or_create_elected_office_entry(batch_header_id, batch_row_id):
     """
     Either create or update ElectedOffice table entry with batch_row elected_office details 
     

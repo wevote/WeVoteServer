@@ -116,7 +116,7 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def create_or_update_voter_plan(
+    def update_or_create_voter_plan(
             self,
             voter_we_vote_id='',
             google_civic_election_id=0,

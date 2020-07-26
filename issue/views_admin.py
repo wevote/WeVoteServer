@@ -4,7 +4,6 @@
 
 from .controllers import *
 from .models import ALPHABETICAL_ASCENDING, Issue, OrganizationLinkToIssue
-from follow.models import FollowIssue
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from django.db.models import Q
@@ -257,11 +256,14 @@ def issue_list_view(request):
 
         if issue_list_count:
             altered_issue_list = []
+            follow_issue_list_manager = FollowIssueList()
             organization_link_to_issue_list_manager = OrganizationLinkToIssueList()
             # Update the linked_organization_count
             for one_issue in issue_list:
                 one_issue.linked_organization_count = \
                     organization_link_to_issue_list_manager.fetch_linked_organization_count(one_issue.we_vote_id)
+                one_issue.issue_followers_count = \
+                    follow_issue_list_manager.fetch_follow_issue_count_by_issue_we_vote_id(one_issue.we_vote_id)
                 try:
                     one_issue.save()
                 except Exception as e:
@@ -282,9 +284,6 @@ def issue_list_view(request):
 
     # Order based on number of organizations per issue
     altered_issue_list.sort(key=lambda x: x.linked_organization_list_count, reverse=True)
-
-    # include issue_followers in the issue list
-    add_issue_followers(altered_issue_list)
 
     status_print_list = ""
     status_print_list += "issue_list_count: " + \
@@ -1055,20 +1054,3 @@ def issue_partisan_analysis_view(request):
         'total_endorsement_count':      total_endorsement_count,
     }
     return render(request, 'issue/issue_partisan_analysis.html', template_values)
-
-
-def add_issue_followers(issue_list):
-    follow_issue_list_manager = FollowIssueList()
-
-    modified_issue_list = []
-    for one_issue in issue_list:
-        try:
-            issue_followers_count = \
-                follow_issue_list_manager.fetch_follow_issue_count_by_issue_we_vote_id(one_issue.we_vote_id)
-            one_issue.issue_followers_count = issue_followers_count
-            one_issue.save()
-        except Exception as e:
-            pass
-        modified_issue_list.append(one_issue)
-
-    return modified_issue_list

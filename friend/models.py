@@ -167,7 +167,7 @@ class FriendManager(models.Model):
     def __unicode__(self):
         return "FriendManager"
 
-    def create_or_update_friend_invitation_email_link(self, sender_voter_we_vote_id, recipient_email_we_vote_id='',
+    def update_or_create_friend_invitation_email_link(self, sender_voter_we_vote_id, recipient_email_we_vote_id='',
                                                       recipient_voter_email='',
                                                       recipient_first_name='', recipient_last_name='',
                                                       invitation_message='',
@@ -216,7 +216,7 @@ class FriendManager(models.Model):
         }
         return results
 
-    def create_or_update_friend_invitation_voter_link(self, sender_voter_we_vote_id, recipient_voter_we_vote_id='',
+    def update_or_create_friend_invitation_voter_link(self, sender_voter_we_vote_id, recipient_voter_we_vote_id='',
                                                       invitation_message='', sender_email_ownership_is_verified=False,
                                                       invitation_status=NO_RESPONSE, invitation_secret_key=''):
         status = ""
@@ -259,7 +259,7 @@ class FriendManager(models.Model):
         }
         return results
 
-    def create_or_update_friend_invitation_facebook_link(self, facebook_request_id, sender_facebook_id,
+    def update_or_create_friend_invitation_facebook_link(self, facebook_request_id, sender_facebook_id,
                                                          recipient_facebook_id, recipient_facebook_name='',):
         status = ""
         defaults = {
@@ -420,7 +420,7 @@ class FriendManager(models.Model):
         }
         return results
 
-    def create_or_update_current_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id,
+    def update_or_create_current_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id,
                                         sender_organization_we_vote_id=None, recipient_organization_we_vote_id=None):
         status = ""
         if not positive_value_exists(sender_voter_we_vote_id) or not positive_value_exists(recipient_voter_we_vote_id):
@@ -495,7 +495,7 @@ class FriendManager(models.Model):
         }
         return results
 
-    def create_or_update_suggested_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id):
+    def update_or_create_suggested_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id):
         status = ""
         if not positive_value_exists(sender_voter_we_vote_id) or not positive_value_exists(recipient_voter_we_vote_id):
             suggested_friend = SuggestedFriend()
@@ -591,7 +591,7 @@ class FriendManager(models.Model):
             if kind_of_invite_response == ACCEPT_INVITATION:
                 # Create a CurrentFriend entry
                 friend_manager = FriendManager()
-                results = friend_manager.create_or_update_current_friend(
+                results = friend_manager.update_or_create_current_friend(
                     sender_voter.we_vote_id,
                     recipient_voter.we_vote_id,
                     sender_voter.linked_organization_we_vote_id,
@@ -2029,7 +2029,7 @@ class FriendManager(models.Model):
                         already_friend_results = self.retrieve_current_friend(first_voter_we_vote_id,
                                                                               second_voter_we_vote_id)
                         if not already_friend_results['current_friend_found']:
-                            suggested_friend_results = self.create_or_update_suggested_friend(first_voter_we_vote_id,
+                            suggested_friend_results = self.update_or_create_suggested_friend(first_voter_we_vote_id,
                                                                                               second_voter_we_vote_id)
                             if suggested_friend_results['suggested_friend_created'] or \
                                     suggested_friend_results['suggested_friend_found']:

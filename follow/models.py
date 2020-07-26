@@ -942,7 +942,7 @@ class FollowOrganizationManager(models.Model):
         return self.retrieve_follow_organization(
             0, voter_id, organization_id, organization_we_vote_id, read_only=read_only)
 
-    def create_or_update_suggested_organization_to_follow(self, viewer_voter_we_vote_id, organization_we_vote_id,
+    def update_or_create_suggested_organization_to_follow(self, viewer_voter_we_vote_id, organization_we_vote_id,
                                                           from_twitter=False):
         """
         Create or update the SuggestedOrganizationToFollow table with suggested organizations from twitter ids i follow

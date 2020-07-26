@@ -82,6 +82,9 @@
     <br />
     <select id="kind_of_processes_to_show_id" name="kind_of_processes_to_show">
         <option value="">-- Show All --</option>
+        <option value="ACTIVITY_NOTICE_PROCESS"
+        {% if kind_of_processes_to_show == "ACTIVITY_NOTICE_PROCESS" %} selected="selected"{% endif %}>
+            Activity Notice Processing</option>
         <option value="API_REFRESH_REQUEST"
         {% if kind_of_processes_to_show == "API_REFRESH_REQUEST" %} selected="selected"{% endif %}>
             API Cache Refresh</option>
