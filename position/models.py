@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 # Diagrams here: https://docs.google.com/drawings/d/1DsPnl97GKe9f14h41RPeZDssDUztRETGkXGaolXCeyo/edit
 
+from activity.controllers import update_or_create_activity_notice_seed_for_voter_position
 from analytics.models import ACTION_POSITION_TAKEN, AnalyticsManager
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching, \
@@ -5924,6 +5925,15 @@ class PositionManager(models.Model):
         success = toggle_results['success']
         voter_position_on_stage = toggle_results['position']
         position_we_vote_id = toggle_results['position_we_vote_id']
+
+        if positive_value_exists(success):
+            activity_results = update_or_create_activity_notice_seed_for_voter_position(
+                position_we_vote_id=voter_position_on_stage.we_vote_id,
+                speaker_name=voter_position_on_stage.speaker_display_name,
+                speaker_organization_we_vote_id=voter_position_on_stage.organization_we_vote_id,
+                speaker_voter_we_vote_id=voter_position_on_stage.voter_we_vote_id)
+            status += activity_results['status']
+
         results = {
             'status':               status,
             'success':              success,
@@ -6208,10 +6218,10 @@ class PositionManager(models.Model):
                 position_list_manager.update_position_network_scores_for_one_position(voter_position_on_stage)
                 position_we_vote_id = voter_position_on_stage.we_vote_id
                 voter_position_on_stage_found = True
-                status += 'NEW_STANCE_SAVED'
+                status += 'NEW_STANCE_SAVED '
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
-                status += 'NEW_STANCE_COULD_NOT_BE_SAVED'
+                status += 'NEW_STANCE_COULD_NOT_BE_SAVED '
 
         if voter_position_on_stage_found:
             # If here we need to make sure a voter guide exists
@@ -6325,9 +6335,31 @@ class PositionManager(models.Model):
         voter_position_on_stage = results['position']
         candidate_campaign_id = 0
 
-        return position_manager.toggle_voter_position(voter_id, voter_position_found, voter_position_on_stage,
-                                                      stance, candidate_campaign_id, contest_measure_id,
-                                                      is_public_position, user_agent_string, user_agent_object)
+        toggle_results = position_manager.toggle_voter_position(
+            voter_id, voter_position_found, voter_position_on_stage,
+            stance, candidate_campaign_id, contest_measure_id,
+            is_public_position, user_agent_string, user_agent_object)
+
+        status += toggle_results['status']
+        success = toggle_results['success']
+        voter_position_on_stage = toggle_results['position']
+        position_we_vote_id = toggle_results['position_we_vote_id']
+
+        if positive_value_exists(success):
+            activity_results = update_or_create_activity_notice_seed_for_voter_position(
+                position_we_vote_id=voter_position_on_stage.we_vote_id,
+                speaker_name=voter_position_on_stage.speaker_display_name,
+                speaker_organization_we_vote_id=voter_position_on_stage.organization_we_vote_id,
+                speaker_voter_we_vote_id=voter_position_on_stage.voter_we_vote_id)
+            status += activity_results['status']
+
+        results = {
+            'status':               status,
+            'success':              success,
+            'position_we_vote_id':  position_we_vote_id,
+            'position':             voter_position_on_stage,
+        }
+        return results
 
     def update_or_create_position_comment(self, position_we_vote_id, voter_id, voter_we_vote_id,
                                           office_we_vote_id, candidate_we_vote_id, measure_we_vote_id,

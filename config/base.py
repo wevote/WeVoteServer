@@ -94,6 +94,7 @@ INSTALLED_APPS = (
     'social_django',
 
     # project specific
+    'activity',
     'admin_tools',
     'analytics',
     'api_internal_cache',

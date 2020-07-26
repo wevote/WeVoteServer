@@ -428,6 +428,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS = {
 }
 
 # BatchProcess constants
+ACTIVITY_NOTICE_PROCESS = "ACTIVITY_NOTICE_PROCESS"
 API_REFRESH_REQUEST = "API_REFRESH_REQUEST"
 AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID = "AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID"
 AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT = "AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT"
@@ -442,6 +443,7 @@ REFRESH_BALLOT_ITEMS_FROM_VOTERS = "REFRESH_BALLOT_ITEMS_FROM_VOTERS"
 SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE = "SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE"
 
 KIND_OF_PROCESS_CHOICES = (
+    (ACTIVITY_NOTICE_PROCESS,  'Create, update, or schedule to send Activity Notices'),
     (API_REFRESH_REQUEST,  'Make sure we have cached a recent return from a specific API'),
     (RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,  'Retrieve Ballot Items from Map Points'),
     (REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, 'Refresh Ballot Items from BallotReturned Map Points'),
@@ -4704,18 +4706,21 @@ class BatchProcessManager(models.Model):
         batch_process = None
 
         if kind_of_process not in \
-                [API_REFRESH_REQUEST,
-                 AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID,
-                 AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
-                 CALCULATE_SITEWIDE_VOTER_METRICS,
-                 CALCULATE_SITEWIDE_DAILY_METRICS,
-                 CALCULATE_SITEWIDE_ELECTION_METRICS,
-                 CALCULATE_ORGANIZATION_DAILY_METRICS,
-                 CALCULATE_ORGANIZATION_ELECTION_METRICS,
-                 REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
-                 REFRESH_BALLOT_ITEMS_FROM_VOTERS,
-                 RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
-                 SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
+                [
+                    ACTIVITY_NOTICE_PROCESS,
+                    API_REFRESH_REQUEST,
+                    AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID,
+                    AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
+                    CALCULATE_SITEWIDE_VOTER_METRICS,
+                    CALCULATE_SITEWIDE_DAILY_METRICS,
+                    CALCULATE_SITEWIDE_ELECTION_METRICS,
+                    CALCULATE_ORGANIZATION_DAILY_METRICS,
+                    CALCULATE_ORGANIZATION_ELECTION_METRICS,
+                    REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
+                    REFRESH_BALLOT_ITEMS_FROM_VOTERS,
+                    RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
+                    SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE
+                ]:
             status += "KIND_OF_PROCESS_NOT_FOUND: " + str(kind_of_process) + " "
             success = False
             results = {
@@ -4907,6 +4912,23 @@ class BatchProcessManager(models.Model):
             status += 'FAILED_COUNT_IS_BATCH_PROCESS_CURRENTLY_SCHEDULED ' + str(e) + ' '
             return True
 
+    def is_activity_notice_process_currently_running(self):
+        status = ""
+        analytics_kind_of_process_list = [ACTIVITY_NOTICE_PROCESS]
+        try:
+            batch_process_queryset = BatchProcess.objects.all()
+            batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
+            batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+            batch_process_queryset = batch_process_queryset.filter(date_checked_out__isnull=False)
+            batch_process_queryset = batch_process_queryset.filter(
+                kind_of_process__in=analytics_kind_of_process_list)
+
+            batch_process_count = batch_process_queryset.count()
+            return positive_value_exists(batch_process_count)
+        except Exception as e:
+            status += 'FAILED_COUNT_CHECKED_OUT_BATCH_PROCESSES-ACTIVITY_NOTICE ' + str(e) + ' '
+            return True
+
     def is_analytics_process_currently_running(self):
         status = ""
         analytics_kind_of_process_list = [
@@ -4969,11 +4991,15 @@ class BatchProcessManager(models.Model):
             batch_process_list = list(batch_process_queryset)
 
             # Cycle through all processes retrieved and make sure they aren't being worked on by other processes
-            checked_out_expiration_time = 30 * 60  # 30 minutes * 60 seconds
             for batch_process in batch_process_list:
                 if batch_process.date_checked_out is None:
                     filtered_batch_process_list.append(batch_process)
                 else:
+                    if batch_process.kind_of_process == ACTIVITY_NOTICE_PROCESS:
+                        # See also longest_activity_notice_processing_run_time_allowed
+                        checked_out_expiration_time = 270  # 4.5 minutes * 60 seconds
+                    else:
+                        checked_out_expiration_time = 30 * 60  # 30 minutes * 60 seconds
                     date_checked_out_time_out = \
                         batch_process.date_checked_out + timedelta(seconds=checked_out_expiration_time)
                     status += "CHECKED_OUT_PROCESS_FOUND "
