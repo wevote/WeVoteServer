@@ -13,7 +13,7 @@ from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager,
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS, \
     IMPORT_CREATE, IMPORT_DELETE, IMPORT_ALREADY_DELETED, IMPORT_ADD_TO_EXISTING, IMPORT_POLLING_LOCATION, IMPORT_VOTER
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
-    create_or_update_batch_header_mapping, export_voter_list_with_emails, import_data_from_batch_row_actions
+    update_or_create_batch_header_mapping, export_voter_list_with_emails, import_data_from_batch_row_actions
 from .controllers_batch_process import batch_process_next_steps
 from .controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
 from admin_tools.views import redirect_to_sign_in_page
@@ -1096,7 +1096,7 @@ def batch_header_mapping_process_view(request):
         'batch_header_map_020': request.GET.get('batch_header_map_020', ''),
     }
 
-    batch_header_mapping_results = create_or_update_batch_header_mapping(
+    batch_header_mapping_results = update_or_create_batch_header_mapping(
         batch_header_id, kind_of_batch, incoming_header_map_values)
 
     try:
@@ -1192,7 +1192,7 @@ def batch_action_list_assign_election_to_rows_process_view(request):
 
 
 @login_required
-def batch_action_list_create_or_update_process_view(request):
+def batch_action_list_update_or_create_process_view(request):
     """
     Use batch_row_action entries and create live data
     :param request:
@@ -1600,16 +1600,19 @@ def batch_process_list_view(request):
             batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
             batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
         if positive_value_exists(kind_of_processes_to_show):
-            if kind_of_processes_to_show == "API_REFRESH_REQUEST":
+            if kind_of_processes_to_show == "ACTIVITY_NOTICE_PROCESS":
+                api_refresh_processes = ['ACTIVITY_NOTICE_PROCESS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=api_refresh_processes)
+            elif kind_of_processes_to_show == "API_REFRESH_REQUEST":
                 api_refresh_processes = ['API_REFRESH_REQUEST']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=api_refresh_processes)
-            if kind_of_processes_to_show == "BALLOT_ITEMS":
+            elif kind_of_processes_to_show == "BALLOT_ITEMS":
                 ballot_item_processes = [
                     'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS',
                     'REFRESH_BALLOT_ITEMS_FROM_VOTERS',
                     'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
-            if kind_of_processes_to_show == "SEARCH_TWITTER":
+            elif kind_of_processes_to_show == "SEARCH_TWITTER":
                 search_twitter_processes = ['SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=search_twitter_processes)
         batch_process_queryset = batch_process_queryset.order_by("-id")

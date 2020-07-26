@@ -1010,7 +1010,7 @@ class AnalyticsManager(models.Model):
             analytics_date_as_integer_last_processed = convert_to_int(results['setting_value'])
 
         if not positive_value_exists(analytics_date_as_integer_last_processed):
-            status += "analytics_date_as_integer_last_processed-MISSING"
+            status += "analytics_date_as_integer_last_processed-MISSING "
             success = False
             results = {
                 'success': success,
