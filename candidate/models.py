@@ -1480,7 +1480,7 @@ class CandidateCampaign(models.Model):
         verbose_name='url of wikipedia logo', blank=True, null=True)
     linkedin_url = models.CharField(
         verbose_name="linkedin url of candidate", max_length=255, null=True, blank=True)
-    linkedin_photo_url = models.URLField(verbose_name='url of linkedin logo', blank=True, null=True)
+    linkedin_photo_url = models.TextField(verbose_name='url of linkedin logo', blank=True, null=True)
 
     # other_source_url is the location (ex/ http://mywebsite.com/candidate1.html) where we find
     # the other_source_photo_url OR the original url of the photo before we store it locally
@@ -1494,13 +1494,13 @@ class CandidateCampaign(models.Model):
                                                   max_length=255, null=True, blank=True)
     ballotpedia_candidate_summary = models.TextField(verbose_name="candidate summary from ballotpedia",
                                                      null=True, blank=True, default=None)
-    ballotpedia_candidate_url = models.URLField(
-        verbose_name='url of candidate on ballotpedia', max_length=255, blank=True, null=True)
+    ballotpedia_candidate_url = models.TextField(
+        verbose_name='url of candidate on ballotpedia', blank=True, null=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
     # The id of the image for retrieval from Ballotpedia API
     ballotpedia_image_id = models.PositiveIntegerField(verbose_name="ballotpedia image id", null=True, blank=True)
-    ballotpedia_profile_image_url_https = models.URLField(
-        verbose_name='locally cached candidate profile image from ballotpedia', max_length=255, blank=True, null=True)
+    ballotpedia_profile_image_url_https = models.TextField(
+        verbose_name='locally cached candidate profile image from ballotpedia', blank=True, null=True)
     # Equivalent to Elected Office
     ballotpedia_office_id = models.PositiveIntegerField(
         verbose_name="ballotpedia elected office integer id", null=True, blank=True)

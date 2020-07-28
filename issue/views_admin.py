@@ -18,7 +18,7 @@ from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception
 from image.controllers import cache_issue_image_master, cache_resized_image_locally, delete_cached_images_for_issue
 from image.models import WeVoteImageManager
-from organization.models import OrganizationManager, OrganizationListManager
+from organization.models import INDIVIDUAL, OrganizationManager, OrganizationListManager
 from voter.models import fetch_voter_from_request, voter_has_authority
 from voter_guide.models import VoterGuideListManager
 import wevote_functions.admin
@@ -830,7 +830,9 @@ def issue_partisan_analysis_view(request):
     organization_manager = OrganizationManager()
     organization_issues_lists = {}
     organization_we_vote_id_has_at_least_one_issue = []
-    results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id_list)
+    exclude_voter_guide_owner_type_list = [INDIVIDUAL]
+    results = voter_guide_list_manager.retrieve_voter_guides_for_election(
+        google_civic_election_id_list, exclude_voter_guide_owner_type_list)
     voter_guide_list = []
     if results['voter_guide_list_found']:
         voter_guide_list = results['voter_guide_list']

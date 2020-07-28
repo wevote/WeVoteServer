@@ -2093,20 +2093,21 @@ class Voter(AbstractBaseUser):
     facebook_email = models.EmailField(verbose_name='facebook email address', max_length=255, unique=False,
                                        null=True, blank=True)
     fb_username = models.CharField(max_length=50, validators=[alphanumeric], null=True)
-    facebook_profile_image_url_https = models.URLField(verbose_name='url of image from facebook', blank=True, null=True)
+    facebook_profile_image_url_https = models.TextField(
+        verbose_name='url of image from facebook', blank=True, null=True)
 
     # Twitter session information
     twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, blank=True)
     twitter_name = models.CharField(verbose_name="display name from twitter", max_length=255, null=True, blank=True)
-    twitter_screen_name = models.CharField(verbose_name='twitter screen name / handle',
-                                           max_length=255, null=True, unique=False)
-    twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
-    we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
-                                                             blank=True, null=True)
-    we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
-                                                              blank=True, null=True)
-    we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
-                                                            blank=True, null=True)
+    twitter_screen_name = models.CharField(
+        verbose_name='twitter screen name / handle', max_length=255, null=True, unique=False)
+    twitter_profile_image_url_https = models.TextField(verbose_name='url of logo from twitter', blank=True, null=True)
+    we_vote_hosted_profile_image_url_large = models.TextField(
+        verbose_name='we vote hosted large image url', blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(
+        verbose_name='we vote hosted medium image url', blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(
+        verbose_name='we vote hosted tiny image url', blank=True, null=True)
 
     twitter_request_token = models.TextField(verbose_name='twitter request token', null=True, blank=True)
     twitter_request_secret = models.TextField(verbose_name='twitter request secret', null=True, blank=True)
