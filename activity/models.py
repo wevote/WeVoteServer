@@ -42,8 +42,8 @@ class ActivityNotice(models.Model):
     send_to_sms = models.BooleanField(default=False)
     scheduled_to_sms = models.BooleanField(default=False)
     sent_to_sms = models.BooleanField(default=False)
-    speaker_profile_image_url_medium = models.URLField(blank=True, null=True)
-    speaker_profile_image_url_tiny = models.URLField(blank=True, null=True)
+    speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
+    speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
 
 
 class ActivityNoticeSeed(models.Model):
@@ -63,8 +63,8 @@ class ActivityNoticeSeed(models.Model):
     speaker_name = models.CharField(max_length=255, default=None, null=True)
     speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
     speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-    speaker_profile_image_url_medium = models.URLField(blank=True, null=True)
-    speaker_profile_image_url_tiny = models.URLField(blank=True, null=True)
+    speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
+    speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
 
 
 class ActivityTidbit(models.Model):
@@ -82,8 +82,8 @@ class ActivityTidbit(models.Model):
     speaker_twitter_followers_count = models.PositiveIntegerField(default=None, null=True)
     speaker_twitter_handle = models.CharField(max_length=255, default=None, null=True)
     speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-    speaker_profile_image_url_medium = models.URLField(blank=True, null=True)
-    speaker_profile_image_url_tiny = models.URLField(blank=True, null=True)
+    speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
+    speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
 
 
 class ActivityManager(models.Manager):
