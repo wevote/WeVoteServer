@@ -1051,13 +1051,13 @@ class VoterGuide(models.Model):
     display_name = models.CharField(
         verbose_name="display title for this voter guide", max_length=255, null=True, blank=True, unique=False)
 
-    image_url = models.URLField(verbose_name='image url of logo/photo associated with voter guide',
-                                blank=True, null=True)
-    we_vote_hosted_profile_image_url_large = models.URLField(
+    image_url = models.TextField(
+        verbose_name='image url of logo/photo associated with voter guide', blank=True, null=True)
+    we_vote_hosted_profile_image_url_large = models.TextField(
         verbose_name='large version image url of logo/photo associated with voter guide', blank=True, null=True)
-    we_vote_hosted_profile_image_url_medium = models.URLField(
+    we_vote_hosted_profile_image_url_medium = models.TextField(
         verbose_name='medium version image url of logo/photo associated with voter guide', blank=True, null=True)
-    we_vote_hosted_profile_image_url_tiny = models.URLField(
+    we_vote_hosted_profile_image_url_tiny = models.TextField(
         verbose_name='tiny version image url of logo/photo associated with voter guide', blank=True, null=True)
 
     # Mapped directly from organization.organization_type
@@ -1188,7 +1188,8 @@ class VoterGuideListManager(models.Model):
     # NOTE: This is extremely simple way to retrieve voter guides, used by admin tools. Being replaced by:
     #  retrieve_voter_guides_by_ballot_item(ballot_item_we_vote_id) AND
     #  retrieve_voter_guides_by_election(google_civic_election_id)
-    def retrieve_voter_guides_for_election(self, google_civic_election_id_list):
+    def retrieve_voter_guides_for_election(
+            self, google_civic_election_id_list, exclude_voter_guide_owner_type_list=[]):
         voter_guide_list = []
         voter_guide_list_found = False
 
@@ -1196,9 +1197,12 @@ class VoterGuideListManager(models.Model):
             # voter_guide_query = VoterGuide.objects.order_by('-twitter_followers_count')
             voter_guide_query = VoterGuide.objects.order_by('display_name')
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
-            voter_guide_list = voter_guide_query.filter(
+            voter_guide_query = voter_guide_query.filter(
                 google_civic_election_id__in=google_civic_election_id_list)
-
+            if len(exclude_voter_guide_owner_type_list):
+                voter_guide_query = \
+                    voter_guide_query.exclude(voter_guide_owner_type__in=exclude_voter_guide_owner_type_list)
+            voter_guide_list = list(voter_guide_query)
             if len(voter_guide_list):
                 voter_guide_list_found = True
                 status = 'VOTER_GUIDE_FOUND'
@@ -2751,11 +2755,11 @@ class VoterGuidePossibility(models.Model):
     # We are relying on built-in Python id field
 
     # Where a volunteer thinks there is a voter guide
-    voter_guide_possibility_url = models.URLField(
-        verbose_name='url of possible voter guide', max_length=255, blank=True, null=True)
+    voter_guide_possibility_url = models.TextField(
+        verbose_name='url of possible voter guide', blank=True, null=True)
 
-    voter_guide_possibility_pdf_url = models.URLField(
-        verbose_name='url of possible voter guide which is a PDF', max_length=255, blank=True, null=True)
+    voter_guide_possibility_pdf_url = models.TextField(
+        verbose_name='url of possible voter guide which is a PDF', blank=True, null=True)
 
     # The unique id of the organization making the endorsements, if/when we know it
     organization_we_vote_id = models.CharField(
@@ -2878,8 +2882,8 @@ class VoterGuidePossibilityPosition(models.Model):
     google_civic_election_id = models.PositiveIntegerField(null=True)
     position_stance = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
     # A link to any location with more information about this position
-    more_info_url = models.URLField(
-        verbose_name='url with more info about this position', max_length=255, blank=True, null=True)
+    more_info_url = models.TextField(
+        verbose_name='url with more info about this position', blank=True, null=True)
     # We don't want to work with this possibility any more
     possibility_should_be_ignored = models.BooleanField(default=False,
                                                         verbose_name='Soft delete. Stop analyzing this entry.')

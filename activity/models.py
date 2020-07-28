@@ -16,6 +16,7 @@ NOTICE_FRIEND_ENDORSEMENTS_SEED = 'NOTICE_FRIEND_ENDORSEMENTS_SEED'
 # Kind of Notice
 NOTICE_FRIEND_ENDORSEMENTS = 'NOTICE_FRIEND_ENDORSEMENTS'
 
+
 class ActivityNotice(models.Model):
     """
     This is a notice for the notification drop-down menu, for one person
@@ -41,6 +42,8 @@ class ActivityNotice(models.Model):
     send_to_sms = models.BooleanField(default=False)
     scheduled_to_sms = models.BooleanField(default=False)
     sent_to_sms = models.BooleanField(default=False)
+    speaker_profile_image_url_medium = models.URLField(blank=True, null=True)
+    speaker_profile_image_url_tiny = models.URLField(blank=True, null=True)
 
 
 class ActivityNoticeSeed(models.Model):
@@ -60,6 +63,8 @@ class ActivityNoticeSeed(models.Model):
     speaker_name = models.CharField(max_length=255, default=None, null=True)
     speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
     speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    speaker_profile_image_url_medium = models.URLField(blank=True, null=True)
+    speaker_profile_image_url_tiny = models.URLField(blank=True, null=True)
 
 
 class ActivityTidbit(models.Model):
@@ -77,6 +82,8 @@ class ActivityTidbit(models.Model):
     speaker_twitter_followers_count = models.PositiveIntegerField(default=None, null=True)
     speaker_twitter_handle = models.CharField(max_length=255, default=None, null=True)
     speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    speaker_profile_image_url_medium = models.URLField(blank=True, null=True)
+    speaker_profile_image_url_tiny = models.URLField(blank=True, null=True)
 
 
 class ActivityManager(models.Manager):
@@ -272,7 +279,7 @@ class ActivityManager(models.Manager):
                 activity_notice_found = False
                 success = False
                 status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_VARIABLES_MISSING "
-        except ActivityNoticeSeed.DoesNotExist:
+        except ActivityNotice.DoesNotExist:
             exception_does_not_exist = True
             success = True
             status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_NOT_FOUND "

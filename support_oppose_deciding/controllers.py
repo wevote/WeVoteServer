@@ -1194,7 +1194,7 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         json_data = {
-            'status': 'VALID_VOTER_DEVICE_ID_MISSING',
+            'status': 'VALID_VOTER_DEVICE_ID_MISSING ',
             'success': False,
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
@@ -1205,7 +1205,7 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         json_data = {
-            'status': "VALID_VOTER_ID_MISSING",
+            'status': "VALID_VOTER_ID_MISSING ",
             'success': False,
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
@@ -1243,9 +1243,9 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
         elif positive_value_exists(measure_we_vote_id):
             measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
 
-        results = position_manager.toggle_on_voter_support_for_contest_measure(voter_id, measure_id,
-                                                                               user_agent_string, user_agent_object)
-        status += "SUPPORTING_MEASURE " + results['status'] + " "
+        results = position_manager.toggle_on_voter_support_for_contest_measure(
+            voter_id, measure_id, user_agent_string, user_agent_object)
+        status += "SUPPORTING_MEASURE: " + results['status'] + " "
         success = results['success']
 
         json_data = {
@@ -1257,7 +1257,7 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
-        status = 'UNABLE_TO_SAVE-CANDIDATE_ID_AND_MEASURE_ID_MISSING'
+        status += 'UNABLE_TO_SAVE-CANDIDATE_ID_AND_MEASURE_ID_MISSING '
         success = False
 
     json_data = {
