@@ -90,7 +90,9 @@ def create_activity_notices_from_seed(activity_notice_seed):
                     recipient_voter_we_vote_id=friend_voter.we_vote_id,
                     speaker_name=activity_notice_seed.speaker_name,
                     speaker_organization_we_vote_id=activity_notice_seed.speaker_organization_we_vote_id,
-                    speaker_voter_we_vote_id=activity_notice_seed.speaker_voter_we_vote_id)
+                    speaker_voter_we_vote_id=activity_notice_seed.speaker_voter_we_vote_id,
+                    speaker_profile_image_url_medium=activity_notice_seed.speaker_profile_image_url_medium,
+                    speaker_profile_image_url_tiny=activity_notice_seed.speaker_profile_image_url_tiny)
                 if activity_results['success']:
                     activity_notice_count += 1
                 else:
@@ -120,7 +122,9 @@ def update_or_create_activity_notice_for_friend(
         recipient_voter_we_vote_id='',
         speaker_name='',
         speaker_organization_we_vote_id='',
-        speaker_voter_we_vote_id=''):
+        speaker_voter_we_vote_id='',
+        speaker_profile_image_url_medium='',
+        speaker_profile_image_url_tiny=''):
     status = ''
     success = True
     activity_manager = ActivityManager()
@@ -146,7 +150,9 @@ def update_or_create_activity_notice_for_friend(
             recipient_voter_we_vote_id=recipient_voter_we_vote_id,
             speaker_name=speaker_name,
             speaker_organization_we_vote_id=speaker_organization_we_vote_id,
-            speaker_voter_we_vote_id=speaker_voter_we_vote_id)
+            speaker_voter_we_vote_id=speaker_voter_we_vote_id,
+            speaker_profile_image_url_medium=speaker_profile_image_url_medium,
+            speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         status += create_results['status']
     else:
         status += results['status']
@@ -162,7 +168,9 @@ def update_or_create_activity_notice_seed_for_voter_position(
         position_we_vote_id='',
         speaker_name='',
         speaker_organization_we_vote_id='',
-        speaker_voter_we_vote_id=''):
+        speaker_voter_we_vote_id='',
+        speaker_profile_image_url_medium='',
+        speaker_profile_image_url_tiny=''):
     status = ''
     success = True
     activity_manager = ActivityManager()
@@ -183,7 +191,9 @@ def update_or_create_activity_notice_seed_for_voter_position(
             position_we_vote_id=position_we_vote_id,
             speaker_name=speaker_name,
             speaker_organization_we_vote_id=speaker_organization_we_vote_id,
-            speaker_voter_we_vote_id=speaker_voter_we_vote_id)
+            speaker_voter_we_vote_id=speaker_voter_we_vote_id,
+            speaker_profile_image_url_medium=speaker_profile_image_url_medium,
+            speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         status += create_results['status']
     else:
         status += results['status']

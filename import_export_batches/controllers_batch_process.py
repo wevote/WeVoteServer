@@ -250,7 +250,7 @@ def batch_process_next_steps():
     # Processing Ballot Items
     # If less than four total active processes, and we aren't working on a current process chunk,
     #  then add a new batch_process (importing ballot items) to the current queue
-    if total_active_batch_processes < 4 and batch_process_list_count < 1:
+    if total_active_batch_processes < 4:  # Removed: and batch_process_list_count < 1
         new_batch_process_list_count = 0
         results = batch_process_manager.retrieve_batch_process_list(process_active=False, process_queued=True)
         if not positive_value_exists(results['success']):

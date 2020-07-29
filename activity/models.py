@@ -10,10 +10,10 @@ from datetime import timedelta
 from wevote_functions.functions import generate_random_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_sms_integer, fetch_site_unique_id_prefix
 
-# Kind of Seed
+# Kind of Seeds
 NOTICE_FRIEND_ENDORSEMENTS_SEED = 'NOTICE_FRIEND_ENDORSEMENTS_SEED'
 
-# Kind of Notice
+# Kind of Notices
 NOTICE_FRIEND_ENDORSEMENTS = 'NOTICE_FRIEND_ENDORSEMENTS'
 
 
@@ -102,7 +102,9 @@ class ActivityManager(models.Manager):
             recipient_voter_we_vote_id='',
             speaker_name='',
             speaker_organization_we_vote_id='',
-            speaker_voter_we_vote_id=''):
+            speaker_voter_we_vote_id='',
+            speaker_profile_image_url_medium='',
+            speaker_profile_image_url_tiny=''):
         status = ''
 
         if not positive_value_exists(speaker_organization_we_vote_id):
@@ -129,6 +131,8 @@ class ActivityManager(models.Manager):
                 speaker_name=speaker_name,
                 speaker_organization_we_vote_id=speaker_organization_we_vote_id,
                 speaker_voter_we_vote_id=speaker_voter_we_vote_id,
+                speaker_profile_image_url_medium=speaker_profile_image_url_medium,
+                speaker_profile_image_url_tiny=speaker_profile_image_url_tiny
             )
             activity_notice_saved = True
             success = True
@@ -155,7 +159,9 @@ class ActivityManager(models.Manager):
             position_we_vote_id='',
             speaker_name='',
             speaker_organization_we_vote_id='',
-            speaker_voter_we_vote_id=''):
+            speaker_voter_we_vote_id='',
+            speaker_profile_image_url_medium='',
+            speaker_profile_image_url_tiny=''):
         status = ''
 
         if not positive_value_exists(speaker_organization_we_vote_id):
@@ -179,6 +185,8 @@ class ActivityManager(models.Manager):
                 speaker_name=speaker_name,
                 speaker_organization_we_vote_id=speaker_organization_we_vote_id,
                 speaker_voter_we_vote_id=speaker_voter_we_vote_id,
+                speaker_profile_image_url_medium=speaker_profile_image_url_medium,
+                speaker_profile_image_url_tiny=speaker_profile_image_url_tiny
             )
             activity_notice_seed_saved = True
             success = True
