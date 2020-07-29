@@ -110,6 +110,11 @@
       <input type="checkbox" name="show_paused_processes_only" id="show_paused_processes_only_id" value="1"
              {% if show_paused_processes_only %}checked{% endif %} /> Only Show Paused Processes
     </label>
+&nbsp;&nbsp;&nbsp;
+    <label for="include_frequent_processes_id">
+      <input type="checkbox" name="include_frequent_processes" id="include_frequent_processes_id" value="1"
+             {% if include_frequent_processes %}checked{% endif %} /> Include Activity and API Processes
+    </label>
 
 
 </form>{#  End of organization_position_choose_election form #}
@@ -345,6 +350,11 @@
 <script>
     $(function() {
         $('#google_civic_election_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#include_frequent_processes_id').change(function() {
             this.form.submit();
         });
     });

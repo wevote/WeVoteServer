@@ -5931,7 +5931,9 @@ class PositionManager(models.Model):
                 position_we_vote_id=voter_position_on_stage.we_vote_id,
                 speaker_name=voter_position_on_stage.speaker_display_name,
                 speaker_organization_we_vote_id=voter_position_on_stage.organization_we_vote_id,
-                speaker_voter_we_vote_id=voter_position_on_stage.voter_we_vote_id)
+                speaker_voter_we_vote_id=voter_position_on_stage.voter_we_vote_id,
+                speaker_profile_image_url_medium=voter_position_on_stage.speaker_image_url_https_medium,
+                speaker_profile_image_url_tiny=voter_position_on_stage.speaker_image_url_https_tiny)
             status += activity_results['status']
 
         results = {
@@ -6350,7 +6352,9 @@ class PositionManager(models.Model):
                 position_we_vote_id=voter_position_on_stage.we_vote_id,
                 speaker_name=voter_position_on_stage.speaker_display_name,
                 speaker_organization_we_vote_id=voter_position_on_stage.organization_we_vote_id,
-                speaker_voter_we_vote_id=voter_position_on_stage.voter_we_vote_id)
+                speaker_voter_we_vote_id=voter_position_on_stage.voter_we_vote_id,
+                speaker_profile_image_url_medium=voter_position_on_stage.speaker_image_url_https_medium,
+                speaker_profile_image_url_tiny=voter_position_on_stage.speaker_image_url_https_tiny)
             status += activity_results['status']
 
         results = {

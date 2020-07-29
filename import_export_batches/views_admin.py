@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager, \
+from .models import ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, \
+    BatchDescription, BatchHeader, BatchHeaderMap, BatchManager, \
     BatchProcess, BatchProcessAnalyticsChunk, BatchProcessBallotItemChunk, BatchProcessLogEntry, BatchProcessManager, \
     BatchRow, BatchRowActionBallotItem, BatchRowActionPollingLocation, \
     BatchSet, \
@@ -1507,6 +1508,7 @@ def batch_process_list_view(request):
     success = True
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    include_frequent_processes = request.GET.get('include_frequent_processes', False)
     kind_of_processes_to_show = request.GET.get('kind_of_processes_to_show', '')
     state_code = request.GET.get('state_code', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
@@ -1615,6 +1617,12 @@ def batch_process_list_view(request):
             elif kind_of_processes_to_show == "SEARCH_TWITTER":
                 search_twitter_processes = ['SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=search_twitter_processes)
+        elif positive_value_exists(include_frequent_processes):
+            # Don't modify the query
+            pass
+        else:
+            exclude_list = [ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST]
+            batch_process_queryset = batch_process_queryset.exclude(kind_of_process__in=exclude_list)
         batch_process_queryset = batch_process_queryset.order_by("-id")
 
         if positive_value_exists(batch_process_search):
@@ -1763,6 +1771,7 @@ def batch_process_list_view(request):
         'batch_process_search':                 batch_process_search,
         'election_list':                        election_list,
         'google_civic_election_id':             google_civic_election_id,
+        'include_frequent_processes':           include_frequent_processes,
         'kind_of_processes_to_show':            kind_of_processes_to_show,
         'show_all_elections':                   show_all_elections,
         'show_active_processes_only':           show_active_processes_only,

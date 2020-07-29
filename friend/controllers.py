@@ -763,29 +763,6 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
             }
             return error_results
 
-        if friend_invitation_email_link.recipient_voter_we_vote_id is not voter_we_vote_id:
-            status += "RECIPIENT_DOES_NOT_MATCH_CURRENT_VOTER-EMAIL_LINK "
-            error_results = {
-                'status':                   status,
-                'success':                  False,
-                'voter_device_id':          voter_device_id,
-                'friend_first_name':        '',
-                'friend_last_name':         '',
-                'friend_image_url_https_tiny': '',
-                'friend_issue_we_vote_id_list': [],
-                'friend_we_vote_id':        '',
-                'friend_organization_we_vote_id': '',
-                'invitation_found':         invitation_found,
-                'invitation_message':       '',
-                'invitation_secret_key':    invitation_secret_key,
-                'invitation_secret_key_belongs_to_this_voter': False,
-            }
-            return error_results
-
-        invitation_secret_key_belongs_to_this_voter = True
-        sender_voter_we_vote_id = friend_invitation_email_link.sender_voter_we_vote_id
-        invitation_message = friend_invitation_email_link.invitation_message
-
     if positive_value_exists(sender_voter_we_vote_id):
         voter_results = voter_manager.retrieve_voter_by_we_vote_id(sender_voter_we_vote_id)
         if voter_results['voter_found']:

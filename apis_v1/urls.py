@@ -10,7 +10,7 @@ from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls.static import static
 
-from apis_v1.views import views_apple, views_docs, views_analytics, views_ballot, views_candidate, views_donation, \
+from apis_v1.views import views_activity, views_apple, views_docs, views_analytics, views_ballot, views_candidate, views_donation, \
     views_election, views_extension, views_facebook, views_friend, \
     views_issues, views_measure, views_misc, views_organization, \
     views_pledge_to_vote, views_position, views_task, views_share, views_twitter, views_voter, views_voter_guide
@@ -33,6 +33,8 @@ from voter_guide.views_admin import voter_guides_sync_out_view
 
 urlpatterns = [
     # Actual API Calls
+    url(r'^activityNoticeListRetrieve/',
+        views_activity.activity_notice_list_retrieve_view, name='activityNoticeListRetrieveView'),
     url(r'^allBallotItemsRetrieve/', views_ballot.all_ballot_items_retrieve_view,
         name='allBallotItemsRetrieveView'),
     url(r'^analyticsActionSyncOut/', analytics_action_sync_out_view, name='analyticsActionSyncOutView'),
@@ -310,6 +312,8 @@ urlpatterns = [
     ##########################
     # API Documentation Views
     url(r'^docs/$', views_docs.apis_index_doc_view, name='apisIndex'),
+    url(r'^docs/activityNoticeListRetrieve/$',
+        views_docs.activity_notice_list_retrieve_doc_view, name='activityNoticeListRetrieveDocs'),
     url(r'^docs/allBallotItemsRetrieve/$',
         views_docs.all_ballot_items_retrieve_doc_view, name='allBallotItemsRetrieveDocs'),
     url(r'^docs/analyticsActionSyncOut/$',
