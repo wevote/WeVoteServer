@@ -250,8 +250,8 @@ def batch_process_next_steps():
     # Processing Ballot Items
     # If less than four total active processes, and we aren't working on a current process chunk,
     #  then add a new batch_process (importing ballot items) to the current queue
+    status += "TOTAL_ACTIVE_BATCH_PROCESSES-BEFORE_RETRIEVE: " + str(total_active_batch_processes) + " "
     if total_active_batch_processes < 4:  # Removed: and batch_process_list_count < 1
-        new_batch_process_list_count = 0
         results = batch_process_manager.retrieve_batch_process_list(process_active=False, process_queued=True)
         if not positive_value_exists(results['success']):
             success = False
@@ -269,24 +269,26 @@ def batch_process_next_steps():
         if positive_value_exists(results['batch_process_list_found']):
             new_batch_process_list = results['batch_process_list']
             new_batch_process_list_count = len(new_batch_process_list)
+            status += "NEW_BATCH_PROCESS_LIST_COUNT: " + str(new_batch_process_list_count) + ", ADDING ONE "
             for new_batch in new_batch_process_list:
-                # Bring the batch_process_list up to 1 item
-                if len(batch_process_list) < 1:
-                    kind_of_process = ""
-                    try:
-                        kind_of_process = new_batch.kind_of_process
-                        new_batch.date_started = now()
-                        new_batch.save()
-                        batch_process_list.append(new_batch)
-                    except Exception as e:
-                        status += "BATCH_PROCESS-CANNOT_SAVE_DATE_STARTED " + str(e) + " "
-                        handle_exception(e, logger=logger, exception_message=status)
-                        batch_process_manager.create_batch_process_log_entry(
-                            batch_process_id=new_batch.id,
-                            kind_of_process=kind_of_process,
-                            status=status,
-                        )
-        status += "NEW_BATCH_PROCESS_COUNT: " + str(new_batch_process_list_count) + ", "
+                # Bring the batch_process_list up by 1 item
+                kind_of_process = ""
+                try:
+                    kind_of_process = new_batch.kind_of_process
+                    new_batch.date_started = now()
+                    new_batch.save()
+                    batch_process_list.append(new_batch)
+                    total_active_batch_processes += 1
+                except Exception as e:
+                    status += "BATCH_PROCESS-CANNOT_SAVE_DATE_STARTED " + str(e) + " "
+                    handle_exception(e, logger=logger, exception_message=status)
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=new_batch.id,
+                        kind_of_process=kind_of_process,
+                        status=status,
+                    )
+                break
+    status += "TOTAL_ACTIVE_BATCH_PROCESSES_BEFORE_PROCESS_LOOP: " + str(total_active_batch_processes) + " "
 
     for batch_process in batch_process_list:
         if batch_process.kind_of_process in \
