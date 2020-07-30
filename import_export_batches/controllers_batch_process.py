@@ -1588,11 +1588,12 @@ def process_activity_notice_batch_process(batch_process):
                 batch_process.date_completed = now()
                 batch_process.save()
 
-                batch_process_manager.create_batch_process_log_entry(
-                    batch_process_id=batch_process.id,
-                    kind_of_process=kind_of_process,
-                    status=status,
-                )
+                if positive_value_exists(activity_notice_seed_count) or positive_value_exists(activity_notice_count):
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        kind_of_process=kind_of_process,
+                        status=status,
+                    )
             except Exception as e:
                 status += "ACTIVITY_NOTICE-DATE_COMPLETED_TIME_NOT_SAVED " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
