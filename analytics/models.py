@@ -85,6 +85,8 @@ ACTION_VIEW_SHARED_OFFICE_ALL_OPINIONS = 67
 ACTION_VIEW_SHARED_READY = 68
 ACTION_VIEW_SHARED_READY_ALL_OPINIONS = 69
 ACTION_SEARCH_OPINIONS = 70
+ACTION_UNSUBSCRIBE_EMAIL_PAGE = 71
+ACTION_UNSUBSCRIBE_SMS_PAGE = 72
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
@@ -1993,6 +1995,10 @@ def display_action_constant_human_readable(action_constant):
         return "SHARE_READY_ALL_OPINIONS"
     if action_constant == ACTION_TWITTER_AUTHENTICATION_EXISTS:
         return "TWITTER_AUTHENTICATION_EXISTS"
+    if action_constant == ACTION_UNSUBSCRIBE_EMAIL_PAGE:
+        return "UNSUBSCRIBE_EMAIL_PAGE"
+    if action_constant == ACTION_UNSUBSCRIBE_SMS_PAGE:
+        return "UNSUBSCRIBE_SMS_PAGE"
     if action_constant == ACTION_VIEW_SHARED_BALLOT:
         return "VIEW_SHARED_BALLOT"
     if action_constant == ACTION_VIEW_SHARED_BALLOT_ALL_OPINIONS:
@@ -2173,4 +2179,8 @@ def fetch_action_constant_number_from_constant_string(action_constant_string):
         return 69
     if action_constant_string in 'ACTION_SEARCH_OPINIONS':
         return 70
+    if action_constant_string in 'ACTION_UNSUBSCRIBE_EMAIL_PAGE':
+        return 71
+    if action_constant_string in 'ACTION_UNSUBSCRIBE_SMS_PAGE':
+        return 72
     return 0

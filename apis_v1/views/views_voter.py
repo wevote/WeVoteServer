@@ -2233,6 +2233,213 @@ def voter_update_view(request):  # voterUpdate
     return response
 
 
+def voter_notification_settings_update_view(request):  # voterNotificationSettingsUpdate
+    """
+    Update notification settings for voter based on secret key
+    :param request:
+    :return:
+    """
+
+    status = ""
+    voter_found = False
+    voter_updated = False
+    normalized_email_address = ''
+    normalized_sms_phone_number = ''
+
+    # If we have an incoming GET value for a variable, use it. If we don't pass "False" into voter_update_for_api
+    # as a signal to not change the variable. (To set variables to False, pass in the string "False".)
+    try:
+        email_subscription_secret_key = request.GET['email_subscription_secret_key']
+        email_subscription_secret_key = email_subscription_secret_key.strip()
+    except KeyError:
+        email_subscription_secret_key = False
+
+    try:
+        sms_subscription_secret_key = request.GET['sms_subscription_secret_key']
+        sms_subscription_secret_key = sms_subscription_secret_key.strip()
+    except KeyError:
+        sms_subscription_secret_key = False
+
+    try:
+        interface_status_flags = request.GET['interface_status_flags']
+        interface_status_flags = interface_status_flags.strip()
+        interface_status_flags = convert_to_int(interface_status_flags)
+    except KeyError:
+        interface_status_flags = False
+
+    try:
+        flag_integer_to_set = request.GET['flag_integer_to_set']
+        flag_integer_to_set = flag_integer_to_set.strip()
+        flag_integer_to_set = convert_to_int(flag_integer_to_set)
+    except KeyError:
+        flag_integer_to_set = False
+
+    try:
+        flag_integer_to_unset = request.GET['flag_integer_to_unset']
+        flag_integer_to_unset = flag_integer_to_unset.strip()
+        flag_integer_to_unset = convert_to_int(flag_integer_to_unset)
+    except KeyError:
+        flag_integer_to_unset = False
+
+    try:
+        notification_settings_flags = request.GET['notification_settings_flags']
+        notification_settings_flags = notification_settings_flags.strip()
+        notification_settings_flags = convert_to_int(notification_settings_flags)
+    except KeyError:
+        notification_settings_flags = False
+
+    try:
+        notification_flag_integer_to_set = request.GET['notification_flag_integer_to_set']
+        notification_flag_integer_to_set = notification_flag_integer_to_set.strip()
+        notification_flag_integer_to_set = convert_to_int(notification_flag_integer_to_set)
+        if not positive_value_exists(notification_flag_integer_to_set):
+            notification_flag_integer_to_set = False
+    except KeyError:
+        notification_flag_integer_to_set = False
+
+    try:
+        notification_flag_integer_to_unset = request.GET['notification_flag_integer_to_unset']
+        notification_flag_integer_to_unset = notification_flag_integer_to_unset.strip()
+        notification_flag_integer_to_unset = convert_to_int(notification_flag_integer_to_unset)
+        if not positive_value_exists(notification_flag_integer_to_unset):
+            notification_flag_integer_to_unset = False
+
+    except KeyError:
+        notification_flag_integer_to_unset = False
+
+    at_least_one_variable_has_changed = True if \
+        interface_status_flags is not False \
+        or flag_integer_to_unset is not False \
+        or flag_integer_to_set is not False \
+        or notification_settings_flags is not False \
+        or notification_flag_integer_to_unset is not False \
+        or notification_flag_integer_to_set is not False \
+        else False
+
+    email_manager = EmailManager()
+    voter_manager = VoterManager()
+    voter_id = 0
+    voter_interface_status_flags = 0
+    voter_notification_settings_flags = 0
+    if positive_value_exists(email_subscription_secret_key):
+        email_results = email_manager.retrieve_email_address_object_from_secret_key(
+            subscription_secret_key=email_subscription_secret_key)
+        if email_results['email_address_object_found']:
+            status += "VOTER_NOTIFICATION_SETTINGS_UPDATE-EMAIL_ADDRESS_FOUND "
+            email_address_object = email_results['email_address_object']
+            normalized_email_address = email_address_object.normalized_email_address
+            voter_results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
+            voter = voter_results['voter']
+            voter_found = True
+            voter_id = voter_results['voter_id']
+            voter_interface_status_flags = voter.interface_status_flags
+            voter_notification_settings_flags = voter.notification_settings_flags
+        else:
+            status += "EMAIL_ADDRESS_NOT_FOUND "
+    elif positive_value_exists(sms_subscription_secret_key):
+        # TODO Finish this
+        pass
+    else:
+        status += "SECRET_KEY_NOT_PROVIDED-VOTER_NOTIFICATION_SETTINGS_UPDATE "
+        json_data = {
+            'status':                           status,
+            'success':                          True,
+            'voter_found':                      voter_found,
+            'voter_updated':                    voter_updated,
+            'interface_status_flags':           interface_status_flags,
+            'flag_integer_to_set':              flag_integer_to_set,
+            'flag_integer_to_unset':            flag_integer_to_unset,
+            'normalized_email_address':         normalized_email_address,
+            'normalized_sms_phone_number':      normalized_sms_phone_number,
+            'notification_settings_flags':      notification_settings_flags,
+            'notification_flag_integer_to_set': notification_flag_integer_to_set,
+            'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
+        }
+        response = HttpResponse(json.dumps(json_data), content_type='application/json')
+        return response
+
+    if not positive_value_exists(voter_id):
+        status += "VOTER_NOT_FOUND_FROM_SECRET_KEY-VOTER_NOTIFICATION_SETTINGS_UPDATE "
+        voter_found = False
+        json_data = {
+            'status':                           status,
+            'success':                          True,
+            'voter_found':                      voter_found,
+            'voter_updated':                    voter_updated,
+            'interface_status_flags':           interface_status_flags,
+            'flag_integer_to_set':              flag_integer_to_set,
+            'flag_integer_to_unset':            flag_integer_to_unset,
+            'normalized_email_address':         normalized_email_address,
+            'normalized_sms_phone_number':      normalized_sms_phone_number,
+            'notification_settings_flags':      notification_settings_flags,
+            'notification_flag_integer_to_set': notification_flag_integer_to_set,
+            'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
+        }
+        response = HttpResponse(json.dumps(json_data), content_type='application/json')
+        return response
+
+    # At this point, we have a valid voter
+
+    if at_least_one_variable_has_changed:
+        pass
+    else:
+        # If here, there is nothing to change and we just want to return the latest data from the voter object
+        status += "MISSING_VARIABLE-NO_VARIABLES_PASSED_IN_TO_CHANGE "
+        json_data = {
+                'status':                           status,
+                'success':                          True,
+                'voter_found':                      voter_found,
+                'voter_updated':                    voter_updated,
+                'interface_status_flags':           voter_interface_status_flags,
+                'flag_integer_to_set':              flag_integer_to_set,
+                'flag_integer_to_unset':            flag_integer_to_unset,
+                'normalized_email_address':         normalized_email_address,
+                'normalized_sms_phone_number':      normalized_sms_phone_number,
+                'notification_settings_flags':      voter_notification_settings_flags,
+                'notification_flag_integer_to_set': notification_flag_integer_to_set,
+                'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
+            }
+        response = HttpResponse(json.dumps(json_data), content_type='application/json')
+        return response
+
+    success = True
+    voter_manager = VoterManager()
+    voter_updated = False
+    if at_least_one_variable_has_changed:
+        results = voter_manager.update_voter_by_id(
+            voter_id,
+            interface_status_flags=interface_status_flags,
+            flag_integer_to_set=flag_integer_to_set,
+            flag_integer_to_unset=flag_integer_to_unset,
+            notification_settings_flags=notification_settings_flags,
+            notification_flag_integer_to_set=notification_flag_integer_to_set,
+            notification_flag_integer_to_unset=notification_flag_integer_to_unset)
+        status += results['status']
+        success = results['success']
+        voter = results['voter']
+        voter_found = True
+        voter_updated = results['voter_updated']
+        voter_interface_status_flags = voter.interface_status_flags
+        voter_notification_settings_flags = voter.notification_settings_flags
+    json_data = {
+        'status':                                   status,
+        'success':                                  success,
+        'voter_found':                              voter_found,
+        'voter_updated':                            voter_updated,
+        'interface_status_flags':                   voter_interface_status_flags,
+        'flag_integer_to_set':                      flag_integer_to_set,
+        'flag_integer_to_unset':                    flag_integer_to_unset,
+        'normalized_email_address':                 normalized_email_address,
+        'normalized_sms_phone_number':              normalized_sms_phone_number,
+        'notification_settings_flags':              voter_notification_settings_flags,
+        'notification_flag_integer_to_set':         notification_flag_integer_to_set,
+        'notification_flag_integer_to_unset':       notification_flag_integer_to_unset,
+    }
+
+    response = HttpResponse(json.dumps(json_data), content_type='application/json')
+    return response
+
+
 def voter_verify_secret_code_view(request):  # voterVerifySecretCode
     """
     Compare a time-limited 6 digit secret code against this specific voter_device_id. If correct, sign in the
