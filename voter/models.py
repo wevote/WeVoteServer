@@ -1714,7 +1714,7 @@ class VoterManager(BaseUserManager):
         return results
 
     def update_voter_by_id(
-            self, voter_id, facebook_email, facebook_profile_image_url_https=False,
+            self, voter_id, facebook_email=False, facebook_profile_image_url_https=False,
             first_name=False, middle_name=False, last_name=False,
             interface_status_flags=False,
             flag_integer_to_set=False, flag_integer_to_unset=False,

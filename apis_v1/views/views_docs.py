@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from apis_v1.documentation_source import activity_notice_list_retrieve_doc, all_ballot_items_retrieve_doc, \
+from apis_v1.documentation_source import \
+    activity_notice_list_retrieve_doc, all_ballot_items_retrieve_doc, \
     analytics_action_sync_out_doc, \
     apple_sign_in_save_doc, ballot_item_highlights_retrieve_doc, ballot_item_options_retrieve_doc, \
     ballot_item_retrieve_doc, ballot_items_search_retrieve_doc, \
@@ -58,7 +59,8 @@ from apis_v1.documentation_source import activity_notice_list_retrieve_doc, all_
     voter_guide_followers_retrieve_doc, voter_guide_save_doc, voter_guides_ignored_retrieve_doc, \
     voter_guides_retrieve_doc, voter_guides_sync_out_doc, voter_guides_to_follow_retrieve_doc, \
     voter_guides_from_friends_upcoming_retrieve_doc, voter_guides_upcoming_retrieve_doc, \
-    voter_location_retrieve_from_ip_doc, voter_merge_two_accounts_doc, voter_photo_save_doc, \
+    voter_location_retrieve_from_ip_doc, voter_merge_two_accounts_doc, \
+    voter_notification_settings_update_doc, voter_photo_save_doc, \
     voter_plan_list_retrieve_doc, voter_plan_save_doc, \
     voter_position_like_off_save_doc, voter_position_like_on_save_doc, voter_position_like_status_retrieve_doc, \
     voter_position_comment_save_doc, voter_position_retrieve_doc, voter_position_visibility_save_doc, \
@@ -1353,6 +1355,16 @@ def voter_merge_two_accounts_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_merge_two_accounts_doc.voter_merge_two_accounts_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_notification_settings_update_doc_view(request):
+    """
+    Show documentation about voterNotificationSettingsUpdate
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = voter_notification_settings_update_doc.voter_notification_settings_update_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

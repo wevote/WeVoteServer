@@ -70,6 +70,7 @@ class EmailAddress(models.Model):
     email_permanent_bounce = models.BooleanField(default=False)
     secret_key = models.CharField(
         verbose_name="secret key to verify ownership of email", max_length=255, null=True, blank=True, unique=True)
+    subscription_secret_key = models.CharField(max_length=255, null=True, blank=True, unique=True)
     deleted = models.BooleanField(default=False)  # If email address is removed from person's account, mark as deleted
 
     # We override the save function so we can auto-generate we_vote_id
@@ -531,9 +532,10 @@ class EmailManager(models.Model):
         }
         return results
 
-    def retrieve_email_address_object_from_secret_key(self, email_secret_key):
+    def retrieve_email_address_object_from_secret_key(self, email_secret_key='', subscription_secret_key=''):
         """
         :param email_secret_key:
+        :param subscription_secret_key:
         :return:
         """
         email_address_object_found = False
@@ -544,11 +546,17 @@ class EmailManager(models.Model):
         status = ''
 
         try:
-            if positive_value_exists(email_secret_key):
-                email_address_object = EmailAddress.objects.get(
-                    secret_key=email_secret_key,
-                    deleted=False
-                )
+            if positive_value_exists(email_secret_key) or positive_value_exists(subscription_secret_key):
+                if positive_value_exists(email_secret_key):
+                    email_address_object = EmailAddress.objects.get(
+                        secret_key=email_secret_key,
+                        deleted=False
+                    )
+                elif positive_value_exists(subscription_secret_key):
+                    email_address_object = EmailAddress.objects.get(
+                        subscription_secret_key=subscription_secret_key,
+                        deleted=False
+                    )
                 email_address_object_id = email_address_object.id
                 email_address_object_we_vote_id = email_address_object.we_vote_id
                 email_ownership_is_verified = email_address_object.email_ownership_is_verified
