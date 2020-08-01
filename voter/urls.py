@@ -11,6 +11,8 @@ urlpatterns = [
     url(r'^authenticate_manually/$', views_admin.voter_authenticate_manually_view, name='authenticate_manually'),
     url(r'^authenticate_manually_process/$',
         views_admin.voter_authenticate_manually_process_view, name='authenticate_manually_process'),
+    url(r'^process_maintenance_status_flags/$',
+        views_admin.process_maintenance_status_flags_view, name='process_maintenance_status_flags'),
     url(r'^voter_change_authority/$',
         views_admin.voter_change_authority_process_view, name='voter_change_authority_process'),
     url(r'^voter_remove_facebook_auth_process/$',
