@@ -5,7 +5,6 @@
 from .models import ActivityNoticeSeed, ActivityManager, ActivityNotice, ActivityTidbit, \
     NOTICE_FRIEND_ENDORSEMENTS, NOTICE_FRIEND_ENDORSEMENTS_SEED
 from config.base import get_environment_variable
-from django.db.models import Q
 from django.utils.timezone import now
 from friend.models import FriendManager
 import json

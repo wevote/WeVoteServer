@@ -2,7 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import Voter, VoterAddressManager, VoterDeviceLinkManager
+from .controllers import process_maintenance_status_flags
+from .models import fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, VoterDeviceLinkManager, \
+    voter_has_authority, VoterManager, voter_setup
 from admin_tools.views import redirect_to_sign_in_page
 from django.urls import reverse
 from django.contrib import messages
@@ -19,7 +21,6 @@ from organization.models import Organization, OrganizationManager, INDIVIDUAL
 from position.controllers import merge_duplicate_positions_for_voter
 from position.models import PositionEntered, PositionForFriends
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
-from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority, VoterManager, voter_setup
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_api_device_id, set_voter_api_device_id, \
     positive_value_exists
@@ -57,6 +58,28 @@ def login_complete_view(request):
         messages.add_message(request, messages.INFO, 'Voter not updated.')
 
     return HttpResponseRedirect(reverse('login_we_vote', args=()))
+
+
+@login_required
+def process_maintenance_status_flags_view(request):
+    """
+    Search for voters who haven't had a specific maintenance task done in blocks of X,
+    and then execute those changes.
+    :param request:
+    :return:
+    """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    results = process_maintenance_status_flags()
+    messages.add_message(
+        request, messages.INFO,
+        "Process maintenance status flags, "
+        "voters_updated_task_one: " + str(results['voters_updated_task_one']))
+
+    return HttpResponseRedirect(reverse('voter:voter_list', args=()))
 
 
 # This is open to anyone, and provides psql to update the database directly

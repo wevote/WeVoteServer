@@ -54,9 +54,20 @@ NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS = 128  # In App: "Friends' opinions (
 NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL = 256  # Email: "Friends' opinions (other regions)"
 NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS = 512  # SMS: "Friends' opinions (other regions)"
 
+# Default to set for new voters
+NOTIFICATION_SETTINGS_FLAGS_DEFAULT = \
+    NOTIFICATION_NEWSLETTER_OPT_IN + \
+    NOTIFICATION_FRIEND_REQUESTS_EMAIL + \
+    NOTIFICATION_SUGGESTED_FRIENDS_EMAIL + \
+    NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL + \
+    NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS + \
+    NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL
+
 NUMBER_OF_FAILED_TRIES_ALLOWED_PER_SECRET_CODE = 5
 NUMBER_OF_FAILED_TRIES_ALLOWED_ALL_TIME = 25
 
+MAINTENANCE_STATUS_FLAGS_TASK_ONE = 1
+MAINTENANCE_STATUS_FLAGS_COMPLETED = MAINTENANCE_STATUS_FLAGS_TASK_ONE
 
 # This way of extending the base user described here:
 # https://docs.djangoproject.com/en/1.8/topics/auth/customizing/#a-full-example
@@ -2115,10 +2126,9 @@ class Voter(AbstractBaseUser):
     twitter_access_secret = models.TextField(verbose_name='twitter access secret', null=True, blank=True)
     twitter_connection_active = models.BooleanField(default=False)
 
-    # Does this voter want to be on the We Vote newsletter? This is using a series of bits in case we want
-    #  to offer different newsletter or notification options.
-    # Default new voters to our mailing list: NOTIFICATION_NEWSLETTER_OPT_IN = 1
-    notification_settings_flags = models.PositiveIntegerField(default=1)
+    # What notification settings has the voter chosen? This is using a series of bits.
+    # Default new voters is determined by NOTIFICATION_SETTINGS_FLAGS_DEFAULT (set above)
+    notification_settings_flags = models.PositiveIntegerField(default=NOTIFICATION_SETTINGS_FLAGS_DEFAULT)
 
     # Interface Status Flags is a positive integer, when represented as a stream of bits,
     # each bit maps to a status of a variable's boolean value
@@ -2126,16 +2136,12 @@ class Voter(AbstractBaseUser):
     # more constants at top of this file
     interface_status_flags = models.PositiveIntegerField(verbose_name="interface status flags", default=0)
 
-    # Custom We Vote fields
-#     image_displayed
-#     image_twitter
-#     image_facebook
-#     blocked
-#     flags (ex/ signed_in)
-#     password_hashed
-#     password_reset_key
-#     password_reset_request_time
-#     last_activity
+    # This is how we keep track of whether we have run certain updates on voter records
+    # For example, have we updated one of the voter's notification_settings_flags after adding new feature?
+    # Once all previous voters have been updated, and new voters are using the new NOTIFICATION_SETTINGS_FLAGS_DEFAULT,
+    #  then we can set maintenance_status_flags to MAINTENANCE_STATUS_FLAGS_COMPLETED
+    #  MAINTENANCE_STATUS_FLAGS_COMPLETED = MAINTENANCE_STATUS_FLAGS_TASK_ONE
+    maintenance_status_flags = models.PositiveIntegerField(default=0)
 
     # The unique ID of the election this voter is currently looking at. (Provided by Google Civic)
     # DALE 2015-10-29 We are replacing this with looking up the value in the ballot_items table, and then
@@ -2371,6 +2377,54 @@ class Voter(AbstractBaseUser):
         :return:
         """
         return flag_integer & self.notification_settings_flags
+
+
+# VoterChangeLog
+EMAIL_ADDRESS_TABLE = 'EmailAddress'
+VOTER_ADDRESS_TABLE = 'VoterAddress'
+VOTER_TABLE = 'Voter'
+CHANGE_TABLE_CHOICES = (
+    (EMAIL_ADDRESS_TABLE, 'EmailAddress'),
+    (VOTER_ADDRESS_TABLE, 'VoterAddress'),
+    (VOTER_TABLE, 'Voter'),
+)
+
+
+class VoterChangeLog(models.Model):
+    """
+    For keeping track of settings changes either by voter or by system. (i.e., setting new default values)
+    """
+    # The voter who had a change
+    voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
+    date_of_change = models.DateTimeField(null=True, auto_now=True)
+    change_table = models.CharField(max_length=50, choices=CHANGE_TABLE_CHOICES, default=VOTER_TABLE)
+    change_field = models.CharField(max_length=255, null=True)
+    change_description = models.CharField(max_length=255, null=True)
+    is_system_update = models.BooleanField(default=False)
+
+    BOOLEAN = 'B'
+    INTEGER = 'I'
+    STRING = 'S'
+    TEXT = 'T'
+    VALUE_TYPE_CHOICES = (
+        (BOOLEAN, 'Boolean'),
+        (INTEGER, 'Integer'),
+        (STRING, 'String'),
+        (TEXT, 'Text'),
+    )
+    value_type = models.CharField("value_type", max_length=1, choices=VALUE_TYPE_CHOICES, default=STRING)
+
+    text_value_from = models.TextField(null=True)
+    text_value_to = models.TextField(null=True)
+
+    string_value_from = models.CharField(max_length=255, null=True)
+    string_value_to = models.CharField(max_length=255, null=True)
+
+    integer_value_from = models.BigIntegerField(null=True)
+    integer_value_to = models.BigIntegerField(null=True)
+
+    boolean_value_from = models.BooleanField(default=None, null=True)
+    boolean_value_to = models.BooleanField(default=None, null=True)
 
 
 class VoterDeviceLink(models.Model):

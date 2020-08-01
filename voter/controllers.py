@@ -1,13 +1,21 @@
 # voter/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, \
+from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, \
+    MAINTENANCE_STATUS_FLAGS_TASK_ONE, MAINTENANCE_STATUS_FLAGS_COMPLETED, \
+    NOTIFICATION_FRIEND_REQUESTS_EMAIL, NOTIFICATION_SUGGESTED_FRIENDS_EMAIL, \
+    NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL, NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS, \
+    NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, \
+    Voter, VoterAddressManager, \
     VoterDeviceLink, VoterDeviceLinkManager, VoterManager
-from django.http import HttpResponse
 from analytics.controllers import move_analytics_info_to_another_voter
 from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, \
     ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
     ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
+from datetime import timedelta
+from django.http import HttpResponse
+from django.db.models import F
+from django.utils.timezone import now
 from donate.controllers import donation_journal_history_for_a_voter, move_donation_info_to_another_voter
 from email_outbound.controllers import move_email_address_entries_to_another_voter, schedule_verification_email, \
     WE_VOTE_SERVER_ROOT_URL, schedule_email_with_email_outbound_description
@@ -626,6 +634,51 @@ def move_voter_plan_to_another_voter(from_voter, to_voter):
         'success': success,
         'entries_moved': entries_moved,
         'entries_not_moved': entries_not_moved,
+    }
+    return results
+
+
+def process_maintenance_status_flags():
+    status = ""
+    success = True
+    voters_updated_task_one = 0
+
+    # Task 1 (bit 1, integer 1) MAINTENANCE_STATUS_FLAGS_TASK_ONE
+    safety_valve_count = 0
+    longest_activity_notice_processing_run_time_allowed = 900  # 15 minutes * 60 seconds
+    when_process_must_stop = now() + timedelta(seconds=longest_activity_notice_processing_run_time_allowed)
+    continue_retrieving = True
+    while continue_retrieving and safety_valve_count < 1000 and when_process_must_stop > now():
+        safety_valve_count += 1
+
+        query = Voter.objects.annotate(
+            task_one_flag=F('maintenance_status_flags').bitand(MAINTENANCE_STATUS_FLAGS_TASK_ONE)
+        ).exclude(task_one_flag__gte=1)
+        task_one_voter_list = query[:100]
+        if len(task_one_voter_list) == 0:
+            continue_retrieving = False
+        for one_voter in task_one_voter_list:
+            updated_flags = one_voter.notification_settings_flags
+
+            # Since these are all new settings, we don't need to see if they have been set or unset by voter.
+            updated_flags = updated_flags | NOTIFICATION_FRIEND_REQUESTS_EMAIL
+            updated_flags = updated_flags | NOTIFICATION_SUGGESTED_FRIENDS_EMAIL
+            updated_flags = updated_flags | NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL
+            updated_flags = updated_flags | NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS
+            updated_flags = updated_flags | NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL
+            one_voter.notification_settings_flags = updated_flags
+
+            # Set the TASK_ONE bit as true in maintenance_status_flags to show it is complete for this voter
+            one_voter.maintenance_status_flags = one_voter.maintenance_status_flags | MAINTENANCE_STATUS_FLAGS_TASK_ONE
+            one_voter.save()
+            voters_updated_task_one += 1
+
+    # Before adding Task 2 here, add the logic to ensure all voters have been updated with task 1
+
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'voters_updated_task_one':  voters_updated_task_one,
     }
     return results
 

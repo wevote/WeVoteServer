@@ -12,7 +12,8 @@
 
 <a href="{% url 'voter:voter_edit' 0 %}">Create New Voter Account</a>
 <br />
-<a href="{% url 'image:cache_images_locally_for_all_voters' %}">Cache images locally for all voters</a>
+<a href="{% url 'image:cache_images_locally_for_all_voters' %}">Cache images locally for all voters</a>,
+<a href="{% url 'voter:process_maintenance_status_flags' %}">Process Maintenance Status Flags</a>
 
 <form name="voter_search_form" method="get" action="{% url 'voter:voter_list' %}">
     {% csrf_token %}
