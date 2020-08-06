@@ -2141,7 +2141,7 @@ class Voter(AbstractBaseUser):
     # Once all previous voters have been updated, and new voters are using the new NOTIFICATION_SETTINGS_FLAGS_DEFAULT,
     #  then we can set maintenance_status_flags to MAINTENANCE_STATUS_FLAGS_COMPLETED
     #  MAINTENANCE_STATUS_FLAGS_COMPLETED = MAINTENANCE_STATUS_FLAGS_TASK_ONE
-    maintenance_status_flags = models.PositiveIntegerField(default=0)
+    maintenance_status_flags = models.PositiveIntegerField(default=MAINTENANCE_STATUS_FLAGS_COMPLETED)
 
     # The unique ID of the election this voter is currently looking at. (Provided by Google Civic)
     # DALE 2015-10-29 We are replacing this with looking up the value in the ballot_items table, and then
