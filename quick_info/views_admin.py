@@ -387,7 +387,7 @@ def quick_info_edit_process_view(request):
             positive_value_exists(change_quick_info_master):
         # We are just changing an option, and not trying to save
         ready_to_save = False
-    elif number_of_ballot_items is 0:
+    elif number_of_ballot_items == 0:
         messages.add_message(request, messages.ERROR, "You must choose at least one ballot item.")
         ready_to_save = False
     elif number_of_ballot_items > 1:

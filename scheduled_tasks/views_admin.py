@@ -34,7 +34,7 @@ def scheduled_tasks_list_view(request):
     task_list_future = list()
 
     for task_list_type in ['task_list_future', 'task_list_completed']:
-        if task_list_type is 'task_list_future':
+        if task_list_type == 'task_list_future':
             task_list = WeTask().raw_list()
         else:
             task_list = WeTaskCompleted().raw_list(limit=limit)
@@ -80,7 +80,7 @@ def scheduled_tasks_list_view(request):
             }
             tasks.append(task_dict)
 
-        if task_list_type is 'task_list_future':
+        if task_list_type == 'task_list_future':
             task_list_future = tasks
             tasks = []
         else:

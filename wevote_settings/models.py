@@ -242,7 +242,7 @@ def fetch_site_unique_id_prefix():
     we_vote_settings_manager = WeVoteSettingsManager()
     site_unique_id_prefix = we_vote_settings_manager.fetch_setting('site_unique_id_prefix')
 
-    if site_unique_id_prefix is '':
+    if site_unique_id_prefix == '':
         safety_valve = 0
         # TODO Create table to keep collection of prefix's used by other sites
         site_unique_id_prefix_reserved = ['1r', 'yf']

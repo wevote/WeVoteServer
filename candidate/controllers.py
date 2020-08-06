@@ -280,9 +280,9 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
             candidate2_attribute_value = getattr(candidate2, attribute)
             if candidate1_attribute_value is None and candidate2_attribute_value is None:
                 candidate_merge_conflict_values[attribute] = 'MATCHING'
-            elif candidate1_attribute_value is None or candidate1_attribute_value is "":
+            elif candidate1_attribute_value is None or candidate1_attribute_value == "":
                 candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
-            elif candidate2_attribute_value is None or candidate2_attribute_value is "":
+            elif candidate2_attribute_value is None or candidate2_attribute_value == "":
                 candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
             else:
                 if attribute == "candidate_name" or attribute == "state_code":
@@ -318,9 +318,9 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
     # Are there any comparisons that require admin intervention?
     merge_choices = {}
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
-        if attribute is "we_vote_hosted_profile_image_url_large" \
-                or attribute is "we_vote_hosted_profile_image_url_medium" \
-                or attribute is "we_vote_hosted_profile_image_url_tiny":
+        if attribute == "we_vote_hosted_profile_image_url_large" \
+                or attribute == "we_vote_hosted_profile_image_url_medium" \
+                or attribute == "we_vote_hosted_profile_image_url_tiny":
             if positive_value_exists(getattr(candidate1_on_stage, attribute)):
                 # We can proceed because candidate1 has a valid image, so we can default to choosing that one
                 pass

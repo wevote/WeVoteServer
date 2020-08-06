@@ -331,3 +331,28 @@ The next day
 ---
     stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 build % npm rebuild node-sass  
     stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 build % 
+
+--- 
+### 7/10/20 After a reboot
+    (WeVoteServerPy3.7.2) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/server.log start
+    dyld: Library not loaded: /usr/local/opt/icu4c/lib/libicui18n.66.dylib
+      Referenced from: /usr/local/Cellar/postgresql/12.3_2/bin/postgres
+      Reason: image not found
+    no data was returned by command ""/usr/local/Cellar/postgresql/12.3_2/bin/postgres" -V"
+    The program "postgres" is needed by pg_ctl but was not found in the
+    same directory as "/usr/local/Cellar/postgresql/12.3_2/bin/pg_ctl".
+    Check your installation.
+    (WeVoteServerPy3.7.2) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % 
+
+
+------
+(WeVoteServerPy3.7.2) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % brew services start postgresql
+Service `postgresql` already started, use `brew services restart postgresql` to restart.
+(WeVoteServerPy3.7.2) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % brew services restart postgresql
+Stopping `postgresql`... (might take a while)
+==> Successfully stopped `postgresql` (label: homebrew.mxcl.postgresql)
+==> Successfully started `postgresql` (label: homebrew.mxcl.postgresql)
+(WeVoteServerPy3.7.2) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % ps -aux
+
+----------
+(WeVoteServerPy3.8) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % ./ngrok http https://localhost:8000 -host-header="localhost:8000" 

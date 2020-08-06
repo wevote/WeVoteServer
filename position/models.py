@@ -5820,7 +5820,7 @@ class PositionManager(models.Model):
             return False
         if speaker_display_name.startswith("Voter-") \
                 or speaker_display_name.startswith("null") \
-                or speaker_display_name is "" \
+                or speaker_display_name == "" \
                 or speaker_display_name.startswith("wv"):
             # Repair not needed if the speaker_display_name is a temporary name too
             return False
@@ -7432,7 +7432,7 @@ class PositionManager(models.Model):
                 too_many_unique_ballot_item_variables_received = True
                 status = "FAILED-TOO_MANY_UNIQUE_BALLOT_ITEM_VARIABLES "
                 success = False
-            elif number_of_unique_ballot_item_identifiers is 0:
+            elif number_of_unique_ballot_item_identifiers == 0:
                 no_unique_ballot_item_variables_received = True
                 status = "FAILED-NO_UNIQUE_BALLOT_ITEM_VARIABLES_RECEIVED "
                 success = False
@@ -7450,7 +7450,7 @@ class PositionManager(models.Model):
                 too_many_unique_actor_variables_received = True
                 status = "FAILED-TOO_MANY_UNIQUE_ACTOR_VARIABLES "
                 success = False
-            elif number_of_unique_actor_identifiers is 0:
+            elif number_of_unique_actor_identifiers == 0:
                 no_unique_actor_variables_received = True
                 status = "FAILED-NO_UNIQUE_ACTOR_VARIABLES_RECEIVED "
                 success = False

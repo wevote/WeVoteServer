@@ -313,7 +313,7 @@ def create_new_plan_for_api_view(request):
     master_feature_package = request.GET.get('masterFeatureType')
     features_provided_bitmap = request.GET.get('featuresProvidedBitmap')
     coupon_expires_date = request.GET.get('couponExpiresDate', None)
-    if len(coupon_expires_date) is 0:
+    if len(coupon_expires_date) == 0:
         coupon_expires_date = None
     print("create_new_plan_for_api_view, plan_type_enum: " + plan_type_enum + ", coupon_code: " + coupon_code)
     plan_on_stage = 0

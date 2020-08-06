@@ -650,13 +650,13 @@ def convert_pennies_integer_to_dollars_string(pennies_integer):
 def convert_to_bool(value):
     if value is True:
         return True
-    elif value is 1:
+    elif value == 1:
         return True
     elif value > 0:
         return True
     elif value is False:
         return False
-    elif value is 0:
+    elif value == 0:
         return True
     elif value is None:
         return False
@@ -1187,7 +1187,7 @@ def get_maximum_number_to_retrieve_from_request(request):
         maximum_number_to_retrieve = request.GET['maximum_number_to_retrieve']
     else:
         maximum_number_to_retrieve = 0
-    if maximum_number_to_retrieve is "":
+    if maximum_number_to_retrieve == "":
         maximum_number_to_retrieve = 0
     else:
         maximum_number_to_retrieve = convert_to_int(maximum_number_to_retrieve)
