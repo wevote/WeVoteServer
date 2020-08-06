@@ -174,13 +174,22 @@ def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_a
         else:
             recipient_email_address_secret_key = \
                 email_manager.update_email_address_with_new_secret_key(recipient_email_we_vote_id)
+        if positive_value_exists(sender_email_address_object.subscription_secret_key):
+            recipient_email_subscription_secret_key = sender_email_address_object.subscription_secret_key
+        else:
+            recipient_email_subscription_secret_key = \
+                email_manager.update_email_address_with_new_subscription_secret_key(
+                    email_we_vote_id=recipient_email_we_vote_id)
         send_now = False
-        # verification_context = None  # TODO DALE Figure out best way to do this
 
-        verifications_send_results = schedule_verification_email(sender_voter.we_vote_id, recipient_voter_we_vote_id,
-                                                                 recipient_email_we_vote_id, recipient_voter_email,
-                                                                 recipient_email_address_secret_key,
-                                                                 web_app_root_url)
+        verifications_send_results = schedule_verification_email(
+            sender_voter_we_vote_id=sender_voter.we_vote_id,
+            recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+            recipient_email_we_vote_id=recipient_email_we_vote_id,
+            recipient_voter_email=recipient_voter_email,
+            recipient_email_address_secret_key=recipient_email_address_secret_key,
+            recipient_email_subscription_secret_key=recipient_email_subscription_secret_key,
+            web_app_root_url=web_app_root_url)
         status += verifications_send_results['status']
         email_scheduled_saved = verifications_send_results['email_scheduled_saved']
         email_scheduled_id = verifications_send_results['email_scheduled_id']
@@ -719,6 +728,13 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
 
     recipient_email_address_object = retrieve_results['email_address_object']
 
+    if positive_value_exists(recipient_email_address_object.subscription_secret_key):
+        recipient_email_subscription_secret_key = recipient_email_address_object.subscription_secret_key
+    else:
+        recipient_email_subscription_secret_key = \
+            email_manager.update_email_address_with_new_subscription_secret_key(
+                email_we_vote_id=recipient_email_address_object.we_vote_id)
+
     # Store the friend invitation linked to voter (if the email address has had its ownership verified),
     # or to an email that isn't linked to a voter
     invitation_secret_key = ""
@@ -768,7 +784,11 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
         else:
             # Store the friend invitation in FriendInvitationEmailLink table
             friend_invitation_results = store_internal_friend_invitation_with_unknown_email(
-                sender_voter, invitation_message, recipient_email_address_object, first_name, last_name)
+                voter=sender_voter,
+                invitation_message=invitation_message,
+                email_address_object=recipient_email_address_object,
+                first_name=first_name,
+                last_name=last_name)
             status += friend_invitation_results['status'] + " "
             success = friend_invitation_results['success']
             if friend_invitation_results['friend_invitation_saved']:
@@ -807,8 +827,10 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
                     "recipient_name":               recipient_name,
                     "recipient_voter_email":        recipient_voter_email,
                     "see_all_friend_requests_url":  web_app_root_url_verified + "/friends",
-                    "confirm_friend_request_url":   web_app_root_url_verified + "/more/network/key/" + invitation_secret_key,
-                    "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",
+                    "confirm_friend_request_url":   web_app_root_url_verified + "/more/network/key/" +
+                    invitation_secret_key,
+                    "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+                    recipient_email_subscription_secret_key,
                     "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
                 }
                 template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -878,7 +900,8 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
         "recipient_voter_email":        recipient_voter_email,
         "see_all_friend_requests_url":  web_app_root_url_verified + "/friends",
         "confirm_friend_request_url":   web_app_root_url_verified + "/more/network/key/" + invitation_secret_key,
-        "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",
+        "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+        recipient_email_subscription_secret_key,
         "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -1070,7 +1093,11 @@ def voter_create_for_api(voter_device_id):  # voterCreate
 
 
 def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
-        voter_device_id, email_secret_key, facebook_secret_key, twitter_secret_key, invitation_secret_key,
+        voter_device_id='',
+        email_secret_key='',
+        facebook_secret_key='',
+        twitter_secret_key='',
+        invitation_secret_key='',
         web_app_root_url=''):
     current_voter_found = False
     email_owner_voter_found = False
@@ -1151,6 +1178,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             if email_owner_voter_results['voter_found']:
                 email_owner_voter_found = True
                 email_owner_voter = email_owner_voter_results['voter']
+                # TODO Pull the first/last name out of FriendInvitationEmailLink
 
         if not email_owner_voter_found:
             error_results = {
@@ -1641,8 +1669,13 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
 
 def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
-        voter, new_owner_voter, voter_device_link, status='',
-        email_owner_voter_found=False, facebook_owner_voter_found=False, invitation_owner_voter_found=False):
+        voter,
+        new_owner_voter,
+        voter_device_link,
+        status='',
+        email_owner_voter_found=False,
+        facebook_owner_voter_found=False,
+        invitation_owner_voter_found=False):
 
     success = True
     current_voter_found = False

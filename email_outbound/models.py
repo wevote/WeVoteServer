@@ -13,6 +13,7 @@ FRIEND_ACCEPTED_INVITATION_TEMPLATE = 'FRIEND_ACCEPTED_INVITATION_TEMPLATE'
 FRIEND_INVITATION_TEMPLATE = 'FRIEND_INVITATION_TEMPLATE'
 GENERIC_EMAIL_TEMPLATE = 'GENERIC_EMAIL_TEMPLATE'
 LINK_TO_SIGN_IN_TEMPLATE = 'LINK_TO_SIGN_IN_TEMPLATE'
+NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE = 'NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE'
 VERIFY_EMAIL_ADDRESS_TEMPLATE = 'VERIFY_EMAIL_ADDRESS_TEMPLATE'
 SEND_BALLOT_TO_SELF = 'SEND_BALLOT_TO_SELF'
 SEND_BALLOT_TO_FRIENDS = 'SEND_BALLOT_TO_FRIENDS'
@@ -22,6 +23,7 @@ KIND_OF_EMAIL_TEMPLATE_CHOICES = (
     (FRIEND_ACCEPTED_INVITATION_TEMPLATE, 'Accept an invitation to be a Friend'),
     (FRIEND_INVITATION_TEMPLATE, 'Invite Friend'),
     (LINK_TO_SIGN_IN_TEMPLATE, 'Link to sign in.'),
+    (NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE, 'New opinion from Friend.'),
     (VERIFY_EMAIL_ADDRESS_TEMPLATE, 'Verify Senders Email Address'),
     (SEND_BALLOT_TO_SELF, 'Send ballot to self'),
     (SEND_BALLOT_TO_FRIENDS, 'Send ballot to friends'),
@@ -434,7 +436,7 @@ class EmailManager(models.Model):
         }
         return results
 
-    def retrieve_email_address_object(self, normalized_email_address, email_address_object_we_vote_id='',
+    def retrieve_email_address_object(self, normalized_email_address='', email_address_object_we_vote_id='',
                                       voter_we_vote_id=''):
         """
         There are cases where we store multiple entries for the same normalized_email_address (prior to an email
@@ -1014,6 +1016,19 @@ class EmailManager(models.Model):
                 email_address_object.secret_key = generate_random_string(12)
                 email_address_object.save()
                 return email_address_object.secret_key
+            except Exception as e:
+                return ""
+        else:
+            return ""
+
+    def update_email_address_with_new_subscription_secret_key(self, email_we_vote_id):
+        results = self.retrieve_email_address_object('', email_we_vote_id)
+        if results['email_address_object_found']:
+            email_address_object = results['email_address_object']
+            try:
+                email_address_object.subscription_secret_key = generate_random_string(48)
+                email_address_object.save()
+                return email_address_object.subscription_secret_key
             except Exception as e:
                 return ""
         else:

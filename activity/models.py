@@ -100,6 +100,8 @@ class ActivityManager(models.Manager):
             new_positions_entered_count=0,
             position_we_vote_id='',
             recipient_voter_we_vote_id='',
+            send_to_email=False,
+            send_to_sms=False,
             speaker_name='',
             speaker_organization_we_vote_id='',
             speaker_voter_we_vote_id='',
@@ -128,6 +130,8 @@ class ActivityManager(models.Manager):
                 new_positions_entered_count=new_positions_entered_count,
                 position_we_vote_id=position_we_vote_id,
                 recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+                send_to_email=send_to_email,
+                send_to_sms=send_to_sms,
                 speaker_name=speaker_name,
                 speaker_organization_we_vote_id=speaker_organization_we_vote_id,
                 speaker_voter_we_vote_id=speaker_voter_we_vote_id,
@@ -241,6 +245,95 @@ class ActivityManager(models.Manager):
             'status':                   status,
             'activity_tidbit_saved':    activity_tidbit_saved,
             'activity_tidbit':          activity_tidbit,
+        }
+        return results
+
+    def retrieve_activity_notice_seed_list(
+            self,
+            notices_to_be_created=False):
+        status = ""
+
+        activity_notice_seed_list = []
+        try:
+            queryset = ActivityNoticeSeed.objects.all()
+            queryset = queryset.filter(deleted=False)
+            if positive_value_exists(notices_to_be_created):
+                queryset = queryset.filter(activity_notices_created=False)
+
+            queryset = queryset.order_by('-id')  # Put most recent at top of list
+            activity_notice_seed_list = list(queryset)
+
+            if len(activity_notice_seed_list):
+                success = True
+                activity_notice_seed_list_found = True
+                status += 'ACTIVITY_NOTICE_SEED_LIST_RETRIEVED '
+            else:
+                success = True
+                activity_notice_seed_list_found = False
+                status += 'NO_ACTIVITY_NOTICE_SEED_LIST_RETRIEVED '
+        except Exception as e:
+            success = False
+            activity_notice_seed_list_found = False
+            status += 'FAILED retrieve_activity_notice_seed_list ActivityNoticeSeed ' + str(e) + ' '
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'activity_notice_seed_list_found':  activity_notice_seed_list_found,
+            'activity_notice_seed_list':        activity_notice_seed_list,
+        }
+        return results
+
+    def retrieve_activity_notice_list(
+            self,
+            activity_notice_seed_id=0,
+            to_be_sent_to_email=False,
+            to_be_sent_to_sms=False,
+            retrieve_count_limit=0,
+            activity_notice_id_already_reviewed_list=[]):
+        status = ""
+
+        activity_notice_list = []
+        try:
+            queryset = ActivityNotice.objects.all()
+            queryset = queryset.filter(deleted=False)
+            if positive_value_exists(activity_notice_seed_id):
+                queryset = queryset.filter(activity_notice_seed_id=activity_notice_seed_id)
+            if positive_value_exists(to_be_sent_to_email):
+                queryset = queryset.filter(send_to_email=True)
+                queryset = queryset.filter(scheduled_to_email=False)
+                queryset = queryset.filter(sent_to_email=False)
+            elif positive_value_exists(to_be_sent_to_sms):
+                queryset = queryset.filter(send_to_sms=True)
+                queryset = queryset.filter(scheduled_to_sms=False)
+                queryset = queryset.filter(sent_to_sms=False)
+            if activity_notice_id_already_reviewed_list and len(activity_notice_id_already_reviewed_list) > 0:
+                queryset = queryset.exclude(id__in=activity_notice_id_already_reviewed_list)
+
+            queryset = queryset.order_by('-id')  # Put most recent at top of list
+            if positive_value_exists(retrieve_count_limit):
+                activity_notice_list = queryset[:retrieve_count_limit]
+            else:
+                activity_notice_list = list(queryset)
+
+            if len(activity_notice_list):
+                success = True
+                activity_notice_list_found = True
+                status += 'ACTIVITY_NOTICE_LIST_RETRIEVED '
+            else:
+                success = True
+                activity_notice_list_found = False
+                status += 'NO_ACTIVITY_NOTICE_LIST_RETRIEVED '
+        except Exception as e:
+            success = False
+            activity_notice_list_found = False
+            status += 'FAILED retrieve_activity_notice_list: ' + str(e) + ' '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'activity_notice_list_found':   activity_notice_list_found,
+            'activity_notice_list':         activity_notice_list,
         }
         return results
 
@@ -374,7 +467,7 @@ class ActivityManager(models.Manager):
         }
         return results
 
-    def retrieve_activity_notice_list(self, recipient_voter_we_vote_id=''):
+    def retrieve_activity_notice_list_for_recipient(self, recipient_voter_we_vote_id=''):
         """
 
         :param recipient_voter_we_vote_id:
@@ -431,45 +524,11 @@ class ActivityManager(models.Manager):
         }
         return results
 
-    def retrieve_activity_notice_seed_list(
-            self,
-            notices_to_be_created=False):
-        status = ""
-
-        activity_notice_seed_list = []
-        try:
-            queryset = ActivityNoticeSeed.objects.all()
-            queryset = queryset.filter(deleted=False)
-            if positive_value_exists(notices_to_be_created):
-                queryset = queryset.filter(activity_notices_created=False)
-
-            queryset = queryset.order_by('-id')  # Put most recent at top of list
-            activity_notice_seed_list = list(queryset)
-
-            if len(activity_notice_seed_list):
-                success = True
-                activity_notice_seed_list_found = True
-                status += 'ACTIVITY_NOTICE_SEED_LIST_RETRIEVED '
-            else:
-                success = True
-                activity_notice_seed_list_found = False
-                status += 'NO_ACTIVITY_NOTICE_SEED_LIST_RETRIEVED '
-        except Exception as e:
-            success = False
-            activity_notice_seed_list_found = False
-            status += 'FAILED retrieve_activity_notice_seed_list ActivityNoticeSeed ' + str(e) + ' '
-
-        results = {
-            'success':                          success,
-            'status':                           status,
-            'activity_notice_seed_list_found':  activity_notice_seed_list_found,
-            'activity_notice_seed_list':        activity_notice_seed_list,
-        }
-        return results
-
     def retrieve_next_activity_notice_seed_to_process(
             self,
             notices_to_be_created=False,
+            notices_to_be_scheduled=False,
+            notices_to_be_updated=False,
             activity_notice_seed_id_already_reviewed_list=[]):
         status = ""
 
@@ -479,6 +538,10 @@ class ActivityManager(models.Manager):
             queryset = queryset.filter(deleted=False)
             if positive_value_exists(notices_to_be_created):
                 queryset = queryset.filter(activity_notices_created=False)
+            elif positive_value_exists(notices_to_be_scheduled):
+                queryset = queryset.filter(activity_notices_scheduled=False)
+            elif positive_value_exists(notices_to_be_updated):
+                queryset = queryset.filter(activity_notices_updated=False)
             if activity_notice_seed_id_already_reviewed_list and len(activity_notice_seed_id_already_reviewed_list) > 0:
                 queryset = queryset.exclude(id__in=activity_notice_seed_id_already_reviewed_list)
 

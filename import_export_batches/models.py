@@ -4922,6 +4922,9 @@ class BatchProcessManager(models.Model):
             batch_process_queryset = batch_process_queryset.filter(date_checked_out__isnull=False)
             batch_process_queryset = batch_process_queryset.filter(
                 kind_of_process__in=analytics_kind_of_process_list)
+            # Don't consider paused back_processes to be currently running
+            # Note: Paused processes might still be running, but for ACTIVITY_NOTICE_PROCESS, we will allow this
+            batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
 
             batch_process_count = batch_process_queryset.count()
             return positive_value_exists(batch_process_count)

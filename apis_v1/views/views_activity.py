@@ -40,7 +40,7 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    results = activity_manager.retrieve_activity_notice_list(recipient_voter_we_vote_id=voter_we_vote_id)
+    results = activity_manager.retrieve_activity_notice_list_for_recipient(recipient_voter_we_vote_id=voter_we_vote_id)
     if not results['success']:
         status += results['status']
         status += "RETRIEVE_ACTIVITY_NOTICE_LIST_FAILED "

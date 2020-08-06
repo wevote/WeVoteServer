@@ -1916,6 +1916,7 @@ def mark_batch_process_as_complete(batch_process=None,
             if batch_process.date_started is None:
                 batch_process.date_started = now()
             if batch_process.date_completed is None:
+                batch_process.date_checked_out = None
                 batch_process.date_completed = now()
             batch_process.save()
             batch_process_updated = True

@@ -16,6 +16,6 @@ The We Vote Team
 
 
 ========================================
-This message was sent to {{ recipient_voter_email }}. If you don't want to receive any emails from We Vote in the future, please follow the link below to unsubscribe.
+This message was sent to {{ recipient_voter_email }}. If you don't want to receive emails from We Vote, please follow the link below to unsubscribe:
 {{ recipient_unsubscribe_url }}
 We Vote, Attention: Community Team, 1717 Clemens Rd, Oakland, CA 94602
