@@ -87,6 +87,7 @@ ACTION_VIEW_SHARED_READY_ALL_OPINIONS = 69
 ACTION_SEARCH_OPINIONS = 70
 ACTION_UNSUBSCRIBE_EMAIL_PAGE = 71
 ACTION_UNSUBSCRIBE_SMS_PAGE = 72
+ACTION_MEASURE = 73
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
@@ -1927,6 +1928,8 @@ def display_action_constant_human_readable(action_constant):
         return "ISSUE_FOLLOW_IGNORE"
     if action_constant == ACTION_ISSUE_STOP_FOLLOWING:
         return "ISSUE_STOP_FOLLOWING"
+    if action_constant == ACTION_MEASURE:
+        return "MEASURE"
     if action_constant == ACTION_MODAL_ISSUES:
         return "MODAL_ISSUES"
     if action_constant == ACTION_MODAL_ORGANIZATIONS:
@@ -2183,4 +2186,6 @@ def fetch_action_constant_number_from_constant_string(action_constant_string):
         return 71
     if action_constant_string in 'ACTION_UNSUBSCRIBE_SMS_PAGE':
         return 72
+    if action_constant_string in 'ACTION_MEASURE':
+        return 73
     return 0
