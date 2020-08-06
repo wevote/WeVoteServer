@@ -1,8 +1,13 @@
 # sign_in_with_apple/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+from config.base import get_environment_variable
 from voter.models import VoterManager
 from wevote_functions.functions import positive_value_exists
+import wevote_functions.admin
+from .jwt_apple_signin import retrieve_user, AppleUser
+
+logger = wevote_functions.admin.get_logger(__name__)
 
 
 def apple_sign_in_retrieve_voter_id(voter_device_id, email, first_name, last_name):
@@ -64,3 +69,10 @@ def apple_sign_in_retrieve_voter_id(voter_device_id, email, first_name, last_nam
             return results
 
     return True
+
+
+def validate_sign_in_with_apple_token_for_api(voter_device_id, apple_oauth_code):
+    # apple.jwt_apple_signin.retrieve_user(apple_oauth_code)
+    appleUser = retrieve_user(apple_oauth_code)
+    print(appleUser)
+    logger.debug('appleuser: ', appleUser)

@@ -1,6 +1,7 @@
 # As we approach deployment, we should probably move to different requirements files for local vs. production
 # See Chapt 5.5 in Two Scoops of Django
 boto3==1.13.16
+cryptography
 dj-database-url==0.5.0
 dj-static==0.0.6
 django==2.2.13

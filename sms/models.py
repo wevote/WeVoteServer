@@ -127,9 +127,9 @@ def convert_phone_number_to_e164(phone_number):
     just_the_digits = ''.join(filter(str.isdigit, phone_number))
     lnum = len(just_the_digits)
 
-    if lnum == 10 and just_the_digits[0] is not '1':   # 5105551212
+    if lnum == 10 and just_the_digits[0] != '1':   # 5105551212
         return "+1" + just_the_digits
-    elif lnum == 11 and just_the_digits[0] is '1':     # 15105551212
+    elif lnum == 11 and just_the_digits[0] == '1':     # 15105551212
         return "+" + just_the_digits
     else:
         return False

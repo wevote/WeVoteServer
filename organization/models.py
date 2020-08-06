@@ -721,7 +721,7 @@ class OrganizationManager(models.Manager):
             return False
         if organization.organization_name.startswith("Voter-") \
                 or organization.organization_name.startswith("null") \
-                or organization.organization_name is "" \
+                or organization.organization_name == "" \
                 or organization.organization_name.startswith("wv"):
             return True
         return False

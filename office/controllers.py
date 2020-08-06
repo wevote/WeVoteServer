@@ -217,17 +217,17 @@ def figure_out_office_conflict_values(contest_office1, contest_office2):
             contest_office2_attribute = getattr(contest_office2, attribute)
             if contest_office1_attribute is None and contest_office2_attribute is None:
                 contest_office_merge_conflict_values[attribute] = 'MATCHING'
-            elif contest_office1_attribute is None or contest_office1_attribute is "":
+            elif contest_office1_attribute is None or contest_office1_attribute == "":
                 if attribute == "maplight_id":
-                    if contest_office2_attribute is None or contest_office2_attribute is "" \
-                            or contest_office2_attribute is 0 or contest_office2_attribute is '0':
+                    if contest_office2_attribute is None or contest_office2_attribute == "" \
+                            or contest_office2_attribute == 0 or contest_office2_attribute == '0':
                         # In certain cases (like maplight_id) we don't want to copy over empty maplight_id
                         contest_office_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE2'
                 else:
                     contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE2'
-            elif contest_office2_attribute is None or contest_office2_attribute is "":
+            elif contest_office2_attribute is None or contest_office2_attribute == "":
                 contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE1'
             else:
                 if attribute == "office_name" or attribute == "state_code":

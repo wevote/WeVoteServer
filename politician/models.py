@@ -277,7 +277,7 @@ class PoliticianManager(models.Model):
             else:
                 politician_list = []
 
-            if len(politician_list) is 1:
+            if len(politician_list) == 1:
                 politician_found = True
                 politician_list_found = False
                 politician = politician_list[0]

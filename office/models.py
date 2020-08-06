@@ -621,7 +621,7 @@ class ContestOfficeManager(models.Model):
                     for key, value in updated_contest_office_values.items():
                         if hasattr(contest_office_on_stage, key):
                             # Note, the incoming google_civic_office_name may need to go in _name, _name2, or _name3
-                            if key is "google_civic_office_name":
+                            if key == "google_civic_office_name":
                                 # We actually don't want to update existing values, but put the value in the first
                                 # available "slot"
                                 if not positive_value_exists(contest_office_on_stage.google_civic_office_name):

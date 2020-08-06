@@ -843,7 +843,7 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
         request = urllib.request.Request(graphapi_url, None, headers)
         response = urllib.request.urlopen(request, timeout=10)
         http_response_code = response.code
-        if http_response_code is 200:
+        if http_response_code == 200:
             photo_url = response.url
             success = True
             status += "FINISHED_QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE1 "
@@ -883,7 +883,7 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
             request = urllib.request.Request(graphapi_url, None, headers)
             response = urllib.request.urlopen(request, timeout=10)
             http_response_code = response.code
-            if http_response_code is 200:
+            if http_response_code == 200:
                 photo_url = response.url
                 success = True
                 status += "FINISHED_QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE2 "

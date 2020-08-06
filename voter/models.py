@@ -876,7 +876,7 @@ class VoterManager(BaseUserManager):
                 voter_id = voter_on_stage.id
                 success = True
                 status += "VOTER_RETRIEVED_BY_VOTER_ID "
-            elif email is not '' and email is not None:
+            elif email != '' and email is not None:
                 if read_only:
                     voter_queryset = Voter.objects.using('readonly').all()
                 else:

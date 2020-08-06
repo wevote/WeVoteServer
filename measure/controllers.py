@@ -44,9 +44,9 @@ def figure_out_measure_conflict_values(contest_measure1, contest_measure2):
             contest_measure2_attribute = getattr(contest_measure2, attribute)
             if contest_measure1_attribute is None and contest_measure2_attribute is None:
                 contest_measure_merge_conflict_values[attribute] = 'MATCHING'
-            elif contest_measure1_attribute is None or contest_measure1_attribute is "":
+            elif contest_measure1_attribute is None or contest_measure1_attribute == "":
                 contest_measure_merge_conflict_values[attribute] = 'CONTEST_MEASURE2'
-            elif contest_measure2_attribute is None or contest_measure2_attribute is "":
+            elif contest_measure2_attribute is None or contest_measure2_attribute == "":
                 contest_measure_merge_conflict_values[attribute] = 'CONTEST_MEASURE1'
             else:
                 if attribute == "measure_title" or attribute == "state_code":

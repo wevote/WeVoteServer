@@ -974,7 +974,7 @@ class VoterGuideManager(models.Manager):
                             success = False
 
         if success:
-            if number_of_voter_guides_found is 1:
+            if number_of_voter_guides_found == 1:
                 status += 'ONE_FOUND '
                 voter_guide_found = True
                 voter_guide = voter_guide_list[0]

@@ -32,7 +32,7 @@ class AppleOAuth2(BaseOAuth2):
             'client_secret': client_secret,
             'code': access_token,
             'grant_type': 'authorization_code',
-            'redirect_uri': 'https://example-app.com/redirect'
+            'redirect_uri': 'https://61d3402b3d5c.ngrok.io/apis/v1/appleSignInOauthRedirectDestination'
         }
 
         res = requests.post(AppleOAuth2.ACCESS_TOKEN_URL, data=data, headers=headers)
@@ -63,7 +63,8 @@ class AppleOAuth2(BaseOAuth2):
             'kid': get_environment_variable("SOCIAL_AUTH_APPLE_KEY_ID")
         }
 
-        payload = {            'iss': get_environment_variable("SOCIAL_AUTH_APPLE_TEAM_ID"),
+        payload = {
+            'iss': get_environment_variable("SOCIAL_AUTH_APPLE_TEAM_ID"),
             'iat': timezone.now(),
             'exp': timezone.now() + timedelta(days=180),
             'aud': 'https://appleid.apple.com',
