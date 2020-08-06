@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import FRIEND_ACCEPTED_INVITATION_TEMPLATE, FRIEND_INVITATION_TEMPLATE, LINK_TO_SIGN_IN_TEMPLATE, \
-    SEND_BALLOT_TO_SELF, SEND_BALLOT_TO_FRIENDS, SIGN_IN_CODE_EMAIL_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
+    NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE, SEND_BALLOT_TO_SELF, SEND_BALLOT_TO_FRIENDS, SIGN_IN_CODE_EMAIL_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
 from django.template.loader import get_template
 from django.template import Context
 import json
@@ -30,6 +30,11 @@ def get_template_filename(kind_of_email_template, text_or_html):
             return "link_to_sign_in.html"
         else:
             return "link_to_sign_in.txt"
+    elif kind_of_email_template == NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE:
+        if text_or_html == "HTML":
+            return "notice_friend_endorsements.html"
+        else:
+            return "notice_friend_endorsements.txt"
     elif kind_of_email_template == SEND_BALLOT_TO_SELF:
         if text_or_html == "HTML":
             return "send_ballot_to_self.html"

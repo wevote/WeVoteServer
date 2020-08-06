@@ -167,12 +167,16 @@ class FriendManager(models.Model):
     def __unicode__(self):
         return "FriendManager"
 
-    def update_or_create_friend_invitation_email_link(self, sender_voter_we_vote_id, recipient_email_we_vote_id='',
-                                                      recipient_voter_email='',
-                                                      recipient_first_name='', recipient_last_name='',
-                                                      invitation_message='',
-                                                      sender_email_ownership_is_verified=False,
-                                                      invitation_secret_key=''):
+    def update_or_create_friend_invitation_email_link(
+            self,
+            sender_voter_we_vote_id='',
+            recipient_email_we_vote_id='',
+            recipient_voter_email='',
+            recipient_first_name='',
+            recipient_last_name='',
+            invitation_message='',
+            sender_email_ownership_is_verified=False,
+            invitation_secret_key=''):
         status = ""
         defaults = {
             "sender_voter_we_vote_id":          sender_voter_we_vote_id,
@@ -420,8 +424,12 @@ class FriendManager(models.Model):
         }
         return results
 
-    def update_or_create_current_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id,
-                                        sender_organization_we_vote_id=None, recipient_organization_we_vote_id=None):
+    def update_or_create_current_friend(
+            self,
+            sender_voter_we_vote_id,
+            recipient_voter_we_vote_id,
+            sender_organization_we_vote_id=None,
+            recipient_organization_we_vote_id=None):
         status = ""
         if not positive_value_exists(sender_voter_we_vote_id) or not positive_value_exists(recipient_voter_we_vote_id):
             current_friend = CurrentFriend()

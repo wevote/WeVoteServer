@@ -61,7 +61,7 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
 
     if not voter_results['voter_found']:
         error_results = {
-            'status':                               "ACCEPTING_VOTER_NOT_FOUND",
+            'status':                               "ACCEPTING_VOTER_NOT_FOUND ",
             'success':                              False,
         }
         return error_results
@@ -71,7 +71,7 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
     original_sender_voter_results = voter_manager.retrieve_voter_by_we_vote_id(original_sender_we_vote_id)
     if not original_sender_voter_results['voter_found']:
         error_results = {
-            'status':                               "ORIGINAL_SENDER_VOTER_NOT_FOUND",
+            'status':                               "ORIGINAL_SENDER_VOTER_NOT_FOUND ",
             'success':                              False,
         }
         return error_results
@@ -83,12 +83,19 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
     # Retrieve the email address of the original_sender (which is the person we are sending this notification to)
     original_sender_email_we_vote_id = ""
     original_sender_email = ""
+    original_sender_email_subscription_secret_key = ""
     if original_sender_voter.has_email_with_verified_ownership():
         results = email_manager.retrieve_primary_email_with_ownership_verified(original_sender_we_vote_id)
         if results['email_address_object_found']:
             original_sender_email_object = results['email_address_object']
             original_sender_email_we_vote_id = original_sender_email_object.we_vote_id
             original_sender_email = original_sender_email_object.normalized_email_address
+            if positive_value_exists(original_sender_email_object.subscription_secret_key):
+                original_sender_email_subscription_secret_key = original_sender_email_object.subscription_secret_key
+            else:
+                original_sender_email_subscription_secret_key = \
+                    email_manager.update_email_address_with_new_subscription_secret_key(
+                        email_we_vote_id=original_sender_email_we_vote_id)
     else:
         # Not having an email is ok now, since the original_sender could have signed in with SMS or Twitter
         status += "ORIGINAL_SENDER_VOTER_DOES_NOT_HAVE_VALID_EMAIL "
@@ -133,7 +140,8 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
             "recipient_name":               original_sender_name,
             "recipient_voter_email":        original_sender_email,
             "see_your_friend_list_url":     web_app_root_url_verified + "/friends",
-            "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",
+            "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+            original_sender_email_subscription_secret_key,
             "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
         }
         template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -294,12 +302,22 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
         else:
             recipient_email_address_secret_key = \
                 email_manager.update_email_address_with_new_secret_key(recipient_email_we_vote_id)
+        if positive_value_exists(sender_email_address_object.subscription_secret_key):
+            recipient_email_subscription_secret_key = sender_email_address_object.subscription_secret_key
+        else:
+            recipient_email_subscription_secret_key = \
+                email_manager.update_email_address_with_new_subscription_secret_key(
+                    email_we_vote_id=recipient_email_we_vote_id)
         send_now = False
 
-        verifications_send_results = schedule_verification_email(sender_voter.we_vote_id, recipient_voter_we_vote_id,
-                                                                 recipient_email_we_vote_id, recipient_voter_email,
-                                                                 recipient_email_address_secret_key,
-                                                                 web_app_root_url)
+        verifications_send_results = schedule_verification_email(
+            sender_voter_we_vote_id=sender_voter.we_vote_id,
+            recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+            recipient_email_we_vote_id=recipient_email_we_vote_id,
+            recipient_voter_email=recipient_voter_email,
+            recipient_email_address_secret_key=recipient_email_address_secret_key,
+            recipient_email_subscription_secret_key=recipient_email_subscription_secret_key,
+            web_app_root_url=web_app_root_url)
         status += verifications_send_results['status']
         email_scheduled_saved = verifications_send_results['email_scheduled_saved']
         email_scheduled_id = verifications_send_results['email_scheduled_id']
@@ -502,7 +520,11 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
     else:
         # Store the friend invitation in FriendInvitationEmailLink table
         friend_invitation_results = store_internal_friend_invitation_with_unknown_email(
-            sender_voter, invitation_message, recipient_email_address_object, first_name, last_name)
+            voter=sender_voter,
+            invitation_message=invitation_message,
+            email_address_object=recipient_email_address_object,
+            first_name=first_name,
+            last_name=last_name)
         status += friend_invitation_results['status'] + " "
         success = friend_invitation_results['success']
         if friend_invitation_results['friend_invitation_saved']:
@@ -530,6 +552,13 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
     if invitation_secret_key is None:
         invitation_secret_key = ""
 
+    if positive_value_exists(recipient_email_address_object.subscription_secret_key):
+        recipient_email_subscription_secret_key = recipient_email_address_object.subscription_secret_key
+    else:
+        recipient_email_subscription_secret_key = \
+            email_manager.update_email_address_with_new_subscription_secret_key(
+                email_we_vote_id=recipient_email_we_vote_id)
+
     template_variables_for_json = {
         "subject":                      subject,
         "invitation_message":           invitation_message,
@@ -542,7 +571,8 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
         "recipient_voter_email":        recipient_voter_email,
         "see_all_friend_requests_url":  web_app_root_url_verified + "/friends",
         "confirm_friend_request_url":   web_app_root_url_verified + "/more/network/key/" + invitation_secret_key,
-        "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",  # TODO Implement
+        "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+        recipient_email_subscription_secret_key,
         "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -904,11 +934,10 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
         if voter_results['voter_found']:
             recipient_organization_we_vote_id = voter_results['voter'].linked_organization_we_vote_id
         friend_results = friend_manager.update_or_create_current_friend(
-            friend_invitation_voter_link.sender_voter_we_vote_id,
-            friend_invitation_voter_link.recipient_voter_we_vote_id,
-            voter.linked_organization_we_vote_id,
-            recipient_organization_we_vote_id
-        )
+            sender_voter_we_vote_id=friend_invitation_voter_link.sender_voter_we_vote_id,
+            recipient_voter_we_vote_id=friend_invitation_voter_link.recipient_voter_we_vote_id,
+            sender_organization_we_vote_id=voter.linked_organization_we_vote_id,
+            recipient_organization_we_vote_id=recipient_organization_we_vote_id)
 
         friend_manager.update_suggested_friends_starting_with_one_voter(
             friend_invitation_voter_link.sender_voter_we_vote_id)
@@ -919,6 +948,7 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
         original_sender_we_vote_id = friend_invitation_voter_link.sender_voter_we_vote_id
         results = friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id,
                                                   web_app_root_url=web_app_root_url)
+        status += results['status']
 
         # Update the PositionNetworkCount entries for both friends
         add_position_network_count_entries_for_one_friend(
@@ -1023,8 +1053,9 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
         # The current voter does not have first or last name, and we have incoming names that can be used
         if update_voter_name:
             results = voter_manager.update_voter_name_by_object(
-                voter, friend_invitation_email_link.recipient_first_name,
-                friend_invitation_email_link.recipient_last_name)
+                voter,
+                first_name=friend_invitation_email_link.recipient_first_name,
+                last_name=friend_invitation_email_link.recipient_last_name)
             if results['voter_updated']:
                 voter = results['voter']
 
@@ -1047,8 +1078,9 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
 
         accepting_voter_we_vote_id = voter_we_vote_id_accepting_invitation
         original_sender_we_vote_id = friend_invitation_email_link.sender_voter_we_vote_id
-        friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id,
-                                        web_app_root_url=web_app_root_url)
+        results = friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id,
+                                                  web_app_root_url=web_app_root_url)
+        status = results['status']
 
         # Update the PositionNetworkCount entries for both friends
         add_position_network_count_entries_for_one_friend(
@@ -1470,6 +1502,13 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
             if invitation_secret_key is None:
                 invitation_secret_key = ""
 
+            if positive_value_exists(recipient_email_address_object.subscription_secret_key):
+                recipient_email_subscription_secret_key = recipient_email_address_object.subscription_secret_key
+            else:
+                recipient_email_subscription_secret_key = \
+                    email_manager.update_email_address_with_new_subscription_secret_key(
+                        email_we_vote_id=recipient_email_we_vote_id)
+
             template_variables_for_json = {
                 "subject":                      subject,
                 "invitation_message":           invitation_message,
@@ -1482,7 +1521,8 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
                 "recipient_voter_email":        recipient_voter_email,
                 "see_all_friend_requests_url":  web_app_root_url_verified + "/friends",
                 "confirm_friend_request_url":   web_app_root_url_verified + "/more/network/key/" + invitation_secret_key,
-                "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?email_key=1234",
+                "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+                recipient_email_subscription_secret_key,
                 "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
             }
             template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -2555,8 +2595,12 @@ def store_internal_friend_invitation_with_two_voters(voter, invitation_message,
     return results
 
 
-def store_internal_friend_invitation_with_unknown_email(voter, invitation_message,
-                                                        email_address_object, first_name, last_name):
+def store_internal_friend_invitation_with_unknown_email(
+        voter=None,
+        invitation_message='',
+        email_address_object=None,
+        first_name='',
+        last_name=''):
     sender_voter_we_vote_id = voter.we_vote_id
     recipient_email_we_vote_id = email_address_object.we_vote_id
     recipient_voter_email = email_address_object.normalized_email_address
@@ -2566,10 +2610,14 @@ def store_internal_friend_invitation_with_unknown_email(voter, invitation_messag
     invitation_secret_key = generate_random_string(12)
 
     create_results = friend_manager.update_or_create_friend_invitation_email_link(
-        sender_voter_we_vote_id,
-        recipient_email_we_vote_id,
-        recipient_voter_email, first_name, last_name, invitation_message, sender_email_ownership_is_verified,
-        invitation_secret_key)
+        sender_voter_we_vote_id=sender_voter_we_vote_id,
+        recipient_email_we_vote_id=recipient_email_we_vote_id,
+        recipient_voter_email=recipient_voter_email,
+        recipient_first_name=first_name,
+        recipient_last_name=last_name,
+        invitation_message=invitation_message,
+        sender_email_ownership_is_verified=sender_email_ownership_is_verified,
+        invitation_secret_key=invitation_secret_key)
     results = {
         'success':                  create_results['success'],
         'status':                   create_results['status'],

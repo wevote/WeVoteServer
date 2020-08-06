@@ -1,5 +1,5 @@
-{# email_outbound/email_templates/friend_accepted_invitation.html #}<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional //EN">
-<html>
+{# email_outbound/email_templates/friend_invitation.html #}<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional //EN">
+<html>{# Later we replace "Your   friend" with the sender name. #}
   <head>
     <title>We Vote</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -26,9 +26,9 @@
                     <td height="16" style="line-height:16px;" colspan="3">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td width="64" align="left" valign="middle" style="height:64;line-height:0px;"><a href="{{ see_your_friend_list_url }}" style="color:#3b5998;text-decoration:none;"><img src="https://WeVote.US/img/global/logos/we-vote-logo-square-inverted-64x64.png" width="64" height="64" style="border:0;" /></a></td>
+                    <td width="64" align="left" valign="middle" style="height:64;line-height:0px;"><a href="{{ view_your_ballot_url }}" style="color:#3b5998;text-decoration:none;"><img src="https://WeVote.US/img/global/logos/we-vote-logo-square-inverted-64x64.png" width="64" height="64" style="border:0;" /></a></td>
                     <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>
-                    <td width="100%" style=""><a href="{{ see_your_friend_list_url }}" style="color:#3b5998;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:19px;line-height:32px;">We Vote</a></td>
+                    <td width="100%" style=""><a href="{{ view_your_ballot_url }}" style="color:#3b5998;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:32px;">We Vote</a></td>
                   </tr>
                   <tr style="border-bottom:solid 1px #e5e5e5;">
                     <td height="16" style="line-height:16px;" colspan="3">&nbsp;</td>
@@ -45,7 +45,7 @@
                     <td height="28" style="line-height:28px;">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#141823;"><a href="{{ see_your_friend_list_url }}" style="color:#3b5998;text-decoration:none;">{% if sender_name %}{{ sender_name }}{% else %}Your friend{% endif %}</a>{% if sender_email_address %} ({{ sender_email_address }}){% endif %} has accepted your invitation to be friends on We Vote.</span></td>
+                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#141823;"><a href="{{ view_your_ballot_url }}" style="color:#3b5998;text-decoration:none;">{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}</a>{% if sender_email_address %} ({{ sender_email_address }}){% elif sms_phone_number %} ({{ sms_phone_number }}){% endif %} has added a new opinion. Voting is better with friends!</span></td>
                   </tr>
                   <tr style="">
                     <td height="14" style="line-height:14px;">&nbsp;</td>
@@ -59,7 +59,7 @@
                             <table cellspacing="0" cellpadding="0" width="100%" align="left" class="ib_t" style="border-collapse:collapse;width:100%;min-width:420px;">
                               <tr class="ib_row">
                                 {% if sender_photo %}
-                                <td valign="middle" style="padding-right:15px;font-size:0px;" class="ib_img"><a href="{{ see_your_friend_list_url }}" style="color:#3b5998;text-decoration:none;"><img src="{{ sender_photo }}" width="75" height="75" style="border:0;background:#ffffff;" /></a></td>
+                                <td valign="middle" style="padding-right:15px;font-size:0px;" class="ib_img"><a href="{{ view_your_ballot_url }}" style="color:#3b5998;text-decoration:none;"><img src="{{ sender_photo }}" width="75" height="75" style="border:0;background:#ffffff;" /></a></td>
                                 {% endif %}
                                 <td width="100%" valign="middle" style="padding-right:10px;" class="ib_mid">
                                   <table cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
@@ -70,7 +70,7 @@
                                     {% endif %}
                                     {% if sender_description or sender_network_details %}
                                         <tr>
-                                          <td style=""><a href="{{ see_your_friend_list_url }}" style="color:#141823;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;font-weight:bold;">{% if sender_name %}{{ sender_name }}{% else %}{{ sender_email_address }}{% endif %}</a></td>
+                                          <td style=""><a href="{{ view_your_ballot_url }}" style="color:#141823;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;font-weight:bold;">{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}</a></td>
                                         </tr>
                                         {% if sender_description %}
                                         <tr>
@@ -117,13 +117,20 @@
                         <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
                           <tr>
                             <td style="border-collapse:collapse;border-radius:2px;text-align:center;display:block;border:solid 1px #344c80;box-shadow:inset 0 1px 1px rgba(255, 255, 255, 0.1),0 1px 0 rgba(0, 0, 0, 0.1);background:#2E3C5D;padding:7px 16px 11px 16px;">
-                      <a href="{{ see_your_friend_list_url }}" style="color:#2E3C5D;text-decoration:none;display:block;"><center><font size="3"><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;font-weight:bold;vertical-align:middle;color:#ffffff;text-shadow:0 -1px 0 #415686;font-size:20px;line-height:20px;">See&nbsp;All&nbsp;Friends</span></font></center></a>
+                      <a href="{{ view_new_endorsements_url }}" style="color:#2E3C5D;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;font-weight:bold;vertical-align:middle;color:#ffffff;text-shadow:0 -1px 0 #415686;font-size:20px;line-height:20px;">View New Opinion(s)</span></center></a>
                             </td>
                           </tr>
                         </table>
                     </td>
                     <td width="10" style="display:block;width:10px;" class="mb_hide">&nbsp;&nbsp;&nbsp;</td>
                     <td class="mb_blk" style="">
+                        <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
+                          <tr>
+                            <td style="border-collapse:collapse;border-radius:2px;text-align:center;display:block;border:solid 1px #c9ccd1;box-shadow:0 1px 0 rgba(0, 0, 0, 0.04);background:#f6f7f8;padding:7px 16px 11px 16px;">
+                      <a href="{{ view_your_ballot_url }}" style="color:#2E3C5D;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;font-weight:bold;vertical-align:middle;color:#525252;text-shadow:0 1px 0 #ffffff;font-size:20px;line-height:20px;">See&nbsp;Your Ballot</span></center></a>
+                            </td>
+                          </tr>
+                        </table>
                     </td>
                     <td width="100%" class="mb_hide" style=""></td>
                   </tr>
@@ -139,13 +146,16 @@
               <td style="">
                 <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
                   <tr style="">
-                    <td height="24" style="line-height:24px;">&nbsp;</td>
+                    <td height="14" style="line-height:14px;">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:18px;line-height:24px;color:#141823;">If the See All Friends button does not work, copy and paste this link into a browser: {{ see_your_friend_list_url }}</span></td>
+                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:18px;line-height:24px;color:#141823;">If the View New Opinion(s) button does not work, please copy and paste this link into a browser: {{ view_new_endorsements_url }}</span></td>
                   </tr>
                   <tr style="">
-                    <td height="14" style="line-height:14px;">&nbsp;</td>
+                    <td height="7" style="line-height:7px;">&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:18px;line-height:24px;color:#141823;">If the See Your Ballot button does not work, please use this link: {{ view_your_ballot_url }}</span></td>
                   </tr>
                 </table>
               </td>

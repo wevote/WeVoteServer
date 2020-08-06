@@ -1768,7 +1768,7 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def update_voter_name_by_object(self, voter, first_name, last_name):
+    def update_voter_name_by_object(self, voter, first_name='', last_name=''):
         facebook_email = False
         facebook_profile_image_url_https = False
         middle_name = False
@@ -1906,7 +1906,7 @@ class VoterManager(BaseUserManager):
 
             success = True
         except Exception as e:
-            status += "UNABLE_TO_UPDATE_INCOMING_VOTER "
+            status += "UNABLE_TO_UPDATE_INCOMING_VOTER " + str(e) + " "
             # We tried to update the incoming voter found but got an error, so we retrieve voter's based on
             #  normalized_email address, and then by primary_email_we_vote_id
             remove_cached_results = voter_manager.remove_voter_cached_email_entries_from_email_address_object(
@@ -2362,7 +2362,7 @@ class Voter(AbstractBaseUser):
         :param flag_integer:
         :return:
         """
-        return flag_integer & self.interface_status_flags
+        return positive_value_exists(flag_integer & self.interface_status_flags)
 
     def set_notification_settings_flags(self, notification_flag_integer_to_set):
         self.notification_settings_flags |= notification_flag_integer_to_set
@@ -2376,7 +2376,7 @@ class Voter(AbstractBaseUser):
         :param flag_integer:
         :return:
         """
-        return flag_integer & self.notification_settings_flags
+        return positive_value_exists(flag_integer & self.notification_settings_flags)
 
 
 # VoterChangeLog

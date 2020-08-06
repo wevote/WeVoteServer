@@ -2321,12 +2321,14 @@ def voter_notification_settings_update_view(request):  # voterNotificationSettin
     voter_id = 0
     voter_interface_status_flags = 0
     voter_notification_settings_flags = 0
+    email_address_object_found = False
     if positive_value_exists(email_subscription_secret_key):
         email_results = email_manager.retrieve_email_address_object_from_secret_key(
             subscription_secret_key=email_subscription_secret_key)
         if email_results['email_address_object_found']:
             status += "VOTER_NOTIFICATION_SETTINGS_UPDATE-EMAIL_ADDRESS_FOUND "
             email_address_object = email_results['email_address_object']
+            email_address_object_found = True
             normalized_email_address = email_address_object.normalized_email_address
             voter_results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
             voter = voter_results['voter']
@@ -2344,6 +2346,7 @@ def voter_notification_settings_update_view(request):  # voterNotificationSettin
         json_data = {
             'status':                           status,
             'success':                          True,
+            'email_found':                      email_address_object_found,
             'voter_found':                      voter_found,
             'voter_updated':                    voter_updated,
             'interface_status_flags':           interface_status_flags,
@@ -2359,11 +2362,15 @@ def voter_notification_settings_update_view(request):  # voterNotificationSettin
         return response
 
     if not positive_value_exists(voter_id):
-        status += "VOTER_NOT_FOUND_FROM_SECRET_KEY-VOTER_NOTIFICATION_SETTINGS_UPDATE "
+        if email_address_object_found:
+            status += "VOTER_NOT_FOUND_BUT_EMAIL_FOUND_FROM_SECRET_KEY "
+        else:
+            status += "VOTER_NOT_FOUND_FROM_SECRET_KEY "
         voter_found = False
         json_data = {
             'status':                           status,
             'success':                          True,
+            'email_found':                      email_address_object_found,
             'voter_found':                      voter_found,
             'voter_updated':                    voter_updated,
             'interface_status_flags':           interface_status_flags,
@@ -2388,6 +2395,7 @@ def voter_notification_settings_update_view(request):  # voterNotificationSettin
         json_data = {
                 'status':                           status,
                 'success':                          True,
+                'email_found':                      email_address_object_found,
                 'voter_found':                      voter_found,
                 'voter_updated':                    voter_updated,
                 'interface_status_flags':           voter_interface_status_flags,
@@ -2424,6 +2432,7 @@ def voter_notification_settings_update_view(request):  # voterNotificationSettin
     json_data = {
         'status':                                   status,
         'success':                                  success,
+        'email_found':                              email_address_object_found,
         'voter_found':                              voter_found,
         'voter_updated':                            voter_updated,
         'interface_status_flags':                   voter_interface_status_flags,

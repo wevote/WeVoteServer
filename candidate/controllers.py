@@ -158,12 +158,13 @@ def candidates_import_from_master_server(request, google_civic_election_id='', s
     )
 
     if import_results['success']:
-        results = filter_candidates_structured_json_for_local_duplicates(structured_json)
-        filtered_structured_json = results['structured_json']
-        duplicates_removed = results['duplicates_removed']
-
-        import_results = candidates_import_from_structured_json(filtered_structured_json)
-        import_results['duplicates_removed'] = duplicates_removed
+        # results = filter_candidates_structured_json_for_local_duplicates(structured_json)
+        # filtered_structured_json = results['structured_json']
+        # duplicates_removed = results['duplicates_removed']
+        # import_results = candidates_import_from_structured_json(filtered_structured_json)
+        import_results = candidates_import_from_structured_json(structured_json)
+        # import_results['duplicates_removed'] = duplicates_removed
+        import_results['duplicates_removed'] = 0
 
     import2_results, structured_json = process_request_from_master(
         request, "Loading Candidate to Office Links from We Vote Master servers",
@@ -711,7 +712,7 @@ def candidates_import_from_structured_json(structured_json):
             contest_office_we_vote_id)
 
         if positive_value_exists(candidate_name) and positive_value_exists(google_civic_election_id) \
-                and positive_value_exists(we_vote_id) and positive_value_exists(contest_office_id):
+                and positive_value_exists(we_vote_id):  # Removed:  and positive_value_exists(contest_office_id)
             proceed_to_update_or_create = True
         else:
             proceed_to_update_or_create = False

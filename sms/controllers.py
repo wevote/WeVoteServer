@@ -414,13 +414,16 @@ def schedule_verification_sms(sender_voter_we_vote_id, recipient_voter_we_vote_i
         return results
 
     subject = "Please verify your sms"
+    original_sender_email_subscription_secret_key = ''
 
     template_variables_for_json = {
         "subject":                      subject,
         "recipient_voter_sms":          recipient_voter_sms,
         "we_vote_url":                  web_app_root_url_verified,
-        "verify_sms_link":              web_app_root_url_verified + "/verify_sms/" + recipient_sms_phone_number_secret_key,
-        "recipient_unsubscribe_url":    web_app_root_url_verified + "/unsubscribe?sms_key=1234",
+        "verify_sms_link":              web_app_root_url_verified + "/verify_sms/" +
+        recipient_sms_phone_number_secret_key,
+        "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+        original_sender_email_subscription_secret_key,
         "sms_open_url":                 WE_VOTE_SERVER_ROOT_URL + "/apis/v1/smsOpen?sms_key=1234",
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)

@@ -184,6 +184,7 @@ def process_one_analytics_batch_process_augment_with_election_id(batch_process, 
 
     if not len(voter_analytics_list):
         try:
+            batch_process.date_checked_out = None
             batch_process.date_completed = now()
             batch_process.save()
         except Exception as e:
@@ -317,6 +318,7 @@ def process_one_analytics_batch_process_augment_with_first_visit(batch_process, 
 
     if not len(voter_analytics_list):
         try:
+            batch_process.date_checked_out = None
             batch_process.date_completed = now()
             batch_process.save()
         except Exception as e:
@@ -743,6 +745,7 @@ def process_sitewide_voter_metrics(batch_process, batch_process_analytics_chunk)
 
     if not len(voter_analytics_list):
         try:
+            batch_process.date_checked_out = None
             batch_process.date_completed = now()
             batch_process.save()
         except Exception as e:
