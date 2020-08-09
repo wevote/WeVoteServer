@@ -170,17 +170,18 @@ def position_list_for_opinion_maker_view(request):  # positionListForOpinionMake
         organization_we_vote_id = ''
         public_figure_id = 0
         public_figure_we_vote_id = ''
-    json_data = position_list_for_opinion_maker_for_api(voter_device_id=voter_device_id,
-                                                        organization_id=organization_id,
-                                                        organization_we_vote_id=organization_we_vote_id,
-                                                        public_figure_id=public_figure_id,
-                                                        public_figure_we_vote_id=public_figure_we_vote_id,
-                                                        friends_vs_public=friends_vs_public,
-                                                        stance_we_are_looking_for=stance_we_are_looking_for,
-                                                        filter_for_voter=filter_for_voter,
-                                                        filter_out_voter=filter_out_voter,
-                                                        google_civic_election_id=google_civic_election_id,
-                                                        state_code=state_code)
+    json_data = position_list_for_opinion_maker_for_api(
+        voter_device_id=voter_device_id,
+        organization_id=organization_id,
+        organization_we_vote_id=organization_we_vote_id,
+        public_figure_id=public_figure_id,
+        public_figure_we_vote_id=public_figure_we_vote_id,
+        friends_vs_public=friends_vs_public,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        filter_for_voter=filter_for_voter,
+        filter_out_voter=filter_out_voter,
+        google_civic_election_id=google_civic_election_id,
+        state_code=state_code)
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 

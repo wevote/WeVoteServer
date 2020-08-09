@@ -45,6 +45,7 @@ def voter_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string (description of what happened),\n' \
                    '  "success": boolean (True as long as no db errors),\n' \
+                   '  "date_joined": string,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "voter_created": boolean,\n' \
                    '  "voter_found": boolean,\n' \
