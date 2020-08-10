@@ -440,7 +440,14 @@ def update_or_create_activity_notice_seed_for_voter_position(
         speaker_voter_we_vote_id=speaker_voter_we_vote_id,
     )
     if results['activity_notice_seed_found']:
-        # activity_notice_seed = results['activity_notice_seed']
+        activity_notice_seed = results['activity_notice_seed']
+        try:
+            activity_notice_seed.speaker_name = speaker_name
+            activity_notice_seed.speaker_profile_image_url_medium = speaker_profile_image_url_medium
+            activity_notice_seed.speaker_profile_image_url_tiny = speaker_profile_image_url_tiny
+            activity_notice_seed.save()
+        except Exception as e:
+            status += "COULD_NOT_UPDATE_SPEAKER_IMAGES " + str(e) + " "
         status += results['status']
     elif results['success']:
         date_of_notice = now()
@@ -479,7 +486,7 @@ def update_activity_notices_from_seed(activity_notice_seed):
 
 def voter_activity_notice_list_retrieve_for_api(voter_device_id):  # voterActivityNoticeListRetrieve
     """
-
+    See: activity_notice_list_retrieve_view in apis_v1/views/views_activity.py
     :param voter_device_id:
     :return:
     """
@@ -494,8 +501,8 @@ def voter_activity_notice_list_retrieve_for_api(voter_device_id):  # voterActivi
             'status':                       device_id_results['status'],
             'success':                      False,
             'voter_device_id':              voter_device_id,
-            'activity_notice_list_found':  False,
-            'activity_notice_list':        [],
+            'activity_notice_list_found':   False,
+            'activity_notice_list':         [],
         }
         return json_data
 

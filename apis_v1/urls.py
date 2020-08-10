@@ -33,6 +33,8 @@ from voter_guide.views_admin import voter_guides_sync_out_view
 
 urlpatterns = [
     # Actual API Calls
+    url(r'^activityListRetrieve/',
+        views_activity.activity_list_retrieve_view, name='activityListRetrieveView'),
     url(r'^activityNoticeListRetrieve/',
         views_activity.activity_notice_list_retrieve_view, name='activityNoticeListRetrieveView'),
     url(r'^allBallotItemsRetrieve/', views_ballot.all_ballot_items_retrieve_view,
@@ -316,6 +318,8 @@ urlpatterns = [
     ##########################
     # API Documentation Views
     url(r'^docs/$', views_docs.apis_index_doc_view, name='apisIndex'),
+    url(r'^docs/activityListRetrieve/$',
+        views_docs.activity_list_retrieve_doc_view, name='activityListRetrieveDocs'),
     url(r'^docs/activityNoticeListRetrieve/$',
         views_docs.activity_notice_list_retrieve_doc_view, name='activityNoticeListRetrieveDocs'),
     url(r'^docs/allBallotItemsRetrieve/$',

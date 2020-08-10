@@ -65,6 +65,8 @@ class ActivityNoticeSeed(models.Model):
     speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
     speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
     speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
+    speaker_twitter_handle = models.CharField(max_length=255, null=True, unique=False, default=None)
+    speaker_twitter_followers_count = models.IntegerField(default=0)
 
 
 class ActivityTidbit(models.Model):
@@ -516,11 +518,76 @@ class ActivityManager(models.Manager):
             status += 'FAILED retrieve_voter_activity_notice_list ActivityNotice ' + str(e) + ' '
 
         results = {
-            'success': success,
-            'status': status,
-            'recipient_voter_we_vote_id': recipient_voter_we_vote_id,
-            'activity_notice_list_found': activity_notice_list_found,
-            'activity_notice_list': activity_notice_list,
+            'success':                      success,
+            'status':                       status,
+            'recipient_voter_we_vote_id':   recipient_voter_we_vote_id,
+            'activity_notice_list_found':   activity_notice_list_found,
+            'activity_notice_list':         activity_notice_list,
+        }
+        return results
+
+    def retrieve_activity_notice_seed_list_for_recipient(self, recipient_voter_we_vote_id=''):
+        """
+
+        :param recipient_voter_we_vote_id:
+        :return:
+        """
+        status = ""
+        if not positive_value_exists(recipient_voter_we_vote_id):
+            success = False
+            status += 'VALID_VOTER_WE_VOTE_ID_MISSING '
+            results = {
+                'success':                          success,
+                'status':                           status,
+                'recipient_voter_we_vote_id':       recipient_voter_we_vote_id,
+                'activity_notice_seed_list_found':  False,
+                'activity_notice_seed_list':        [],
+            }
+            return results
+
+        activity_notice_seed_list = []
+        voter_friend_we_vote_id_list = []
+        voter_friend_we_vote_id_list.append(recipient_voter_we_vote_id)
+        from friend.models import FriendManager
+        friend_manager = FriendManager()
+        friend_results = friend_manager.retrieve_friends_we_vote_id_list(recipient_voter_we_vote_id)
+        if friend_results['friends_we_vote_id_list_found']:
+            friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+            voter_friend_we_vote_id_list += friends_we_vote_id_list
+        try:
+            queryset = ActivityNoticeSeed.objects.all()
+            queryset = queryset.filter(
+                speaker_voter_we_vote_id__in=voter_friend_we_vote_id_list,
+                deleted=False
+            )
+            queryset = queryset.order_by('-id')  # Put most recent sms at top of list
+            activity_notice_seed_list = list(queryset)
+
+            if len(activity_notice_seed_list):
+                success = True
+                activity_notice_seed_list_found = True
+                status += 'ACTIVITY_NOTICE_SEED_LIST_RETRIEVED '
+            else:
+                success = True
+                activity_notice_seed_list_found = False
+                status += 'NO_ACTIVITY_NOTICE_SEED_LIST_RETRIEVED '
+        except ActivityNotice.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            activity_notice_seed_list_found = False
+            status += 'NO_ACTIVITY_NOTICE_SEED_LIST_RETRIEVED_DoesNotExist '
+            activity_notice_seed_list = []
+        except Exception as e:
+            success = False
+            activity_notice_seed_list_found = False
+            status += 'FAILED retrieve_voter_activity_notice_seed_list: ' + str(e) + ' '
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'recipient_voter_we_vote_id':       recipient_voter_we_vote_id,
+            'activity_notice_seed_list_found':  activity_notice_seed_list_found,
+            'activity_notice_seed_list':        activity_notice_seed_list,
         }
         return results
 
@@ -640,5 +707,5 @@ class ActivityManager(models.Manager):
 
 def get_lifespan_of_seed(kind_of_seed):
     if kind_of_seed == NOTICE_FRIEND_ENDORSEMENTS_SEED:
-        return 1800  # 30 minutes * 60 seconds/minute
+        return 21600  # 6 hours * 60 minutes * 60 seconds/minute
     return 0
