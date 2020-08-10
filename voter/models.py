@@ -2298,10 +2298,10 @@ class Voter(AbstractBaseUser):
                 return True
         return False
 
-    def signed_in_with_apple(self, voter_device_id):
+    def signed_in_with_apple(self, voter_we_vote_id):
         # Signed in with apple is only for iOS under Cordova at this point, and is tied to one voter_device_id
         try:
-            apple_object = AppleUser.objects.get(voter_device_id__iexact=voter_device_id)
+            apple_object = AppleUser.objects.get(voter_we_vote_id=voter_we_vote_id)
             return True
         except AppleUser.DoesNotExist:
             return False

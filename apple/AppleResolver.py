@@ -2,14 +2,13 @@ import json  # pragma: no cover
 import jwt   # pragma: no cover
 from cryptography.hazmat.primitives import serialization    # pragma: no cover
 from jwt.algorithms import RSAAlgorithm     # pragma: no cover
-from config.base import get_environment_variable
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
 class AppleResolver(object):
-# https://gist.github.com/davidhariri/b053787aabc9a8a9cc0893244e1549fe
+    # https://gist.github.com/davidhariri/b053787aabc9a8a9cc0893244e1549fe
 
     @classmethod
     def __get_right_public_key_info(cls, keys, unverified_header):
@@ -18,7 +17,7 @@ class AppleResolver(object):
                 return key
 
     @classmethod
-    def authenticate(cls, access_token):
+    def authenticate(cls, access_token, client_id):
 
         import http.client
 
@@ -46,9 +45,8 @@ class AppleResolver(object):
                 format=serialization.PublicFormat.SubjectPublicKeyInfo
             )
 
-
             verified_payload = jwt.decode(access_token, apple_public_key_as_string,
-                                          audience=get_environment_variable("SOCIAL_AUTH_APPLE_CLIENT_ID"),
+                                          audience=client_id,
                                           algorithm=public_key_info['alg'])
             print('AppleResolver verified_payload: ', verified_payload)
 
