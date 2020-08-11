@@ -112,6 +112,24 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+    activity_notice_id_list_clicked = request.GET.getlist('activity_notice_id_list_clicked[]')
+    activity_notice_id_list_seen = request.GET.getlist('activity_notice_id_list_seen[]')
+
+    if activity_notice_id_list_clicked and len(activity_notice_id_list_clicked):
+        results = activity_manager.update_activity_notice_list_in_bulk(
+            recipient_voter_we_vote_id=voter_we_vote_id,
+            activity_notice_id_list=activity_notice_id_list_clicked,
+            activity_notice_clicked=True
+        )
+        status += results['status']
+    if activity_notice_id_list_seen and len(activity_notice_id_list_seen):
+        results = activity_manager.update_activity_notice_list_in_bulk(
+            recipient_voter_we_vote_id=voter_we_vote_id,
+            activity_notice_id_list=activity_notice_id_list_seen,
+            activity_notice_seen=True,
+        )
+        status += results['status']
+
     results = activity_manager.retrieve_activity_notice_list_for_recipient(recipient_voter_we_vote_id=voter_we_vote_id)
     if not results['success']:
         status += results['status']
@@ -132,6 +150,8 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
         new_positions_entered_count = activity_notice.new_positions_entered_count
         if new_positions_entered_count > 0:
             activity_notice_dict = {
+                'activity_notice_clicked':          activity_notice.activity_notice_clicked,
+                'activity_notice_seen':             activity_notice.activity_notice_seen,
                 'date_last_changed':                activity_notice.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
                 'date_of_notice':                   activity_notice.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
                 'id':                               activity_notice.id,

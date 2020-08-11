@@ -22,6 +22,8 @@ class ActivityNotice(models.Model):
     activity_notice_seed_id = models.PositiveIntegerField(default=None, null=True)
     date_of_notice = models.DateTimeField(null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True)
+    activity_notice_clicked = models.BooleanField(default=False)
+    activity_notice_seen = models.BooleanField(default=False)
     deleted = models.BooleanField(default=False)
     kind_of_notice = models.CharField(max_length=50, default=None, null=True)
     kind_of_seed = models.CharField(max_length=50, default=None, null=True)
@@ -633,6 +635,68 @@ class ActivityManager(models.Manager):
             'status':                       status,
             'activity_notice_seed_found':   activity_notice_seed_found,
             'activity_notice_seed':         activity_notice_seed,
+        }
+        return results
+
+    def update_activity_notice_list_in_bulk(
+            self,
+            recipient_voter_we_vote_id='',
+            activity_notice_id_list=[],
+            activity_notice_seen=False,
+            activity_notice_clicked=False):
+        status = ""
+        if not positive_value_exists(recipient_voter_we_vote_id):
+            success = False
+            status += 'VALID_VOTER_WE_VOTE_ID_MISSING '
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'recipient_voter_we_vote_id':   recipient_voter_we_vote_id,
+                'activity_notice_list_updated': False,
+            }
+            return results
+
+        try:
+            if activity_notice_clicked and activity_notice_seen:
+                ActivityNotice.objects.all().filter(
+                    id__in=activity_notice_id_list,
+                    recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                    deleted=False
+                ).update(
+                    activity_notice_seen=True,
+                    activity_notice_clicked=True)  # Put most recent sms at top of list
+            elif activity_notice_clicked:
+                ActivityNotice.objects.all().filter(
+                    id__in=activity_notice_id_list,
+                    recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                    deleted=False
+                ).update(
+                    activity_notice_clicked=True)  # Put most recent sms at top of list
+            elif activity_notice_seen:
+                ActivityNotice.objects.all().filter(
+                    id__in=activity_notice_id_list,
+                    recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                    deleted=False
+                ).update(
+                    activity_notice_seen=True)  # Put most recent sms at top of list
+            success = True
+            activity_notice_list_updated = True
+            status += 'ACTIVITY_NOTICE_LIST_UPDATED '
+        except ActivityNotice.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            activity_notice_list_updated = False
+            status += 'NO_ACTIVITY_NOTICE_LIST_ENTRIES_FOUND '
+        except Exception as e:
+            success = False
+            activity_notice_list_updated = False
+            status += 'FAILED update_activity_notice_list_in_bulk ActivityNotice ' + str(e) + ' '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'recipient_voter_we_vote_id':   recipient_voter_we_vote_id,
+            'activity_notice_list_updated': activity_notice_list_updated,
         }
         return results
 
