@@ -3133,7 +3133,8 @@ class PositionListManager(models.Model):
 
     def retrieve_all_positions_for_voter(self, voter_id=0, voter_we_vote_id='',
                                          stance_we_are_looking_for=ANY_STANCE, friends_vs_public=FRIENDS_AND_PUBLIC,
-                                         google_civic_election_id=0, this_election_vs_others='', state_code=''):
+                                         google_civic_election_id=0, this_election_vs_others='', state_code='',
+                                         since_date=None):
         """
         We want the voter's position information for display prior to sign in
         :param voter_id:
@@ -3144,15 +3145,21 @@ class PositionListManager(models.Model):
         :param google_civic_election_id:
         :param this_election_vs_others:
         :param state_code:
+        :param since_date:
         :return:
         """
+        status = ''
+        public_positions_list = []
+        friends_positions_list = []
         if not positive_value_exists(voter_id) and not positive_value_exists(voter_we_vote_id):
             position_list = []
             results = {
-                'status':               'MISSING_VOTER_ID',
-                'success':              False,
-                'position_list_found':  False,
-                'position_list':        position_list,
+                'status':                   'MISSING_VOTER_ID',
+                'success':                  False,
+                'friends_positions_list':   friends_positions_list,
+                'position_list_found':      False,
+                'position_list':            position_list,
+                'public_positions_list':    public_positions_list,
             }
             return results
 
@@ -3161,11 +3168,14 @@ class PositionListManager(models.Model):
         if stance_we_are_looking_for not \
                 in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
+            status += 'STANCE_WE_ARE_LOOKING_FOR_NOT_VALID'
             results = {
-                'status':               'STANCE_WE_ARE_LOOKING_FOR_NOT_VALID',
-                'success':              False,
-                'position_list_found':  False,
-                'position_list':        position_list,
+                'status':                   status,
+                'success':                  False,
+                'friends_positions_list':   friends_positions_list,
+                'position_list_found':      False,
+                'position_list':            position_list,
+                'public_positions_list':    public_positions_list,
             }
             return results
 
@@ -3183,8 +3193,6 @@ class PositionListManager(models.Model):
             or not one_election_filter_applied
 
         # Retrieve public positions for this organization
-        public_positions_list = []
-        friends_positions_list = []
         position_list_found = False
 
         if retrieve_public_positions:
@@ -3224,16 +3232,23 @@ class PositionListManager(models.Model):
                     public_positions_list_query = public_positions_list_query.filter(
                         stance=stance_we_are_looking_for)
 
+                if positive_value_exists(since_date):
+                    public_positions_list_query = public_positions_list_query.filter(
+                        date_entered__gte=since_date)
+
                 # Force the position for the most recent election to show up last
                 public_positions_list_query = public_positions_list_query.order_by('google_civic_election_id')
                 public_positions_list = list(public_positions_list_query)  # Force the query to run
             except Exception as e:
                 position_list = []
+                status += 'VOTER_POSITION_FOR_PUBLIC_SEARCH_FAILED' + str(e) + ' '
                 results = {
-                    'status':               'VOTER_POSITION_FOR_PUBLIC_SEARCH_FAILED',
-                    'success':              False,
-                    'position_list_found':  False,
-                    'position_list':        position_list,
+                    'status':                   status,
+                    'success':                  False,
+                    'friends_positions_list':   friends_positions_list,
+                    'position_list_found':      False,
+                    'position_list':            position_list,
+                    'public_positions_list':    public_positions_list,
                 }
                 return results
 
@@ -3274,16 +3289,23 @@ class PositionListManager(models.Model):
                     friends_positions_list_query = friends_positions_list_query.filter(
                         stance=stance_we_are_looking_for)
 
+                if positive_value_exists(since_date):
+                    friends_positions_list_query = friends_positions_list_query.filter(
+                        date_entered__gte=since_date)
+
                 # Force the position for the most recent election to show up last
                 friends_positions_list_query = friends_positions_list_query.order_by('google_civic_election_id')
                 friends_positions_list = list(friends_positions_list_query)  # Force the query to run
             except Exception as e:
                 position_list = []
+                status += 'VOTER_POSITION_FOR_FRIENDS_SEARCH_FAILED' + str(e) + ' '
                 results = {
-                    'status':               'VOTER_POSITION_FOR_FRIENDS_SEARCH_FAILED',
-                    'success':              False,
-                    'position_list_found':  False,
-                    'position_list':        position_list,
+                    'status':                   status,
+                    'success':                  False,
+                    'friends_positions_list':   friends_positions_list,
+                    'position_list_found':      False,
+                    'position_list':            position_list,
+                    'public_positions_list':    public_positions_list,
                 }
                 return results
 
@@ -3341,19 +3363,23 @@ class PositionListManager(models.Model):
                 enhanced_position_list.append(position)
 
             results = {
-                'status':               'VOTER_POSITION_LIST_FOUND',
-                'success':              True,
-                'position_list_found':  True,
-                'position_list':        enhanced_position_list,
+                'status':                   'VOTER_POSITION_LIST_FOUND',
+                'success':                  True,
+                'friends_positions_list':   friends_positions_list,
+                'position_list_found':      True,
+                'position_list':            enhanced_position_list,
+                'public_positions_list':    public_positions_list,
             }
             return results
         else:
             position_list = []
             results = {
-                'status':               'VOTER_POSITION_LIST_NOT_FOUND',
-                'success':              True,
-                'position_list_found':  False,
-                'position_list':        position_list,
+                'status':                   'VOTER_POSITION_LIST_NOT_FOUND',
+                'success':                  True,
+                'friends_positions_list':   friends_positions_list,
+                'position_list_found':      False,
+                'position_list':            position_list,
+                'public_positions_list':    public_positions_list,
             }
             return results
 
@@ -5950,6 +5976,7 @@ class PositionManager(models.Model):
         if positive_value_exists(success):
             activity_results = update_or_create_activity_notice_seed_for_voter_position(
                 position_we_vote_id=voter_position_on_stage.we_vote_id,
+                is_public_position=is_public_position,
                 speaker_name=voter_position_on_stage.speaker_display_name,
                 speaker_organization_we_vote_id=voter_position_on_stage.organization_we_vote_id,
                 speaker_voter_we_vote_id=voter_position_on_stage.voter_we_vote_id,
@@ -6363,6 +6390,7 @@ class PositionManager(models.Model):
         if positive_value_exists(success):
             activity_results = update_or_create_activity_notice_seed_for_voter_position(
                 position_we_vote_id=voter_position_on_stage.we_vote_id,
+                is_public_position=is_public_position,
                 speaker_name=voter_position_on_stage.speaker_display_name,
                 speaker_organization_we_vote_id=voter_position_on_stage.organization_we_vote_id,
                 speaker_voter_we_vote_id=voter_position_on_stage.voter_we_vote_id,

@@ -55,14 +55,22 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
     activity_list = []
     activity_notice_seed_list = results['activity_notice_seed_list']
     for activity_notice_seed in activity_notice_seed_list:
+        new_positions_entered_count = 0
+        position_we_vote_id_list = []
+        # In this scenario we want to return both friends and public values
+        if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_friends_serialized):
+            position_we_vote_id_list += json.loads(activity_notice_seed.position_we_vote_ids_for_friends_serialized)
+        if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_public_serialized):
+            position_we_vote_id_list += json.loads(activity_notice_seed.position_we_vote_ids_for_public_serialized)
+        new_positions_entered_count += len(position_we_vote_id_list)
         activity_notice_seed_dict = {
             'date_last_changed':                activity_notice_seed.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
             'date_of_notice':                   activity_notice_seed.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
             'id':                               activity_notice_seed.id,
             'kind_of_activity':                 "ACTIVITY_NOTICE_SEED",
             'kind_of_seed':                     activity_notice_seed.kind_of_seed,
-            'new_positions_entered_count':      activity_notice_seed.new_positions_entered_count,
-            'position_we_vote_id':              activity_notice_seed.position_we_vote_id,
+            'new_positions_entered_count':      new_positions_entered_count,
+            'position_we_vote_id_list':         position_we_vote_id_list,
             'speaker_name':                     activity_notice_seed.speaker_name,
             'speaker_organization_we_vote_id':  activity_notice_seed.speaker_organization_we_vote_id,
             'speaker_voter_we_vote_id':         activity_notice_seed.speaker_voter_we_vote_id,
@@ -118,20 +126,25 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
     modified_activity_notice_list = []
     activity_notice_list = results['activity_notice_list']
     for activity_notice in activity_notice_list:
-        activity_notice_dict = {
-            'date_last_changed':                activity_notice.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
-            'date_of_notice':                   activity_notice.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
-            'id':                               activity_notice.id,
-            'kind_of_notice':                   activity_notice.kind_of_notice,
-            'new_positions_entered_count':      activity_notice.new_positions_entered_count,
-            'position_we_vote_id':              activity_notice.position_we_vote_id,
-            'speaker_name':                     activity_notice.speaker_name,
-            'speaker_organization_we_vote_id':  activity_notice.speaker_organization_we_vote_id,
-            'speaker_voter_we_vote_id':         activity_notice.speaker_voter_we_vote_id,
-            'speaker_profile_image_url_medium': activity_notice.speaker_profile_image_url_medium,
-            'speaker_profile_image_url_tiny':   activity_notice.speaker_profile_image_url_tiny,
-        }
-        modified_activity_notice_list.append(activity_notice_dict)
+        position_we_vote_id_list = []
+        if positive_value_exists(activity_notice.position_we_vote_id_list_serialized):
+            position_we_vote_id_list = json.loads(activity_notice.position_we_vote_id_list_serialized)
+        new_positions_entered_count = activity_notice.new_positions_entered_count
+        if new_positions_entered_count > 0:
+            activity_notice_dict = {
+                'date_last_changed':                activity_notice.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+                'date_of_notice':                   activity_notice.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
+                'id':                               activity_notice.id,
+                'kind_of_notice':                   activity_notice.kind_of_notice,
+                'new_positions_entered_count':      new_positions_entered_count,
+                'position_we_vote_id_list':         position_we_vote_id_list,
+                'speaker_name':                     activity_notice.speaker_name,
+                'speaker_organization_we_vote_id':  activity_notice.speaker_organization_we_vote_id,
+                'speaker_voter_we_vote_id':         activity_notice.speaker_voter_we_vote_id,
+                'speaker_profile_image_url_medium': activity_notice.speaker_profile_image_url_medium,
+                'speaker_profile_image_url_tiny':   activity_notice.speaker_profile_image_url_tiny,
+            }
+            modified_activity_notice_list.append(activity_notice_dict)
     json_data = {
         'status': status,
         'success': True,
