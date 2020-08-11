@@ -18,9 +18,7 @@ class AppleUser(models.Model):
     Apple allows alias sign in email addresses, so the reported email address might be an alias that would not be
     in our system anywhere else
     """
-    objects = None
-    voter_device_id = models.CharField(verbose_name='voter device id',
-                                       max_length=255, null=False, blank=False, unique=False)
+    # objects = None
     voter_we_vote_id = models.CharField(verbose_name="we vote id for the Apple ID owner", max_length=255, unique=False)
     user_code = models.CharField(verbose_name="User's apple id code, a.k.a. `subject registered claim`", max_length=255, null=False, unique=False)
     email = models.EmailField(verbose_name='apple email address', max_length=255, unique=False,

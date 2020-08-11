@@ -1,7 +1,7 @@
 # sign_in_with_apple/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from config.base import get_environment_variable
+from django.db.models import Q
 from voter.models import VoterManager
 from wevote_functions.functions import positive_value_exists
 import wevote_functions.admin
@@ -11,17 +11,6 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 def apple_sign_in_retrieve_voter_id(voter_device_id, email, first_name, last_name):
-    """
-    We are asking for the results of the most recent Twitter authentication
-
-    July 2017: We want the TwitterUser class/table to be the authoritative source of twitter info, ideally
-    TwitterUser feeds the duplicated columns in voter, organization, candidate, etc.
-    Unfortunately Django Auth, pre-populates voter with some key info first, which is fine, but makes it less clean.
-
-    :param voter_device_id:
-    :return:
-    """
-
     # First find out if there is an existing voter_id for the existing device_id
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
@@ -54,7 +43,7 @@ def apple_sign_in_retrieve_voter_id(voter_device_id, email, first_name, last_nam
                 }
                 return results
 
-    # next look for an email match in voters
+    # next look for a name match in voters
     voter_results = voter_manager.retrieve_voter_list_by_name(first_name, last_name)
     for voter in voter_results['voter_list']:
         voter_we_vote_id = voter.we_vote_id
