@@ -3,12 +3,10 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
-from config.base import get_environment_variable
 from django.utils.timezone import now
-from django.db.models import Q
 from datetime import timedelta
-from wevote_functions.functions import generate_random_string, positive_value_exists
-from wevote_settings.models import fetch_next_we_vote_id_sms_integer, fetch_site_unique_id_prefix
+import json
+from wevote_functions.functions import positive_value_exists
 
 # Kind of Seeds
 NOTICE_FRIEND_ENDORSEMENTS_SEED = 'NOTICE_FRIEND_ENDORSEMENTS_SEED'
@@ -28,7 +26,7 @@ class ActivityNotice(models.Model):
     kind_of_notice = models.CharField(max_length=50, default=None, null=True)
     kind_of_seed = models.CharField(max_length=50, default=None, null=True)
     new_positions_entered_count = models.PositiveIntegerField(default=None, null=True)
-    position_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    position_we_vote_id_list_serialized = models.TextField(default=None, null=True)
     speaker_name = models.CharField(max_length=255, default=None, null=True)
     speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
     speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
@@ -52,14 +50,14 @@ class ActivityNoticeSeed(models.Model):
     out to an ActivityNotice, which gets shown to an individual voter.
     """
     activity_notices_created = models.BooleanField(default=False)
-    activity_notices_updated = models.BooleanField(default=False)
+    date_of_notice_earlier_than_update_window = models.BooleanField(default=False)
     activity_notices_scheduled = models.BooleanField(default=False)
     date_of_notice = models.DateTimeField(null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True)
     deleted = models.BooleanField(default=False)
     kind_of_seed = models.CharField(max_length=50, default=None, null=True)
-    position_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-    new_positions_entered_count = models.PositiveIntegerField(default=None, null=True)
+    position_we_vote_ids_for_friends_serialized = models.TextField(default=None, null=True)
+    position_we_vote_ids_for_public_serialized = models.TextField(default=None, null=True)
     speaker_name = models.CharField(max_length=255, default=None, null=True)
     speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
     speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
@@ -99,8 +97,7 @@ class ActivityManager(models.Manager):
             date_of_notice=None,
             kind_of_notice=None,
             kind_of_seed=None,
-            new_positions_entered_count=0,
-            position_we_vote_id='',
+            position_we_vote_id_list_serialized=None,
             recipient_voter_we_vote_id='',
             send_to_email=False,
             send_to_sms=False,
@@ -122,15 +119,17 @@ class ActivityManager(models.Manager):
             return results
 
         try:
-            if new_positions_entered_count == 0:
-                new_positions_entered_count = 1
+            new_positions_entered_count = 0
+            if positive_value_exists(position_we_vote_id_list_serialized):
+                position_we_vote_id_list = json.loads(position_we_vote_id_list_serialized)
+                new_positions_entered_count += len(position_we_vote_id_list)
             activity_notice = ActivityNotice.objects.create(
                 activity_notice_seed_id=activity_notice_seed_id,
                 date_of_notice=date_of_notice,
                 kind_of_notice=kind_of_notice,
                 kind_of_seed=kind_of_seed,
                 new_positions_entered_count=new_positions_entered_count,
-                position_we_vote_id=position_we_vote_id,
+                position_we_vote_id_list_serialized=position_we_vote_id_list_serialized,
                 recipient_voter_we_vote_id=recipient_voter_we_vote_id,
                 send_to_email=send_to_email,
                 send_to_sms=send_to_sms,
@@ -161,8 +160,8 @@ class ActivityManager(models.Manager):
             self,
             date_of_notice=None,
             kind_of_seed=None,
-            new_positions_entered_count=0,
-            position_we_vote_id='',
+            position_we_vote_ids_for_friends_serialized='',
+            position_we_vote_ids_for_public_serialized='',
             speaker_name='',
             speaker_organization_we_vote_id='',
             speaker_voter_we_vote_id='',
@@ -181,13 +180,11 @@ class ActivityManager(models.Manager):
             return results
 
         try:
-            if new_positions_entered_count == 0:
-                new_positions_entered_count = 1
             activity_notice_seed = ActivityNoticeSeed.objects.create(
                 date_of_notice=date_of_notice,
                 kind_of_seed=kind_of_seed,
-                new_positions_entered_count=new_positions_entered_count,
-                position_we_vote_id=position_we_vote_id,
+                position_we_vote_ids_for_friends_serialized=position_we_vote_ids_for_friends_serialized,
+                position_we_vote_ids_for_public_serialized=position_we_vote_ids_for_public_serialized,
                 speaker_name=speaker_name,
                 speaker_organization_we_vote_id=speaker_organization_we_vote_id,
                 speaker_voter_we_vote_id=speaker_voter_we_vote_id,
@@ -496,7 +493,7 @@ class ActivityManager(models.Manager):
                 deleted=False
             )
             queryset = queryset.order_by('-id')  # Put most recent sms at top of list
-            activity_notice_list = list(queryset)
+            activity_notice_list = queryset[:30]
 
             if len(activity_notice_list):
                 success = True
@@ -561,7 +558,7 @@ class ActivityManager(models.Manager):
                 deleted=False
             )
             queryset = queryset.order_by('-id')  # Put most recent sms at top of list
-            activity_notice_seed_list = list(queryset)
+            activity_notice_seed_list = queryset[:200]
 
             if len(activity_notice_seed_list):
                 success = True
@@ -608,7 +605,8 @@ class ActivityManager(models.Manager):
             elif positive_value_exists(notices_to_be_scheduled):
                 queryset = queryset.filter(activity_notices_scheduled=False)
             elif positive_value_exists(notices_to_be_updated):
-                queryset = queryset.filter(activity_notices_updated=False)
+                queryset = queryset.filter(activity_notices_created=True)
+                queryset = queryset.filter(date_of_notice_earlier_than_update_window=False)
             if activity_notice_seed_id_already_reviewed_list and len(activity_notice_seed_id_already_reviewed_list) > 0:
                 queryset = queryset.exclude(id__in=activity_notice_seed_id_already_reviewed_list)
 
@@ -665,11 +663,13 @@ class ActivityManager(models.Manager):
                 if 'kind_of_seed' in update_values:
                     existing_entry.kind_of_seed = update_values['kind_of_seed']
                     values_changed = True
-                if 'new_positions_entered_count' in update_values:
-                    existing_entry.new_positions_entered_count = update_values['new_positions_entered_count']
+                if 'position_we_vote_ids_for_friends_serialized' in update_values:
+                    existing_entry.position_we_vote_ids_for_friends_serialized = \
+                        update_values['position_we_vote_ids_for_friends_serialized']
                     values_changed = True
-                if 'position_we_vote_id' in update_values:
-                    existing_entry.position_we_vote_id = update_values['position_we_vote_id']
+                if 'position_we_vote_ids_for_public_serialized' in update_values:
+                    existing_entry.position_we_vote_ids_for_public_serialized = \
+                        update_values['position_we_vote_ids_for_public_serialized']
                     values_changed = True
                 if 'speaker_name' in update_values:
                     existing_entry.speaker_name = update_values['speaker_name']

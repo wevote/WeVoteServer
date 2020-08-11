@@ -48,7 +48,7 @@ def activity_notice_list_retrieve_doc_template_values(url_root):
                    '     "id": integer,\n' \
                    '     "kind_of_notice": string,\n' \
                    '     "new_positions_entered_count": integer,\n' \
-                   '     "position_we_vote_id": string,\n' \
+                   '     "position_we_vote_id_list": list,\n' \
                    '     "speaker_name": string,\n' \
                    '     "speaker_organization_we_vote_id": string,\n' \
                    '     "speaker_voter_we_vote_id": string,\n' \

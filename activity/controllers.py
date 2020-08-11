@@ -181,14 +181,46 @@ def update_or_create_activity_notices_triggered_by_batch_process():
 
     # Retrieve ActivityNoticeSeeds that need to have ActivityNotice entries created
     activity_manager = ActivityManager()
-    safety_valve_count = 0
     # We want this process to stop before it has run for 5 minutes, so that we don't collide with another process
     #  starting. Please also see: activity_notice_processing_time_out_duration & checked_out_expiration_time
     # We adjust timeout for ACTIVITY_NOTICE_PROCESS in retrieve_batch_process_list
     longest_activity_notice_processing_run_time_allowed = 270  # 4.5 minutes * 60 seconds
     when_process_must_stop = now() + timedelta(seconds=longest_activity_notice_processing_run_time_allowed)
+
+    # Update existing ActivityNoticeSeed entries
+    # Only run this when the minutes are divisible by "5"
+    update_interval = 5
+    time_now = now()
+    if time_now.minute % update_interval == 0:
+        continue_retrieving_notices_to_be_updated = True
+        activity_notice_seed_id_already_reviewed_list = []
+        safety_valve_count = 0
+        while continue_retrieving_notices_to_be_updated and \
+                safety_valve_count < 1000 and \
+                when_process_must_stop > now():
+            safety_valve_count += 1
+            results = activity_manager.retrieve_next_activity_notice_seed_to_process(
+                notices_to_be_updated=True,
+                activity_notice_seed_id_already_reviewed_list=activity_notice_seed_id_already_reviewed_list)
+            if results['activity_notice_seed_found']:
+                activity_notice_seed = results['activity_notice_seed']
+                activity_notice_seed_id_already_reviewed_list.append(activity_notice_seed.id)
+                activity_notice_seed_count += 1
+                update_seed_results = update_activity_notice_seed_with_positions(activity_notice_seed)
+                if update_seed_results['success'] and \
+                        update_seed_results['activity_notice_seed_changed'] and not \
+                        update_seed_results['date_of_notice_earlier_than_update_window']:
+                    activity_notice_seed = update_seed_results['activity_notice_seed']
+                    update_results = update_or_create_activity_notices_from_seed(activity_notice_seed)
+                    if not update_results['success']:
+                        status += update_results['status']
+            else:
+                continue_retrieving_notices_to_be_updated = False
+
+    # Create new ActivityNoticeSeed entries
     continue_retrieving_notices_to_be_created = True
-    activity_notice_seed_id_already_reviewed_list = []
+    activity_notice_seed_id_already_reviewed_list = []  # Reset
+    safety_valve_count = 0
     while continue_retrieving_notices_to_be_created and safety_valve_count < 1000 and when_process_must_stop > now():
         safety_valve_count += 1
         results = activity_manager.retrieve_next_activity_notice_seed_to_process(
@@ -198,15 +230,15 @@ def update_or_create_activity_notices_triggered_by_batch_process():
             activity_notice_seed = results['activity_notice_seed']
             activity_notice_seed_id_already_reviewed_list.append(activity_notice_seed.id)
             activity_notice_seed_count += 1
-            create_results = create_activity_notices_from_seed(activity_notice_seed)
-            # activity_notice_seed.activity_notices_created = True  # Marked in create_activity_notices_from_seed
+            create_results = update_or_create_activity_notices_from_seed(activity_notice_seed)
+            # activity_notice_seed.activity_notices_created = True  # Marked in function immediately above
             activity_notice_count += create_results['activity_notice_count']
         else:
             continue_retrieving_notices_to_be_created = False
 
     # Send email notifications
     continue_retrieving_notices_to_be_scheduled = True
-    activity_notice_seed_id_already_reviewed_list = []
+    activity_notice_seed_id_already_reviewed_list = []  # Reset
     safety_valve_count = 0
     while continue_retrieving_notices_to_be_scheduled and safety_valve_count < 1000 and when_process_must_stop > now():
         safety_valve_count += 1
@@ -218,7 +250,7 @@ def update_or_create_activity_notices_triggered_by_batch_process():
             activity_notice_seed_id_already_reviewed_list.append(activity_notice_seed.id)
             # activity_notice_seed_count += 1
             schedule_results = schedule_activity_notices_from_seed(activity_notice_seed)
-            # activity_notice_seed.activity_notices_scheduled = True  # Marked in create_activity_notices_from_seed
+            # activity_notice_seed.activity_notices_scheduled = True  # Marked in function immediately above
             if not schedule_results['success']:
                 status += schedule_results['status']
             # activity_notice_count += create_results['activity_notice_count']
@@ -234,7 +266,7 @@ def update_or_create_activity_notices_triggered_by_batch_process():
     return results
 
 
-def create_activity_notices_from_seed(activity_notice_seed):
+def update_or_create_activity_notices_from_seed(activity_notice_seed):
     status = ''
     success = True
     activity_notice_count = 0
@@ -253,6 +285,18 @@ def create_activity_notices_from_seed(activity_notice_seed):
         status += retrieve_current_friends_as_voters_results['status']
         if retrieve_current_friends_as_voters_results['friend_list_found']:
             current_friend_list = retrieve_current_friends_as_voters_results['friend_list']
+
+            position_we_vote_id_list = []
+            if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_friends_serialized):
+                position_we_vote_id_list_for_friends = \
+                    json.loads(activity_notice_seed.position_we_vote_ids_for_friends_serialized)
+                position_we_vote_id_list += position_we_vote_id_list_for_friends
+            if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_public_serialized):
+                position_we_vote_id_list_for_public = \
+                    json.loads(activity_notice_seed.position_we_vote_ids_for_public_serialized)
+                position_we_vote_id_list += position_we_vote_id_list_for_public
+            position_we_vote_id_list_serialized = json.dumps(position_we_vote_id_list)
+
             for friend_voter in current_friend_list:
                 kind_of_notice = NOTICE_FRIEND_ENDORSEMENTS  # Figure this out from activity_notice_seed.kind_of_seed
                 # Decide whether to send email or sms based on friend's notification settings
@@ -270,7 +314,7 @@ def create_activity_notices_from_seed(activity_notice_seed):
                     activity_notice_seed_id=activity_notice_seed.id,
                     kind_of_seed=activity_notice_seed.kind_of_seed,
                     kind_of_notice=kind_of_notice,
-                    position_we_vote_id=activity_notice_seed.position_we_vote_id,
+                    position_we_vote_id_list_serialized=position_we_vote_id_list_serialized,
                     recipient_voter_we_vote_id=friend_voter.we_vote_id,
                     send_to_email=send_to_email,
                     send_to_sms=send_to_sms,
@@ -373,7 +417,7 @@ def update_or_create_activity_notice_for_friend(
         activity_notice_seed_id=0,
         kind_of_seed='',
         kind_of_notice='',
-        position_we_vote_id='',
+        position_we_vote_id_list_serialized='',
         recipient_voter_we_vote_id='',
         send_to_email=False,
         send_to_sms=False,
@@ -393,8 +437,15 @@ def update_or_create_activity_notice_for_friend(
         speaker_organization_we_vote_id=speaker_organization_we_vote_id,
         speaker_voter_we_vote_id=speaker_voter_we_vote_id,
     )
+    # Combine friends and public into single position_we_vote_id_list_serialized
     if results['activity_notice_found']:
-        # activity_notice = results['activity_notice_seed']
+        try:
+            activity_notice = results['activity_notice']
+            activity_notice.position_we_vote_id_list_serialized = position_we_vote_id_list_serialized
+
+            activity_notice.save()
+        except Exception as e:
+            status += "FAILED_ACTIVITY_NOTICE_SAVE: " + str(e) + ' '
         status += results['status']
     elif results['success']:
         date_of_notice = now()
@@ -403,7 +454,7 @@ def update_or_create_activity_notice_for_friend(
             date_of_notice=date_of_notice,
             kind_of_notice=kind_of_notice,
             kind_of_seed=kind_of_seed,
-            position_we_vote_id=position_we_vote_id,
+            position_we_vote_id_list_serialized=position_we_vote_id_list_serialized,
             recipient_voter_we_vote_id=recipient_voter_we_vote_id,
             send_to_email=send_to_email,
             send_to_sms=send_to_sms,
@@ -425,14 +476,28 @@ def update_or_create_activity_notice_for_friend(
 
 def update_or_create_activity_notice_seed_for_voter_position(
         position_we_vote_id='',
+        is_public_position=False,
         speaker_name='',
         speaker_organization_we_vote_id='',
         speaker_voter_we_vote_id='',
         speaker_profile_image_url_medium='',
         speaker_profile_image_url_tiny=''):
+    """
+
+    :param position_we_vote_id: Not used for updates
+    :param is_public_position: Not used for updates
+    :param speaker_name:
+    :param speaker_organization_we_vote_id:
+    :param speaker_voter_we_vote_id:
+    :param speaker_profile_image_url_medium:
+    :param speaker_profile_image_url_tiny:
+    :return:
+    """
     status = ''
     success = True
     activity_manager = ActivityManager()
+    from position.models import PositionListManager
+    position_list_manager = PositionListManager()
 
     results = activity_manager.retrieve_recent_activity_notice_seed_from_speaker(
         kind_of_seed=NOTICE_FRIEND_ENDORSEMENTS_SEED,
@@ -442,19 +507,63 @@ def update_or_create_activity_notice_seed_for_voter_position(
     if results['activity_notice_seed_found']:
         activity_notice_seed = results['activity_notice_seed']
         try:
+            # Since the position is being saved microseconds before the activity_notice_seed is stored, we want to
+            #  "rewind" the date_of_notice by 60 seconds
+            since_date = activity_notice_seed.date_of_notice - timedelta(seconds=60)
+            position_results = position_list_manager.retrieve_all_positions_for_voter(
+                voter_we_vote_id=speaker_voter_we_vote_id,
+                since_date=since_date)
+            if position_results['success']:
+                friends_positions_list = position_results['friends_positions_list']
+                position_we_vote_id_list_for_friends = []
+                for one_position in friends_positions_list:
+                    position_we_vote_id_list_for_friends.append(one_position.we_vote_id)
+                position_we_vote_ids_for_friends_serialized = json.dumps(position_we_vote_id_list_for_friends)
+
+                public_positions_list = position_results['public_positions_list']
+                position_we_vote_id_list_for_public = []
+                for one_position in public_positions_list:
+                    position_we_vote_id_list_for_public.append(one_position.we_vote_id)
+                position_we_vote_ids_for_public_serialized = json.dumps(position_we_vote_id_list_for_public)
+            else:
+                # If here, there was a problem retrieving positions since the activity_notice_seed was saved,
+                #  so we just work with the one position_we_vote_id
+                if is_public_position:
+                    position_we_vote_ids_for_friends_serialized = None
+                    position_we_vote_id_list_for_public = [position_we_vote_id]
+                    position_we_vote_ids_for_public_serialized = json.dumps(position_we_vote_id_list_for_public)
+                else:
+                    position_we_vote_id_list_for_friends = [position_we_vote_id]
+                    position_we_vote_ids_for_friends_serialized = json.dumps(position_we_vote_id_list_for_friends)
+                    position_we_vote_ids_for_public_serialized = None
+
+            activity_notice_seed.position_we_vote_ids_for_friends_serialized = \
+                position_we_vote_ids_for_friends_serialized
+            activity_notice_seed.position_we_vote_ids_for_public_serialized = \
+                position_we_vote_ids_for_public_serialized
             activity_notice_seed.speaker_name = speaker_name
             activity_notice_seed.speaker_profile_image_url_medium = speaker_profile_image_url_medium
             activity_notice_seed.speaker_profile_image_url_tiny = speaker_profile_image_url_tiny
+
             activity_notice_seed.save()
         except Exception as e:
             status += "COULD_NOT_UPDATE_SPEAKER_IMAGES " + str(e) + " "
         status += results['status']
     elif results['success']:
         date_of_notice = now()
+        if is_public_position:
+            position_we_vote_ids_for_friends_serialized = None
+            position_we_vote_id_list_for_public = [position_we_vote_id]
+            position_we_vote_ids_for_public_serialized = json.dumps(position_we_vote_id_list_for_public)
+        else:
+            position_we_vote_id_list_for_friends = [position_we_vote_id]
+            position_we_vote_ids_for_friends_serialized = json.dumps(position_we_vote_id_list_for_friends)
+            position_we_vote_ids_for_public_serialized = None
         create_results = activity_manager.create_activity_notice_seed(
             date_of_notice=date_of_notice,
             kind_of_seed=NOTICE_FRIEND_ENDORSEMENTS_SEED,
-            position_we_vote_id=position_we_vote_id,
+            position_we_vote_ids_for_friends_serialized=position_we_vote_ids_for_friends_serialized,
+            position_we_vote_ids_for_public_serialized=position_we_vote_ids_for_public_serialized,
             speaker_name=speaker_name,
             speaker_organization_we_vote_id=speaker_organization_we_vote_id,
             speaker_voter_we_vote_id=speaker_voter_we_vote_id,
@@ -471,15 +580,80 @@ def update_or_create_activity_notice_seed_for_voter_position(
     return results
 
 
-def update_activity_notices_from_seed(activity_notice_seed):
+def update_activity_notice_seed_with_positions(activity_notice_seed):
     status = ''
     success = True
+    activity_notice_seed_changed = False
 
-    # Update the ActivityNotice before email send
+    from activity.models import get_lifespan_of_seed
+    kind_of_seed = NOTICE_FRIEND_ENDORSEMENTS_SEED
+    lifespan_of_seed_in_seconds = get_lifespan_of_seed(kind_of_seed)  # In seconds
+    earliest_date_of_notice = now() - timedelta(seconds=lifespan_of_seed_in_seconds)
+    # Is this activity_notice_seed.date_of_notice older than earliest_date_of_notice?
+    if activity_notice_seed.date_of_notice < earliest_date_of_notice:
+        try:
+            activity_notice_seed.date_of_notice_earlier_than_update_window = True
+            activity_notice_seed.save()
+            activity_notice_seed_changed = True
+        except Exception as e:
+            status += "COULD_NOT_UPDATE-date_of_notice_earlier_than_update_window: " + str(e) + ' '
+        results = {
+            'success':                                      success,
+            'status':                                       status,
+            'activity_notice_seed':                         activity_notice_seed,
+            'activity_notice_seed_changed':                 activity_notice_seed_changed,
+            'date_of_notice_earlier_than_update_window':    True,
+        }
+        return results
 
+    # What values currently exist?
+    position_we_vote_id_list_for_friends = []
+    if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_friends_serialized):
+        position_we_vote_id_list_for_friends = \
+            json.loads(activity_notice_seed.position_we_vote_ids_for_friends_serialized)
+
+    position_we_vote_id_list_for_public = []
+    if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_public_serialized):
+        position_we_vote_id_list_for_public = \
+            json.loads(activity_notice_seed.position_we_vote_ids_for_public_serialized)
+
+    from position.models import PositionListManager
+    position_list_manager = PositionListManager()
+    since_date = activity_notice_seed.date_of_notice - timedelta(seconds=60)
+    position_results = position_list_manager.retrieve_all_positions_for_voter(
+        voter_we_vote_id=activity_notice_seed.speaker_voter_we_vote_id,
+        since_date=since_date)
+    if position_results['success']:
+        friends_positions_list = position_results['friends_positions_list']
+        position_we_vote_id_list_for_friends_latest = []
+        for one_position in friends_positions_list:
+            position_we_vote_id_list_for_friends_latest.append(one_position.we_vote_id)
+        public_positions_list = position_results['public_positions_list']
+        position_we_vote_id_list_for_public_latest = []
+        for one_position in public_positions_list:
+            position_we_vote_id_list_for_public_latest.append(one_position.we_vote_id)
+
+        friends_list_different = set(position_we_vote_id_list_for_friends) != \
+            set(position_we_vote_id_list_for_friends_latest)
+        public_list_different = set(position_we_vote_id_list_for_public) != \
+            set(position_we_vote_id_list_for_public_latest)
+        if friends_list_different or public_list_different:
+            try:
+                activity_notice_seed.position_we_vote_ids_for_friends_serialized = \
+                    json.dumps(position_we_vote_id_list_for_friends_latest)
+                activity_notice_seed.position_we_vote_ids_for_public_serialized = \
+                    json.dumps(position_we_vote_id_list_for_public_latest)
+                activity_notice_seed.save()
+                activity_notice_seed_changed = True
+            except Exception as e:
+                success = False
+                status += "COULD_NOT_SAVE: " + str(e) + ' '
     results = {
-        'success':              success,
-        'status':               status,
+        'success':                                      success,
+        'status':                                       status,
+        'activity_notice_seed':                         activity_notice_seed,
+        'activity_notice_seed_changed':                 activity_notice_seed_changed,
+        'date_of_notice_earlier_than_update_window':    False,
     }
     return results
 
