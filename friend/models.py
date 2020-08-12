@@ -1016,8 +1016,9 @@ class FriendManager(models.Model):
                 else:
                     we_vote_id_of_friend = current_friend_entry.viewer_voter_we_vote_id
                 # This is the voter you are friends with
-                friends_we_vote_id_list.append(we_vote_id_of_friend)
-                friends_we_vote_id_list_found = True
+                if positive_value_exists(we_vote_id_of_friend):
+                    friends_we_vote_id_list.append(we_vote_id_of_friend)
+                    friends_we_vote_id_list_found = True
 
         results = {
             'success':                          success,
