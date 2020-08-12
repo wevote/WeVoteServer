@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 from django.utils.timezone import now
 from datetime import timedelta
 import json
@@ -494,6 +495,8 @@ class ActivityManager(models.Manager):
                 recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
                 deleted=False
             )
+            queryset = queryset.exclude(
+                Q(recipient_voter_we_vote_id=None) | Q(recipient_voter_we_vote_id=""))
             queryset = queryset.order_by('-id')  # Put most recent sms at top of list
             activity_notice_list = queryset[:30]
 
@@ -559,6 +562,8 @@ class ActivityManager(models.Manager):
                 speaker_voter_we_vote_id__in=voter_friend_we_vote_id_list,
                 deleted=False
             )
+            queryset = queryset.exclude(
+                Q(speaker_voter_we_vote_id=None) | Q(speaker_voter_we_vote_id=""))
             queryset = queryset.order_by('-id')  # Put most recent sms at top of list
             activity_notice_seed_list = queryset[:200]
 
@@ -570,7 +575,7 @@ class ActivityManager(models.Manager):
                 success = True
                 activity_notice_seed_list_found = False
                 status += 'NO_ACTIVITY_NOTICE_SEED_LIST_RETRIEVED '
-        except ActivityNotice.DoesNotExist:
+        except ActivityNoticeSeed.DoesNotExist:
             # No data found. Not a problem.
             success = True
             activity_notice_seed_list_found = False
