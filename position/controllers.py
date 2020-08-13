@@ -2339,6 +2339,11 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
             one_position_dict_for_api = {
                 'position_we_vote_id':              one_position.we_vote_id,
                 'ballot_item_display_name':         one_position.ballot_item_display_name,
+                'ballot_item_image_url_https_large':    one_position.ballot_item_image_url_https_large
+                if positive_value_exists(one_position.ballot_item_image_url_https_large)
+                else one_position.ballot_item_image_url_https,
+                'ballot_item_image_url_https_medium':   one_position.ballot_item_image_url_https_medium,
+                'ballot_item_image_url_https_tiny':     one_position.ballot_item_image_url_https_tiny,
                 'kind_of_ballot_item':              one_position.get_kind_of_ballot_item(),
                 'ballot_item_id':                   one_position.get_ballot_item_id(),
                 'ballot_item_we_vote_id':           one_position.get_ballot_item_we_vote_id(),
@@ -2521,6 +2526,11 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
                 'kind_of_ballot_item':              one_position.get_kind_of_ballot_item(),
                 'ballot_item_id':                   one_position.get_ballot_item_id(),
                 'ballot_item_we_vote_id':           one_position.get_ballot_item_we_vote_id(),
+                'ballot_item_image_url_https_large':    one_position.ballot_item_image_url_https_large
+                if positive_value_exists(one_position.ballot_item_image_url_https_large)
+                else one_position.ballot_item_image_url_https,
+                'ballot_item_image_url_https_medium':   one_position.ballot_item_image_url_https_medium,
+                'ballot_item_image_url_https_tiny':     one_position.ballot_item_image_url_https_tiny,
                 'speaker_display_name':             speaker_display_name,
                 'speaker_image_url_https_large':    one_position.speaker_image_url_https_large
                 if positive_value_exists(one_position.speaker_image_url_https_large)
@@ -3847,13 +3857,13 @@ def positions_import_from_structured_json(structured_json):
                 # Create new
                 position_on_stage = PositionEntered(
                     we_vote_id=one_position["we_vote_id"],
+                    date_entered=one_position["date_entered"],
                     candidate_campaign_id=candidate_campaign_id,
                     candidate_campaign_we_vote_id=one_position["candidate_campaign_we_vote_id"],
                     contest_measure_id=contest_measure_id,
                     contest_measure_we_vote_id=one_position["contest_measure_we_vote_id"],
                     contest_office_id=contest_office_id,
                     contest_office_we_vote_id=one_position["contest_office_we_vote_id"],
-                    date_entered=one_position["date_entered"],
                     google_civic_candidate_name=google_civic_candidate_name,
                     google_civic_election_id=one_position["google_civic_election_id"],
                     state_code=one_position["state_code"],

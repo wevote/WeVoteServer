@@ -105,6 +105,10 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                    '   [\n' \
                    '     "position_we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string (either measure name or candidate name),\n' \
+                   '     "ballot_item_image_url_https_large": string,\n' \
+                   '     "ballot_item_image_url_https_medium": string,\n' \
+                   '     "ballot_item_image_url_https_tiny": string,\n' \
+                   '     "ballot_item_we_vote_id": string,\n' \
                    '     "speaker_display_name": string,\n' \
                    '     "speaker_image_url_https_large": string,\n' \
                    '     "speaker_image_url_https_medium": string,\n' \
