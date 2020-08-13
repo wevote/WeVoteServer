@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import PledgeToVoteManager
+from django.utils.timezone import now
 from follow.models import FollowOrganizationManager
 from friend.models import FriendManager
 from organization.models import OrganizationManager
@@ -178,6 +179,7 @@ def pledge_to_vote_with_voter_guide_for_api(voter_device_id, voter_guide_we_vote
                     voter_organization_id = organization.id
 
             position_on_stage = PositionForFriends(
+                date_entered=now(),
                 voter_id=voter.id,
                 voter_we_vote_id=voter.we_vote_id,
                 candidate_campaign_id=organization_position.candidate_campaign_id,

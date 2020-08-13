@@ -21,6 +21,127 @@ logger = wevote_functions.admin.get_logger(__name__)
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
+def move_activity_notices_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id, from_organization_we_vote_id, to_organization_we_vote_id,
+        to_voter=None):
+    status = ''
+    success = True
+    activity_notice_seed_entries_moved = 0
+    activity_notice_entries_moved = 0
+
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        status += "MOVE_ACTIVITY_NOTICE_SEEDS-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        success = False
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'activity_notice_seed_entries_moved': activity_notice_seed_entries_moved,
+            'activity_notice_entries_moved': activity_notice_entries_moved,
+        }
+        return results
+
+    if from_voter_we_vote_id == to_voter_we_vote_id:
+        status += "MOVE_ACTIVITY_NOTICE_SEEDS-FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
+        success = False
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'activity_notice_seed_entries_moved': activity_notice_seed_entries_moved,
+            'activity_notice_entries_moved': activity_notice_entries_moved,
+        }
+        return results
+
+    # ######################
+    # Migrations
+    speaker_profile_image_url_medium = None
+    speaker_profile_image_url_tiny = None
+    try:
+        speaker_profile_image_url_medium = to_voter.we_vote_hosted_profile_image_url_medium
+        speaker_profile_image_url_tiny = to_voter.we_vote_hosted_profile_image_url_tiny
+    except Exception as e:
+        status += "UNABLE_TO_GET_PHOTOS " + str(e) + " "
+
+    if positive_value_exists(to_organization_we_vote_id):
+        # Move based on speaker_voter_we_vote_id
+        try:
+            activity_notice_seed_entries_moved += ActivityNoticeSeed.objects\
+                .filter(speaker_voter_we_vote_id__iexact=from_voter_we_vote_id)\
+                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                        speaker_organization_we_vote_id=to_organization_we_vote_id,
+                        speaker_profile_image_url_medium=speaker_profile_image_url_medium,
+                        speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
+        except Exception as e:
+            status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-INCLUDING_ORG_UPDATE " + str(e) + " "
+        try:
+            activity_notice_entries_moved += ActivityNotice.objects\
+                .filter(speaker_voter_we_vote_id__iexact=from_voter_we_vote_id) \
+                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                        speaker_organization_we_vote_id=to_organization_we_vote_id,
+                        speaker_profile_image_url_medium=speaker_profile_image_url_medium,
+                        speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
+        except Exception as e:
+            status += "FAILED-ACTIVITY_NOTICE_UPDATE-INCLUDING_ORG_UPDATE " + str(e) + " "
+        # #############################################
+        # Move based on speaker_organization_we_vote_id
+        try:
+            activity_notice_seed_entries_moved += ActivityNoticeSeed.objects \
+                .filter(speaker_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                        speaker_organization_we_vote_id=to_organization_we_vote_id,
+                        speaker_profile_image_url_medium=speaker_profile_image_url_medium,
+                        speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
+        except Exception as e:
+            status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-FROM_ORG_WE_VOTE_ID " + str(e) + " "
+        try:
+            activity_notice_entries_moved += ActivityNotice.objects \
+                .filter(speaker_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                        speaker_organization_we_vote_id=to_organization_we_vote_id,
+                        speaker_profile_image_url_medium=speaker_profile_image_url_medium,
+                        speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
+        except Exception as e:
+            status += "FAILED-ACTIVITY_NOTICE_UPDATE-FROM_ORG_WE_VOTE_ID " + str(e) + " "
+    else:
+        try:
+            activity_notice_seed_entries_moved += ActivityNoticeSeed.objects\
+                .filter(speaker_voter_we_vote_id__iexact=from_voter_we_vote_id)\
+                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                        speaker_profile_image_url_medium=speaker_profile_image_url_medium,
+                        speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
+        except Exception as e:
+            status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-MISSING_ORG " + str(e) + " "
+        try:
+            activity_notice_entries_moved += ActivityNotice.objects\
+                .filter(speaker_voter_we_vote_id__iexact=from_voter_we_vote_id) \
+                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                        speaker_profile_image_url_medium=speaker_profile_image_url_medium,
+                        speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
+        except Exception as e:
+            status += "FAILED-ACTIVITY_NOTICE_UPDATE-MISSING_ORG " + str(e) + " "
+
+    # Now move ActivityNotice recipient_voter_we_vote_id
+    try:
+        activity_notice_entries_moved += ActivityNotice.objects \
+            .filter(recipient_voter_we_vote_id__iexact=from_voter_we_vote_id) \
+            .update(recipient_voter_we_vote_id=to_voter_we_vote_id)
+    except Exception as e:
+        status += "FAILED-ACTIVITY_NOTICE_UPDATE-RECIPIENT " + str(e) + " "
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_voter_we_vote_id': from_voter_we_vote_id,
+        'to_voter_we_vote_id': to_voter_we_vote_id,
+        'activity_notice_seed_entries_moved': activity_notice_seed_entries_moved,
+        'activity_notice_entries_moved': activity_notice_entries_moved,
+    }
+    return results
+
+
 def notice_friend_endorsements_send(
         speaker_voter_we_vote_id='', recipient_voter_we_vote_id='', invitation_message=''):
     """

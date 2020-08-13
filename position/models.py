@@ -11,6 +11,7 @@ from ballot.controllers import figure_out_google_civic_election_id_voter_is_watc
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import models
 from django.db.models import Q
+from django.utils.timezone import now
 from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
@@ -126,7 +127,7 @@ class PositionEntered(models.Model):
     speaker_type = models.CharField(
         verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
 
-    date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now_add=True, db_index=True)
+    date_entered = models.DateTimeField(verbose_name='date entered', default=None, null=True, db_index=True)
     # The date the this position last changed
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
@@ -539,7 +540,7 @@ class PositionForFriends(models.Model):
     speaker_type = models.CharField(
         verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
 
-    date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True, db_index=True)
+    date_entered = models.DateTimeField(verbose_name='date entered', default=None, null=True, db_index=True)
     # The date the this position last changed
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
@@ -4479,6 +4480,7 @@ class PositionManager(models.Model):
             if positive_value_exists(state_code):
                 state_code = state_code.lower()
             position_on_stage = position_on_stage_starter(
+                date_entered=now(),
                 voter_id=voter_id,
                 voter_we_vote_id=voter_we_vote_id,
                 candidate_campaign_id=candidate_campaign_id,
@@ -5391,7 +5393,7 @@ class PositionManager(models.Model):
             error_result = True
             exception_multiple_object_returned = True
             success = False
-            status += "RETRIEVE_POSITION_MULTIPLE_FOUND "
+            status += "RETRIEVE_POSITION_MULTIPLE_FOUND " + str(e) + ' '
             if retrieve_position_for_friends:
                 position_on_stage = PositionForFriends()
             else:
@@ -5828,6 +5830,13 @@ class PositionManager(models.Model):
             if positive_value_exists(dead_position.statement_html):
                 position_to_keep.statement_html = dead_position.statement_html
                 data_transferred = True
+        if not positive_value_exists(position_to_keep.date_entered):
+            if positive_value_exists(dead_position.date_entered):
+                position_to_keep.date_entered = dead_position.date_entered
+                data_transferred = True
+            else:
+                position_to_keep.date_entered = now()
+                data_transferred = True
 
         if data_transferred:
             status = "MERGE_POSITION_VISIBILITY-DATA_TRANSFERRED"
@@ -6122,6 +6131,8 @@ class PositionManager(models.Model):
 
             try:
                 # Heal the data
+                if not voter_position_on_stage.date_entered:
+                    voter_position_on_stage.date_entered = now()
                 voter_position_on_stage.voter_we_vote_id = voter_we_vote_id
                 voter_position_on_stage.organization_we_vote_id = linked_organization_we_vote_id
                 voter_position_on_stage.speaker_display_name = speaker_display_name
@@ -6204,6 +6215,7 @@ class PositionManager(models.Model):
 
                 if is_public_position:
                     voter_position_on_stage = PositionEntered(
+                        date_entered=now(),
                         voter_id=voter_id,
                         voter_we_vote_id=voter_we_vote_id,
                         candidate_campaign_id=candidate_campaign_id,
@@ -6225,6 +6237,7 @@ class PositionManager(models.Model):
                     )
                 else:
                     voter_position_on_stage = PositionForFriends(
+                        date_entered=now(),
                         voter_id=voter_id,
                         voter_we_vote_id=voter_we_vote_id,
                         candidate_campaign_id=candidate_campaign_id,
@@ -8033,6 +8046,7 @@ class PositionManager(models.Model):
                 if positive_value_exists(state_code):
                     state_code = state_code.lower()
                 position_on_stage = position_on_stage_starter.objects.create(
+                    date_entered=now(),
                     organization_we_vote_id=organization_we_vote_id,
                     organization_id=organization_id,
                     voter_we_vote_id=voter_we_vote_id,
