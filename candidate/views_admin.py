@@ -1154,7 +1154,8 @@ def candidate_edit_process_view(request):
     # ##################################
     # Deleting or Adding a new CandidateToOfficeLink
     results = candidate_list_manager.retrieve_candidate_to_office_link_list(
-        candidate_we_vote_id_list=[candidate_we_vote_id])
+        candidate_we_vote_id_list=[candidate_we_vote_id],
+        read_only=False)
     candidate_to_office_link_list = results['candidate_to_office_link_list']
     for candidate_to_office_link in candidate_to_office_link_list:
         variable_name = "delete_candidate_to_office_link_" + str(candidate_to_office_link.id)
