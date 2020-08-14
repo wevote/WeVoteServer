@@ -8,6 +8,13 @@
 {% load humanize %}
 <style>
 span.wrap_word { word-break: break-word; }
+table, th, td {
+  border: 1px solid lightgray;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 3px;
+}
 </style>
 <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ page }}">
     < Back to Candidates</a>
@@ -21,6 +28,16 @@ span.wrap_word { word-break: break-word; }
 
 <input type="hidden" name="candidate_id" value="{% if candidate %}{{ candidate.id }}{% else %}0{% endif %}">
 <input type="hidden" name="redirect_to_candidate_list" value="0">
+
+<p>{# There is another submit button at bottom of form #}
+{% if candidate %}
+    <a href="{% url 'candidate:candidate_summary' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+      cancel</a>
+{% else %}
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+      cancel</a>
+{% endif %}
+<input name="submit_text" type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" /></p>
 
 <div class="form-group">
     <label for="candidate_name_id" class="col-sm-3 control-label">
@@ -68,23 +85,68 @@ span.wrap_word { word-break: break-word; }
 
 <input type="hidden" name="google_civic_election_id" value="{% if candidate %}{{ candidate.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
 <div class="form-group">
-    <label for="google_civic_election_id_id" class="col-sm-3 control-label">Candidate to Office Link</label>
+    <label for="google_civic_election_id_id" class="col-sm-3 control-label">
+        Candidate to Office Link
+        (<span onclick="showElement('candidate_to_office_link_table_add');" style="color: royalblue" >add</span>)
+    </label>
     <div class="col-sm-8">
     {% if office_name %}
         Adding Candidate to: {{ office_name }}
         <input type="hidden" name="contest_office_id" value="{{ contest_office_id }}">
     {% endif %}
-    {% if candidate %}
-        {# We don't currently offer a way to edit the google_civic_election_id once a candidate is saved. #}
-{#        {{ candidate.google_civic_election_id }}{% if candidate.election %} ({{ candidate.election.election_name }}, {{ candidate.election.election_day_text }}){% endif %}<br />#}
-        bp: {{ candidate.ballotpedia_election_id|default_if_none:"" }}<br />
-    {% endif %}
+    <table>
     {% for candidate_to_office_link in candidate_to_office_link_list %}
-        {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
-        ({{ candidate_to_office_link.google_civic_election_id }}) --
-      <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
-         target="_blank">{{ candidate_to_office_link.office.office_name }} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a><br />
+        <tr>
+            <td>
+                id: {{ candidate_to_office_link.id }}
+            </td>
+            <td>
+                {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
+                ({{ candidate_to_office_link.google_civic_election_id }})
+            </td>
+            <td>
+                {{ candidate_to_office_link.state_code }}
+            </td>
+            <td>
+                <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
+                   target="_blank">{{ candidate_to_office_link.office.office_name }} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a><br />
+            </td>
+            <td>
+                <label for="delete_candidate_to_office_link_{{ candidate_to_office_link.id }}_id">
+                    delete
+                    <input type="checkbox"
+                           name="delete_candidate_to_office_link_{{ candidate_to_office_link.id }}"
+                           id="delete_candidate_to_office_link_{{ candidate_to_office_link.id }}_id"
+                           value=1
+                    />
+                </label>
+            </td>
+        </tr>
     {% endfor %}
+    </table>
+    <table id="candidate_to_office_link_table_add" style="display: none;">
+        <thead>
+            <tr>
+                <th>Election Id</th>
+                <th>State</th>
+                <th>Office We Vote Id</th>
+            </tr>
+        </thead>
+        <tr>
+            <td>
+                <input type="text" name="candidate_to_office_link_add_election"
+                       style="width: 125px; border: 1px solid lightgray;"/>
+            </td>
+            <td>
+                <input type="text" name="candidate_to_office_link_add_state_code"
+                       style="width: 40px; border: 1px solid lightgray;"/>
+            </td>
+            <td>
+                <input type="text" name="candidate_to_office_link_add_office_we_vote_id"
+                       style="width: 125px; border: 1px solid lightgray;"/>
+            </td>
+        </tr>
+    </table>
     </div>
 </div>
 
@@ -407,7 +469,7 @@ span.wrap_word { word-break: break-word; }
     </div>
 </div>
 
-<p>
+<p>{# There is another submit button at top of form #}
 {% if candidate %}
     <a href="{% url 'candidate:candidate_summary' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
       cancel</a>
@@ -649,6 +711,14 @@ span.wrap_word { word-break: break-word; }
     }
 </style>
 <script>
+    function hideElement(elementId) {
+      var x = document.getElementById(elementId);
+      x.style.display = "none";
+    }
+    function showElement(elementId) {
+      var x = document.getElementById(elementId);
+      x.style.display = "block";
+    }
     $(function(){
         $('.normal').autosize();
         $('.animated').autosize({append: "\n"});

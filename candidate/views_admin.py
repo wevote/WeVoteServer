@@ -1056,6 +1056,9 @@ def candidate_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_list_manager = CandidateCampaignListManager()
+
     status = ""
     look_for_politician = request.POST.get('look_for_politician', False)  # If this comes in with value, don't save
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
@@ -1138,14 +1141,53 @@ def candidate_edit_process_view(request):
     candidate_on_stage_found = False
     candidate_on_stage = CandidateCampaign()
     state_code_from_candidate = ''
+    candidate_we_vote_id = ''
     if positive_value_exists(candidate_id):
         # We don't put this in a try/except block because we want the page to fail if there's an error
         candidate_query = CandidateCampaign.objects.filter(id=candidate_id)
         if len(candidate_query):
             candidate_on_stage = candidate_query[0]
+            candidate_we_vote_id = candidate_on_stage.we_vote_id
             state_code_from_candidate = candidate_on_stage.state_code
             candidate_on_stage_found = True
 
+    # ##################################
+    # Deleting or Adding a new CandidateToOfficeLink
+    results = candidate_list_manager.retrieve_candidate_to_office_link_list(
+        candidate_we_vote_id_list=[candidate_we_vote_id])
+    candidate_to_office_link_list = results['candidate_to_office_link_list']
+    for candidate_to_office_link in candidate_to_office_link_list:
+        variable_name = "delete_candidate_to_office_link_" + str(candidate_to_office_link.id)
+        candidate_to_office_link_delete_id = request.POST.get(variable_name, False)
+        if positive_value_exists(candidate_to_office_link_delete_id):
+            candidate_to_office_link.delete()
+            messages.add_message(request, messages.INFO, 'Deleted Candidate-to-Office Link.')
+
+    candidate_to_office_link_add_election = request.POST.get('candidate_to_office_link_add_election', False)
+    candidate_to_office_link_add_state_code = request.POST.get('candidate_to_office_link_add_state_code', False)
+    candidate_to_office_link_add_office_we_vote_id = request.POST.get('candidate_to_office_link_add_office_we_vote_id', False)
+    if positive_value_exists(candidate_to_office_link_add_election) and \
+            positive_value_exists(candidate_to_office_link_add_state_code) and \
+            positive_value_exists(candidate_to_office_link_add_office_we_vote_id):
+        if positive_value_exists(candidate_we_vote_id):
+            results = candidate_campaign_manager.get_or_create_candidate_to_office_link(
+                candidate_we_vote_id=candidate_we_vote_id,
+                contest_office_we_vote_id=candidate_to_office_link_add_office_we_vote_id,
+                google_civic_election_id=candidate_to_office_link_add_election,
+                state_code=candidate_to_office_link_add_state_code)
+            if results['new_candidate_to_office_link_created']:
+                messages.add_message(request, messages.INFO, 'Added Candidate-to-Office Link.')
+            else:
+                messages.add_message(request, messages.ERROR, 'Candidate-to-Office Link already exists.')
+        else:
+            messages.add_message(request, messages.ERROR,
+                                 'Cannot add Candidate-to-Office Link: candidate_we_vote_id missing.')
+    elif positive_value_exists(candidate_to_office_link_add_election) or \
+            positive_value_exists(candidate_to_office_link_add_state_code) or \
+            positive_value_exists(candidate_to_office_link_add_office_we_vote_id):
+        messages.add_message(request, messages.ERROR, 'To add Candidate-to-Office Link, all three variables required.')
+
+    # ##################################
     # If linked to a Politician, make sure that both politician_id and politician_we_vote_id exist
     if candidate_on_stage_found:
         if positive_value_exists(candidate_on_stage.politician_we_vote_id) \
@@ -1263,7 +1305,6 @@ def candidate_edit_process_view(request):
                 candidate_duplicates_query = CandidateCampaign.objects.filter(filter_list)
                 if positive_value_exists(google_civic_election_id):
                     google_civic_election_id_list = [google_civic_election_id]
-                    candidate_list_manager = CandidateCampaignListManager()
                     results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
                         google_civic_election_id_list=google_civic_election_id_list,
                         limit_to_this_state_code=state_code)
@@ -1462,7 +1503,6 @@ def candidate_edit_process_view(request):
                 messages.add_message(request, messages.INFO, 'New candidate saved.')
 
                 # Now add Candidate to Office Link
-                candidate_campaign_manager = CandidateCampaignManager()
                 candidate_campaign_manager.get_or_create_candidate_to_office_link(
                     candidate_we_vote_id=candidate_we_vote_id,
                     contest_office_we_vote_id=contest_office_we_vote_id,
