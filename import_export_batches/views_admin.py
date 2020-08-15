@@ -1537,7 +1537,7 @@ def batch_process_list_view(request):
         batch_process_search = request.POST.get('batch_process_search', '')
         google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
         show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
-        state_code = request.POST.get('state_code', '')
+        state_code = request.POST.get('state_code', '')  # Already retrieved with GET, now retrieving with POST
 
         for one_batch_process_id in select_for_changing_batch_process_ids:
             try:
@@ -1669,8 +1669,7 @@ def batch_process_list_view(request):
         status += 'NO_OFFICES_FOUND_DoesNotExist '
         batch_process_list = []
     except Exception as e:
-        status += 'FAILED retrieve_all_offices_for_upcoming_election ' \
-                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e)) + " "
+        status += 'FAILED retrieve_all_offices_for_upcoming_election: ' + str(e) + ' '
         success = False
 
     # Add the processing "chunks" under each Batch Process
@@ -1690,8 +1689,7 @@ def batch_process_list_view(request):
             # BatchProcessBallotItemChunk not found. Not a problem.
             status += 'NO_BatchProcessBallotItemChunk_FOUND_DoesNotExist '
         except Exception as e:
-            status += 'FAILED BatchProcessBallotItemChunk ' \
-                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+            status += 'FAILED BatchProcessBallotItemChunk ' + str(e) + ' '
         batch_process.batch_process_ballot_item_chunk_list = batch_process_ballot_item_chunk_list
         batch_process.batch_process_ballot_item_chunk_list_found = batch_process_ballot_item_chunk_list_found
 
@@ -1708,8 +1706,7 @@ def batch_process_list_view(request):
                 # BatchProcessBallotItemChunk not found. Not a problem.
                 status += 'NO_BatchProcessAnalyticsChunk_FOUND_DoesNotExist '
             except Exception as e:
-                status += 'FAILED BatchProcessAnalyticsChunk ' \
-                          '{error} [type: {error_type}] '.format(error=e, error_type=type(e)) + " "
+                status += 'FAILED BatchProcessAnalyticsChunk ' + str(e) + ' '
             batch_process.batch_process_analytics_chunk_list = batch_process_analytics_chunk_list
             batch_process.batch_process_analytics_chunk_list_found = batch_process_analytics_chunk_list_found
 

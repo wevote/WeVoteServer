@@ -102,12 +102,16 @@
         {% if not is_national_election %}
             <th>Google Civic ID</th>
         {% endif %}
-            <th align="middle">Offices
+            <th align="middle">
+                Offices
               {% if show_election_statistics %}
               <br />
               (w/o Candidates)
               {% endif %}
             </th>
+        {% if is_national_election %}
+            <th>Last Retrieve / Refresh</th>
+        {% endif %}
         {% if show_election_statistics %}
             <th align="middle">Candidates<br />
               (w/o Photos)</th>
@@ -181,6 +185,28 @@
                 <span style="color: darkgray">({{ election.offices_without_candidates_count|default_if_none:"" }})</span>
             {% endif %}
             </td>
+        {% if is_national_election %}{# Last Retrieve / Refresh #}
+            <td>
+                {% if election.retrieve_date_completed %}
+                    retrieve: {{ election.retrieve_date_completed }}
+                {% elif election.retrieve_date_started %}
+                    <span style="color: lightgray">retrieve start: {{ election.retrieve_date_completed }}</span>
+                {% endif %}
+
+                {% if election.retrieve_date_completed or election.retrieve_date_started and election.refresh_date_completed or election.refresh_date_started %}
+                /
+                {% endif %}
+
+                {% if election.refresh_date_completed %}
+                    refresh: {{ election.refresh_date_completed }}
+                {% elif election.refresh_date_started %}
+                    <span style="color: lightgray">refresh start: {{ election.refresh_date_started }}</span>
+                {% endif %}
+                <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}">
+                    <span style="color: lightgray"><span class="glyphicon glyphicon-new-window"></span></span>
+                </a>
+            </td>
+        {% endif %}
         {% if show_election_statistics %}
             <td align="middle">
             {% if election.candidate_count %}
