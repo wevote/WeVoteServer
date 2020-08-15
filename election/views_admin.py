@@ -15,6 +15,7 @@ from config.base import get_environment_variable
 import copy
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
+from django.utils.timezone import now
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -1005,6 +1006,7 @@ def nationwide_election_list_view(request):
     if is_national_election:
         state_list = STATE_CODE_MAP
         election_list = []
+        data_stale_if_older_than = now() - timedelta(days=30)
         for one_state_code, one_state_name in state_list.items():
             # ############################
             # Figure out the last dates we retrieved data for this state
@@ -1059,6 +1061,34 @@ def nationwide_election_list_view(request):
                 election_for_one_state.refresh_date_started = refresh_date_started
                 election_for_one_state.retrieve_date_completed = retrieve_date_completed
                 election_for_one_state.retrieve_date_started = retrieve_date_started
+
+                if refresh_date_completed:
+                    most_recent_time = refresh_date_completed
+                elif refresh_date_started:
+                    most_recent_time = refresh_date_started
+                elif retrieve_date_completed:
+                    most_recent_time = retrieve_date_completed
+                elif retrieve_date_started:
+                    most_recent_time = retrieve_date_started
+                else:
+                    most_recent_time = None
+
+                if most_recent_time:
+                    if refresh_date_completed and refresh_date_completed > most_recent_time:
+                        most_recent_time = refresh_date_completed
+                    if refresh_date_started and refresh_date_started > most_recent_time:
+                        most_recent_time = refresh_date_started
+                    if retrieve_date_completed and retrieve_date_completed > most_recent_time:
+                        most_recent_time = retrieve_date_completed
+                    if retrieve_date_started and retrieve_date_started > most_recent_time:
+                        most_recent_time = retrieve_date_started
+
+                    if most_recent_time > data_stale_if_older_than:
+                        election_for_one_state.data_getting_stale = False
+                    else:
+                        election_for_one_state.data_getting_stale = True
+                else:
+                    election_for_one_state.data_getting_stale = True
 
                 election_list.append(election_for_one_state)
     else:
