@@ -118,6 +118,16 @@
 
 
 </form>{#  End of organization_position_choose_election form #}
+{% if google_civic_election_id %}
+<ul>
+    <li>
+        <a href="{% url 'election:nationwide_election_list' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+            <strong>See Retrieve Dates Across All States</strong> <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+    </li>
+</ul>
+{% endif %}
+
 {% if google_civic_election_id and state_code %}
 <ol>
     <li>

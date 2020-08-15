@@ -29,7 +29,7 @@ from exception.models import handle_record_found_more_than_one_exception, handle
 from image.models import WeVoteImageManager
 from import_export_ballotpedia.models import BallotpediaApiCounter, BallotpediaApiCounterDailySummary, \
     BallotpediaApiCounterWeeklySummary, BallotpediaApiCounterMonthlySummary
-from import_export_batches.models import BatchDescription, BatchManager, \
+from import_export_batches.models import BatchDescription, BatchManager, BatchProcess, \
     BatchRowActionBallotItem, \
     BatchRowActionCandidate, BatchRowActionContestOffice, BatchRowActionMeasure, BatchRowActionPosition,  \
     BatchRowTranslationMap, BatchSet
@@ -1006,6 +1006,48 @@ def nationwide_election_list_view(request):
         state_list = STATE_CODE_MAP
         election_list = []
         for one_state_code, one_state_name in state_list.items():
+            # ############################
+            # Figure out the last dates we retrieved data for this state
+            refresh_date_started = None
+            refresh_date_completed = None
+            retrieve_date_started = None
+            retrieve_date_completed = None
+            try:
+                batch_process_queryset = BatchProcess.objects.all()
+                batch_process_queryset = \
+                    batch_process_queryset.filter(google_civic_election_id=google_civic_election_id)
+                batch_process_queryset = batch_process_queryset.filter(state_code__iexact=one_state_code)
+                batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
+                batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
+                ballot_item_processes = [
+                    'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS',
+                    'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
+                batch_process_queryset = batch_process_queryset.order_by("-id")
+
+                batch_process_queryset = batch_process_queryset[:3]
+                batch_process_list = list(batch_process_queryset)
+
+                if len(batch_process_list):
+                    for one_batch_process in batch_process_list:
+                        if one_batch_process.kind_of_process == 'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
+                            if not refresh_date_completed and one_batch_process.date_completed:
+                                refresh_date_completed = one_batch_process.date_completed
+                            elif not refresh_date_started and one_batch_process.date_started:
+                                refresh_date_started = one_batch_process.date_started
+                        elif one_batch_process.kind_of_process == 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
+                            if not retrieve_date_completed and one_batch_process.date_completed:
+                                retrieve_date_completed = one_batch_process.date_completed
+                            elif not retrieve_date_started and one_batch_process.date_started:
+                                retrieve_date_started = one_batch_process.date_started
+                        if refresh_date_completed and retrieve_date_completed:
+                            break  # Break out of this batch_process loop only
+            except BatchProcess.DoesNotExist:
+                # No offices found. Not a problem.
+                batch_process_list = []
+            except Exception as e:
+                pass
+
             if one_state_code == "NA":
                 pass
             else:
@@ -1013,6 +1055,10 @@ def nationwide_election_list_view(request):
                 election_for_one_state.state_code = one_state_code
                 election_for_one_state.is_national_election = False
                 election_for_one_state.internal_notes = None  # Do we want to try to add this for states?
+                election_for_one_state.refresh_date_completed = refresh_date_completed
+                election_for_one_state.refresh_date_started = refresh_date_started
+                election_for_one_state.retrieve_date_completed = retrieve_date_completed
+                election_for_one_state.retrieve_date_started = retrieve_date_started
 
                 election_list.append(election_for_one_state)
     else:
