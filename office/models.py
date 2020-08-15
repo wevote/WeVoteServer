@@ -387,6 +387,7 @@ class ContestOfficeManager(models.Model):
                                        origin_google_civic_election_id_list=[], read_only=True):
         """
         Get a list of office_we_vote_id's from other elections which are "visiting" this election
+        # TODO 2020-08-15 Remove after verifying all uses are deprecated
         :param host_google_civic_election_id_list:
         :param origin_google_civic_election_id_list:
         :param read_only:
@@ -441,11 +442,13 @@ class ContestOfficeManager(models.Model):
         return results
 
     def fetch_office_visiting_list_we_vote_ids(self, host_google_civic_election_id_list):
+        # TODO 2020-08-15 Remove after verifying all uses are deprecated
         results = self.retrieve_offices_visiting_list(
             host_google_civic_election_id_list=host_google_civic_election_id_list, read_only=True)
         return results['contest_office_visiting_list_we_vote_ids']
 
     def fetch_office_visiting_list_we_vote_ids_from_origin_list(self, origin_google_civic_election_id_list):
+        # TODO 2020-08-15 Remove after verifying all uses are deprecated
         results = self.retrieve_offices_visiting_list(
             origin_google_civic_election_id_list=origin_google_civic_election_id_list, read_only=True)
         return results['contest_office_visiting_list_we_vote_ids']

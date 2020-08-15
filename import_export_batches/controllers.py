@@ -14,6 +14,7 @@ from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, Ba
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLLING_LOCATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
 from ballot.models import BallotItem, BallotItemListManager, BallotItemManager, BallotReturnedManager
+from candidate.controllers import retrieve_next_or_most_recent_office_for_candidate
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 # from django.db import transaction
 from django.db.models import Q
@@ -2389,12 +2390,13 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             candidate_found = True
             candidate_we_vote_id = candidate.we_vote_id
             candidate_id = candidate.id
-            contest_office_we_vote_id = candidate.contest_office_we_vote_id
-            contest_office_id = candidate.contest_office_id
-            if not positive_value_exists(google_civic_election_id) and positive_value_exists(contest_office_we_vote_id):
-                google_civic_election_id = \
-                    contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
-                        contest_office_we_vote_id)
+            office_results = \
+                retrieve_next_or_most_recent_office_for_candidate(candidate_we_vote_id=candidate_we_vote_id)
+            if office_results['contest_office_found']:
+                contest_office = office_results['contest_office']
+                contest_office_we_vote_id = contest_office.we_vote_id
+                contest_office_name = contest_office.office_name
+                google_civic_election_id = contest_office.google_civic_election_id
         else:
             status += candidate_results['status']
     elif positive_value_exists(measure_we_vote_id):
@@ -2424,12 +2426,13 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             candidate_found = True
             candidate_we_vote_id = candidate.we_vote_id
             candidate_id = candidate.id
-            contest_office_we_vote_id = candidate.contest_office_we_vote_id
-            contest_office_id = candidate.contest_office_id
-            if not positive_value_exists(google_civic_election_id) and positive_value_exists(contest_office_we_vote_id):
-                google_civic_election_id = \
-                    contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
-                        contest_office_we_vote_id)
+            office_results = \
+                retrieve_next_or_most_recent_office_for_candidate(candidate_we_vote_id=candidate_we_vote_id)
+            if office_results['contest_office_found']:
+                contest_office = office_results['contest_office']
+                contest_office_we_vote_id = contest_office.we_vote_id
+                contest_office_name = contest_office.office_name
+                google_civic_election_id = contest_office.google_civic_election_id
         elif matching_results['multiple_entries_found']:
             # Note: In some jurisdictions like NY, they list one candidate with multiple parties.
             #  We therefore have to store multiple candidates with the same name in these cases.
@@ -2441,13 +2444,13 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
                 candidate_found = True
                 candidate_we_vote_id = candidate.we_vote_id
                 candidate_id = candidate.id
-                contest_office_we_vote_id = candidate.contest_office_we_vote_id
-                contest_office_id = candidate.contest_office_id
-                if not positive_value_exists(google_civic_election_id) and positive_value_exists(
-                        contest_office_we_vote_id):
-                    google_civic_election_id = \
-                        contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
-                            contest_office_we_vote_id)
+                office_results = \
+                    retrieve_next_or_most_recent_office_for_candidate(candidate_we_vote_id=candidate_we_vote_id)
+                if office_results['contest_office_found']:
+                    contest_office = office_results['contest_office']
+                    contest_office_we_vote_id = contest_office.we_vote_id
+                    contest_office_name = contest_office.office_name
+                    google_civic_election_id = contest_office.google_civic_election_id
         elif not matching_results['success']:
             status += matching_results['status']
         else:
@@ -2487,27 +2490,6 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             if position_results['position_found']:
                 position = position_results['position']
                 position_we_vote_id = position.we_vote_id
-
-    if positive_value_exists(contest_office_we_vote_id):
-        contest_office_manager = ContestOfficeManager()
-        office_results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id)
-        if office_results['contest_office_found']:
-            contest_office = office_results['contest_office']
-            contest_office_name = contest_office.office_name
-            contest_office_we_vote_id = contest_office.we_vote_id
-            contest_office_id = contest_office.id
-    # NOTE 2017-10-16 Given we have some office entries that have the identical contest_office_name, but different
-    #  district_id, we don't want to search this way here (since we don't have the district_id)
-    # else:
-    #     # Find the office even though we haven't found candidate
-    #     contest_office_list_manager = ContestOfficeListManager()
-    #     matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
-    #         contest_office_name, google_civic_election_id, state_code)
-    #     if matching_results['contest_office_found']:
-    #         contest_office = matching_results['contest_office']
-    #         contest_office_name = contest_office.office_name
-    #         contest_office_we_vote_id = contest_office.we_vote_id
-    #         contest_office_id = contest_office.id
 
     if candidate_name:
         ballot_item_display_name = candidate_name
@@ -2610,7 +2592,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         success = True
     except Exception as e:
         success = False
-        status += "BATCH_ROW_ACTION_POSITION_UNABLE_TO_SAVE "
+        status += "BATCH_ROW_ACTION_POSITION_UNABLE_TO_SAVE: " + str(e) + ' '
 
     try:
         if batch_row_action_created or batch_row_action_updated:
@@ -2618,7 +2600,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             one_batch_row.batch_row_analyzed = True
             one_batch_row.save()
     except Exception as e:
-        pass
+        status += "CANNOT_SAVE_ONE_BATCH_ROW: " + str(e) + ' '
 
     results = {
         'success': success,
