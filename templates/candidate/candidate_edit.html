@@ -109,7 +109,7 @@ th, td {
             </td>
             <td>
                 <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
-                   target="_blank">{{ candidate_to_office_link.office.office_name }} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a><br />
+                   target="_blank">{% if candidate_to_office_link.office.office_name %}{{ candidate_to_office_link.office.office_name }}{% else %}MISSING OFFICE OBJECT{% endif %} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a><br />
             </td>
             <td>
                 <label for="delete_candidate_to_office_link_{{ candidate_to_office_link.id }}_id">

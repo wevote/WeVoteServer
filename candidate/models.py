@@ -1542,19 +1542,20 @@ class CandidateCampaign(models.Model):
             logger.error("candidate.election Found multiple")
             return
         except Election.DoesNotExist:
-            logger.error("candidate.election did not find")
+            logger.error("CandidateCampaign.election not attached to object, id: " + str(self.google_civic_election_id))
             return
         return election
 
     def office(self):
         try:
-            office = ContestOffice.objects.get(id=self.contest_office_id)
+            office = ContestOffice.objects.get(we_vote_id=self.contest_office_we_vote_id)
         except ContestOffice.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("candidate.election Found multiple")
+            logger.error("candidate.office Found multiple")
             return
         except ContestOffice.DoesNotExist:
-            logger.error("candidate.election did not find")
+            logger.error("CandidateCampaign.office not attached to object, we_vote_id: " +
+                         str(self.contest_office_we_vote_id))
             return
         return office
 
@@ -3388,10 +3389,10 @@ class CandidateToOfficeLink(models.Model):
             election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("candidate.election Found multiple")
+            logger.error("CandidateToOfficeLink.election Found multiple")
             return
         except Election.DoesNotExist:
-            logger.error("candidate.election did not find")
+            logger.error("CandidateToOfficeLink.election not attached to object, id: " + str(self.google_civic_election_id))
             return
         return election
 
@@ -3400,10 +3401,10 @@ class CandidateToOfficeLink(models.Model):
             office = ContestOffice.objects.get(we_vote_id=self.contest_office_we_vote_id)
         except ContestOffice.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("candidate.election Found multiple")
+            logger.error("CandidateToOfficeLink.office Found multiple")
             return
         except ContestOffice.DoesNotExist:
-            logger.error("candidate.election did not find")
+            logger.error("CandidateToOfficeLink.office not attached to object, id: " + str(self.contest_office_we_vote_id))
             return
         return office
 

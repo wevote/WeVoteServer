@@ -9,6 +9,7 @@ from bookmark.models import BookmarkItemList
 from config.base import get_environment_variable
 import datetime as the_other_datetime
 from django.http import HttpResponse
+from django.utils.timezone import now
 from election.models import ElectionManager
 from exception.models import handle_exception
 from image.controllers import retrieve_all_images_for_one_candidate, cache_master_and_resized_image, \
@@ -26,6 +27,7 @@ from twitter.models import TwitterUserManager
 import urllib.request
 import wevote_functions.admin
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
+    convert_date_to_we_vote_date_string, \
     convert_to_political_party_constant, positive_value_exists, process_request_from_master, convert_to_int, \
     extract_twitter_handle_from_text_string, extract_website_from_url, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
@@ -1535,6 +1537,70 @@ def retrieve_candidate_list_for_all_prior_elections_this_year(
         'google_civic_election_id_list':    prior_google_civic_election_id_list,
         'return_list_of_objects':           return_list_of_objects,
         'super_light_candidate_list':       super_light_candidate_list,
+    }
+    return results
+
+
+def retrieve_next_or_most_recent_office_for_candidate(candidate_we_vote_id=''):
+    status = ''
+    success = True
+    contest_office = None
+    contest_office_found = False
+    google_civic_election_id = 0
+
+    candidate_list_manager = CandidateCampaignListManager()
+    candidate_we_vote_id_list = [candidate_we_vote_id]
+    link_results = candidate_list_manager.retrieve_candidate_to_office_link_list(
+        candidate_we_vote_id_list=candidate_we_vote_id_list)
+    candidate_to_office_link_list = link_results['candidate_to_office_link_list']
+    link_dict = {}
+    for one_link in candidate_to_office_link_list:
+        election = one_link.election()
+        if election and election.election_day_text:
+            link_dict[election.election_day_text] = one_link
+
+    now_as_we_vote_date_string = convert_date_to_we_vote_date_string(now())
+    sorted_keys = sorted(link_dict.keys())
+    # Start with oldest
+    is_first = True
+    first_after_now_found = False
+    candidate_to_office_link_found = False
+    office_we_vote_id = ''
+    for election_day_text in sorted_keys:
+        if is_first:
+            # Default to oldest entry
+            candidate_to_office_link = link_dict[election_day_text]
+            office_we_vote_id = candidate_to_office_link.contest_office_we_vote_id
+            google_civic_election_id = candidate_to_office_link.google_civic_election_id
+            candidate_to_office_link_found = True
+            is_first = False
+        elif election_day_text < now_as_we_vote_date_string:
+            # Keep updating as we approach "now"
+            candidate_to_office_link = link_dict[election_day_text]
+            office_we_vote_id = candidate_to_office_link.contest_office_we_vote_id
+            google_civic_election_id = candidate_to_office_link.google_civic_election_id
+            candidate_to_office_link_found = True
+        else:
+            # Once we have passed "now", take the first election (i.e., the next election)
+            if not first_after_now_found:
+                candidate_to_office_link = link_dict[election_day_text]
+                office_we_vote_id = candidate_to_office_link.contest_office_we_vote_id
+                google_civic_election_id = candidate_to_office_link.google_civic_election_id
+                candidate_to_office_link_found = True
+                first_after_now_found = True
+
+    if candidate_to_office_link_found and positive_value_exists(office_we_vote_id):
+        contest_office_manager = ContestOfficeManager()
+        office_results = contest_office_manager.retrieve_contest_office_from_we_vote_id(office_we_vote_id)
+        contest_office_found = office_results['contest_office_found']
+        contest_office = office_results['contest_office']
+
+    results = {
+        'success':              success,
+        'status':               status,
+        'contest_office_found': contest_office_found,
+        'contest_office':       contest_office,
+        'google_civic_election_id': google_civic_election_id,
     }
     return results
 

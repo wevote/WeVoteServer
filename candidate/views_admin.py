@@ -7,7 +7,8 @@ from .controllers import candidates_import_from_master_server, candidates_import
     find_duplicate_candidate, \
     merge_if_duplicate_candidates, merge_these_two_candidates, \
     refresh_candidate_data_from_master_tables, retrieve_candidate_photos, \
-    retrieve_candidate_politician_match_options, save_image_to_candidate_table, \
+    retrieve_candidate_politician_match_options, retrieve_next_or_most_recent_office_for_candidate, \
+    save_image_to_candidate_table, \
     save_google_search_link_to_candidate_table
 from .models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager, CandidateToOfficeLink, \
     CANDIDATE_UNIQUE_IDENTIFIERS
@@ -29,7 +30,7 @@ from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
 from google_custom_search.models import GoogleSearchUser, GoogleSearchUserManager
-from image.controllers import retrieve_and_save_ballotpedia_candidate_images
+# from image.controllers import retrieve_and_save_ballotpedia_candidate_images
 from import_export_batches.models import BatchManager
 from import_export_twitter.controllers import refresh_twitter_candidate_details
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
@@ -664,6 +665,24 @@ def candidate_list_view(request):
                 # As of Aug 2018 we are no longer using PERCENT_RATING
                 position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
                 election.public_positions_count = position_query.count()
+
+    # Attach the latest contest_office information
+    modified_candidate_list = []
+    for candidate in candidate_list:
+        election_id_found_from_link = False
+        office_results = \
+            retrieve_next_or_most_recent_office_for_candidate(candidate_we_vote_id=candidate.we_vote_id)
+        if positive_value_exists(office_results['google_civic_election_id']):
+            candidate.google_civic_election_id = office_results['google_civic_election_id']
+            election_id_found_from_link = True
+        if office_results['contest_office_found']:
+            contest_office = office_results['contest_office']
+            candidate.contest_office_we_vote_id = contest_office.we_vote_id
+            candidate.contest_office_name = contest_office.office_name
+            if not election_id_found_from_link:
+                candidate.google_civic_election_id = contest_office.google_civic_election_id
+        modified_candidate_list.append(candidate)
+    candidate_list = modified_candidate_list
 
     # Make sure we always include the current election in the election_list, even if it is older
     if positive_value_exists(google_civic_election_id):
