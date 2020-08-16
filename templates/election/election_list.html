@@ -197,16 +197,18 @@
 {#                /#}
 {#                {% endif %}#}
 
-            <span style="{% if election.data_getting_stale %}color: red{% endif %}">
-                {% if election.refresh_date_completed %}
-                    {{ election.refresh_date_completed }}
-                {% elif election.refresh_date_started %}
-                    start: {{ election.refresh_date_started }}
-                {% endif %}
-                <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}">
-                    <span style="{% if election.data_getting_stale %}color: red{% else %}color: lightgray{% endif %}"><span class="glyphicon glyphicon-new-window"></span></span>
-                </a>
-            </span>
+            <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}" target="_blank">
+                <span style="{% if election.data_getting_stale %}color: red{% endif %}">
+                    {% if election.refresh_date_completed %}
+                        {{ election.refresh_date_completed }}
+                    {% elif election.refresh_date_started %}
+                        <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
+                            start: {{ election.refresh_date_started }}
+                        </span>
+                    {% endif %}
+                    <span class="glyphicon glyphicon-new-window"></span>
+                </span>
+            </a>
             </td>
         {% endif %}
         {% if show_election_statistics %}
