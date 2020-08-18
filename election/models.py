@@ -694,11 +694,13 @@ class ElectionManager(models.Model):
         }
         return results
 
-    def retrieve_prior_election_for_state(self, state_code, require_include_in_list_for_voters=True):
+    def retrieve_prior_election_for_state(self, state_code, require_include_in_list_for_voters=True,
+                                          cached_national_election_list=False):
         """
         We want either the prior election in this state, or the prior national election, whichever was most recent
         :param state_code:
         :param require_include_in_list_for_voters:
+        :param cached_national_election_list:
         :return:
         """
         status = ""
@@ -712,10 +714,13 @@ class ElectionManager(models.Model):
         status += prior_state_elections_results['status']
 
         # Find national elections with data from this state
-        without_state_code = True
-        prior_national_elections_results = self.retrieve_prior_elections_this_year(
-            state_code="", without_state_code=without_state_code)
-        national_election_list = prior_national_elections_results['election_list']
+        if cached_national_election_list:
+            national_election_list = cached_national_election_list
+        else:
+            without_state_code = True
+            prior_national_elections_results = self.retrieve_prior_elections_this_year(
+                state_code="", without_state_code=without_state_code)
+            national_election_list = prior_national_elections_results['election_list']
         filtered_national_election_list = []
         for national_election in national_election_list:
             # Does this national election have any ballot items for state_code?
@@ -733,7 +738,7 @@ class ElectionManager(models.Model):
         for one_election in combined_election_list:
             if not positive_value_exists(latest_election_day_text):
                 latest_election_day_text = one_election.election_day_text
-            if one_election.election_day_text <= latest_election_day_text:
+            if one_election.election_day_text >= latest_election_day_text:
                 latest_election_day_text = one_election.election_day_text
                 election = one_election
                 election_found = True
@@ -741,10 +746,11 @@ class ElectionManager(models.Model):
         success = True
         status += "RETRIEVE_PRIOR_ELECTION_FOR_STATE_COMPLETED "
         results = {
-            'success':          success,
-            'status':           status,
-            'election_found':   election_found,
-            'election':         election,
+            'success':                  success,
+            'status':                   status,
+            'election_found':           election_found,
+            'election':                 election,
+            'national_election_list':   national_election_list,
         }
         return results
 

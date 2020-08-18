@@ -979,6 +979,7 @@ def nationwide_election_list_view(request):
     show_all_elections_this_year = request.GET.get('show_all_elections_this_year', False)
     show_election_statistics = request.GET.get('show_election_statistics', False)
     show_ignored_elections = request.GET.get('show_ignored_elections', False)
+    show_related_elections = request.GET.get('show_related_elections', False)
     if positive_value_exists(show_all_elections_this_year):
         # Give priority to show_all_elections_this_year
         show_all_elections = False
@@ -991,12 +992,12 @@ def nationwide_election_list_view(request):
     messages_on_stage = get_messages(request)
     timezone = pytz.timezone("America/Los_Angeles")
     datetime_now = timezone.localize(datetime.now())
+    election_manager = ElectionManager()
     office_manager = ContestOfficeManager()
 
     is_national_election = False
     national_election = None
     if positive_value_exists(google_civic_election_id):
-        election_manager = ElectionManager()
         results = election_manager.retrieve_election(google_civic_election_id, read_only=False)
         if results['election_found']:
             national_election = results['election']
@@ -1008,6 +1009,7 @@ def nationwide_election_list_view(request):
         from election.models import fetch_next_election_for_state, fetch_prior_election_for_state
         state_list = STATE_CODE_MAP
         election_list = []
+        cached_national_election_list = False
         data_stale_if_older_than = now() - timedelta(days=30)
         for one_state_code, one_state_name in state_list.items():
             # ############################
@@ -1080,23 +1082,20 @@ def nationwide_election_list_view(request):
             except Exception as e:
                 pass
 
-            # Last & Next Election (so we know if it makes sense to wait to start a process)
-            prior_election_in_state = fetch_prior_election_for_state(one_state_code)
-            try:
-                if prior_election_in_state and \
-                        prior_election_in_state.google_civic_election_id and \
-                        prior_election_in_state.google_civic_election_id != google_civic_election_id:
-                    pass
-            except Exception as e:
-                pass
-            next_election_in_state = fetch_next_election_for_state(one_state_code)
-            try:
-                if next_election_in_state and \
-                        next_election_in_state.google_civic_election_id and \
-                        next_election_in_state.google_civic_election_id != google_civic_election_id:
-                    pass
-            except Exception as e:
-                pass
+            prior_election_in_state = None
+            next_election_in_state = None
+            if positive_value_exists(show_related_elections):
+                # Prior Election (so we know if the primary has ended, and if it makes sense to start a process)
+                results = election_manager.retrieve_prior_election_for_state(
+                    state_code=one_state_code, cached_national_election_list=cached_national_election_list)
+                if results['election_found']:
+                    prior_election_in_state = results['election']
+                    if not cached_national_election_list and positive_value_exists(results['national_election_list']):
+                        cached_national_election_list = results['national_election_list']
+                else:
+                    prior_election_in_state = None
+                # Next Election (is a primary coming up?)
+                next_election_in_state = fetch_next_election_for_state(one_state_code)
 
             # Transfer to election object
             if one_state_code == "NA":
@@ -1313,6 +1312,7 @@ def nationwide_election_list_view(request):
         'show_all_elections_this_year': show_all_elections_this_year,
         'show_election_statistics':     show_election_statistics,
         'show_ignored_elections':       show_ignored_elections,
+        'show_related_elections':       show_related_elections,
         'state_code':                   state_code,
     }
     return render(request, 'election/election_list.html', template_values)

@@ -43,6 +43,11 @@
           <input type="checkbox" name="show_election_statistics" id="show_election_statistics_id" value="1"
                  {% if show_election_statistics %}checked{% endif %} /> Show Election Statistics
         </label>
+        &nbsp;&nbsp;&nbsp;
+        <label for="show_related_elections_id">
+          <input type="checkbox" name="show_related_elections" id="show_related_elections_id" value="1"
+                 {% if show_related_elections %}checked{% endif %} /> Show Related Elections (2+ mins)
+        </label>
     </form>
 
 {% else %}
@@ -80,6 +85,12 @@
         <label for="show_election_statistics_id">
           <input type="checkbox" name="show_election_statistics" id="show_election_statistics_id" value="1"
                  {% if show_election_statistics %}checked{% endif %} /> Show Election Statistics
+        </label>
+
+        &nbsp;&nbsp;&nbsp;
+        <label for="show_related_elections_id">
+          <input type="checkbox" name="show_related_elections" id="show_related_elections_id" value="1"
+                 {% if show_related_elections %}checked{% endif %} /> Show Related Elections (2+ mins)
         </label>
     </form>
 {% endif %}
@@ -328,6 +339,11 @@
     });
     $(function() {
         $('#show_election_statistics_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_related_elections_id').change(function() {
             this.form.submit();
         });
     });
