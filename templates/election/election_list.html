@@ -111,6 +111,9 @@
             </th>
         {% if is_national_election %}
             <th>Last Refresh</th>
+            <th>Refresh Added to Queue</th>
+            <th>Last Election</th>
+            <th>Next Election</th>
         {% endif %}
         {% if show_election_statistics %}
             <th align="middle">Candidates<br />
@@ -209,6 +212,29 @@
                     <span class="glyphicon glyphicon-new-window"></span>
                 </span>
             </a>
+            </td>
+            <td>
+                {% if election.refresh_date_added_to_queue %}
+                <span style="color: darkgray">
+                    {{ election.refresh_date_added_to_queue }}
+                </span>
+                {% endif %}
+            </td>
+            <td>
+            {% if election.prior_election_in_state and election.prior_election_in_state.election_day_text %}
+                {{ election.prior_election_in_state_date|date:"N j, Y" }}
+            {% endif %}
+            </td>
+            <td>
+            {% if election.next_election_in_state and election.next_election_in_state.election_day_text %}
+                {% if election.next_election_in_state.election_day_text == election.election_day_text %}
+                <span style="color: darkgray">
+                    This election
+                </span>
+                {% else %}
+                    {{ election.next_election_in_state_date|date:"N j, Y" }}
+                {% endif %}
+            {% endif %}
             </td>
         {% endif %}
         {% if show_election_statistics %}

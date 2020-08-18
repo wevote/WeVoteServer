@@ -802,6 +802,12 @@ def convert_date_to_we_vote_date_string(date):
     return day_as_string
 
 
+def convert_we_vote_date_string_to_date(we_vote_date_string):
+    date_as_string = convert_to_str(we_vote_date_string)
+    date = datetime.datetime.strptime(date_as_string, '%Y-%m-%d')
+    return date
+
+
 def digit_count(number):
     if number > 1 and round(log10(number)) >= log10(number) and number % 10 != 0:
         return round(log10(number))
