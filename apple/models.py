@@ -19,8 +19,10 @@ class AppleUser(models.Model):
     in our system anywhere else
     """
     # objects = None
-    voter_we_vote_id = models.CharField(verbose_name="we vote id for the Apple ID owner", max_length=255, unique=False)
-    user_code = models.CharField(verbose_name="User's apple id code, a.k.a. `subject registered claim`", max_length=255, null=False, unique=False)
+    voter_device_id = models.CharField(verbose_name='voter device id',
+                                       max_length=255, null=False, blank=False, unique=True, default='DELETE_ME')
+    voter_we_vote_id = models.CharField(verbose_name="we vote id for the Apple ID owner", max_length=255, unique=True)
+    user_code = models.CharField(verbose_name="User's apple id code", max_length=255, null=False, unique=False)
     email = models.EmailField(verbose_name='apple email address', max_length=255, unique=False,
                               null=True, blank=True)
     first_name = models.CharField(

@@ -345,6 +345,8 @@ The next day
     (WeVoteServerPy3.7.2) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % 
 
 
+
+
 ------
 (WeVoteServerPy3.7.2) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % brew services start postgresql
 Service `postgresql` already started, use `brew services restart postgresql` to restart.
@@ -355,4 +357,29 @@ Stopping `postgresql`... (might take a while)
 (WeVoteServerPy3.7.2) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % ps -aux
 
 ----------
+
+(WeVoteServerPy3.8) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % python manage.py sqlmigrate apple 0001_initial   
+Running
+BEGIN;
+--
+-- Create model AppleUser
+--
+CREATE TABLE "apple_appleuser" ("id" serial NOT NULL PRIMARY KEY, "voter_device_id" varchar(255) NOT NULL, "voter_we_vote_id" varchar(255) NOT NULL, "user_code" varchar(255) NOT NULL, "email" varchar(255) NULL, "first_name" varchar(255) NULL, "middle_name" varchar(255) NULL, "last_name" varchar(255) NULL, "apple_platform" varchar(32) NULL, "apple_os_version" varchar(32) NULL, "apple_model" varchar(32) NULL, "date_created" timestamp with time zone NOT NULL, "date_last_referenced" timestamp with time zone NOT NULL);
+COMMIT;
+(WeVoteServerPy3.8) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer %
+
+----------
 (WeVoteServerPy3.8) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % ./ngrok http https://localhost:8000 -host-header="localhost:8000" 
+
+Certificate side at https://developer.apple.com/account/resources/identifiers/serviceId/edit/558W8996A7
+
+https://2e17b805919a.ngrok.io/apis/v1/
+
+./ngrok http http://localhost:8000 -host-header="localhost:8000" 
+
+https://9f876040d5c8.ngrok.io/apis/v1/appleSignInOauthRedirectDestination
+
+Django runs http.  Redirect locally to http, not to https.
+./ngrok http http://localhost:8000 -host-header="localhost:8000" 
+
+'{"name":{"firstName":"Steve","lastName":"Podell"},"email":"stevepodell@yahoo.com"}'
