@@ -41,7 +41,7 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
         client_id = get_environment_variable_default('SOCIAL_AUTH_APPLE_CLIENT_ID_IOS', 'org.wevote.cordova')
         results = AppleResolver().authenticate(identity_token, client_id)
         if results:
-            user_code2 = results['subject_registered_claim']
+            user_code = results['subject_registered_claim']
             email = results['email']
 
     results = sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name, middle_name, last_name,
@@ -82,21 +82,27 @@ def sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name,
 
 
     #
-    # Moving forward there will only be one row for one user_code (will need to cleanup on the fly for production)
+    # The presence of a matching voter_device_id indicates signed in status on the specific device
     #
     try:
-        # Force kill any legacy duplicates, from now on only one row per user code
-        # to test this you will have to navigate to https://appleid.apple.com/account/manage and remove the wevote cordova app from the list
-        usr = AppleUser.objects.filter(user_code=user_code)[:1].values_list("id", flat=True)  # only retrieve ids.
-        AppleUser.objects.exclude(pk__in=list(usr)).delete()
+        # I may need to delete any row prior to this change 8/14/20
+        # # Force kill any legacy duplicates, from now on only one row per user code
+        # # to test this you will have to navigate to https://appleid.apple.com/account/manage and remove the wevote cordova app from the list
+        # usr = AppleUser.objects.filter(user_code=user_code)[:1].values_list("id", flat=True)  # only retrieve ids.
+        # AppleUser.objects.exclude(pk__in=list(usr)).delete()
 
-        # Get the last (hopefully only, user)
-        apple_user = AppleUser.objects.filter(user_code=user_code).last()
+        # Get the last row that matches user_code and voter_device_id
+        apple_user = AppleUser.objects.filter(user_code=user_code, voter_device_id=voter_device_id).last()
         if not apple_user:
+            if not last_name:
+                apple_user_first = AppleUser.objects.filter(user_code=user_code).first()
+                first_name = apple_user_first.first_name
+                middle_name = apple_user_first.middle_name
+                last_name = apple_user_first.last_name
             apple_user = AppleUser.objects.get_or_create(
-                user_code__iexact=user_code,
+                user_code=user_code,
+                voter_device_id=voter_device_id,
                 defaults={
-                    'user_code': user_code,
                     'email': email,
                     'first_name': first_name,
                     'middle_name': middle_name,
@@ -108,6 +114,9 @@ def sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name,
                 }
             )
             apple_user = apple_user[0]
+            status += "APPLE_USER_ID_RECORD_CREATED "
+        else:
+            status += "APPLE_USER_ID_RECORD_UPDATED "
 
         apple_user.date_last_referenced = datetime.today()
         if not positive_value_exists(voter_we_vote_id):
@@ -115,13 +124,12 @@ def sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name,
             if positive_value_exists(results_id['voter_we_vote_id']):
                 voter_we_vote_id = results_id['voter_we_vote_id']
                 apple_user.voter_we_vote_id = voter_we_vote_id
-                status += results_id['status']
+                status += voter_we_vote_id + " " + results_id['status'] + " "
         apple_user.save()
         success_siwa = True
-        status += "APPLE_USER_ID_RECORD_UPDATED_OR_CREATED "
     except Exception as e:
         success_siwa = False
-        status += "ERROR_APPLE_USER_NOT_CREATED_OR_NOT_UPDATED "
+        status += "ERROR_APPLE_USER_NOT_CREATED_OR_UPDATED "
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
@@ -134,7 +142,7 @@ def sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name,
 
 @csrf_exempt
 def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirectDestination
-    # This is part of the OAuth flow for the WebApp (Not for iOS)
+    # This is part of the OAuth flow for the WebApp (This is NOT part of the flow for iOS!)
 
     print("Method is", request.method)
     if not request.method == 'POST':
@@ -152,10 +160,36 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
     email = ''
     user_code = ''
     if 'user' in request.POST:
-        # First time
-        # <QueryDict: {'state': ['steve'], 'code': ['cae6bae43fae8490d8c69b99950db4e7c.0.nruqx.ovW0z46777pdzB6777qwRA'],
-        #              'id_token': ['eyJraW...1P9S_vgWJHn4SMNjrujasVxWN7JSdDLuxrXN-6CCQ22Iqeg']}>
-        user = request.POST['user']
+        # Apple only sends this user name in the clear on the very first time the voter signs in with Apple on a device
+        # <QueryDict: {
+        #   'state': [
+        #     '{"voter_device_id":"WHEQYCQ...hWFUs6RJ1k",
+        #     "return_url":"https://localhost:3000/ready"}'
+        #   ],
+        #   'code': ['cfd1436ca8c8d463d94e55f4a2bdbfbf8.0.nruqx.bg8M64KEkoUOBwmddufJLA'],
+        #   'id_token': ['eyJraW...JO4aJMpGGtN2q8L1kJG7AQV1sgRg'],
+        #   'user': [
+        #     '{"name":
+        #       {"firstName":"Steve",
+        #        "lastName":"Podell"},
+        #        "email":"stevepodell11@yahoo.com"}'
+        #   ]}>
+        # On subsequent calls it looks like
+        # <QueryDict: {
+        #   'state': [
+        #     '{"voter_device_id": "eHUgOyy...8ho2uvPZWmGY4mNWNn6U9VKVhthrh7MHiurhNwwDoirgSR",
+        #     "return_url":"https://localhost:3000/ready"}'
+        #   ],
+        #   'code': ['cfd1436ca8c8d463d94e55f4a2bdbfbf8.0.nruqx.bg8M64KEkoUOBwmddufJLA'],
+        #   'id_token': ['eyJraW...JO4aJMpGGtN2q8L1kJG7AQV1sgRg'],
+        # But the voter's email that is registered with SIWA is received encrypted in the id_token on subsequent logins
+        # To re-test the initial login message, goto https://appleid.apple.com/account/manage and under
+        #   Security/"APPS & WEBSITES USING APPLE ID" click "Manage..." and "Stop Using Apple ID" for
+        #      "We Vote Ballot Guide, @WeVote"
+
+        user_string = request.POST['user']
+        user = json.loads(user_string)
+
         first_name = user['name']['firstName']
         if 'middle_name' in user['name']:
             middle_name = user['name']['middleName']
