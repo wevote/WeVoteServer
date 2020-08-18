@@ -474,10 +474,6 @@ class ElectionManager(models.Model):
             status += 'ELECTION_QUERY_COMPLETE '
             election_list_found = positive_value_exists(len(upcoming_election_list))
             success = True
-        except Election.DoesNotExist as e:
-            status = 'NO_ELECTIONS_FOUND '
-            success = True
-            election_list_found = False
         except Exception as e:
             status = "RETRIEVE_UPCOMING_ELECTIONS_QUERY_FAILURE " + str(e) + " "
             success = False
@@ -694,6 +690,60 @@ class ElectionManager(models.Model):
             'success':          success,
             'status':           status,
             'election_found':   True,
+            'election':         election,
+        }
+        return results
+
+    def retrieve_prior_election_for_state(self, state_code, require_include_in_list_for_voters=True):
+        """
+        We want either the prior election in this state, or the prior national election, whichever was most recent
+        :param state_code:
+        :param require_include_in_list_for_voters:
+        :return:
+        """
+        status = ""
+        from ballot.models import BallotItemListManager
+        ballot_item_list_manager = BallotItemListManager()
+
+        # Find state-specific elections
+        prior_state_elections_results = self.retrieve_prior_elections_this_year(
+            state_code=state_code)
+        state_election_list = prior_state_elections_results['election_list']
+        status += prior_state_elections_results['status']
+
+        # Find national elections with data from this state
+        without_state_code = True
+        prior_national_elections_results = self.retrieve_prior_elections_this_year(
+            state_code="", without_state_code=without_state_code)
+        national_election_list = prior_national_elections_results['election_list']
+        filtered_national_election_list = []
+        for national_election in national_election_list:
+            # Does this national election have any ballot items for state_code?
+            results = ballot_item_list_manager.count_ballot_items(
+                national_election.google_civic_election_id, state_code)
+            ballot_item_count = results['ballot_item_list_count']
+            if positive_value_exists(ballot_item_count):
+                filtered_national_election_list.append(national_election)
+
+        combined_election_list = state_election_list + filtered_national_election_list
+        # Find latest election in the past
+        election = None
+        election_found = False
+        latest_election_day_text = None
+        for one_election in combined_election_list:
+            if not positive_value_exists(latest_election_day_text):
+                latest_election_day_text = one_election.election_day_text
+            if one_election.election_day_text <= latest_election_day_text:
+                latest_election_day_text = one_election.election_day_text
+                election = one_election
+                election_found = True
+
+        success = True
+        status += "RETRIEVE_PRIOR_ELECTION_FOR_STATE_COMPLETED "
+        results = {
+            'success':          success,
+            'status':           status,
+            'election_found':   election_found,
             'election':         election,
         }
         return results
@@ -1018,6 +1068,22 @@ def fetch_election_state(google_civic_election_id):
         return election.get_election_state()
     else:
         return ''
+
+
+def fetch_prior_election_for_state(state_code, require_include_in_list_for_voters=True):
+    """
+    :param state_code:
+    :param require_include_in_list_for_voters:
+    :return:
+    """
+    election_manager = ElectionManager()
+    results = election_manager.retrieve_prior_election_for_state(
+        state_code, require_include_in_list_for_voters=require_include_in_list_for_voters)
+    if results['election_found']:
+        election = results['election']
+        return election
+    else:
+        return Election()
 
 
 def fetch_next_election_for_state(state_code, require_include_in_list_for_voters=True):

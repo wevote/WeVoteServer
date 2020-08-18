@@ -53,7 +53,8 @@ from voter.models import VoterAddressManager, VoterDeviceLink, voter_has_authori
 from voter_guide.models import VoterGuide, VoterGuidePossibility, \
     VoterGuideListManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, convert_we_vote_date_string_to_date, positive_value_exists,\
+    STATE_CODE_MAP
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1004,6 +1005,7 @@ def nationwide_election_list_view(request):
                 national_election = None
 
     if is_national_election:
+        from election.models import fetch_next_election_for_state, fetch_prior_election_for_state
         state_list = STATE_CODE_MAP
         election_list = []
         data_stale_if_older_than = now() - timedelta(days=30)
@@ -1035,21 +1037,68 @@ def nationwide_election_list_view(request):
                         if one_batch_process.kind_of_process == 'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
                             if not refresh_date_completed and one_batch_process.date_completed:
                                 refresh_date_completed = one_batch_process.date_completed
-                            elif not refresh_date_started and one_batch_process.date_started:
+                            if not refresh_date_started and one_batch_process.date_started:
                                 refresh_date_started = one_batch_process.date_started
                         elif one_batch_process.kind_of_process == 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
                             if not retrieve_date_completed and one_batch_process.date_completed:
                                 retrieve_date_completed = one_batch_process.date_completed
-                            elif not retrieve_date_started and one_batch_process.date_started:
+                            if not retrieve_date_started and one_batch_process.date_started:
                                 retrieve_date_started = one_batch_process.date_started
-                        if refresh_date_completed and retrieve_date_completed:
-                            break  # Break out of this batch_process loop only
+                        # if refresh_date_completed and retrieve_date_completed:
+                        #     break  # Break out of this batch_process loop only
             except BatchProcess.DoesNotExist:
                 # No offices found. Not a problem.
                 batch_process_list = []
             except Exception as e:
                 pass
 
+            # Upcoming refresh date scheduled?
+            refresh_date_added_to_queue = None
+            try:
+                batch_process_queryset = BatchProcess.objects.all()
+                batch_process_queryset = \
+                    batch_process_queryset.filter(google_civic_election_id=google_civic_election_id)
+                batch_process_queryset = batch_process_queryset.filter(state_code__iexact=one_state_code)
+                batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+                batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
+                ballot_item_processes = [
+                    'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
+                batch_process_queryset = batch_process_queryset.order_by("-id")
+
+                batch_process_queryset = batch_process_queryset[:3]
+                batch_process_list = list(batch_process_queryset)
+
+                if len(batch_process_list):
+                    for one_batch_process in batch_process_list:
+                        if one_batch_process.kind_of_process == 'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
+                            if not refresh_date_added_to_queue and one_batch_process.date_added_to_queue:
+                                refresh_date_added_to_queue = one_batch_process.date_added_to_queue
+            except BatchProcess.DoesNotExist:
+                # No offices found. Not a problem.
+                batch_process_list = []
+            except Exception as e:
+                pass
+
+            # Last & Next Election (so we know if it makes sense to wait to start a process)
+            prior_election_in_state = fetch_prior_election_for_state(one_state_code)
+            try:
+                if prior_election_in_state and \
+                        prior_election_in_state.google_civic_election_id and \
+                        prior_election_in_state.google_civic_election_id != google_civic_election_id:
+                    pass
+            except Exception as e:
+                pass
+            next_election_in_state = fetch_next_election_for_state(one_state_code)
+            try:
+                if next_election_in_state and \
+                        next_election_in_state.google_civic_election_id and \
+                        next_election_in_state.google_civic_election_id != google_civic_election_id:
+                    pass
+            except Exception as e:
+                pass
+
+            # Transfer to election object
             if one_state_code == "NA":
                 pass
             else:
@@ -1059,8 +1108,19 @@ def nationwide_election_list_view(request):
                 election_for_one_state.internal_notes = None  # Do we want to try to add this for states?
                 election_for_one_state.refresh_date_completed = refresh_date_completed
                 election_for_one_state.refresh_date_started = refresh_date_started
+                election_for_one_state.refresh_date_added_to_queue = refresh_date_added_to_queue
                 election_for_one_state.retrieve_date_completed = retrieve_date_completed
                 election_for_one_state.retrieve_date_started = retrieve_date_started
+
+                election_for_one_state.prior_election_in_state = prior_election_in_state
+                if prior_election_in_state and prior_election_in_state.election_day_text:
+                    election_for_one_state.prior_election_in_state_date = \
+                        convert_we_vote_date_string_to_date(prior_election_in_state.election_day_text)
+
+                election_for_one_state.next_election_in_state = next_election_in_state
+                if next_election_in_state and next_election_in_state.election_day_text:
+                    election_for_one_state.next_election_in_state_date = \
+                        convert_we_vote_date_string_to_date(next_election_in_state.election_day_text)
 
                 if refresh_date_completed:
                     most_recent_time = refresh_date_completed
