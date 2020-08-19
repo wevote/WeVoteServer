@@ -7,10 +7,11 @@ from django.views.decorators.csrf import csrf_exempt
 from exception.models import print_to_log, handle_exception
 import json
 from apple.AppleResolver import AppleResolver
-from apple.controllers import apple_sign_in_retrieve_voter_id, validate_sign_in_with_apple_token_for_api
+from apple.controllers import apple_sign_in_save_merge_if_needed, \
+    validate_sign_in_with_apple_token_for_api  # apple_sign_in_retrieve_voter_id,
 from apple.models import AppleUser
 from config.base import get_environment_variable, get_environment_variable_default
-from voter.models import fetch_voter_we_vote_id_from_voter_device_link
+from voter.models import VoterDeviceLinkManager, VoterManager  # fetch_voter_we_vote_id_from_voter_device_link,
 from wevote_functions.functions import get_voter_device_id, positive_value_exists
 import wevote_functions.admin
 
@@ -25,7 +26,12 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    status = ""
+    previously_signed_in_voter = None
+    previously_signed_in_voter_found = False
+    previously_signed_in_voter_we_vote_id = ''
+
+    # voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     user_code = request.GET.get('user_code', '')
     identity_token = request.GET.get('identity_token', '')
     email = request.GET.get('email', '')
@@ -35,7 +41,7 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
     apple_platform = request.GET.get('apple_platform', '')
     apple_os_version = request.GET.get('apple_os_version', '')
     apple_model = request.GET.get('apple_model', '')
-    voter_we_vote_id = request.GET.get('voter_we_vote_id', '')
+    # voter_we_vote_id = request.GET.get('voter_we_vote_id', '')
 
     if not positive_value_exists(email):
         client_id = get_environment_variable_default('SOCIAL_AUTH_APPLE_CLIENT_ID_IOS', 'org.wevote.cordova')
@@ -44,13 +50,64 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
             user_code = results['subject_registered_claim']
             email = results['email']
 
-    results = sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name, middle_name, last_name,
-                                         apple_platform, apple_os_version, apple_model, voter_we_vote_id)
+    voter_manager = VoterManager()
+    voter_device_link_manager = VoterDeviceLinkManager()
+
+    voter_device_id = get_voter_device_id(request)
+    results = voter_device_link_manager.retrieve_voter_device_link(
+        voter_device_id, read_only=False)
+    if results['voter_device_link_found']:
+        voter_device_link = results['voter_device_link']
+    else:
+        voter_device_link = None
+
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)
+    if results['voter_found']:
+        # This is the voter account the person is using when they click "Sign in with Apple"
+        voter_starting_process = results['voter']
+        voter_starting_process_we_vote_id = voter_starting_process.we_vote_id
+    else:
+        voter_starting_process = None
+        voter_starting_process_we_vote_id = ''
+
+    if not positive_value_exists(voter_starting_process_we_vote_id):
+        status += "VOTER_WE_VOTE_ID_FROM_VOTER_STARTING_PROCESS_MISSING "
+        json_data = {
+            'status':                                   status,
+            'success':                                  False,
+            'previously_signed_in_voter':               previously_signed_in_voter,
+            'previously_signed_in_voter_found':         previously_signed_in_voter_found,
+            'previously_signed_in_voter_we_vote_id':    previously_signed_in_voter_we_vote_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    results = sign_in_with_apple_for_api(
+        user_code=user_code,
+        email=email,
+        first_name=first_name,
+        middle_name=middle_name,
+        last_name=last_name,
+        apple_platform=apple_platform,
+        apple_os_version=apple_os_version,
+        apple_model=apple_model,
+        voter_starting_process_we_vote_id=voter_starting_process_we_vote_id)
+    status += results['status']
+
+    merge_results = apple_sign_in_save_merge_if_needed(
+        email_from_apple=email,
+        previously_signed_in_apple_voter_found=results['previously_signed_in_voter_found'],
+        previously_signed_in_apple_voter_we_vote_id=results['previously_signed_in_voter_we_vote_id'],
+        voter_device_link=voter_device_link,
+        voter_starting_process=voter_starting_process,
+    )
+    status += merge_results['status']
 
     json_data = {
-        'status': results['status'],
-        'success': results['success'],
-        'voter_we_vote_id': results['voter_we_vote_id'],
+        'status':                                   status,
+        'success':                                  success,
+        'previously_signed_in_voter':               previously_signed_in_voter,
+        'previously_signed_in_voter_found':         previously_signed_in_voter_found,
+        'previously_signed_in_voter_we_vote_id':    previously_signed_in_voter_we_vote_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -65,43 +122,62 @@ def success(message=None):
     return payload(message, "success")
 
 
-def sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name,
-                               middle_name, last_name, apple_platform, apple_os_version,
-                               apple_model, voter_we_vote_id):
+def sign_in_with_apple_for_api(
+        user_code='',
+        email='',
+        first_name='',
+        middle_name='',
+        last_name='',
+        apple_platform='',
+        apple_os_version='',
+        apple_model='',
+        voter_starting_process_we_vote_id=''):
     status = ""
     success_siwa = False
+    previously_signed_in_voter_found = False
+    previously_signed_in_voter_we_vote_id = ''
+    signed_in_voter_we_vote_id = ''
+
     if not positive_value_exists(user_code):
         status += "CREATE_APPLE_USER_MISSING_REQUIRED_VARIABLE_USER_CODE "
         print_to_log(logger=logger, exception_message_optional=status)
         results = {
             'success': success_siwa,
             'status': status,
-            'voter_we_vote_id': voter_we_vote_id,
+            'previously_signed_in_voter_found': '',
+            'previously_signed_in_voter_we_vote_id': '',
+            'signed_in_voter_we_vote_id': '',
         }
         return results
-
 
     #
     # The presence of a matching voter_device_id indicates signed in status on the specific device
     #
     try:
         # I may need to delete any row prior to this change 8/14/20
-        # # Force kill any legacy duplicates, from now on only one row per user code
-        # # to test this you will have to navigate to https://appleid.apple.com/account/manage and remove the wevote cordova app from the list
+        # Force kill any legacy duplicates, from now on only one row per user code
+        # to test this you will have to navigate to https://appleid.apple.com/account/manage
+        # and remove the wevote cordova app from the list
         # usr = AppleUser.objects.filter(user_code=user_code)[:1].values_list("id", flat=True)  # only retrieve ids.
         # AppleUser.objects.exclude(pk__in=list(usr)).delete()
 
-        # Get the last row that matches user_code and voter_device_id
-        apple_user = AppleUser.objects.filter(user_code=user_code, voter_device_id=voter_device_id).last()
-        if not apple_user:
-            if not last_name:
-                apple_user_first = AppleUser.objects.filter(user_code=user_code).first()
-                first_name = apple_user_first.first_name
-                middle_name = apple_user_first.middle_name
-                last_name = apple_user_first.last_name
-            apple_user = AppleUser.objects.get_or_create(
+        # Get the last row that matches user_code
+        apple_user = AppleUser.objects.filter(user_code=user_code).last()
+        if apple_user:
+            status += "APPLE_USER_ID_RECORD_UPDATED "
+            previously_signed_in_voter_found = True
+            previously_signed_in_voter_we_vote_id = apple_user.voter_we_vote_id
+            signed_in_voter_we_vote_id = apple_user.voter_we_vote_id
+        else:
+            # user_code not found: Create new AppleUser entry
+            # if not last_name:
+            #     apple_user_first = AppleUser.objects.filter(user_code=user_code).first()
+            #     first_name = apple_user_first.first_name
+            #     middle_name = apple_user_first.middle_name
+            #     last_name = apple_user_first.last_name
+            apple_user = AppleUser.objects.create(
                 user_code=user_code,
-                voter_device_id=voter_device_id,
+                voter_we_vote_id=voter_starting_process_we_vote_id,
                 defaults={
                     'email': email,
                     'first_name': first_name,
@@ -110,32 +186,36 @@ def sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name,
                     'apple_platform': apple_platform,
                     'apple_os_version': apple_os_version,
                     'apple_model': apple_model,
-                    'voter_we_vote_id': voter_we_vote_id,
+                    'voter_we_vote_id': voter_starting_process_we_vote_id,
+                    'user_code': user_code,
                 }
             )
-            apple_user = apple_user[0]
             status += "APPLE_USER_ID_RECORD_CREATED "
-        else:
-            status += "APPLE_USER_ID_RECORD_UPDATED "
+            previously_signed_in_voter_found = False
+            previously_signed_in_voter_we_vote_id = ''
+            signed_in_voter_we_vote_id = apple_user.voter_we_vote_id
 
         apple_user.date_last_referenced = datetime.today()
-        if not positive_value_exists(voter_we_vote_id):
-            results_id = apple_sign_in_retrieve_voter_id(voter_device_id, email, first_name, last_name)
-            if positive_value_exists(results_id['voter_we_vote_id']):
-                voter_we_vote_id = results_id['voter_we_vote_id']
-                apple_user.voter_we_vote_id = voter_we_vote_id
-                status += voter_we_vote_id + " " + results_id['status'] + " "
+        # We match to existing voter outside of this function
+        # if not positive_value_exists(previously_signed_in_voter_we_vote_id):
+        #     results_id = apple_sign_in_retrieve_voter_id(email, first_name, last_name)
+        #     if positive_value_exists(results_id['voter_we_vote_id']):
+        #         previously_signed_in_voter_we_vote_id = results_id['voter_we_vote_id']
+        #         apple_user.voter_we_vote_id = previously_signed_in_voter_we_vote_id
+        #         status += previously_signed_in_voter_we_vote_id + " " + results_id['status'] + " "
         apple_user.save()
         success_siwa = True
     except Exception as e:
         success_siwa = False
-        status += "ERROR_APPLE_USER_NOT_CREATED_OR_UPDATED "
+        status += "ERROR_APPLE_USER_NOT_CREATED_OR_UPDATED " + str(e) + ' '
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
-        'success': success_siwa,
-        'status': status,
-        'voter_we_vote_id': voter_we_vote_id,
+        'success':                                  success_siwa,
+        'status':                                   status,
+        'previously_signed_in_voter_found':         previously_signed_in_voter_found,
+        'previously_signed_in_voter_we_vote_id':    previously_signed_in_voter_we_vote_id,
+        'signed_in_voter_we_vote_id':               signed_in_voter_we_vote_id,
     }
     return results
 
@@ -154,6 +234,7 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
     return_url = state_dict['return_url']
     # print('id_token renamed as access_token: ', access_token)
 
+    status = ''
     first_name = ''
     middle_name = ''
     last_name = ''
@@ -190,11 +271,14 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
         user_string = request.POST['user']
         user = json.loads(user_string)
 
-        first_name = user['name']['firstName']
-        if 'middle_name' in user['name']:
+        if 'firstName' in user['name']:
+            first_name = user['name']['firstName']
+        if 'middleName' in user['name']:
             middle_name = user['name']['middleName']
-        last_name = user['name']['lastName']
-        email = user['email']
+        if 'lastName' in user['name']:
+            last_name = user['name']['lastName']
+        if 'email' in user:
+            email = user['email']
 
     client_id = get_environment_variable_default('SOCIAL_AUTH_APPLE_CLIENT_ID_WEB', 'us.wevote.webapp')
     results = AppleResolver().authenticate(access_token, client_id)
@@ -202,12 +286,50 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
         user_code = results['subject_registered_claim']
         email = results['email']
 
-    voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
-    if not positive_value_exists(voter_we_vote_id):
-        logger.error('did not receive a voter_we_vote_id from voter_device_id in sign_in_with_apple_oauth_redirect_view ')
+    # voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+    voter_manager = VoterManager()
+    voter_device_link_manager = VoterDeviceLinkManager()
 
-    sign_in_with_apple_for_api(voter_device_id, user_code, email, first_name, middle_name, last_name,
-                               'Web WeVoteWebApp', 'n/a', 'n/a', voter_we_vote_id)
+    results = voter_device_link_manager.retrieve_voter_device_link(
+        voter_device_id, read_only=False)
+    if results['voter_device_link_found']:
+        voter_device_link = results['voter_device_link']
+    else:
+        voter_device_link = None
+
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)
+    if results['voter_found']:
+        # This is the voter account the person is using when they click "Sign in with Apple"
+        voter_starting_process = results['voter']
+        voter_starting_process_we_vote_id = voter_starting_process.we_vote_id
+    else:
+        voter_starting_process = None
+        voter_starting_process_we_vote_id = ''
+
+    if not positive_value_exists(voter_starting_process_we_vote_id):
+        logger.error(
+            'did not receive a voter_we_vote_id from voter_device_id in sign_in_with_apple_oauth_redirect_view ')
+
+    results = sign_in_with_apple_for_api(
+        user_code=user_code,
+        email=email,
+        first_name=first_name,
+        middle_name=middle_name,
+        last_name=last_name,
+        apple_platform='Web WeVoteWebApp',
+        apple_os_version='n/a',
+        apple_model='n/a',
+        voter_starting_process_we_vote_id=voter_starting_process_we_vote_id)
+    status += results['status']
+
+    merge_results = apple_sign_in_save_merge_if_needed(
+        email_from_apple=email,
+        previously_signed_in_apple_voter_found=results['previously_signed_in_voter_found'],
+        previously_signed_in_apple_voter_we_vote_id=results['previously_signed_in_voter_we_vote_id'],
+        voter_device_link=voter_device_link,
+        voter_starting_process=voter_starting_process,
+    )
+    status += merge_results['status']
 
     return HttpResponseRedirect(return_url)
 
@@ -222,7 +344,6 @@ def validate_sign_in_with_apple_token(request):  # appleValidateSignInWithAppleT
     apple_oauth_code = request.GET.get('code', '')
 
     results = validate_sign_in_with_apple_token_for_api(
-        voter_device_id=voter_device_id,
         apple_oauth_code=apple_oauth_code,
     )
 

@@ -1,4 +1,4 @@
-# sign_in_with_apple/models.py
+# apple/models.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
@@ -19,8 +19,8 @@ class AppleUser(models.Model):
     in our system anywhere else
     """
     # objects = None
-    voter_device_id = models.CharField(verbose_name='voter device id',
-                                       max_length=255, null=False, blank=False, unique=True, default='DELETE_ME')
+    # voter_device_id = models.CharField(verbose_name='voter device id',
+    #                                    max_length=255, null=False, blank=False, unique=True, default='DELETE_ME')
     voter_we_vote_id = models.CharField(verbose_name="we vote id for the Apple ID owner", max_length=255, unique=True)
     user_code = models.CharField(verbose_name="User's apple id code", max_length=255, null=False, unique=False)
     email = models.EmailField(verbose_name='apple email address', max_length=255, unique=False,
@@ -34,11 +34,11 @@ class AppleUser(models.Model):
 
     # The next three are for debugging/statistics are are not necessary for sign in
     apple_platform = models.CharField(
-        verbose_name="User's last_name from Apple", max_length=32, null=True, blank=True, unique=False)
+        verbose_name="Platform of Apple Device", max_length=32, null=True, blank=True, unique=False)
     apple_os_version = models.CharField(
-        verbose_name="User's last_name from Apple", max_length=32, null=True, blank=True, unique=False)
+        verbose_name="Apple OS Version", max_length=32, null=True, blank=True, unique=False)
     apple_model = models.CharField(
-        verbose_name="User's last_name from Apple", max_length=32, null=True, blank=True, unique=False)
+        verbose_name="Apple Device Model", max_length=32, null=True, blank=True, unique=False)
 
     date_created = models.DateTimeField(verbose_name='date created', null=False, auto_now_add=True)
     date_last_referenced = models.DateTimeField(verbose_name='date last referenced', null=False, auto_now=True)
