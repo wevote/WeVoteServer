@@ -606,6 +606,7 @@ def move_membership_link_entries_to_another_voter(from_voter_we_vote_id, to_vote
             voter_member_link.save()
             voter_member_entries_moved += 1
         except Exception as e:
+            status += "COULD_NOT_SAVE_ORGANIZATION_MEMBERSHIP_LINK: " + str(e) + ' '
             voter_member_entries_not_moved += 1
 
     results = {

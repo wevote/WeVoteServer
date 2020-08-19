@@ -15,6 +15,7 @@ APPLE_LAST_KEY_FETCH = 0
 # https://gist.github.com/davidhariri/b053787aabc9a8a9cc0893244e1549fe
 
 
+# TODO: Question - could we change the name of this class so it doesn't conflict with the AppleUser in models.py?
 class AppleUser(object):
     def __init__(self, apple_id, email=None):
         self.id = apple_id

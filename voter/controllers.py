@@ -13,6 +13,7 @@ from analytics.controllers import move_analytics_info_to_another_voter
 from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, \
     ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
     ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
+from apple.controllers import move_apple_user_entries_to_another_voter
 from datetime import timedelta
 from django.http import HttpResponse
 from django.db.models import F
@@ -1160,10 +1161,6 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         }
         return error_results
 
-    from_voter_id = 0
-    from_voter_we_vote_id = ""
-    to_voter_id = 0
-    to_voter_we_vote_id = ""
     email_manager = EmailManager()
     friend_manager = FriendManager()
 
@@ -1208,9 +1205,6 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
         # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
         # We are going to make the email_owner_voter the new master
-        from_voter_id = voter.id
-        from_voter_we_vote_id = voter.we_vote_id
-        to_voter_id = email_owner_voter.id
         to_voter_we_vote_id = email_owner_voter.we_vote_id
         new_owner_voter = email_owner_voter
         status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
@@ -1330,9 +1324,6 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
         # Now we have voter (from voter_device_id) and email_owner_voter (from facebook_secret_key)
         # We are going to make the email_owner_voter the new master
-        from_voter_id = voter.id
-        from_voter_we_vote_id = voter.we_vote_id
-        to_voter_id = facebook_owner_voter.id
         to_voter_we_vote_id = facebook_owner_voter.we_vote_id
         new_owner_voter = facebook_owner_voter
         status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
@@ -1569,9 +1560,6 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
         # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
         # We are going to make the email_owner_voter the new master
-        from_voter_id = voter.id
-        from_voter_we_vote_id = voter.we_vote_id
-        to_voter_id = twitter_owner_voter.id
         to_voter_we_vote_id = twitter_owner_voter.we_vote_id
         new_owner_voter = twitter_owner_voter
         status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
@@ -1633,9 +1621,6 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
         # Now we have voter (from voter_device_id) and invitation_owner_voter (from invitation_secret_key)
         # We are going to make the email_owner_voter the new master
-        from_voter_id = voter.id
-        from_voter_we_vote_id = voter.we_vote_id
-        to_voter_id = invitation_owner_voter.id
         to_voter_we_vote_id = invitation_owner_voter.we_vote_id
         new_owner_voter = invitation_owner_voter
         status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
@@ -1670,7 +1655,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
 
 def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
-        voter,
+        from_voter,
         new_owner_voter,
         voter_device_link,
         status='',
@@ -1702,8 +1687,8 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         return results
 
     try:
-        from_voter_id = voter.id
-        from_voter_we_vote_id = voter.we_vote_id
+        from_voter_id = from_voter.id
+        from_voter_we_vote_id = from_voter.we_vote_id
         current_voter_found = True
     except Exception as e:
         pass
@@ -1733,7 +1718,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
 
     # The from_voter and to_voter may both have their own linked_organization_we_vote_id
     organization_manager = OrganizationManager()
-    from_voter_linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+    from_voter_linked_organization_we_vote_id = from_voter.linked_organization_we_vote_id
     from_voter_linked_organization_id = 0
     if positive_value_exists(from_voter_linked_organization_we_vote_id):
         from_linked_organization_results = organization_manager.retrieve_organization_from_we_vote_id(
@@ -1745,8 +1730,8 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
             # Remove the link to the organization so we don't have a future conflict
             try:
                 from_voter_linked_organization_we_vote_id = None
-                voter.linked_organization_we_vote_id = None
-                voter.save()
+                from_voter.linked_organization_we_vote_id = None
+                from_voter.save()
                 # All positions should have already been moved with move_positions_to_another_voter
             except Exception as e:
                 status += "FAILED_TO_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID-FROM_VOTER " + str(e) + " "
@@ -1775,6 +1760,11 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         # Use the from_voter's linked_organization_we_vote_id
         to_voter_linked_organization_we_vote_id = from_voter_linked_organization_we_vote_id
         to_voter_linked_organization_id = from_voter_linked_organization_id
+
+    # Transfer the apple_user entries to the new_owner_voter
+    move_apple_user_results = move_apple_user_entries_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id)
+    status += move_apple_user_results['status']
 
     # Data healing scripts before we try to move the positions
     position_list_manager = PositionListManager()
@@ -1825,11 +1815,11 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         from_voter_we_vote_id, to_voter_we_vote_id)
     status += " " + move_friend_invitations_results['status']
 
-    if positive_value_exists(voter.linked_organization_we_vote_id):
+    if positive_value_exists(from_voter.linked_organization_we_vote_id):
         # Remove the link to the organization so we don't have a future conflict
         try:
-            voter.linked_organization_we_vote_id = None
-            voter.save()
+            from_voter.linked_organization_we_vote_id = None
+            from_voter.save()
             # All positions should have already been moved with move_positions_to_another_voter
         except Exception as e:
             status += "CANNOT_DELETE_LINKED_ORGANIZATION_WE_VOTE_ID: " + str(e) + " "
@@ -1849,35 +1839,35 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
 
     # Make sure we bring over all emails from the from_voter over to the to_voter
     move_email_addresses_results = move_email_address_entries_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id, from_voter=voter, to_voter=new_owner_voter)
+        from_voter_we_vote_id, to_voter_we_vote_id, from_voter=from_voter, to_voter=new_owner_voter)
     status += move_email_addresses_results['status']
     if move_email_addresses_results['success']:
-        voter = move_email_addresses_results['from_voter']
+        from_voter = move_email_addresses_results['from_voter']
         new_owner_voter = move_email_addresses_results['to_voter']
 
     # Bring over all sms phone numbers from the from_voter over to the to_voter
     move_sms_phone_number_results = move_sms_phone_number_entries_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id, from_voter=voter, to_voter=new_owner_voter)
+        from_voter_we_vote_id, to_voter_we_vote_id, from_voter=from_voter, to_voter=new_owner_voter)
     status += " " + move_sms_phone_number_results['status']
     if move_sms_phone_number_results['success']:
-        voter = move_sms_phone_number_results['from_voter']
+        from_voter = move_sms_phone_number_results['from_voter']
         new_owner_voter = move_sms_phone_number_results['to_voter']
 
     # Bring over Facebook information
-    move_facebook_results = move_facebook_info_to_another_voter(voter, new_owner_voter)
+    move_facebook_results = move_facebook_info_to_another_voter(from_voter, new_owner_voter)
     status += " " + move_facebook_results['status']
 
     # Bring over Twitter information
-    move_twitter_results = move_twitter_info_to_another_voter(voter, new_owner_voter)
+    move_twitter_results = move_twitter_info_to_another_voter(from_voter, new_owner_voter)
     status += " " + move_twitter_results['status']
 
     # Bring over the voter's plans to vote
-    move_voter_plan_results = move_voter_plan_to_another_voter(voter, new_owner_voter)
+    move_voter_plan_results = move_voter_plan_to_another_voter(from_voter, new_owner_voter)
     status += " " + move_voter_plan_results['status']
 
     # Bring over any donations that have been made in this session by the new_owner_voter to the voter, subscriptions
     # are complicated.  See the comments in the donate/controllers.py
-    move_donation_results = move_donation_info_to_another_voter(voter, new_owner_voter)
+    move_donation_results = move_donation_info_to_another_voter(from_voter, new_owner_voter)
     status += " " + move_donation_results['status']
 
     # Bring over Voter Guides
@@ -1904,13 +1894,13 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     status += " " + move_analytics_results['status']
 
     # Bring over the voter-table data
-    merge_voter_accounts_results = merge_voter_accounts(voter, new_owner_voter)
+    merge_voter_accounts_results = merge_voter_accounts(from_voter, new_owner_voter)
     status += " " + merge_voter_accounts_results['status']
 
     # Delete all existing PositionNetworkScore entries for both the old account and the new account, so they
     # have to be regenerated
     delete_score_results = \
-        position_list_manager.delete_all_position_network_scores_for_voter(voter.id, voter.we_vote_id)
+        position_list_manager.delete_all_position_network_scores_for_voter(from_voter.id, from_voter.we_vote_id)
     status += " " + delete_score_results['status']
     delete_score_results = \
         position_list_manager.delete_all_position_network_scores_for_voter(
@@ -1928,10 +1918,10 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
             status += send_results['status']
         else:
             status += "CANNOT_SEND_SCHEDULED_EMAILS_WITHOUT_ORGANIZATION_NAME-VOTER_CONTROLLER "
-    elif positive_value_exists(voter.get_full_name(real_name_only)):
+    elif positive_value_exists(from_voter.get_full_name(real_name_only)):
         # Only send if the sender's full name exists
         send_results = email_manager.send_scheduled_emails_waiting_for_verification(
-            from_voter_we_vote_id, voter.get_full_name(real_name_only))
+            from_voter_we_vote_id, from_voter.get_full_name(real_name_only))
         status += send_results['status']
     else:
         status += "CANNOT_SEND_SCHEDULED_EMAILS_WITHOUT_NAME-VOTER_CONTROLLER "

@@ -905,6 +905,7 @@ class VoterManager(BaseUserManager):
                 else:
                     voter_queryset = Voter.objects.all()
                 voter_queryset = voter_queryset.filter(Q(email__iexact=email))
+                voter_queryset = voter_queryset.order_by('-email_ownership_is_verified')  # Get verified entries first
                 voter_list = list(voter_queryset[:1])
                 if len(voter_list):
                     voter_on_stage = voter_list[0]
