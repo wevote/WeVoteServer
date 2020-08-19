@@ -13,7 +13,6 @@ from analytics.controllers import move_analytics_info_to_another_voter
 from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, \
     ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
     ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
-from apple.controllers import move_apple_user_entries_to_another_voter
 from datetime import timedelta
 from django.http import HttpResponse
 from django.db.models import F
@@ -1762,6 +1761,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         to_voter_linked_organization_id = from_voter_linked_organization_id
 
     # Transfer the apple_user entries to the new_owner_voter
+    from apple.controllers import move_apple_user_entries_to_another_voter
     move_apple_user_results = move_apple_user_entries_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id)
     status += move_apple_user_results['status']
