@@ -27,6 +27,7 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
     :return:
     """
     status = ""
+    status += "STARTING-appleSignInSave "
     previously_signed_in_voter = None
     previously_signed_in_voter_found = False
     previously_signed_in_voter_we_vote_id = ''
@@ -176,19 +177,15 @@ def sign_in_with_apple_for_api(
             #     middle_name = apple_user_first.middle_name
             #     last_name = apple_user_first.last_name
             apple_user = AppleUser.objects.create(
-                user_code=user_code,
+                email=email,
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name,
+                apple_platform=apple_platform,
+                apple_os_version=apple_os_version,
+                apple_model=apple_model,
                 voter_we_vote_id=voter_starting_process_we_vote_id,
-                defaults={
-                    'email': email,
-                    'first_name': first_name,
-                    'middle_name': middle_name,
-                    'last_name': last_name,
-                    'apple_platform': apple_platform,
-                    'apple_os_version': apple_os_version,
-                    'apple_model': apple_model,
-                    'voter_we_vote_id': voter_starting_process_we_vote_id,
-                    'user_code': user_code,
-                }
+                user_code=user_code,
             )
             status += "APPLE_USER_ID_RECORD_CREATED "
             previously_signed_in_voter_found = False
@@ -207,7 +204,7 @@ def sign_in_with_apple_for_api(
         success_siwa = True
     except Exception as e:
         success_siwa = False
-        status += "ERROR_APPLE_USER_NOT_CREATED_OR_UPDATED " + str(e) + ' '
+        status += "ERROR_APPLE_USER_NOT_CREATED_OR_UPDATED: " + str(e) + ' '
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
@@ -224,6 +221,8 @@ def sign_in_with_apple_for_api(
 def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirectDestination
     # This is part of the OAuth flow for the WebApp (This is NOT part of the flow for iOS!)
     status = ''
+    status += "STARTING-appleSignInOauthRedirectDestination "
+    access_token = ''
     critical_variable_missing = False
     first_name = ''
     middle_name = ''
@@ -240,14 +239,14 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
     try:
         access_token = request.POST['id_token']
     except Exception as e:
-        status += "ID_TOKEN_MISSING "
+        status += "ID_TOKEN_MISSING: " + str(e) + ' '
         critical_variable_missing = True
     try:
         state_dict = json.loads(request.POST['state'])
         voter_device_id = state_dict['voter_device_id']
         return_url = state_dict['return_url']
     except Exception as e:
-        status += "STATE_DICT_MISSING "
+        status += "STATE_DICT_MISSING: " + str(e) + ' '
         critical_variable_missing = True
     # print('id_token renamed as access_token: ', access_token)
 
