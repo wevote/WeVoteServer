@@ -5,12 +5,14 @@
 from .controllers import politicians_import_from_master_server
 from .models import Politician, PoliticianManager
 from admin_tools.views import redirect_to_sign_in_page
+from candidate.controllers import retrieve_candidate_photos
 from candidate.models import CandidateCampaign
+from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
-from office.models import ContestOffice, ContestOfficeManager
+from office.models import ContestOffice
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
