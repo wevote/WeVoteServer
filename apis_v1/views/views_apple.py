@@ -80,6 +80,7 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
             'previously_signed_in_voter_found':         previously_signed_in_voter_found,
             'previously_signed_in_voter_we_vote_id':    previously_signed_in_voter_we_vote_id,
         }
+        logger.error(status)
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     results = sign_in_with_apple_for_api(
@@ -102,6 +103,8 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
         voter_starting_process=voter_starting_process,
     )
     status += merge_results['status']
+
+    logger.error(status)
 
     json_data = {
         'status':                                   status,
