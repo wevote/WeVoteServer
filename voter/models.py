@@ -888,6 +888,7 @@ class VoterManager(BaseUserManager):
         exception_multiple_object_returned = False
         status = ""
         voter_on_stage = Voter()
+        voter_found = False
 
         try:
             if positive_value_exists(voter_id):
@@ -897,6 +898,7 @@ class VoterManager(BaseUserManager):
                     voter_on_stage = Voter.objects.get(id=voter_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                voter_found = True
                 success = True
                 status += "VOTER_RETRIEVED_BY_VOTER_ID "
             elif email != '' and email is not None:
@@ -910,6 +912,7 @@ class VoterManager(BaseUserManager):
                 if len(voter_list):
                     voter_on_stage = voter_list[0]
                     voter_id = voter_on_stage.id
+                    voter_found = True
                     success = True
                     status += "VOTER_RETRIEVED_BY_VOTER_EMAIL "
                 else:
@@ -923,6 +926,7 @@ class VoterManager(BaseUserManager):
                     voter_on_stage = Voter.objects.get(we_vote_id__iexact=voter_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                voter_found = True
                 success = True
                 status += "VOTER_RETRIEVED_BY_VOTER_WE_VOTE_ID "
             elif positive_value_exists(twitter_request_token):
@@ -932,6 +936,7 @@ class VoterManager(BaseUserManager):
                     voter_on_stage = Voter.objects.get(twitter_request_token=twitter_request_token)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                voter_found = True
                 success = True
                 status += "VOTER_RETRIEVED_BY_TWITTER_REQUEST_TOKEN "
             elif positive_value_exists(facebook_id):
@@ -944,6 +949,7 @@ class VoterManager(BaseUserManager):
                     voter_on_stage = Voter.objects.get(facebook_id=facebook_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                voter_found = True
                 success = True
                 status += "VOTER_RETRIEVED_BY_FACEBOOK_ID "
             elif positive_value_exists(twitter_id):
@@ -958,6 +964,7 @@ class VoterManager(BaseUserManager):
                         voter_on_stage = Voter.objects.get(twitter_id=twitter_id)
                     # If still here, we found a single existing voter
                     voter_id = voter_on_stage.id
+                    voter_found = True
                     success = True
                     status += "VOTER_RETRIEVED_BY_TWITTER_ID "
                 except Voter.MultipleObjectsReturned as e:
@@ -979,6 +986,7 @@ class VoterManager(BaseUserManager):
                         linked_organization_we_vote_id__iexact=organization_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                voter_found = True
                 success = True
                 status += "VOTER_RETRIEVED_BY_ORGANIZATION_WE_VOTE_ID "
             elif positive_value_exists(primary_email_we_vote_id):
@@ -989,6 +997,7 @@ class VoterManager(BaseUserManager):
                     voter_on_stage = Voter.objects.get(primary_email_we_vote_id__iexact=primary_email_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                voter_found = True
                 success = True
                 status += "VOTER_RETRIEVED_BY_PRIMARY_EMAIL_WE_VOTE_ID "
             else:
@@ -1014,7 +1023,7 @@ class VoterManager(BaseUserManager):
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
-            'voter_found':              True if voter_id > 0 else False,
+            'voter_found':              voter_found,
             'voter_id':                 voter_id,
             'voter':                    voter_on_stage,
         }
