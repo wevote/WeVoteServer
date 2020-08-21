@@ -69,8 +69,10 @@ def apple_sign_in_save_merge_if_needed(
             previously_signed_in_voter = results['voter']
             previously_signed_in_voter_we_vote_id = previously_signed_in_voter.we_vote_id
             previously_signed_in_voter_found = True
+            status += "VOTER_WITH_MATCHING_EMAIL_FOUND(" + str(email_from_apple) + ") "
         else:
             status += results['status']
+            status += "VOTER_WITH_MATCHING_EMAIL_NOT_FOUND(" + str(email_from_apple) + ") "
     else:
         status += "NO_PRIOR_VOTER_FOUND "
 
