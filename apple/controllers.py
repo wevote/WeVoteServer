@@ -52,6 +52,7 @@ def apple_sign_in_save_merge_if_needed(
         }
         return results
 
+    status += "EMAIL_FROM_APPLE(" + str(email_from_apple) + ") "
     if previously_signed_in_apple_voter_found and positive_value_exists(previously_signed_in_apple_voter_we_vote_id):
         results = voter_manager.retrieve_voter_by_we_vote_id(
             previously_signed_in_apple_voter_we_vote_id, read_only=False)
@@ -60,8 +61,10 @@ def apple_sign_in_save_merge_if_needed(
             previously_signed_in_voter = results['voter']
             previously_signed_in_voter_we_vote_id = previously_signed_in_voter.we_vote_id
             previously_signed_in_voter_found = True
+            status += "PREVIOUSLY_SIGNED_IN_VOTER_FOUND_BY_APPLE_WE_VOTE_ID "
         else:
             status += results['status']
+            status += "PREVIOUSLY_SIGNED_IN_VOTER_NOT_FOUND_BY_APPLE_WE_VOTE_ID "
     elif positive_value_exists(email_from_apple):
         # This is a new sign in, so we want to check to make sure we don't have an account with this email already
         results = voter_manager.retrieve_voter_by_email(email_from_apple, read_only=False)
@@ -86,6 +89,7 @@ def apple_sign_in_save_merge_if_needed(
             email_owner_voter_found=False,
             facebook_owner_voter_found=False,
             invitation_owner_voter_found=False)
+        status += merge_results['status']
 
     results = {
         'status':                                   status,
