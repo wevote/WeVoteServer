@@ -106,7 +106,7 @@ def ballot_returned_import_from_master_server(request, google_civic_election_id,
     """
 
     import_results, structured_json = process_request_from_master(
-        request, "Requesting BallotReturned entries (saved ballots, specific to one location) "
+        request, "Requesting Ballot Returned entries (saved ballots, specific to one location) "
                  "from WeVote Master servers",
         BALLOT_RETURNED_SYNC_URL,
         {

@@ -377,7 +377,7 @@ https://2e17b805919a.ngrok.io/apis/v1/
 
 ./ngrok http http://localhost:8000 -host-header="localhost:8000" 
 
-https://9f876040d5c8.ngrok.io/apis/v1/appleSignInOauthRedirectDestination
+https://cc37b176e346.ngrok.io/apis/v1/appleSignInOauthRedirectDestination
 
 Django runs http.  Redirect locally to http, not to https.
 ./ngrok http http://localhost:8000 -host-header="localhost:8000" 
