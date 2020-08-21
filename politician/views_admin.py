@@ -56,7 +56,13 @@ def politicians_import_from_master_server_view(request):
     results = politicians_import_from_master_server(request, state_code)
 
     if not results['success']:
-        messages.add_message(request, messages.ERROR, results['status'])
+        if 'POLITICIAN_LIST_MISSING' in results['status']:
+            messages.add_message(request, messages.INFO,
+                                 'Politician import completed, and it returned no politicians, but this is not '
+                                 'necessarily a problem!  It might be that are no local politicians running for office '
+                                 'in this election.')
+        else:
+            messages.add_message(request, messages.ERROR, results['status'])
     else:
         messages.add_message(request, messages.INFO, 'Politician import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
