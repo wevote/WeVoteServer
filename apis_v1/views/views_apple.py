@@ -223,23 +223,38 @@ def sign_in_with_apple_for_api(
 @csrf_exempt
 def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirectDestination
     # This is part of the OAuth flow for the WebApp (This is NOT part of the flow for iOS!)
+    status = ''
+    critical_variable_missing = False
+    first_name = ''
+    middle_name = ''
+    last_name = ''
+    email = ''
+    return_url = ''
+    user_code = ''
+    voter_device_id = ''
 
     print("Method is", request.method)
     if not request.method == 'POST':
         logger.error('appleSignInOauthRedirectDestination WRONG Method: ' + request.method)
 
-    access_token = request.POST['id_token']
-    state_dict = json.loads(request.POST['state'])
-    voter_device_id = state_dict['voter_device_id']
-    return_url = state_dict['return_url']
+    try:
+        access_token = request.POST['id_token']
+    except Exception as e:
+        status += "ID_TOKEN_MISSING "
+        critical_variable_missing = True
+    try:
+        state_dict = json.loads(request.POST['state'])
+        voter_device_id = state_dict['voter_device_id']
+        return_url = state_dict['return_url']
+    except Exception as e:
+        status += "STATE_DICT_MISSING "
+        critical_variable_missing = True
     # print('id_token renamed as access_token: ', access_token)
 
-    status = ''
-    first_name = ''
-    middle_name = ''
-    last_name = ''
-    email = ''
-    user_code = ''
+    if critical_variable_missing:
+        logger.error(status)
+        return HttpResponseRedirect('https://WeVote.US/applesigninprocess')
+
     if 'user' in request.POST:
         # Apple only sends this user name in the clear on the very first time the voter signs in with Apple on a device
         # <QueryDict: {
@@ -330,6 +345,7 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
         voter_starting_process=voter_starting_process,
     )
     status += merge_results['status']
+    logger.error(status)
 
     return HttpResponseRedirect(return_url)
 
