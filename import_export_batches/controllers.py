@@ -137,7 +137,7 @@ def create_batch_row_actions(
     batch_row_action_list_found = False
     if batch_description_found and batch_header_map_found and not delete_analysis_only:
         try:
-            batch_row_query = BatchRow.objects.all()  # We need to be able to save this
+            batch_row_query = BatchRow.objects.all()  # We need to be able to save the batch_row entries we retrieve
             batch_row_query = batch_row_query.filter(batch_header_id=batch_header_id)
             if positive_value_exists(batch_row_id):
                 batch_row_query = batch_row_query.filter(id=batch_row_id)
@@ -2633,6 +2633,7 @@ def create_batch_row_action_ballot_item(batch_description,
     batch_row_action_created = False
     batch_row_action_updated = False
     status = ''
+    status += 'CREATE_BATCH_ROW_ACTION_BALLOT_ITEM-START '
     success = True
     existing_ballot_item_id = 0
     existing_ballot_item_found = False
@@ -2646,48 +2647,9 @@ def create_batch_row_action_ballot_item(batch_description,
     else:
         google_civic_election_id = str(batch_description.google_civic_election_id)
 
-    # Does a BatchRowActionBallotItem entry already exist?
-    # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
-    #  we are checking for existing duplicate data
-    existing_results = batch_manager.retrieve_batch_row_action_ballot_item(
-        batch_description.batch_header_id, one_batch_row.id)
-    if existing_results['batch_row_action_found']:
-        batch_row_action_ballot_item = existing_results['batch_row_action_ballot_item']
-        batch_row_action_updated = True
-        status += "EXISTING_BATCH_ROW_ACTION_BALLOT_ITEM_FOUND "
-    else:
-        # If a BatchRowActionBallotItem entry does not exist, create one
-        status += "[BatchRowActionBallotItem.objects.create]"
-        try:
-            batch_row_action_ballot_item = BatchRowActionBallotItem.objects.create(
-                batch_header_id=batch_description.batch_header_id,
-                batch_row_id=one_batch_row.id,
-                batch_set_id=batch_description.batch_set_id,
-            )
-            batch_row_action_created = True
-            status += "BATCH_ROW_ACTION_BALLOT_ITEM_CREATED "
-        except Exception as e:
-            batch_row_action_created = False
-            batch_row_action_ballot_item = None
-            success = False
-            status += "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_CREATED: " + str(e) + " "
-            handle_exception(e, logger=logger, exception_message=status)
-
-            results = {
-                'success':                      success,
-                'status':                       status,
-                'batch_row_action_updated':     batch_row_action_updated,
-                'batch_row_action_created':     batch_row_action_created,
-                'batch_row_action_ballot_item': batch_row_action_ballot_item,
-                'batch_row':                    one_batch_row,
-                'election_objects_dict':        election_objects_dict,
-                'measure_objects_dict':         measure_objects_dict,
-                'office_objects_dict':          office_objects_dict,
-            }
-            return results
+    # Gather information in advance so we can try to only do a single create (and avoid another save if we can help it)
 
     # NOTE: If you add incoming header names here, make sure to update BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
-
     # These are variables that might come from an import file, and are used to identify which
     #  ballot item to add to a polling location
     polling_location_we_vote_id = batch_manager.retrieve_value_from_batch_row(
@@ -2706,10 +2668,12 @@ def create_batch_row_action_ballot_item(batch_description,
         "contest_measure_name", batch_header_map, one_batch_row)
     local_ballot_order = batch_manager.retrieve_value_from_batch_row(
         "local_ballot_order", batch_header_map, one_batch_row)
+    local_ballot_order = convert_to_int(local_ballot_order)
     state_code = batch_manager.retrieve_value_from_batch_row(
         "state_code", batch_header_map, one_batch_row)
     voter_id = batch_manager.retrieve_value_from_batch_row(
         "voter_id", batch_header_map, one_batch_row)
+    voter_id = convert_to_int(voter_id)
     # These are not needed because they come from the measure table
     # contest_measure_text = batch_manager.retrieve_value_from_batch_row(
     #     "contest_measure_text", batch_header_map, one_batch_row)
@@ -2898,7 +2862,7 @@ def create_batch_row_action_ballot_item(batch_description,
     if polling_location_or_voter and office_or_measure and google_civic_election_id:
         if positive_value_exists(existing_ballot_item_found):
             # Update existing ballot item
-            batch_row_action_ballot_item.ballot_item_id = existing_ballot_item_id
+            # batch_row_action_ballot_item.ballot_item_id = existing_ballot_item_id
             kind_of_action = IMPORT_ADD_TO_EXISTING
         else:
             kind_of_action = IMPORT_CREATE
@@ -2910,31 +2874,121 @@ def create_batch_row_action_ballot_item(batch_description,
         if not google_civic_election_id:
             status += "MISSING_GOOGLE_CIVIC_ELECTION_ID "
         kind_of_action = IMPORT_TO_BE_DETERMINED
-        print_to_log(logger=logger, exception_message=status)
+        print_to_log(logger=logger, exception_message_optional=status)
 
-    # Update the BatchRowActionBallotItem
+    ballot_item_display_name = ''
+    if positive_value_exists(contest_office_name):
+        ballot_item_display_name = contest_office_name
+    elif positive_value_exists(contest_measure_name):
+        ballot_item_display_name = contest_measure_name
+
+    # Does a BatchRowActionBallotItem entry already exist?
+    # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
+    #  we are checking for existing duplicate data
+    batch_row_action_ballot_item_change_found = False
+    existing_results = batch_manager.retrieve_batch_row_action_ballot_item(
+        batch_description.batch_header_id, one_batch_row.id)
+    if existing_results['batch_row_action_found']:
+        batch_row_action_ballot_item = existing_results['batch_row_action_ballot_item']
+        batch_row_action_updated = True
+        status += "EXISTING_BATCH_ROW_ACTION_BALLOT_ITEM_FOUND "
+    else:
+        # If a BatchRowActionBallotItem entry does not exist, create one
+        status += "[BatchRowActionBallotItem.objects.create]"
+        try:
+            batch_row_action_ballot_item = BatchRowActionBallotItem.objects.create(
+                ballot_item_display_name=ballot_item_display_name,
+                ballot_item_id=existing_ballot_item_id,
+                batch_header_id=batch_description.batch_header_id,
+                batch_row_id=one_batch_row.id,
+                batch_set_id=batch_description.batch_set_id,
+                contest_measure_we_vote_id=contest_measure_we_vote_id,
+                contest_office_we_vote_id=contest_office_we_vote_id,
+                google_civic_election_id=google_civic_election_id,
+                kind_of_action=kind_of_action,
+                local_ballot_order=local_ballot_order,
+                measure_text=contest_measure_text,
+                measure_url=contest_measure_url,
+                no_vote_description=no_vote_description,
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                state_code=state_code,
+                status=status,
+                voter_id=voter_id,
+                yes_vote_description=yes_vote_description,
+            )
+            batch_row_action_created = True
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_CREATED "
+        except Exception as e:
+            batch_row_action_created = False
+            batch_row_action_ballot_item = None
+            success = False
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_CREATED: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
+
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'batch_row_action_updated':     batch_row_action_updated,
+                'batch_row_action_created':     batch_row_action_created,
+                'batch_row_action_ballot_item': batch_row_action_ballot_item,
+                'batch_row':                    one_batch_row,
+                'election_objects_dict':        election_objects_dict,
+                'measure_objects_dict':         measure_objects_dict,
+                'office_objects_dict':          office_objects_dict,
+            }
+            return results
+
+    # Update the BatchRowActionBallotItem if needed
     try:
-        batch_row_action_ballot_item.batch_set_id = batch_description.batch_set_id
-        batch_row_action_ballot_item.polling_location_we_vote_id = polling_location_we_vote_id
-        batch_row_action_ballot_item.kind_of_action = kind_of_action
-        batch_row_action_ballot_item.contest_office_we_vote_id = contest_office_we_vote_id
-        batch_row_action_ballot_item.contest_measure_we_vote_id = contest_measure_we_vote_id
-        batch_row_action_ballot_item.state_code = state_code
+        if batch_row_action_ballot_item.batch_set_id != batch_description.batch_set_id:
+            batch_row_action_ballot_item.batch_set_id = batch_description.batch_set_id
+            batch_row_action_ballot_item_change_found = True
+        if batch_row_action_ballot_item.polling_location_we_vote_id != polling_location_we_vote_id:
+            batch_row_action_ballot_item.polling_location_we_vote_id = polling_location_we_vote_id
+            batch_row_action_ballot_item_change_found = True
+        if batch_row_action_ballot_item.kind_of_action != kind_of_action:
+            batch_row_action_ballot_item.kind_of_action = kind_of_action
+            batch_row_action_ballot_item_change_found = True
+        if batch_row_action_ballot_item.contest_office_we_vote_id != contest_office_we_vote_id:
+            batch_row_action_ballot_item.contest_office_we_vote_id = contest_office_we_vote_id
+            batch_row_action_ballot_item_change_found = True
+        if batch_row_action_ballot_item.contest_measure_we_vote_id != contest_measure_we_vote_id:
+            batch_row_action_ballot_item.contest_measure_we_vote_id = contest_measure_we_vote_id
+            batch_row_action_ballot_item_change_found = True
+        if batch_row_action_ballot_item.state_code != state_code:
+            batch_row_action_ballot_item.state_code = state_code
+            batch_row_action_ballot_item_change_found = True
         # batch_row_action_ballot_item.contest_measure_name = contest_measure_name
-        batch_row_action_ballot_item.local_ballot_order = local_ballot_order
-        batch_row_action_ballot_item.google_civic_election_id = google_civic_election_id
-        batch_row_action_ballot_item.measure_text = contest_measure_text
-        batch_row_action_ballot_item.measure_url = contest_measure_url
-        batch_row_action_ballot_item.no_vote_description = no_vote_description
-        batch_row_action_ballot_item.yes_vote_description = yes_vote_description
-        batch_row_action_ballot_item.status = status
-        batch_row_action_ballot_item.voter_id = voter_id
-        if positive_value_exists(contest_office_name):
-            batch_row_action_ballot_item.ballot_item_display_name = contest_office_name
-        elif positive_value_exists(contest_measure_name):
-            batch_row_action_ballot_item.ballot_item_display_name = contest_measure_name
-        batch_row_action_ballot_item.save()
-        status += "BATCH_ROW_ACTION_BALLOT_ITEM_SAVED "
+        if batch_row_action_ballot_item.local_ballot_order != local_ballot_order:
+            batch_row_action_ballot_item.local_ballot_order = local_ballot_order
+            batch_row_action_ballot_item_change_found = True
+        if batch_row_action_ballot_item.google_civic_election_id != google_civic_election_id:
+            batch_row_action_ballot_item.google_civic_election_id = google_civic_election_id
+            batch_row_action_ballot_item_change_found = True
+        if batch_row_action_ballot_item.measure_text != contest_measure_text:
+            batch_row_action_ballot_item.measure_text = contest_measure_text
+            batch_row_action_ballot_item_change_found = True
+        if batch_row_action_ballot_item.measure_url != contest_measure_url:
+            batch_row_action_ballot_item.measure_url = contest_measure_url
+            batch_row_action_ballot_item_change_found = True
+        if batch_row_action_ballot_item.no_vote_description != no_vote_description:
+            batch_row_action_ballot_item.no_vote_description = no_vote_description
+            batch_row_action_ballot_item_change_found = True
+        if batch_row_action_ballot_item.yes_vote_description != yes_vote_description:
+            batch_row_action_ballot_item.yes_vote_description = yes_vote_description
+            batch_row_action_ballot_item_change_found = True
+        if batch_row_action_ballot_item.voter_id != voter_id:
+            batch_row_action_ballot_item.voter_id = voter_id
+            batch_row_action_ballot_item_change_found = True
+        if batch_row_action_ballot_item.ballot_item_display_name != ballot_item_display_name:
+            batch_row_action_ballot_item.ballot_item_display_name = ballot_item_display_name
+            batch_row_action_ballot_item_change_found = True
+        if positive_value_exists(batch_row_action_ballot_item_change_found):
+            batch_row_action_ballot_item.status = status
+            batch_row_action_ballot_item.save()
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_SAVED "
+        else:
+            status += "BATCH_ROW_ACTION_BALLOT_ITEM_NO_SAVE_NEEDED "
     except Exception as e:
         success = False
         status += "BATCH_ROW_ACTION_BALLOT_ITEM_UNABLE_TO_SAVE: " + str(e) + " "
@@ -2943,12 +2997,20 @@ def create_batch_row_action_ballot_item(batch_description,
     try:
         if batch_row_action_created or batch_row_action_updated:
             # If BatchRowAction was created, this batch_row was analyzed
+            batch_row_changed = False
             if positive_value_exists(polling_location_we_vote_id):
-                one_batch_row.polling_location_we_vote_id = polling_location_we_vote_id
+                if one_batch_row.polling_location_we_vote_id != polling_location_we_vote_id:
+                    one_batch_row.polling_location_we_vote_id = polling_location_we_vote_id
+                    batch_row_changed = True
             if positive_value_exists(voter_id):
-                one_batch_row.voter_id = voter_id
-            one_batch_row.batch_row_analyzed = True
-            one_batch_row.save()
+                if one_batch_row.voter_id != voter_id:
+                    one_batch_row.voter_id = voter_id
+                    batch_row_changed = True
+            if not positive_value_exists(one_batch_row.batch_row_analyzed):
+                one_batch_row.batch_row_analyzed = True
+                batch_row_changed = True
+            if batch_row_changed:
+                one_batch_row.save()
     except Exception as e:
         status += "COULD_NOT_SAVE_BATCH_ROW: " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)

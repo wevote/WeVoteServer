@@ -51,6 +51,11 @@
                         clear</a>
                 {% endif %}
                 &nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;
+                <label for="show_status_statistics_id">
+                  <input type="checkbox" name="show_status_statistics" id="show_status_statistics_id" value="1"
+                         {% if show_status_statistics %}checked{% endif %} /> Show Status Statistics
+                </label>
             </div>
         </div>
         {% endif %}{# End of if election_list #}
@@ -127,7 +132,10 @@
                 {% endif %}
               </span>
             </td>
-            <td>{% if one_batch_set.batch_description_total_rows_count > 0 %}{{ one_batch_set.batch_description_total_rows_count }}{% endif %}</td>
+            <td>
+                {% if not show_status_statistics %}<span style="color: darkgray">(Check "Show Status Statistics" to show)</span>{% endif %}
+                {% if one_batch_set.batch_description_total_rows_count > 0 %}{{ one_batch_set.batch_description_total_rows_count }}{% endif %}
+            </td>
             <td>{{ one_batch_set.import_date }}</td>
         </tr>
     {% endfor %}
@@ -151,6 +159,11 @@
     <script>
         $(function() {
             $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#show_status_statistics_id').change(function() {
                 this.form.submit();
             });
         });

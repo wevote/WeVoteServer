@@ -1309,6 +1309,8 @@ def batch_set_list_view(request):
     batch_set_id = convert_to_int(request.GET.get('batch_set_id', 0))
     batch_process_id = convert_to_int(request.GET.get('batch_process_id', 0))
     limit = request.GET.get('limit', 25)
+    show_status_statistics = request.GET.get('show_status_statistics', False)
+    show_status_statistics = positive_value_exists(show_status_statistics)
     state_code = request.GET.get('state_code', '')
 
     messages_on_stage = get_messages(request)
@@ -1334,33 +1336,34 @@ def batch_set_list_view(request):
         batch_set_list_found = False
         pass
 
-    for one_batch_set in batch_set_list:
-        batch_description_query = BatchDescription.objects.filter(batch_set_id=one_batch_set.id)
-        batch_description = batch_description_query.first()
+    if positive_value_exists(show_status_statistics):
+        for one_batch_set in batch_set_list:
+            batch_description_query = BatchDescription.objects.filter(batch_set_id=one_batch_set.id)
+            batch_description = batch_description_query.first()
 
-        batch_description_query = BatchDescription.objects.filter(batch_set_id=one_batch_set.id)
-        one_batch_set.batch_description_total_rows_count = batch_description_query.count()
+            batch_description_query = BatchDescription.objects.filter(batch_set_id=one_batch_set.id)
+            one_batch_set.batch_description_total_rows_count = batch_description_query.count()
 
-        batch_description_query = BatchDescription.objects.filter(batch_set_id=one_batch_set.id)
-        batch_description_query = batch_description_query.exclude(batch_description_analyzed=True)
-        one_batch_set.batch_description_not_analyzed_count = batch_description_query.count()
+            batch_description_query = BatchDescription.objects.filter(batch_set_id=one_batch_set.id)
+            batch_description_query = batch_description_query.exclude(batch_description_analyzed=True)
+            one_batch_set.batch_description_not_analyzed_count = batch_description_query.count()
 
-        batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_set_id=one_batch_set.id)
-        batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=IMPORT_DELETE)
-        one_batch_set.batch_description_to_delete_count = batch_row_action_query.count()
+            batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_set_id=one_batch_set.id)
+            batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=IMPORT_DELETE)
+            one_batch_set.batch_description_to_delete_count = batch_row_action_query.count()
 
-        batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_set_id=one_batch_set.id)
-        batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=IMPORT_ALREADY_DELETED)
-        one_batch_set.batch_description_already_deleted_count = batch_row_action_query.count()
+            batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_set_id=one_batch_set.id)
+            batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=IMPORT_ALREADY_DELETED)
+            one_batch_set.batch_description_already_deleted_count = batch_row_action_query.count()
 
-        if positive_value_exists(one_batch_set.batch_description_total_rows_count):
-            try:
-                if batch_description.kind_of_batch == IMPORT_BALLOT_ITEM:
-                    batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_set_id=one_batch_set.id)
-                    batch_row_action_query = batch_row_action_query.filter(kind_of_action=IMPORT_CREATE)
-                    one_batch_set.batch_description_not_created_count = batch_row_action_query.count()
-            except Exception as e:
-                pass
+            if positive_value_exists(one_batch_set.batch_description_total_rows_count):
+                try:
+                    if batch_description.kind_of_batch == IMPORT_BALLOT_ITEM:
+                        batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_set_id=one_batch_set.id)
+                        batch_row_action_query = batch_row_action_query.filter(kind_of_action=IMPORT_CREATE)
+                        one_batch_set.batch_description_not_created_count = batch_row_action_query.count()
+                except Exception as e:
+                    pass
 
     election_list = Election.objects.order_by('-election_day_text')
 
@@ -1374,6 +1377,7 @@ def batch_set_list_view(request):
             'google_civic_election_id': google_civic_election_id,
             'election_list':            election_list,
             'messages_on_stage':        messages_on_stage,
+            'show_status_statistics':   show_status_statistics,
             'state_code':               state_code,
         }
     else:
@@ -1385,6 +1389,7 @@ def batch_set_list_view(request):
             'election_list':            election_list,
             'google_civic_election_id': google_civic_election_id,
             'messages_on_stage':        messages_on_stage,
+            'show_status_statistics':   show_status_statistics,
             'state_code':               state_code,
         }
     return render(request, 'import_export_batches/batch_set_list.html', template_values)
@@ -1403,12 +1408,14 @@ def batch_set_list_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     batch_uri = request.POST.get('batch_uri', '')
-    batch_process_id = convert_to_int(request.PROCESS.get('batch_process_id', 0))
+    batch_process_id = convert_to_int(request.POST.get('batch_process_id', 0))
     batch_set_id = convert_to_int(request.POST.get('batch_set_id', 0))
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     organization_we_vote_id = request.POST.get('organization_we_vote_id', '')
     # Was form submitted, or was election just changed?
     import_batch_button = request.POST.get('import_batch_button', '')
+    show_status_statistics = request.POST.get('show_status_statistics', False)
+    show_status_statistics = positive_value_exists(show_status_statistics)
     state_code = request.POST.get('state_code', '')
 
     batch_uri_encoded = urlquote(batch_uri) if positive_value_exists(batch_uri) else ""
@@ -1467,6 +1474,7 @@ def batch_set_list_process_view(request):
                                 "&batch_process_id=" + str(batch_process_id) +
                                 "&batch_set_id=" + str(batch_set_id) +
                                 "&state_code=" + str(state_code) +
+                                "&show_status_statistics=" + str(show_status_statistics) +
                                 "&batch_uri=" + batch_uri_encoded)
 
 
@@ -2014,6 +2022,8 @@ def batch_set_batch_list_view(request):
             batch_list = list(batch_description_query)
             batch_list_not_analyzed_count = len(batch_list)
 
+            # For this batch set, cycle through each batch. Within each batch, cycle through each batch_row
+            # and decide whether the action required is create or update.
             for one_batch_description in batch_list:
                 results = create_batch_row_actions(
                     one_batch_description.batch_header_id,
@@ -2208,10 +2218,11 @@ def batch_set_batch_list_view(request):
 
         batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
         batch_set_count = batch_description_query.count()
-        batch_list = list(batch_description_query)
 
         if not positive_value_exists(show_all_batches):
-            batch_list = batch_list[:10]
+            batch_list = batch_description_query[:10]
+        else:
+            batch_list = list(batch_description_query)
 
         # Loop through all batches and add count data
         for one_batch_description in batch_list:
