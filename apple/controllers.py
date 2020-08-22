@@ -137,13 +137,14 @@ def apple_sign_in_save_merge_if_needed(
 
 def move_apple_user_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
     status = ''
-    success = False
+    success = True
     apple_user_entries_moved = 0
     apple_user_entries_not_moved = 0
 
     if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
         status += "MOVE_APPLE_USER_ENTRIES_TO_ANOTHER_VOTER-" \
                   "Missing either from_voter_we_vote_id or to_voter_we_vote_id "
+        success = False
         results = {
             'status':                   status,
             'success':                  success,
@@ -157,6 +158,7 @@ def move_apple_user_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_
     if from_voter_we_vote_id == to_voter_we_vote_id:
         status += "MOVE_APPLE_USER_ENTRIES_TO_ANOTHER_VOTER-" \
                   "from_voter_we_vote_id and to_voter_we_vote_id identical "
+        success = False
         results = {
             'status':                   status,
             'success':                  success,
@@ -179,6 +181,7 @@ def move_apple_user_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_
         except Exception as e:
             # This might just mean that another entry already exists for the "to" voter
             status += "COULD_NOT_SAVE_APPLE_USER: " + str(e) + ' '
+            success = False
             apple_user_entries_not_moved += 1
 
     results = {

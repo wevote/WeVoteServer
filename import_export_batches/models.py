@@ -4400,7 +4400,7 @@ class BatchDescription(models.Model):
     voter_id = models.IntegerField(null=True, blank=True)
     batch_description_text = models.CharField(max_length=255)
     # Have the batch rows under this description been analyzed?
-    batch_description_analyzed = models.BooleanField(default=False)
+    batch_description_analyzed = models.BooleanField(default=False, db_index=True)
     source_uri = models.URLField(max_length=255, blank=True, null=True, verbose_name='uri where data is coming from')
     date_created = models.DateTimeField(verbose_name='date first saved', null=True, auto_now=True)
 
@@ -6034,7 +6034,8 @@ class BatchRowActionBallotItem(models.Model):
     """
     The definition of the action for importing one ballot item.
     """
-    batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
+    batch_set_id = models.PositiveIntegerField(
+        verbose_name="unique id of batch set", unique=False, null=True, db_index=True)
     batch_header_id = models.PositiveIntegerField(
         verbose_name="unique id of header row", unique=False, null=False, db_index=True)
     batch_row_id = models.PositiveIntegerField(
