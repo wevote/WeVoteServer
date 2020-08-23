@@ -45,14 +45,14 @@ IMPORT_VOTER = 'IMPORT_VOTER'
 MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
 
-NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES = 12  # Twelve at a time
+NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES = 8  # Eight at a time
 
 def batch_process_next_steps():
     success = True
     status = ""
     batch_process_manager = BatchProcessManager()
 
-    # If we have more than twelve (NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES) batch_processes that are still active,
+    # If we have more than eight (NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES) batch_processes that are still active,
     # don't start a new import ballot item batch_process
     total_active_batch_processes = batch_process_manager.count_active_batch_processes()
     status += "TOTAL_ACTIVE_BATCH_PROCESSES: " + str(total_active_batch_processes) + ", "
@@ -250,7 +250,7 @@ def batch_process_next_steps():
 
     # ############################
     # Processing Ballot Items
-    # If less than twelve (NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES) total active processes,
+    # If less than eight (NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES) total active processes,
     #  and we aren't working on a current process chunk,
     #  then add a new batch_process (importing ballot items) to the current queue
     status += "TOTAL_ACTIVE_BATCH_PROCESSES-BEFORE_RETRIEVE: " + str(total_active_batch_processes) + " "

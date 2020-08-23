@@ -352,7 +352,7 @@
 {% if not is_national_election or is_national_election and state_code %}
   <li>
     <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1" target="_blank">
-        Ballotpedia: Retrieve Ballots for this Election, up to 250 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+        Ballotpedia: Retrieve Ballots for this Election, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
     <span class="glyphicon glyphicon-new-window"></span></a>
     (<a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}"
        target="_blank">old version</a>)
@@ -390,7 +390,7 @@
 {% endif %}
   <li>
     <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_entire_election_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}" target="_blank">
-        Ballotpedia - ALL STATES: Schedule Batch Processes to Retrieve Ballots for this Election (All States), up to 250 at a time
+        Ballotpedia - ALL STATES: Schedule Batch Processes to Retrieve Ballots for this Election (All States), up to 125 at a time
         <span class="glyphicon glyphicon-new-window"></span></a>
   </li>
 </ol>
@@ -415,14 +415,14 @@
 
   <li>
     <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1&use_batch_process=1" target="_blank">
-      Refresh <strong>Map Point</strong> BallotItems from Ballotpedia from existing BallotReturned entries (up to 250 at a time) <span class="glyphicon glyphicon-new-window"></span></a> (Oldest: {{ ballot_returned_oldest_date }})
+      Refresh <strong>Map Point</strong> BallotItems from Ballotpedia from existing BallotReturned entries (up to 125 at a time) <span class="glyphicon glyphicon-new-window"></span></a> (Oldest: {{ ballot_returned_oldest_date }})
     (<a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1"
         target="_blank">old version</a>)
   </li>
 
   <li>
     <a href="{% url 'ballotpedia:refresh_ballotpedia_ballots_for_voters_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1" target="_blank">
-      Refresh <strong>Voter</strong> BallotItems from Ballotpedia from existing BallotReturned entries (up to 250 at a time) <span class="glyphicon glyphicon-new-window"></span></a> (Oldest: {{ ballot_returned_voter_oldest_date }})
+      Refresh <strong>Voter</strong> BallotItems from Ballotpedia from existing BallotReturned entries (up to 125 at a time) <span class="glyphicon glyphicon-new-window"></span></a> (Oldest: {{ ballot_returned_voter_oldest_date }})
     (<a href="{% url 'ballotpedia:refresh_ballotpedia_ballots_for_voters_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}"
         target="_blank">old version</a>)
   </li>
