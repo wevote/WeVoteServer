@@ -45,13 +45,15 @@ IMPORT_VOTER = 'IMPORT_VOTER'
 MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
 
+NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES = 12  # Twelve at a time
 
 def batch_process_next_steps():
     success = True
     status = ""
     batch_process_manager = BatchProcessManager()
 
-    # If we have more than 4 batch_processes that are still active, don't start a new import ballot item batch_process
+    # If we have more than twelve (NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES) batch_processes that are still active,
+    # don't start a new import ballot item batch_process
     total_active_batch_processes = batch_process_manager.count_active_batch_processes()
     status += "TOTAL_ACTIVE_BATCH_PROCESSES: " + str(total_active_batch_processes) + ", "
 
@@ -248,10 +250,11 @@ def batch_process_next_steps():
 
     # ############################
     # Processing Ballot Items
-    # If less than four total active processes, and we aren't working on a current process chunk,
+    # If less than twelve (NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES) total active processes,
+    #  and we aren't working on a current process chunk,
     #  then add a new batch_process (importing ballot items) to the current queue
     status += "TOTAL_ACTIVE_BATCH_PROCESSES-BEFORE_RETRIEVE: " + str(total_active_batch_processes) + " "
-    if total_active_batch_processes < 4:  # Removed: and batch_process_list_count < 1
+    if total_active_batch_processes < NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES:
         results = batch_process_manager.retrieve_batch_process_list(process_active=False, process_queued=True)
         if not positive_value_exists(results['success']):
             success = False
@@ -678,7 +681,7 @@ def process_one_ballot_item_batch_process(batch_process):
     batch_manager = BatchManager()
     batch_process_manager = BatchProcessManager()
     election_manager = ElectionManager()
-    retrieve_time_out_duration = 30 * 60  # 30 minutes * 60 seconds
+    retrieve_time_out_duration = 20 * 60  # 30 minutes * 60 seconds
     analyze_time_out_duration = 30 * 60  # 30 minutes
     create_time_out_duration = 20 * 60  # 20 minutes
 
