@@ -132,19 +132,19 @@
 <ol>
     <li>
         <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1">
-            <strong>Retrieve BallotItems from Brand New Map Points</strong>, up to 250 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+            <strong>Retrieve BallotItems from Brand New Map Points</strong>, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
         </a>
     </li>
 
     <li>
         <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1&use_batch_process=1">
-            <strong>Refresh BallotItems from Bulk Map Points</strong>, up to 250 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}</a>
+            <strong>Refresh BallotItems from Bulk Map Points</strong>, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}</a>
             (Oldest: {{ ballot_returned_oldest_date }})
     </li>
 
     <li>
         <a href="{% url 'ballotpedia:refresh_ballotpedia_ballots_for_voters_api_v4' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1">
-            <strong>Refresh BallotItems from Voter-entered Street Addresses</strong>, up to 250 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}</a>
+            <strong>Refresh BallotItems from Voter-entered Street Addresses</strong>, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}</a>
             (Oldest: {{ ballot_returned_voter_oldest_date }})
     </li>
 </ol>
