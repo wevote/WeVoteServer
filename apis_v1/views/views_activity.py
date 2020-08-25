@@ -6,7 +6,8 @@ from activity.models import ActivityManager
 from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
-from voter.models import fetch_voter_we_vote_id_from_voter_device_link
+from twitter.models import TwitterUserManager
+from voter.models import fetch_voter_we_vote_id_from_voter_device_link, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_device_id, is_voter_device_id_valid, \
     positive_value_exists
@@ -25,14 +26,17 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
     status = ''
     activity_list = []
     activity_manager = ActivityManager()
+    activity_notice_seed_list = []
+    activity_post_list = []
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    voter_friend_we_vote_id_list = []
     voter_we_vote_id = ''
 
     if positive_value_exists(voter_device_id):
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
 
     if not positive_value_exists(voter_we_vote_id):
-        status += "RETRIEVE_ACTIVITY_NOTICE_LIST_MISSING_VOTER_WE_VOTE_ID "
+        status += "RETRIEVE_ACTIVITY_LIST_MISSING_VOTER_WE_VOTE_ID "
         json_data = {
             'status': status,
             'success': False,
@@ -42,18 +46,13 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
 
     results = activity_manager.retrieve_activity_notice_seed_list_for_recipient(
         recipient_voter_we_vote_id=voter_we_vote_id)
-    if not results['success']:
+    if results['success']:
+        activity_notice_seed_list = results['activity_notice_seed_list']
+        voter_friend_we_vote_id_list = results['voter_friend_we_vote_id_list']
+    else:
         status += results['status']
-        status += "RETRIEVE_ACTIVITY_NOTICE_LIST_FAILED "
-        json_data = {
-            'status': status,
-            'success': False,
-            'activity_list': activity_list,
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        status += "RETRIEVE_ACTIVITY_LIST_FAILED "
 
-    activity_list = []
-    activity_notice_seed_list = results['activity_notice_seed_list']
     for activity_notice_seed in activity_notice_seed_list:
         new_positions_entered_count = 0
         position_we_vote_id_list = []
@@ -64,9 +63,11 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
             position_we_vote_id_list += json.loads(activity_notice_seed.position_we_vote_ids_for_public_serialized)
         new_positions_entered_count += len(position_we_vote_id_list)
         activity_notice_seed_dict = {
+            'date_created':                     activity_notice_seed.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
             'date_last_changed':                activity_notice_seed.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
             'date_of_notice':                   activity_notice_seed.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
-            'id':                               activity_notice_seed.id,
+            'id':                               activity_notice_seed.id,  # We normalize to generate activityTidbitKey
+            'activity_notice_seed_id':          activity_notice_seed.id,
             'kind_of_activity':                 "ACTIVITY_NOTICE_SEED",
             'kind_of_seed':                     activity_notice_seed.kind_of_seed,
             'new_positions_entered_count':      new_positions_entered_count,
@@ -80,10 +81,52 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
             'speaker_twitter_followers_count':  activity_notice_seed.speaker_twitter_followers_count,
         }
         activity_list.append(activity_notice_seed_dict)
+
+    # ####################################################
+    # Retrieve entries directly in the ActivityPost table
+    results = activity_manager.retrieve_activity_post_list_for_recipient(
+        recipient_voter_we_vote_id=voter_we_vote_id,
+        voter_friend_we_vote_id_list=voter_friend_we_vote_id_list)
+    if results['success']:
+        activity_post_list = results['activity_post_list']
+    else:
+        status += results['status']
+        status += "RETRIEVE_ACTIVITY_POST_LIST_FAILED "
+
+    for activity_post in activity_post_list:
+        date_created_string = ''
+        if activity_post.date_created:
+            date_created_string = activity_post.date_created.strftime('%Y-%m-%d %H:%M:%S')
+        activity_post_dict = {
+            'date_created':                     date_created_string,
+            'date_last_changed':                activity_post.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_of_notice':                   date_created_string,
+            'id':                               activity_post.id,  # We normalize to generate activityTidbitKey
+            'activity_post_id':                 activity_post.id,
+            'kind_of_activity':                 'ACTIVITY_POST',
+            'kind_of_seed':                     '',
+            'new_positions_entered_count':      0,
+            'position_we_vote_id_list':         [],
+            'speaker_name':                     activity_post.speaker_name,
+            'speaker_organization_we_vote_id':  activity_post.speaker_organization_we_vote_id,
+            'speaker_voter_we_vote_id':         activity_post.speaker_voter_we_vote_id,
+            'speaker_profile_image_url_medium': activity_post.speaker_profile_image_url_medium,
+            'speaker_profile_image_url_tiny':   activity_post.speaker_profile_image_url_tiny,
+            'speaker_twitter_handle':           activity_post.speaker_twitter_handle,
+            'speaker_twitter_followers_count':  activity_post.speaker_twitter_followers_count,
+            'statement_text':                   activity_post.statement_text,
+            'visibility_is_public':             activity_post.visibility_is_public,
+        }
+        activity_list.append(activity_post_dict)
+
+    # Order entries in the activity_list by "date_created"
+    from operator import itemgetter
+    activity_list_ordered = sorted(activity_list, key=itemgetter('date_created'), reverse=True)
+
     json_data = {
         'status': status,
         'success': True,
-        'activity_list': activity_list,
+        'activity_list': activity_list_ordered,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -154,7 +197,7 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
                 'activity_notice_seen':             activity_notice.activity_notice_seen,
                 'date_last_changed':                activity_notice.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
                 'date_of_notice':                   activity_notice.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
-                'id':                               activity_notice.id,
+                'activity_notice_id':               activity_notice.id,
                 'kind_of_notice':                   activity_notice.kind_of_notice,
                 'new_positions_entered_count':      new_positions_entered_count,
                 'position_we_vote_id_list':         position_we_vote_id_list,
@@ -171,3 +214,113 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
         'activity_notice_list': modified_activity_notice_list,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def activity_post_save_view(request):  # activityPostSave
+    """
+    Save new Tidbit, or edit existing.
+    :param request:
+    :return:
+    """
+    status = ''
+    activity_manager = ActivityManager()
+
+    activity_post_id = request.GET.get('activity_post_id', False)
+    statement_text = request.GET.get('statement_text', False)
+    visibility_setting = request.GET.get('visibility_setting', False)
+
+    if visibility_setting not in ['FRIENDS_ONLY', 'SHOW_PUBLIC']:
+        visibility_setting = 'FRIENDS_ONLY'
+
+    visibility_is_public = visibility_setting == 'SHOW_PUBLIC'
+
+    updated_values = {
+        'speaker_name':                     '',
+        'speaker_organization_we_vote_id':  '',
+        'speaker_twitter_followers_count':  0,
+        'speaker_twitter_handle':           '',
+        'speaker_voter_we_vote_id':         '',
+        'speaker_profile_image_url_medium': '',
+        'speaker_profile_image_url_tiny':   '',
+        'statement_text':                   statement_text,
+        'visibility_is_public':             visibility_is_public,
+    }
+
+    voter_device_id = get_voter_device_id(request)
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
+    if results['voter_found']:
+        voter = results['voter']
+        speaker_twitter_followers_count = 0
+
+        if positive_value_exists(voter.linked_organization_we_vote_id):
+            # Is there a Twitter handle linked to this organization? If so, update the information.
+            twitter_user_manager = TwitterUserManager()
+            twitter_link_results = \
+                twitter_user_manager.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
+                    voter.linked_organization_we_vote_id)
+            if twitter_link_results['twitter_link_to_organization_found']:
+                twitter_link_to_organization = twitter_link_results['twitter_link_to_organization']
+
+                twitter_results = \
+                    twitter_user_manager.retrieve_twitter_user_locally_or_remotely(
+                        twitter_link_to_organization.twitter_id)
+
+                if twitter_results['twitter_user_found']:
+                    twitter_user = twitter_results['twitter_user']
+                    try:
+                        speaker_twitter_followers_count = twitter_user.twitter_followers_count \
+                            if positive_value_exists(twitter_user.twitter_followers_count) else 0
+                    except Exception as e:
+                        status += "FAILED_TO_RETRIEVE_TWITTER_FOLLOWERS_COUNT " + str(e) + ' '
+
+        updated_values['speaker_name'] = voter.get_full_name(real_name_only=True)
+        updated_values['speaker_voter_we_vote_id'] = voter.we_vote_id
+        updated_values['speaker_organization_we_vote_id'] = voter.linked_organization_we_vote_id
+        updated_values['speaker_profile_image_url_medium'] = voter.we_vote_hosted_profile_image_url_medium
+        updated_values['speaker_profile_image_url_tiny'] = voter.we_vote_hosted_profile_image_url_tiny
+        updated_values['speaker_twitter_followers_count'] = speaker_twitter_followers_count
+        updated_values['speaker_twitter_handle'] = voter.twitter_screen_name
+
+    if not positive_value_exists(updated_values['speaker_voter_we_vote_id']):
+        status += "ACTIVITY_TIDBIT_SAVE_MISSING_VOTER_WE_VOTE_ID "
+        json_data = {
+            'status': status,
+            'success': False,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    results = activity_manager.update_or_create_activity_post(
+        activity_post_id=activity_post_id,
+        updated_values=updated_values,
+        speaker_voter_we_vote_id=updated_values['speaker_voter_we_vote_id'],
+    )
+    status += results['status']
+    success = results['success']
+    activity_post_dict = {}
+    if results['activity_post_found']:
+        activity_post = results['activity_post']
+        activity_post_dict = {
+            'date_created':                     activity_post.date_created.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_last_changed':                activity_post.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_of_notice':                   activity_post.date_created.strftime('%Y-%m-%d %H:%M:%S'),
+            'id':                               activity_post.id,  # We normalize to generate activityTidbitKey
+            'activity_post_id':                 activity_post.id,
+            'kind_of_activity':                 'ACTIVITY_POST',
+            'kind_of_seed':                     '',
+            'new_positions_entered_count':      0,
+            'position_we_vote_id_list':         [],
+            'speaker_name':                     activity_post.speaker_name,
+            'speaker_organization_we_vote_id':  activity_post.speaker_organization_we_vote_id,
+            'speaker_voter_we_vote_id':         activity_post.speaker_voter_we_vote_id,
+            'speaker_profile_image_url_medium': activity_post.speaker_profile_image_url_medium,
+            'speaker_profile_image_url_tiny':   activity_post.speaker_profile_image_url_tiny,
+            'speaker_twitter_handle':           activity_post.speaker_twitter_handle,
+            'speaker_twitter_followers_count':  activity_post.speaker_twitter_followers_count,
+            'statement_text':                   activity_post.statement_text,
+            'visibility_is_public':             activity_post.visibility_is_public,
+        }
+
+    activity_post_dict['status'] = status
+    activity_post_dict['success'] = success
+    return HttpResponse(json.dumps(activity_post_dict), content_type='application/json')

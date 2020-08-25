@@ -19,7 +19,7 @@ from exception.models import handle_record_found_more_than_one_exception
 from image.controllers import cache_issue_image_master, cache_resized_image_locally, delete_cached_images_for_issue
 from image.models import WeVoteImageManager
 from organization.models import INDIVIDUAL, OrganizationManager, OrganizationListManager
-from voter.models import fetch_voter_from_request, voter_has_authority
+from voter.models import fetch_api_voter_from_request, voter_has_authority
 from voter_guide.models import VoterGuideListManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, get_voter_device_id, STATE_CODE_MAP
@@ -819,7 +819,7 @@ def issue_partisan_analysis_view(request):
     else:
         google_civic_election_id_list = retrieve_upcoming_election_id_list(state_code)
 
-    voter = fetch_voter_from_request(request)
+    voter = fetch_api_voter_from_request(request)
     try:
         is_admin = voter.is_admin
         is_political_data_manager = voter.is_political_data_manager

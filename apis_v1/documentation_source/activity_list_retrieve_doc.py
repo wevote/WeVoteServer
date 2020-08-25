@@ -43,9 +43,13 @@ def activity_list_retrieve_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "activity_list": list\n' \
                    '   [{\n' \
+                   '     "date_created": string,\n' \
                    '     "date_last_changed": string,\n' \
                    '     "date_of_notice": string,\n' \
                    '     "id": integer,\n' \
+                   '     "activity_notice_seed_id": integer,\n' \
+                   '     "activity_post_id": integer,\n' \
+                   '     "kind_of_activity": string,\n' \
                    '     "kind_of_seed": string,\n' \
                    '     "new_positions_entered_count": integer,\n' \
                    '     "position_we_vote_id_list": list,\n' \
@@ -54,6 +58,10 @@ def activity_list_retrieve_doc_template_values(url_root):
                    '     "speaker_voter_we_vote_id": string,\n' \
                    '     "speaker_profile_image_url_medium": string,\n' \
                    '     "speaker_profile_image_url_tiny": string,\n' \
+                   '     "speaker_twitter_handle": string,\n' \
+                   '     "speaker_twitter_followers_count": number,\n' \
+                   '     "statement_text": string,\n' \
+                   '     "visibility_is_public": boolean,\n' \
                    '   },],\n' \
                    '}'
 
