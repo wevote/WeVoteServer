@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import ActivityNoticeSeed, ActivityManager, ActivityNotice, ActivityTidbit, \
+from .models import ActivityNoticeSeed, ActivityManager, ActivityNotice, \
     NOTICE_FRIEND_ENDORSEMENTS, NOTICE_FRIEND_ENDORSEMENTS_SEED
 from config.base import get_environment_variable
 from django.utils.timezone import now

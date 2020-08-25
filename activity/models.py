@@ -15,6 +15,9 @@ NOTICE_FRIEND_ENDORSEMENTS_SEED = 'NOTICE_FRIEND_ENDORSEMENTS_SEED'
 # Kind of Notices
 NOTICE_FRIEND_ENDORSEMENTS = 'NOTICE_FRIEND_ENDORSEMENTS'
 
+FRIENDS_ONLY = 'FRIENDS_ONLY'
+SHOW_PUBLIC = 'SHOW_PUBLIC'
+
 
 class ActivityNotice(models.Model):
     """
@@ -70,23 +73,22 @@ class ActivityNoticeSeed(models.Model):
     speaker_twitter_followers_count = models.IntegerField(default=0)
 
 
-class ActivityTidbit(models.Model):
+class ActivityPost(models.Model):
     """
-    An article or chunk of information to show on the Activity feed
+    A voter-created post for the activity list
     """
-    date_of_tidbit = models.DateTimeField(null=True)
+    date_created = models.DateTimeField(null=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
-    position_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    deleted = models.BooleanField(default=False)
     speaker_name = models.CharField(max_length=255, default=None, null=True)
     speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-    speaker_photo_url_large = models.TextField(null=True)
-    speaker_photo_url_medium = models.TextField(null=True)
-    speaker_photo_url_tiny = models.TextField(null=True)
     speaker_twitter_followers_count = models.PositiveIntegerField(default=None, null=True)
     speaker_twitter_handle = models.CharField(max_length=255, default=None, null=True)
     speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
     speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
     speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
+    statement_text = models.TextField(null=True, blank=True)
+    visibility_is_public = models.BooleanField(default=False)
 
 
 class ActivityManager(models.Manager):
@@ -211,7 +213,7 @@ class ActivityManager(models.Manager):
         }
         return results
 
-    def create_activity_tidbit(
+    def create_activity_post(
             self,
             sender_voter_we_vote_id,
             sender_voter_sms,
@@ -224,7 +226,7 @@ class ActivityManager(models.Manager):
         success = True
 
         try:
-            activity_tidbit = ActivityTidbit.objects.create(
+            activity_post = ActivityPost.objects.create(
                 sender_voter_we_vote_id=sender_voter_we_vote_id,
                 sender_voter_sms=sender_voter_sms,
                 recipient_voter_we_vote_id=recipient_voter_we_vote_id,
@@ -233,20 +235,20 @@ class ActivityManager(models.Manager):
                 kind_of_sms_template=kind_of_sms_template,
                 template_variables_in_json=template_variables_in_json,
             )
-            activity_tidbit_saved = True
+            activity_post_saved = True
             success = True
             status += "SMS_DESCRIPTION_CREATED "
         except Exception as e:
-            activity_tidbit_saved = False
-            activity_tidbit = ActivityTidbit()
+            activity_post_saved = False
+            activity_post = ActivityPost()
             success = False
             status += "SMS_DESCRIPTION_NOT_CREATED " + str(e) + ' '
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'activity_tidbit_saved':    activity_tidbit_saved,
-            'activity_tidbit':          activity_tidbit,
+            'success':              success,
+            'status':               status,
+            'activity_post_saved':  activity_post_saved,
+            'activity_post':        activity_post,
         }
         return results
 
@@ -544,6 +546,7 @@ class ActivityManager(models.Manager):
                 'recipient_voter_we_vote_id':       recipient_voter_we_vote_id,
                 'activity_notice_seed_list_found':  False,
                 'activity_notice_seed_list':        [],
+                'voter_friend_we_vote_id_list':     [],
             }
             return results
 
@@ -592,6 +595,7 @@ class ActivityManager(models.Manager):
             'recipient_voter_we_vote_id':       recipient_voter_we_vote_id,
             'activity_notice_seed_list_found':  activity_notice_seed_list_found,
             'activity_notice_seed_list':        activity_notice_seed_list,
+            'voter_friend_we_vote_id_list':     voter_friend_we_vote_id_list,
         }
         return results
 
@@ -640,6 +644,78 @@ class ActivityManager(models.Manager):
             'status':                       status,
             'activity_notice_seed_found':   activity_notice_seed_found,
             'activity_notice_seed':         activity_notice_seed,
+        }
+        return results
+
+    def retrieve_activity_post_list_for_recipient(
+            self,
+            recipient_voter_we_vote_id='',
+            voter_friend_we_vote_id_list=[]):
+        """
+
+        :param recipient_voter_we_vote_id:
+        :param voter_friend_we_vote_id_list:
+        :return:
+        """
+        status = ""
+        if not positive_value_exists(recipient_voter_we_vote_id):
+            success = False
+            status += 'VALID_VOTER_WE_VOTE_ID_MISSING '
+            results = {
+                'success':                          success,
+                'status':                           status,
+                'recipient_voter_we_vote_id':       recipient_voter_we_vote_id,
+                'activity_post_list_found':  False,
+                'activity_post_list':        [],
+            }
+            return results
+
+        activity_post_list = []
+        if not positive_value_exists(len(voter_friend_we_vote_id_list)):
+            voter_friend_we_vote_id_list = []
+            voter_friend_we_vote_id_list.append(recipient_voter_we_vote_id)
+            from friend.models import FriendManager
+            friend_manager = FriendManager()
+            friend_results = friend_manager.retrieve_friends_we_vote_id_list(recipient_voter_we_vote_id)
+            if friend_results['friends_we_vote_id_list_found']:
+                friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+                voter_friend_we_vote_id_list += friends_we_vote_id_list
+        try:
+            queryset = ActivityPost.objects.all()
+            queryset = queryset.filter(
+                speaker_voter_we_vote_id__in=voter_friend_we_vote_id_list,
+                deleted=False
+            )
+            queryset = queryset.exclude(
+                Q(speaker_voter_we_vote_id=None) | Q(speaker_voter_we_vote_id=""))
+            queryset = queryset.order_by('-id')  # Put most recent ActivityPost at top of list
+            activity_post_list = queryset[:200]
+
+            if len(activity_post_list):
+                success = True
+                activity_post_list_found = True
+                status += 'ACTIVITY_POST_LIST_RETRIEVED '
+            else:
+                success = True
+                activity_post_list_found = False
+                status += 'NO_ACTIVITY_POST_LIST_RETRIEVED '
+        except ActivityPost.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            activity_post_list_found = False
+            status += 'NO_ACTIVITY_POST_LIST_RETRIEVED_DoesNotExist '
+            activity_post_list = []
+        except Exception as e:
+            success = False
+            activity_post_list_found = False
+            status += 'FAILED retrieve_activity_post_list_for_recipient: ' + str(e) + ' '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'recipient_voter_we_vote_id':   recipient_voter_we_vote_id,
+            'activity_post_list_found':     activity_post_list_found,
+            'activity_post_list':           activity_post_list,
         }
         return results
 
@@ -771,6 +847,82 @@ class ActivityManager(models.Manager):
                 'activity_notice_seed_updated': activity_notice_seed_updated,
                 'updated_activity_notice_seed': existing_entry,
             }
+        return results
+
+    def update_or_create_activity_post(
+            self,
+            activity_post_id=0,
+            updated_values={},
+            speaker_voter_we_vote_id='',
+    ):
+        """
+        Either update or create an election entry.
+        """
+        activity_post = None
+        activity_post_created = False
+        activity_post_found = False
+        missing_variable = False
+        status = ""
+
+        statement_text = updated_values['statement_text'] if 'statement_text' in updated_values else ''
+
+        if not speaker_voter_we_vote_id:
+            missing_variable = True
+            status += 'MISSING_VOTER_WE_VOTE_ID '
+        if not positive_value_exists(activity_post_id) and not positive_value_exists(statement_text):
+            missing_variable = True
+            status += 'MISSING_BOTH_ID_AND_STATEMENT_TEXT '
+
+        if missing_variable:
+            success = False
+            results = {
+                'success':                  success,
+                'status':                   status,
+                'activity_post':            activity_post,
+                'activity_post_found':      activity_post_found,
+                'activity_post_created':    activity_post_created,
+            }
+            return results
+
+        if positive_value_exists(activity_post_id):
+            try:
+                activity_post = ActivityPost.objects.get(
+                    id=activity_post_id,
+                    speaker_voter_we_vote_id=updated_values['speaker_voter_we_vote_id'])
+                activity_post_found = True
+                # Instead of manually mapping them above, we do it this way for flexibility
+                for key, value in updated_values.items():
+                    setattr(activity_post, key, value)
+                activity_post.save()
+                success = True
+                status += 'ACTIVITY_POST_UPDATED '
+            except Exception as e:
+                success = False
+                status += "ACTIVITY_POST_UPDATE_FAILURE: " + str(e) + " "
+        else:
+            try:
+                activity_post = ActivityPost.objects.create(
+                    date_created=now(),
+                    speaker_voter_we_vote_id=updated_values['speaker_voter_we_vote_id'])
+                activity_post_created = True
+                # Instead of manually mapping them above, we do it this way for flexibility
+                for key, value in updated_values.items():
+                    setattr(activity_post, key, value)
+                activity_post.save()
+                activity_post_found = True
+                success = True
+                status += 'ACTIVITY_POST_CREATED '
+            except Exception as e:
+                success = False
+                status += "ACTIVITY_POST_CREATE_FAILURE: " + str(e) + " "
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'activity_post':            activity_post,
+            'activity_post_found':      activity_post_found,
+            'activity_post_created':    activity_post_created,
+        }
         return results
 
 

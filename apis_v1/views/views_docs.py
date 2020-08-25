@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from apis_v1.documentation_source import \
-    activity_list_retrieve_doc, activity_notice_list_retrieve_doc, all_ballot_items_retrieve_doc, \
+    activity_list_retrieve_doc, activity_notice_list_retrieve_doc, activity_post_save_doc,\
+    all_ballot_items_retrieve_doc, \
     analytics_action_sync_out_doc, \
     apple_sign_in_save_doc, ballot_item_highlights_retrieve_doc, ballot_item_options_retrieve_doc, \
     ballot_item_retrieve_doc, ballot_items_search_retrieve_doc, \
@@ -95,6 +96,16 @@ def activity_notice_list_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = activity_notice_list_retrieve_doc.activity_notice_list_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def activity_post_save_doc_view(request):
+    """
+    Show documentation about activityPostSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = activity_post_save_doc.activity_post_save_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

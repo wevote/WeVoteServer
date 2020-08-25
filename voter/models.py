@@ -3019,7 +3019,7 @@ def fetch_voter_we_vote_id_from_voter_id(voter_id):
 #         return ""
 
 
-def fetch_voter_from_request(request):
+def fetch_api_voter_from_request(request):
     """
     For use on API server only
     :param request:
