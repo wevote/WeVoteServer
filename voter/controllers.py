@@ -8,7 +8,7 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, \
     NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, \
     Voter, VoterAddressManager, \
     VoterDeviceLink, VoterDeviceLinkManager, VoterManager
-from activity.controllers import move_activity_notices_to_another_voter
+from activity.controllers import move_activity_notices_to_another_voter, move_activity_posts_to_another_voter
 from analytics.controllers import move_analytics_info_to_another_voter
 from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, \
     ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
@@ -1888,6 +1888,13 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id,
         to_voter=new_owner_voter)
     status += " " + move_activity_results['status']
+
+    # Transfer ActivityPost entries from voter to new_owner_voter
+    move_activity_post_results = move_activity_posts_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id,
+        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id,
+        to_voter=new_owner_voter)
+    status += " " + move_activity_post_results['status']
 
     # Bring over Analytics information
     move_analytics_results = move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)

@@ -923,7 +923,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                 status += "DELETED_SMS_PHONE_NUMBER "
                 success = True
             except Exception as e:
-                status += "UNABLE_TO_DELETE_SMS_PHONE_NUMBER "
+                status += "UNABLE_TO_DELETE_SMS_PHONE_NUMBER " + str(e) + " "
                 success = False
 
             if sms_phone_number_deleted:

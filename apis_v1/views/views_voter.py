@@ -28,8 +28,6 @@ import json
 from organization.models import OrganizationManager
 from position.controllers import voter_all_positions_retrieve_for_api, \
     voter_position_retrieve_for_api, voter_position_comment_save_for_api, voter_position_visibility_save_for_api
-from position_like.controllers import voter_position_like_off_save_for_api, \
-    voter_position_like_on_save_for_api, voter_position_like_status_retrieve_for_api
 from sms.controllers import voter_sms_phone_number_retrieve_for_api, voter_sms_phone_number_save_for_api
 from sms.models import SMSManager
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
@@ -1371,43 +1369,6 @@ def voter_all_positions_retrieve_view(request):  # voterAllPositionsRetrieve
         voter_device_id=voter_device_id,
         google_civic_election_id=google_civic_election_id
     )
-
-
-def voter_position_like_off_save_view(request):
-    """
-    Un-mark the position_like for a single position for one voter (voterPositionLikeOffSave)
-    :param request:
-    :return:
-    """
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    position_like_id = request.GET.get('position_like_id', 0)
-    position_entered_id = request.GET.get('position_entered_id', 0)
-    return voter_position_like_off_save_for_api(
-        voter_device_id=voter_device_id, position_like_id=position_like_id, position_entered_id=position_entered_id)
-
-
-def voter_position_like_on_save_view(request):
-    """
-    Mark the position_like for a single position for one voter (voterPositionLikeOnSave)
-    :param request:
-    :return:
-    """
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    position_entered_id = request.GET.get('position_entered_id', 0)
-    return voter_position_like_on_save_for_api(
-        voter_device_id=voter_device_id, position_entered_id=position_entered_id)
-
-
-def voter_position_like_status_retrieve_view(request):
-    """
-    Retrieve whether or not a position_like is marked for position (voterPositionLikeStatusRetrieve)
-    :param request:
-    :return:
-    """
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    position_entered_id = request.GET.get('position_entered_id', 0)
-    return voter_position_like_status_retrieve_for_api(
-        voter_device_id=voter_device_id, position_entered_id=position_entered_id)
 
 
 def voter_position_comment_save_view(request):  # voterPositionCommentSave

@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/voter_position_like_off_save_doc.py
+# apis_v1/documentation_source/voter_reaction_like_off_save_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def voter_position_like_off_save_doc_template_values(url_root):
+def voter_reaction_like_off_save_doc_template_values(url_root):
     """
-    Show documentation about voterPositionLikeOffSave
+    Show documentation about voterReactionLikeOffSave
     """
     required_query_parameter_list = [
         {
@@ -19,12 +19,12 @@ def voter_position_like_off_save_doc_template_values(url_root):
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
-            'name':         'position_like_id',
+            'name':         'reaction_like_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'The id of the position_like entry.',
+            'description':  'The id of the reaction entry.',
         },
         {
-            'name':         'position_entered_id',
+            'name':         'liked_item_we_vote_id',
             'value':        'integer',  # boolean, integer, long, string
             'description':  'The position that the voter is liking.',
         },
@@ -47,21 +47,21 @@ def voter_position_like_off_save_doc_template_values(url_root):
             'description':  'Cannot proceed. Missing voter_id while trying to save.',
         },
         {
-            'code':         'DELETED_BY_VOTER_ID_AND_POSITION_ENTERED_ID',
+            'code':         'DELETED_BY_VOTER_ID_AND_LIKED_ITEM_WE_VOTE_ID',
             'description':  '',
         },
         {
-            'code':         'DELETED_BY_POSITION_LIKE_ID',
+            'code':         'DELETED_BY_REACTION_LIKE_ID',
             'description':  '',
         },
         {
-            'code':         'UNABLE_TO_DELETE_POSITION_LIKE-INSUFFICIENT_VARIABLES',
+            'code':         'UNABLE_TO_DELETE_REACTION_LIKE-INSUFFICIENT_VARIABLES',
             'description':  '',
         },
     ]
 
     try_now_link_variables_dict = {
-        'position_entered_id': '5655',
+        'liked_item_we_vote_id': '5655',
     }
 
     api_response = '{\n' \
@@ -70,11 +70,11 @@ def voter_position_like_off_save_doc_template_values(url_root):
                    '}'
 
     template_values = {
-        'api_name': 'voterPositionLikeOffSave',
-        'api_slug': 'voterPositionLikeOffSave',
+        'api_name': 'voterReactionLikeOffSave',
+        'api_slug': 'voterReactionLikeOffSave',
         'api_introduction':
             "Remove a Like that the voter set on a position.",
-        'try_now_link': 'apis_v1:voterPositionLikeOffSaveView',
+        'try_now_link': 'apis_v1:voterReactionLikeOffSaveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',

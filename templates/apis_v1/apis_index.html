@@ -569,22 +569,22 @@
           <td>Save the voter's comment based on voter_device_id and ballot item id.</td>
         </tr>
         <tr>
-          <td><a href="{% url 'apis_v1:voterPositionLikeOnSaveDocs' %}">voterPositionLikeOnSave</a></td>
+          <td><a href="{% url 'apis_v1:voterReactionLikeOnSaveDocs' %}">voterReactionLikeOnSave</a></td>
           <td></td>
           <td>Mark that the voter wants to 'Like' this position.</td>
         </tr>
         <tr>
-          <td><a href="{% url 'apis_v1:voterPositionLikeOffSaveDocs' %}">voterPositionLikeOffSave</a></td>
+          <td><a href="{% url 'apis_v1:voterReactionLikeOffSaveDocs' %}">voterReactionLikeOffSave</a></td>
           <td></td>
           <td>Remove a Like that the voter set on a position.</td>
         </tr>
         <tr>
-          <td><a href="{% url 'apis_v1:voterPositionLikeStatusRetrieveDocs' %}">voterPositionLikeStatusRetrieve</a></td>
+          <td><a href="{% url 'apis_v1:reactionLikeStatusRetrieveDocs' %}">reactionLikeStatusRetrieve</a></td>
           <td></td>
           <td>Has this voter 'Liked' this position?</td>
         </tr>
         <tr>
-          <td><a href="{% url 'apis_v1:positionLikeCountDocs' %}">positionLikeCount</a></td>
+          <td><a href="{% url 'apis_v1:reactionLikeCountDocs' %}">reactionLikeCount</a></td>
           <td></td>
           <td>The total number of Likes that a position has received, either from the perspective of
             your network of friends, or the entire network.
@@ -959,6 +959,13 @@
           <td></td>
           <td>
             Save or edit an Activity Post.
+          </td>
+        </tr>
+        <tr>
+          <td><a href="{% url 'apis_v1:activityCommentSaveDocs' %}">activityCommentSave</a></td>
+          <td></td>
+          <td>
+            Save or edit an Activity Comment.
           </td>
         </tr>
 

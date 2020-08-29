@@ -269,6 +269,18 @@ def fetch_next_we_vote_id_integer(we_vote_id_last_setting_name):
     return we_vote_id_next_integer
 
 
+def fetch_next_we_vote_id_activity_comment_integer():
+    return fetch_next_we_vote_id_integer('we_vote_id_last_activity_comment_integer')
+
+
+def fetch_next_we_vote_id_activity_notice_seed_integer():
+    return fetch_next_we_vote_id_integer('we_vote_id_last_activity_notice_seed_integer')
+
+
+def fetch_next_we_vote_id_activity_post_integer():
+    return fetch_next_we_vote_id_integer('we_vote_id_last_activity_post_integer')
+
+
 def fetch_next_we_vote_id_ballot_returned_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_last_ballot_returned_integer')
 

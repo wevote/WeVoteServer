@@ -135,8 +135,8 @@ INSTALLED_APPS = (
     'politician',
     'polling_location',
     'position',
-    'position_like',
     'quick_info',
+    'reaction',
     'rest_framework',    # Jan 2019, looks abandoned
     'scheduled_tasks',
     'search',

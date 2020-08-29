@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from apis_v1.documentation_source import \
-    activity_list_retrieve_doc, activity_notice_list_retrieve_doc, activity_post_save_doc,\
+    activity_comment_save_doc, activity_list_retrieve_doc, activity_notice_list_retrieve_doc, activity_post_save_doc,\
     all_ballot_items_retrieve_doc, \
     analytics_action_sync_out_doc, \
     apple_sign_in_save_doc, ballot_item_highlights_retrieve_doc, ballot_item_options_retrieve_doc, \
@@ -30,7 +30,7 @@ from apis_v1.documentation_source import \
     organization_suggestion_tasks_doc, \
     pdf_to_html_doc, \
     pledge_to_vote_with_voter_guide_doc, politicians_sync_out_doc, polling_locations_sync_out_doc, \
-    position_like_count_doc, position_list_for_ballot_item_doc, position_list_for_ballot_item_from_friends_doc, \
+    reaction_like_count_doc, position_list_for_ballot_item_doc, position_list_for_ballot_item_from_friends_doc, \
     position_list_for_opinion_maker_doc, \
     position_list_for_voter_doc, position_oppose_count_for_ballot_item_doc, \
     position_public_oppose_count_for_ballot_item_doc, position_retrieve_doc, position_save_doc, \
@@ -63,7 +63,7 @@ from apis_v1.documentation_source import \
     voter_location_retrieve_from_ip_doc, voter_merge_two_accounts_doc, \
     voter_notification_settings_update_doc, voter_photo_save_doc, \
     voter_plan_list_retrieve_doc, voter_plan_save_doc, \
-    voter_position_like_off_save_doc, voter_position_like_on_save_doc, voter_position_like_status_retrieve_doc, \
+    voter_reaction_like_off_save_doc, voter_reaction_like_on_save_doc, reaction_like_status_retrieve_doc, \
     voter_position_comment_save_doc, voter_position_retrieve_doc, voter_position_visibility_save_doc, \
     voter_opposing_save_doc, voter_retrieve_doc, voter_sign_out_doc, \
     voter_sms_phone_number_retrieve_doc, voter_sms_phone_number_save_doc, \
@@ -78,6 +78,16 @@ from voter.models import voter_setup
 from wevote_functions.functions import get_voter_api_device_id, set_voter_api_device_id, positive_value_exists
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+
+
+def activity_comment_save_doc_view(request):
+    """
+    Show documentation about activityCommentSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = activity_comment_save_doc.activity_comment_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
 def activity_list_retrieve_doc_view(request):
@@ -1420,32 +1430,32 @@ def voter_plan_save_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
-def voter_position_like_off_save_doc_view(request):
+def voter_reaction_like_off_save_doc_view(request):
     """
-    Show documentation about voterPositionLikeOffSave
+    Show documentation about voterReactionLikeOffSave
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
-    template_values = voter_position_like_off_save_doc.voter_position_like_off_save_doc_template_values(url_root)
+    template_values = voter_reaction_like_off_save_doc.voter_reaction_like_off_save_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
-def voter_position_like_on_save_doc_view(request):
+def voter_reaction_like_on_save_doc_view(request):
     """
-    Show documentation about voterPositionLikeOnSave
+    Show documentation about voterReactionLikeOnSave
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
-    template_values = voter_position_like_on_save_doc.voter_position_like_on_save_doc_template_values(url_root)
+    template_values = voter_reaction_like_on_save_doc.voter_reaction_like_on_save_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
-def voter_position_like_status_retrieve_doc_view(request):
+def reaction_like_status_retrieve_doc_view(request):
     """
-    Show documentation about voterPositionLikeStatusRetrieve
+    Show documentation about reactionLikeStatusRetrieve
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
-    template_values = voter_position_like_status_retrieve_doc.voter_position_like_status_retrieve_doc_template_values(
+    template_values = reaction_like_status_retrieve_doc.reaction_like_status_retrieve_doc_template_values(
         url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
@@ -1491,12 +1501,12 @@ def polling_locations_sync_out_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
-def position_like_count_doc_view(request):
+def reaction_like_count_doc_view(request):
     """
-    Show documentation about positionLikeCount
+    Show documentation about reactionLikeCount
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
-    template_values = position_like_count_doc.position_like_count_doc_template_values(url_root)
+    template_values = reaction_like_count_doc.reaction_like_count_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

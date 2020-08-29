@@ -14,7 +14,6 @@ from position.controllers import calculate_positions_count_for_all_ballot_items_
     position_retrieve_for_api, position_save_for_api
 from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING, \
     FRIENDS_ONLY, PUBLIC_ONLY, FRIENDS_AND_PUBLIC
-from position_like.controllers import position_like_count_for_api
 from support_oppose_deciding.controllers import position_oppose_count_for_ballot_item_for_api, \
     position_support_count_for_ballot_item_for_api, \
     position_public_oppose_count_for_ballot_item_for_api, \
@@ -456,18 +455,3 @@ def positions_count_for_one_ballot_item_view(request):  # positionsCountForOneBa
         'position_counts_list': results['position_counts_list'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
-def position_like_count_view(request):
-    """
-    Retrieve the total number of Likes that a position has received, either from the perspective of the voter's
-    network of friends, or the entire network. (positionLikeCount)
-    :param request:
-    :return:
-    """
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    position_entered_id = request.GET.get('position_entered_id', 0)
-    limit_to_voters_network = request.GET.get('limit_to_voters_network', False)
-    limit_to_voters_network = positive_value_exists(limit_to_voters_network)
-    return position_like_count_for_api(voter_device_id=voter_device_id, position_entered_id=position_entered_id,
-                                       limit_to_voters_network=limit_to_voters_network)

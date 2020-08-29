@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/voter_position_like_on_save_doc.py
+# apis_v1/documentation_source/voter_reaction_like_on_save_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def voter_position_like_on_save_doc_template_values(url_root):
+def voter_reaction_like_on_save_doc_template_values(url_root):
     """
-    Show documentation about voterPositionLikeOnSave
+    Show documentation about voterReactionLikeOnSave
     """
     required_query_parameter_list = [
         {
@@ -19,7 +19,7 @@ def voter_position_like_on_save_doc_template_values(url_root):
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
-            'name':         'position_entered_id',
+            'name':         'liked_item_we_vote_id',
             'value':        'integer',  # boolean, integer, long, string
             'description':  'The position that the voter is liking.',
         },
@@ -42,36 +42,36 @@ def voter_position_like_on_save_doc_template_values(url_root):
             'description':  'Cannot proceed. Missing voter_id while trying to save.',
         },
         {
-            'code':         'POSITION_LIKE_CREATED',
+            'code':         'REACTION_LIKE_CREATED',
             'description':  '',
         },
         {
-            'code':         'POSITION_LIKE_FOUND_WITH_VOTER_ID_AND_POSITION_ID',
+            'code':         'REACTION_LIKE_FOUND_WITH_VOTER_ID_AND_POSITION_ID',
             'description':  '',
         },
         {
-            'code':         'UNABLE_TO_SAVE_POSITION_LIKE-INSUFFICIENT_VARIABLES',
+            'code':         'UNABLE_TO_SAVE_REACTION_LIKE-INSUFFICIENT_VARIABLES',
             'description':  '',
         },
     ]
 
     try_now_link_variables_dict = {
-        'position_entered_id': '5655',
+        'liked_item_we_vote_id': '5655',
     }
 
     api_response = '{\n' \
                    '  "status": string (description of what happened),\n' \
                    '  "success": boolean (did the save happen?),\n' \
-                   '  "position_like_id": integer,\n' \
-                   '  "position_entered_id": integer,\n' \
+                   '  "reaction_like_id": integer,\n' \
+                   '  "liked_item_we_vote_id": integer,\n' \
                    '}'
 
     template_values = {
-        'api_name': 'voterPositionLikeOnSave',
-        'api_slug': 'voterPositionLikeOnSave',
+        'api_name': 'voterReactionLikeOnSave',
+        'api_slug': 'voterReactionLikeOnSave',
         'api_introduction':
             "Mark that the voter wants to Like this position.",
-        'try_now_link': 'apis_v1:voterPositionLikeOnSaveView',
+        'try_now_link': 'apis_v1:voterReactionLikeOnSaveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
