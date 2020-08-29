@@ -17,6 +17,116 @@ logger = wevote_functions.admin.get_logger(__name__)
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
+def activity_comment_save_view(request):  # activityCommentSave
+    """
+    Save comment about an existing ActivityPost or other parent item.
+    :param request:
+    :return:
+    """
+    status = ''
+    activity_manager = ActivityManager()
+
+    activity_comment_we_vote_id = request.GET.get('activity_comment_we_vote_id', False)
+    parent_we_vote_id = request.GET.get('parent_we_vote_id', False)
+    parent_comment_we_vote_id = request.GET.get('parent_comment_we_vote_id', False)
+    statement_text = request.GET.get('statement_text', False)
+    visibility_setting = request.GET.get('visibility_setting', False)
+
+    if visibility_setting not in ['FRIENDS_ONLY', 'SHOW_PUBLIC']:
+        visibility_setting = 'FRIENDS_ONLY'
+
+    visibility_is_public = visibility_setting == 'SHOW_PUBLIC'
+
+    updated_values = {
+        'commenter_name':                       '',
+        'commenter_organization_we_vote_id':    '',
+        'commenter_twitter_followers_count':    0,
+        'commenter_twitter_handle':             '',
+        'commenter_voter_we_vote_id':           '',
+        'commenter_profile_image_url_medium':   '',
+        'commenter_profile_image_url_tiny':     '',
+        'parent_we_vote_id':                    parent_we_vote_id,
+        'parent_comment_we_vote_id':            parent_comment_we_vote_id,
+        'statement_text':                       statement_text,
+        'visibility_is_public':                 visibility_is_public,
+    }
+
+    voter_device_id = get_voter_device_id(request)
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
+    if results['voter_found']:
+        voter = results['voter']
+        commenter_twitter_followers_count = 0
+
+        if positive_value_exists(voter.linked_organization_we_vote_id):
+            # Is there a Twitter handle linked to this organization? If so, update the information.
+            twitter_user_manager = TwitterUserManager()
+            twitter_link_results = \
+                twitter_user_manager.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
+                    voter.linked_organization_we_vote_id)
+            if twitter_link_results['twitter_link_to_organization_found']:
+                twitter_link_to_organization = twitter_link_results['twitter_link_to_organization']
+
+                twitter_results = \
+                    twitter_user_manager.retrieve_twitter_user_locally_or_remotely(
+                        twitter_link_to_organization.twitter_id)
+
+                if twitter_results['twitter_user_found']:
+                    twitter_user = twitter_results['twitter_user']
+                    try:
+                        commenter_twitter_followers_count = twitter_user.twitter_followers_count \
+                            if positive_value_exists(twitter_user.twitter_followers_count) else 0
+                    except Exception as e:
+                        status += "FAILED_TO_RETRIEVE_TWITTER_FOLLOWERS_COUNT " + str(e) + ' '
+
+        updated_values['commenter_name'] = voter.get_full_name(real_name_only=True)
+        updated_values['commenter_voter_we_vote_id'] = voter.we_vote_id
+        updated_values['commenter_organization_we_vote_id'] = voter.linked_organization_we_vote_id
+        updated_values['commenter_profile_image_url_medium'] = voter.we_vote_hosted_profile_image_url_medium
+        updated_values['commenter_profile_image_url_tiny'] = voter.we_vote_hosted_profile_image_url_tiny
+        updated_values['commenter_twitter_followers_count'] = commenter_twitter_followers_count
+        updated_values['commenter_twitter_handle'] = voter.twitter_screen_name
+        updated_values['parent_we_vote_id'] = parent_we_vote_id
+        updated_values['parent_comment_we_vote_id'] = parent_comment_we_vote_id
+
+    if not positive_value_exists(updated_values['commenter_voter_we_vote_id']):
+        status += "ACTIVITY_COMMENT_SAVE_MISSING_VOTER_WE_VOTE_ID "
+        json_data = {
+            'status': status,
+            'success': False,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    results = activity_manager.update_or_create_activity_comment(
+        activity_comment_we_vote_id=activity_comment_we_vote_id,
+        updated_values=updated_values,
+        commenter_voter_we_vote_id=updated_values['commenter_voter_we_vote_id'],
+    )
+    status += results['status']
+    success = results['success']
+    activity_comment_dict = {}
+    if results['activity_comment_found']:
+        activity_comment = results['activity_comment']
+        activity_comment_dict = {
+            'date_created':                         activity_comment.date_created.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_last_changed':                    activity_comment.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'commenter_name':                       activity_comment.commenter_name,
+            'commenter_organization_we_vote_id':    activity_comment.commenter_organization_we_vote_id,
+            'commenter_voter_we_vote_id':           activity_comment.commenter_voter_we_vote_id,
+            'commenter_profile_image_url_medium':   activity_comment.commenter_profile_image_url_medium,
+            'commenter_profile_image_url_tiny':     activity_comment.commenter_profile_image_url_tiny,
+            'commenter_twitter_handle':             activity_comment.commenter_twitter_handle,
+            'commenter_twitter_followers_count':    activity_comment.commenter_twitter_followers_count,
+            'statement_text':                       activity_comment.statement_text,
+            'visibility_is_public':                 activity_comment.visibility_is_public,
+            'we_vote_id':                           activity_comment.we_vote_id,
+        }
+
+    activity_comment_dict['status'] = status
+    activity_comment_dict['success'] = success
+    return HttpResponse(json.dumps(activity_comment_dict), content_type='application/json')
+
+
 def activity_list_retrieve_view(request):  # activityListRetrieve
     """
     Retrieve activity so we can populate the news page
@@ -62,6 +172,11 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
         if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_public_serialized):
             position_we_vote_id_list += json.loads(activity_notice_seed.position_we_vote_ids_for_public_serialized)
         new_positions_entered_count += len(position_we_vote_id_list)
+        if not positive_value_exists(activity_notice_seed.we_vote_id):
+            try:
+                activity_notice_seed.save()
+            except Exception as e:
+                status += "COULD_NOT_UPDATE_SEED_WE_VOTE_ID: " + str(e) + ' '
         activity_notice_seed_dict = {
             'date_created':                     activity_notice_seed.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
             'date_last_changed':                activity_notice_seed.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
@@ -79,6 +194,7 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
             'speaker_profile_image_url_tiny':   activity_notice_seed.speaker_profile_image_url_tiny,
             'speaker_twitter_handle':           activity_notice_seed.speaker_twitter_handle,
             'speaker_twitter_followers_count':  activity_notice_seed.speaker_twitter_followers_count,
+            'we_vote_id':                       activity_notice_seed.we_vote_id,
         }
         activity_list.append(activity_notice_seed_dict)
 
@@ -97,6 +213,11 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
         date_created_string = ''
         if activity_post.date_created:
             date_created_string = activity_post.date_created.strftime('%Y-%m-%d %H:%M:%S')
+        if not positive_value_exists(activity_post.we_vote_id):
+            try:
+                activity_post.save()
+            except Exception as e:
+                status += "COULD_NOT_UPDATE_POST_WE_VOTE_ID: " + str(e) + ' '
         activity_post_dict = {
             'date_created':                     date_created_string,
             'date_last_changed':                activity_post.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
@@ -116,12 +237,40 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
             'speaker_twitter_followers_count':  activity_post.speaker_twitter_followers_count,
             'statement_text':                   activity_post.statement_text,
             'visibility_is_public':             activity_post.visibility_is_public,
+            'we_vote_id':                       activity_post.we_vote_id,
         }
         activity_list.append(activity_post_dict)
 
+    # Now cycle through these activities and retrieve all related comments
+    activity_list_with_comments = []
+    for activity_tidbit_dict in activity_list:
+        results = activity_manager.retrieve_activity_comment_list(
+            parent_we_vote_id=activity_tidbit_dict['we_vote_id'])
+        activity_comment_list = []
+        if results['success']:
+            activity_comment_object_list = results['activity_comment_list']
+            for activity_comment in activity_comment_object_list:
+                activity_comment_dict = {
+                    'date_created': activity_comment.date_created.strftime('%Y-%m-%d %H:%M:%S'),
+                    'date_last_changed': activity_comment.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+                    'commenter_name': activity_comment.commenter_name,
+                    'commenter_organization_we_vote_id': activity_comment.commenter_organization_we_vote_id,
+                    'commenter_voter_we_vote_id': activity_comment.commenter_voter_we_vote_id,
+                    'commenter_profile_image_url_medium': activity_comment.commenter_profile_image_url_medium,
+                    'commenter_profile_image_url_tiny': activity_comment.commenter_profile_image_url_tiny,
+                    'commenter_twitter_handle': activity_comment.commenter_twitter_handle,
+                    'commenter_twitter_followers_count': activity_comment.commenter_twitter_followers_count,
+                    'statement_text': activity_comment.statement_text,
+                    'visibility_is_public': activity_comment.visibility_is_public,
+                    'we_vote_id': activity_comment.we_vote_id,
+                }
+                activity_comment_list.append(activity_comment_dict)
+        activity_tidbit_dict['activity_comment_list'] = activity_comment_list
+        activity_list_with_comments.append(activity_tidbit_dict)
+
     # Order entries in the activity_list by "date_created"
     from operator import itemgetter
-    activity_list_ordered = sorted(activity_list, key=itemgetter('date_created'), reverse=True)
+    activity_list_ordered = sorted(activity_list_with_comments, key=itemgetter('date_created'), reverse=True)
 
     json_data = {
         'status': status,
@@ -225,7 +374,7 @@ def activity_post_save_view(request):  # activityPostSave
     status = ''
     activity_manager = ActivityManager()
 
-    activity_post_id = request.GET.get('activity_post_id', False)
+    activity_post_we_vote_id = request.GET.get('activity_post_we_vote_id', False)
     statement_text = request.GET.get('statement_text', False)
     visibility_setting = request.GET.get('visibility_setting', False)
 
@@ -291,7 +440,7 @@ def activity_post_save_view(request):  # activityPostSave
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     results = activity_manager.update_or_create_activity_post(
-        activity_post_id=activity_post_id,
+        activity_post_we_vote_id=activity_post_we_vote_id,
         updated_values=updated_values,
         speaker_voter_we_vote_id=updated_values['speaker_voter_we_vote_id'],
     )
@@ -319,6 +468,7 @@ def activity_post_save_view(request):  # activityPostSave
             'speaker_twitter_followers_count':  activity_post.speaker_twitter_followers_count,
             'statement_text':                   activity_post.statement_text,
             'visibility_is_public':             activity_post.visibility_is_public,
+            'we_vote_id':                       activity_post.we_vote_id,
         }
 
     activity_post_dict['status'] = status

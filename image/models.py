@@ -1517,7 +1517,7 @@ class WeVoteImageManager(models.Model):
             image_stored_to_aws = True
         except Exception as e:
             image_stored_to_aws = False
-            exception_message = "store_image_to_aws failed"
+            exception_message = "store_image_to_aws failed: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=exception_message)
 
         return image_stored_to_aws

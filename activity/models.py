@@ -8,6 +8,9 @@ from django.utils.timezone import now
 from datetime import timedelta
 import json
 from wevote_functions.functions import positive_value_exists
+from wevote_settings.models import fetch_next_we_vote_id_activity_notice_seed_integer, \
+    fetch_next_we_vote_id_activity_comment_integer, fetch_next_we_vote_id_activity_post_integer, \
+    fetch_site_unique_id_prefix
 
 # Kind of Seeds
 NOTICE_FRIEND_ENDORSEMENTS_SEED = 'NOTICE_FRIEND_ENDORSEMENTS_SEED'
@@ -19,76 +22,46 @@ FRIENDS_ONLY = 'FRIENDS_ONLY'
 SHOW_PUBLIC = 'SHOW_PUBLIC'
 
 
-class ActivityNotice(models.Model):
+class ActivityComment(models.Model):
     """
-    This is a notice for the notification drop-down menu, for one person
+    A voter-created comment on another item (like an ActivityPost)
     """
-    activity_notice_seed_id = models.PositiveIntegerField(default=None, null=True)
-    date_of_notice = models.DateTimeField(null=True)
-    date_last_changed = models.DateTimeField(null=True, auto_now=True)
-    activity_notice_clicked = models.BooleanField(default=False)
-    activity_notice_seen = models.BooleanField(default=False)
-    deleted = models.BooleanField(default=False)
-    kind_of_notice = models.CharField(max_length=50, default=None, null=True)
-    kind_of_seed = models.CharField(max_length=50, default=None, null=True)
-    new_positions_entered_count = models.PositiveIntegerField(default=None, null=True)
-    position_we_vote_id_list_serialized = models.TextField(default=None, null=True)
-    speaker_name = models.CharField(max_length=255, default=None, null=True)
-    speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-    speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-    recipient_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-    is_in_app = models.BooleanField(default=False)
-    # Track Email send progress
-    send_to_email = models.BooleanField(default=False)
-    scheduled_to_email = models.BooleanField(default=False)
-    sent_to_email = models.BooleanField(default=False)
-    # Track SMS send progress
-    send_to_sms = models.BooleanField(default=False)
-    scheduled_to_sms = models.BooleanField(default=False)
-    sent_to_sms = models.BooleanField(default=False)
-    speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
-    speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
-
-
-class ActivityNoticeSeed(models.Model):
-    """
-    This is the "seed" for a notice for the notification drop-down menu, which is used before we "distribute" it
-    out to an ActivityNotice, which gets shown to an individual voter.
-    """
-    activity_notices_created = models.BooleanField(default=False)
-    date_of_notice_earlier_than_update_window = models.BooleanField(default=False)
-    activity_notices_scheduled = models.BooleanField(default=False)
-    date_of_notice = models.DateTimeField(null=True)
-    date_last_changed = models.DateTimeField(null=True, auto_now=True)
-    deleted = models.BooleanField(default=False)
-    kind_of_seed = models.CharField(max_length=50, default=None, null=True)
-    position_we_vote_ids_for_friends_serialized = models.TextField(default=None, null=True)
-    position_we_vote_ids_for_public_serialized = models.TextField(default=None, null=True)
-    speaker_name = models.CharField(max_length=255, default=None, null=True)
-    speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-    speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-    speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
-    speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
-    speaker_twitter_handle = models.CharField(max_length=255, null=True, unique=False, default=None)
-    speaker_twitter_followers_count = models.IntegerField(default=0)
-
-
-class ActivityPost(models.Model):
-    """
-    A voter-created post for the activity list
-    """
+    # The ultimate parent of all comments
+    parent_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    # The comment that is the parent of this comment (only used when a comment on a comment)
+    parent_comment_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    commenter_name = models.CharField(max_length=255, default=None, null=True)
+    commenter_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    commenter_twitter_followers_count = models.PositiveIntegerField(default=None, null=True)
+    commenter_twitter_handle = models.CharField(max_length=255, default=None, null=True)
+    commenter_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    commenter_profile_image_url_medium = models.TextField(blank=True, null=True)
+    commenter_profile_image_url_tiny = models.TextField(blank=True, null=True)
     date_created = models.DateTimeField(null=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
     deleted = models.BooleanField(default=False)
-    speaker_name = models.CharField(max_length=255, default=None, null=True)
-    speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-    speaker_twitter_followers_count = models.PositiveIntegerField(default=None, null=True)
-    speaker_twitter_handle = models.CharField(max_length=255, default=None, null=True)
-    speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-    speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
-    speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
     statement_text = models.TextField(null=True, blank=True)
     visibility_is_public = models.BooleanField(default=False)
+    we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=True, db_index=True)
+
+    # We override the save function so we can auto-generate we_vote_id
+    def save(self, *args, **kwargs):
+        # Even if this data came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip().lower()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
+            # ...generate a new id
+            site_unique_id_prefix = fetch_site_unique_id_prefix()
+            next_local_integer = fetch_next_we_vote_id_activity_comment_integer()
+            # "wv" = We Vote
+            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+            # "comment" = tells us this is a unique id for an ActivityPost
+            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+            self.we_vote_id = "wv{site_unique_id_prefix}comment{next_integer}".format(
+                site_unique_id_prefix=site_unique_id_prefix,
+                next_integer=next_local_integer,
+            )
+        super(ActivityComment, self).save(*args, **kwargs)
 
 
 class ActivityManager(models.Manager):
@@ -249,6 +222,63 @@ class ActivityManager(models.Manager):
             'status':               status,
             'activity_post_saved':  activity_post_saved,
             'activity_post':        activity_post,
+        }
+        return results
+
+    def retrieve_activity_comment_list(self, parent_we_vote_id=''):
+        """
+
+        :param parent_we_vote_id:
+        :return:
+        """
+        status = ""
+        success = True
+        if not positive_value_exists(parent_we_vote_id):
+            success = False
+            status += 'VALID_PARENT_WE_VOTE_ID_MISSING '
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'parent_we_vote_id':            parent_we_vote_id,
+                'activity_comment_list_found':  False,
+                'activity_comment_list':        [],
+            }
+            return results
+
+        activity_comment_list = []
+        try:
+            queryset = ActivityComment.objects.all()
+            queryset = queryset.filter(
+                parent_we_vote_id__iexact=parent_we_vote_id,
+                deleted=False
+            )
+            queryset = queryset.exclude(
+                Q(parent_we_vote_id=None) | Q(parent_we_vote_id=""))
+            queryset = queryset.order_by('-id')  # Put most recent at top of list
+            activity_comment_list = queryset[:30]
+
+            if len(activity_comment_list):
+                activity_comment_list_found = True
+                status += 'ACTIVITY_COMMENT_LIST_RETRIEVED '
+            else:
+                activity_comment_list_found = False
+                status += 'NO_ACTIVITY_COMMENT_LIST_RETRIEVED '
+        except ActivityComment.DoesNotExist:
+            # No data found. Not a problem.
+            activity_comment_list_found = False
+            status += 'NO_ACTIVITY_COMMENT_LIST_RETRIEVED_DoesNotExist '
+            activity_comment_list = []
+        except Exception as e:
+            success = False
+            activity_comment_list_found = False
+            status += 'FAILED retrieve_activity_comment_list ActivityComment: ' + str(e) + ' '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'parent_we_vote_id':            parent_we_vote_id,
+            'activity_comment_list_found':  activity_comment_list_found,
+            'activity_comment_list':        activity_comment_list,
         }
         return results
 
@@ -499,7 +529,7 @@ class ActivityManager(models.Manager):
             )
             queryset = queryset.exclude(
                 Q(recipient_voter_we_vote_id=None) | Q(recipient_voter_we_vote_id=""))
-            queryset = queryset.order_by('-id')  # Put most recent sms at top of list
+            queryset = queryset.order_by('-id')  # Put most recent at top of list
             activity_notice_list = queryset[:30]
 
             if len(activity_notice_list):
@@ -567,7 +597,7 @@ class ActivityManager(models.Manager):
             )
             queryset = queryset.exclude(
                 Q(speaker_voter_we_vote_id=None) | Q(speaker_voter_we_vote_id=""))
-            queryset = queryset.order_by('-id')  # Put most recent sms at top of list
+            queryset = queryset.order_by('-id')  # Put most recent at top of list
             activity_notice_seed_list = queryset[:200]
 
             if len(activity_notice_seed_list):
@@ -745,21 +775,21 @@ class ActivityManager(models.Manager):
                     deleted=False
                 ).update(
                     activity_notice_seen=True,
-                    activity_notice_clicked=True)  # Put most recent sms at top of list
+                    activity_notice_clicked=True)
             elif activity_notice_clicked:
                 ActivityNotice.objects.all().filter(
                     id__in=activity_notice_id_list,
                     recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
                     deleted=False
                 ).update(
-                    activity_notice_clicked=True)  # Put most recent sms at top of list
+                    activity_notice_clicked=True)
             elif activity_notice_seen:
                 ActivityNotice.objects.all().filter(
                     id__in=activity_notice_id_list,
                     recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
                     deleted=False
                 ).update(
-                    activity_notice_seen=True)  # Put most recent sms at top of list
+                    activity_notice_seen=True)
             success = True
             activity_notice_list_updated = True
             status += 'ACTIVITY_NOTICE_LIST_UPDATED '
@@ -849,14 +879,90 @@ class ActivityManager(models.Manager):
             }
         return results
 
+    def update_or_create_activity_comment(
+            self,
+            activity_comment_we_vote_id='',
+            updated_values={},
+            commenter_voter_we_vote_id='',
+    ):
+        """
+        Either update or create an ActivityComment.
+        """
+        activity_comment = None
+        activity_comment_created = False
+        activity_comment_found = False
+        missing_variable = False
+        status = ""
+
+        statement_text = updated_values['statement_text'] if 'statement_text' in updated_values else ''
+
+        if not commenter_voter_we_vote_id:
+            missing_variable = True
+            status += 'MISSING_VOTER_WE_VOTE_ID '
+        if not positive_value_exists(activity_comment_we_vote_id) and not positive_value_exists(statement_text):
+            missing_variable = True
+            status += 'MISSING_BOTH_ID_AND_STATEMENT_TEXT '
+
+        if missing_variable:
+            success = False
+            results = {
+                'success':                  success,
+                'status':                   status,
+                'activity_comment':            activity_comment,
+                'activity_comment_found':      activity_comment_found,
+                'activity_comment_created':    activity_comment_created,
+            }
+            return results
+
+        if positive_value_exists(activity_comment_we_vote_id):
+            try:
+                activity_comment = ActivityComment.objects.get(
+                    we_vote_id=activity_comment_we_vote_id,
+                    commenter_voter_we_vote_id=updated_values['commenter_voter_we_vote_id'])
+                activity_comment_found = True
+                # Instead of manually mapping them above, we do it this way for flexibility
+                for key, value in updated_values.items():
+                    setattr(activity_comment, key, value)
+                activity_comment.save()
+                success = True
+                status += 'ACTIVITY_COMMENT_UPDATED '
+            except Exception as e:
+                success = False
+                status += "ACTIVITY_COMMENT_UPDATE_FAILURE: " + str(e) + " "
+        else:
+            try:
+                activity_comment = ActivityComment.objects.create(
+                    date_created=now(),
+                    commenter_voter_we_vote_id=updated_values['commenter_voter_we_vote_id'])
+                activity_comment_created = True
+                # Instead of manually mapping them above, we do it this way for flexibility
+                for key, value in updated_values.items():
+                    setattr(activity_comment, key, value)
+                activity_comment.save()
+                activity_comment_found = True
+                success = True
+                status += 'ACTIVITY_COMMENT_CREATED '
+            except Exception as e:
+                success = False
+                status += "ACTIVITY_COMMENT_CREATE_FAILURE: " + str(e) + " "
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'activity_comment':         activity_comment,
+            'activity_comment_found':   activity_comment_found,
+            'activity_comment_created': activity_comment_created,
+        }
+        return results
+
     def update_or_create_activity_post(
             self,
-            activity_post_id=0,
+            activity_post_we_vote_id='',
             updated_values={},
             speaker_voter_we_vote_id='',
     ):
         """
-        Either update or create an election entry.
+        Either update or create an ActivityPost.
         """
         activity_post = None
         activity_post_created = False
@@ -869,7 +975,7 @@ class ActivityManager(models.Manager):
         if not speaker_voter_we_vote_id:
             missing_variable = True
             status += 'MISSING_VOTER_WE_VOTE_ID '
-        if not positive_value_exists(activity_post_id) and not positive_value_exists(statement_text):
+        if not positive_value_exists(activity_post_we_vote_id) and not positive_value_exists(statement_text):
             missing_variable = True
             status += 'MISSING_BOTH_ID_AND_STATEMENT_TEXT '
 
@@ -884,10 +990,10 @@ class ActivityManager(models.Manager):
             }
             return results
 
-        if positive_value_exists(activity_post_id):
+        if positive_value_exists(activity_post_we_vote_id):
             try:
                 activity_post = ActivityPost.objects.get(
-                    id=activity_post_id,
+                    we_vote_id=activity_post_we_vote_id,
                     speaker_voter_we_vote_id=updated_values['speaker_voter_we_vote_id'])
                 activity_post_found = True
                 # Instead of manually mapping them above, we do it this way for flexibility
@@ -924,6 +1030,118 @@ class ActivityManager(models.Manager):
             'activity_post_created':    activity_post_created,
         }
         return results
+
+
+class ActivityNotice(models.Model):
+    """
+    This is a notice for the notification drop-down menu, for one person
+    """
+    activity_notice_seed_id = models.PositiveIntegerField(default=None, null=True)
+    date_of_notice = models.DateTimeField(null=True)
+    date_last_changed = models.DateTimeField(null=True, auto_now=True)
+    activity_notice_clicked = models.BooleanField(default=False)
+    activity_notice_seen = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False)
+    kind_of_notice = models.CharField(max_length=50, default=None, null=True)
+    kind_of_seed = models.CharField(max_length=50, default=None, null=True)
+    new_positions_entered_count = models.PositiveIntegerField(default=None, null=True)
+    position_we_vote_id_list_serialized = models.TextField(default=None, null=True)
+    speaker_name = models.CharField(max_length=255, default=None, null=True)
+    speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    recipient_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    is_in_app = models.BooleanField(default=False)
+    # Track Email send progress
+    send_to_email = models.BooleanField(default=False)
+    scheduled_to_email = models.BooleanField(default=False)
+    sent_to_email = models.BooleanField(default=False)
+    # Track SMS send progress
+    send_to_sms = models.BooleanField(default=False)
+    scheduled_to_sms = models.BooleanField(default=False)
+    sent_to_sms = models.BooleanField(default=False)
+    speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
+    speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
+
+
+class ActivityNoticeSeed(models.Model):
+    """
+    This is the "seed" for a notice for the notification drop-down menu, which is used before we "distribute" it
+    out to an ActivityNotice, which gets shown to an individual voter.
+    """
+    activity_notices_created = models.BooleanField(default=False)
+    date_of_notice_earlier_than_update_window = models.BooleanField(default=False)
+    activity_notices_scheduled = models.BooleanField(default=False)
+    date_of_notice = models.DateTimeField(null=True)
+    date_last_changed = models.DateTimeField(null=True, auto_now=True)
+    deleted = models.BooleanField(default=False)
+    kind_of_seed = models.CharField(max_length=50, default=None, null=True)
+    position_we_vote_ids_for_friends_serialized = models.TextField(default=None, null=True)
+    position_we_vote_ids_for_public_serialized = models.TextField(default=None, null=True)
+    speaker_name = models.CharField(max_length=255, default=None, null=True)
+    speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
+    speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
+    speaker_twitter_handle = models.CharField(max_length=255, null=True, unique=False, default=None)
+    speaker_twitter_followers_count = models.IntegerField(default=0)
+    we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=True)
+
+    # We override the save function so we can auto-generate we_vote_id
+    def save(self, *args, **kwargs):
+        # Even if this data came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip().lower()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
+            # ...generate a new id
+            site_unique_id_prefix = fetch_site_unique_id_prefix()
+            next_local_integer = fetch_next_we_vote_id_activity_notice_seed_integer()
+            # "wv" = We Vote
+            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+            # "actseed" = tells us this is a unique id for an ActivityNoticeSeed
+            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+            self.we_vote_id = "wv{site_unique_id_prefix}actseed{next_integer}".format(
+                site_unique_id_prefix=site_unique_id_prefix,
+                next_integer=next_local_integer,
+            )
+        super(ActivityNoticeSeed, self).save(*args, **kwargs)
+
+
+class ActivityPost(models.Model):
+    """
+    A voter-created post for the activity list
+    """
+    date_created = models.DateTimeField(null=True)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    deleted = models.BooleanField(default=False)
+    speaker_name = models.CharField(max_length=255, default=None, null=True)
+    speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    speaker_twitter_followers_count = models.PositiveIntegerField(default=None, null=True)
+    speaker_twitter_handle = models.CharField(max_length=255, default=None, null=True)
+    speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
+    speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
+    statement_text = models.TextField(null=True, blank=True)
+    visibility_is_public = models.BooleanField(default=False)
+    we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=True)
+
+    # We override the save function so we can auto-generate we_vote_id
+    def save(self, *args, **kwargs):
+        # Even if this data came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip().lower()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
+            # ...generate a new id
+            site_unique_id_prefix = fetch_site_unique_id_prefix()
+            next_local_integer = fetch_next_we_vote_id_activity_post_integer()
+            # "wv" = We Vote
+            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+            # "post" = tells us this is a unique id for an ActivityPost
+            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+            self.we_vote_id = "wv{site_unique_id_prefix}post{next_integer}".format(
+                site_unique_id_prefix=site_unique_id_prefix,
+                next_integer=next_local_integer,
+            )
+        super(ActivityPost, self).save(*args, **kwargs)
 
 
 def get_lifespan_of_seed(kind_of_seed):

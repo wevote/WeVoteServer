@@ -2693,7 +2693,7 @@ class VoterDeviceLinkManager(models.Model):
         :param voter_device_id:
         :return:
         """
-        success = False
+        success = True
         status = ""
         secret_code = ''
         # NUMBER_OF_FAILED_TRIES_ALLOWED_PER_SECRET_CODE = 5

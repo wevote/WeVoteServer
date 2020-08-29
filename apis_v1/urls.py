@@ -10,10 +10,12 @@ from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls.static import static
 
-from apis_v1.views import views_activity, views_apple, views_docs, views_analytics, views_ballot, views_candidate, views_donation, \
+from apis_v1.views import views_activity, views_apple, views_docs, views_analytics, views_ballot, \
+    views_candidate, views_donation, \
     views_election, views_extension, views_facebook, views_friend, \
     views_issues, views_measure, views_misc, views_organization, \
-    views_pledge_to_vote, views_position, views_task, views_share, views_twitter, views_voter, views_voter_guide
+    views_pledge_to_vote, views_position, views_reaction, \
+    views_task, views_share, views_twitter, views_voter, views_voter_guide
 from analytics.views_admin import analytics_action_sync_out_view, organization_daily_metrics_sync_out_view, \
     organization_election_metrics_sync_out_view, sitewide_daily_metrics_sync_out_view, \
     sitewide_election_metrics_sync_out_view, sitewide_voter_metrics_sync_out_view
@@ -33,6 +35,8 @@ from voter_guide.views_admin import voter_guides_sync_out_view
 
 urlpatterns = [
     # Actual API Calls
+    url(r'^activityCommentSave/',
+        views_activity.activity_comment_save_view, name='activityCommentSaveView'),
     url(r'^activityListRetrieve/',
         views_activity.activity_list_retrieve_view, name='activityListRetrieveView'),
     url(r'^activityNoticeListRetrieve/',
@@ -152,7 +156,6 @@ urlpatterns = [
         views_position.positions_count_for_all_ballot_items_view, name='positionsCountForAllBallotItemsView'),
     url(r'^positionsCountForOneBallotItem/',
         views_position.positions_count_for_one_ballot_item_view, name='positionsCountForOneBallotItemView'),
-    url(r'^positionLikeCount/', views_position.position_like_count_view, name='positionLikeCountView'),
     url(r'^positionListForBallotItem/', views_position.position_list_for_ballot_item_view,
         name='positionListForBallotItemView'),
     url(r'^positionListForBallotItemFromFriends/', views_position.position_list_for_ballot_item_from_friends_view,
@@ -175,6 +178,7 @@ urlpatterns = [
     url(r'^positionSupportCountForBallotItem/',
         views_position.position_support_count_for_ballot_item_view, name='positionSupportCountForBallotItemView'),
     url(r'^quickInfoRetrieve/', views_misc.quick_info_retrieve_view, name='quickInfoRetrieveView'),
+    url(r'^reactionLikeCount/', views_reaction.reaction_like_count_view, name='reactionLikeCountView'),
     url(r'^retrieveIssuesToFollow/', retrieve_issues_to_follow_view, name='retrieveIssuesToFollowView'),
     url(r'^saveAnalyticsAction/', views_analytics.save_analytics_action_view, name='saveAnalyticsActionView'),
     url(r'^searchAll/', views_misc.search_all_view, name='searchAllView'),
@@ -292,12 +296,12 @@ urlpatterns = [
     url(r'^voterPlanSave/', views_voter.voter_plan_save_view, name='voterPlanSaveView'),
     url(r'^voterPositionCommentSave/', views_voter.voter_position_comment_save_view,
         name='voterPositionCommentSaveView'),
-    url(r'^voterPositionLikeOffSave/', views_voter.voter_position_like_off_save_view,
-        name='voterPositionLikeOffSaveView'),
-    url(r'^voterPositionLikeOnSave/', views_voter.voter_position_like_on_save_view,
-        name='voterPositionLikeOnSaveView'),
-    url(r'^voterPositionLikeStatusRetrieve/',
-        views_voter.voter_position_like_status_retrieve_view, name='voterPositionLikeStatusRetrieveView'),
+    url(r'^voterReactionLikeOffSave/', views_reaction.voter_reaction_like_off_save_view,
+        name='voterReactionLikeOffSaveView'),
+    url(r'^voterReactionLikeOnSave/', views_reaction.voter_reaction_like_on_save_view,
+        name='voterReactionLikeOnSaveView'),
+    url(r'^reactionLikeStatusRetrieve/',
+        views_reaction.reaction_like_status_retrieve_view, name='reactionLikeStatusRetrieveView'),
     url(r'^voterPositionRetrieve/', views_voter.voter_position_retrieve_view, name='voterPositionRetrieveView'),
     url(r'^voterPositionVisibilitySave/',
         views_voter.voter_position_visibility_save_view, name='voterPositionVisibilitySaveView'),
@@ -320,6 +324,8 @@ urlpatterns = [
     ##########################
     # API Documentation Views
     url(r'^docs/$', views_docs.apis_index_doc_view, name='apisIndex'),
+    url(r'^docs/activityCommentSave/$',
+        views_docs.activity_comment_save_doc_view, name='activityCommentSaveDocs'),
     url(r'^docs/activityListRetrieve/$',
         views_docs.activity_list_retrieve_doc_view, name='activityListRetrieveDocs'),
     url(r'^docs/activityNoticeListRetrieve/$',
@@ -428,7 +434,6 @@ urlpatterns = [
     url(r'^docs/politiciansSyncOut/$', views_docs.politicians_sync_out_doc_view, name='politiciansSyncOutDocs'),
     url(r'^docs/pollingLocationsSyncOut/$',
         views_docs.polling_locations_sync_out_doc_view, name='pollingLocationsSyncOutDocs'),
-    url(r'^docs/positionLikeCount/$', views_docs.position_like_count_doc_view, name='positionLikeCountDocs'),
     url(r'^docs/positionListForBallotItem/',
         views_docs.position_list_for_ballot_item_doc_view, name='positionListForBallotItemDocs'),
     url(r'^docs/positionListForBallotItemFromFriends/',
@@ -455,6 +460,7 @@ urlpatterns = [
     url(r'^docs/positionSupportCountForBallotItem/',
         views_docs.position_support_count_for_ballot_item_doc_view, name='positionSupportCountForBallotItemDocs'),
     url(r'^docs/quickInfoRetrieve/$', views_docs.quick_info_retrieve_doc_view, name='quickInfoRetrieveDocs'),
+    url(r'^docs/reactionLikeCount/$', views_docs.reaction_like_count_doc_view, name='reactionLikeCountDocs'),
     url(r'^docs/retrieveIssuesToFollow/', views_docs.retrieve_issues_to_follow_doc_view,
         name='retrieveIssuesToFollowDocs'),
     url(r'^docs/saveAnalyticsAction/$',
@@ -570,12 +576,12 @@ urlpatterns = [
         views_docs.voter_position_retrieve_doc_view, name='voterPositionRetrieveDocs'),
     url(r'^docs/voterPositionCommentSave/$',
         views_docs.voter_position_comment_save_doc_view, name='voterPositionCommentSaveDocs'),
-    url(r'^docs/voterPositionLikeOffSave/$',
-        views_docs.voter_position_like_off_save_doc_view, name='voterPositionLikeOffSaveDocs'),
-    url(r'^docs/voterPositionLikeOnSave/$',
-        views_docs.voter_position_like_on_save_doc_view, name='voterPositionLikeOnSaveDocs'),
-    url(r'^docs/voterPositionLikeStatusRetrieve/$',
-        views_docs.voter_position_like_status_retrieve_doc_view, name='voterPositionLikeStatusRetrieveDocs'),
+    url(r'^docs/voterReactionLikeOffSave/$',
+        views_docs.voter_reaction_like_off_save_doc_view, name='voterReactionLikeOffSaveDocs'),
+    url(r'^docs/voterReactionLikeOnSave/$',
+        views_docs.voter_reaction_like_on_save_doc_view, name='voterReactionLikeOnSaveDocs'),
+    url(r'^docs/reactionLikeStatusRetrieve/$',
+        views_docs.reaction_like_status_retrieve_doc_view, name='reactionLikeStatusRetrieveDocs'),
     url(r'^docs/voterPositionVisibilitySave/$',
         views_docs.voter_position_visibility_save_doc_view, name='voterPositionVisibilitySaveDocs'),
     url(r'^docs/voterRetrieve/$', views_docs.voter_retrieve_doc_view, name='voterRetrieveDocs'),

@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/position_like_count.py
+# apis_v1/documentation_source/reaction_like_count.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def position_like_count_doc_template_values(url_root):
+def reaction_like_count_doc_template_values(url_root):
     """
-    Show documentation about positionLikeCount
+    Show documentation about reactionLikeCount
     """
     required_query_parameter_list = [
         {
@@ -19,7 +19,7 @@ def position_like_count_doc_template_values(url_root):
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
         {
-            'name':         'position_entered_id',
+            'name':         'liked_item_we_vote_id',
             'value':        'integer',  # boolean, integer, long, string
             'description':  'The position that the voter is liking.',
         },
@@ -43,24 +43,24 @@ def position_like_count_doc_template_values(url_root):
             'description':  'Cannot proceed. A valid voter_id was not found.',
         },
         {
-            'code':         'POSITION_LIKE_ALL_COUNT_RETRIEVED',
+            'code':         'REACTION_LIKE_ALL_COUNT_RETRIEVED',
             'description':  '',
         },
         {
-            'code':         'POSITION_LIKE_VOTER_NETWORK_COUNT_RETRIEVED',
+            'code':         'REACTION_LIKE_VOTER_NETWORK_COUNT_RETRIEVED',
             'description':  '',
         },
     ]
 
     try_now_link_variables_dict = {
-        'position_entered_id': '5655',
+        'liked_item_we_vote_id': '5655',
     }
 
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "position_entered_id": integer,\n' \
+                   '  "liked_item_we_vote_id": integer,\n' \
                    '  "type_of_count": string, (is this a count based on ALL or VOTER_NETWORK)\n' \
                    '  "number_of_likes": integer, (will be same count as all_likes and voter_network_likes values-' \
                    ' is provided if the front end would rather work with a type_of_count switch)\n' \
@@ -69,12 +69,12 @@ def position_like_count_doc_template_values(url_root):
                    '}'
 
     template_values = {
-        'api_name': 'positionLikeCount',
-        'api_slug': 'positionLikeCount',
+        'api_name': 'reactionLikeCount',
+        'api_slug': 'reactionLikeCount',
         'api_introduction':
             "The total number of Likes that a position has received, either from the perspective of "
             "your network of friends, or the entire network.",
-        'try_now_link': 'apis_v1:positionLikeCountView',
+        'try_now_link': 'apis_v1:reactionLikeCountView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',

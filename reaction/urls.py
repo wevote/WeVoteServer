@@ -1,4 +1,4 @@
-# position_like/urls.py
+# reaction/urls.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
@@ -8,5 +8,5 @@ from . import views_admin
 
 
 urlpatterns = [
-    url(r'^export/', views_admin.export_position_like_data_view(), name='position_like_export'),
+    url(r'^export/', views_admin.export_reaction_like_data_view(), name='reaction_like_export'),
 ]
