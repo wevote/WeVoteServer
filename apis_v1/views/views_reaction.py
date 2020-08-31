@@ -35,10 +35,10 @@ def voter_reaction_like_off_save_view(request):  # voterReactionLikeOffSave
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    reaction_like_id = request.GET.get('reaction_like_id', 0)
     liked_item_we_vote_id = request.GET.get('liked_item_we_vote_id', '')
     return voter_reaction_like_off_save_for_api(
-        voter_device_id=voter_device_id, reaction_like_id=reaction_like_id, liked_item_we_vote_id=liked_item_we_vote_id)
+        voter_device_id=voter_device_id,
+        liked_item_we_vote_id=liked_item_we_vote_id)
 
 
 def voter_reaction_like_on_save_view(request):  # voterReactionLikeOnSave
@@ -48,9 +48,13 @@ def voter_reaction_like_on_save_view(request):  # voterReactionLikeOnSave
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    # We track activity_tidbit_we_vote_id so we can get all of the likes under on major item
+    activity_tidbit_we_vote_id = request.GET.get('activity_tidbit_we_vote_id', '')
     liked_item_we_vote_id = request.GET.get('liked_item_we_vote_id', '')
     return voter_reaction_like_on_save_for_api(
-        voter_device_id=voter_device_id, liked_item_we_vote_id=liked_item_we_vote_id)
+        voter_device_id=voter_device_id,
+        liked_item_we_vote_id=liked_item_we_vote_id,
+        activity_tidbit_we_vote_id=activity_tidbit_we_vote_id)
 
 
 def reaction_like_status_retrieve_view(request):  # reactionLikeStatusRetrieve

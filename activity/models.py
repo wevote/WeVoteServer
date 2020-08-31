@@ -225,21 +225,23 @@ class ActivityManager(models.Manager):
         }
         return results
 
-    def retrieve_activity_comment_list(self, parent_we_vote_id=''):
+    def retrieve_activity_comment_list(self, parent_we_vote_id='', parent_comment_we_vote_id=''):
         """
 
         :param parent_we_vote_id:
+        :param parent_comment_we_vote_id:
         :return:
         """
         status = ""
         success = True
-        if not positive_value_exists(parent_we_vote_id):
+        if not positive_value_exists(parent_we_vote_id) and not positive_value_exists(parent_comment_we_vote_id):
             success = False
-            status += 'VALID_PARENT_WE_VOTE_ID_MISSING '
+            status += 'VALID_PARENT_OR_PARENT_COMMENT_WE_VOTE_ID_MISSING '
             results = {
                 'success':                      success,
                 'status':                       status,
                 'parent_we_vote_id':            parent_we_vote_id,
+                'parent_comment_we_vote_id':    parent_comment_we_vote_id,
                 'activity_comment_list_found':  False,
                 'activity_comment_list':        [],
             }
@@ -247,15 +249,25 @@ class ActivityManager(models.Manager):
 
         activity_comment_list = []
         try:
-            queryset = ActivityComment.objects.all()
-            queryset = queryset.filter(
-                parent_we_vote_id__iexact=parent_we_vote_id,
-                deleted=False
-            )
+            if positive_value_exists(parent_comment_we_vote_id):
+                queryset = ActivityComment.objects.all()
+                queryset = queryset.filter(
+                    parent_comment_we_vote_id__iexact=parent_comment_we_vote_id,
+                    deleted=False
+                )
+            else:
+                queryset = ActivityComment.objects.all()
+                queryset = queryset.filter(
+                    parent_we_vote_id__iexact=parent_we_vote_id,
+                    deleted=False
+                )
+                # Don't retrieve entries where there is a value for parent_comment_we_vote_id
+                queryset = queryset.filter(
+                    Q(parent_comment_we_vote_id=None) | Q(parent_comment_we_vote_id=""))
             queryset = queryset.exclude(
                 Q(parent_we_vote_id=None) | Q(parent_we_vote_id=""))
             queryset = queryset.order_by('-id')  # Put most recent at top of list
-            activity_comment_list = queryset[:30]
+            activity_comment_list = list(queryset)
 
             if len(activity_comment_list):
                 activity_comment_list_found = True
@@ -277,6 +289,7 @@ class ActivityManager(models.Manager):
             'success':                      success,
             'status':                       status,
             'parent_we_vote_id':            parent_we_vote_id,
+            'parent_comment_we_vote_id': parent_comment_we_vote_id,
             'activity_comment_list_found':  activity_comment_list_found,
             'activity_comment_list':        activity_comment_list,
         }

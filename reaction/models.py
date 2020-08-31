@@ -26,6 +26,8 @@ class ReactionLike(models.Model):
 
     # The item being liked
     liked_item_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    # The parent of the liked item so we can group together all related likes
+    activity_tidbit_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
 
     # The date the voter liked this position
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
@@ -150,9 +152,9 @@ class ReactionLikeManager(models.Manager):
 
     def toggle_off_voter_reaction_like(
             self,
+            liked_item_we_vote_id='',
             reaction_like_id=0,
-            voter_id=0,
-            liked_item_we_vote_id=''):
+            voter_id=0):
         status = ''
         success = True
         if positive_value_exists(reaction_like_id):
@@ -184,7 +186,8 @@ class ReactionLikeManager(models.Manager):
             voter_id=0,
             voter_we_vote_id=0,
             voter_display_name='',
-            liked_item_we_vote_id=''):
+            liked_item_we_vote_id='',
+            activity_tidbit_we_vote_id=''):
         status = ''
         success = True
         # Does a reaction entry exist from this voter already exist?
@@ -198,8 +201,14 @@ class ReactionLikeManager(models.Manager):
         reaction_like_found = False
         reaction_like = ReactionLike()
         if results['reaction_like_found']:
-            # We don't need to do anything because this means there is already an entry
+            # This means there is already an entry
             reaction_like = results['reaction']
+            # Update the activity_tidbit_we_vote_id
+            try:
+                reaction_like.activity_tidbit_we_vote_id = activity_tidbit_we_vote_id
+                reaction_like.save()
+            except Exception as e:
+                status += "COULD_NOT_UPDATE_REACTION_LIKE: " + str(e) + " "
             reaction_like_id = results['reaction_like_id']
             reaction_like_found = True
             status += results['status']
@@ -211,6 +220,7 @@ class ReactionLikeManager(models.Manager):
                     voter_we_vote_id=voter_we_vote_id,
                     voter_display_name=voter_display_name,
                     liked_item_we_vote_id=liked_item_we_vote_id,
+                    activity_tidbit_we_vote_id=activity_tidbit_we_vote_id
                 )
                 reaction_like.save()
                 reaction_like_id = reaction_like.id
