@@ -38,6 +38,7 @@ def activity_comment_save_view(request):  # activityCommentSave
     visibility_is_public = visibility_setting == 'SHOW_PUBLIC'
 
     updated_values = {
+        'activity_comment_created':             False,
         'commenter_name':                       '',
         'commenter_organization_we_vote_id':    '',
         'commenter_twitter_followers_count':    0,
@@ -108,6 +109,7 @@ def activity_comment_save_view(request):  # activityCommentSave
     if results['activity_comment_found']:
         activity_comment = results['activity_comment']
         activity_comment_dict = {
+            'activity_comment_created':             results['activity_comment_created'],
             'date_created':                         activity_comment.date_created.strftime('%Y-%m-%d %H:%M:%S'),
             'date_last_changed':                    activity_comment.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
             'commenter_name':                       activity_comment.commenter_name,
@@ -117,6 +119,8 @@ def activity_comment_save_view(request):  # activityCommentSave
             'commenter_profile_image_url_tiny':     activity_comment.commenter_profile_image_url_tiny,
             'commenter_twitter_handle':             activity_comment.commenter_twitter_handle,
             'commenter_twitter_followers_count':    activity_comment.commenter_twitter_followers_count,
+            'parent_we_vote_id':                    activity_comment.parent_we_vote_id,
+            'parent_comment_we_vote_id':            activity_comment.parent_comment_we_vote_id,
             'statement_text':                       activity_comment.statement_text,
             'visibility_is_public':                 activity_comment.visibility_is_public,
             'we_vote_id':                           activity_comment.we_vote_id,
@@ -250,7 +254,33 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
         if results['success']:
             activity_comment_object_list = results['activity_comment_list']
             for activity_comment in activity_comment_object_list:
+                # Retrieve the Child comments
+                child_results = activity_manager.retrieve_activity_comment_list(
+                    parent_comment_we_vote_id=activity_comment.we_vote_id)
+                child_comment_list = []
+                if results['success']:
+                    child_comment_object_list = child_results['activity_comment_list']
+                    for child_comment in child_comment_object_list:
+                        child_comment_dict = {
+                            'date_created': child_comment.date_created.strftime('%Y-%m-%d %H:%M:%S'),
+                            'date_last_changed': child_comment.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+                            'commenter_name': child_comment.commenter_name,
+                            'commenter_organization_we_vote_id': child_comment.commenter_organization_we_vote_id,
+                            'commenter_voter_we_vote_id': child_comment.commenter_voter_we_vote_id,
+                            'commenter_profile_image_url_medium': child_comment.commenter_profile_image_url_medium,
+                            'commenter_profile_image_url_tiny': child_comment.commenter_profile_image_url_tiny,
+                            'commenter_twitter_handle': child_comment.commenter_twitter_handle,
+                            'commenter_twitter_followers_count': child_comment.commenter_twitter_followers_count,
+                            'parent_we_vote_id': child_comment.parent_we_vote_id,
+                            'parent_comment_we_vote_id': child_comment.parent_comment_we_vote_id,
+                            'statement_text': child_comment.statement_text,
+                            'visibility_is_public': child_comment.visibility_is_public,
+                            'we_vote_id': child_comment.we_vote_id,
+                        }
+                        child_comment_list.append(child_comment_dict)
+
                 activity_comment_dict = {
+                    'comment_list': child_comment_list,
                     'date_created': activity_comment.date_created.strftime('%Y-%m-%d %H:%M:%S'),
                     'date_last_changed': activity_comment.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
                     'commenter_name': activity_comment.commenter_name,
@@ -260,6 +290,8 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
                     'commenter_profile_image_url_tiny': activity_comment.commenter_profile_image_url_tiny,
                     'commenter_twitter_handle': activity_comment.commenter_twitter_handle,
                     'commenter_twitter_followers_count': activity_comment.commenter_twitter_followers_count,
+                    'parent_we_vote_id': activity_comment.parent_we_vote_id,
+                    'parent_comment_we_vote_id': activity_comment.parent_comment_we_vote_id,
                     'statement_text': activity_comment.statement_text,
                     'visibility_is_public': activity_comment.visibility_is_public,
                     'we_vote_id': activity_comment.we_vote_id,

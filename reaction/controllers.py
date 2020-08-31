@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import ReactionLike, ReactionLikeManager
+from django.db.models import Q
 from django.http import HttpResponse
 import json
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
@@ -83,25 +84,24 @@ def reaction_like_count_for_api(voter_device_id, liked_item_we_vote_id, limit_to
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_reaction_like_off_save_for_api(voter_device_id, reaction_like_id, liked_item_we_vote_id):
+def voter_reaction_like_off_save_for_api(
+        voter_device_id='',
+        liked_item_we_vote_id=''):
     status = ''
     # Get voter_id from the voter_device_id so we can know who is doing the liking
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         status += "VALID_VOTER_ID_MISSING "
         json_data = {
-            'status':                   status,
-            'success':                  False,
-            'reaction_like_id':         reaction_like_id,
-            'liked_item_we_vote_id':    liked_item_we_vote_id,
+            'status':                       status,
+            'success':                      False,
+            'liked_item_we_vote_id':        liked_item_we_vote_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     reaction_like_manager = ReactionLikeManager()
-    if positive_value_exists(reaction_like_id) or \
-            (positive_value_exists(voter_id) and positive_value_exists(liked_item_we_vote_id)):
+    if positive_value_exists(voter_id) and positive_value_exists(liked_item_we_vote_id):
         results = reaction_like_manager.toggle_off_voter_reaction_like(
-            reaction_like_id=reaction_like_id,
             voter_id=voter_id,
             liked_item_we_vote_id=liked_item_we_vote_id)
         status += results['status']
@@ -113,23 +113,25 @@ def voter_reaction_like_off_save_for_api(voter_device_id, reaction_like_id, like
     json_data = {
         'status':                   status,
         'success':                  success,
-        'reaction_like_id':         reaction_like_id,
         'liked_item_we_vote_id':    liked_item_we_vote_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_reaction_like_on_save_for_api(voter_device_id, liked_item_we_vote_id):
+def voter_reaction_like_on_save_for_api(
+        voter_device_id='',
+        liked_item_we_vote_id='',
+        activity_tidbit_we_vote_id=''):
     status = ''
     # Get voter_id from the voter_device_id so we can know who is doing the liking
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         status += "VALID_VOTER_ID_MISSING "
         json_data = {
-            'status':                   status,
-            'success':                  False,
-            'reaction_like_id':         0,
-            'liked_item_we_vote_id':    liked_item_we_vote_id,
+            'status':                       status,
+            'success':                      False,
+            'activity_tidbit_we_vote_id':   activity_tidbit_we_vote_id,
+            'liked_item_we_vote_id':        liked_item_we_vote_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -156,7 +158,8 @@ def voter_reaction_like_on_save_for_api(voter_device_id, liked_item_we_vote_id):
             voter_id=voter_id,
             voter_we_vote_id=voter_we_vote_id,
             voter_display_name=voter_display_name,
-            liked_item_we_vote_id=liked_item_we_vote_id)
+            liked_item_we_vote_id=liked_item_we_vote_id,
+            activity_tidbit_we_vote_id=activity_tidbit_we_vote_id)
         status += results['status']
         success = results['success']
         reaction_like_id = results['reaction_like_id']
@@ -192,18 +195,22 @@ def reaction_like_status_retrieve_for_api(voter_device_id, liked_item_we_vote_id
     if liked_item_we_vote_id_list and len(liked_item_we_vote_id_list) > 0:
         try:
             reaction_query = ReactionLike.objects.filter(
-                liked_item_we_vote_id__in=liked_item_we_vote_id_list)
+                Q(liked_item_we_vote_id__in=liked_item_we_vote_id_list) |
+                Q(activity_tidbit_we_vote_id__in=liked_item_we_vote_id_list))
             reaction_like_object_list = list(reaction_query)
             status += "REACTION_LIKE_LIST_RETRIEVE "
             for reaction_like in reaction_like_object_list:
                 reaction_like_dict = {
-                    'voter_id':                 reaction_like.voter_id,
-                    'voter_we_vote_id':         reaction_like.voter_we_vote_id,
-                    'voter_display_name':       reaction_like.voter_display_name,
-                    'liked_item_we_vote_id':    reaction_like.liked_item_we_vote_id,
-                    'date_last_changed':        reaction_like.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+                    'date_last_changed':            reaction_like.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+                    'activity_tidbit_we_vote_id':   reaction_like.activity_tidbit_we_vote_id,
+                    'liked_item_we_vote_id':        reaction_like.liked_item_we_vote_id,
+                    'voter_display_name':           reaction_like.voter_display_name,
+                    'voter_id':                     reaction_like.voter_id,
+                    'voter_we_vote_id':             reaction_like.voter_we_vote_id,
                 }
                 reaction_like_list.append(reaction_like_dict)
+                if reaction_like.liked_item_we_vote_id not in liked_item_we_vote_id_list:
+                    liked_item_we_vote_id_list.append(reaction_like.liked_item_we_vote_id)
         except Exception as e:
             status += "FAILED_RETRIEVING_REACTION_LIKE_LIST " + str(e) + " "
             success = False
