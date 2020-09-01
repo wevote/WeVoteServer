@@ -135,6 +135,47 @@ def apple_sign_in_save_merge_if_needed(
 #     return True
 
 
+def delete_apple_user_entries_for_voter(voter_to_delete_we_vote_id):
+    status = ''
+    success = True
+    apple_user_entries_deleted = 0
+    apple_user_entries_not_deleted = 0
+
+    if not positive_value_exists(voter_to_delete_we_vote_id):
+        status += "DELETE_APPLE_USER_ENTRIES-Missing voter_to_delete_we_vote_id "
+        success = False
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'voter_to_delete_we_vote_id':       voter_to_delete_we_vote_id,
+            'apple_user_entries_deleted':       apple_user_entries_deleted,
+            'apple_user_entries_not_deleted':   apple_user_entries_not_deleted,
+        }
+        return results
+
+    apple_users_query = AppleUser.objects.all()
+    apple_users_query = apple_users_query.filter(voter_we_vote_id__iexact=voter_to_delete_we_vote_id)
+    apple_users_list = list(apple_users_query)
+    for apple_user_link in apple_users_list:
+        try:
+            apple_user_link.delete()
+            apple_user_entries_deleted += 1
+        except Exception as e:
+            # This might just mean that another entry already exists for the "to" voter
+            status += "COULD_NOT_DELETE_APPLE_USER: " + str(e) + ' '
+            success = False
+            apple_user_entries_not_deleted += 1
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'voter_to_delete_we_vote_id':   voter_to_delete_we_vote_id,
+        'apple_user_entries_deleted':     apple_user_entries_deleted,
+        'apple_user_entries_not_deleted': apple_user_entries_not_deleted,
+    }
+    return results
+
+
 def move_apple_user_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
     status = ''
     success = True

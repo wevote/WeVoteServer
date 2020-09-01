@@ -561,6 +561,19 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
     <p>(no positions for friends found)</p>
 {% endif %}
 
+{% if voter %}
+    <br />
+    <br />
+    <form action="{% url "voter:voter_delete_process" %}" method="post" class="form-horizontal">
+    {% csrf_token %}
+      <input type="hidden" name="voter_id" value="{{ voter.id }}">
+      <button type="submit" class="btn btn-danger">Delete Voter</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <label for="confirm_delete_id">
+        <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> Check to confirm that you want to permanently delete this voter
+      </label>
+    </form>
+{% endif %}
+
     <br />
     <br />
     <br />

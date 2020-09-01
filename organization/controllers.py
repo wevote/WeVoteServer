@@ -16,7 +16,8 @@ from django.http import HttpResponse
 from donate.controllers import move_donation_info_to_another_organization
 from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
-from follow.controllers import move_organization_followers_to_another_organization
+from follow.controllers import delete_organization_followers_for_organization, \
+    move_organization_followers_to_another_organization
 from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, \
     STOP_FOLLOWING, STOP_IGNORING
 from image.controllers import cache_organization_sharing_image, retrieve_all_images_for_one_organization
@@ -25,7 +26,7 @@ import json
 from io import BytesIO, StringIO
 from PIL import Image, ImageOps
 from position.controllers import add_position_network_count_entries_for_one_organization, \
-    move_positions_to_another_organization, \
+    delete_positions_for_organization, move_positions_to_another_organization, \
     update_position_entered_details_from_organization
 from position.models import PositionListManager
 import robot_detection
@@ -55,6 +56,126 @@ CHOSEN_LOGO_MAX_WIDTH = 132
 CHOSEN_LOGO_MAX_HEIGHT = 42
 CHOSEN_SOCIAL_SHARE_MASTER_MAX_WIDTH = 1600
 CHOSEN_SOCIAL_SHARE_MASTER_MAX_HEIGHT = 900
+
+
+def delete_membership_link_entries_for_voter(from_voter_we_vote_id):
+    status = ''
+    success = False
+    voter_member_entries_deleted = 0
+    voter_member_entries_not_deleted = 0
+
+    if not positive_value_exists(from_voter_we_vote_id):
+        status += "MOVE_MEMBERSHIP_LINK_ENTRIES_TO_ANOTHER_VOTER-Missing from_voter_we_vote_id "
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'from_voter_we_vote_id':            from_voter_we_vote_id,
+            'voter_member_entries_deleted':     voter_member_entries_deleted,
+            'voter_member_entries_not_deleted': voter_member_entries_not_deleted,
+        }
+        return results
+
+    voter_members_query = OrganizationMembershipLinkToVoter.objects.all()
+    voter_members_query = voter_members_query.filter(voter_we_vote_id__iexact=from_voter_we_vote_id)
+    voter_members_list = list(voter_members_query)
+    for voter_member_link in voter_members_list:
+        try:
+            voter_member_link.delete()
+            voter_member_entries_deleted += 1
+        except Exception as e:
+            status += "COULD_NOT_SAVE_ORGANIZATION_MEMBERSHIP_LINK: " + str(e) + ' '
+            voter_member_entries_not_deleted += 1
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'from_voter_we_vote_id':            from_voter_we_vote_id,
+        'voter_member_entries_deleted':       voter_member_entries_deleted,
+        'voter_member_entries_not_deleted':   voter_member_entries_not_deleted,
+    }
+    return results
+
+
+def delete_organization_membership_link_for_organization(from_organization_we_vote_id):
+    status = ''
+    success = False
+    membership_link_entries_deleted = 0
+    membership_link_entries_not_deleted = 0
+
+    organization_members_query = OrganizationMembershipLinkToVoter.objects.all()
+    organization_members_query = organization_members_query.filter(
+        organization_we_vote_id__iexact=from_organization_we_vote_id)
+    organization_members_list = list(organization_members_query)
+    for organization_member_link in organization_members_list:
+        try:
+            organization_member_link.delete()
+            membership_link_entries_deleted += 1
+        except Exception as e:
+            membership_link_entries_not_deleted += 1
+
+    results = {
+        'status':                               status,
+        'success':                              success,
+        'from_organization_we_vote_id':         from_organization_we_vote_id,
+        'membership_link_entries_deleted':      membership_link_entries_deleted,
+        'membership_link_entries_not_deleted':  membership_link_entries_not_deleted,
+    }
+    return results
+
+
+def delete_organization_complete(from_organization_id, from_organization_we_vote_id):
+    status = ""
+    success = True
+
+    if not positive_value_exists(from_organization_id) and not positive_value_exists(from_organization_we_vote_id):
+        status += "MISSING_BOTH_ORGANIZATION_IDS "
+        results = {
+            'status': status,
+            'success': success,
+        }
+        return results
+
+    # Make sure we have both from_organization values
+    organization_manager = OrganizationManager()
+    if positive_value_exists(from_organization_id) and not positive_value_exists(from_organization_we_vote_id):
+        from_organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(from_organization_id)
+    elif positive_value_exists(from_organization_we_vote_id) and not positive_value_exists(from_organization_id):
+        from_organization_id = organization_manager.fetch_organization_id(from_organization_we_vote_id)
+
+    # If anyone is following the old voter's organization, delete those followers
+    delete_organization_followers_results = delete_organization_followers_for_organization(
+        from_organization_id, from_organization_we_vote_id)
+    status += " " + delete_organization_followers_results['status']
+
+    # If anyone has been linked with external_voter_id as a member of the old voter's organization,
+    #  move those followers to the new voter's organization
+    delete_organization_membership_link_results = delete_organization_membership_link_for_organization(
+        from_organization_we_vote_id)
+    status += " " + delete_organization_membership_link_results['status']
+
+    # Delete positions from "from" organization
+    delete_positions_to_another_org_results = delete_positions_for_organization(
+        from_organization_id, from_organization_we_vote_id)
+    status += " " + delete_positions_to_another_org_results['status']
+
+    # delete_donation_results = move_donation_info_to_another_organization(
+    #     from_organization_we_vote_id, to_organization_we_vote_id)
+    # status += " " + delete_donation_results['status']
+
+    # Finally, delete the from_voter's organization
+    results = organization_manager.retrieve_organization_from_we_vote_id(from_organization_we_vote_id)
+    if results['organization_found']:
+        organization_to_delete = results['organization']
+        try:
+            organization_to_delete.delete()
+        except Exception as e:
+            status += "UNABLE_TO_DELETE_FROM_ORGANIZATION: " + str(e) + " "
+
+    results = {
+        'status':                   status,
+        'success':                  success,
+    }
+    return results
 
 
 def full_domain_string_available(full_domain_string, requesting_organization_id):

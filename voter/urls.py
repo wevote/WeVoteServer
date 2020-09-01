@@ -15,6 +15,7 @@ urlpatterns = [
         views_admin.process_maintenance_status_flags_view, name='process_maintenance_status_flags'),
     url(r'^voter_change_authority/$',
         views_admin.voter_change_authority_process_view, name='voter_change_authority_process'),
+    url(r'^delete_process/$', views_admin.voter_delete_process_view, name='voter_delete_process'),
     url(r'^voter_remove_facebook_auth_process/$',
         views_admin.voter_remove_facebook_auth_process_view, name='voter_remove_facebook_auth_process'),
     url(r'^edit_process/$', views_admin.voter_edit_process_view, name='voter_edit_process'),

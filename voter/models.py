@@ -2568,6 +2568,26 @@ class VoterDeviceLinkManager(models.Model):
         }
         return results
 
+    def delete_all_voter_device_links_by_voter_id(self, voter_id):
+        status = ""
+        try:
+            if positive_value_exists(voter_id):
+                VoterDeviceLink.objects.filter(voter_id=voter_id).delete()
+                status += "DELETE_ALL_VOTER_DEVICE_LINKS_SUCCESSFUL "
+                success = True
+            else:
+                status += "DELETE_ALL_VOTER_DEVICE_LINKS-MISSING_VARIABLES "
+                success = False
+        except Exception as e:
+            status += "DELETE_ALL_VOTER_DEVICE_LINKS-DATABASE_DELETE_EXCEPTION: " + str(e) + " "
+            success = False
+
+        results = {
+            'success':  success,
+            'status':   status,
+        }
+        return results
+
     def delete_voter_device_link(self, voter_device_id):
         try:
             if positive_value_exists(voter_device_id):

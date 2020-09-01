@@ -8,8 +8,9 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, \
     NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, \
     Voter, VoterAddressManager, \
     VoterDeviceLink, VoterDeviceLinkManager, VoterManager
-from activity.controllers import move_activity_notices_to_another_voter, move_activity_posts_to_another_voter
-from analytics.controllers import move_analytics_info_to_another_voter
+from activity.controllers import delete_activity_notices_for_voter, delete_activity_posts_for_voter, \
+    move_activity_notices_to_another_voter, move_activity_posts_to_another_voter
+from analytics.controllers import delete_analytics_info_for_voter, move_analytics_info_to_another_voter
 from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, \
     ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
     ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
@@ -18,15 +19,20 @@ from django.http import HttpResponse
 from django.db.models import F
 from django.utils.timezone import now
 from donate.controllers import donation_journal_history_for_a_voter, move_donation_info_to_another_voter
-from email_outbound.controllers import move_email_address_entries_to_another_voter, schedule_verification_email, \
+from email_outbound.controllers import delete_email_address_entries_for_voter, \
+    move_email_address_entries_to_another_voter, schedule_verification_email, \
     WE_VOTE_SERVER_ROOT_URL, schedule_email_with_email_outbound_description
 from email_outbound.models import EmailManager, EmailAddress, FRIEND_INVITATION_TEMPLATE, TO_BE_PROCESSED, \
     WAITING_FOR_VERIFICATION, SEND_BALLOT_TO_FRIENDS, SEND_BALLOT_TO_SELF
-from follow.controllers import duplicate_follow_entries_to_another_voter, \
+from follow.controllers import \
+    delete_follow_issue_entries_for_voter, delete_follow_entries_for_voter, \
+    duplicate_follow_entries_to_another_voter, \
     duplicate_follow_issue_entries_to_another_voter, \
     move_follow_issue_entries_to_another_voter, move_follow_entries_to_another_voter, \
     duplicate_organization_followers_to_another_organization
-from friend.controllers import fetch_friend_invitation_recipient_voter_we_vote_id, friend_accepted_invitation_send, \
+from friend.controllers import delete_friend_invitations_for_voter, delete_friends_for_voter, \
+    delete_suggested_friends_for_voter, \
+    fetch_friend_invitation_recipient_voter_we_vote_id, friend_accepted_invitation_send, \
     move_friend_invitations_to_another_voter, move_friends_to_another_voter, move_suggested_friends_to_another_voter, \
     retrieve_voter_and_email_address, \
     store_internal_friend_invitation_with_two_voters, store_internal_friend_invitation_with_unknown_email
@@ -35,22 +41,411 @@ from image.controllers import cache_master_and_resized_image, TWITTER, FACEBOOK
 from import_export_facebook.models import FacebookManager
 from import_export_twitter.models import TwitterAuthManager
 import json
-from organization.controllers import move_membership_link_entries_to_another_voter, \
+from organization.controllers import delete_membership_link_entries_for_voter, \
+    delete_organization_complete, \
+    move_membership_link_entries_to_another_voter, \
     move_organization_to_another_complete, transform_web_app_url
 from organization.models import OrganizationListManager, OrganizationManager, INDIVIDUAL
-from position.controllers import duplicate_positions_to_another_voter, move_positions_to_another_voter
+from position.controllers import delete_positions_for_voter, duplicate_positions_to_another_voter, \
+    move_positions_to_another_voter
 from position.models import PositionListManager
 import robot_detection
 from share.controllers import move_shared_items_to_another_voter
-from sms.controllers import move_sms_phone_number_entries_to_another_voter
+from sms.controllers import delete_sms_phone_number_entries_for_voter, move_sms_phone_number_entries_to_another_voter
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from validate_email import validate_email
-from voter_guide.controllers import duplicate_voter_guides, move_voter_guides_to_another_voter
+from voter_guide.controllers import delete_voter_guides_for_voter, duplicate_voter_guides, \
+    move_voter_guides_to_another_voter
 import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+def delete_all_voter_information_permanently(voter_to_delete=None):  # voterDeleteAccount
+    success = True
+    status = ""
+    voter_to_delete_id = 0
+    voter_to_delete_we_vote_id = ''
+
+    try:
+        voter_to_delete_id = voter_to_delete.id
+        voter_to_delete_we_vote_id = voter_to_delete.we_vote_id
+    except Exception as e:
+        status += "PROBLEM_WITH_INCOMING_VOTER: " + str(e) + " "
+
+    voter_device_link_manager = VoterDeviceLinkManager()
+
+    # The voter_to_delete and to_voter may both have their own linked_organization_we_vote_id
+    organization_manager = OrganizationManager()
+    voter_to_delete_linked_organization_we_vote_id = voter_to_delete.linked_organization_we_vote_id
+    voter_to_delete_linked_organization_id = 0
+    if positive_value_exists(voter_to_delete_linked_organization_we_vote_id):
+        from_linked_organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+            voter_to_delete_linked_organization_we_vote_id)
+        if from_linked_organization_results['organization_found']:
+            from_linked_organization = from_linked_organization_results['organization']
+            voter_to_delete_linked_organization_id = from_linked_organization.id
+        else:
+            # Remove the link to the organization so we don't have a future conflict
+            try:
+                voter_to_delete_linked_organization_we_vote_id = None
+                voter_to_delete.linked_organization_we_vote_id = None
+                voter_to_delete.save()
+                # All positions should have already been moved with move_positions_to_another_voter
+            except Exception as e:
+                status += "FAILED_TO_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID-VOTER_TO_DELETE " + str(e) + " "
+
+    # Delete the apple_user entries
+    from apple.controllers import delete_apple_user_entries_for_voter
+    delete_apple_user_results = delete_apple_user_entries_for_voter(voter_to_delete_we_vote_id)
+    status += delete_apple_user_results['status']
+
+    # Data healing scripts before we try to move the positions
+    position_list_manager = PositionListManager()
+    if positive_value_exists(voter_to_delete_id):
+        repair_results = position_list_manager.repair_all_positions_for_voter(voter_to_delete_id)
+        status += repair_results['status']
+
+    # Delete positions from voter
+    delete_positions_results = delete_positions_for_voter(voter_to_delete_id, voter_to_delete_we_vote_id)
+    status += " " + delete_positions_results['status']
+
+    # Delete voter's organization
+    delete_organization_results = delete_organization_complete(
+        voter_to_delete_linked_organization_id, voter_to_delete_linked_organization_we_vote_id)
+    status += " " + delete_organization_results['status']
+
+    # Delete friends
+    delete_friends_results = delete_friends_for_voter(voter_to_delete_we_vote_id)
+    status += " " + delete_friends_results['status']
+
+    # Delete suggested friends
+    delete_suggested_friends_results = delete_suggested_friends_for_voter(voter_to_delete_we_vote_id)
+    status += " " + delete_suggested_friends_results['status']
+
+    # Delete friend invitations
+    delete_friend_invitations_results = delete_friend_invitations_for_voter(voter_to_delete_we_vote_id)
+    status += " " + delete_friend_invitations_results['status']
+
+    if positive_value_exists(voter_to_delete.linked_organization_we_vote_id):
+        # Remove the link to the organization so we don't have a future conflict
+        try:
+            voter_to_delete.linked_organization_we_vote_id = None
+            voter_to_delete.save()
+            # All positions should have already been moved with move_positions_to_another_voter
+        except Exception as e:
+            status += "CANNOT_DELETE_LINKED_ORGANIZATION_WE_VOTE_ID: " + str(e) + " "
+
+    # Delete the organizations that voter_to_delete is following
+    delete_follow_results = delete_follow_entries_for_voter(voter_to_delete_id)
+    status += delete_follow_results['status']
+
+    # Delete the organizations the voter_to_delete is a member of (with external_voter_id entry)
+    delete_membership_link_results = delete_membership_link_entries_for_voter(voter_to_delete_we_vote_id)
+    status += delete_membership_link_results['status']
+
+    # Delete the issues that the voter is following
+    delete_follow_issue_results = delete_follow_issue_entries_for_voter(voter_to_delete_we_vote_id)
+    status += delete_follow_issue_results['status']
+
+    # Make sure we delete all emails
+    delete_email_addresses_results = delete_email_address_entries_for_voter(
+        voter_to_delete_we_vote_id, voter_to_delete=voter_to_delete)
+    status += delete_email_addresses_results['status']
+    if delete_email_addresses_results['success']:
+        voter_to_delete = delete_email_addresses_results['voter_to_delete']
+
+    # Delete all sms phone numbers from the voter_to_delete
+    delete_sms_phone_number_results = delete_sms_phone_number_entries_for_voter(
+        voter_to_delete_we_vote_id, voter_to_delete=voter_to_delete)
+    status += " " + delete_sms_phone_number_results['status']
+    if delete_sms_phone_number_results['success']:
+        voter_to_delete = delete_sms_phone_number_results['voter_to_delete']
+
+    # Delete Facebook information
+    delete_facebook_results = delete_facebook_info_for_voter(voter_to_delete)
+    status += " " + delete_facebook_results['status']
+
+    # Delete Twitter information
+    delete_twitter_results = delete_twitter_info_for_voter(voter_to_delete)
+    status += " " + delete_twitter_results['status']
+
+    # Delete the voter's plans to vote
+    delete_voter_plan_results = delete_voter_plan_for_voter(voter_to_delete)
+    status += " " + delete_voter_plan_results['status']
+
+    # # Bring over any donations that have been made in this session by the new_owner_voter to the voter, subscriptions
+    # # are complicated.  See the comments in the donate/controllers.py
+    # delete_donation_results = move_donation_info_to_another_voter(voter_to_delete, new_owner_voter)
+    # status += " " + delete_donation_results['status']
+
+    # Delete Voter Guides
+    delete_voter_guide_results = delete_voter_guides_for_voter(
+        voter_to_delete_we_vote_id, voter_to_delete_linked_organization_we_vote_id)
+    status += " " + delete_voter_guide_results['status']
+
+    # # Bring over SharedItems
+    # delete_shared_items_results = move_shared_items_to_another_voter(
+    #     voter_to_delete_we_vote_id, to_voter_we_vote_id,
+    #     voter_to_delete_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
+    # status += " " + delete_shared_items_results['status']
+
+    # Transfer ActivityNoticeSeed and ActivityNotice entries from voter to new_owner_voter
+    delete_activity_results = delete_activity_notices_for_voter(
+        voter_to_delete_we_vote_id, voter_to_delete_linked_organization_we_vote_id)
+    status += " " + delete_activity_results['status']
+
+    # Transfer ActivityPost entries from voter to new_owner_voter
+    delete_activity_post_results = delete_activity_posts_for_voter(
+        voter_to_delete_we_vote_id, voter_to_delete_linked_organization_we_vote_id)
+    status += " " + delete_activity_post_results['status']
+
+    # Delete Analytics information
+    delete_analytics_results = delete_analytics_info_for_voter(voter_to_delete_we_vote_id)
+    status += " " + delete_analytics_results['status']
+
+    # Delete the voter-table data
+    merge_voter_accounts_results = delete_voter_table_information(voter_to_delete)
+    status += " " + merge_voter_accounts_results['status']
+
+    # And finally, delete all voter_device_links for this voter
+    update_link_results = voter_device_link_manager.delete_all_voter_device_links_by_voter_id(voter_to_delete_id)
+    if update_link_results['voter_device_link_updated']:
+        success = True
+        status += "VOTER_DEVICE_LINK_DELETED "
+    else:
+        status += update_link_results['status']
+        status += "VOTER_DEVICE_LINK_NOT_UPDATED "
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+    }
+    return results
+
+
+def voter_delete_account_for_api(  # voterDeleteAccount
+        voter_device_id=''):
+    current_voter_found = False
+    email_owner_voter_found = False
+    facebook_owner_voter_found = False
+    twitter_owner_voter_found = False
+    invitation_owner_voter_found = False
+    new_owner_voter = None
+    success = False
+    status = ""
+
+    voter_device_link_manager = VoterDeviceLinkManager()
+    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+    if not voter_device_link_results['voter_device_link_found']:
+        error_results = {
+            'status': voter_device_link_results['status'],
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'current_voter_found': current_voter_found,
+            'email_owner_voter_found': email_owner_voter_found,
+            'facebook_owner_voter_found': facebook_owner_voter_found,
+            'invitation_owner_voter_found': False,
+        }
+        return error_results
+
+    # We need this below
+    voter_device_link = voter_device_link_results['voter_device_link']
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = voter_results['voter_id']
+    if not positive_value_exists(voter_id):
+        error_results = {
+            'status': "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'current_voter_found': current_voter_found,
+            'email_owner_voter_found': email_owner_voter_found,
+            'facebook_owner_voter_found': facebook_owner_voter_found,
+            'invitation_owner_voter_found': False,
+        }
+        return error_results
+
+    voter = voter_results['voter']
+    status += "DELETE_VOTER-" + str(voter.we_vote_id) + " "
+
+    # if not positive_value_exists(email_secret_key) \
+    #         and not positive_value_exists(facebook_secret_key) \
+    #         and not positive_value_exists(twitter_secret_key) \
+    #         and not positive_value_exists(invitation_secret_key):
+    #     error_results = {
+    #         'status': "VOTER_SPLIT_INTO_TWO_ACCOUNTS_SECRET_KEY_NOT_PASSED_IN",
+    #         'success': False,
+    #         'voter_device_id': voter_device_id,
+    #         'current_voter_found': current_voter_found,
+    #         'email_owner_voter_found': email_owner_voter_found,
+    #         'facebook_owner_voter_found': facebook_owner_voter_found,
+    #         'invitation_owner_voter_found': False,
+    #     }
+    #     return error_results
+
+    results = delete_all_voter_information_permanently(voter)
+
+    return results
+
+
+def delete_facebook_info_for_voter(voter_to_delete):
+    status = "DELETE_FACEBOOK_INFO "
+    success = False
+
+    if not hasattr(voter_to_delete, "we_vote_id") or not positive_value_exists(voter_to_delete.we_vote_id):
+        status += "DELETE_FACEBOOK_INFO_MISSING_FROM_OR_TO_VOTER_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'voter_to_delete': voter_to_delete,
+        }
+        return results
+
+    facebook_manager = FacebookManager()
+    voter_to_delete_facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
+        voter_to_delete.we_vote_id)
+
+    if voter_to_delete_facebook_results['facebook_link_to_voter_found']:
+        voter_to_delete_facebook_link = voter_to_delete_facebook_results['facebook_link_to_voter']
+        try:
+            voter_to_delete_facebook_link.delete()
+            success = True
+            status += "FROM_VOTER_FACEBOOK_LINK_MOVED "
+        except Exception as e:
+            status += "FROM_VOTER_FACEBOOK_LINK_COULD_NOT_BE_MOVED "
+
+    if positive_value_exists(voter_to_delete.facebook_id):
+        # Remove info from the voter_to_delete and then move facebook info to the to_voter
+        try:
+            voter_to_delete.facebook_email = ""
+            voter_to_delete.facebook_id = 0
+            voter_to_delete.facebook_profile_image_url_https = ""
+            voter_to_delete.fb_username = None
+            voter_to_delete.save()
+            status += "FROM_VOTER_FACEBOOK_DATA_REMOVED "
+        except Exception as e:
+            status += "FROM_VOTER_FACEBOOK_DATA_COULD_NOT_BE_DELETED: " + str(e) + " "
+    else:
+        success = True
+        status += "NO_FACEBOOK_ID_FOUND "
+
+    results = {
+        'status':           status,
+        'success':          success,
+        'voter_to_delete':  voter_to_delete,
+    }
+    return results
+
+
+def delete_twitter_info_for_voter(voter_to_delete):
+    status = "DELETE_TWITTER_INFO "
+    success = False
+
+    if not hasattr(voter_to_delete, "we_vote_id") or not positive_value_exists(voter_to_delete.we_vote_id):
+        status += "DELETE_TWITTER_INFO_MISSING_VOTER_WE_VOTE_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'voter_to_delete': voter_to_delete,
+        }
+        return results
+
+    twitter_user_manager = TwitterUserManager()
+    voter_to_delete_twitter_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
+        voter_to_delete.we_vote_id)  # Cannot be read_only
+
+    if voter_to_delete_twitter_results['twitter_link_to_voter_found']:
+        voter_to_delete_twitter_link = voter_to_delete_twitter_results['twitter_link_to_voter']
+        try:
+            voter_to_delete_twitter_link.delete()
+            success = True
+            status += "FROM_VOTER_TWITTER_LINK_DELETED "
+        except Exception as e:
+            # Fail silently
+            status += "FROM_VOTER_TWITTER_LINK_NOT_DELETED: " + str(e) + " "
+
+    try:
+        voter_to_delete.twitter_id = None
+        voter_to_delete.twitter_name = ""
+        voter_to_delete.twitter_profile_image_url_https = ""
+        voter_to_delete.twitter_screen_name = ""
+        voter_to_delete.save()
+        status += "FROM_VOTER_TWITTER_DATA_REMOVED "
+    except Exception as e:
+        status += "FROM_VOTER_TWITTER_DATA_NOT_REMOVED: " + str(e) + " "
+
+    results = {
+        'status': status,
+        'success': success,
+        'voter_to_delete': voter_to_delete,
+    }
+    return results
+
+
+def delete_voter_plan_for_voter(voter_to_delete):
+    status = "DELETE_VOTER_PLAN "
+    success = False
+    entries_deleted = 0
+    entries_not_deleted = 0
+
+    if not hasattr(voter_to_delete, "we_vote_id") or not positive_value_exists(voter_to_delete.we_vote_id):
+        status += "DELETE_VOTER_PLAN_MISSING_VOTER_WE_VOTE_ID "
+        results = {
+            'status':               status,
+            'success':              success,
+            'entries_deleted':      entries_deleted,
+            'entries_not_deleted':  entries_not_deleted,
+        }
+        return results
+
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_plan_list(voter_we_vote_id=voter_to_delete.we_vote_id, read_only=False)
+    voter_to_delete_plan_list = results['voter_plan_list']
+
+    for voter_to_delete_plan in voter_to_delete_plan_list:
+        try:
+            voter_to_delete_plan.delete()
+        except Exception as e:
+            status += "FAILED_DELETE_VOTER_PLAN: " + str(e) + " "
+
+    results = {
+        'status':               status,
+        'success':              success,
+        'entries_deleted':      entries_deleted,
+        'entries_not_deleted':  entries_not_deleted,
+    }
+    return results
+
+
+def delete_voter_table_information(voter_to_delete):
+    status = "DELETE_VOTER_TABLE_INFO "
+    success = False
+
+    if not hasattr(voter_to_delete, "we_vote_id") or not positive_value_exists(voter_to_delete.we_vote_id):
+        status += "DELETE_VOTER_INFO_MISSING_VOTER_WE_VOTE_ID "
+        results = {
+            'status':           status,
+            'success':          success,
+            'voter_to_delete':  voter_to_delete,
+        }
+        return results
+
+    try:
+        voter_to_delete.save()
+        status += "VOTER_DELETED "
+    except Exception as e:
+        status += "VOTER_MERGE_SAVE_FAILED " + str(e) + " "
+
+    results = {
+        'status':           status,
+        'success':          success,
+        'voter_to_delete':  voter_to_delete,
+    }
+    return results
 
 
 def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_array, last_name_array,

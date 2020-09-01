@@ -115,6 +115,63 @@ def augment_email_address_list(email_address_list, voter):
     return results
 
 
+def delete_email_address_entries_for_voter(voter_to_delete_we_vote_id, voter_to_delete):
+    status = "DELETE_EMAIL_ADDRESSES "
+    success = False
+    email_addresses_deleted = 0
+    email_addresses_not_deleted = 0
+
+    if not positive_value_exists(voter_to_delete_we_vote_id):
+        status += "DELETE_EMAIL_ADDRESS_ENTRIES_MISSING_FROM_VOTER_WE_VOTE_ID "
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'voter_to_delete_we_vote_id':   voter_to_delete_we_vote_id,
+            'voter_to_delete':              voter_to_delete,
+            'email_addresses_deleted':      email_addresses_deleted,
+            'email_addresses_not_deleted':  email_addresses_not_deleted,
+        }
+        return results
+
+    email_manager = EmailManager()
+    email_address_list_results = email_manager.retrieve_voter_email_address_list(voter_to_delete_we_vote_id)
+    if email_address_list_results['email_address_list_found']:
+        email_address_list = email_address_list_results['email_address_list']
+
+        for email_address_object in email_address_list:
+            try:
+                email_address_object.delete()
+                email_addresses_deleted += 1
+            except Exception as e:
+                email_addresses_not_deleted += 1
+                status += "UNABLE_TO_DELETE_EMAIL_ADDRESS " + str(e) + " "
+
+        status += "EMAIL_ADDRESSES-DELETED: " + str(email_addresses_deleted) + \
+                  ", NOT_DELETED: " + str(email_addresses_not_deleted) + " "
+    else:
+        status += email_address_list_results['status']
+
+    if positive_value_exists(voter_to_delete.primary_email_we_vote_id):
+        # Remove the email information so we don't have a future conflict
+        try:
+            voter_to_delete.email = None
+            voter_to_delete.primary_email_we_vote_id = None
+            voter_to_delete.email_ownership_is_verified = False
+            voter_to_delete.save()
+        except Exception as e:
+            status += "CANNOT_CLEAR_OUT_VOTER_EMAIL_INFO: " + str(e) + " "
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'voter_to_delete':              voter_to_delete,
+        'voter_to_delete_we_vote_id':   voter_to_delete_we_vote_id,
+        'email_addresses_deleted':      email_addresses_deleted,
+        'email_addresses_not_deleted':  email_addresses_not_deleted,
+    }
+    return results
+
+
 def heal_primary_email_data_for_voter(email_address_list, voter):
     primary_email_address = None
     primary_email_address_found = False

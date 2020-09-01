@@ -27,6 +27,167 @@ logger = wevote_functions.admin.get_logger(__name__)
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
+def delete_friend_invitations_for_voter(voter_to_delete_we_vote_id):
+    status = "DELETE_FRIEND_INVITATIONS_START "
+    success = False
+    friend_invitation_entries_deleted = 0
+    friend_invitation_entries_not_deleted = 0
+
+    if not positive_value_exists(voter_to_delete_we_vote_id):
+        status = "DELETE_FRIENDS-MISSING_VOTER_WE_VOTE_ID"
+        results = {
+            'status':                               status,
+            'success':                              success,
+            'voter_to_delete_we_vote_id':                voter_to_delete_we_vote_id,
+            'friend_invitation_entries_deleted':      0,
+            'friend_invitation_entries_not_deleted':  0,
+        }
+        return results
+
+    friend_manager = FriendManager()
+
+    # ###############################
+    # FriendInvitationEmailLink
+    # SENDER entries
+    # FROM SENDER: Invitations sent BY the voter_to_delete to others
+    friend_invitation_email_link_from_sender_results = friend_manager.retrieve_friend_invitation_email_link_list(
+        voter_to_delete_we_vote_id)
+    if friend_invitation_email_link_from_sender_results['friend_invitation_list_found']:
+        friend_invitation_email_link_from_sender_list = \
+            friend_invitation_email_link_from_sender_results['friend_invitation_list']
+
+        for from_sender_entry in friend_invitation_email_link_from_sender_list:
+            # Change the sender_voter_we_vote_id to the new we_vote_id
+            try:
+                from_sender_entry.delete()
+                friend_invitation_entries_deleted += 1
+            except Exception as e:
+                status += "FriendInvitationEmailLink Sender entries not deleted: " + str(e) + ' '
+                friend_invitation_entries_not_deleted += 1
+
+    # ###############################
+    # FriendInvitationVoterLink
+    # FROM SENDER: Invitations sent BY the voter_to_delete to others
+    friend_invitation_voter_link_from_sender_results = friend_manager.retrieve_friend_invitation_voter_link_list(
+        voter_to_delete_we_vote_id)
+    if friend_invitation_voter_link_from_sender_results['friend_invitation_list_found']:
+        friend_invitation_voter_link_from_sender_list = \
+            friend_invitation_voter_link_from_sender_results['friend_invitation_list']
+        for from_sender_entry in friend_invitation_voter_link_from_sender_list:
+            try:
+                from_sender_entry.delete()
+                friend_invitation_entries_deleted += 1
+            except Exception as e:
+                status += "FriendInvitationVoterLink Sender entries not deleted: " + str(e) + ' '
+                friend_invitation_entries_not_deleted += 1
+
+    # RECIPIENT entries
+    # FROM RECIPIENT: Invitations sent TO the voter_to_delete from others
+    friend_invitation_voter_link_from_recipient_results = friend_manager.retrieve_friend_invitation_voter_link_list(
+        '', voter_to_delete_we_vote_id)
+    if friend_invitation_voter_link_from_recipient_results['friend_invitation_list_found']:
+        friend_invitation_voter_link_from_recipient_list = \
+            friend_invitation_voter_link_from_recipient_results['friend_invitation_list']
+
+        for from_sender_entry in friend_invitation_voter_link_from_recipient_list:
+            try:
+                from_sender_entry.delete()
+                friend_invitation_entries_deleted += 1
+            except Exception as e:
+                status += "FriendInvitationVoterLink Recipient entries not deleted: " + str(e) + " "
+                friend_invitation_entries_not_deleted += 1
+    status += " FRIEND_INVITATIONS moved: " + str(friend_invitation_entries_deleted) + \
+              ", not moved: " + str(friend_invitation_entries_not_deleted) + " "
+
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'voter_to_delete_we_vote_id':    voter_to_delete_we_vote_id,
+        'friend_entries_deleted':     friend_invitation_entries_deleted,
+        'friend_entries_not_deleted': friend_invitation_entries_not_deleted,
+    }
+    return results
+
+
+def delete_friends_for_voter(voter_to_delete_we_vote_id):
+    status = ''
+    success = False
+    friend_entries_deleted = 0
+    friend_entries_not_deleted = 0
+
+    if not positive_value_exists(voter_to_delete_we_vote_id):
+        status += "DELETE_FRIENDS-MISSING_VOTER_WE_VOTE_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'voter_to_delete_we_vote_id': voter_to_delete_we_vote_id,
+            'friend_entries_deleted': friend_entries_deleted,
+            'friend_entries_not_deleted': friend_entries_not_deleted,
+        }
+        return results
+
+    friend_manager = FriendManager()
+    from_friend_results = friend_manager.retrieve_current_friends(voter_to_delete_we_vote_id, read_only=False)
+    from_friend_list = from_friend_results['current_friend_list']
+
+    for from_friend_entry in from_friend_list:
+        try:
+            from_friend_entry.delete()
+            friend_entries_deleted += 1
+        except Exception as e:
+            friend_entries_not_deleted += 1
+            status += "PROBLEM_UPDATING_FRIEND: " + str(e) + ' '
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'voter_to_delete_we_vote_id':   voter_to_delete_we_vote_id,
+        'friend_entries_deleted':       friend_entries_deleted,
+        'friend_entries_not_deleted':   friend_entries_not_deleted,
+    }
+    return results
+
+
+def delete_suggested_friends_for_voter(voter_to_delete_we_vote_id):
+    status = ''
+    success = False
+    suggested_friend_entries_deleted = 0
+    suggested_friend_entries_not_deleted = 0
+
+    if not positive_value_exists(voter_to_delete_we_vote_id):
+        status += "DELETE_SUGGESTED_FRIENDS-MISSING_VOTER_WE_VOTE_ID "
+        results = {
+            'status':                               status,
+            'success':                              success,
+            'voter_to_delete_we_vote_id':           voter_to_delete_we_vote_id,
+            'suggested_friend_entries_deleted':     suggested_friend_entries_deleted,
+            'suggested_friend_entries_not_deleted': suggested_friend_entries_not_deleted,
+        }
+        return results
+
+    friend_manager = FriendManager()
+    from_friend_results = friend_manager.retrieve_suggested_friend_list(
+        voter_to_delete_we_vote_id, hide_deleted=False, read_only=False)
+    from_friend_list = from_friend_results['suggested_friend_list']
+
+    for from_friend_entry in from_friend_list:
+        try:
+            from_friend_entry.delete()
+            suggested_friend_entries_deleted += 1
+        except Exception as e:
+            suggested_friend_entries_not_deleted += 1
+            status += "PROBLEM_DELETING_SUGGESTED_FRIEND: " + str(e) + ' '
+
+    results = {
+        'status':                               status,
+        'success':                              success,
+        'voter_to_delete_we_vote_id':           voter_to_delete_we_vote_id,
+        'suggested_friend_entries_deleted':     suggested_friend_entries_deleted,
+        'suggested_friend_entries_not_deleted': suggested_friend_entries_not_deleted,
+    }
+    return results
+
+
 def fetch_friend_invitation_recipient_voter_we_vote_id(friend_invitation):
     if hasattr(friend_invitation, 'recipient_voter_we_vote_id'):
         return friend_invitation.recipient_voter_we_vote_id

@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import process_maintenance_status_flags
+from .controllers import delete_all_voter_information_permanently, process_maintenance_status_flags
 from .models import fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, VoterDeviceLinkManager, \
     voter_has_authority, VoterManager, voter_setup
 from admin_tools.views import redirect_to_sign_in_page
@@ -192,6 +192,49 @@ def voter_authenticate_manually_process_view(request):
         return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
     else:
         return HttpResponseRedirect(reverse('voter:authenticate_manually', args=()))
+
+
+@login_required
+def voter_delete_process_view(request):
+    """
+    Permanently delete a voter
+    :param request:
+    :return:
+    """
+    status = ""
+    voter_id = convert_to_int(request.POST.get('voter_id', 0))
+    confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    if not positive_value_exists(confirm_delete):
+        messages.add_message(request, messages.ERROR,
+                             'Unable to delete this voter. '
+                             'Please check the checkbox to confirm you want to delete this voter permanently.')
+        return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)))
+
+    # Check to see if this voter is already being used anywhere
+    voter_on_stage_found = False
+    try:
+        voter_query = Voter.objects.filter(id=voter_id)
+        if len(voter_query):
+            voter_on_stage = voter_query[0]
+            voter_on_stage_found = True
+            results = delete_all_voter_information_permanently(voter_to_delete=voter_on_stage)
+            status += results['status']
+    except Exception as e:
+        handle_record_not_found_exception(e, logger=logger)
+
+    if voter_on_stage_found:
+        messages.add_message(request, messages.INFO, 'Voter deleted.')
+        messages.add_message(request, messages.INFO, 'status: ' + str(status))
+    else:
+        messages.add_message(request, messages.ERROR, 'Voter not found.')
+
+    return HttpResponseRedirect(reverse('voter:voter_list', args=()))
 
 
 @login_required

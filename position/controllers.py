@@ -647,6 +647,107 @@ def count_for_all_ballot_items_from_position_network_score_for_api(  # positions
     return json_data
 
 
+def delete_positions_for_organization(from_organization_id, from_organization_we_vote_id):
+    status = ''
+    success = False
+    position_entries_deleted = 0
+    position_entries_not_deleted = 0
+    position_list_manager = PositionListManager()
+
+    # Find private positions for the "from_organization" that we are moving away from
+    stance_we_are_looking_for = ANY_STANCE
+    friends_vs_public = FRIENDS_ONLY
+
+    from_position_private_list = position_list_manager.retrieve_all_positions_for_organization(
+        organization_id=from_organization_id,
+        organization_we_vote_id=from_organization_we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        friends_vs_public=friends_vs_public)
+
+    for from_position_entry in from_position_private_list:
+        try:
+            from_position_entry.delete()
+            position_entries_deleted += 1
+        except Exception as e:
+            position_entries_not_deleted += 1
+
+    # Find public positions for the "from_voter" that we are moving away from
+    stance_we_are_looking_for = ANY_STANCE
+    friends_vs_public = PUBLIC_ONLY
+    from_position_public_list = position_list_manager.retrieve_all_positions_for_organization(
+        organization_id=from_organization_id,
+        organization_we_vote_id=from_organization_we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        friends_vs_public=friends_vs_public)
+
+    for from_position_entry in from_position_public_list:
+        try:
+            from_position_entry.delete()
+            position_entries_deleted += 1
+        except Exception as e:
+            position_entries_not_deleted += 1
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'from_organization_id':         from_organization_id,
+        'from_organization_we_vote_id': from_organization_we_vote_id,
+        'position_entries_deleted':     position_entries_deleted,
+        'position_entries_not_deleted': position_entries_not_deleted,
+    }
+    return results
+
+
+def delete_positions_for_voter(from_voter_id, from_voter_we_vote_id):
+    status = ''
+    success = False
+    position_entries_deleted = 0
+    position_entries_not_deleted = 0
+    position_list_manager = PositionListManager()
+
+    # Find private positions for the "from_voter" that we are moving away from
+    stance_we_are_looking_for = ANY_STANCE
+    friends_vs_public = FRIENDS_ONLY
+    from_position_private_list_results = position_list_manager.retrieve_all_positions_for_voter(
+        from_voter_id, from_voter_we_vote_id,
+        stance_we_are_looking_for, friends_vs_public)
+    from_position_private_list = from_position_private_list_results['position_list']
+
+    for from_position_entry in from_position_private_list:
+        try:
+            from_position_entry.delete()
+            position_entries_deleted += 1
+        except Exception as e:
+            status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_FRIENDS_ONLY_ORGANIZATION_UPDATE2: " + str(e) + " "
+            position_entries_not_deleted += 1
+
+    # Find public positions for the "from_voter" that we are moving away from
+    stance_we_are_looking_for = ANY_STANCE
+    friends_vs_public = PUBLIC_ONLY
+    from_position_public_results = position_list_manager.retrieve_all_positions_for_voter(
+        from_voter_id, from_voter_we_vote_id,
+        stance_we_are_looking_for, friends_vs_public)
+    from_position_public_list = from_position_public_results['position_list']
+
+    for from_position_entry in from_position_public_list:
+        try:
+            from_position_entry.delete()
+            position_entries_deleted += 1
+        except Exception as e:
+            position_entries_not_deleted += 1
+            status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_PUBLIC_ORGANIZATION_UPDATE2: " + str(e) + " "
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'from_voter_id':                from_voter_id,
+        'from_voter_we_vote_id':        from_voter_we_vote_id,
+        'position_entries_deleted':     position_entries_deleted,
+        'position_entries_not_deleted': position_entries_not_deleted,
+    }
+    return results
+
+
 def find_organizations_referenced_in_positions_for_this_voter(voter):
     related_organizations = []
 
