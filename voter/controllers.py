@@ -207,8 +207,8 @@ def delete_all_voter_information_permanently(voter_to_delete=None):  # voterDele
     status += " " + delete_analytics_results['status']
 
     # Delete the voter-table data
-    merge_voter_accounts_results = delete_voter_table_information(voter_to_delete)
-    status += " " + merge_voter_accounts_results['status']
+    delete_voter_accounts_results = delete_voter_table_information(voter_to_delete)
+    status += " " + delete_voter_accounts_results['status']
 
     # And finally, delete all voter_device_links for this voter
     update_link_results = voter_device_link_manager.delete_all_voter_device_links_by_voter_id(voter_to_delete_id)
@@ -435,7 +435,7 @@ def delete_voter_table_information(voter_to_delete):
         return results
 
     try:
-        voter_to_delete.save()
+        voter_to_delete.delete()
         status += "VOTER_DELETED "
     except Exception as e:
         status += "VOTER_MERGE_SAVE_FAILED " + str(e) + " "
