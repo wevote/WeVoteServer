@@ -23,6 +23,63 @@ def validate_sms_phone_number(sms_phone_number, region="US"):
     return phonenumbers.is_valid_number(parse_results)
 
 
+def delete_sms_phone_number_entries_for_voter(voter_to_delete_we_vote_id, voter_to_delete):
+    status = "DELETE_SMS_PHONE_NUMBERS "
+    success = False
+    sms_phone_numbers_deleted = 0
+    sms_phone_numbers_not_deleted = 0
+
+    if not positive_value_exists(voter_to_delete_we_vote_id):
+        status += "DELETE_SMS_PHONE_NUMBER_ENTRIES_MISSING_FROM_VOTER_WE_VOTE_ID "
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'voter_to_delete':                  voter_to_delete,
+            'voter_to_delete_we_vote_id':       voter_to_delete_we_vote_id,
+            'sms_phone_numbers_deleted':        sms_phone_numbers_deleted,
+            'sms_phone_numbers_not_deleted':    sms_phone_numbers_not_deleted,
+        }
+        return results
+
+    sms_manager = SMSManager()
+    sms_phone_number_list_results = sms_manager.retrieve_voter_sms_phone_number_list(voter_to_delete_we_vote_id)
+    if sms_phone_number_list_results['sms_phone_number_list_found']:
+        sms_phone_number_list = sms_phone_number_list_results['sms_phone_number_list']
+
+        for sms_phone_number in sms_phone_number_list:
+            try:
+                sms_phone_number.delete()
+                sms_phone_numbers_deleted += 1
+            except Exception as e:
+                sms_phone_numbers_not_deleted += 1
+                status += "UNABLE_TO_DELETE_SMS_PHONE_NUMBER " + str(e) + ' '
+
+        status += " MOVE_SMS_PHONE_NUMBERS, moved: " + str(sms_phone_numbers_deleted) + \
+                  ", not moved: " + str(sms_phone_numbers_not_deleted)
+    else:
+        status += " " + sms_phone_number_list_results['status']
+
+    if positive_value_exists(voter_to_delete.primary_sms_we_vote_id):
+        # Remove the sms information so we don't have a future conflict
+        try:
+            voter_to_delete.normalized_sms_phone_number = None
+            voter_to_delete.primary_sms_we_vote_id = None
+            voter_to_delete.sms_ownership_is_verified = False
+            voter_to_delete.save()
+        except Exception as e:
+            status += "CANNOT_CLEAR_OUT_VOTER_SMS_INFO: " + str(e) + " "
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'voter_to_delete':                  voter_to_delete,
+        'voter_to_delete_we_vote_id':       voter_to_delete_we_vote_id,
+        'sms_phone_numbers_deleted':        sms_phone_numbers_deleted,
+        'sms_phone_numbers_not_deleted':    sms_phone_numbers_not_deleted,
+    }
+    return results
+
+
 def augment_sms_phone_number_list(sms_phone_number_list, voter):
     status = ""
     success = True

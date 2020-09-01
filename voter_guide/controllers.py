@@ -1223,6 +1223,51 @@ def take_in_possible_endorsement_list_from_form(request):
     return results
 
 
+def delete_voter_guides_for_voter(from_voter_we_vote_id, from_organization_we_vote_id):
+    status = ''
+    success = False
+    voter_guide_entries_deleted = 0
+    voter_guide_entries_not_deleted = 0
+
+    if not positive_value_exists(from_voter_we_vote_id):
+        status += "DELETE_VOTER_GUIDES-MISSING_VOTER_WE_VOTE_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'voter_guide_entries_deleted': voter_guide_entries_deleted,
+            'voter_guide_entries_not_deleted': voter_guide_entries_not_deleted,
+        }
+        return results
+
+    if not positive_value_exists(from_organization_we_vote_id):
+        status += "DELETE_VOTER_GUIDES-MISSING_FROM_ORGANIZATION_WE_VOTE_ID "
+
+    voter_guide_list_manager = VoterGuideListManager()
+    from_voter_guide_results = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_we_vote_id(
+        from_voter_we_vote_id, read_only=False)
+    if from_voter_guide_results['voter_guide_list_found']:
+        from_voter_guide_list = from_voter_guide_results['voter_guide_list']
+    else:
+        from_voter_guide_list = []
+
+    for from_voter_guide in from_voter_guide_list:
+        try:
+            from_voter_guide.delete()
+            voter_guide_entries_deleted += 1
+        except Exception as e:
+            voter_guide_entries_not_deleted += 1
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'from_voter_we_vote_id':            from_voter_we_vote_id,
+        'voter_guide_entries_deleted':      voter_guide_entries_deleted,
+        'voter_guide_entries_not_deleted':  voter_guide_entries_not_deleted,
+    }
+    return results
+
+
 def duplicate_voter_guides(from_voter_id, from_voter_we_vote_id, from_organization_we_vote_id,
                            to_voter_id, to_voter_we_vote_id, to_organization_we_vote_id):
     status = ''

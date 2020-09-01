@@ -565,6 +565,11 @@ def organization_delete_process_view(request):
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     state_code = request.POST.get('state_code', '')
 
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     if not positive_value_exists(confirm_delete):
         messages.add_message(request, messages.ERROR,
                              'Unable to delete this organization. '

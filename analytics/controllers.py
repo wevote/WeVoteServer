@@ -1264,6 +1264,51 @@ def calculate_sitewide_voter_metrics_for_one_voter(voter_we_vote_id):
     return results
 
 
+def delete_analytics_info_for_voter(voter_to_delete_we_vote_id):
+    status = "DELETE_ANALYTICS_ACTION_DATA"
+    success = False
+    analytics_action_deleted = 0
+    analytics_action_not_deleted = 0
+
+    if not positive_value_exists(voter_to_delete_we_vote_id):
+        status += "DELETE_ANALYTICS_ACTION-MISSING_FROM_OR_TO_VOTER_ID"
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'voter_to_delete_we_vote_id':   voter_to_delete_we_vote_id,
+            'analytics_action_deleted':     analytics_action_deleted,
+            'analytics_action_not_deleted': analytics_action_not_deleted,
+        }
+        return results
+
+    analytics_manager = AnalyticsManager()
+    analytics_action_list_results = analytics_manager.retrieve_analytics_action_list(voter_to_delete_we_vote_id)
+    if analytics_action_list_results['analytics_action_list_found']:
+        analytics_action_list = analytics_action_list_results['analytics_action_list']
+
+        for analytics_action_object in analytics_action_list:
+            try:
+                analytics_action_object.delete()
+                analytics_action_deleted += 1
+            except Exception as e:
+                analytics_action_not_deleted += 1
+                status += "UNABLE_TO_SAVE_ANALYTICS_ACTION "
+
+        status += " DELETE_ANALYTICS_ACTION, moved: " + str(analytics_action_deleted) + \
+                  ", not moved: " + str(analytics_action_not_deleted)
+    else:
+        status += " " + analytics_action_list_results['status']
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'voter_to_delete_we_vote_id':   voter_to_delete_we_vote_id,
+        'analytics_action_deleted':     analytics_action_deleted,
+        'analytics_action_not_deleted': analytics_action_not_deleted,
+    }
+    return results
+
+
 def move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
     status = " MOVE_ANALYTICS_ACTION_DATA"
     success = False

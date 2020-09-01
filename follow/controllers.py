@@ -19,6 +19,119 @@ from wevote_functions.functions import is_voter_device_id_valid, positive_value_
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+def delete_follow_entries_for_voter(voter_to_delete_id):
+    status = ''
+    success = False
+    follow_entries_deleted = 0
+    follow_entries_not_deleted = 0
+
+    if not positive_value_exists(voter_to_delete_id):
+        status += "DELETE_FOLLOW_ENTRIES-Missing voter_to_delete_id "
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'voter_to_delete_id':            voter_to_delete_id,
+            'follow_entries_deleted':     follow_entries_deleted,
+            'follow_entries_not_deleted': follow_entries_not_deleted,
+        }
+        return results
+
+    follow_organization_list = FollowOrganizationList()
+    from_follow_list = follow_organization_list.retrieve_follow_organization_by_voter_id(voter_to_delete_id)
+
+    for from_follow_entry in from_follow_list:
+        try:
+            from_follow_entry.delete()
+            follow_entries_deleted += 1
+        except Exception as e:
+            follow_entries_not_deleted += 1
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'voter_to_delete_id':           voter_to_delete_id,
+        'follow_entries_deleted':       follow_entries_deleted,
+        'follow_entries_not_deleted':   follow_entries_not_deleted,
+    }
+    return results
+
+
+def delete_follow_issue_entries_for_voter(voter_to_delete_we_vote_id):
+    status = ''
+    success = False
+    follow_issue_entries_deleted = 0
+    follow_issue_entries_not_deleted = 0
+    follow_issue_list = FollowIssueList()
+
+    if not positive_value_exists(voter_to_delete_we_vote_id):
+        status += "DELETE_FOLLOW_ISSUE_ENTRIES_FOR_VOTER-Missing voter_to_delete_we_vote_id "
+        results = {
+            'status': status,
+            'success': success,
+            'voter_to_delete_we_vote_id': voter_to_delete_we_vote_id,
+            'follow_issue_entries_deleted': follow_issue_entries_deleted,
+            'follow_issue_entries_not_deleted': follow_issue_entries_not_deleted,
+        }
+        return results
+
+    from_follow_issue_list = follow_issue_list.retrieve_follow_issue_list_by_voter_we_vote_id(
+        voter_to_delete_we_vote_id, read_only=False)
+
+    for from_follow_issue_entry in from_follow_issue_list:
+        try:
+            from_follow_issue_entry.delete()
+            follow_issue_entries_deleted += 1
+        except Exception as e:
+            follow_issue_entries_not_deleted += 1
+            status += "FAILED_FROM_FOLLOW_ISSUE_DELETE: " + str(e) + " "
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'voter_to_delete_we_vote_id':       voter_to_delete_we_vote_id,
+        'follow_issue_entries_deleted':     follow_issue_entries_deleted,
+        'follow_issue_entries_not_deleted': follow_issue_entries_not_deleted,
+    }
+    return results
+
+
+def delete_organization_followers_for_organization(from_organization_id, from_organization_we_vote_id):
+    status = ''
+    success = False
+    follow_entries_deleted = 0
+    follow_entries_not_deleted = 0
+    follow_organization_list = FollowOrganizationList()
+
+    # We search on both from_organization_id and from_organization_we_vote_id in case there is some data that needs
+    # to be healed
+    from_follow_list = follow_organization_list.retrieve_follow_organization_by_organization_id(from_organization_id)
+    for from_follow_entry in from_follow_list:
+        try:
+            from_follow_entry.delete()
+            follow_entries_deleted += 1
+        except Exception as e:
+            follow_entries_not_deleted += 1
+
+    from_follow_list = follow_organization_list.retrieve_follow_organization_by_organization_we_vote_id(
+        from_organization_we_vote_id)
+    for from_follow_entry in from_follow_list:
+        try:
+            from_follow_entry.delete()
+            follow_entries_deleted += 1
+        except Exception as e:
+            follow_entries_not_deleted += 1
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'from_organization_id':         from_organization_id,
+        'from_organization_we_vote_id': from_organization_we_vote_id,
+        'follow_entries_deleted':       follow_entries_deleted,
+        'follow_entries_not_deleted':   follow_entries_not_deleted,
+    }
+    return results
+
+
 def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_id, to_voter_id, to_voter_we_vote_id):
     status = ''
     success = False
