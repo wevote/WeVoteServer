@@ -329,12 +329,16 @@ def move_activity_posts_to_another_voter(
 
 
 def notice_friend_endorsements_send(
-        speaker_voter_we_vote_id='', recipient_voter_we_vote_id='', invitation_message=''):
+        speaker_voter_we_vote_id='',
+        recipient_voter_we_vote_id='',
+        invitation_message='',
+        activity_tidbit_we_vote_id=''):
     """
     We are sending an email to the speaker's friends who are subscribed to NOTICE_FRIEND_ENDORSEMENTS
     :param speaker_voter_we_vote_id:
     :param recipient_voter_we_vote_id:
     :param invitation_message:
+    :param activity_tidbit_we_vote_id:
     :return:
     """
     from email_outbound.controllers import schedule_email_with_email_outbound_description
@@ -398,7 +402,6 @@ def notice_friend_endorsements_send(
     # Retrieve the email address of the speaker_voter - used in invitation to help the recipient understand who sent
     speaker_voter_email = ""
     speaker_voter_we_vote_id = speaker_voter.we_vote_id
-    view_new_endorsements_path = "voterguide/" + speaker_voter.linked_organization_we_vote_id
     if speaker_voter.has_email_with_verified_ownership():
         results = email_manager.retrieve_primary_email_with_ownership_verified(speaker_voter_we_vote_id)
         if results['email_address_object_found']:
@@ -438,7 +441,7 @@ def notice_friend_endorsements_send(
             "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
             recipient_email_subscription_secret_key,
             "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
-            "view_new_endorsements_url":    web_app_root_url_verified + "/" + view_new_endorsements_path,
+            "view_new_endorsements_url":    web_app_root_url_verified + "/news/a/" + activity_tidbit_we_vote_id,
             "view_your_ballot_url":         web_app_root_url_verified + "/ballot",
         }
         template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -619,6 +622,7 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
 
                 activity_results = update_or_create_activity_notice_for_friend(
                     activity_notice_seed_id=activity_notice_seed.id,
+                    activity_tidbit_we_vote_id=activity_notice_seed.we_vote_id,
                     kind_of_seed=activity_notice_seed.kind_of_seed,
                     kind_of_notice=kind_of_notice,
                     position_we_vote_id_list_serialized=position_we_vote_id_list_serialized,
@@ -679,7 +683,8 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
             for activity_notice in activity_notice_list:
                 send_results = notice_friend_endorsements_send(
                     speaker_voter_we_vote_id=activity_notice.speaker_voter_we_vote_id,
-                    recipient_voter_we_vote_id=activity_notice.recipient_voter_we_vote_id)
+                    recipient_voter_we_vote_id=activity_notice.recipient_voter_we_vote_id,
+                    activity_tidbit_we_vote_id=activity_notice_seed.we_vote_id)
                 activity_notice_id_already_reviewed_list.append(activity_notice.id)
                 if send_results['success']:
                     try:
@@ -722,6 +727,7 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
 
 def update_or_create_activity_notice_for_friend(
         activity_notice_seed_id=0,
+        activity_tidbit_we_vote_id='',
         kind_of_seed='',
         kind_of_notice='',
         position_we_vote_id_list_serialized='',
@@ -749,7 +755,8 @@ def update_or_create_activity_notice_for_friend(
         try:
             activity_notice = results['activity_notice']
             activity_notice.position_we_vote_id_list_serialized = position_we_vote_id_list_serialized
-
+            if positive_value_exists(activity_tidbit_we_vote_id):
+                activity_notice.activity_tidbit_we_vote_id = activity_tidbit_we_vote_id
             activity_notice.save()
         except Exception as e:
             status += "FAILED_ACTIVITY_NOTICE_SAVE: " + str(e) + ' '
@@ -758,6 +765,7 @@ def update_or_create_activity_notice_for_friend(
         date_of_notice = now()
         create_results = activity_manager.create_activity_notice(
             activity_notice_seed_id=activity_notice_seed_id,
+            activity_tidbit_we_vote_id=activity_tidbit_we_vote_id,
             date_of_notice=date_of_notice,
             kind_of_notice=kind_of_notice,
             kind_of_seed=kind_of_seed,

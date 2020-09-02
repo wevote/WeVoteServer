@@ -72,6 +72,7 @@ class ActivityManager(models.Manager):
     def create_activity_notice(
             self,
             activity_notice_seed_id=0,
+            activity_tidbit_we_vote_id='',
             date_of_notice=None,
             kind_of_notice=None,
             kind_of_seed=None,
@@ -103,6 +104,7 @@ class ActivityManager(models.Manager):
                 new_positions_entered_count += len(position_we_vote_id_list)
             activity_notice = ActivityNotice.objects.create(
                 activity_notice_seed_id=activity_notice_seed_id,
+                activity_tidbit_we_vote_id=activity_tidbit_we_vote_id,
                 date_of_notice=date_of_notice,
                 kind_of_notice=kind_of_notice,
                 kind_of_seed=kind_of_seed,
@@ -573,10 +575,14 @@ class ActivityManager(models.Manager):
         }
         return results
 
-    def retrieve_activity_notice_seed_list_for_recipient(self, recipient_voter_we_vote_id=''):
+    def retrieve_activity_notice_seed_list_for_recipient(
+            self,
+            recipient_voter_we_vote_id='',
+            limit_to_activity_tidbit_we_vote_id_list=[]):
         """
 
         :param recipient_voter_we_vote_id:
+        :param limit_to_activity_tidbit_we_vote_id_list:
         :return:
         """
         status = ""
@@ -608,6 +614,8 @@ class ActivityManager(models.Manager):
                 speaker_voter_we_vote_id__in=voter_friend_we_vote_id_list,
                 deleted=False
             )
+            if limit_to_activity_tidbit_we_vote_id_list and len(limit_to_activity_tidbit_we_vote_id_list) > 0:
+                queryset = queryset.filter(we_vote_id__in=limit_to_activity_tidbit_we_vote_id_list)
             queryset = queryset.exclude(
                 Q(speaker_voter_we_vote_id=None) | Q(speaker_voter_we_vote_id=""))
             queryset = queryset.order_by('-id')  # Put most recent at top of list
@@ -693,10 +701,12 @@ class ActivityManager(models.Manager):
     def retrieve_activity_post_list_for_recipient(
             self,
             recipient_voter_we_vote_id='',
+            limit_to_activity_tidbit_we_vote_id_list=[],
             voter_friend_we_vote_id_list=[]):
         """
 
         :param recipient_voter_we_vote_id:
+        :param limit_to_activity_tidbit_we_vote_id_list:
         :param voter_friend_we_vote_id_list:
         :return:
         """
@@ -729,6 +739,8 @@ class ActivityManager(models.Manager):
                 speaker_voter_we_vote_id__in=voter_friend_we_vote_id_list,
                 deleted=False
             )
+            if limit_to_activity_tidbit_we_vote_id_list and len(limit_to_activity_tidbit_we_vote_id_list) > 0:
+                queryset = queryset.filter(we_vote_id__in=limit_to_activity_tidbit_we_vote_id_list)
             queryset = queryset.exclude(
                 Q(speaker_voter_we_vote_id=None) | Q(speaker_voter_we_vote_id=""))
             queryset = queryset.order_by('-id')  # Put most recent ActivityPost at top of list
@@ -1050,6 +1062,7 @@ class ActivityNotice(models.Model):
     This is a notice for the notification drop-down menu, for one person
     """
     activity_notice_seed_id = models.PositiveIntegerField(default=None, null=True)
+    activity_tidbit_we_vote_id = models.CharField(max_length=255, default=None, null=True)  # subject of notice
     date_of_notice = models.DateTimeField(null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True)
     activity_notice_clicked = models.BooleanField(default=False)
