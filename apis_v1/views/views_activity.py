@@ -145,6 +145,8 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_friend_we_vote_id_list = []
     voter_we_vote_id = ''
+    activity_tidbit_we_vote_id_list = request.GET.getlist('activity_tidbit_we_vote_id_list[]')
+    activity_tidbit_we_vote_id_list = list(filter(None, activity_tidbit_we_vote_id_list))
 
     if positive_value_exists(voter_device_id):
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
@@ -159,7 +161,8 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     results = activity_manager.retrieve_activity_notice_seed_list_for_recipient(
-        recipient_voter_we_vote_id=voter_we_vote_id)
+        recipient_voter_we_vote_id=voter_we_vote_id,
+        limit_to_activity_tidbit_we_vote_id_list=activity_tidbit_we_vote_id_list)
     if results['success']:
         activity_notice_seed_list = results['activity_notice_seed_list']
         voter_friend_we_vote_id_list = results['voter_friend_we_vote_id_list']
@@ -206,6 +209,7 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
     # Retrieve entries directly in the ActivityPost table
     results = activity_manager.retrieve_activity_post_list_for_recipient(
         recipient_voter_we_vote_id=voter_we_vote_id,
+        limit_to_activity_tidbit_we_vote_id_list=activity_tidbit_we_vote_id_list,
         voter_friend_we_vote_id_list=voter_friend_we_vote_id_list)
     if results['success']:
         activity_post_list = results['activity_post_list']
@@ -376,6 +380,7 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
             activity_notice_dict = {
                 'activity_notice_clicked':          activity_notice.activity_notice_clicked,
                 'activity_notice_seen':             activity_notice.activity_notice_seen,
+                'activity_tidbit_we_vote_id':       activity_notice.activity_tidbit_we_vote_id,
                 'date_last_changed':                activity_notice.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
                 'date_of_notice':                   activity_notice.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
                 'activity_notice_id':               activity_notice.id,

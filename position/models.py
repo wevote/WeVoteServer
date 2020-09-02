@@ -6575,12 +6575,12 @@ class PositionManager(models.Model):
                 if duplicate_results['position_found']:
                     problem_with_duplicate = True
                     success = False
-                    status = 'UPDATE_OR_CREATE_POSITION_COMMENT-EXISTING_POSITION_CHECK_FAILED'
+                    status = 'UPDATE_OR_CREATE_POSITION_COMMENT-EXISTING_POSITION_CHECK_FAILED '
 
             except Exception as e:
                 problem_with_duplicate = True
                 success = False
-                status = 'UPDATE_OR_CREATE_POSITION_COMMENT-EXISTING_POSITION_CHECK_FAILED-EXCEPTION'
+                status = 'UPDATE_OR_CREATE_POSITION_COMMENT-EXISTING_POSITION_CHECK_FAILED-EXCEPTION ' + str(e) + ' '
 
             if problem_with_duplicate:
                 results = {
@@ -6666,6 +6666,8 @@ class PositionManager(models.Model):
                     # Heal the data: Make sure we have a voter_we_vote_id
                     voter_position_on_stage.voter_we_vote_id = fetch_voter_we_vote_id_from_voter_id(voter_id)
 
+                if not positive_value_exists(voter_position_on_stage.date_entered):
+                    voter_position_on_stage.date_entered = now()
                 voter_position_on_stage.save()
                 position_list_manager.update_position_network_scores_for_one_position(voter_position_on_stage)
                 position_we_vote_id = voter_position_on_stage.we_vote_id
@@ -6676,16 +6678,18 @@ class PositionManager(models.Model):
         else:
             try:
                 # Create new
+                ballot_item_display_name = ""
                 candidate_campaign_id = None
                 contest_office_id = 0
                 contest_office_we_vote_id = ''
                 google_civic_election_id = 0
                 politician_id = 0
                 politician_we_vote_id = ''
-                state_code = ''
-                ballot_item_display_name = ""
-                speaker_display_name = ""
                 position_year = None
+                state_code = ''
+                speaker_display_name = ""
+                speaker_image_url_https_medium = '',
+                speaker_image_url_https_tiny = '',
                 if candidate_we_vote_id:
                     candidate_campaign_manager = CandidateCampaignManager()
                     results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
@@ -6748,6 +6752,8 @@ class PositionManager(models.Model):
                     voter = results['voter']
                     voter_we_vote_id = voter.we_vote_id
                     organization_we_vote_id = voter.linked_organization_we_vote_id
+                    speaker_image_url_https_medium = voter.we_vote_hosted_profile_image_url_medium
+                    speaker_image_url_https_tiny = voter.we_vote_hosted_profile_image_url_tiny
                     if positive_value_exists(organization_we_vote_id):
                         # Look up the organization_id
                         organization_manager = OrganizationManager()
@@ -6762,23 +6768,26 @@ class PositionManager(models.Model):
                 voter_position_on_stage = PositionForFriends(
                     voter_id=voter_id,
                     voter_we_vote_id=voter_we_vote_id,
+                    ballot_item_display_name=ballot_item_display_name,
                     candidate_campaign_id=candidate_campaign_id,
                     candidate_campaign_we_vote_id=candidate_we_vote_id,
                     contest_measure_id=contest_measure_id,
                     contest_measure_we_vote_id=measure_we_vote_id,
                     contest_office_id=contest_office_id,
                     contest_office_we_vote_id=contest_office_we_vote_id,
-                    stance=NO_STANCE,
+                    date_entered=now(),
                     google_civic_election_id=google_civic_election_id,
                     state_code=state_code,
                     organization_id=organization_id,
                     organization_we_vote_id=organization_we_vote_id,
                     politician_id=politician_id,
                     politician_we_vote_id=politician_we_vote_id,
-                    statement_text=statement_text,
-                    ballot_item_display_name=ballot_item_display_name,
-                    speaker_display_name=speaker_display_name,
                     position_year=position_year,
+                    speaker_display_name=speaker_display_name,
+                    speaker_image_url_https_medium=speaker_image_url_https_medium,
+                    speaker_image_url_https_tiny=speaker_image_url_https_tiny,
+                    stance=NO_STANCE,
+                    statement_text=statement_text,
                 )
 
                 voter_position_on_stage.save()
@@ -6789,6 +6798,17 @@ class PositionManager(models.Model):
                 status = 'NEW_POSITION_COMMENT_SAVED '
             except Exception as e:
                 status = 'NEW_POSITION_COMMENT_COULD_NOT_BE_SAVED' + str(e) + ' '
+
+        if voter_position_on_stage_found:
+            activity_results = update_or_create_activity_notice_seed_for_voter_position(
+                position_we_vote_id=voter_position_on_stage.we_vote_id,
+                is_public_position=is_public_position,
+                speaker_name=voter_position_on_stage.speaker_display_name,
+                speaker_organization_we_vote_id=voter_position_on_stage.organization_we_vote_id,
+                speaker_voter_we_vote_id=voter_position_on_stage.voter_we_vote_id,
+                speaker_profile_image_url_medium=voter_position_on_stage.speaker_image_url_https_medium,
+                speaker_profile_image_url_tiny=voter_position_on_stage.speaker_image_url_https_tiny)
+            status += activity_results['status']
 
         results = {
             'status':               status,

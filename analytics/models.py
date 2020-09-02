@@ -88,6 +88,7 @@ ACTION_SEARCH_OPINIONS = 70
 ACTION_UNSUBSCRIBE_EMAIL_PAGE = 71
 ACTION_UNSUBSCRIBE_SMS_PAGE = 72
 ACTION_MEASURE = 73
+ACTION_NEWS = 74
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
@@ -1946,6 +1947,8 @@ def display_action_constant_human_readable(action_constant):
         return "MODAL_VOTER_PLAN"
     if action_constant == ACTION_NETWORK:
         return "NETWORK"
+    if action_constant == ACTION_NEWS:
+        return "NEWS"
     if action_constant == ACTION_OFFICE:
         return "OFFICE"
     if action_constant == ACTION_ORGANIZATION_AUTO_FOLLOW:
@@ -2188,4 +2191,6 @@ def fetch_action_constant_number_from_constant_string(action_constant_string):
         return 72
     if action_constant_string in 'ACTION_MEASURE':
         return 73
+    if action_constant_string in 'ACTION_NEWS':
+        return 74
     return 0
