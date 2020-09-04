@@ -1925,6 +1925,7 @@ def friend_list_for_api(voter_device_id,  # friendList
                 positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                 one_friend = {
                     "voter_we_vote_id":                 friend_voter.we_vote_id,
+                    "voter_date_last_changed":          friend_voter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
                     "voter_display_name":               friend_voter.get_full_name(),
                     "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
                     if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
@@ -1965,6 +1966,7 @@ def friend_list_for_api(voter_device_id,  # friendList
                     positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                     one_friend = {
                         "voter_we_vote_id":                 friend_voter.we_vote_id,
+                        "voter_date_last_changed":          friend_voter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
                         "voter_display_name":               friend_voter.get_full_name(),
                         "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
                             if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
@@ -2008,6 +2010,7 @@ def friend_list_for_api(voter_device_id,  # friendList
                     positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                     one_friend = {
                         "voter_we_vote_id":                 friend_voter.we_vote_id,
+                        "voter_date_last_changed":          friend_voter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
                         "voter_display_name":               friend_voter.get_full_name(),
                         "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
                             if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
@@ -2056,6 +2059,7 @@ def friend_list_for_api(voter_device_id,  # friendList
                             voter.we_vote_id, friend_voter.we_vote_id)
                         one_friend = {
                             "voter_we_vote_id":                 friend_voter.we_vote_id,
+                            "voter_date_last_changed":          friend_voter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
                             "voter_display_name":               friend_voter.get_full_name(),
                             "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
                             if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
@@ -2080,6 +2084,7 @@ def friend_list_for_api(voter_device_id,  # friendList
                         if positive_value_exists(one_friend_invitation.recipient_voter_email):
                             one_friend = {
                                 "voter_we_vote_id":                 "",
+                                "voter_date_last_changed":          "",
                                 "voter_display_name":               "",
                                 "voter_photo_url_large":            "",
                                 'voter_photo_url_medium':           "",
@@ -2110,6 +2115,7 @@ def friend_list_for_api(voter_device_id,  # friendList
             for scheduled_email in scheduled_email_list:
                 one_friend = {
                     "voter_we_vote_id": "",
+                    "voter_date_last_changed": "",
                     "voter_display_name": "",
                     "voter_photo_url_large": "",
                     'voter_photo_url_medium': "",
@@ -2156,6 +2162,7 @@ def friend_list_for_api(voter_device_id,  # friendList
                 positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(suggested_friend)
                 one_friend = {
                     "voter_we_vote_id":                 suggested_friend.we_vote_id,
+                    "voter_date_last_changed":          suggested_friend.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
                     "voter_display_name":               suggested_friend.get_full_name(),
                     "voter_photo_url_large":            suggested_friend.we_vote_hosted_profile_image_url_large
                     if positive_value_exists(suggested_friend.we_vote_hosted_profile_image_url_large)
