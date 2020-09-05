@@ -43,8 +43,9 @@
   <div class="devsite-main-content clearfix">
     <h1 class="devsite-page-title" itemprop="name">
       <div>
-        <p><font color="#333333">Below is a list of our available APIs.
-          See also our <a href="/admin/">admin tools</a>.</font>
+        <p style="color: #333333">A list of our available APIs:</p>
+        <p style="color: #333333; font-weight: 300; font-size: 24px;">
+          Also see our <a href="/admin/">admin tools</a>.
         </p>
       </div>
     </h1>
@@ -70,6 +71,11 @@
           <td><a href="{% url 'apis_v1:deviceIdGenerateDocs' %}">deviceIdGenerate</a></td>
           <td></td>
           <td>Generate a device_id (store in cookie) that can be linked to a voter_id</td>
+        </tr>
+        <tr>
+          <td><a href="{% url 'apis_v1:deviceStoreFirebaseCloudMessagingTokenDocs' %}">deviceStoreFirebaseCloudMessagingToken</a></td>
+          <td></td>
+          <td>Store the Firebase Cloud Messaging (FCW) token in the same record as the voter_device_id</td>
         </tr>
         <tr>
           <td><a href="{% url 'apis_v1:donationWithStripeDocs' %}">donationWithStripe</a></td>
@@ -1038,8 +1044,6 @@
         {###  ###}
         <tr>
           <td colspan="3"><strong>Extension Utils</strong></td>
-          <td></td>
-          <td></td>
         </tr>
          <tr>
           <td><a href="{% url 'apis_v1:pdfToHtmlRetrieveDocs' %}">pdfToHtmlRetrieve</a></td>
@@ -1048,21 +1052,16 @@
           </td>
         </tr>
 
-        {###  ###}
-        <tr>
-          <td colspan="3"><strong>Voter Language</strong></td>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr>
-        </tr>
-        <tr>
-          <td colspan="3"><strong>Messages</strong></td>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr>
-        </tr>
+<!--        <tr>-->
+<!--          <td colspan="3"><strong>Voter Language</strong></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--          <td colspan="3"><strong>Messages</strong></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--        </tr>-->
         </tbody>
       </table>
 
