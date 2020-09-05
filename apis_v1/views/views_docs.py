@@ -10,7 +10,8 @@ from apis_v1.documentation_source import \
     ballot_item_retrieve_doc, ballot_items_search_retrieve_doc, \
     ballot_items_sync_out_doc, ballot_returned_sync_out_doc, candidate_retrieve_doc, \
     candidates_retrieve_doc, candidate_list_for_upcoming_elections_retrieve_doc, \
-    candidates_sync_out_doc, candidate_to_office_link_sync_out_doc, device_id_generate_doc, donation_with_stripe_doc, \
+    candidates_sync_out_doc, candidate_to_office_link_sync_out_doc, device_id_generate_doc, \
+    device_store_firebase_fcm_token_doc, donation_with_stripe_doc, \
     elections_retrieve_doc, elections_sync_out_doc, facebook_disconnect_doc, facebook_friends_action_doc, \
     friend_invitation_by_email_send_doc, \
     friend_invitation_by_email_verify_doc, friend_invitation_by_we_vote_id_send_doc, \
@@ -278,6 +279,15 @@ def device_id_generate_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = device_id_generate_doc.device_id_generate_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def device_store_firebase_fcm_token_doc_view(request):
+    """
+    Show documentation about deviceStoreFirebaseCloudMessagingToken
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = device_store_firebase_fcm_token_doc.device_store_firebase_fcm_token_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 

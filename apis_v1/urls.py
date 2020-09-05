@@ -71,6 +71,8 @@ urlpatterns = [
         views_donation.coupon_summary_retrieve_for_api_view, name='couponSummaryRetrieve'),  # No doc yet
     url(r'^defaultPricing', views_donation.default_pricing_for_api_view, name='defaultPricing'),  # No doc yet
     url(r'^deviceIdGenerate/$', views_misc.device_id_generate_view, name='deviceIdGenerateView'),
+    url(r'^deviceStoreFirebaseCloudMessagingToken/$', views_misc.device_store_firebase_fcm_token_view,
+        name='deviceStoreFirebaseCloudMessagingToken'),
     url(r'^donationCancelSubscription',
         views_donation.donation_cancel_subscription_view, name='donationCancelSubscription'),
     url(r'^donationHistory', views_donation.donation_history_list_view, name='donationHistory'),
@@ -356,6 +358,9 @@ urlpatterns = [
     url(r'^docs/candidateToOfficeLinkSyncOut/$',
         views_docs.candidate_to_office_link_sync_out_doc_view, name='candidateToOfficeLinkSyncOutDocs'),
     url(r'^docs/deviceIdGenerate/$', views_docs.device_id_generate_doc_view, name='deviceIdGenerateDocs'),
+    url(r'^docs/deviceStoreFirebaseCloudMessagingToken/$',
+        views_docs.device_store_firebase_fcm_token_doc_view,
+        name='deviceStoreFirebaseCloudMessagingTokenDocs'),
     url(r'^docs/donationWithStripe/$', views_docs.donation_with_stripe_doc_view, name='donationWithStripeDocs'),
     url(r'^docs/electionsRetrieve/$', views_docs.elections_retrieve_doc_view, name='electionsRetrieveDocs'),
     url(r'^docs/electionsSyncOut/$', views_docs.elections_sync_out_doc_view, name='electionsSyncOutDocs'),
