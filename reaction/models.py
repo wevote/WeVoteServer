@@ -33,16 +33,16 @@ class ReactionLike(models.Model):
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
 
-class ReactionLikeManager(models.Manager):
+class ReactionManager(models.Manager):
 
     def __unicode__(self):
-        return "ReactionLikeManager"
+        return "ReactionManager"
 
     def count_all_reaction_likes(self, liked_item_we_vote_id):
         # How many people, across the entire network, like this position?
         try:
             reaction_like_query = ReactionLike.objects.all()
-            reaction_like_query = reaction_like_query.filter(liked_item_we_vote_id=liked_item_we_vote_id)
+            reaction_like_query = reaction_like_query.filter(liked_item_we_vote_id__iexact=liked_item_we_vote_id)
             number_of_likes = reaction_like_query.count()
             status = "REACTION_LIKE_ALL_COUNT_RETRIEVED"
             success = True
@@ -58,6 +58,10 @@ class ReactionLikeManager(models.Manager):
             'liked_item_we_vote_id':    liked_item_we_vote_id,
         }
         return results
+
+    def fetch_reaction_likes_count(self, liked_item_we_vote_id):
+        results = self.count_all_reaction_likes(liked_item_we_vote_id)
+        return results['number_of_likes']
 
     def retrieve_reaction_like(
             self,
@@ -191,7 +195,7 @@ class ReactionLikeManager(models.Manager):
         status = ''
         success = True
         # Does a reaction entry exist from this voter already exist?
-        reaction_like_manager = ReactionLikeManager()
+        reaction_like_manager = ReactionManager()
         reaction_like_id = 0
         results = reaction_like_manager.retrieve_reaction_like(
             reaction_like_id=0,

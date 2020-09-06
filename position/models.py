@@ -5661,9 +5661,12 @@ class PositionManager(models.Model):
                         if positive_value_exists(contest_office.state_code):
                             existing_position.state_code = contest_office.state_code
 
+            date_entered = existing_position.date_entered
+            if not positive_value_exists(date_entered):
+                date_entered = now()
             new_position = new_position_starter.objects.create(
                 we_vote_id=existing_position.we_vote_id,
-                date_entered=existing_position.date_entered,
+                date_entered=date_entered,
                 date_last_changed=existing_position.date_last_changed,
                 organization_id=existing_position.organization_id,
                 organization_we_vote_id=existing_position.organization_we_vote_id,
@@ -7947,7 +7950,8 @@ class PositionManager(models.Model):
                                 position_on_stage.statement_html = statement_html
                             if more_info_url:
                                 position_on_stage.more_info_url = more_info_url
-
+                            if not positive_value_exists(position_on_stage.date_entered):
+                                position_on_stage.date_entered = now()
                             position_on_stage.save()
                             position_list_manager.update_position_network_scores_for_one_position(position_on_stage)
                             success = True

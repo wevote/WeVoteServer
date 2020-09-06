@@ -2,7 +2,10 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from activity.models import ActivityManager
+from activity.controllers import update_or_create_activity_notice_seed_for_activity_posts
+from activity.models import ActivityManager, NOTICE_ACTIVITY_POST_SEED, \
+    NOTICE_FRIEND_ACTIVITY_POSTS, NOTICE_FRIEND_ENDORSEMENTS, \
+    NOTICE_FRIEND_ENDORSEMENTS_SEED
 from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
@@ -160,8 +163,10 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+    # Retrieve the NOTICE_FRIEND_ENDORSEMENTS_SEED and the ActivityPost entries below
     results = activity_manager.retrieve_activity_notice_seed_list_for_recipient(
         recipient_voter_we_vote_id=voter_we_vote_id,
+        kind_of_seed_list=[NOTICE_FRIEND_ENDORSEMENTS_SEED],
         limit_to_activity_tidbit_we_vote_id_list=activity_tidbit_we_vote_id_list)
     if results['success']:
         activity_notice_seed_list = results['activity_notice_seed_list']
@@ -373,10 +378,16 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
     activity_notice_list = results['activity_notice_list']
     for activity_notice in activity_notice_list:
         position_we_vote_id_list = []
-        if positive_value_exists(activity_notice.position_we_vote_id_list_serialized):
-            position_we_vote_id_list = json.loads(activity_notice.position_we_vote_id_list_serialized)
-        new_positions_entered_count = activity_notice.new_positions_entered_count
-        if new_positions_entered_count > 0:
+        include_this_activity_notice = False
+        new_positions_entered_count = 0
+        if activity_notice.kind_of_notice == NOTICE_FRIEND_ENDORSEMENTS:
+            if positive_value_exists(activity_notice.position_we_vote_id_list_serialized):
+                position_we_vote_id_list = json.loads(activity_notice.position_we_vote_id_list_serialized)
+            new_positions_entered_count = activity_notice.new_positions_entered_count
+            include_this_activity_notice = True
+        elif activity_notice.kind_of_notice == NOTICE_FRIEND_ACTIVITY_POSTS:
+            include_this_activity_notice = True
+        if include_this_activity_notice:
             activity_notice_dict = {
                 'activity_notice_clicked':          activity_notice.activity_notice_clicked,
                 'activity_notice_seen':             activity_notice.activity_notice_seen,
@@ -386,6 +397,8 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
                 'activity_notice_id':               activity_notice.id,
                 'kind_of_notice':                   activity_notice.kind_of_notice,
                 'new_positions_entered_count':      new_positions_entered_count,
+                'number_of_comments':               activity_notice.number_of_comments,
+                'number_of_likes':                  activity_notice.number_of_likes,
                 'position_we_vote_id_list':         position_we_vote_id_list,
                 'speaker_name':                     activity_notice.speaker_name,
                 'speaker_organization_we_vote_id':  activity_notice.speaker_organization_we_vote_id,
@@ -433,10 +446,13 @@ def activity_post_save_view(request):  # activityPostSave
     }
 
     voter_device_id = get_voter_device_id(request)
+    voter = None
+    voter_found = False
     voter_manager = VoterManager()
     results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if results['voter_found']:
         voter = results['voter']
+        voter_found = True
         speaker_twitter_followers_count = 0
 
         if positive_value_exists(voter.linked_organization_we_vote_id):
@@ -468,7 +484,7 @@ def activity_post_save_view(request):  # activityPostSave
         updated_values['speaker_twitter_followers_count'] = speaker_twitter_followers_count
         updated_values['speaker_twitter_handle'] = voter.twitter_screen_name
 
-    if not positive_value_exists(updated_values['speaker_voter_we_vote_id']):
+    if not voter_found or not positive_value_exists(updated_values['speaker_voter_we_vote_id']):
         status += "ACTIVITY_TIDBIT_SAVE_MISSING_VOTER_WE_VOTE_ID "
         json_data = {
             'status': status,
@@ -486,6 +502,15 @@ def activity_post_save_view(request):  # activityPostSave
     activity_post_dict = {}
     if results['activity_post_found']:
         activity_post = results['activity_post']
+        activity_results = update_or_create_activity_notice_seed_for_activity_posts(
+            activity_post_we_vote_id=activity_post.we_vote_id,
+            visibility_is_public=visibility_is_public,
+            speaker_name=voter.get_full_name(real_name_only=True),
+            speaker_organization_we_vote_id=voter.linked_organization_we_vote_id,
+            speaker_voter_we_vote_id=voter.we_vote_id,
+            speaker_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium,
+            speaker_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny)
+        status += activity_results['status']
         activity_post_dict = {
             'date_created':                     activity_post.date_created.strftime('%Y-%m-%d %H:%M:%S'),
             'date_last_changed':                activity_post.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),

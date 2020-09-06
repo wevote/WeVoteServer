@@ -1,0 +1,32 @@
+========================================{# Later we replace "Your   friend" with the sender name. #}
+{% if view_new_endorsements_url %}
+View New Opinions:
+{{ view_new_endorsements_url }}
+
+{% endif %}
+{% if view_your_ballot_url %}
+See Your Ballot:
+{{ view_your_ballot_url }}
+
+{% endif %}
+========================================
+
+{% if recipient_name %}
+Hello {{ recipient_name }},
+{% else %}
+Hello,
+{% endif %}
+
+{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}{% if sender_email_address %} ({{ sender_email_address }}){% elif sms_phone_number %} ({{ sms_phone_number }}){% endif %} added a new opinion on We Vote, a simple way to plan your entire ballot.
+{% if invitation_message %}
+"{{ invitation_message }}"{% endif %}
+
+Thank you,
+The We Vote Team
+
+
+
+========================================
+This message was sent to {{ recipient_voter_email }}. If you don't want to receive emails from We Vote, please follow the link below to unsubscribe:
+{{ recipient_unsubscribe_url }}
+We Vote, Attention: Community Team, 1423 Broadway PMB 158, Oakland, CA 94612

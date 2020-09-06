@@ -13,10 +13,14 @@ from wevote_settings.models import fetch_next_we_vote_id_activity_notice_seed_in
     fetch_site_unique_id_prefix
 
 # Kind of Seeds
+NOTICE_ACTIVITY_POST_SEED = 'NOTICE_ACTIVITY_POST_SEED'
 NOTICE_FRIEND_ENDORSEMENTS_SEED = 'NOTICE_FRIEND_ENDORSEMENTS_SEED'
+NOTICE_VOTER_DAILY_SUMMARY_SEED = 'NOTICE_VOTER_DAILY_SUMMARY_SEED'  # Activity that touches each voter, for each day
 
 # Kind of Notices
+NOTICE_FRIEND_ACTIVITY_POSTS = 'NOTICE_FRIEND_ACTIVITY_POSTS'  # Notice shown in header menu, no email sent
 NOTICE_FRIEND_ENDORSEMENTS = 'NOTICE_FRIEND_ENDORSEMENTS'
+NOTICE_VOTER_DAILY_SUMMARY = 'NOTICE_VOTER_DAILY_SUMMARY'  # Email sent, not shown in header menu
 
 FRIENDS_ONLY = 'FRIENDS_ONLY'
 SHOW_PUBLIC = 'SHOW_PUBLIC'
@@ -76,6 +80,8 @@ class ActivityManager(models.Manager):
             date_of_notice=None,
             kind_of_notice=None,
             kind_of_seed=None,
+            number_of_comments=0,
+            number_of_likes=0,
             position_we_vote_id_list_serialized=None,
             recipient_voter_we_vote_id='',
             send_to_email=False,
@@ -109,6 +115,8 @@ class ActivityManager(models.Manager):
                 kind_of_notice=kind_of_notice,
                 kind_of_seed=kind_of_seed,
                 new_positions_entered_count=new_positions_entered_count,
+                number_of_comments=number_of_comments,
+                number_of_likes=number_of_likes,
                 position_we_vote_id_list_serialized=position_we_vote_id_list_serialized,
                 recipient_voter_we_vote_id=recipient_voter_we_vote_id,
                 send_to_email=send_to_email,
@@ -126,7 +134,7 @@ class ActivityManager(models.Manager):
             activity_notice_saved = False
             activity_notice = None
             success = False
-            status += "ACTIVITY_NOTICE_NOT_CREATED " + str(e) + ' '
+            status += "ACTIVITY_NOTICE_NOT_CREATED: " + str(e) + ' '
 
         results = {
             'success':                  success,
@@ -138,22 +146,33 @@ class ActivityManager(models.Manager):
 
     def create_activity_notice_seed(
             self,
+            activity_notices_created=False,
+            activity_notices_scheduled=False,
+            activity_tidbit_we_vote_ids_for_friends_serialized='',
+            activity_tidbit_we_vote_ids_for_public_serialized='',
             date_of_notice=None,
             kind_of_seed=None,
+            listener_name='',
+            listener_voter_we_vote_id='',
             position_we_vote_ids_for_friends_serialized='',
             position_we_vote_ids_for_public_serialized='',
+            send_to_email=False,  # For VOTER_DAILY_SUMMARY
+            send_to_sms=False,  # For VOTER_DAILY_SUMMARY
             speaker_name='',
             speaker_organization_we_vote_id='',
+            speaker_organization_we_vote_ids_serialized=None,
             speaker_voter_we_vote_id='',
+            speaker_voter_we_vote_ids_serialized=None,
             speaker_profile_image_url_medium='',
             speaker_profile_image_url_tiny=''):
         status = ''
 
-        if not positive_value_exists(speaker_organization_we_vote_id):
+        if not positive_value_exists(speaker_organization_we_vote_id) \
+                and not positive_value_exists(listener_voter_we_vote_id):
             activity_notice_seed = None
             results = {
                 'success':                      False,
-                'status':                       "ACTIVITY_NOTICE_SEED_MISSING_SPEAKER_ORG_ID ",
+                'status':                       "ACTIVITY_NOTICE_SEED_MISSING_SPEAKER_AND_LISTENER ",
                 'activity_notice_seed_saved':   False,
                 'activity_notice_seed':         activity_notice_seed,
             }
@@ -161,13 +180,23 @@ class ActivityManager(models.Manager):
 
         try:
             activity_notice_seed = ActivityNoticeSeed.objects.create(
+                activity_notices_created=activity_notices_created,
+                activity_notices_scheduled=activity_notices_scheduled,
+                activity_tidbit_we_vote_ids_for_friends_serialized=activity_tidbit_we_vote_ids_for_friends_serialized,
+                activity_tidbit_we_vote_ids_for_public_serialized=activity_tidbit_we_vote_ids_for_public_serialized,
                 date_of_notice=date_of_notice,
                 kind_of_seed=kind_of_seed,
+                listener_name=listener_name,
+                listener_voter_we_vote_id=listener_voter_we_vote_id,
                 position_we_vote_ids_for_friends_serialized=position_we_vote_ids_for_friends_serialized,
                 position_we_vote_ids_for_public_serialized=position_we_vote_ids_for_public_serialized,
+                send_to_email=send_to_email,
+                send_to_sms=send_to_sms,
                 speaker_name=speaker_name,
                 speaker_organization_we_vote_id=speaker_organization_we_vote_id,
+                speaker_organization_we_vote_ids_serialized=speaker_organization_we_vote_ids_serialized,
                 speaker_voter_we_vote_id=speaker_voter_we_vote_id,
+                speaker_voter_we_vote_ids_serialized=speaker_voter_we_vote_ids_serialized,
                 speaker_profile_image_url_medium=speaker_profile_image_url_medium,
                 speaker_profile_image_url_tiny=speaker_profile_image_url_tiny
             )
@@ -178,7 +207,7 @@ class ActivityManager(models.Manager):
             activity_notice_seed_saved = False
             activity_notice_seed = None
             success = False
-            status += "ACTIVITY_NOTICE_SEED_NOT_CREATED " + str(e) + ' '
+            status += "ACTIVITY_NOTICE_SEED_NOT_CREATED: " + str(e) + ' '
 
         results = {
             'success':                      success,
@@ -224,6 +253,66 @@ class ActivityManager(models.Manager):
             'status':               status,
             'activity_post_saved':  activity_post_saved,
             'activity_post':        activity_post,
+        }
+        return results
+
+    def fetch_number_of_comments(self, parent_we_vote_id='', parent_comment_we_vote_id=''):
+        results = self.retrieve_number_of_comments(
+            parent_we_vote_id=parent_we_vote_id,
+            parent_comment_we_vote_id=parent_comment_we_vote_id)
+        return results['number_of_comments']
+
+    def retrieve_number_of_comments(self, parent_we_vote_id='', parent_comment_we_vote_id=''):
+        """
+
+        :param parent_we_vote_id:
+        :param parent_comment_we_vote_id:
+        :return:
+        """
+        status = ""
+        success = True
+        if not positive_value_exists(parent_we_vote_id) and not positive_value_exists(parent_comment_we_vote_id):
+            success = False
+            status += 'VALID_PARENT_OR_PARENT_COMMENT_WE_VOTE_ID_MISSING-NUMBER_OF_COMMENTS '
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'parent_we_vote_id':            parent_we_vote_id,
+                'parent_comment_we_vote_id':    parent_comment_we_vote_id,
+                'number_of_comments':           0,
+            }
+            return results
+
+        number_of_comments = 0
+        try:
+            if positive_value_exists(parent_comment_we_vote_id):
+                queryset = ActivityComment.objects.all()
+                queryset = queryset.filter(
+                    parent_comment_we_vote_id__iexact=parent_comment_we_vote_id,
+                    deleted=False
+                )
+            else:
+                queryset = ActivityComment.objects.all()
+                queryset = queryset.filter(
+                    parent_we_vote_id__iexact=parent_we_vote_id,
+                    deleted=False
+                )
+                # Don't retrieve entries where there is a value for parent_comment_we_vote_id
+                queryset = queryset.filter(
+                    Q(parent_comment_we_vote_id=None) | Q(parent_comment_we_vote_id=""))
+            queryset = queryset.exclude(
+                Q(parent_we_vote_id=None) | Q(parent_we_vote_id=""))
+            number_of_comments = queryset.count()
+        except Exception as e:
+            success = False
+            status += 'FAILED retrieve_number_of_comments ActivityComment: ' + str(e) + ' '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'parent_we_vote_id':            parent_we_vote_id,
+            'parent_comment_we_vote_id':    parent_comment_we_vote_id,
+            'number_of_comments':           number_of_comments,
         }
         return results
 
@@ -383,6 +472,61 @@ class ActivityManager(models.Manager):
             'status':                       status,
             'activity_notice_list_found':   activity_notice_list_found,
             'activity_notice_list':         activity_notice_list,
+        }
+        return results
+
+    def retrieve_recent_activity_notice_seed_from_listener(
+            self,
+            kind_of_seed='',
+            listener_voter_we_vote_id=''):
+        """
+
+        :param kind_of_seed:
+        :param listener_voter_we_vote_id:
+        :return:
+        """
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        activity_notice_seed_found = False
+        activity_notice_seed = None
+        activity_notice_seed_id = 0
+        status = ""
+
+        lifespan_of_seed_in_seconds = get_lifespan_of_seed(kind_of_seed)  # In seconds
+        earliest_date_of_notice = now() - timedelta(seconds=lifespan_of_seed_in_seconds)
+
+        try:
+            if positive_value_exists(listener_voter_we_vote_id):
+                activity_notice_seed = ActivityNoticeSeed.objects.get(
+                    date_of_notice__gte=earliest_date_of_notice,
+                    deleted=False,
+                    kind_of_seed=kind_of_seed,
+                    listener_voter_we_vote_id__iexact=listener_voter_we_vote_id,
+                )
+                activity_notice_seed_id = activity_notice_seed.id
+                activity_notice_seed_found = True
+                success = True
+                status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_SEED_FOUND_BY_LISTENER_VOTER_WE_VOTE_ID "
+            else:
+                activity_notice_seed_found = False
+                success = False
+                status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_SEED_LISTENER_VOTER_WE_VOTE_ID_MISSING "
+        except ActivityNoticeSeed.DoesNotExist:
+            exception_does_not_exist = True
+            success = True
+            status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_SEED_NOT_FOUND "
+        except Exception as e:
+            success = False
+            status += 'FAILED retrieve_recent_activity_notice_seed_from_listener ActivityNoticeSeed: ' + str(e) + ' '
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'DoesNotExist':                     exception_does_not_exist,
+            'MultipleObjectsReturned':          exception_multiple_object_returned,
+            'activity_notice_seed_found':       activity_notice_seed_found,
+            'activity_notice_seed_id':          activity_notice_seed_id,
+            'activity_notice_seed':             activity_notice_seed,
         }
         return results
 
@@ -578,10 +722,12 @@ class ActivityManager(models.Manager):
     def retrieve_activity_notice_seed_list_for_recipient(
             self,
             recipient_voter_we_vote_id='',
+            kind_of_seed_list=None,
             limit_to_activity_tidbit_we_vote_id_list=[]):
         """
 
         :param recipient_voter_we_vote_id:
+        :param kind_of_seed_list:
         :param limit_to_activity_tidbit_we_vote_id_list:
         :return:
         """
@@ -610,12 +756,12 @@ class ActivityManager(models.Manager):
             voter_friend_we_vote_id_list += friends_we_vote_id_list
         try:
             queryset = ActivityNoticeSeed.objects.all()
-            queryset = queryset.filter(
-                speaker_voter_we_vote_id__in=voter_friend_we_vote_id_list,
-                deleted=False
-            )
+            queryset = queryset.filter(deleted=False)
+            queryset = queryset.filter(speaker_voter_we_vote_id__in=voter_friend_we_vote_id_list)
             if limit_to_activity_tidbit_we_vote_id_list and len(limit_to_activity_tidbit_we_vote_id_list) > 0:
                 queryset = queryset.filter(we_vote_id__in=limit_to_activity_tidbit_we_vote_id_list)
+            if kind_of_seed_list and len(kind_of_seed_list) > 0:
+                queryset = queryset.filter(kind_of_seed__in=kind_of_seed_list)
             queryset = queryset.exclude(
                 Q(speaker_voter_we_vote_id=None) | Q(speaker_voter_we_vote_id=""))
             queryset = queryset.order_by('-id')  # Put most recent at top of list
@@ -655,6 +801,7 @@ class ActivityManager(models.Manager):
             notices_to_be_created=False,
             notices_to_be_scheduled=False,
             notices_to_be_updated=False,
+            to_be_added_to_voter_daily_summary=False,
             activity_notice_seed_id_already_reviewed_list=[]):
         status = ""
 
@@ -664,11 +811,21 @@ class ActivityManager(models.Manager):
             queryset = queryset.filter(deleted=False)
             if positive_value_exists(notices_to_be_created):
                 queryset = queryset.filter(activity_notices_created=False)
+                queryset = \
+                    queryset.filter(kind_of_seed__in=[NOTICE_ACTIVITY_POST_SEED, NOTICE_FRIEND_ENDORSEMENTS_SEED])
             elif positive_value_exists(notices_to_be_scheduled):
                 queryset = queryset.filter(activity_notices_scheduled=False)
+                queryset = queryset.filter(
+                    kind_of_seed__in=[NOTICE_FRIEND_ENDORSEMENTS_SEED, NOTICE_VOTER_DAILY_SUMMARY_SEED])
             elif positive_value_exists(notices_to_be_updated):
                 queryset = queryset.filter(activity_notices_created=True)
                 queryset = queryset.filter(date_of_notice_earlier_than_update_window=False)
+                queryset = queryset.filter(
+                    kind_of_seed__in=[NOTICE_ACTIVITY_POST_SEED, NOTICE_FRIEND_ENDORSEMENTS_SEED])
+            elif positive_value_exists(to_be_added_to_voter_daily_summary):
+                queryset = queryset.filter(added_to_voter_daily_summary=False)
+                queryset = queryset.filter(
+                    kind_of_seed__in=[NOTICE_ACTIVITY_POST_SEED, NOTICE_FRIEND_ENDORSEMENTS_SEED])
             if activity_notice_seed_id_already_reviewed_list and len(activity_notice_seed_id_already_reviewed_list) > 0:
                 queryset = queryset.exclude(id__in=activity_notice_seed_id_already_reviewed_list)
 
@@ -695,6 +852,77 @@ class ActivityManager(models.Manager):
             'status':                       status,
             'activity_notice_seed_found':   activity_notice_seed_found,
             'activity_notice_seed':         activity_notice_seed,
+        }
+        return results
+
+    def retrieve_activity_post_list(
+            self,
+            speaker_voter_we_vote_id_list=[],
+            limit_to_visibility_is_friends_only=False,
+            limit_to_visibility_is_public=False,
+            since_date=None):
+        """
+
+        :param speaker_voter_we_vote_id_list:
+        :param limit_to_visibility_is_friends_only:
+        :param limit_to_visibility_is_public:
+        :param since_date:
+        :return:
+        """
+        status = ""
+        if not speaker_voter_we_vote_id_list or len(speaker_voter_we_vote_id_list) == 0:
+            success = False
+            status += 'VALID_VOTER_WE_VOTE_IDS_MISSING '
+            results = {
+                'success':                          success,
+                'status':                           status,
+                'activity_post_list_found':  False,
+                'activity_post_list':        [],
+            }
+            return results
+
+        activity_post_list = []
+        try:
+            queryset = ActivityPost.objects.all()
+            queryset = queryset.filter(
+                speaker_voter_we_vote_id__in=speaker_voter_we_vote_id_list,
+                deleted=False
+            )
+            if positive_value_exists(since_date):
+                queryset = queryset.filter(date_created__gte=since_date)
+            if positive_value_exists(limit_to_visibility_is_friends_only):
+                queryset = queryset.filter(visibility_is_public=False)
+            elif positive_value_exists(limit_to_visibility_is_public):
+                queryset = queryset.filter(visibility_is_public=True)
+            queryset = queryset.exclude(
+                Q(speaker_voter_we_vote_id=None) | Q(speaker_voter_we_vote_id=""))
+            queryset = queryset.order_by('-id')  # Put most recent ActivityPost at top of list
+            activity_post_list = queryset[:200]
+
+            if len(activity_post_list):
+                success = True
+                activity_post_list_found = True
+                status += 'ACTIVITY_POST_LIST_RETRIEVED '
+            else:
+                success = True
+                activity_post_list_found = False
+                status += 'NO_ACTIVITY_POST_LIST_RETRIEVED '
+        except ActivityPost.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            activity_post_list_found = False
+            status += 'NO_ACTIVITY_POST_LIST_RETRIEVED_DoesNotExist '
+            activity_post_list = []
+        except Exception as e:
+            success = False
+            activity_post_list_found = False
+            status += 'FAILED retrieve_activity_post_list: ' + str(e) + ' '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'activity_post_list_found':     activity_post_list_found,
+            'activity_post_list':           activity_post_list,
         }
         return results
 
@@ -735,12 +963,14 @@ class ActivityManager(models.Manager):
                 voter_friend_we_vote_id_list += friends_we_vote_id_list
         try:
             queryset = ActivityPost.objects.all()
-            queryset = queryset.filter(
-                speaker_voter_we_vote_id__in=voter_friend_we_vote_id_list,
-                deleted=False
-            )
+            queryset = queryset.filter(deleted=False)
             if limit_to_activity_tidbit_we_vote_id_list and len(limit_to_activity_tidbit_we_vote_id_list) > 0:
                 queryset = queryset.filter(we_vote_id__in=limit_to_activity_tidbit_we_vote_id_list)
+                # Allow the public ActivityPosts to be found
+                queryset = queryset.filter(
+                    Q(speaker_voter_we_vote_id__in=voter_friend_we_vote_id_list) | Q(visibility_is_public=True))
+            else:
+                queryset = queryset.filter(speaker_voter_we_vote_id__in=voter_friend_we_vote_id_list)
             queryset = queryset.exclude(
                 Q(speaker_voter_we_vote_id=None) | Q(speaker_voter_we_vote_id=""))
             queryset = queryset.order_by('-id')  # Put most recent ActivityPost at top of list
@@ -749,16 +979,16 @@ class ActivityManager(models.Manager):
             if len(activity_post_list):
                 success = True
                 activity_post_list_found = True
-                status += 'ACTIVITY_POST_LIST_RETRIEVED '
+                status += 'ACTIVITY_POST_LIST_FOR_RECIPIENT_RETRIEVED '
             else:
                 success = True
                 activity_post_list_found = False
-                status += 'NO_ACTIVITY_POST_LIST_RETRIEVED '
+                status += 'NO_ACTIVITY_POST_LIST_FOR_RECIPIENT_RETRIEVED '
         except ActivityPost.DoesNotExist:
             # No data found. Not a problem.
             success = True
             activity_post_list_found = False
-            status += 'NO_ACTIVITY_POST_LIST_RETRIEVED_DoesNotExist '
+            status += 'NO_ACTIVITY_POST_LIST_FOR_RECIPIENT_RETRIEVED_DoesNotExist '
             activity_post_list = []
         except Exception as e:
             success = False
@@ -1071,6 +1301,8 @@ class ActivityNotice(models.Model):
     kind_of_notice = models.CharField(max_length=50, default=None, null=True)
     kind_of_seed = models.CharField(max_length=50, default=None, null=True)
     new_positions_entered_count = models.PositiveIntegerField(default=None, null=True)
+    number_of_comments = models.PositiveIntegerField(default=None, null=True)
+    number_of_likes = models.PositiveIntegerField(default=None, null=True)
     position_we_vote_id_list_serialized = models.TextField(default=None, null=True)
     speaker_name = models.CharField(max_length=255, default=None, null=True)
     speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
@@ -1095,14 +1327,32 @@ class ActivityNoticeSeed(models.Model):
     out to an ActivityNotice, which gets shown to an individual voter.
     """
     activity_notices_created = models.BooleanField(default=False)
+    activity_tidbit_we_vote_ids_for_friends_serialized = models.TextField(default=None, null=True)
+    activity_tidbit_we_vote_ids_for_public_serialized = models.TextField(default=None, null=True)
     date_of_notice_earlier_than_update_window = models.BooleanField(default=False)
     activity_notices_scheduled = models.BooleanField(default=False)
+    added_to_voter_daily_summary = models.BooleanField(default=False)
     date_of_notice = models.DateTimeField(null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True)
     deleted = models.BooleanField(default=False)
     kind_of_seed = models.CharField(max_length=50, default=None, null=True)
+    # Voter receiving the daily summary: NOTICE_VOTER_DAILY_SUMMARY
+    listener_name = models.CharField(max_length=255, default=None, null=True)
+    listener_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    speaker_voter_we_vote_ids_serialized = models.TextField(default=None, null=True)
+    speaker_organization_we_vote_ids_serialized = models.TextField(default=None, null=True)
+    # Positions that were changed: NOTICE_FRIEND_ENDORSEMENTS
     position_we_vote_ids_for_friends_serialized = models.TextField(default=None, null=True)
     position_we_vote_ids_for_public_serialized = models.TextField(default=None, null=True)
+    # Track Email send progress for NOTICE_VOTER_DAILY_SUMMARY_SEED
+    send_to_email = models.BooleanField(default=False)
+    scheduled_to_email = models.BooleanField(default=False)
+    sent_to_email = models.BooleanField(default=False)
+    # Track SMS send progress for NOTICE_VOTER_DAILY_SUMMARY_SEED
+    send_to_sms = models.BooleanField(default=False)
+    scheduled_to_sms = models.BooleanField(default=False)
+    sent_to_sms = models.BooleanField(default=False)
+    # Voter who took the action: NOTICE_ACTIVITY_POST_SEED, NOTICE_FRIEND_ENDORSEMENTS_SEED
     speaker_name = models.CharField(max_length=255, default=None, null=True)
     speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
     speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
@@ -1110,6 +1360,7 @@ class ActivityNoticeSeed(models.Model):
     speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
     speaker_twitter_handle = models.CharField(max_length=255, null=True, unique=False, default=None)
     speaker_twitter_followers_count = models.IntegerField(default=0)
+    # we_vote_id of this SEED
     we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=True)
 
     # We override the save function so we can auto-generate we_vote_id
@@ -1170,7 +1421,53 @@ class ActivityPost(models.Model):
         super(ActivityPost, self).save(*args, **kwargs)
 
 
+# class ActivitySummaryForVoter(models.Model):
+#     """
+#     This is a summary of activity that leads to an email or sms being sent on a daily or weekly basis.
+#     """
+#     # activity_notices_created = models.BooleanField(default=False)
+#     # date_of_notice_earlier_than_update_window = models.BooleanField(default=False)
+#     # activity_notices_scheduled = models.BooleanField(default=False)
+#     date_created = models.DateTimeField(null=True)
+#     date_last_changed = models.DateTimeField(null=True, auto_now=True)
+#     deleted = models.BooleanField(default=False)
+#     kind_of_summary = models.CharField(max_length=50, default=None, null=True)
+#     # position_we_vote_ids_for_friends_serialized = models.TextField(default=None, null=True)
+#     # position_we_vote_ids_for_public_serialized = models.TextField(default=None, null=True)
+#     # speaker_name = models.CharField(max_length=255, default=None, null=True)
+#     # speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+#     # speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+#     # speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
+#     # speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
+#     # speaker_twitter_handle = models.CharField(max_length=255, null=True, unique=False, default=None)
+#     # speaker_twitter_followers_count = models.IntegerField(default=0)
+#     we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=True)
+#
+#     # We override the save function so we can auto-generate we_vote_id
+#     def save(self, *args, **kwargs):
+#         # Even if this data came from another source we still need a unique we_vote_id
+#         if self.we_vote_id:
+#             self.we_vote_id = self.we_vote_id.strip().lower()
+#         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
+#             # ...generate a new id
+#             site_unique_id_prefix = fetch_site_unique_id_prefix()
+#             next_local_integer = fetch_next_we_vote_id_activity_summary_for_voter_integer()
+#             # "wv" = We Vote
+#             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+#             # "actsum" = tells us this is a unique id for an ActivitySummaryForVoter
+#             # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+#             self.we_vote_id = "wv{site_unique_id_prefix}actsum{next_integer}".format(
+#                 site_unique_id_prefix=site_unique_id_prefix,
+#                 next_integer=next_local_integer,
+#             )
+#         super(ActivitySummaryForVoter, self).save(*args, **kwargs)
+
+
 def get_lifespan_of_seed(kind_of_seed):
+    if kind_of_seed == NOTICE_ACTIVITY_POST_SEED:
+        return 14400  # 4 hours * 60 minutes * 60 seconds/minute
     if kind_of_seed == NOTICE_FRIEND_ENDORSEMENTS_SEED:
         return 21600  # 6 hours * 60 minutes * 60 seconds/minute
+    if kind_of_seed == NOTICE_VOTER_DAILY_SUMMARY_SEED:
+        return 43200  # 12 hours * 60 minutes * 60 seconds/minute
     return 0

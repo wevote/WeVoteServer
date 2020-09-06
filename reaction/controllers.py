@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import ReactionLike, ReactionLikeManager
+from .models import ReactionLike, ReactionManager
 from django.db.models import Q
 from django.http import HttpResponse
 import json
@@ -39,7 +39,7 @@ def reaction_like_count_for_api(voter_device_id, liked_item_we_vote_id, limit_to
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    reaction_like_manager = ReactionLikeManager()
+    reaction_like_manager = ReactionManager()
     type_of_count = False
     number_of_likes = False
     if positive_value_exists(liked_item_we_vote_id):
@@ -99,7 +99,7 @@ def voter_reaction_like_off_save_for_api(
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    reaction_like_manager = ReactionLikeManager()
+    reaction_like_manager = ReactionManager()
     if positive_value_exists(voter_id) and positive_value_exists(liked_item_we_vote_id):
         results = reaction_like_manager.toggle_off_voter_reaction_like(
             voter_id=voter_id,
@@ -151,7 +151,7 @@ def voter_reaction_like_on_save_for_api(
     voter_we_vote_id = voter.we_vote_id
     voter_display_name = voter.get_full_name(real_name_only=True)
 
-    reaction_like_manager = ReactionLikeManager()
+    reaction_like_manager = ReactionManager()
     reaction_like_id = 0
     if positive_value_exists(voter_id) and positive_value_exists(liked_item_we_vote_id):
         results = reaction_like_manager.toggle_on_voter_reaction_like(

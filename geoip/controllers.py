@@ -33,10 +33,13 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
 
     if ip_address == '127.0.0.1' and 'test' not in sys.argv:
         ip_address = '73.158.32.221'
-        if 'only_log_ip_substitution_once' not in sys.argv:
-            sys.argv.append('only_log_ip_substitution_once')
-            print("Running on a local dev server, so we are sending a valid Oakland IP address 73.158.32.221 for use "
-                  "in geolocation")
+        try:
+            if 'only_log_ip_substitution_once' not in sys.argv:
+                sys.argv.append('only_log_ip_substitution_once')
+                print("Running on a local dev server, "
+                      "so we are sending a valid Oakland IP address 73.158.32.221 for use in geolocation")
+        except Exception as e:
+            pass
 
     if not positive_value_exists(ip_address):
         # return HttpResponse('missing ip_address request parameter', status=400)
