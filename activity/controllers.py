@@ -3,15 +3,19 @@
 # -*- coding: UTF-8 -*-
 
 from .models import ActivityNoticeSeed, ActivityManager, ActivityNotice, ActivityPost, \
-    NOTICE_FRIEND_ENDORSEMENTS, NOTICE_FRIEND_ENDORSEMENTS_SEED
+    NOTICE_ACTIVITY_POST_SEED, NOTICE_FRIEND_ACTIVITY_POSTS, \
+    NOTICE_FRIEND_ENDORSEMENTS, NOTICE_FRIEND_ENDORSEMENTS_SEED, \
+    NOTICE_VOTER_DAILY_SUMMARY, NOTICE_VOTER_DAILY_SUMMARY_SEED
 from config.base import get_environment_variable
 from django.utils.timezone import now
 from friend.models import FriendManager
 import json
 from datetime import timedelta
+from reaction.models import ReactionManager
 from voter.models import \
-    NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL, \
-    NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_SMS, NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS, \
+    NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS, \
+    NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL, NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_SMS,\
+    NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL, NOTIFICATION_VOTER_DAILY_SUMMARY_SMS, \
     VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
@@ -334,7 +338,8 @@ def notice_friend_endorsements_send(
         invitation_message='',
         activity_tidbit_we_vote_id=''):
     """
-    We are sending an email to the speaker's friends who are subscribed to NOTICE_FRIEND_ENDORSEMENTS
+    We are sending an email to the speaker's friends who are
+    subscribed to NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT or NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS
     :param speaker_voter_we_vote_id:
     :param recipient_voter_we_vote_id:
     :param invitation_message:
@@ -479,7 +484,159 @@ def notice_friend_endorsements_send(
     return results
 
 
-def update_or_create_activity_notices_triggered_by_batch_process():
+def notice_voter_daily_summary_send(  # NOTICE_VOTER_DAILY_SUMMARY
+        speaker_voter_we_vote_id='',
+        recipient_voter_we_vote_id='',
+        invitation_message='',
+        activity_tidbit_we_vote_id=''):
+    """
+    We are sending an email to the speaker's friends who are subscribed to NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL
+    TODO: Convert this to pull data from ActivitySummaryForVoter
+    :param speaker_voter_we_vote_id:
+    :param recipient_voter_we_vote_id:
+    :param invitation_message:
+    :param activity_tidbit_we_vote_id:
+    :return:
+    """
+    from email_outbound.controllers import schedule_email_with_email_outbound_description
+    from email_outbound.models import EmailManager, NOTICE_VOTER_DAILY_SUMMARY_TEMPLATE
+    status = ""
+    success = True
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_by_we_vote_id(speaker_voter_we_vote_id)
+    from organization.controllers import transform_web_app_url
+    web_app_root_url_verified = transform_web_app_url('')  # Change to client URL if needed
+
+    if not voter_results['voter_found']:
+        error_results = {
+            'status':                               "SPEAKER_VOTER_NOT_FOUND ",
+            'success':                              False,
+        }
+        return error_results
+
+    speaker_voter = voter_results['voter']
+
+    recipient_voter_results = voter_manager.retrieve_voter_by_we_vote_id(recipient_voter_we_vote_id)
+    if not recipient_voter_results['voter_found']:
+        error_results = {
+            'status':                               "RECIPIENT_VOTER_NOT_FOUND ",
+            'success':                              False,
+        }
+        return error_results
+
+    recipient_voter = recipient_voter_results['voter']
+
+    email_manager = EmailManager()
+
+    # Retrieve the email address of the original_sender (which is the person we are sending this notification to)
+    recipient_email_we_vote_id = ""
+    recipient_email = ""
+    recipient_email_subscription_secret_key = ""
+    if recipient_voter.has_email_with_verified_ownership():
+        results = email_manager.retrieve_primary_email_with_ownership_verified(recipient_voter_we_vote_id)
+        success = results['success']
+        if results['email_address_object_found']:
+            recipient_email_object = results['email_address_object']
+            recipient_email_we_vote_id = recipient_email_object.we_vote_id
+            recipient_email = recipient_email_object.normalized_email_address
+            if positive_value_exists(recipient_email_object.subscription_secret_key):
+                recipient_email_subscription_secret_key = recipient_email_object.subscription_secret_key
+            else:
+                recipient_email_subscription_secret_key = \
+                    email_manager.update_email_address_with_new_subscription_secret_key(
+                        email_we_vote_id=recipient_email_we_vote_id)
+    else:
+        # The recipient must have a valid email
+        status += "RECIPIENT_VOTER_DOES_NOT_HAVE_VALID_EMAIL "
+        success = True
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    # Retrieve the email address of the speaker_voter - used in invitation to help the recipient understand who sent
+    speaker_voter_email = ""
+    speaker_voter_we_vote_id = speaker_voter.we_vote_id
+    if speaker_voter.has_email_with_verified_ownership():
+        results = email_manager.retrieve_primary_email_with_ownership_verified(speaker_voter_we_vote_id)
+        if results['email_address_object_found']:
+            speaker_voter_email_object = results['email_address_object']
+            speaker_voter_email = speaker_voter_email_object.normalized_email_address
+    else:
+        # Not having an email is ok now, since the speaker_voter could have signed in with SMS or Twitter
+        status += "SPEAKER_VOTER_DOES_NOT_HAVE_VALID_EMAIL "
+
+    if positive_value_exists(recipient_email_we_vote_id):
+        recipient_voter_we_vote_id = recipient_voter.we_vote_id
+
+        # Template variables
+        real_name_only = True
+        recipient_name = recipient_voter.get_full_name(real_name_only)
+        speaker_voter_name = speaker_voter.get_full_name(real_name_only)
+        speaker_voter_photo = speaker_voter.voter_photo_url()
+        speaker_voter_description = ""
+        speaker_voter_network_details = ""
+
+        # Variables used by templates/email_outbound/email_templates/friend_accepted_invitation.txt and .html
+        if positive_value_exists(speaker_voter_name):
+            subject = speaker_voter_name + " has added a new opinion"
+        else:
+            subject = "Your friend added new opinion"
+
+        template_variables_for_json = {
+            "subject":                      subject,
+            "invitation_message":           invitation_message,
+            "sender_name":                  speaker_voter_name,
+            "sender_photo":                 speaker_voter_photo,
+            "sender_email_address":         speaker_voter_email,  # Does not affect the "From" email header
+            "sender_description":           speaker_voter_description,
+            "sender_network_details":       speaker_voter_network_details,
+            "recipient_name":               recipient_name,
+            "recipient_voter_email":        recipient_email,
+            "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+            recipient_email_subscription_secret_key,
+            "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
+            "view_new_endorsements_url":    web_app_root_url_verified + "/news/a/" + activity_tidbit_we_vote_id,
+            "view_your_ballot_url":         web_app_root_url_verified + "/ballot",
+        }
+        template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
+
+        # Create the outbound email description, then schedule it
+        kind_of_email_template = NOTICE_VOTER_DAILY_SUMMARY_TEMPLATE
+        outbound_results = email_manager.create_email_outbound_description(
+            sender_voter_we_vote_id=speaker_voter_we_vote_id,
+            sender_voter_email=speaker_voter_email,
+            sender_voter_name=speaker_voter_name,
+            recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+            recipient_email_we_vote_id=recipient_email_we_vote_id,
+            recipient_voter_email=recipient_email,
+            template_variables_in_json=template_variables_in_json,
+            kind_of_email_template=kind_of_email_template)
+        status += outbound_results['status'] + " "
+        success = outbound_results['success']
+        if outbound_results['email_outbound_description_saved']:
+            email_outbound_description = outbound_results['email_outbound_description']
+            schedule_results = schedule_email_with_email_outbound_description(email_outbound_description)
+            status += schedule_results['status'] + " "
+            success = schedule_results['success']
+            if schedule_results['email_scheduled_saved']:
+                # messages_to_send.append(schedule_results['email_scheduled_id'])
+                email_scheduled = schedule_results['email_scheduled']
+                send_results = email_manager.send_scheduled_email(email_scheduled)
+                email_scheduled_sent = send_results['email_scheduled_sent']
+                status += send_results['status']
+                success = send_results['success']
+
+    results = {
+        'success':                              success,
+        'status':                               status,
+    }
+    return results
+
+
+def process_activity_notice_seeds_triggered_by_batch_process():
     """
     We assume only one of this function is running at any time.
     :return:
@@ -489,7 +646,7 @@ def update_or_create_activity_notices_triggered_by_batch_process():
     activity_notice_seed_count = 0
     activity_notice_count = 0
 
-    # Retrieve ActivityNoticeSeeds that need to have ActivityNotice entries created
+    # Retrieve ActivityNoticeSeeds that need to have some processing done, including ActivityNotice entries created
     activity_manager = ActivityManager()
     # We want this process to stop before it has run for 5 minutes, so that we don't collide with another process
     #  starting. Please also see: activity_notice_processing_time_out_duration & checked_out_expiration_time
@@ -497,8 +654,10 @@ def update_or_create_activity_notices_triggered_by_batch_process():
     longest_activity_notice_processing_run_time_allowed = 270  # 4.5 minutes * 60 seconds
     when_process_must_stop = now() + timedelta(seconds=longest_activity_notice_processing_run_time_allowed)
 
-    # Update existing ActivityNoticeSeed entries
+    # Update existing ActivityNoticeSeed entries (notices_to_be_updated=True)
     # Only run this when the minutes are divisible by "5"
+    # Note: Because of other processes running we cannot count on every entry updating every 5 minutes -- there
+    #  is some randomness to when they get updated
     update_interval = 5
     time_now = now()
     if time_now.minute % update_interval == 0:
@@ -513,21 +672,35 @@ def update_or_create_activity_notices_triggered_by_batch_process():
                 notices_to_be_updated=True,
                 activity_notice_seed_id_already_reviewed_list=activity_notice_seed_id_already_reviewed_list)
             if results['activity_notice_seed_found']:
+                # We retrieve from these seed types: NOTICE_ACTIVITY_POST_SEED, NOTICE_FRIEND_ENDORSEMENTS_SEED
+                #  We do not update NOTICE_VOTER_DAILY_SUMMARY_SEED
                 activity_notice_seed = results['activity_notice_seed']
                 activity_notice_seed_id_already_reviewed_list.append(activity_notice_seed.id)
                 activity_notice_seed_count += 1
-                update_seed_results = update_activity_notice_seed_with_positions(activity_notice_seed)
-                if update_seed_results['success'] and \
-                        update_seed_results['activity_notice_seed_changed'] and not \
-                        update_seed_results['date_of_notice_earlier_than_update_window']:
-                    activity_notice_seed = update_seed_results['activity_notice_seed']
+                update_activity_notices = False
+
+                if activity_notice_seed.kind_of_seed == NOTICE_FRIEND_ENDORSEMENTS_SEED:
+                    # Only update if the number of positions has changed
+                    update_seed_results = update_activity_notice_seed_with_positions(activity_notice_seed)
+                    if update_seed_results['success'] and \
+                            update_seed_results['activity_notice_seed_changed'] and not \
+                            update_seed_results['date_of_notice_earlier_than_update_window']:
+                        activity_notice_seed = update_seed_results['activity_notice_seed']
+                        update_activity_notices = True
+                elif activity_notice_seed.kind_of_seed == NOTICE_ACTIVITY_POST_SEED:
+                    # We are storing number_of_comments and number_of_likes in NOTICE_ACTIVITY_POST_SEED, so we need
+                    #  to update in case there have been changes.
+                    update_activity_notices = True
+
+                if update_activity_notices:
+                    # Update the activity drop down in each voter touched (friends of the voter acting)
                     update_results = update_or_create_activity_notices_from_seed(activity_notice_seed)
                     if not update_results['success']:
                         status += update_results['status']
             else:
                 continue_retrieving_notices_to_be_updated = False
 
-    # Create new ActivityNoticeSeed entries
+    # Create new ActivityNotice entries, which appear in header notification menu (notices_to_be_created=True)
     continue_retrieving_notices_to_be_created = True
     activity_notice_seed_id_already_reviewed_list = []  # Reset
     safety_valve_count = 0
@@ -537,16 +710,46 @@ def update_or_create_activity_notices_triggered_by_batch_process():
             notices_to_be_created=True,
             activity_notice_seed_id_already_reviewed_list=activity_notice_seed_id_already_reviewed_list)
         if results['activity_notice_seed_found']:
+            # We retrieve from these seed types: NOTICE_ACTIVITY_POST_SEED, NOTICE_FRIEND_ENDORSEMENTS_SEED
             activity_notice_seed = results['activity_notice_seed']
             activity_notice_seed_id_already_reviewed_list.append(activity_notice_seed.id)
             activity_notice_seed_count += 1
+
+            # Create the activity drop down in each voter's header for each voter touched (friends of the voter acting)
             create_results = update_or_create_activity_notices_from_seed(activity_notice_seed)
             # activity_notice_seed.activity_notices_created = True  # Marked in function immediately above
             activity_notice_count += create_results['activity_notice_count']
+
+            # NOTE: Since the daily summary is only sent once per day, wait to create NOTICE_VOTER_DAILY_SUMMARY_SEED
+            #  in the update step above
         else:
             continue_retrieving_notices_to_be_created = False
 
-    # Send email notifications
+    # Schedule daily_summaries
+    continue_retrieving_to_be_added_to_voter_summary = True
+    activity_notice_seed_id_already_reviewed_list = []
+    safety_valve_count = 0
+    while continue_retrieving_to_be_added_to_voter_summary and \
+            safety_valve_count < 1000 and \
+            when_process_must_stop > now():
+        safety_valve_count += 1
+        results = activity_manager.retrieve_next_activity_notice_seed_to_process(
+            to_be_added_to_voter_daily_summary=True,
+            activity_notice_seed_id_already_reviewed_list=activity_notice_seed_id_already_reviewed_list)
+        if results['activity_notice_seed_found']:
+            # We retrieve from these seed types: NOTICE_VOTER_DAILY_SUMMARY_SEED
+            activity_notice_seed = results['activity_notice_seed']
+            activity_notice_seed_id_already_reviewed_list.append(activity_notice_seed.id)
+            activity_notice_seed_count += 1
+            # Create the seeds (one for each voter touched) which will be used to send a daily summary
+            #  to each voter touched
+            update_results = update_or_create_voter_daily_summary_seeds_from_seed(activity_notice_seed)
+            if not update_results['success']:
+                status += update_results['status']
+        else:
+            continue_retrieving_to_be_added_to_voter_summary = False
+
+    # Send email notifications (notices_to_be_scheduled=True)
     continue_retrieving_notices_to_be_scheduled = True
     activity_notice_seed_id_already_reviewed_list = []  # Reset
     safety_valve_count = 0
@@ -556,6 +759,7 @@ def update_or_create_activity_notices_triggered_by_batch_process():
             notices_to_be_scheduled=True,
             activity_notice_seed_id_already_reviewed_list=activity_notice_seed_id_already_reviewed_list)
         if results['activity_notice_seed_found']:
+            # We retrieve from these seed types: NOTICE_FRIEND_ENDORSEMENTS_SEED, NOTICE_VOTER_DAILY_SUMMARY_SEED
             activity_notice_seed = results['activity_notice_seed']
             activity_notice_seed_id_already_reviewed_list.append(activity_notice_seed.id)
             # activity_notice_seed_count += 1
@@ -580,9 +784,11 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
     status = ''
     success = True
     activity_notice_count = 0
+    activity_manager = ActivityManager()
     friend_manager = FriendManager()
+    reaction_manager = ReactionManager()
 
-    # Create ActivityNotice entries that haven't been created yet
+    # Create or update ActivityNotice entries
     # Who needs to see a notice?
     audience = 'FRIENDS'
     # audience = 'ONE_FRIEND'
@@ -595,49 +801,103 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
         status += retrieve_current_friends_as_voters_results['status']
         if retrieve_current_friends_as_voters_results['friend_list_found']:
             current_friend_list = retrieve_current_friends_as_voters_results['friend_list']
+            if activity_notice_seed.kind_of_seed == NOTICE_FRIEND_ENDORSEMENTS_SEED:
+                kind_of_notice = NOTICE_FRIEND_ENDORSEMENTS
+                position_we_vote_id_list = []
+                if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_friends_serialized):
+                    position_we_vote_id_list_for_friends = \
+                        json.loads(activity_notice_seed.position_we_vote_ids_for_friends_serialized)
+                    position_we_vote_id_list += position_we_vote_id_list_for_friends
+                if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_public_serialized):
+                    position_we_vote_id_list_for_public = \
+                        json.loads(activity_notice_seed.position_we_vote_ids_for_public_serialized)
+                    position_we_vote_id_list += position_we_vote_id_list_for_public
+                position_we_vote_id_list_serialized = json.dumps(position_we_vote_id_list)
 
-            position_we_vote_id_list = []
-            if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_friends_serialized):
-                position_we_vote_id_list_for_friends = \
-                    json.loads(activity_notice_seed.position_we_vote_ids_for_friends_serialized)
-                position_we_vote_id_list += position_we_vote_id_list_for_friends
-            if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_public_serialized):
-                position_we_vote_id_list_for_public = \
-                    json.loads(activity_notice_seed.position_we_vote_ids_for_public_serialized)
-                position_we_vote_id_list += position_we_vote_id_list_for_public
-            position_we_vote_id_list_serialized = json.dumps(position_we_vote_id_list)
+                for friend_voter in current_friend_list:
+                    # Add switch for NOTICE_FRIEND_ACTIVITY_POSTS here
 
-            for friend_voter in current_friend_list:
-                kind_of_notice = NOTICE_FRIEND_ENDORSEMENTS  # Figure this out from activity_notice_seed.kind_of_seed
-                # Decide whether to send email or sms based on friend's notification settings
-                # We will need to figure out if this endorsement is on this voter's ballot
-                # NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL
-                # NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL
-                send_to_email = friend_voter.is_notification_status_flag_set(
-                    NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL)
-                # NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_SMS
-                # NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS
-                send_to_sms = friend_voter.is_notification_status_flag_set(
-                    NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS)
+                    # Decide whether to send email or sms based on friend's notification settings
+                    # We will need to figure out if this endorsement is on this voter's ballot
+                    # NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL
+                    # NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL
+                    send_to_email = friend_voter.is_notification_status_flag_set(
+                        NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL)
+                    # NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_SMS
+                    # NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS
+                    send_to_sms = friend_voter.is_notification_status_flag_set(
+                        NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS)
 
-                activity_results = update_or_create_activity_notice_for_friend(
-                    activity_notice_seed_id=activity_notice_seed.id,
-                    activity_tidbit_we_vote_id=activity_notice_seed.we_vote_id,
-                    kind_of_seed=activity_notice_seed.kind_of_seed,
-                    kind_of_notice=kind_of_notice,
-                    position_we_vote_id_list_serialized=position_we_vote_id_list_serialized,
-                    recipient_voter_we_vote_id=friend_voter.we_vote_id,
-                    send_to_email=send_to_email,
-                    send_to_sms=send_to_sms,
-                    speaker_name=activity_notice_seed.speaker_name,
-                    speaker_organization_we_vote_id=activity_notice_seed.speaker_organization_we_vote_id,
-                    speaker_voter_we_vote_id=activity_notice_seed.speaker_voter_we_vote_id,
-                    speaker_profile_image_url_medium=activity_notice_seed.speaker_profile_image_url_medium,
-                    speaker_profile_image_url_tiny=activity_notice_seed.speaker_profile_image_url_tiny)
-                if activity_results['success']:
-                    activity_notice_count += 1
-                else:
-                    status += activity_results['status']
+                    # ###########################
+                    # This is the entry that goes in the header drop-down
+                    activity_results = update_or_create_activity_notice_for_friend_endorsements(
+                        activity_notice_seed_id=activity_notice_seed.id,
+                        activity_tidbit_we_vote_id=activity_notice_seed.we_vote_id,
+                        kind_of_seed=activity_notice_seed.kind_of_seed,
+                        kind_of_notice=kind_of_notice,
+                        position_we_vote_id_list_serialized=position_we_vote_id_list_serialized,
+                        recipient_voter_we_vote_id=friend_voter.we_vote_id,
+                        send_to_email=send_to_email,
+                        send_to_sms=send_to_sms,
+                        speaker_name=activity_notice_seed.speaker_name,
+                        speaker_organization_we_vote_id=activity_notice_seed.speaker_organization_we_vote_id,
+                        speaker_voter_we_vote_id=activity_notice_seed.speaker_voter_we_vote_id,
+                        speaker_profile_image_url_medium=activity_notice_seed.speaker_profile_image_url_medium,
+                        speaker_profile_image_url_tiny=activity_notice_seed.speaker_profile_image_url_tiny)
+                    if activity_results['success']:
+                        activity_notice_count += 1
+                    else:
+                        status += activity_results['status']
+            elif activity_notice_seed.kind_of_seed == NOTICE_ACTIVITY_POST_SEED:
+                # Pop the last activity_tidbit_we_vote_id
+                activity_tidbit_we_vote_id = ''
+                if positive_value_exists(activity_notice_seed.activity_tidbit_we_vote_ids_for_friends_serialized):
+                    activity_tidbit_we_vote_id_list_for_friends = \
+                        json.loads(activity_notice_seed.activity_tidbit_we_vote_ids_for_friends_serialized)
+                    if len(activity_tidbit_we_vote_id_list_for_friends) > 0:
+                        activity_tidbit_we_vote_id = activity_tidbit_we_vote_id_list_for_friends.pop()
+                if not positive_value_exists(activity_tidbit_we_vote_id):
+                    if positive_value_exists(activity_notice_seed.activity_tidbit_we_vote_ids_for_public_serialized):
+                        activity_tidbit_we_vote_id_list_for_public = \
+                            json.loads(activity_notice_seed.activity_tidbit_we_vote_ids_for_public_serialized)
+                        if len(activity_tidbit_we_vote_id_list_for_public) > 0:
+                            activity_tidbit_we_vote_id = activity_tidbit_we_vote_id_list_for_public.pop()
+                if positive_value_exists(activity_tidbit_we_vote_id):
+                    number_of_comments = activity_manager.fetch_number_of_comments(
+                        parent_we_vote_id=activity_tidbit_we_vote_id)
+                    number_of_likes = reaction_manager.fetch_reaction_likes_count(activity_tidbit_we_vote_id)
+                    kind_of_notice = NOTICE_FRIEND_ACTIVITY_POSTS
+                    for friend_voter in current_friend_list:
+                        # ###########################
+                        # NOTE: We call update_or_create_voter_daily_summary_seeds_from_seed from the same place
+                        #  (process_activity_notice_seeds_triggered_by_batch_process) we call the function
+                        #  we are currently in. We don't do it here.
+
+                        # ###########################
+                        # This is the entry that goes in the header drop-down
+                        activity_results = update_or_create_activity_notice_for_friend_posts(
+                            activity_notice_seed_id=activity_notice_seed.id,
+                            activity_tidbit_we_vote_id=activity_tidbit_we_vote_id,
+                            kind_of_seed=activity_notice_seed.kind_of_seed,
+                            kind_of_notice=kind_of_notice,
+                            number_of_comments=number_of_comments,
+                            number_of_likes=number_of_likes,
+                            recipient_voter_we_vote_id=friend_voter.we_vote_id,
+                            send_to_email=False,
+                            send_to_sms=False,
+                            speaker_name=activity_notice_seed.speaker_name,
+                            speaker_organization_we_vote_id=activity_notice_seed.speaker_organization_we_vote_id,
+                            speaker_voter_we_vote_id=activity_notice_seed.speaker_voter_we_vote_id,
+                            speaker_profile_image_url_medium=activity_notice_seed.speaker_profile_image_url_medium,
+                            speaker_profile_image_url_tiny=activity_notice_seed.speaker_profile_image_url_tiny)
+                        if activity_results['success']:
+                            activity_notice_count += 1
+                        else:
+                            status += activity_results['status']
+            elif activity_notice_seed.kind_of_seed == NOTICE_VOTER_DAILY_SUMMARY_SEED:
+                # kind_of_notice = NOTICE_VOTER_DAILY_SUMMARY
+                # DALE Sept 6 2020: We don't want to create an ActivityNotice. We just send email directly from SEED
+                pass
         else:
             status += "CREATE_ACTIVITY_NOTICES_FROM_SEED-NO_FRIENDS "
 
@@ -647,6 +907,186 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
         status += "CREATE_ACTIVITY_NOTICES_FROM_SEED-MARKED_CREATED "
     except Exception as e:
         status += "CREATE_ACTIVITY_NOTICES_FROM_SEED-CANNOT_MARK_NOTICES_CREATED: " + str(e) + " "
+        success = False
+
+    results = {
+        'success':                  success,
+        'status':                   status,
+        'activity_notice_count':    activity_notice_count,
+    }
+    return results
+
+
+def update_or_create_voter_daily_summary_seed(
+        listener_name='',
+        listener_voter_we_vote_id='',
+        send_to_email=False,
+        send_to_sms=False,
+        speaker_organization_we_vote_id='',
+        speaker_voter_we_vote_id='',
+        update_only=False):
+    """
+
+    :param listener_name:
+    :param listener_voter_we_vote_id:
+    :param send_to_email:
+    :param send_to_sms:
+    :param speaker_organization_we_vote_id: The person's organization who has done something
+    :param speaker_voter_we_vote_id: The person who has done something
+    :param update_only:
+    :return:
+    """
+    status = ''
+    success = True
+    activity_manager = ActivityManager()
+
+    results = activity_manager.retrieve_recent_activity_notice_seed_from_listener(
+        kind_of_seed=NOTICE_VOTER_DAILY_SUMMARY_SEED,
+        listener_voter_we_vote_id=listener_voter_we_vote_id,
+    )
+    if results['activity_notice_seed_found']:
+        activity_notice_seed = results['activity_notice_seed']
+        change_detected = False
+        try:
+            # DALE Sept 6, 2020: I'm not 100% sure we need to update NOTICE_VOTER_DAILY_SUMMARY_SEED with this data
+            #  since when we generate the daily summary email we are just querying against activity since the last
+            #  summary was sent.
+            if positive_value_exists(speaker_organization_we_vote_id):
+                speaker_organization_we_vote_ids = []
+                if positive_value_exists(activity_notice_seed.speaker_organization_we_vote_ids_serialized):
+                    # Deserialize
+                    speaker_organization_we_vote_ids = \
+                        json.loads(activity_notice_seed.speaker_organization_we_vote_ids_serialized)
+                if speaker_organization_we_vote_id not in speaker_organization_we_vote_ids:
+                    speaker_organization_we_vote_ids.append(speaker_organization_we_vote_id)
+                    change_detected = True
+                # Then serialize
+                speaker_organization_we_vote_ids_serialized = json.dumps(speaker_organization_we_vote_ids)
+                activity_notice_seed.speaker_organization_we_vote_ids_serialized = \
+                    speaker_organization_we_vote_ids_serialized
+
+            if positive_value_exists(speaker_voter_we_vote_id):
+                speaker_voter_we_vote_ids = []
+                if positive_value_exists(activity_notice_seed.speaker_voter_we_vote_ids_serialized):
+                    # Deserialize
+                    speaker_voter_we_vote_ids = json.loads(activity_notice_seed.speaker_voter_we_vote_ids_serialized)
+                if speaker_voter_we_vote_id not in speaker_voter_we_vote_ids:
+                    speaker_voter_we_vote_ids.append(speaker_voter_we_vote_id)
+                    change_detected = True
+                # Then serialize
+                speaker_voter_we_vote_ids_serialized = json.dumps(speaker_voter_we_vote_ids)
+                activity_notice_seed.speaker_voter_we_vote_ids_serialized = speaker_voter_we_vote_ids_serialized
+
+            if activity_notice_seed.listener_name != listener_name:
+                activity_notice_seed.listener_name = listener_name
+                change_detected = True
+            if positive_value_exists(change_detected):
+                activity_notice_seed.save()
+        except Exception as e:
+            status += "COULD_NOT_UPDATE_ACTIVITY_NOTICE_SEED_FOR_POSTS: " + str(e) + " "
+        status += results['status']
+    elif update_only:
+        status += "DID_NOT_CREATE_SEED-UPDATE_ONLY_MODE "
+    elif results['success']:
+        if positive_value_exists(send_to_email) or positive_value_exists(send_to_sms):
+            date_of_notice = now()
+            speaker_organization_we_vote_ids = [speaker_organization_we_vote_id]
+            speaker_organization_we_vote_ids_serialized = json.dumps(speaker_organization_we_vote_ids)
+            speaker_voter_we_vote_ids = [speaker_voter_we_vote_id]
+            speaker_voter_we_vote_ids_serialized = json.dumps(speaker_voter_we_vote_ids)
+
+            create_results = activity_manager.create_activity_notice_seed(
+                date_of_notice=date_of_notice,
+                kind_of_seed=NOTICE_VOTER_DAILY_SUMMARY_SEED,
+                listener_name=listener_name,
+                listener_voter_we_vote_id=listener_voter_we_vote_id,
+                send_to_email=send_to_email,
+                send_to_sms=send_to_sms,
+                speaker_organization_we_vote_ids_serialized=speaker_organization_we_vote_ids_serialized,
+                speaker_voter_we_vote_ids_serialized=speaker_voter_we_vote_ids_serialized)
+            status += create_results['status']
+        else:
+            status += "NOT_SENDING-NEITHER_SEND_TO_EMAIL_NOR_SMS_SET "
+    else:
+        status += results['status']
+
+    results = {
+        'success':              success,
+        'status':               status,
+    }
+    return results
+
+
+def update_or_create_voter_daily_summary_seeds_from_seed(activity_notice_seed):
+    """
+    Take in seeds like NOTICE_ACTIVITY_POST_SEED and create a NOTICE_VOTER_DAILY_SUMMARY_SEED for
+    each of the speaker_voter's friends
+    :param activity_notice_seed:
+    :return:
+    """
+    status = ''
+    success = True
+    activity_notice_count = 0
+    friend_manager = FriendManager()
+    seed_types_that_always_cause_the_creation_of_voter_daily_summary_seed = [NOTICE_ACTIVITY_POST_SEED]
+
+    # Who needs to see a notice?
+    audience = 'FRIENDS'
+    # audience = 'ONE_FRIEND'
+    if audience == 'FRIENDS':
+        # Retrieve all friends of activity_notice_seed.speaker_voter_we_vote_id
+        status += "KIND_OF_LIST-CURRENT_FRIENDS "
+        retrieve_current_friends_as_voters_results = \
+            friend_manager.retrieve_current_friends_as_voters(activity_notice_seed.speaker_voter_we_vote_id)
+        success = retrieve_current_friends_as_voters_results['success']
+        status += retrieve_current_friends_as_voters_results['status']
+        if retrieve_current_friends_as_voters_results['friend_list_found']:
+            current_friend_list = retrieve_current_friends_as_voters_results['friend_list']
+            for friend_voter in current_friend_list:
+                create_voter_daily_summary_seed_for_this_voter = False
+                update_only = False
+                if activity_notice_seed.kind_of_seed == NOTICE_FRIEND_ENDORSEMENTS_SEED:
+                    # Add friend endorsements to a daily summary of activity: NOTICE_VOTER_DAILY_SUMMARY
+                    #  if a NOTICE_VOTER_DAILY_SUMMARY has already been created
+                    #  OR if this voter has this notification setting turned off
+                    create_voter_daily_summary_seed_for_this_voter = True
+                    opinions_email_turned_on = friend_voter.is_notification_status_flag_set(
+                        NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL)
+                    if positive_value_exists(opinions_email_turned_on):
+                        # Since the friend_voter is already getting a notice about the speaker_voter's endorsements
+                        #  don't create a VOTER_DAILY_SUMMARY *just* for NOTICE_FRIEND_ENDORSEMENTS
+                        #  but updating is ok.
+                        update_only = True
+                elif activity_notice_seed.kind_of_seed \
+                        in seed_types_that_always_cause_the_creation_of_voter_daily_summary_seed:
+                    create_voter_daily_summary_seed_for_this_voter = True
+
+                # Decide whether to send email or sms based on friend's notification settings
+                send_to_email = friend_voter.is_notification_status_flag_set(
+                    NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL)
+                send_to_sms = friend_voter.is_notification_status_flag_set(
+                    NOTIFICATION_VOTER_DAILY_SUMMARY_SMS)
+
+                if create_voter_daily_summary_seed_for_this_voter:
+                    results = update_or_create_voter_daily_summary_seed(
+                        listener_name=friend_voter.get_full_name(real_name_only=True),
+                        listener_voter_we_vote_id=friend_voter.we_vote_id,
+                        send_to_email=send_to_email,
+                        send_to_sms=send_to_sms,
+                        speaker_organization_we_vote_id=activity_notice_seed.speaker_organization_we_vote_id,
+                        speaker_voter_we_vote_id=activity_notice_seed.speaker_voter_we_vote_id,
+                        update_only=update_only,
+                    )
+                    status += results['status']
+        else:
+            status += "CREATE_DAILY_SUMMARY_FROM_SEED-NO_FRIENDS "
+
+    try:
+        activity_notice_seed.added_to_voter_daily_summary = True
+        activity_notice_seed.save()
+        status += "MARKED_ADDED_TO_VOTER_DAILY_SUMMARY "
+    except Exception as e:
+        status += "ADDED_TO_VOTER_DAILY_SUMMARY-CANNOT_MARK_CREATED: " + str(e) + " "
         success = False
 
     results = {
@@ -670,38 +1110,63 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
     safety_valve_count = 0
     while continue_retrieving and safety_valve_count < 1000:
         safety_valve_count += 1
-        results = activity_manager.retrieve_activity_notice_list(
-            activity_notice_seed_id=activity_notice_seed.id,
-            to_be_sent_to_email=True,
-            retrieve_count_limit=100,
-            activity_notice_id_already_reviewed_list=activity_notice_id_already_reviewed_list,
-        )
-        if not results['success']:
-            status += results['status']
-        if results['activity_notice_list_found']:
-            activity_notice_list = results['activity_notice_list']
-            for activity_notice in activity_notice_list:
-                send_results = notice_friend_endorsements_send(
-                    speaker_voter_we_vote_id=activity_notice.speaker_voter_we_vote_id,
-                    recipient_voter_we_vote_id=activity_notice.recipient_voter_we_vote_id,
-                    activity_tidbit_we_vote_id=activity_notice_seed.we_vote_id)
-                activity_notice_id_already_reviewed_list.append(activity_notice.id)
-                if send_results['success']:
-                    try:
-                        activity_notice.scheduled_to_email = True
-                        activity_notice.sent_to_email = True
-                        activity_notice.scheduled_to_sms = True
-                        activity_notice.sent_to_sms = True
-                        activity_notice.save()
-                        activity_notice_count += 1
-                        # We will want to create another routine that connects up to the SendGrid API for more accuracy
-                    except Exception as e:
-                        status += "FAILED_SAVING_ACTIVITY_NOTICE: " + str(e) + " "
-                        pass
-                else:
-                    status += send_results['status']
-        else:
-            continue_retrieving = False
+        if activity_notice_seed.kind_of_seed in [NOTICE_FRIEND_ENDORSEMENTS_SEED]:
+            # For these kind of seeds, we just send an email notification for the activity_notice (that is displayed
+            #  to each voter in the header bar
+            results = activity_manager.retrieve_activity_notice_list(
+                activity_notice_seed_id=activity_notice_seed.id,
+                to_be_sent_to_email=True,
+                retrieve_count_limit=100,
+                activity_notice_id_already_reviewed_list=activity_notice_id_already_reviewed_list,
+            )
+            if not results['success']:
+                status += results['status']
+            if results['activity_notice_list_found']:
+                activity_notice_list = results['activity_notice_list']
+                for activity_notice in activity_notice_list:
+                    send_results = notice_friend_endorsements_send(
+                        speaker_voter_we_vote_id=activity_notice.speaker_voter_we_vote_id,
+                        recipient_voter_we_vote_id=activity_notice.recipient_voter_we_vote_id,
+                        activity_tidbit_we_vote_id=activity_notice_seed.we_vote_id)
+                    activity_notice_id_already_reviewed_list.append(activity_notice.id)
+                    if send_results['success']:
+                        try:
+                            activity_notice.scheduled_to_email = True
+                            activity_notice.sent_to_email = True
+                            activity_notice.scheduled_to_sms = True
+                            activity_notice.sent_to_sms = True
+                            activity_notice.save()
+                            activity_notice_count += 1
+                            # We will want to create another routine that connects up to the SendGrid API for more accuracy
+                        except Exception as e:
+                            status += "FAILED_SAVING_ACTIVITY_NOTICE: " + str(e) + " "
+                            pass
+                    else:
+                        status += send_results['status']
+            else:
+                continue_retrieving = False
+        elif activity_notice_seed.kind_of_seed == NOTICE_VOTER_DAILY_SUMMARY_SEED:
+            # TODO: Finish this code
+            pass
+            # send_results = notice_voter_daily_summary_send(
+            #     speaker_voter_we_vote_id=activity_notice.speaker_voter_we_vote_id,
+            #     recipient_voter_we_vote_id=activity_notice.recipient_voter_we_vote_id,
+            #     activity_tidbit_we_vote_id=activity_notice_seed.we_vote_id)
+            # activity_notice_id_already_reviewed_list.append(activity_notice.id)
+            # if send_results['success']:
+            #     try:
+            #         activity_notice.scheduled_to_email = True
+            #         activity_notice.sent_to_email = True
+            #         activity_notice.scheduled_to_sms = True
+            #         activity_notice.sent_to_sms = True
+            #         activity_notice.save()
+            #         activity_notice_count += 1
+            #         # We will want to create another routine that connects up to the SendGrid API for more accuracy
+            #     except Exception as e:
+            #         status += "FAILED_SAVING_ACTIVITY_NOTICE: " + str(e) + " "
+            #         pass
+            # else:
+            #     status += send_results['status']
 
     # # Schedule/send sms
     # results = activity_manager.retrieve_activity_notice_list(
@@ -725,7 +1190,7 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
     return results
 
 
-def update_or_create_activity_notice_for_friend(
+def update_or_create_activity_notice_for_friend_endorsements(
         activity_notice_seed_id=0,
         activity_tidbit_we_vote_id='',
         kind_of_seed='',
@@ -773,6 +1238,188 @@ def update_or_create_activity_notice_for_friend(
             recipient_voter_we_vote_id=recipient_voter_we_vote_id,
             send_to_email=send_to_email,
             send_to_sms=send_to_sms,
+            speaker_name=speaker_name,
+            speaker_organization_we_vote_id=speaker_organization_we_vote_id,
+            speaker_voter_we_vote_id=speaker_voter_we_vote_id,
+            speaker_profile_image_url_medium=speaker_profile_image_url_medium,
+            speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
+        status += create_results['status']
+    else:
+        status += results['status']
+
+    results = {
+        'success':              success,
+        'status':               status,
+    }
+    return results
+
+
+def update_or_create_activity_notice_for_friend_posts(
+        activity_notice_seed_id=0,
+        activity_tidbit_we_vote_id='',
+        kind_of_seed='',
+        kind_of_notice='',
+        number_of_comments=0,
+        number_of_likes=0,
+        recipient_voter_we_vote_id='',
+        send_to_email=False,
+        send_to_sms=False,
+        speaker_name='',
+        speaker_organization_we_vote_id='',
+        speaker_voter_we_vote_id='',
+        speaker_profile_image_url_medium='',
+        speaker_profile_image_url_tiny=''):
+    status = ''
+    success = True
+    activity_manager = ActivityManager()
+
+    results = activity_manager.retrieve_recent_activity_notice_from_speaker_and_recipient(
+        activity_notice_seed_id=activity_notice_seed_id,
+        kind_of_notice=kind_of_notice,
+        recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+        speaker_organization_we_vote_id=speaker_organization_we_vote_id,
+        speaker_voter_we_vote_id=speaker_voter_we_vote_id,
+    )
+    # Combine friends and public into single position_we_vote_id_list_serialized
+    if results['activity_notice_found']:
+        try:
+            activity_notice = results['activity_notice']
+            change_found = False
+            # if positive_value_exists(position_we_vote_id_list_serialized):
+            #     activity_notice.position_we_vote_id_list_serialized = position_we_vote_id_list_serialized
+            #     change_found = False
+            if positive_value_exists(activity_tidbit_we_vote_id) and \
+                    activity_tidbit_we_vote_id != activity_notice.activity_tidbit_we_vote_id:
+                activity_notice.activity_tidbit_we_vote_id = activity_tidbit_we_vote_id
+                change_found = True
+            if positive_value_exists(number_of_comments) and number_of_comments != activity_notice.number_of_comments:
+                activity_notice.number_of_comments = number_of_comments
+                change_found = True
+            if positive_value_exists(number_of_likes) and number_of_likes != activity_notice.number_of_likes:
+                activity_notice.number_of_likes = number_of_likes
+                change_found = True
+            if change_found:
+                activity_notice.save()
+        except Exception as e:
+            status += "FAILED_ACTIVITY_NOTICE_SAVE: " + str(e) + ' '
+        status += results['status']
+    elif results['success']:
+        date_of_notice = now()
+        create_results = activity_manager.create_activity_notice(
+            activity_notice_seed_id=activity_notice_seed_id,
+            activity_tidbit_we_vote_id=activity_tidbit_we_vote_id,
+            date_of_notice=date_of_notice,
+            kind_of_notice=kind_of_notice,
+            kind_of_seed=kind_of_seed,
+            number_of_comments=number_of_comments,
+            number_of_likes=number_of_likes,
+            recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+            send_to_email=send_to_email,
+            send_to_sms=send_to_sms,
+            speaker_name=speaker_name,
+            speaker_organization_we_vote_id=speaker_organization_we_vote_id,
+            speaker_voter_we_vote_id=speaker_voter_we_vote_id,
+            speaker_profile_image_url_medium=speaker_profile_image_url_medium,
+            speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
+        status += create_results['status']
+    else:
+        status += results['status']
+
+    results = {
+        'success':              success,
+        'status':               status,
+    }
+    return results
+
+
+def update_or_create_activity_notice_seed_for_activity_posts(
+        activity_post_we_vote_id='',
+        visibility_is_public=False,
+        speaker_name='',
+        speaker_organization_we_vote_id='',
+        speaker_voter_we_vote_id='',
+        speaker_profile_image_url_medium='',
+        speaker_profile_image_url_tiny=''):
+    """
+    NOTE: This is tied to ANY activity_posts
+    :param activity_post_we_vote_id: Not used for updates
+    :param visibility_is_public: Not used for updates
+    :param speaker_name:
+    :param speaker_organization_we_vote_id:
+    :param speaker_voter_we_vote_id:
+    :param speaker_profile_image_url_medium:
+    :param speaker_profile_image_url_tiny:
+    :return:
+    """
+    status = ''
+    success = True
+    activity_manager = ActivityManager()
+
+    results = activity_manager.retrieve_recent_activity_notice_seed_from_speaker(
+        kind_of_seed=NOTICE_ACTIVITY_POST_SEED,
+        speaker_organization_we_vote_id=speaker_organization_we_vote_id,
+        speaker_voter_we_vote_id=speaker_voter_we_vote_id,
+    )
+    if results['activity_notice_seed_found']:
+        activity_notice_seed = results['activity_notice_seed']
+        try:
+            # This SEED might have multiple ActivityPost entries associated with it
+            since_date = activity_notice_seed.date_of_notice
+            post_results = activity_manager.retrieve_activity_post_list(
+                speaker_voter_we_vote_id_list=[speaker_voter_we_vote_id],
+                since_date=since_date,
+                limit_to_visibility_is_friends_only=True)
+            activity_tidbit_we_vote_ids_for_friends = []
+            activity_tidbit_we_vote_ids_for_friends_serialized = None
+            if post_results['success']:
+                friends_post_list = post_results['activity_post_list']
+                for one_post in friends_post_list:
+                    activity_tidbit_we_vote_ids_for_friends.append(one_post.we_vote_id)
+                activity_tidbit_we_vote_ids_for_friends_serialized = json.dumps(activity_tidbit_we_vote_ids_for_friends)
+
+            post_results = activity_manager.retrieve_activity_post_list(
+                speaker_voter_we_vote_id_list=[speaker_voter_we_vote_id],
+                since_date=since_date,
+                limit_to_visibility_is_public=True)
+            activity_tidbit_we_vote_ids_for_public = []
+            activity_tidbit_we_vote_ids_for_public_serialized = None
+            if post_results['success']:
+                public_post_list = post_results['activity_post_list']
+                for one_post in public_post_list:
+                    activity_tidbit_we_vote_ids_for_public.append(one_post.we_vote_id)
+                activity_tidbit_we_vote_ids_for_public_serialized = json.dumps(activity_tidbit_we_vote_ids_for_public)
+            activity_notice_seed.activity_tidbit_we_vote_ids_for_friends_serialized = \
+                activity_tidbit_we_vote_ids_for_friends_serialized
+            activity_notice_seed.activity_tidbit_we_vote_ids_for_public_serialized = \
+                activity_tidbit_we_vote_ids_for_public_serialized
+
+            activity_notice_seed.speaker_name = speaker_name
+            activity_notice_seed.speaker_profile_image_url_medium = speaker_profile_image_url_medium
+            activity_notice_seed.speaker_profile_image_url_tiny = speaker_profile_image_url_tiny
+
+            activity_notice_seed.save()
+        except Exception as e:
+            status += "COULD_NOT_UPDATE_ACTIVITY_NOTICE_SEED_FOR_POSTS: " + str(e) + " "
+        status += results['status']
+    elif results['success']:
+        date_of_notice = now()
+        activity_tidbit_we_vote_ids_for_friends = []
+        activity_tidbit_we_vote_ids_for_friends_serialized = None
+        activity_tidbit_we_vote_ids_for_public = []
+        activity_tidbit_we_vote_ids_for_public_serialized = None
+        if positive_value_exists(visibility_is_public):
+            activity_tidbit_we_vote_ids_for_public.append(activity_post_we_vote_id)
+            activity_tidbit_we_vote_ids_for_public_serialized = json.dumps(activity_tidbit_we_vote_ids_for_public)
+        else:
+            activity_tidbit_we_vote_ids_for_friends.append(activity_post_we_vote_id)
+            activity_tidbit_we_vote_ids_for_friends_serialized = json.dumps(activity_tidbit_we_vote_ids_for_friends)
+
+        create_results = activity_manager.create_activity_notice_seed(
+            activity_notices_scheduled=True,  # Set this to true so it gets ignored by the email-sending routine
+            activity_tidbit_we_vote_ids_for_friends_serialized=activity_tidbit_we_vote_ids_for_friends_serialized,
+            activity_tidbit_we_vote_ids_for_public_serialized=activity_tidbit_we_vote_ids_for_public_serialized,
+            date_of_notice=date_of_notice,
+            kind_of_seed=NOTICE_ACTIVITY_POST_SEED,
             speaker_name=speaker_name,
             speaker_organization_we_vote_id=speaker_organization_we_vote_id,
             speaker_voter_we_vote_id=speaker_voter_we_vote_id,

@@ -281,6 +281,10 @@ def fetch_next_we_vote_id_activity_post_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_last_activity_post_integer')
 
 
+# def fetch_next_we_vote_id_activity_summary_for_voter_integer():
+#     return fetch_next_we_vote_id_integer('we_vote_id_last_activity_summary_for_voter_integer')
+
+
 def fetch_next_we_vote_id_ballot_returned_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_last_ballot_returned_integer')
 

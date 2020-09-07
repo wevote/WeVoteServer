@@ -14,7 +14,7 @@ from .models import ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, \
     IMPORT_CREATE, IMPORT_DELETE, \
     RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, \
     REFRESH_BALLOT_ITEMS_FROM_VOTERS, SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE
-from activity.controllers import update_or_create_activity_notices_triggered_by_batch_process
+from activity.controllers import process_activity_notice_seeds_triggered_by_batch_process
 from analytics.controllers import calculate_sitewide_daily_metrics, \
     process_one_analytics_batch_process_augment_with_election_id, \
     process_one_analytics_batch_process_augment_with_first_visit, process_sitewide_voter_metrics, \
@@ -1575,7 +1575,7 @@ def process_activity_notice_batch_process(batch_process):
             status += results['status']
 
     if process_now:
-        activity_notice_results = update_or_create_activity_notices_triggered_by_batch_process()
+        activity_notice_results = process_activity_notice_seeds_triggered_by_batch_process()
         status += activity_notice_results['status']
 
         if activity_notice_results['success']:

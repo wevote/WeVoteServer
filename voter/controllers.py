@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, \
-    MAINTENANCE_STATUS_FLAGS_TASK_ONE, MAINTENANCE_STATUS_FLAGS_COMPLETED, \
+    MAINTENANCE_STATUS_FLAGS_TASK_ONE, MAINTENANCE_STATUS_FLAGS_TASK_TWO, MAINTENANCE_STATUS_FLAGS_COMPLETED, \
+    NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL, \
     NOTIFICATION_FRIEND_REQUESTS_EMAIL, NOTIFICATION_SUGGESTED_FRIENDS_EMAIL, \
     NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL, NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS, \
     NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, \
@@ -1046,24 +1047,27 @@ def move_voter_plan_to_another_voter(from_voter, to_voter):
 def process_maintenance_status_flags():
     status = ""
     success = True
-    voters_updated_task_one = 0
-
-    # Task 1 (bit 1, integer 1) MAINTENANCE_STATUS_FLAGS_TASK_ONE
-    safety_valve_count = 0
     longest_activity_notice_processing_run_time_allowed = 900  # 15 minutes * 60 seconds
     when_process_must_stop = now() + timedelta(seconds=longest_activity_notice_processing_run_time_allowed)
-    continue_retrieving = True
-    while continue_retrieving and safety_valve_count < 1000 and when_process_must_stop > now():
-        safety_valve_count += 1
 
+    # Task 1 (bit 1, integer 1) MAINTENANCE_STATUS_FLAGS_TASK_ONE
+    continue_retrieving_for_task_one = True
+    no_more_task1_voters_found = False
+    safety_valve_count = 0
+    voters_updated_task_one = 0
+    while continue_retrieving_for_task_one and safety_valve_count < 1000 and when_process_must_stop > now():
+        safety_valve_count += 1
+        # Retrieve voters. Exclude rows where MAINTENANCE_STATUS_FLAGS_TASK_ONE bit is already set
+        #  in maintenance_status_flags field.
         query = Voter.objects.annotate(
             task_one_flag=F('maintenance_status_flags').bitand(MAINTENANCE_STATUS_FLAGS_TASK_ONE)
         ).exclude(task_one_flag__gte=1)
         task_one_voter_list = query[:100]
         if len(task_one_voter_list) == 0:
-            continue_retrieving = False
-        for one_voter in task_one_voter_list:
-            updated_flags = one_voter.notification_settings_flags
+            continue_retrieving_for_task_one = False
+            no_more_task1_voters_found = True
+        for voter_on_stage in task_one_voter_list:
+            updated_flags = voter_on_stage.notification_settings_flags
 
             # Since these are all new settings, we don't need to see if they have been set or unset by voter.
             updated_flags = updated_flags | NOTIFICATION_FRIEND_REQUESTS_EMAIL
@@ -1071,19 +1075,53 @@ def process_maintenance_status_flags():
             updated_flags = updated_flags | NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL
             updated_flags = updated_flags | NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS
             updated_flags = updated_flags | NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL
-            one_voter.notification_settings_flags = updated_flags
+            voter_on_stage.notification_settings_flags = updated_flags
 
             # Set the TASK_ONE bit as true in maintenance_status_flags to show it is complete for this voter
-            one_voter.maintenance_status_flags = one_voter.maintenance_status_flags | MAINTENANCE_STATUS_FLAGS_TASK_ONE
-            one_voter.save()
+            voter_on_stage.maintenance_status_flags = \
+                voter_on_stage.maintenance_status_flags | MAINTENANCE_STATUS_FLAGS_TASK_ONE
+            voter_on_stage.save()
             voters_updated_task_one += 1
 
-    # Before adding Task 2 here, add the logic to ensure all voters have been updated with task 1
+    # Task 2 (bit 2, integer 2) MAINTENANCE_STATUS_FLAGS_TASK_TWO
+    continue_retrieving_for_task_two = True
+    no_more_task2_voters_found = False
+    safety_valve_count = 0
+    voters_updated_task_two = 0
+    if no_more_task1_voters_found:
+        while continue_retrieving_for_task_two and safety_valve_count < 1000 and when_process_must_stop > now():
+            safety_valve_count += 1
+            # Retrieve voters. Exclude rows where MAINTENANCE_STATUS_FLAGS_TASK_TWO bit is already set
+            #  in maintenance_status_flags field.
+            query = Voter.objects.annotate(
+                task_two_flag=F('maintenance_status_flags').bitand(MAINTENANCE_STATUS_FLAGS_TASK_TWO)
+            ).exclude(task_two_flag__gte=1)
+            task_two_voter_list = query[:100]
+            if len(task_two_voter_list) == 0:
+                continue_retrieving_for_task_two = False
+                no_more_task2_voters_found = True
+            for voter_on_stage in task_two_voter_list:
+                updated_flags = voter_on_stage.notification_settings_flags
+
+                # Since these are new settings, we don't need to see if they have been set or unset by voter.
+                updated_flags = updated_flags | NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL
+                voter_on_stage.notification_settings_flags = updated_flags
+
+                # Set the TASK_TWO bit as true in maintenance_status_flags to show it is complete for this voter
+                voter_on_stage.maintenance_status_flags = \
+                    voter_on_stage.maintenance_status_flags | MAINTENANCE_STATUS_FLAGS_TASK_TWO
+                voter_on_stage.save()
+                voters_updated_task_two += 1
+
+    # Task 3
+    if no_more_task2_voters_found:
+        pass
 
     results = {
         'status':                   status,
         'success':                  success,
         'voters_updated_task_one':  voters_updated_task_one,
+        'voters_updated_task_two':  voters_updated_task_two,
     }
     return results
 

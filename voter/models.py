@@ -53,6 +53,9 @@ NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_SMS = 64  # SMS: "Friends' opinions (on
 NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS = 128  # In App: "Friends' opinions (other regions)"
 NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL = 256  # Email: "Friends' opinions (other regions)"
 NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS = 512  # SMS: "Friends' opinions (other regions)"
+# NOTIFICATION_VOTER_DAILY_SUMMARY = n/a  # In App: When a friend posts something, or reacts to another post
+NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL = 1024  # Email: When a friend posts something, or reacts to another post
+NOTIFICATION_VOTER_DAILY_SUMMARY_SMS = 2048  # SMS: When a friend posts something, or reacts to another post
 
 # Default to set for new voters
 NOTIFICATION_SETTINGS_FLAGS_DEFAULT = \
@@ -61,23 +64,16 @@ NOTIFICATION_SETTINGS_FLAGS_DEFAULT = \
     NOTIFICATION_SUGGESTED_FRIENDS_EMAIL + \
     NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL + \
     NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS + \
-    NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL
+    NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL + \
+    NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL
 
 NUMBER_OF_FAILED_TRIES_ALLOWED_PER_SECRET_CODE = 5
 NUMBER_OF_FAILED_TRIES_ALLOWED_ALL_TIME = 25
 
+# See process_maintenance_status_flags in /voter/controllers.py
 MAINTENANCE_STATUS_FLAGS_TASK_ONE = 1
+MAINTENANCE_STATUS_FLAGS_TASK_TWO = 2
 MAINTENANCE_STATUS_FLAGS_COMPLETED = MAINTENANCE_STATUS_FLAGS_TASK_ONE
-
-# This way of extending the base user described here:
-# https://docs.djangoproject.com/en/1.8/topics/auth/customizing/#a-full-example
-# I then altered with this: http://buildthis.com/customizing-djangos-default-user-model/
-
-
-# class VoterTwitterLink(models.Model):
-#     voter_id
-#     twitter_handle
-#     confirmed_signin_date
 
 
 # See AUTH_USER_MODEL in config/base.py
@@ -2151,6 +2147,7 @@ class Voter(AbstractBaseUser):
     # Once all previous voters have been updated, and new voters are using the new NOTIFICATION_SETTINGS_FLAGS_DEFAULT,
     #  then we can set maintenance_status_flags to MAINTENANCE_STATUS_FLAGS_COMPLETED
     #  MAINTENANCE_STATUS_FLAGS_COMPLETED = MAINTENANCE_STATUS_FLAGS_TASK_ONE
+    # See process_maintenance_status_flags in /voter/controllers.py
     maintenance_status_flags = models.PositiveIntegerField(default=MAINTENANCE_STATUS_FLAGS_COMPLETED)
 
     # The unique ID of the election this voter is currently looking at. (Provided by Google Civic)
@@ -2514,7 +2511,7 @@ class VoterDeviceLinkManager(models.Model):
             status += "EMAIL_SECRET_KEY_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'EMAIL_SECRET_KEY_RETRIEVE_ERROR ' + str(e) + ' '
+            status += 'EMAIL_SECRET_KEY_RETRIEVE_ERROR: ' + str(e) + ' '
 
         if email_secret_key_found:
             try:
@@ -2522,7 +2519,7 @@ class VoterDeviceLinkManager(models.Model):
                 voter_device_link.save()
             except Exception as e:
                 success = False
-                status += 'EMAIL_SECRET_KEY_SAVE_ERROR ' + str(e) + ' '
+                status += 'EMAIL_SECRET_KEY_SAVE_ERROR: ' + str(e) + ' '
 
         try:
             if positive_value_exists(sms_secret_key):
@@ -2534,7 +2531,7 @@ class VoterDeviceLinkManager(models.Model):
             status += "SMS_SECRET_KEY_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'SMS_SECRET_KEY_RETRIEVE_ERROR ' + str(e) + ' '
+            status += 'SMS_SECRET_KEY_RETRIEVE_ERROR: ' + str(e) + ' '
 
         if sms_secret_key_found:
             try:
@@ -2542,7 +2539,7 @@ class VoterDeviceLinkManager(models.Model):
                 voter_device_link.save()
             except Exception as e:
                 success = False
-                status += 'SMS_SECRET_KEY_SAVE_ERROR ' + str(e) + ' '
+                status += 'SMS_SECRET_KEY_SAVE_ERROR: ' + str(e) + ' '
 
         results = {
             'success':                      success,
@@ -2556,13 +2553,13 @@ class VoterDeviceLinkManager(models.Model):
         try:
             if positive_value_exists(voter_id):
                 VoterDeviceLink.objects.filter(voter_id=voter_id).delete()
-                status = "DELETE_ALL_VOTER_DEVICE_LINKS_SUCCESSFUL"
+                status = "DELETE_ALL_VOTER_DEVICE_LINKS_SUCCESSFUL "
                 success = True
             else:
-                status = "DELETE_ALL_VOTER_DEVICE_LINKS-MISSING_VARIABLES"
+                status = "DELETE_ALL_VOTER_DEVICE_LINKS-MISSING_VARIABLES "
                 success = False
         except Exception as e:
-            status = "DELETE_ALL_VOTER_DEVICE_LINKS-DATABASE_DELETE_EXCEPTION"
+            status = "DELETE_ALL_VOTER_DEVICE_LINKS-DATABASE_DELETE_EXCEPTION: " + str(e) + " "
             success = False
 
         results = {
@@ -2595,13 +2592,13 @@ class VoterDeviceLinkManager(models.Model):
         try:
             if positive_value_exists(voter_device_id):
                 VoterDeviceLink.objects.filter(voter_device_id=voter_device_id).delete()
-                status = "DELETE_VOTER_DEVICE_LINK_SUCCESSFUL"
+                status = "DELETE_VOTER_DEVICE_LINK_SUCCESSFUL "
                 success = True
             else:
-                status = "DELETE_VOTER_DEVICE_LINK-MISSING_VARIABLES"
+                status = "DELETE_VOTER_DEVICE_LINK-MISSING_VARIABLES "
                 success = False
         except Exception as e:
-            status = "DELETE_VOTER_DEVICE_LINK-DATABASE_DELETE_EXCEPTION"
+            status = "DELETE_VOTER_DEVICE_LINK-DATABASE_DELETE_EXCEPTION: " + str(e) + " "
             success = False
 
         results = {
@@ -2627,7 +2624,7 @@ class VoterDeviceLinkManager(models.Model):
 
         try:
             if positive_value_exists(voter_device_id):
-                status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_DEVICE_ID"
+                status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_DEVICE_ID "
                 if read_only and not 'test' in sys.argv:
                     voter_device_link_on_stage = VoterDeviceLink.objects.using('readonly').get(
                         voter_device_id=voter_device_id)
@@ -2635,7 +2632,7 @@ class VoterDeviceLinkManager(models.Model):
                     voter_device_link_on_stage = VoterDeviceLink.objects.get(voter_device_id=voter_device_id)
                 voter_device_link_id = voter_device_link_on_stage.id
             elif positive_value_exists(voter_id):
-                status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_ID"
+                status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_ID "
                 if read_only:
                     voter_device_link_query = VoterDeviceLink.objects.using('readonly').all()
                 else:
@@ -2650,7 +2647,7 @@ class VoterDeviceLinkManager(models.Model):
                 except Exception as e:
                     voter_device_link_id = 0
             elif positive_value_exists(voter_device_link_id):
-                status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_DEVICE_LINK_ID"
+                status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_DEVICE_LINK_ID "
                 if read_only:
                     voter_device_link_on_stage = VoterDeviceLink.objects.using('readonly').get(id=voter_device_link_id)
                 else:
@@ -2659,16 +2656,16 @@ class VoterDeviceLinkManager(models.Model):
                 voter_device_link_id = voter_device_link_on_stage.id
             else:
                 voter_device_link_id = 0
-                status += " RETRIEVE_VOTER_DEVICE_LINK-MISSING_REQUIRED_SEARCH_VARIABLES"
+                status += " RETRIEVE_VOTER_DEVICE_LINK-MISSING_REQUIRED_SEARCH_VARIABLES "
         except VoterDeviceLink.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True
             exception_multiple_object_returned = True
-            status += " RETRIEVE_VOTER_DEVICE_LINK-MULTIPLE_OBJECTS_RETURNED"
+            status += " RETRIEVE_VOTER_DEVICE_LINK-MULTIPLE_OBJECTS_RETURNED "
         except VoterDeviceLink.DoesNotExist:
             error_result = True
             exception_does_not_exist = True
-            status += " RETRIEVE_VOTER_DEVICE_LINK-DOES_NOT_EXIST"
+            status += " RETRIEVE_VOTER_DEVICE_LINK-DOES_NOT_EXIST "
 
         results = {
             'success':                      True if not error_result else False,
@@ -2697,7 +2694,7 @@ class VoterDeviceLinkManager(models.Model):
             status += "VOTER_DEVICE_LINK_LIST_FOUND "
         except Exception as e:
             voter_device_link_list_found = False
-            status += "VOTER_DEVICE_LINK_LIST_NOT_FOUND-EXCEPTION "
+            status += "VOTER_DEVICE_LINK_LIST_NOT_FOUND-EXCEPTION: " + str(e) + " "
 
         results = {
             'success': success,
