@@ -26,9 +26,9 @@
                     <td height="16" style="line-height:16px;" colspan="3">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td width="64" align="left" valign="middle" style="height:64;line-height:0px;"><a href="{{ view_your_ballot_url }}" style="color:#3b5998;text-decoration:none;"><img src="https://WeVote.US/img/global/logos/we-vote-logo-square-inverted-64x64.png" width="64" height="64" style="border:0;" /></a></td>
+                    <td width="64" align="left" valign="middle" style="height:64;line-height:0px;"><a href="{{ view_main_discussion_page_url }}" style="color:#3b5998;text-decoration:none;"><img src="https://WeVote.US/img/global/logos/we-vote-logo-square-inverted-64x64.png" width="64" height="64" style="border:0;" /></a></td>
                     <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>
-                    <td width="100%" style=""><a href="{{ view_your_ballot_url }}" style="color:#3b5998;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:32px;">We Vote</a></td>
+                    <td width="100%" style=""><a href="{{ view_main_discussion_page_url }}" style="color:#3b5998;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:32px;">We Vote</a></td>
                   </tr>
                   <tr style="border-bottom:solid 1px #e5e5e5;">
                     <td height="16" style="line-height:16px;" colspan="3">&nbsp;</td>
@@ -45,12 +45,13 @@
                     <td height="28" style="line-height:28px;">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#141823;"><a href="{{ view_your_ballot_url }}" style="color:#3b5998;text-decoration:none;">{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}</a>{% if sender_email_address %} ({{ sender_email_address }}){% elif sms_phone_number %} ({{ sms_phone_number }}){% endif %} has added a new opinion. Voting is better with friends!</span></td>
+                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#141823;"><a href="{{ view_main_discussion_page_url }}" style="color:#3b5998;text-decoration:none;">{{ introduction_line }}</a> Voting is better with friends!</span></td>
                   </tr>
                   <tr style="">
                     <td height="14" style="line-height:14px;">&nbsp;</td>
                   </tr>
-                {% if sender_photo or sender_description or sender_network_details or invitation_message %}
+                {% for friend_activity in friend_activity_dict_list %}
+                {% if friend_activity.speaker_profile_image_url_medium or friend_activity.speaker_name or friend_activity.statement_text or friend_activity.view_activity_tidbit_url %}
                   <tr>
                     <td style="">
                       <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
@@ -58,23 +59,18 @@
                           <td style="font-size:11px;font-family:LucidaGrande,tahoma,verdana,arial,sans-serif;border:solid 1px #e5e5e5;border-radius:2px;padding:10px;display:block;">
                             <table cellspacing="0" cellpadding="0" width="100%" align="left" class="ib_t" style="border-collapse:collapse;width:100%;min-width:420px;">
                               <tr class="ib_row">
-                                {% if sender_photo %}
-                                <td valign="middle" style="padding-right:15px;font-size:0px;" class="ib_img"><a href="{{ view_your_ballot_url }}" style="color:#3b5998;text-decoration:none;"><img src="{{ sender_photo }}" width="75" height="75" style="border:0;background:#ffffff;" /></a></td>
+                                {% if friend_activity.speaker_profile_image_url_medium %}
+                                <td valign="middle" style="padding-right:15px;font-size:0px;" class="ib_img"><a href="{{ friend_activity.view_activity_tidbit_url }}" style="color:#3b5998;text-decoration:none;"><img src="{{ friend_activity.speaker_profile_image_url_medium }}" width="75" height="75" style="border:0;background:#ffffff;" /></a></td>
                                 {% endif %}
                                 <td width="100%" valign="middle" style="padding-right:10px;" class="ib_mid">
                                   <table cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
-                                    {% if invitation_message %}
-                                    <tr>
-                                      <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#898f9c;"><span style="color: #808080;">{{ invitation_message }}</span></span></td>
-                                    </tr>
-                                    {% endif %}
-                                    {% if sender_description or sender_network_details %}
+                                    {% if friend_activity.speaker_name or friend_activity.statement_text or friend_activity.view_activity_tidbit_url %}
                                         <tr>
-                                          <td style=""><a href="{{ view_your_ballot_url }}" style="color:#141823;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;font-weight:bold;">{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}</a></td>
+                                          <td style=""><a href="{{ friend_activity.view_activity_tidbit_url }}" style="color:#141823;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;font-weight:bold;">{% if friend_activity.speaker_name %}{{ friend_activity.speaker_name }}{% else %}Your   friend{% endif %}</a></td>
                                         </tr>
-                                        {% if sender_description %}
+                                        {% if friend_activity.statement_text %}
                                         <tr>
-                                          <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:14px;line-height:19px;color:#898f9c;"><span style="color: #808080;">{{ sender_description }}</span></span></td>
+                                          <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:14px;line-height:19px;color:#898f9c;"><span style="color: #808080;">&quot;{{ friend_activity.statement_text|truncatechars:50 }}&quot;</span></span></td>
                                         </tr>
                                         {% endif %}
                                         {% if sender_network_details %}
@@ -83,6 +79,17 @@
                                         </tr>
                                         {% endif %}
                                     {% endif %}
+                                        <tr>
+                                          <td class="mb_blk" style="">
+                                            <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
+                                              <tr>
+                                                <td style="border-collapse:collapse;border-radius:2px;text-align:center;display:block;border:solid 1px #344c80;box-shadow:inset 0 1px 1px rgba(255, 255, 255, 0.1),0 1px 0 rgba(0, 0, 0, 0.1);background:#2E3C5D;padding:7px 16px 11px 16px;">
+                                          <a href="{{ friend_activity.view_activity_tidbit_url }}" style="color:#2E3C5D;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;font-weight:bold;vertical-align:middle;color:#ffffff;text-shadow:0 -1px 0 #415686;font-size:20px;line-height:20px;">View Discussion</span></center></a>
+                                                </td>
+                                              </tr>
+                                            </table>
+                                          </td>
+                                        </tr>
                                   </table>
                                 </td>
                               </tr>
@@ -98,6 +105,7 @@
                     </td>
                   </tr>
                 {% endif %}
+                {% endfor %}
                   <tr style="">
                     <td height="14" style="line-height:14px;">&nbsp;</td>
                   </tr>
@@ -117,7 +125,7 @@
                         <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
                           <tr>
                             <td style="border-collapse:collapse;border-radius:2px;text-align:center;display:block;border:solid 1px #344c80;box-shadow:inset 0 1px 1px rgba(255, 255, 255, 0.1),0 1px 0 rgba(0, 0, 0, 0.1);background:#2E3C5D;padding:7px 16px 11px 16px;">
-                      <a href="{{ view_new_endorsements_url }}" style="color:#2E3C5D;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;font-weight:bold;vertical-align:middle;color:#ffffff;text-shadow:0 -1px 0 #415686;font-size:20px;line-height:20px;">View New Opinion(s)</span></center></a>
+                      <a href="{{ view_main_discussion_page_url }}" style="color:#2E3C5D;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;font-weight:bold;vertical-align:middle;color:#ffffff;text-shadow:0 -1px 0 #415686;font-size:20px;line-height:20px;">See All Discussions</span></center></a>
                             </td>
                           </tr>
                         </table>
@@ -149,7 +157,7 @@
                     <td height="14" style="line-height:14px;">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:18px;line-height:24px;color:#141823;">If the View New Opinion(s) button does not work, please copy and paste this link into a browser: {{ view_new_endorsements_url }}</span></td>
+                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:18px;line-height:24px;color:#141823;">If the See All Discussions button does not work, please copy and paste this link into a browser: {{ view_main_discussion_page_url }}</span></td>
                   </tr>
                   <tr style="">
                     <td height="7" style="line-height:7px;">&nbsp;</td>

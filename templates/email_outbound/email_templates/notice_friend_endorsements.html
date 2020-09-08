@@ -26,9 +26,9 @@
                     <td height="16" style="line-height:16px;" colspan="3">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td width="64" align="left" valign="middle" style="height:64;line-height:0px;"><a href="{{ view_your_ballot_url }}" style="color:#3b5998;text-decoration:none;"><img src="https://WeVote.US/img/global/logos/we-vote-logo-square-inverted-64x64.png" width="64" height="64" style="border:0;" /></a></td>
+                    <td width="64" align="left" valign="middle" style="height:64;line-height:0px;"><a href="{{ view_new_endorsements_url }}" style="color:#3b5998;text-decoration:none;"><img src="https://WeVote.US/img/global/logos/we-vote-logo-square-inverted-64x64.png" width="64" height="64" style="border:0;" /></a></td>
                     <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>
-                    <td width="100%" style=""><a href="{{ view_your_ballot_url }}" style="color:#3b5998;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:32px;">We Vote</a></td>
+                    <td width="100%" style=""><a href="{{ view_new_endorsements_url }}" style="color:#3b5998;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:32px;">We Vote</a></td>
                   </tr>
                   <tr style="border-bottom:solid 1px #e5e5e5;">
                     <td height="16" style="line-height:16px;" colspan="3">&nbsp;</td>
@@ -45,7 +45,7 @@
                     <td height="28" style="line-height:28px;">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#141823;"><a href="{{ view_your_ballot_url }}" style="color:#3b5998;text-decoration:none;">{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}</a>{% if sender_email_address %} ({{ sender_email_address }}){% elif sms_phone_number %} ({{ sms_phone_number }}){% endif %} has added a new opinion. Voting is better with friends!</span></td>
+                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#141823;"><a href="{{ view_new_endorsements_url }}" style="color:#3b5998;text-decoration:none;">{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}</a>{% if sender_email_address %} ({{ sender_email_address }}){% elif sms_phone_number %} ({{ sms_phone_number }}){% endif %} has added a new opinion. Voting is better with friends!</span></td>
                   </tr>
                   <tr style="">
                     <td height="14" style="line-height:14px;">&nbsp;</td>
@@ -59,7 +59,7 @@
                             <table cellspacing="0" cellpadding="0" width="100%" align="left" class="ib_t" style="border-collapse:collapse;width:100%;min-width:420px;">
                               <tr class="ib_row">
                                 {% if sender_photo %}
-                                <td valign="middle" style="padding-right:15px;font-size:0px;" class="ib_img"><a href="{{ view_your_ballot_url }}" style="color:#3b5998;text-decoration:none;"><img src="{{ sender_photo }}" width="75" height="75" style="border:0;background:#ffffff;" /></a></td>
+                                <td valign="middle" style="padding-right:15px;font-size:0px;" class="ib_img"><a href="{{ view_new_endorsements_url }}" style="color:#3b5998;text-decoration:none;"><img src="{{ sender_photo }}" width="75" height="75" style="border:0;background:#ffffff;" /></a></td>
                                 {% endif %}
                                 <td width="100%" valign="middle" style="padding-right:10px;" class="ib_mid">
                                   <table cellspacing="0" cellpadding="0" style="border-collapse:collapse;">

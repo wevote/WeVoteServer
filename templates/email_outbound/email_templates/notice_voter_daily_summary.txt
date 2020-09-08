@@ -1,7 +1,7 @@
 ========================================{# Later we replace "Your   friend" with the sender name. #}
-{% if view_new_endorsements_url %}
-View New Opinions:
-{{ view_new_endorsements_url }}
+{% if view_main_discussion_page_url %}
+See All Discussions:
+{{ view_main_discussion_page_url }}
 
 {% endif %}
 {% if view_your_ballot_url %}
@@ -17,9 +17,13 @@ Hello {{ recipient_name }},
 Hello,
 {% endif %}
 
-{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}{% if sender_email_address %} ({{ sender_email_address }}){% elif sms_phone_number %} ({{ sms_phone_number }}){% endif %} added a new opinion on We Vote, a simple way to plan your entire ballot.
-{% if invitation_message %}
-"{{ invitation_message }}"{% endif %}
+{% for friend_activity in friend_activity_dict_list %}
+  {% if friend_activity.speaker_name %}{{ friend_activity.speaker_name }}{% else %}Your   friend{% endif %}:
+  {% if friend_activity.statement_text %}"{{ friend_activity.statement_text|truncatechars:50 }}"{% endif %}
+  Click to see: {{ friend_activity.view_activity_tidbit_url }}
+
+
+{% endfor %}
 
 Thank you,
 The We Vote Team
