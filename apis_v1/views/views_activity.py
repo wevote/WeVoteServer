@@ -405,6 +405,7 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
                 'speaker_voter_we_vote_id':         activity_notice.speaker_voter_we_vote_id,
                 'speaker_profile_image_url_medium': activity_notice.speaker_profile_image_url_medium,
                 'speaker_profile_image_url_tiny':   activity_notice.speaker_profile_image_url_tiny,
+                'statement_text_preview':             activity_notice.statement_text_preview,
             }
             modified_activity_notice_list.append(activity_notice_dict)
     json_data = {
@@ -509,7 +510,8 @@ def activity_post_save_view(request):  # activityPostSave
             speaker_organization_we_vote_id=voter.linked_organization_we_vote_id,
             speaker_voter_we_vote_id=voter.we_vote_id,
             speaker_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium,
-            speaker_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny)
+            speaker_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny,
+            statement_text=activity_post.statement_text)
         status += activity_results['status']
         activity_post_dict = {
             'date_created':                     activity_post.date_created.strftime('%Y-%m-%d %H:%M:%S'),

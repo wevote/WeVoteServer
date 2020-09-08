@@ -73,7 +73,7 @@ NUMBER_OF_FAILED_TRIES_ALLOWED_ALL_TIME = 25
 # See process_maintenance_status_flags in /voter/controllers.py
 MAINTENANCE_STATUS_FLAGS_TASK_ONE = 1
 MAINTENANCE_STATUS_FLAGS_TASK_TWO = 2
-MAINTENANCE_STATUS_FLAGS_COMPLETED = MAINTENANCE_STATUS_FLAGS_TASK_ONE
+MAINTENANCE_STATUS_FLAGS_COMPLETED = MAINTENANCE_STATUS_FLAGS_TASK_ONE + MAINTENANCE_STATUS_FLAGS_TASK_TWO
 
 
 # See AUTH_USER_MODEL in config/base.py
@@ -2143,10 +2143,14 @@ class Voter(AbstractBaseUser):
     interface_status_flags = models.PositiveIntegerField(verbose_name="interface status flags", default=0)
 
     # This is how we keep track of whether we have run certain updates on voter records
-    # For example, have we updated one of the voter's notification_settings_flags after adding new feature?
-    # Once all previous voters have been updated, and new voters are using the new NOTIFICATION_SETTINGS_FLAGS_DEFAULT,
-    #  then we can set maintenance_status_flags to MAINTENANCE_STATUS_FLAGS_COMPLETED
-    #  MAINTENANCE_STATUS_FLAGS_COMPLETED = MAINTENANCE_STATUS_FLAGS_TASK_ONE
+    #  to the latest defaults, for example
+    # For example, have we updated a voter's notification_settings_flags after adding new feature?
+    # We update the default value for maintenance_status_flags for new voters with MAINTENANCE_STATUS_FLAGS_COMPLETED
+    #  since we updated the NOTIFICATION_SETTINGS_FLAGS_DEFAULT to match what we want after all of the maintenance
+    #  tasks have run.
+    # As all previous voters are updated with the newest NOTIFICATION_SETTINGS defaults,
+    #  we AND maintenance_status_flags with the new MAINTENANCE_STATUS_FLAGS_TASK_... so it ends up matching
+    #  MAINTENANCE_STATUS_FLAGS_COMPLETED = MAINTENANCE_STATUS_FLAGS_TASK_ONE + MAINTENANCE_STATUS_FLAGS_TASK_TWO
     # See process_maintenance_status_flags in /voter/controllers.py
     maintenance_status_flags = models.PositiveIntegerField(default=MAINTENANCE_STATUS_FLAGS_COMPLETED)
 

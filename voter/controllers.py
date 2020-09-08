@@ -1060,8 +1060,8 @@ def process_maintenance_status_flags():
         # Retrieve voters. Exclude rows where MAINTENANCE_STATUS_FLAGS_TASK_ONE bit is already set
         #  in maintenance_status_flags field.
         query = Voter.objects.annotate(
-            task_one_flag=F('maintenance_status_flags').bitand(MAINTENANCE_STATUS_FLAGS_TASK_ONE)
-        ).exclude(task_one_flag__gte=1)
+            task_one_flag_already_set=F('maintenance_status_flags').bitand(MAINTENANCE_STATUS_FLAGS_TASK_ONE)
+        ).exclude(task_one_flag_already_set=MAINTENANCE_STATUS_FLAGS_TASK_ONE)
         task_one_voter_list = query[:100]
         if len(task_one_voter_list) == 0:
             continue_retrieving_for_task_one = False
@@ -1094,8 +1094,8 @@ def process_maintenance_status_flags():
             # Retrieve voters. Exclude rows where MAINTENANCE_STATUS_FLAGS_TASK_TWO bit is already set
             #  in maintenance_status_flags field.
             query = Voter.objects.annotate(
-                task_two_flag=F('maintenance_status_flags').bitand(MAINTENANCE_STATUS_FLAGS_TASK_TWO)
-            ).exclude(task_two_flag__gte=1)
+                task_two_flag_already_set=F('maintenance_status_flags').bitand(MAINTENANCE_STATUS_FLAGS_TASK_TWO)
+            ).exclude(task_two_flag_already_set=MAINTENANCE_STATUS_FLAGS_TASK_TWO)
             task_two_voter_list = query[:100]
             if len(task_two_voter_list) == 0:
                 continue_retrieving_for_task_two = False

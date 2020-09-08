@@ -59,7 +59,7 @@ class ReactionManager(models.Manager):
         }
         return results
 
-    def fetch_reaction_likes_count(self, liked_item_we_vote_id):
+    def fetch_number_of_likes(self, liked_item_we_vote_id):
         results = self.count_all_reaction_likes(liked_item_we_vote_id)
         return results['number_of_likes']
 

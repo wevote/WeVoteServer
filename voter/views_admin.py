@@ -77,7 +77,9 @@ def process_maintenance_status_flags_view(request):
     messages.add_message(
         request, messages.INFO,
         "Process maintenance status flags, "
-        "voters_updated_task_one: " + str(results['voters_updated_task_one']))
+        "voters_updated_task_one: " + str(results['voters_updated_task_one']) +
+        ", voters_updated_task_two: " + str(results['voters_updated_task_two'])
+    )
 
     return HttpResponseRedirect(reverse('voter:voter_list', args=()))
 
