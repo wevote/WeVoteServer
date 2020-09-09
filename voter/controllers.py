@@ -9,8 +9,10 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, \
     NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, \
     Voter, VoterAddressManager, \
     VoterDeviceLink, VoterDeviceLinkManager, VoterManager
-from activity.controllers import delete_activity_notices_for_voter, delete_activity_posts_for_voter, \
-    move_activity_notices_to_another_voter, move_activity_posts_to_another_voter
+from activity.controllers import delete_activity_comments_for_voter, delete_activity_notices_for_voter, \
+    delete_activity_posts_for_voter, \
+    move_activity_comments_to_another_voter, move_activity_notices_to_another_voter, \
+    move_activity_posts_to_another_voter
 from analytics.controllers import delete_analytics_info_for_voter, move_analytics_info_to_another_voter
 from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, \
     ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
@@ -193,15 +195,20 @@ def delete_all_voter_information_permanently(voter_to_delete=None):  # voterDele
     #     voter_to_delete_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
     # status += " " + delete_shared_items_results['status']
 
-    # Transfer ActivityNoticeSeed and ActivityNotice entries from voter to new_owner_voter
+    # Delete ActivityNoticeSeed and ActivityNotice entries for voter
     delete_activity_results = delete_activity_notices_for_voter(
         voter_to_delete_we_vote_id, voter_to_delete_linked_organization_we_vote_id)
     status += " " + delete_activity_results['status']
 
-    # Transfer ActivityPost entries from voter to new_owner_voter
+    # Delete ActivityPost entries for voter
     delete_activity_post_results = delete_activity_posts_for_voter(
         voter_to_delete_we_vote_id, voter_to_delete_linked_organization_we_vote_id)
     status += " " + delete_activity_post_results['status']
+
+    # Delete ActivityComment entries for voter
+    delete_activity_comment_results = delete_activity_comments_for_voter(
+        voter_to_delete_we_vote_id, voter_to_delete_linked_organization_we_vote_id)
+    status += " " + delete_activity_comment_results['status']
 
     # Delete Analytics information
     delete_analytics_results = delete_analytics_info_for_voter(voter_to_delete_we_vote_id)
@@ -2328,6 +2335,13 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id,
         to_voter=new_owner_voter)
     status += " " + move_activity_post_results['status']
+
+    # Transfer ActivityComment entries from voter to new_owner_voter
+    move_activity_comment_results = move_activity_comments_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id,
+        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id,
+        to_voter=new_owner_voter)
+    status += " " + move_activity_comment_results['status']
 
     # Bring over Analytics information
     move_analytics_results = move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)

@@ -82,6 +82,7 @@ class ActivityManager(models.Manager):
             kind_of_seed=None,
             number_of_comments=0,
             number_of_likes=0,
+            position_name_list_serialized=None,
             position_we_vote_id_list_serialized=None,
             recipient_voter_we_vote_id='',
             send_to_email=False,
@@ -118,6 +119,7 @@ class ActivityManager(models.Manager):
                 new_positions_entered_count=new_positions_entered_count,
                 number_of_comments=number_of_comments,
                 number_of_likes=number_of_likes,
+                position_name_list_serialized=position_name_list_serialized,
                 position_we_vote_id_list_serialized=position_we_vote_id_list_serialized,
                 recipient_voter_we_vote_id=recipient_voter_we_vote_id,
                 send_to_email=send_to_email,
@@ -154,6 +156,8 @@ class ActivityManager(models.Manager):
             activity_tidbit_we_vote_ids_for_public_serialized='',
             date_of_notice=None,
             kind_of_seed=None,
+            position_names_for_friends_serialized='',
+            position_names_for_public_serialized='',
             position_we_vote_ids_for_friends_serialized='',
             position_we_vote_ids_for_public_serialized='',
             recipient_name='',
@@ -189,6 +193,8 @@ class ActivityManager(models.Manager):
                 activity_tidbit_we_vote_ids_for_public_serialized=activity_tidbit_we_vote_ids_for_public_serialized,
                 date_of_notice=date_of_notice,
                 kind_of_seed=kind_of_seed,
+                position_names_for_friends_serialized=position_names_for_friends_serialized,
+                position_names_for_public_serialized=position_names_for_public_serialized,
                 position_we_vote_ids_for_friends_serialized=position_we_vote_ids_for_friends_serialized,
                 position_we_vote_ids_for_public_serialized=position_we_vote_ids_for_public_serialized,
                 recipient_name=recipient_name,
@@ -1097,6 +1103,14 @@ class ActivityManager(models.Manager):
                 if 'kind_of_seed' in update_values:
                     existing_entry.kind_of_seed = update_values['kind_of_seed']
                     values_changed = True
+                if 'position_names_for_friends_serialized' in update_values:
+                    existing_entry.position_names_for_friends_serialized = \
+                        update_values['position_names_for_friends_serialized']
+                    values_changed = True
+                if 'position_names_for_public_serialized' in update_values:
+                    existing_entry.position_names_for_public_serialized = \
+                        update_values['position_names_for_public_serialized']
+                    values_changed = True
                 if 'position_we_vote_ids_for_friends_serialized' in update_values:
                     existing_entry.position_we_vote_ids_for_friends_serialized = \
                         update_values['position_we_vote_ids_for_friends_serialized']
@@ -1307,6 +1321,7 @@ class ActivityNotice(models.Model):
     new_positions_entered_count = models.PositiveIntegerField(default=None, null=True)
     number_of_comments = models.PositiveIntegerField(default=None, null=True)
     number_of_likes = models.PositiveIntegerField(default=None, null=True)
+    position_name_list_serialized = models.TextField(default=None, null=True)
     position_we_vote_id_list_serialized = models.TextField(default=None, null=True)
     speaker_name = models.CharField(max_length=255, default=None, null=True)
     speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
@@ -1342,6 +1357,8 @@ class ActivityNoticeSeed(models.Model):
     deleted = models.BooleanField(default=False)
     kind_of_seed = models.CharField(max_length=50, default=None, null=True)
     # Positions that were changed: NOTICE_FRIEND_ENDORSEMENTS
+    position_names_for_friends_serialized = models.TextField(default=None, null=True)
+    position_names_for_public_serialized = models.TextField(default=None, null=True)
     position_we_vote_ids_for_friends_serialized = models.TextField(default=None, null=True)
     position_we_vote_ids_for_public_serialized = models.TextField(default=None, null=True)
     # Voter receiving the daily summary: NOTICE_VOTER_DAILY_SUMMARY
@@ -1425,48 +1442,6 @@ class ActivityPost(models.Model):
                 next_integer=next_local_integer,
             )
         super(ActivityPost, self).save(*args, **kwargs)
-
-
-# class ActivitySummaryForVoter(models.Model):
-#     """
-#     This is a summary of activity that leads to an email or sms being sent on a daily or weekly basis.
-#     """
-#     # activity_notices_created = models.BooleanField(default=False)
-#     # date_of_notice_earlier_than_update_window = models.BooleanField(default=False)
-#     # activity_notices_scheduled = models.BooleanField(default=False)
-#     date_created = models.DateTimeField(null=True)
-#     date_last_changed = models.DateTimeField(null=True, auto_now=True)
-#     deleted = models.BooleanField(default=False)
-#     kind_of_summary = models.CharField(max_length=50, default=None, null=True)
-#     # position_we_vote_ids_for_friends_serialized = models.TextField(default=None, null=True)
-#     # position_we_vote_ids_for_public_serialized = models.TextField(default=None, null=True)
-#     # speaker_name = models.CharField(max_length=255, default=None, null=True)
-#     # speaker_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-#     # speaker_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
-#     # speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
-#     # speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
-#     # speaker_twitter_handle = models.CharField(max_length=255, null=True, unique=False, default=None)
-#     # speaker_twitter_followers_count = models.IntegerField(default=0)
-#     we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=True)
-#
-#     # We override the save function so we can auto-generate we_vote_id
-#     def save(self, *args, **kwargs):
-#         # Even if this data came from another source we still need a unique we_vote_id
-#         if self.we_vote_id:
-#             self.we_vote_id = self.we_vote_id.strip().lower()
-#         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
-#             # ...generate a new id
-#             site_unique_id_prefix = fetch_site_unique_id_prefix()
-#             next_local_integer = fetch_next_we_vote_id_activity_summary_for_voter_integer()
-#             # "wv" = We Vote
-#             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
-#             # "actsum" = tells us this is a unique id for an ActivitySummaryForVoter
-#             # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
-#             self.we_vote_id = "wv{site_unique_id_prefix}actsum{next_integer}".format(
-#                 site_unique_id_prefix=site_unique_id_prefix,
-#                 next_integer=next_local_integer,
-#             )
-#         super(ActivitySummaryForVoter, self).save(*args, **kwargs)
 
 
 def get_lifespan_of_seed(kind_of_seed):

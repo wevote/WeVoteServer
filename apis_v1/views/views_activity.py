@@ -177,8 +177,15 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
 
     for activity_notice_seed in activity_notice_seed_list:
         new_positions_entered_count = 0
+        position_name_list = []
         position_we_vote_id_list = []
         # In this scenario we want to return both friends and public values
+        # Position names
+        if positive_value_exists(activity_notice_seed.position_names_for_friends_serialized):
+            position_name_list += json.loads(activity_notice_seed.position_names_for_friends_serialized)
+        if positive_value_exists(activity_notice_seed.position_names_for_public_serialized):
+            position_name_list += json.loads(activity_notice_seed.position_names_for_public_serialized)
+        # Position we_vote_ids
         if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_friends_serialized):
             position_we_vote_id_list += json.loads(activity_notice_seed.position_we_vote_ids_for_friends_serialized)
         if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_public_serialized):
@@ -198,6 +205,7 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
             'kind_of_activity':                 "ACTIVITY_NOTICE_SEED",
             'kind_of_seed':                     activity_notice_seed.kind_of_seed,
             'new_positions_entered_count':      new_positions_entered_count,
+            'position_name_list':               position_name_list,
             'position_we_vote_id_list':         position_we_vote_id_list,
             'speaker_name':                     activity_notice_seed.speaker_name,
             'speaker_organization_we_vote_id':  activity_notice_seed.speaker_organization_we_vote_id,
@@ -240,6 +248,7 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
             'kind_of_activity':                 'ACTIVITY_POST',
             'kind_of_seed':                     '',
             'new_positions_entered_count':      0,
+            'position_name_list':               [],
             'position_we_vote_id_list':         [],
             'speaker_name':                     activity_post.speaker_name,
             'speaker_organization_we_vote_id':  activity_post.speaker_organization_we_vote_id,
@@ -377,10 +386,13 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
     modified_activity_notice_list = []
     activity_notice_list = results['activity_notice_list']
     for activity_notice in activity_notice_list:
+        position_name_list = []
         position_we_vote_id_list = []
         include_this_activity_notice = False
         new_positions_entered_count = 0
         if activity_notice.kind_of_notice == NOTICE_FRIEND_ENDORSEMENTS:
+            if positive_value_exists(activity_notice.position_name_list_serialized):
+                position_name_list = json.loads(activity_notice.position_name_list_serialized)
             if positive_value_exists(activity_notice.position_we_vote_id_list_serialized):
                 position_we_vote_id_list = json.loads(activity_notice.position_we_vote_id_list_serialized)
             new_positions_entered_count = activity_notice.new_positions_entered_count
@@ -399,6 +411,7 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
                 'new_positions_entered_count':      new_positions_entered_count,
                 'number_of_comments':               activity_notice.number_of_comments,
                 'number_of_likes':                  activity_notice.number_of_likes,
+                'position_name_list':               position_name_list,
                 'position_we_vote_id_list':         position_we_vote_id_list,
                 'speaker_name':                     activity_notice.speaker_name,
                 'speaker_organization_we_vote_id':  activity_notice.speaker_organization_we_vote_id,

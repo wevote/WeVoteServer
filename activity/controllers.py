@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import ActivityNoticeSeed, ActivityManager, ActivityNotice, ActivityPost, \
+from .models import ActivityComment, ActivityNoticeSeed, ActivityManager, ActivityNotice, ActivityPost, \
     NOTICE_ACTIVITY_POST_SEED, NOTICE_FRIEND_ACTIVITY_POSTS, \
     NOTICE_FRIEND_ENDORSEMENTS, NOTICE_FRIEND_ENDORSEMENTS_SEED, \
     NOTICE_VOTER_DAILY_SUMMARY, NOTICE_VOTER_DAILY_SUMMARY_SEED
@@ -23,6 +23,46 @@ from wevote_functions.functions import is_voter_device_id_valid, positive_value_
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+
+
+def delete_activity_comments_for_voter(voter_to_delete_we_vote_id, from_organization_we_vote_id):
+    status = ''
+    success = True
+    activity_comment_entries_deleted = 0
+
+    if not positive_value_exists(voter_to_delete_we_vote_id):
+        status += "DELETE_ACTIVITY_COMMENTS-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        success = False
+        results = {
+            'status': status,
+            'success': success,
+            'voter_to_delete_we_vote_id': voter_to_delete_we_vote_id,
+            'activity_comment_entries_deleted': activity_comment_entries_deleted,
+        }
+        return results
+
+    try:
+        activity_comment_entries_deleted += ActivityComment.objects\
+            .filter(commenter_voter_we_vote_id__iexact=voter_to_delete_we_vote_id)\
+            .delete()
+    except Exception as e:
+        status += "FAILED-ACTIVITY_COMMENT_UPDATE-INCLUDING_ORG_UPDATE " + str(e) + " "
+    # #############################################
+    # Delete based on organization_we_vote_id
+    try:
+        activity_comment_entries_deleted += ActivityComment.objects \
+            .filter(commenter_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+            .delete()
+    except Exception as e:
+        status += "FAILED-ACTIVITY_COMMENT_DELETE-FROM_ORG_WE_VOTE_ID " + str(e) + " "
+
+    results = {
+        'status': status,
+        'success': success,
+        'voter_to_delete_we_vote_id': voter_to_delete_we_vote_id,
+        'activity_comment_entries_deleted': activity_comment_entries_deleted,
+    }
+    return results
 
 
 def delete_activity_notices_for_voter(voter_to_delete_we_vote_id, from_organization_we_vote_id):
@@ -128,6 +168,94 @@ def delete_activity_posts_for_voter(voter_to_delete_we_vote_id, from_organizatio
     return results
 
 
+def move_activity_comments_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id, from_organization_we_vote_id, to_organization_we_vote_id,
+        to_voter=None):
+    status = ''
+    success = True
+    activity_comment_entries_moved = 0
+
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        status += "MOVE_ACTIVITY_COMMENTS-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        success = False
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'from_voter_we_vote_id':            from_voter_we_vote_id,
+            'to_voter_we_vote_id':              to_voter_we_vote_id,
+            'activity_comment_entries_moved':   activity_comment_entries_moved,
+        }
+        return results
+
+    if from_voter_we_vote_id == to_voter_we_vote_id:
+        status += "MOVE_ACTIVITY_COMMENTS-FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
+        success = False
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'from_voter_we_vote_id':            from_voter_we_vote_id,
+            'to_voter_we_vote_id':              to_voter_we_vote_id,
+            'activity_comment_entries_moved':   activity_comment_entries_moved,
+        }
+        return results
+
+    # ######################
+    # Migrations
+    to_voter_commenter_name = ''
+    commenter_profile_image_url_medium = None
+    commenter_profile_image_url_tiny = None
+    try:
+        to_voter_commenter_name = to_voter.get_full_name()
+        commenter_profile_image_url_medium = to_voter.we_vote_hosted_profile_image_url_medium
+        commenter_profile_image_url_tiny = to_voter.we_vote_hosted_profile_image_url_tiny
+    except Exception as e:
+        status += "UNABLE_TO_GET_NAME_OR_PHOTOS: " + str(e) + " "
+
+    if positive_value_exists(to_organization_we_vote_id):
+        # Move based on commenter_voter_we_vote_id
+        try:
+            activity_comment_entries_moved += ActivityComment.objects\
+                .filter(commenter_voter_we_vote_id__iexact=from_voter_we_vote_id)\
+                .update(commenter_name=to_voter_commenter_name,
+                        commenter_voter_we_vote_id=to_voter_we_vote_id,
+                        commenter_organization_we_vote_id=to_organization_we_vote_id,
+                        commenter_profile_image_url_medium=commenter_profile_image_url_medium,
+                        commenter_profile_image_url_tiny=commenter_profile_image_url_tiny)
+        except Exception as e:
+            status += "FAILED-ACTIVITY_COMMENT_UPDATE-INCLUDING_ORG_UPDATE: " + str(e) + " "
+        # #############################################
+        # Move based on commenter_organization_we_vote_id
+        try:
+            activity_comment_entries_moved += ActivityComment.objects \
+                .filter(commenter_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(commenter_name=to_voter_commenter_name,
+                        commenter_voter_we_vote_id=to_voter_we_vote_id,
+                        commenter_organization_we_vote_id=to_organization_we_vote_id,
+                        commenter_profile_image_url_medium=commenter_profile_image_url_medium,
+                        commenter_profile_image_url_tiny=commenter_profile_image_url_tiny)
+        except Exception as e:
+            status += "FAILED-ACTIVITY_COMMENT_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+    else:
+        try:
+            activity_comment_entries_moved += ActivityComment.objects\
+                .filter(commenter_voter_we_vote_id__iexact=from_voter_we_vote_id)\
+                .update(commenter_name=to_voter_commenter_name,
+                        commenter_voter_we_vote_id=to_voter_we_vote_id,
+                        commenter_profile_image_url_medium=commenter_profile_image_url_medium,
+                        commenter_profile_image_url_tiny=commenter_profile_image_url_tiny)
+        except Exception as e:
+            status += "FAILED-ACTIVITY_COMMENT_UPDATE-MISSING_ORG: " + str(e) + " "
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'from_voter_we_vote_id':            from_voter_we_vote_id,
+        'to_voter_we_vote_id':              to_voter_we_vote_id,
+        'activity_comment_entries_moved':   activity_comment_entries_moved,
+    }
+    return results
+
+
 def move_activity_notices_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id, from_organization_we_vote_id, to_organization_we_vote_id,
         to_voter=None):
@@ -140,12 +268,12 @@ def move_activity_notices_to_another_voter(
         status += "MOVE_ACTIVITY_NOTICE_SEEDS-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID "
         success = False
         results = {
-            'status': status,
-            'success': success,
-            'from_voter_we_vote_id': from_voter_we_vote_id,
-            'to_voter_we_vote_id': to_voter_we_vote_id,
-            'activity_notice_seed_entries_moved': activity_notice_seed_entries_moved,
-            'activity_notice_entries_moved': activity_notice_entries_moved,
+            'status':                               status,
+            'success':                              success,
+            'from_voter_we_vote_id':                from_voter_we_vote_id,
+            'to_voter_we_vote_id':                  to_voter_we_vote_id,
+            'activity_notice_seed_entries_moved':   activity_notice_seed_entries_moved,
+            'activity_notice_entries_moved':        activity_notice_entries_moved,
         }
         return results
 
@@ -153,40 +281,44 @@ def move_activity_notices_to_another_voter(
         status += "MOVE_ACTIVITY_NOTICE_SEEDS-FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
         success = False
         results = {
-            'status': status,
-            'success': success,
-            'from_voter_we_vote_id': from_voter_we_vote_id,
-            'to_voter_we_vote_id': to_voter_we_vote_id,
-            'activity_notice_seed_entries_moved': activity_notice_seed_entries_moved,
-            'activity_notice_entries_moved': activity_notice_entries_moved,
+            'status':                               status,
+            'success':                              success,
+            'from_voter_we_vote_id':                from_voter_we_vote_id,
+            'to_voter_we_vote_id':                  to_voter_we_vote_id,
+            'activity_notice_seed_entries_moved':   activity_notice_seed_entries_moved,
+            'activity_notice_entries_moved':        activity_notice_entries_moved,
         }
         return results
 
     # ######################
     # Migrations
+    to_voter_speaker_name = ''
     speaker_profile_image_url_medium = None
     speaker_profile_image_url_tiny = None
     try:
+        to_voter_speaker_name = to_voter.get_full_name()
         speaker_profile_image_url_medium = to_voter.we_vote_hosted_profile_image_url_medium
         speaker_profile_image_url_tiny = to_voter.we_vote_hosted_profile_image_url_tiny
     except Exception as e:
-        status += "UNABLE_TO_GET_PHOTOS " + str(e) + " "
+        status += "UNABLE_TO_GET_NAME_OR_PHOTOS: " + str(e) + " "
 
     if positive_value_exists(to_organization_we_vote_id):
         # Move based on speaker_voter_we_vote_id
         try:
             activity_notice_seed_entries_moved += ActivityNoticeSeed.objects\
                 .filter(speaker_voter_we_vote_id__iexact=from_voter_we_vote_id)\
-                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                .update(speaker_name=to_voter_speaker_name,
+                        speaker_voter_we_vote_id=to_voter_we_vote_id,
                         speaker_organization_we_vote_id=to_organization_we_vote_id,
                         speaker_profile_image_url_medium=speaker_profile_image_url_medium,
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
-            status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-INCLUDING_ORG_UPDATE " + str(e) + " "
+            status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-INCLUDING_ORG_UPDATE: " + str(e) + " "
         try:
             activity_notice_entries_moved += ActivityNotice.objects\
                 .filter(speaker_voter_we_vote_id__iexact=from_voter_we_vote_id) \
-                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                .update(speaker_name=to_voter_speaker_name,
+                        speaker_voter_we_vote_id=to_voter_we_vote_id,
                         speaker_organization_we_vote_id=to_organization_we_vote_id,
                         speaker_profile_image_url_medium=speaker_profile_image_url_medium,
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
@@ -197,54 +329,59 @@ def move_activity_notices_to_another_voter(
         try:
             activity_notice_seed_entries_moved += ActivityNoticeSeed.objects \
                 .filter(speaker_organization_we_vote_id__iexact=from_organization_we_vote_id) \
-                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                .update(speaker_name=to_voter_speaker_name,
+                        speaker_voter_we_vote_id=to_voter_we_vote_id,
                         speaker_organization_we_vote_id=to_organization_we_vote_id,
                         speaker_profile_image_url_medium=speaker_profile_image_url_medium,
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
-            status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-FROM_ORG_WE_VOTE_ID " + str(e) + " "
+            status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
         try:
             activity_notice_entries_moved += ActivityNotice.objects \
                 .filter(speaker_organization_we_vote_id__iexact=from_organization_we_vote_id) \
-                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                .update(speaker_name=to_voter_speaker_name,
+                        speaker_voter_we_vote_id=to_voter_we_vote_id,
                         speaker_organization_we_vote_id=to_organization_we_vote_id,
                         speaker_profile_image_url_medium=speaker_profile_image_url_medium,
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
-            status += "FAILED-ACTIVITY_NOTICE_UPDATE-FROM_ORG_WE_VOTE_ID " + str(e) + " "
+            status += "FAILED-ACTIVITY_NOTICE_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
     else:
         try:
             activity_notice_seed_entries_moved += ActivityNoticeSeed.objects\
                 .filter(speaker_voter_we_vote_id__iexact=from_voter_we_vote_id)\
-                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                .update(speaker_name=to_voter_speaker_name,
+                        speaker_voter_we_vote_id=to_voter_we_vote_id,
                         speaker_profile_image_url_medium=speaker_profile_image_url_medium,
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
-            status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-MISSING_ORG " + str(e) + " "
+            status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-MISSING_ORG: " + str(e) + " "
         try:
             activity_notice_entries_moved += ActivityNotice.objects\
                 .filter(speaker_voter_we_vote_id__iexact=from_voter_we_vote_id) \
-                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                .update(speaker_name=to_voter_speaker_name,
+                        speaker_voter_we_vote_id=to_voter_we_vote_id,
                         speaker_profile_image_url_medium=speaker_profile_image_url_medium,
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
-            status += "FAILED-ACTIVITY_NOTICE_UPDATE-MISSING_ORG " + str(e) + " "
+            status += "FAILED-ACTIVITY_NOTICE_UPDATE-MISSING_ORG: " + str(e) + " "
 
     # Now move ActivityNotice recipient_voter_we_vote_id
     try:
         activity_notice_entries_moved += ActivityNotice.objects \
             .filter(recipient_voter_we_vote_id__iexact=from_voter_we_vote_id) \
-            .update(recipient_voter_we_vote_id=to_voter_we_vote_id)
+            .update(speaker_name=to_voter_speaker_name,
+                    recipient_voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
-        status += "FAILED-ACTIVITY_NOTICE_UPDATE-RECIPIENT " + str(e) + " "
+        status += "FAILED-ACTIVITY_NOTICE_UPDATE-RECIPIENT: " + str(e) + " "
 
     results = {
-        'status': status,
-        'success': success,
-        'from_voter_we_vote_id': from_voter_we_vote_id,
-        'to_voter_we_vote_id': to_voter_we_vote_id,
-        'activity_notice_seed_entries_moved': activity_notice_seed_entries_moved,
-        'activity_notice_entries_moved': activity_notice_entries_moved,
+        'status':                               status,
+        'success':                              success,
+        'from_voter_we_vote_id':                from_voter_we_vote_id,
+        'to_voter_we_vote_id':                  to_voter_we_vote_id,
+        'activity_notice_seed_entries_moved':   activity_notice_seed_entries_moved,
+        'activity_notice_entries_moved':        activity_notice_entries_moved,
     }
     return results
 
@@ -282,20 +419,23 @@ def move_activity_posts_to_another_voter(
 
     # ######################
     # Migrations
+    to_voter_speaker_name = ''
     speaker_profile_image_url_medium = None
     speaker_profile_image_url_tiny = None
     try:
+        to_voter_speaker_name = to_voter.get_full_name()
         speaker_profile_image_url_medium = to_voter.we_vote_hosted_profile_image_url_medium
         speaker_profile_image_url_tiny = to_voter.we_vote_hosted_profile_image_url_tiny
     except Exception as e:
-        status += "UNABLE_TO_GET_PHOTOS " + str(e) + " "
+        status += "UNABLE_TO_GET_NAME_OR_PHOTOS: " + str(e) + " "
 
     if positive_value_exists(to_organization_we_vote_id):
         # Move based on speaker_voter_we_vote_id
         try:
             activity_post_entries_moved += ActivityPost.objects\
                 .filter(speaker_voter_we_vote_id__iexact=from_voter_we_vote_id)\
-                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                .update(speaker_name=to_voter_speaker_name,
+                        speaker_voter_we_vote_id=to_voter_we_vote_id,
                         speaker_organization_we_vote_id=to_organization_we_vote_id,
                         speaker_profile_image_url_medium=speaker_profile_image_url_medium,
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
@@ -306,21 +446,23 @@ def move_activity_posts_to_another_voter(
         try:
             activity_post_entries_moved += ActivityPost.objects \
                 .filter(speaker_organization_we_vote_id__iexact=from_organization_we_vote_id) \
-                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                .update(speaker_name=to_voter_speaker_name,
+                        speaker_voter_we_vote_id=to_voter_we_vote_id,
                         speaker_organization_we_vote_id=to_organization_we_vote_id,
                         speaker_profile_image_url_medium=speaker_profile_image_url_medium,
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
-            status += "FAILED-ACTIVITY_POST_UPDATE-FROM_ORG_WE_VOTE_ID " + str(e) + " "
+            status += "FAILED-ACTIVITY_POST_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
     else:
         try:
             activity_post_entries_moved += ActivityPost.objects\
                 .filter(speaker_voter_we_vote_id__iexact=from_voter_we_vote_id)\
-                .update(speaker_voter_we_vote_id=to_voter_we_vote_id,
+                .update(speaker_name=to_voter_speaker_name,
+                        speaker_voter_we_vote_id=to_voter_we_vote_id,
                         speaker_profile_image_url_medium=speaker_profile_image_url_medium,
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
-            status += "FAILED-ACTIVITY_POST_UPDATE-MISSING_ORG " + str(e) + " "
+            status += "FAILED-ACTIVITY_POST_UPDATE-MISSING_ORG: " + str(e) + " "
 
     results = {
         'status': status,
@@ -336,7 +478,8 @@ def notice_friend_endorsements_send(
         speaker_voter_we_vote_id='',
         recipient_voter_we_vote_id='',
         invitation_message='',
-        activity_tidbit_we_vote_id=''):
+        activity_tidbit_we_vote_id='',
+        position_name_list=[]):
     """
     We are sending an email to the speaker's friends who are
     subscribed to NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT or NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS
@@ -344,6 +487,7 @@ def notice_friend_endorsements_send(
     :param recipient_voter_we_vote_id:
     :param invitation_message:
     :param activity_tidbit_we_vote_id:
+    :param position_name_list:
     :return:
     """
     from email_outbound.controllers import schedule_email_with_email_outbound_description
@@ -427,13 +571,50 @@ def notice_friend_endorsements_send(
         speaker_voter_description = ""
         speaker_voter_network_details = ""
 
-        # Variables used by templates/email_outbound/email_templates/friend_accepted_invitation.txt and .html
         if positive_value_exists(speaker_voter_name):
-            subject = speaker_voter_name + " has added a new opinion"
+            subject = speaker_voter_name
         else:
-            subject = "Your friend added new opinion"
+            subject = "Your friend"
 
+        activity_description = ''
+        if position_name_list and len(position_name_list) > 0:
+            if len(position_name_list) == 1:
+                subject += " added opinion about "
+                subject += position_name_list[0]
+
+                activity_description += "added opinion about "
+                activity_description += position_name_list[0]
+            elif len(position_name_list) == 2:
+                subject += " added opinions about "
+                subject += position_name_list[0]
+                subject += " and "
+                subject += position_name_list[1]
+
+                activity_description += "added opinions about "
+                activity_description += position_name_list[0]
+                activity_description += " and "
+                activity_description += position_name_list[1]
+            elif len(position_name_list) >= 3:
+                subject += " added opinions about "
+                subject += position_name_list[0]
+                subject += ", "
+                subject += position_name_list[1]
+                subject += " and "
+                subject += position_name_list[2]
+
+                activity_description += "added opinions about "
+                activity_description += position_name_list[0]
+                activity_description += ", "
+                activity_description += position_name_list[1]
+                activity_description += " and "
+                activity_description += position_name_list[2]
+            else:
+                subject += " has added new opinion"
+                activity_description += "has added new opinion"
+
+        # Variables used by templates/email_outbound/email_templates/notice_friend_endorsements.txt and .html
         template_variables_for_json = {
+            "activity_description":         activity_description,
             "subject":                      subject,
             "invitation_message":           invitation_message,
             "sender_name":                  speaker_voter_name,
@@ -926,6 +1107,18 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
             current_friend_list = retrieve_current_friends_as_voters_results['friend_list']
             if activity_notice_seed.kind_of_seed == NOTICE_FRIEND_ENDORSEMENTS_SEED:
                 kind_of_notice = NOTICE_FRIEND_ENDORSEMENTS
+                # Names for quick summaries
+                position_name_list = []
+                if positive_value_exists(activity_notice_seed.position_names_for_friends_serialized):
+                    position_name_list_for_friends = \
+                        json.loads(activity_notice_seed.position_names_for_friends_serialized)
+                    position_name_list += position_name_list_for_friends
+                if positive_value_exists(activity_notice_seed.position_names_for_public_serialized):
+                    position_name_list_for_public = \
+                        json.loads(activity_notice_seed.position_names_for_public_serialized)
+                    position_name_list += position_name_list_for_public
+                position_name_list_serialized = json.dumps(position_name_list)
+                # We Vote Ids for full position display
                 position_we_vote_id_list = []
                 if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_friends_serialized):
                     position_we_vote_id_list_for_friends = \
@@ -958,6 +1151,7 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
                         activity_tidbit_we_vote_id=activity_notice_seed.we_vote_id,
                         kind_of_seed=activity_notice_seed.kind_of_seed,
                         kind_of_notice=kind_of_notice,
+                        position_name_list_serialized=position_name_list_serialized,
                         position_we_vote_id_list_serialized=position_we_vote_id_list_serialized,
                         recipient_voter_we_vote_id=friend_voter.we_vote_id,
                         send_to_email=send_to_email,
@@ -1069,46 +1263,47 @@ def update_or_create_voter_daily_summary_seed(
         recipient_voter_we_vote_id=recipient_voter_we_vote_id,
     )
     if results['activity_notice_seed_found']:
-        activity_notice_seed = results['activity_notice_seed']
-        change_detected = False
-        try:
-            # DALE Sept 6, 2020: I'm not 100% sure we need to update NOTICE_VOTER_DAILY_SUMMARY_SEED with this data
-            #  since when we generate the daily summary email we are just querying against activity since the last
-            #  summary was sent.
-            if positive_value_exists(speaker_organization_we_vote_id):
-                speaker_organization_we_vote_ids = []
-                if positive_value_exists(activity_notice_seed.speaker_organization_we_vote_ids_serialized):
-                    # Deserialize
-                    speaker_organization_we_vote_ids = \
-                        json.loads(activity_notice_seed.speaker_organization_we_vote_ids_serialized)
-                if speaker_organization_we_vote_id not in speaker_organization_we_vote_ids:
-                    speaker_organization_we_vote_ids.append(speaker_organization_we_vote_id)
-                    change_detected = True
-                # Then serialize
-                speaker_organization_we_vote_ids_serialized = json.dumps(speaker_organization_we_vote_ids)
-                activity_notice_seed.speaker_organization_we_vote_ids_serialized = \
-                    speaker_organization_we_vote_ids_serialized
-
-            if positive_value_exists(speaker_voter_we_vote_id):
-                speaker_voter_we_vote_ids = []
-                if positive_value_exists(activity_notice_seed.speaker_voter_we_vote_ids_serialized):
-                    # Deserialize
-                    speaker_voter_we_vote_ids = json.loads(activity_notice_seed.speaker_voter_we_vote_ids_serialized)
-                if speaker_voter_we_vote_id not in speaker_voter_we_vote_ids:
-                    speaker_voter_we_vote_ids.append(speaker_voter_we_vote_id)
-                    change_detected = True
-                # Then serialize
-                speaker_voter_we_vote_ids_serialized = json.dumps(speaker_voter_we_vote_ids)
-                activity_notice_seed.speaker_voter_we_vote_ids_serialized = speaker_voter_we_vote_ids_serialized
-
-            if activity_notice_seed.recipient_name != recipient_name:
-                activity_notice_seed.recipient_name = recipient_name
-                change_detected = True
-            if positive_value_exists(change_detected):
-                activity_notice_seed.save()
-        except Exception as e:
-            status += "COULD_NOT_UPDATE_ACTIVITY_NOTICE_SEED_FOR_POSTS: " + str(e) + " "
-        status += results['status']
+        status += "WE_DO_NOT_NEED_TO_UPDATE_NOTICE_VOTER_DAILY_SUMMARY_SEED "
+        # activity_notice_seed = results['activity_notice_seed']
+        # change_detected = False
+        # try:
+        #     # DALE Sept 6, 2020: I'm not 100% sure we need to update NOTICE_VOTER_DAILY_SUMMARY_SEED with this data
+        #     #  since when we generate the daily summary email we are just querying against activity since the last
+        #     #  summary was sent.
+        #     if positive_value_exists(speaker_organization_we_vote_id):
+        #         speaker_organization_we_vote_ids = []
+        #         if positive_value_exists(activity_notice_seed.speaker_organization_we_vote_ids_serialized):
+        #             # Deserialize
+        #             speaker_organization_we_vote_ids = \
+        #                 json.loads(activity_notice_seed.speaker_organization_we_vote_ids_serialized)
+        #         if speaker_organization_we_vote_id not in speaker_organization_we_vote_ids:
+        #             speaker_organization_we_vote_ids.append(speaker_organization_we_vote_id)
+        #             change_detected = True
+        #         # Then serialize
+        #         speaker_organization_we_vote_ids_serialized = json.dumps(speaker_organization_we_vote_ids)
+        #         activity_notice_seed.speaker_organization_we_vote_ids_serialized = \
+        #             speaker_organization_we_vote_ids_serialized
+        #
+        #     if positive_value_exists(speaker_voter_we_vote_id):
+        #         speaker_voter_we_vote_ids = []
+        #         if positive_value_exists(activity_notice_seed.speaker_voter_we_vote_ids_serialized):
+        #             # Deserialize
+        #             speaker_voter_we_vote_ids = json.loads(activity_notice_seed.speaker_voter_we_vote_ids_serialized)
+        #         if speaker_voter_we_vote_id not in speaker_voter_we_vote_ids:
+        #             speaker_voter_we_vote_ids.append(speaker_voter_we_vote_id)
+        #             change_detected = True
+        #         # Then serialize
+        #         speaker_voter_we_vote_ids_serialized = json.dumps(speaker_voter_we_vote_ids)
+        #         activity_notice_seed.speaker_voter_we_vote_ids_serialized = speaker_voter_we_vote_ids_serialized
+        #
+        #     if activity_notice_seed.recipient_name != recipient_name:
+        #         activity_notice_seed.recipient_name = recipient_name
+        #         change_detected = True
+        #     if positive_value_exists(change_detected):
+        #         activity_notice_seed.save()
+        # except Exception as e:
+        #     status += "COULD_NOT_UPDATE_ACTIVITY_NOTICE_SEED_FOR_POSTS: " + str(e) + " "
+        # status += results['status']
     elif update_only:
         status += "DID_NOT_CREATE_SEED-UPDATE_ONLY_MODE "
     elif results['success']:
@@ -1247,12 +1442,23 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
             if not results['success']:
                 status += results['status']
             elif results['activity_notice_list_found']:
+                position_name_list = []
+                if positive_value_exists(activity_notice_seed.position_names_for_friends_serialized):
+                    position_name_list_for_friends = \
+                        json.loads(activity_notice_seed.position_names_for_friends_serialized)
+                    position_name_list += position_name_list_for_friends
+                if positive_value_exists(activity_notice_seed.position_names_for_public_serialized):
+                    position_name_list_for_public = \
+                        json.loads(activity_notice_seed.position_names_for_public_serialized)
+                    position_name_list += position_name_list_for_public
+
                 activity_notice_list = results['activity_notice_list']
                 for activity_notice in activity_notice_list:
                     send_results = notice_friend_endorsements_send(
                         speaker_voter_we_vote_id=activity_notice.speaker_voter_we_vote_id,
                         recipient_voter_we_vote_id=activity_notice.recipient_voter_we_vote_id,
-                        activity_tidbit_we_vote_id=activity_notice_seed.we_vote_id)
+                        activity_tidbit_we_vote_id=activity_notice_seed.we_vote_id,
+                        position_name_list=position_name_list)
                     activity_notice_id_already_reviewed_list.append(activity_notice.id)
                     if send_results['success']:
                         try:
@@ -1327,6 +1533,7 @@ def update_or_create_activity_notice_for_friend_endorsements(
         activity_tidbit_we_vote_id='',
         kind_of_seed='',
         kind_of_notice='',
+        position_name_list_serialized='',
         position_we_vote_id_list_serialized='',
         recipient_voter_we_vote_id='',
         send_to_email=False,
@@ -1351,6 +1558,7 @@ def update_or_create_activity_notice_for_friend_endorsements(
     if results['activity_notice_found']:
         try:
             activity_notice = results['activity_notice']
+            activity_notice.position_name_list_serialized = position_name_list_serialized
             activity_notice.position_we_vote_id_list_serialized = position_we_vote_id_list_serialized
             if positive_value_exists(activity_tidbit_we_vote_id):
                 activity_notice.activity_tidbit_we_vote_id = activity_tidbit_we_vote_id
@@ -1366,6 +1574,7 @@ def update_or_create_activity_notice_for_friend_endorsements(
             date_of_notice=date_of_notice,
             kind_of_notice=kind_of_notice,
             kind_of_seed=kind_of_seed,
+            position_name_list_serialized=position_name_list_serialized,
             position_we_vote_id_list_serialized=position_we_vote_id_list_serialized,
             recipient_voter_we_vote_id=recipient_voter_we_vote_id,
             send_to_email=send_to_email,
@@ -1413,14 +1622,10 @@ def update_or_create_activity_notice_for_friend_posts(
         speaker_organization_we_vote_id=speaker_organization_we_vote_id,
         speaker_voter_we_vote_id=speaker_voter_we_vote_id,
     )
-    # Combine friends and public into single position_we_vote_id_list_serialized
     if results['activity_notice_found']:
         try:
             activity_notice = results['activity_notice']
             change_found = False
-            # if positive_value_exists(position_we_vote_id_list_serialized):
-            #     activity_notice.position_we_vote_id_list_serialized = position_we_vote_id_list_serialized
-            #     change_found = False
             if positive_value_exists(activity_tidbit_we_vote_id) and \
                     activity_tidbit_we_vote_id != activity_notice.activity_tidbit_we_vote_id:
                 activity_notice.activity_tidbit_we_vote_id = activity_tidbit_we_vote_id
@@ -1430,6 +1635,9 @@ def update_or_create_activity_notice_for_friend_posts(
                 change_found = True
             if positive_value_exists(number_of_likes) and number_of_likes != activity_notice.number_of_likes:
                 activity_notice.number_of_likes = number_of_likes
+                change_found = True
+            if positive_value_exists(speaker_name) and speaker_name != activity_notice.speaker_name:
+                activity_notice.speaker_name = speaker_name
                 change_found = True
             if positive_value_exists(statement_text_preview) and \
                     statement_text_preview != activity_notice.statement_text_preview:
@@ -1602,6 +1810,7 @@ def update_or_create_activity_notice_seed_for_activity_posts(
 
 
 def update_or_create_activity_notice_seed_for_voter_position(
+        position_ballot_item_display_name='',
         position_we_vote_id='',
         is_public_position=False,
         speaker_name='',
@@ -1611,6 +1820,7 @@ def update_or_create_activity_notice_seed_for_voter_position(
         speaker_profile_image_url_tiny=''):
     """
 
+    :param position_ballot_item_display_name: Not used for updates
     :param position_we_vote_id: Not used for updates
     :param is_public_position: Not used for updates
     :param speaker_name:
@@ -1642,28 +1852,42 @@ def update_or_create_activity_notice_seed_for_voter_position(
                 since_date=since_date)
             if position_results['success']:
                 friends_positions_list = position_results['friends_positions_list']
+                position_name_list_for_friends = []
                 position_we_vote_id_list_for_friends = []
                 for one_position in friends_positions_list:
+                    position_name_list_for_friends.append(one_position.ballot_item_display_name)
                     position_we_vote_id_list_for_friends.append(one_position.we_vote_id)
+                position_names_for_friends_serialized = json.dumps(position_name_list_for_friends)
                 position_we_vote_ids_for_friends_serialized = json.dumps(position_we_vote_id_list_for_friends)
 
                 public_positions_list = position_results['public_positions_list']
+                position_name_list_for_public = []
                 position_we_vote_id_list_for_public = []
                 for one_position in public_positions_list:
+                    position_name_list_for_public.append(one_position.ballot_item_display_name)
                     position_we_vote_id_list_for_public.append(one_position.we_vote_id)
+                position_names_for_public_serialized = json.dumps(position_name_list_for_public)
                 position_we_vote_ids_for_public_serialized = json.dumps(position_we_vote_id_list_for_public)
             else:
                 # If here, there was a problem retrieving positions since the activity_notice_seed was saved,
                 #  so we just work with the one position_we_vote_id
                 if is_public_position:
+                    position_names_for_friends_serialized = None
+                    position_name_list_for_public = [position_ballot_item_display_name]
+                    position_names_for_public_serialized = json.dumps(position_name_list_for_public)
                     position_we_vote_ids_for_friends_serialized = None
                     position_we_vote_id_list_for_public = [position_we_vote_id]
                     position_we_vote_ids_for_public_serialized = json.dumps(position_we_vote_id_list_for_public)
                 else:
+                    position_name_list_for_friends = [position_ballot_item_display_name]
+                    position_names_for_friends_serialized = json.dumps(position_name_list_for_friends)
+                    position_names_for_public_serialized = None
                     position_we_vote_id_list_for_friends = [position_we_vote_id]
                     position_we_vote_ids_for_friends_serialized = json.dumps(position_we_vote_id_list_for_friends)
                     position_we_vote_ids_for_public_serialized = None
 
+            activity_notice_seed.position_names_for_friends_serialized = position_names_for_friends_serialized
+            activity_notice_seed.position_names_for_public_serialized = position_names_for_public_serialized
             activity_notice_seed.position_we_vote_ids_for_friends_serialized = \
                 position_we_vote_ids_for_friends_serialized
             activity_notice_seed.position_we_vote_ids_for_public_serialized = \
@@ -1679,16 +1903,24 @@ def update_or_create_activity_notice_seed_for_voter_position(
     elif results['success']:
         date_of_notice = now()
         if is_public_position:
-            position_we_vote_ids_for_friends_serialized = None
+            position_name_list_for_public = [position_ballot_item_display_name]
+            position_names_for_public_serialized = json.dumps(position_name_list_for_public)
+            position_names_for_friends_serialized = None
             position_we_vote_id_list_for_public = [position_we_vote_id]
             position_we_vote_ids_for_public_serialized = json.dumps(position_we_vote_id_list_for_public)
+            position_we_vote_ids_for_friends_serialized = None
         else:
+            position_name_list_for_friends = [position_ballot_item_display_name]
+            position_names_for_friends_serialized = json.dumps(position_name_list_for_friends)
+            position_names_for_public_serialized = None
             position_we_vote_id_list_for_friends = [position_we_vote_id]
             position_we_vote_ids_for_friends_serialized = json.dumps(position_we_vote_id_list_for_friends)
             position_we_vote_ids_for_public_serialized = None
         create_results = activity_manager.create_activity_notice_seed(
             date_of_notice=date_of_notice,
             kind_of_seed=NOTICE_FRIEND_ENDORSEMENTS_SEED,
+            position_names_for_friends_serialized=position_names_for_friends_serialized,
+            position_names_for_public_serialized=position_names_for_public_serialized,
             position_we_vote_ids_for_friends_serialized=position_we_vote_ids_for_friends_serialized,
             position_we_vote_ids_for_public_serialized=position_we_vote_ids_for_public_serialized,
             speaker_name=speaker_name,
@@ -1733,12 +1965,19 @@ def update_activity_notice_seed_with_positions(activity_notice_seed):
         }
         return results
 
-    # What values currently exist?
+    # What values currently exist? We deserialize so we can compare with latest positions
+    # Position names
+    position_name_list_for_friends = []
+    if positive_value_exists(activity_notice_seed.position_names_for_friends_serialized):
+        position_name_list_for_friends = json.loads(activity_notice_seed.position_names_for_friends_serialized)
+    position_name_list_for_public = []
+    if positive_value_exists(activity_notice_seed.position_names_for_public_serialized):
+        position_name_list_for_public = json.loads(activity_notice_seed.position_names_for_public_serialized)
+    # Position we_vote_ids
     position_we_vote_id_list_for_friends = []
     if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_friends_serialized):
         position_we_vote_id_list_for_friends = \
             json.loads(activity_notice_seed.position_we_vote_ids_for_friends_serialized)
-
     position_we_vote_id_list_for_public = []
     if positive_value_exists(activity_notice_seed.position_we_vote_ids_for_public_serialized):
         position_we_vote_id_list_for_public = \
@@ -1752,20 +1991,33 @@ def update_activity_notice_seed_with_positions(activity_notice_seed):
         since_date=since_date)
     if position_results['success']:
         friends_positions_list = position_results['friends_positions_list']
+        position_name_list_for_friends_latest = []
         position_we_vote_id_list_for_friends_latest = []
         for one_position in friends_positions_list:
+            position_name_list_for_friends_latest.append(one_position.ballot_item_display_name)
             position_we_vote_id_list_for_friends_latest.append(one_position.we_vote_id)
         public_positions_list = position_results['public_positions_list']
+        position_name_list_for_public_latest = []
         position_we_vote_id_list_for_public_latest = []
         for one_position in public_positions_list:
+            position_name_list_for_public_latest.append(one_position.ballot_item_display_name)
             position_we_vote_id_list_for_public_latest.append(one_position.we_vote_id)
 
-        friends_list_different = set(position_we_vote_id_list_for_friends) != \
+        friends_name_list_different = set(position_name_list_for_friends) != \
+            set(position_name_list_for_friends_latest)
+        public_name_list_different = set(position_name_list_for_public) != \
+            set(position_name_list_for_public_latest)
+        friends_we_vote_id_list_different = set(position_we_vote_id_list_for_friends) != \
             set(position_we_vote_id_list_for_friends_latest)
-        public_list_different = set(position_we_vote_id_list_for_public) != \
+        public_we_vote_id_list_different = set(position_we_vote_id_list_for_public) != \
             set(position_we_vote_id_list_for_public_latest)
-        if friends_list_different or public_list_different:
+        if friends_name_list_different or public_name_list_different or \
+                friends_we_vote_id_list_different or public_we_vote_id_list_different:
             try:
+                activity_notice_seed.position_names_for_friends_serialized = \
+                    json.dumps(position_name_list_for_friends_latest)
+                activity_notice_seed.position_names_for_public_serialized = \
+                    json.dumps(position_name_list_for_public_latest)
                 activity_notice_seed.position_we_vote_ids_for_friends_serialized = \
                     json.dumps(position_we_vote_id_list_for_friends_latest)
                 activity_notice_seed.position_we_vote_ids_for_public_serialized = \
