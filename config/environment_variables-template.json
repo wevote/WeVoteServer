@@ -131,6 +131,9 @@
   "GOOGLE_SEARCH_API_NAME":         "customsearch",
   "GOOGLE_SEARCH_API_VERSION":      "v1",
 
+  "_comment":                       "Google Firebase Admin API (for Firebase Cloud Messaging send/receive)",
+  "GOOGLE_APPLICATION_CREDENTIALS": "/etc/wevoteapps-f4b59fec8c57.json",
+
   "_comment":                       "django secret key",
   "SECRET_KEY":                     "REALLYANYTHINGYOUWANT",
 

@@ -1,7 +1,7 @@
 # As we approach deployment, we should probably move to different requirements files for local vs. production
 # See Chapt 5.5 in Two Scoops of Django
 boto3==1.13.16
-cryptography
+cryptography==2.5
 dj-database-url==0.5.0
 dj-static==0.0.6
 django==2.2.13
@@ -14,10 +14,15 @@ django-user_agents==0.3.2
 djangorestframework==3.11.0
 elasticsearch>=1.0.0,<2.0.0
 facebook-sdk==3.1.0
+firebase_admin==4.3.0
 future==0.18.2
 geoip2==2.9.0
 geopy==1.23.0
+google-api-core==1.22.2
 google-api-python-client==1.7.11
+google-auth==1.21.1
+google-cloud-firestore==1.9.0
+google-cloud-storage==1.31.0
 gunicorn==19.10.0
 httplib2==0.18.0
 oauth2client==4.1.3
