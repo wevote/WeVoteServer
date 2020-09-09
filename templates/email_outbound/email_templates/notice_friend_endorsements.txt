@@ -17,7 +17,7 @@ Hello {{ recipient_name }},
 Hello,
 {% endif %}
 
-{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}{% if sender_email_address %} ({{ sender_email_address }}){% elif sms_phone_number %} ({{ sms_phone_number }}){% endif %} added a new opinion on We Vote, a simple way to plan your entire ballot.
+{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}{% if sender_email_address %} ({{ sender_email_address }}){% elif sms_phone_number %} ({{ sms_phone_number }}){% endif %} {{ activity_description }}. Voting is better with friends!
 {% if invitation_message %}
 "{{ invitation_message }}"{% endif %}
 

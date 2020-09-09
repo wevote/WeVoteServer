@@ -6033,6 +6033,7 @@ class PositionManager(models.Model):
 
         if positive_value_exists(success):
             activity_results = update_or_create_activity_notice_seed_for_voter_position(
+                position_ballot_item_display_name=voter_position_on_stage.ballot_item_display_name,
                 position_we_vote_id=voter_position_on_stage.we_vote_id,
                 is_public_position=is_public_position,
                 speaker_name=voter_position_on_stage.speaker_display_name,
@@ -6451,6 +6452,7 @@ class PositionManager(models.Model):
 
         if positive_value_exists(success):
             activity_results = update_or_create_activity_notice_seed_for_voter_position(
+                position_ballot_item_display_name=voter_position_on_stage.ballot_item_display_name,
                 position_we_vote_id=voter_position_on_stage.we_vote_id,
                 is_public_position=is_public_position,
                 speaker_name=voter_position_on_stage.speaker_display_name,
@@ -6804,6 +6806,7 @@ class PositionManager(models.Model):
 
         if voter_position_on_stage_found:
             activity_results = update_or_create_activity_notice_seed_for_voter_position(
+                position_ballot_item_display_name=voter_position_on_stage.ballot_item_display_name,
                 position_we_vote_id=voter_position_on_stage.we_vote_id,
                 is_public_position=is_public_position,
                 speaker_name=voter_position_on_stage.speaker_display_name,
