@@ -29,14 +29,16 @@ creds_path_from_json = get_environment_variable("GOOGLE_APPLICATION_CREDENTIALS"
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path_from_json
 # initialize the firebase admin API, that we use to send Firebase Cloud Messaging (FCM) messages
 default_app = firebase_admin.initialize_app()
-print('firebase initialized')
+# print('firebase initialized')
 
 
 def test_msg_to_my_phone():
     # test function
     registration_token = 'eGU5OlHjNg75HGu:APA91bHv0fyc7dr_8Y1h2BL8Z7WSToQI24Uz4sbPYIewDtI7dDX3nRE_4P1RENJNs' \
                          'VVboU142Z-pndTqhnMcCEqCGqkvp36n59Ly7EAPH_1kLJCea_u-6pnkDC8-vjt_oOvZow5r___t'
-    send_single_message_ios(registration_token, "Hello mom", "It is smokey today", 2020)
+    send_single_message_ios(registration_token, "Hello mom", "It is smokey today, like the day before", 2020)
+    registration_token = 'c2k5Ew4EQaiyZGuXDpw35t:APA91bHr69JiOxA90hLc7U4pYmPRfYqOWjzijQIPrgiFZSnr4ZwbCv9UawQ_K1UnjOlSEZXij_eMYuK2vZ4FaYljKRRIPG3vctoVlfL4nIEOYgrcdBppAd3a6gdTTaFd7cnwW2jG1Ipi'
+    send_single_message_android(registration_token, "Hello mom", "It is smokey today, again", 2020)
 
 
 def send_single_message_ios(token, title, body, badge_number):
@@ -60,6 +62,34 @@ def send_single_message_ios(token, title, body, badge_number):
                     ),
                     badge=badge_number,
                 ),
+            ),
+        ),
+        token=token,
+    )
+    response = messaging.send(message)
+    # Response is a message ID string.
+    print('Successfully sent message:', response)
+    return response
+
+def send_single_message_android(token, title, body, badge_number):
+    """
+    Send a message to a single iOS device by firebase_fcm_token (from voter_voterdevicelink)
+    :param token: The firebase_fcm_token stored in the table from the phone when received from service
+    :param title: Title of the message
+    :param body: Body of the message
+    :param badge_number: The red numeric badge that appears on the icon in iOS
+    :return: the response code
+    """
+
+    message = messaging.Message(
+        android=messaging.AndroidConfig(
+            ttl=datetime.timedelta(seconds=3600),
+            priority='normal',
+            notification=messaging.AndroidNotification(
+                title=title,
+                body=body,
+                # icon='stock_ticker_update',
+                # color='#f45342'
             ),
         ),
         token=token,
