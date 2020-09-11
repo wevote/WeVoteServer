@@ -11,6 +11,8 @@ from search.controllers import search_all_for_api
 import wevote_functions.admin
 from voter.models import VoterDeviceLinkManager
 from wevote_functions.functions import generate_voter_device_id, get_voter_device_id, positive_value_exists
+# from google_firebase_api.controllers import initialize_sdk
+#from google_firebase_api import cloud_messaging
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -57,15 +59,20 @@ def device_store_firebase_fcm_token_view(request): # deviceStoreFirebaseCloudMes
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
 
+    # cloud_messaging.test_msg_to_my_phone()
+
     if positive_value_exists(voter_device_id):
         voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
         firebase_fcm_token = request.GET.get('firebase_fcm_token', "")
+        platform_type = request.GET.get('platform_type', "")
         if positive_value_exists(firebase_fcm_token) and len(firebase_fcm_token) > 90:
             voter_device_link_manager = VoterDeviceLinkManager()
             voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
             if voter_device_link_results['voter_device_link_found']:
                 voter_device_link = voter_device_link_results['voter_device_link']
-                voter_device_link.firebase_fcm_token = firebase_fcm_token  # 180 characters long
+                voter_device_link.firebase_fcm_token = firebase_fcm_token  # Sept 2020, was 180 characters long
+                if positive_value_exists(platform_type):
+                    voter_device_link.platform_type = platform_type
                 voter_device_link.save()
                 success = True
                 status = "FIREBASE_TOKEN_ADDED_TO_VOTER_DEVICE_TOKEN "

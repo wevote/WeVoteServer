@@ -2474,6 +2474,9 @@ class VoterDeviceLink(models.Model):
     # The number of failed attempts at entering secret code (since last success)
     # This is so we can lock high profile accounts that are being hacked
     secret_code_number_of_failed_tries_all_time = models.PositiveIntegerField(null=True)
+    platform_type = models.CharField(
+        verbose_name="Platform type string {IOS, ANDROID, WEBAPP}", max_length=32, null=True,
+        blank=True)
     firebase_fcm_token = models.CharField(
         verbose_name="the Firebase Cloud Messaging (FCW) token for this device", max_length=255, null=True,
         blank=True, unique=True)

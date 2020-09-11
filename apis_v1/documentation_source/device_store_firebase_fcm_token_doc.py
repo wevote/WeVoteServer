@@ -19,6 +19,11 @@ def device_store_firebase_fcm_token_doc_template_values(url_root):
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
+            'name':         'platform_type',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'One of {"IOS", "ANDROID", WEBAPP"} ',
+        },
+        {
             'name':         'firebase_fcm_token',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The unique Firebase Cloud Messaging Token assigned to the calling device by Firebase',
