@@ -837,6 +837,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
 
     batch_set_id = 0
     if len(polling_location_list) > 0:
+        status += "POLLING_LOCATIONS_FOR_THIS_BATCH_SET: " + str(len(polling_location_list)) + " "
         # Create Batch Set for ballot items
         import_date = date.today()
         batch_set_name = "Ballot items (from Map Points v4) for " + election_name
@@ -901,9 +902,6 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
             if one_ballot_results['success']:
                 success = True
 
-            if len(status) < 1024:
-                status += one_ballot_results['status']
-
             existing_offices_by_election_dict = one_ballot_results['existing_offices_by_election_dict']
             existing_office_objects_dict = one_ballot_results['existing_office_objects_dict']
             existing_candidate_objects_dict = one_ballot_results['existing_candidate_objects_dict']
@@ -916,6 +914,11 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                 ballots_retrieved += 1
             else:
                 ballots_not_retrieved += 1
+                if ballots_not_retrieved < 5 and len(status) < 1024:
+                    status += "NOT_RETRIEVED: [[[" + one_ballot_results['status'] + "]]] "
+        # status += "BALLOTS_RETRIEVED-from_pl: " + str(ballots_retrieved)
+        # if positive_value_exists(ballots_not_retrieved):
+        #     status += "BALLOTS_NOT_RETRIEVED-from_pl: " + str(ballots_not_retrieved)
     else:
         status += "CANNOT_CALL_RETRIEVE_BECAUSE_OF_ERRORS [retrieve_ballot_items_from_polling_location_api_v4] "
     retrieve_row_count = ballots_retrieved
@@ -933,7 +936,8 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
     if from_browser:
         messages.add_message(request, messages.INFO,
                              'Ballot data retrieved from Ballotpedia (Map Points) for the {election_name}. '
-                             'ballots retrieved: {ballots_retrieved}. '
+                             'ballots retrieved: {ballots_retrieved}, '
+                             'ballots NOT retrieved: {ballots_not_retrieved}. '
                              'new offices: {new_offices_found} (existing: {existing_offices_found}) '
                              'new candidates: {new_candidates_found} (existing: {existing_candidates_found}) '
                              'new measures: {new_measures_found} (existing: {existing_measures_found}) '
