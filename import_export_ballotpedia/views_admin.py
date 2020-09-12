@@ -708,7 +708,8 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
 
         # Retrieve polling locations already in ballot_returned table
         if positive_value_exists(is_national_election) and positive_value_exists(state_code):
-            status += "NATIONAL_WITH_STATE "
+            status += "NATIONAL_WITH_STATE (" + str(state_code) + ") "
+            status += "date_last_updated_should_not_exceed: " + str(date_last_updated_should_not_exceed) + ' '
             results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
                 google_civic_election_id=google_civic_election_id,
                 state_code=state_code,
@@ -717,6 +718,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
             )
         else:
             status += "WITHOUT_STATE "
+            status += "date_last_updated_should_not_exceed: " + str(date_last_updated_should_not_exceed) + ' '
             results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
                 google_civic_election_id=google_civic_election_id,
                 limit=limit_polling_locations_retrieved,

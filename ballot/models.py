@@ -2858,6 +2858,7 @@ class BallotReturnedListManager(models.Model):
         polling_location_we_vote_id_list = []
         status = ''
         success = True
+        status += "BallotReturned LIMIT: " + str(limit) + " "
 
         try:
             if positive_value_exists(state_code):
@@ -2890,6 +2891,7 @@ class BallotReturnedListManager(models.Model):
                     polling_location_we_vote_id_list = list(polling_location_we_vote_id_query)
         except Exception as e:
             status += "COULD_NOT_RETRIEVE_POLLING_LOCATION_LIST " + str(e) + " "
+        status += "PL_LIST: " + str(polling_location_we_vote_id_list) + " "
         polling_location_we_vote_id_list_found = positive_value_exists(len(polling_location_we_vote_id_list))
         results = {
             'success':                                  success,
