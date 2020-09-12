@@ -24,6 +24,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.db.models import Q
+from django.utils.timezone import now
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
@@ -2016,6 +2017,8 @@ def batch_set_batch_list_view(request):
             batch_actions_analyzed = 0
             batch_actions_not_analyzed = 0
             batch_header_id_created_list = []
+            start_each_batch_time_tracker = []  # Array of times
+            summary_of_create_batch_row_action_time_tracker = []  # Array of arrays
 
             batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
             batch_description_query = batch_description_query.filter(batch_description_analyzed=False)
@@ -2025,6 +2028,7 @@ def batch_set_batch_list_view(request):
             # For this batch set, cycle through each batch. Within each batch, cycle through each batch_row
             # and decide whether the action required is create or update.
             for one_batch_description in batch_list:
+                start_each_batch_time_tracker.append(now().strftime("%H:%M:%S:%f"))
                 results = create_batch_row_actions(
                     one_batch_description.batch_header_id,
                     batch_description=one_batch_description,
@@ -2047,6 +2051,8 @@ def batch_set_batch_list_view(request):
                 election_objects_dict = results['election_objects_dict']
                 measure_objects_dict = results['measure_objects_dict']
                 office_objects_dict = results['office_objects_dict']
+                start_create_batch_row_action_time_tracker = results['start_create_batch_row_action_time_tracker']
+                summary_of_create_batch_row_action_time_tracker.append(start_create_batch_row_action_time_tracker)
 
             # If there were not any entries with batch_description_analyzed set to False, then retrieve all
             if not positive_value_exists(batch_list_not_analyzed_count):
@@ -2057,6 +2063,7 @@ def batch_set_batch_list_view(request):
                 batch_list = list(batch_description_query)
 
                 for one_batch_description in batch_list:
+                    start_each_batch_time_tracker.append(now().strftime("%H:%M:%S:%f"))
                     results = create_batch_row_actions(
                         one_batch_description.batch_header_id,
                         batch_description=one_batch_description,
@@ -2078,6 +2085,8 @@ def batch_set_batch_list_view(request):
                     election_objects_dict = results['election_objects_dict']
                     measure_objects_dict = results['measure_objects_dict']
                     office_objects_dict = results['office_objects_dict']
+                    start_create_batch_row_action_time_tracker = results['start_create_batch_row_action_time_tracker']
+                    summary_of_create_batch_row_action_time_tracker.append(start_create_batch_row_action_time_tracker)
 
             if positive_value_exists(batch_actions_analyzed):
                 messages.add_message(request, messages.INFO, "Analyze All, BatchRows Analyzed: "

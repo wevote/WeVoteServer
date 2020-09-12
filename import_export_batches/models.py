@@ -875,6 +875,8 @@ class BatchManager(models.Model):
                             batch_row_048=get_value_if_index_in_list(line, 48),
                             batch_row_049=get_value_if_index_in_list(line, 49),
                             batch_row_050=get_value_if_index_in_list(line, 50),
+                            google_civic_election_id=google_civic_election_id,
+                            polling_location_we_vote_id=polling_location_we_vote_id,
                         )
                         number_of_batch_rows += 1
                     except Exception as e:
@@ -1066,6 +1068,15 @@ class BatchManager(models.Model):
             for one_dict in structured_json_list:
                 # if number_of_batch_rows >= limit_for_testing:
                 #     break
+                local_google_civic_election_id = google_civic_election_id  # Use it if it came in to this function
+                if not positive_value_exists(google_civic_election_id):
+                    local_google_civic_election_id = get_value_from_dict(one_dict, 'google_civic_election_id')
+                local_polling_location_we_vote_id = polling_location_we_vote_id  # Use it if it came in to this function
+                if not positive_value_exists(polling_location_we_vote_id):
+                    local_polling_location_we_vote_id = get_value_from_dict(one_dict, 'polling_location_we_vote_id')
+                local_state_code = state_code  # Use it if it came in to this function
+                if not positive_value_exists(state_code):
+                    local_state_code = get_value_from_dict(one_dict, 'state_code')
                 try:
                     batch_row = BatchRow.objects.create(
                         batch_header_id=batch_header_id,
@@ -1120,21 +1131,26 @@ class BatchManager(models.Model):
                         batch_row_048=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 48)),
                         batch_row_049=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 49)),
                         batch_row_050=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 50)),
+                        google_civic_election_id=local_google_civic_election_id,
+                        polling_location_we_vote_id=local_polling_location_we_vote_id,
+                        state_code=local_state_code,
                     )
                     number_of_batch_rows += 1
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
                     status += "EXCEPTION_BATCH_ROW_FOR_JSON " + str(e) + " "
                     break
+        else:
+            status += "NO_BATCH_HEADER_ID "
 
-            results = {
-                'success':              success,
-                'status':               status,
-                'batch_header_id':      batch_header_id,
-                'batch_saved':          success,
-                'number_of_batch_rows': number_of_batch_rows,
-            }
-            return results
+        results = {
+            'success':              success,
+            'status':               status,
+            'batch_header_id':      batch_header_id,
+            'batch_saved':          success,
+            'number_of_batch_rows': number_of_batch_rows,
+        }
+        return results
 
     # I don't believe this is currently in use. There is also a function of this same name in controllers.py
     def create_batch_header_translation_suggestion(

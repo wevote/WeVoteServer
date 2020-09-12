@@ -18,6 +18,7 @@ from candidate.controllers import retrieve_next_or_most_recent_office_for_candid
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 # from django.db import transaction
 from django.db.models import Q
+from django.utils.timezone import now
 from elected_office.models import ElectedOffice, ElectedOfficeManager
 from electoral_district.controllers import retrieve_electoral_district
 from election.models import ElectionManager
@@ -162,8 +163,10 @@ def create_batch_row_actions(
         status += "ELSE [if batch_description_found and batch_header_map_found and not delete_analysis_only] "
 
     batch_row_action_list = []
+    start_create_batch_row_action_time_tracker = []
     if batch_description_found and batch_header_map_found and batch_row_action_list_found and not delete_analysis_only:
         for one_batch_row in batch_row_list:
+            start_create_batch_row_action_time_tracker.append(now().strftime("%H:%M:%S:%f"))
             if kind_of_batch == CANDIDATE:
                 results = create_batch_row_action_candidate(batch_description, batch_header_map, one_batch_row)
 
@@ -319,7 +322,8 @@ def create_batch_row_actions(
                           "[ELSE if batch_description_found and batch_header_map_found] "
 
         if existing_ballot_item_list and len(existing_ballot_item_list):
-            # If we are here, then we are checking to see if there were previous ballot items that have since been deleted
+            # If we are here, then we are checking to see if there were previous ballot items
+            # that have since been deleted
             # Note that we should not be here if we are looking at only one batch row
             for existing_ballot_item in existing_ballot_item_list:
                 batch_row_action_found = False
@@ -328,10 +332,12 @@ def create_batch_row_actions(
                     if batch_row_action_found:
                         continue
                     elif positive_value_exists(batch_row_action.contest_measure_we_vote_id) and \
-                            batch_row_action.contest_measure_we_vote_id == existing_ballot_item.contest_measure_we_vote_id:
+                            batch_row_action.contest_measure_we_vote_id == \
+                            existing_ballot_item.contest_measure_we_vote_id:
                         batch_row_action_found = True
                     elif positive_value_exists(batch_row_action.contest_office_we_vote_id) and \
-                            batch_row_action.contest_office_we_vote_id == existing_ballot_item.contest_office_we_vote_id:
+                            batch_row_action.contest_office_we_vote_id == \
+                            existing_ballot_item.contest_office_we_vote_id:
                         batch_row_action_found = True
                     else:
                         # Doesn't match this existing_ballot_item
@@ -386,6 +392,7 @@ def create_batch_row_actions(
         'measure_objects_dict':             measure_objects_dict,
         'office_objects_dict':              office_objects_dict,
         'polling_location_we_vote_id':      polling_location_we_vote_id,
+        'start_create_batch_row_action_time_tracker':   start_create_batch_row_action_time_tracker,
         'voter_id':                         voter_id,
     }
     return results
@@ -2727,7 +2734,8 @@ def create_batch_row_action_ballot_item(batch_description,
                 status += "COULD_NOT_RETRIEVE_OFFICE_FROM_WE_VOTE_ID: "
                 status += results['status']
 
-    if keep_looking_for_duplicates and not positive_value_exists(contest_office_name):
+    if keep_looking_for_duplicates and not positive_value_exists(contest_office_we_vote_id) and \
+            positive_value_exists(contest_office_name):
         # See if we have an office name
         contest_office_list_manager = ContestOfficeListManager()
         # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
@@ -2747,7 +2755,8 @@ def create_batch_row_action_ballot_item(batch_description,
             status += matching_results['status']
             keep_looking_for_duplicates = False
 
-    if keep_looking_for_duplicates:
+    if keep_looking_for_duplicates and \
+            positive_value_exists(candidate_twitter_handle) or positive_value_exists(candidate_name):
         candidate_campaign_list_manager = CandidateCampaignListManager()
         google_civic_election_id_list = [google_civic_election_id]
         # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
@@ -2781,7 +2790,8 @@ def create_batch_row_action_ballot_item(batch_description,
                 else:
                     keep_looking_for_duplicates = True
 
-    if keep_looking_for_duplicates and not positive_value_exists(contest_measure_name):
+    if keep_looking_for_duplicates and not \
+            positive_value_exists(contest_measure_we_vote_id) and positive_value_exists(contest_measure_name):
         # See if we have an measure name
         contest_measure_list = ContestMeasureListManager()
         keep_looking_for_duplicates = True
@@ -2838,7 +2848,7 @@ def create_batch_row_action_ballot_item(batch_description,
             if positive_value_exists(contest_office_we_vote_id):
                 existing_ballot_item_query = existing_ballot_item_query.filter(
                     contest_office_we_vote_id__iexact=contest_office_we_vote_id)
-            if positive_value_exists(contest_measure_we_vote_id):
+            elif positive_value_exists(contest_measure_we_vote_id):
                 existing_ballot_item_query = existing_ballot_item_query.filter(
                     contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
 

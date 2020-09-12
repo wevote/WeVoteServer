@@ -1804,6 +1804,8 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False, delet
     batch_rows_analyzed = 0
     batch_rows_created = 0
     batch_rows_deleted = 0
+    start_each_batch_time_tracker = []  # Array of times
+    summary_of_create_batch_row_action_time_tracker = []  # Array of arrays
 
     if not positive_value_exists(batch_set_id):
         status += "BATCH_SET_ID_REQUIRED "
@@ -1832,6 +1834,7 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False, delet
 
         batch_description_rows_reviewed = 0
         for one_batch_description in batch_list:
+            start_each_batch_time_tracker.append(now().strftime("%H:%M:%S:%f"))
             results = create_batch_row_actions(
                 one_batch_description.batch_header_id,
                 batch_description=one_batch_description,
@@ -1848,6 +1851,8 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False, delet
             election_objects_dict = results['election_objects_dict']
             measure_objects_dict = results['measure_objects_dict']
             office_objects_dict = results['office_objects_dict']
+            start_create_batch_row_action_time_tracker = results['start_create_batch_row_action_time_tracker']
+            summary_of_create_batch_row_action_time_tracker.append(start_create_batch_row_action_time_tracker)
         status += "CREATE_BATCH_ROW_ACTIONS_BATCH_ROWS_ANALYZED: " + str(batch_rows_analyzed) + \
                   " OUT_OF " + str(batch_description_rows_reviewed) + ", "
     elif positive_value_exists(create_all):

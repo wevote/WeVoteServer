@@ -54,6 +54,99 @@ MAIL_HEADERS = {
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:72.0) Gecko/20100101 Firefox/72.0',
 }
 
+PRESIDENTIAL_CANDIDATES_JSON_LIST = [
+    {
+        'id': 54804,
+        'race': 31729,
+        'is_incumbent': True,
+        'party_affiliation': [{
+            'id': 1,
+            'name': 'Republican Party',
+            'url': 'https://ballotpedia.org/Republican_Party',
+        }],
+        'person': {
+            'id': 15180,
+            'image': {
+            },
+            'name': 'Donald Trump',
+            'first_name': 'Donald',
+            'last_name': 'Trump',
+        },
+    },
+    {
+        'id': 59216,
+        'race': 31729,
+        'is_incumbent': False,
+        'party_affiliation': [{
+            'id': 2,
+            'name': 'Democratic Party',
+            'url': 'https://ballotpedia.org/Democratic_Party',
+        }],
+        'person': {
+            'id': 26709,
+            'image': {
+            },
+            'name': 'Joe Biden',
+            'first_name': 'Joe',
+            'last_name': 'Biden',
+        },
+    },
+    {
+        'id': 59781,
+        'race': 31729,
+        'is_incumbent': False,
+        'party_affiliation': [{
+            'id': 2,
+            'name': 'Green Party',
+            'url': 'https://ballotpedia.org/Green_Party',
+        }],
+        'person': {
+            'id': 21669,
+            'image': {
+            },
+            'name': 'Howie Hawkins',
+            'first_name': 'Howie',
+            'last_name': 'Hawkins',
+        },
+    },
+    {
+        'id': 65308,
+        'race': 31729,
+        'is_incumbent': False,
+        'party_affiliation': [{
+            'id': 2,
+            'name': 'Libertarian Party',
+            'url': 'https://ballotpedia.org/Libertarian_Party',
+        }],
+        'person': {
+            'id': 322425,
+            'image': {
+            },
+            'name': 'Jo Jorgensen',
+            'first_name': 'Jo',
+            'last_name': 'Jorgensen',
+        },
+    },
+    {
+        'id': 66055,
+        'race': 31729,
+        'is_incumbent': False,
+        'party_affiliation': [{
+            'id': 2,
+            'name': 'Peace and Freedom Party',
+            'url': 'https://ballotpedia.org/Peace_and_Freedom_Party',
+        }],
+        'person': {
+            'id': 20080,
+            'image': {
+            },
+            'name': 'Gloria',
+            'first_name': 'Gloria',
+            'last_name': 'La Riva',
+        },
+    },
+]
+
 logger = wevote_functions.admin.get_logger(__name__)
 
 
@@ -1888,20 +1981,21 @@ def groom_and_store_sample_ballot_elections_api_v4(structured_json, google_civic
     return results
 
 
-def groom_and_store_sample_ballot_results_api_v4(structured_json,
-                                                 google_civic_election_id,
-                                                 state_code='',
-                                                 polling_location_we_vote_id='',
-                                                 election_day_text='',
-                                                 voter_id=0,
-                                                 existing_office_objects_dict={},
-                                                 existing_offices_by_election_dict={},
-                                                 existing_candidate_objects_dict={},
-                                                 existing_measure_objects_dict={},
-                                                 new_office_we_vote_ids_list=[],
-                                                 new_candidate_we_vote_ids_list=[],
-                                                 new_measure_we_vote_ids_list=[],
-                                                 ):
+def groom_and_store_sample_ballot_results_api_v4(
+        structured_json,
+        google_civic_election_id,
+        state_code='',
+        polling_location_we_vote_id='',
+        election_day_text='',
+        voter_id=0,
+        existing_office_objects_dict={},
+        existing_offices_by_election_dict={},
+        existing_candidate_objects_dict={},
+        existing_measure_objects_dict={},
+        new_office_we_vote_ids_list=[],
+        new_candidate_we_vote_ids_list=[],
+        new_measure_we_vote_ids_list=[],
+        ):
     from image.controllers import cache_master_and_resized_image, BALLOTPEDIA_IMAGE_SOURCE
     status = ""
     success = False
@@ -1927,9 +2021,22 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
                     candidate_data_exists = 'candidates' in one_race_json and \
                                             positive_value_exists(one_race_json['candidates'])
                     office_data_exists = 'office' in one_race_json and positive_value_exists(one_race_json['office'])
+                    # In September 2020, Ballotpedia is not providing Presidential candidates in this data array
+                    #  so we are manually adding them. We are also stripping the VPs.
+                    is_president = False
+                    is_vice_president = False
+                    if office_data_exists:
+                        is_president = one_race_json['office']['name'] == "President of the United States"
+                        is_vice_president = one_race_json['office']['name'] == "Vice President of the United States"
 
-                    if not office_data_exists or not candidate_data_exists:
-                        # We need both office data and candidate data to proceed
+                    if is_president:
+                        # We want to proceed
+                        pass
+                    elif is_vice_president:
+                        # We are not bringing in separate entry for Vice President
+                        continue
+                    elif not office_data_exists or not candidate_data_exists:
+                        # We need both office data and candidate data to proceed, so without it, go to the next race
                         continue
 
                     # Clear out prior values
@@ -1948,7 +2055,10 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
                     ocd_division_id = ""
                     office_name = ""
                     if office_data_exists:
-                        if candidate_data_exists:
+                        if is_president:
+                            # Sept 11, 2020: For now we want to always override the incoming President candidates
+                            candidates_json_list = PRESIDENTIAL_CANDIDATES_JSON_LIST
+                        elif candidate_data_exists:
                             candidates_json_list = one_race_json['candidates']
                         else:
                             candidates_json_list = []
@@ -2120,7 +2230,7 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
                                     candidate_results = \
                                         candidate_manager.retrieve_candidate_campaign_from_ballotpedia_candidate_id(
                                             ballotpedia_candidate_id=ballotpedia_candidate_id,
-                                            read_only=True
+                                            read_only=False
                                         )
                                     if candidate_results['candidate_campaign_found']:
                                         candidate_campaign = candidate_results['candidate_campaign']
@@ -2246,6 +2356,8 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
 
                                 # Now make sure we have a CandidateToOfficeLink
                                 if positive_value_exists(candidate_campaign_we_vote_id):
+                                    # TODO NOTE, 2020-09-12: We could pass a dict through with whether there is a
+                                    #  candidate_to_office_link, in order to save looking in the database
                                     results = candidate_manager.get_or_create_candidate_to_office_link(
                                         candidate_we_vote_id=candidate_campaign_we_vote_id,
                                         contest_office_we_vote_id=contest_office_we_vote_id,
@@ -2253,8 +2365,9 @@ def groom_and_store_sample_ballot_results_api_v4(structured_json,
                                         state_code=state_code)
                                     if positive_value_exists(results['success']):
                                         try:
-                                            candidate_campaign.migrated_to_link = True
-                                            candidate_campaign.save()
+                                            if not positive_value_exists(candidate_campaign.migrated_to_link):
+                                                candidate_campaign.migrated_to_link = True
+                                                candidate_campaign.save()
                                         except Exception as e:
                                             pass
             if 'ballot_measures' in one_district_json and positive_value_exists(one_district_json['ballot_measures']):
