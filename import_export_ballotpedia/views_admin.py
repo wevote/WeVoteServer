@@ -708,6 +708,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
 
         # Retrieve polling locations already in ballot_returned table
         if positive_value_exists(is_national_election) and positive_value_exists(state_code):
+            status += "NATIONAL_WITH_STATE "
             results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
                 google_civic_election_id=google_civic_election_id,
                 state_code=state_code,
@@ -715,11 +716,13 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                 date_last_updated_should_not_exceed=date_last_updated_should_not_exceed,
             )
         else:
+            status += "WITHOUT_STATE "
             results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
                 google_civic_election_id=google_civic_election_id,
                 limit=limit_polling_locations_retrieved,
                 date_last_updated_should_not_exceed=date_last_updated_should_not_exceed,
             )
+        status += results['status']
         if results['polling_location_we_vote_id_list_found']:
             polling_location_we_vote_id_list = results['polling_location_we_vote_id_list']
         else:
@@ -962,6 +965,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
         status += \
             'Ballot data retrieved from Ballotpedia (Map Points) for the {election_name}. ' \
             'ballots retrieved: {ballots_retrieved}. ' \
+            'ballots NOT retrieved: {ballots_not_retrieved}. ' \
             'new offices: {new_offices_found} (existing: {existing_offices_found}) ' \
             'new candidates: {new_candidates_found} (existing: {existing_candidates_found}) ' \
             'new measures: {new_measures_found} (existing: {existing_measures_found}) ' \
@@ -1243,6 +1247,7 @@ def refresh_ballotpedia_ballots_for_voters_api_v4_internal_view(
     message = \
         'Ballot data retrieved from Ballotpedia (Voters) for the {election_name}. ' \
         'ballots retrieved: {ballots_retrieved}. ' \
+        'ballots not retrieved: {ballots_not_retrieved}. ' \
         'new offices: {new_offices_found} (existing: {existing_offices_found}) ' \
         'new candidates: {new_candidates_found} (existing: {existing_candidates_found}) ' \
         'new measures: {new_measures_found} (existing: {existing_measures_found}) ' \
@@ -1557,8 +1562,9 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         #     break
 
         messages.add_message(request, messages.INFO,
-                             'Ballot data retrieved from Ballotpedia for the {election_name}. '
+                             'Ballot data retrieved from Ballotpedia v3 for the {election_name}. '
                              'ballots retrieved: {ballots_retrieved}. '
+                             'ballots not retrieved: {ballots_not_retrieved}. '
                              ''.format(
                                  ballots_retrieved=ballots_retrieved,
                                  ballots_not_retrieved=ballots_not_retrieved,
