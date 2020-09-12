@@ -956,6 +956,23 @@ def process_one_ballot_item_batch_process(batch_process):
                     'status': status,
                 }
                 return results
+            else:
+                try:
+                    status += results['status']
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
+                        batch_set_id=batch_set_id,
+                        critical_failure=True,
+                        google_civic_election_id=google_civic_election_id,
+                        kind_of_process=kind_of_process,
+                        state_code=state_code,
+                        status=status,
+                    )
+                except Exception as e:
+                    status += "ERROR-CANNOT_WRITE_TO_BATCH_PROCESS_LOG: " + str(e) + " "
+                    handle_exception(e, logger=logger, exception_message=status)
+
     elif batch_process_ballot_item_chunk.retrieve_date_completed is None:
         # Check to see if retrieve process has timed out
         date_when_retrieve_has_timed_out = \
