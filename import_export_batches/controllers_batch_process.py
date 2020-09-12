@@ -1861,15 +1861,21 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False, delet
         batch_list = list(batch_description_query)
 
         batch_rows_created = 0
+        batch_rows_not_created = 0
         for one_batch_description in batch_list:
             results = import_data_from_batch_row_actions(
                 one_batch_description.kind_of_batch, IMPORT_CREATE, one_batch_description.batch_header_id)
             if results['number_of_table_rows_created']:
                 batch_rows_created += 1
-
+            else:
+                batch_rows_not_created += 1
+                if batch_rows_not_created < 10:
+                    status += results['status']
             if not positive_value_exists(results['success']) and len(status) < 1024:
                 status += results['status']
         status += "BATCH_ROWS_CREATED: " + str(batch_rows_created) + ", "
+        if positive_value_exists(batch_rows_not_created):
+            status += "BATCH_ROWS_NOT_CREATED: " + str(batch_rows_created) + ", "
     elif positive_value_exists(delete_all):
         batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
         batch_description_query = batch_description_query.filter(batch_description_analyzed=True)
