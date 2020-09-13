@@ -2868,12 +2868,11 @@ class BallotReturnedListManager(models.Model):
                     .order_by('date_last_updated')\
                     .filter(google_civic_election_id=google_civic_election_id, normalized_state__iexact=state_code)\
                     .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id="")).\
-                    values_list('polling_location_we_vote_id', flat=True)
+                    values_list('polling_location_we_vote_id', flat=True).distinct()
                 if date_last_updated_should_not_exceed:
                     polling_location_we_vote_id_query = \
                         polling_location_we_vote_id_query.filter(
                             date_last_updated__lt=date_last_updated_should_not_exceed)
-                polling_location_we_vote_id_query = polling_location_we_vote_id_query.distinct()
                 if positive_value_exists(limit):
                     polling_location_we_vote_id_list = polling_location_we_vote_id_query[:limit]
                 else:
@@ -2883,12 +2882,11 @@ class BallotReturnedListManager(models.Model):
                     .order_by('date_last_updated') \
                     .filter(google_civic_election_id=google_civic_election_id) \
                     .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id="")). \
-                    values_list('polling_location_we_vote_id', flat=True)
+                    values_list('polling_location_we_vote_id', flat=True).distinct()
                 if date_last_updated_should_not_exceed:
                     polling_location_we_vote_id_query = \
                         polling_location_we_vote_id_query.filter(
                             date_last_updated__lt=date_last_updated_should_not_exceed)
-                polling_location_we_vote_id_query = polling_location_we_vote_id_query.distinct()
                 if positive_value_exists(limit):
                     polling_location_we_vote_id_list = polling_location_we_vote_id_query[:limit]
                 else:

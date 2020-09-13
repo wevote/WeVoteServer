@@ -730,6 +730,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
         else:
             polling_location_we_vote_id_list = []
 
+        status += "REFRESH_BALLOT_RETURNED: " + str(refresh_ballot_returned) + " "
         if positive_value_exists(refresh_ballot_returned):
             polling_location_query = PollingLocation.objects.using('readonly').all()
             polling_location_query = polling_location_query.filter(we_vote_id__in=polling_location_we_vote_id_list)
@@ -857,7 +858,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
             batch_process_id = batch_process_ballot_item_chunk.batch_process_id
             batch_set_id = batch_process_ballot_item_chunk.batch_set_id
         except Exception as e:
-            pass
+            status += "BATCH_PROCESS_BALLOT_ITEM_CHUNK: " + str(e) + ' '
 
         if not positive_value_exists(batch_set_id):
             # create batch_set object
@@ -917,9 +918,11 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
 
             if one_ballot_results['batch_header_id']:
                 ballots_retrieved += 1
+                if ballots_retrieved < 5:
+                    status += "RETRIEVED: [[[" + one_ballot_results['status'] + "]]] "
             else:
                 ballots_not_retrieved += 1
-                if ballots_not_retrieved < 5 and len(status) < 1024:
+                if ballots_not_retrieved < 5:
                     status += "NOT_RETRIEVED: [[[" + one_ballot_results['status'] + "]]] "
         # status += "BALLOTS_RETRIEVED-from_pl: " + str(ballots_retrieved)
         # if positive_value_exists(ballots_not_retrieved):
