@@ -1035,7 +1035,7 @@ class BatchManager(models.Model):
                     batch_header_map_050=get_value_if_index_in_list(we_vote_keys, 50),
                 )
                 batch_header_map_id = batch_header_map.id
-                status += "BATCH_HEADER_MAP_SAVED_FOR_JSON "
+                # status += "BATCH_HEADER_MAP_SAVED_FOR_JSON "
 
             if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
                 # Now save the BatchDescription
@@ -1056,7 +1056,7 @@ class BatchManager(models.Model):
                     polling_location_we_vote_id=polling_location_we_vote_id,
                     # source_uri=batch_uri,
                 )
-                status += "BATCH_DESCRIPTION_SAVED_FOR_JSON "
+                # status += "BATCH_DESCRIPTION_SAVED_FOR_JSON "
                 success = True
         except Exception as e:
             # Stop trying to save rows -- break out of the for loop
