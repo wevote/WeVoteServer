@@ -2525,13 +2525,13 @@ class BallotReturnedManager(models.Model):
             try:
                 if positive_value_exists(polling_location_we_vote_id):
                     ballot_returned, new_ballot_returned_created = BallotReturned.objects.get_or_create(
-                        google_civic_election_id__exact=google_civic_election_id,
+                        google_civic_election_id=google_civic_election_id,
                         polling_location_we_vote_id=polling_location_we_vote_id,
                     )
                     ballot_returned_found = True
                 elif positive_value_exists(voter_id):
                     ballot_returned, new_ballot_returned_created = BallotReturned.objects.get_or_create(
-                        google_civic_election_id__exact=google_civic_election_id,
+                        google_civic_election_id=google_civic_election_id,
                         voter_id=voter_id
                     )
                     ballot_returned_found = True
@@ -2601,6 +2601,7 @@ class BallotReturnedManager(models.Model):
                             ballot_returned.state_code = extract_state_code_from_address_string(
                                 ballot_returned.text_for_map_search)
 
+                    # We always save so date_last_updated resets to current date
                     ballot_returned.save()
 
                     if new_ballot_returned_created:
@@ -2859,6 +2860,7 @@ class BallotReturnedListManager(models.Model):
         status = ''
         success = True
         status += "BallotReturned LIMIT: " + str(limit) + " "
+        status += "google_civic_election_id: " + str(google_civic_election_id) + " "
 
         try:
             if positive_value_exists(state_code):
@@ -2871,6 +2873,7 @@ class BallotReturnedListManager(models.Model):
                     polling_location_we_vote_id_query = \
                         polling_location_we_vote_id_query.filter(
                             date_last_updated__lt=date_last_updated_should_not_exceed)
+                polling_location_we_vote_id_query = polling_location_we_vote_id_query.distinct()
                 if positive_value_exists(limit):
                     polling_location_we_vote_id_list = polling_location_we_vote_id_query[:limit]
                 else:
@@ -2885,6 +2888,7 @@ class BallotReturnedListManager(models.Model):
                     polling_location_we_vote_id_query = \
                         polling_location_we_vote_id_query.filter(
                             date_last_updated__lt=date_last_updated_should_not_exceed)
+                polling_location_we_vote_id_query = polling_location_we_vote_id_query.distinct()
                 if positive_value_exists(limit):
                     polling_location_we_vote_id_list = polling_location_we_vote_id_query[:limit]
                 else:
