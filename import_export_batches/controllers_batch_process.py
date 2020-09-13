@@ -1892,7 +1892,7 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False, delet
                 status += results['status']
         status += "BATCH_ROWS_CREATED: " + str(batch_rows_created) + ", "
         if positive_value_exists(batch_rows_not_created):
-            status += "BATCH_ROWS_NOT_CREATED: " + str(batch_rows_created) + ", "
+            status += "BATCH_ROWS_NOT_CREATED: " + str(batch_rows_not_created) + ", "
     elif positive_value_exists(delete_all):
         batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
         batch_description_query = batch_description_query.filter(batch_description_analyzed=True)
