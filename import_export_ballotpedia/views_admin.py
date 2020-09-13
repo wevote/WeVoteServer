@@ -937,8 +937,8 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
 
             if one_ballot_results['batch_header_id']:
                 ballots_retrieved += 1
-                # if ballots_retrieved < 5:
-                #     status += "BALLOT_ITEMS_RETRIEVED: [[[" + one_ballot_results['status'] + "]]] "
+                if ballots_retrieved < 5:
+                    status += "BALLOT_ITEMS_RETRIEVED: [[[" + one_ballot_results['status'] + "]]] "
             else:
                 ballots_not_retrieved += 1
                 if ballots_not_retrieved < 5:
