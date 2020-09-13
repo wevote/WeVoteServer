@@ -1813,23 +1813,26 @@ class BallotReturnedManager(models.Model):
                 success = True
                 status += "BALLOT_RETURNED_FOUND_FROM_BALLOT_RETURNED_WE_VOTE_ID "
             elif positive_value_exists(ballot_location_shortcut):
-                ballot_returned = BallotReturned.objects.get(ballot_location_shortcut=ballot_location_shortcut)
+                ballot_returned = BallotReturned.objects.get(
+                    ballot_location_shortcut=ballot_location_shortcut)
                 # If still here, we found an existing ballot_returned
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
                 status += "BALLOT_RETURNED_FOUND_FROM_BALLOT_RETURNED_LOCATION_SHORTCUT "
             elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
-                ballot_returned = BallotReturned.objects.get(voter_id=voter_id,
-                                                             google_civic_election_id=google_civic_election_id)
+                ballot_returned = BallotReturned.objects.get(
+                    voter_id=voter_id,
+                    google_civic_election_id=google_civic_election_id)
                 # If still here, we found an existing ballot_returned
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
                 status += "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
             elif positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
-                ballot_returned = BallotReturned.objects.get(polling_location_we_vote_id=polling_location_we_vote_id,
-                                                             google_civic_election_id=google_civic_election_id)
+                ballot_returned = BallotReturned.objects.get(
+                    polling_location_we_vote_id=polling_location_we_vote_id,
+                    google_civic_election_id=google_civic_election_id)
                 # If still here, we found an existing ballot_returned
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False

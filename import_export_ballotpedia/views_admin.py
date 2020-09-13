@@ -8,7 +8,7 @@ from .controllers import attach_ballotpedia_election_by_district_from_api, \
     retrieve_ballotpedia_candidates_by_district_from_api, retrieve_ballotpedia_measures_by_district_from_api, \
     retrieve_ballotpedia_district_id_list_for_polling_location, retrieve_ballotpedia_offices_by_district_from_api
 from admin_tools.views import redirect_to_sign_in_page
-from ballot.models import BallotReturnedListManager
+from ballot.models import BallotReturnedListManager, BallotReturnedManager
 from config.base import get_environment_variable
 from datetime import date
 from django.contrib import messages
@@ -603,6 +603,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
     batch_process_ballot_item_chunk_id = 0
     batch_set_id = 0
     retrieve_row_count = 0
+    ballot_returned_manager = BallotReturnedManager()
 
     try:
         if positive_value_exists(google_civic_election_id):
@@ -734,7 +735,8 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
         if positive_value_exists(refresh_ballot_returned):
             polling_location_query = PollingLocation.objects.using('readonly').all()
             polling_location_query = polling_location_query.filter(we_vote_id__in=polling_location_we_vote_id_list)
-            polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
+            # We don't exclude the deleted polling locations because we need to know to delete the ballot returned entry
+            # polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
             polling_location_list = list(polling_location_query)
             polling_location_count = len(polling_location_list)
         else:
@@ -745,9 +747,10 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                 polling_location_query.exclude(Q(zip_long__isnull=True) | Q(zip_long__exact='0') |
                                                Q(zip_long__exact=''))
             polling_location_query = polling_location_query.filter(state__iexact=state_code)
-            # Exclude deleted and polling locations already retrieved
-            polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
+            # Exclude polling locations already retrieved
             polling_location_query = polling_location_query.exclude(we_vote_id__in=polling_location_we_vote_id_list)
+            # We don't exclude the deleted polling locations because we need to know to delete the ballot returned entry
+            # polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
 
             # Randomly change the sort order so we over time load different polling locations (before timeout)
             random_sorting = random.randint(1, 5)
@@ -766,6 +769,22 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                 polling_location_list = polling_location_query.order_by('-city')[:first_retrieve_limit]
                 status += "RANDOM_SORTING-CITY-DESC: " + str(random_sorting) + " "
             polling_location_count = len(polling_location_list)
+        # Cycle through -- if the polling_location is deleted, delete the associated ballot_returned,
+        #  and then remove the polling_location from the list
+        modified_polling_location = []
+        for one_polling_location in polling_location_list:
+            if positive_value_exists(one_polling_location.polling_location_deleted):
+                delete_results = ballot_returned_manager.delete_ballot_returned_by_identifier(
+                    google_civic_election_id=google_civic_election_id,
+                    polling_location_we_vote_id=one_polling_location.we_vote_id)
+                if delete_results['ballot_deleted']:
+                    status += "BR_PL_DELETED (" + str(one_polling_location.we_vote_id) + " "
+                else:
+                    status += "BR_PL_NOT_DELETED (" + str(one_polling_location.we_vote_id) + " "
+            else:
+                modified_polling_location.append(one_polling_location)
+        polling_location_list = modified_polling_location
+        polling_location_count = len(polling_location_list)
     except PollingLocation.DoesNotExist:
         message = 'Could not retrieve (as opposed to refresh) ballot data for the {election_name}. ' \
                   'Ballotpedia Ballots-No polling locations exist for the state \'{state}\'. ' \
