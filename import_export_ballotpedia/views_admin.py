@@ -778,9 +778,9 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                     google_civic_election_id=google_civic_election_id,
                     polling_location_we_vote_id=one_polling_location.we_vote_id)
                 if delete_results['ballot_deleted']:
-                    status += "BR_PL_DELETED (" + str(one_polling_location.we_vote_id) + " "
+                    status += "BR_PL_DELETED (" + str(one_polling_location.we_vote_id) + ") "
                 else:
-                    status += "BR_PL_NOT_DELETED (" + str(one_polling_location.we_vote_id) + " "
+                    status += "BR_PL_NOT_DELETED (" + str(one_polling_location.we_vote_id) + ") "
             else:
                 modified_polling_location.append(one_polling_location)
         polling_location_list = modified_polling_location
@@ -937,23 +937,20 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
 
             if one_ballot_results['batch_header_id']:
                 ballots_retrieved += 1
-                if ballots_retrieved < 5:
-                    status += "RETRIEVED: [[[" + one_ballot_results['status'] + "]]] "
+                # if ballots_retrieved < 5:
+                #     status += "BALLOT_ITEMS_RETRIEVED: [[[" + one_ballot_results['status'] + "]]] "
             else:
                 ballots_not_retrieved += 1
                 if ballots_not_retrieved < 5:
-                    status += "NOT_RETRIEVED: [[[" + one_ballot_results['status'] + "]]] "
-        # status += "BALLOTS_RETRIEVED-from_pl: " + str(ballots_retrieved)
-        # if positive_value_exists(ballots_not_retrieved):
-        #     status += "BALLOTS_NOT_RETRIEVED-from_pl: " + str(ballots_not_retrieved)
+                    status += "BALLOT_ITEMS_NOT_RETRIEVED: [[[" + one_ballot_results['status'] + "]]] "
     else:
         status += "CANNOT_CALL_RETRIEVE_BECAUSE_OF_ERRORS [retrieve_ballot_items_from_polling_location_api_v4] "
     retrieve_row_count = ballots_retrieved
 
-    existing_offices_found = 0
     if google_civic_election_id in existing_offices_by_election_dict:
         existing_offices_found = len(existing_offices_by_election_dict[google_civic_election_id])
-    existing_offices_found = len(existing_office_objects_dict)
+    else:
+        existing_offices_found = len(existing_office_objects_dict)
     existing_candidates_found = len(existing_candidate_objects_dict)
     existing_measures_found = len(existing_measure_objects_dict)
     new_offices_found = len(new_office_we_vote_ids_list)

@@ -2245,7 +2245,9 @@ def groom_and_store_sample_ballot_results_api_v4(
                                                 candidate_campaign
                                         # In the future, we will want to look for updated data to save
                                     elif candidate_results['MultipleObjectsReturned']:
-                                        status += "MORE_THAN_ONE_CANDIDATE_WITH_SAME_BALLOTPEDIA_CANDIDATE_ID "
+                                        status += "MORE_THAN_ONE_CANDIDATE_WITH_SAME_BALLOTPEDIA_CANDIDATE_ID1 ("
+                                        status += str(ballotpedia_candidate_id)
+                                        status += ") "
                                         continue
                                     elif not candidate_results['success']:
                                         status += "RETRIEVE_BY_BALLOTPEDIA_CANDIDATE_ID_FAILED "

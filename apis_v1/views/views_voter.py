@@ -784,18 +784,19 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
     is_cordova = positive_value_exists(request.GET.get('is_cordova', False))
     hostname = request.GET.get('hostname', '')
 
-    results = voter_email_address_save_for_api(voter_device_id=voter_device_id,
-                                               text_for_email_address=text_for_email_address,
-                                               incoming_email_we_vote_id=incoming_email_we_vote_id,
-                                               send_link_to_sign_in=send_link_to_sign_in,
-                                               send_sign_in_code_email=send_sign_in_code_email,
-                                               resend_verification_email=resend_verification_email,
-                                               resend_verification_code_email=resend_verification_code_email,
-                                               make_primary_email=make_primary_email,
-                                               delete_email=delete_email,
-                                               is_cordova=is_cordova,
-                                               web_app_root_url=hostname,
-                                               )
+    results = voter_email_address_save_for_api(
+        voter_device_id=voter_device_id,
+        text_for_email_address=text_for_email_address,
+        incoming_email_we_vote_id=incoming_email_we_vote_id,
+        send_link_to_sign_in=send_link_to_sign_in,
+        send_sign_in_code_email=send_sign_in_code_email,
+        resend_verification_email=resend_verification_email,
+        resend_verification_code_email=resend_verification_code_email,
+        make_primary_email=make_primary_email,
+        delete_email=delete_email,
+        is_cordova=is_cordova,
+        web_app_root_url=hostname,
+        )
 
     json_data = {
         'status':                           results['status'],
