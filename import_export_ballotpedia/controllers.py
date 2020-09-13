@@ -1036,11 +1036,11 @@ def retrieve_ballot_items_from_polling_location_api_v4(
                 )
                 status += results['status']
                 if results['ballot_returned_found']:
-                    status += "UPDATE_OR_CREATE_BALLOT_RETURNED-SUCCESS "
+                    status += "UPDATE_OR_CREATE_BALLOT_RETURNED1-SUCCESS "
                     # ballot_returned = results['ballot_returned']
                     # ballot_returned_found = True
                 else:
-                    status += "UPDATE_OR_CREATE_BALLOT_RETURNED-BALLOT_RETURNED_FOUND-FALSE "
+                    status += "UPDATE_OR_CREATE_BALLOT_RETURNED1-BALLOT_RETURNED_FOUND-FALSE "
                 results = store_ballotpedia_json_response_to_import_batch_system(
                     modified_json_list=ballot_item_dict_list,
                     google_civic_election_id=google_civic_election_id,
@@ -3309,11 +3309,11 @@ def retrieve_one_ballot_from_ballotpedia_api_v4(latitude, longitude, google_civi
             )
             status += results['status']
             if results['ballot_returned_found']:
-                status += "UPDATE_OR_CREATE_BALLOT_RETURNED-SUCCESS "
+                status += "UPDATE_OR_CREATE_BALLOT_RETURNED2-SUCCESS "
                 ballot_returned = results['ballot_returned']
                 ballot_returned_found = True
             else:
-                status += "UPDATE_OR_CREATE_BALLOT_RETURNED-BALLOT_RETURNED_FOUND-FALSE "
+                status += "UPDATE_OR_CREATE_BALLOT_RETURNED2-BALLOT_RETURNED_FOUND-FALSE "
 
             ballot_item_manager = BallotItemManager()
             ballot_item_list_manager = BallotItemListManager()
@@ -3527,11 +3527,11 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
         )
         status += results['status']
         if results['ballot_returned_found']:
-            status += "UPDATE_OR_CREATE_BALLOT_RETURNED-SUCCESS "
+            status += "UPDATE_OR_CREATE_BALLOT_RETURNED3-SUCCESS "
             ballot_returned = results['ballot_returned']
             ballot_returned_found = True
         else:
-            status += "UPDATE_OR_CREATE_BALLOT_RETURNED-BALLOT_RETURNED_FOUND-FALSE "
+            status += "UPDATE_OR_CREATE_BALLOT_RETURNED3-BALLOT_RETURNED_FOUND-FALSE "
     else:
         status += "NUMBER_OF_BALLOT_ITEMS_UPDATED-NEGATIVE "
 
