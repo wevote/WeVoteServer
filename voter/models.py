@@ -1762,6 +1762,7 @@ class VoterManager(BaseUserManager):
                 we_vote_hosted_profile_image_url_tiny)
             success = results['success']
             status += results['status']
+            voter_updated = results['voter_updated']
         else:
             voter = Voter()
             status += "UPDATE_VOTER_BY_ID-COULD_NOT_RETRIEVE_VOTER "

@@ -2000,32 +2000,33 @@ def organization_retrieve_for_api(  # organizationRetrieve
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def organization_save_for_api(voter_device_id='',  # organizationSave
-                              organization_id=0,
-                              organization_we_vote_id='',
-                              organization_name=False,
-                              organization_description=False,
-                              organization_email=False,
-                              organization_website=False,
-                              organization_twitter_handle=False,
-                              organization_facebook=False,
-                              organization_instagram_handle=False,
-                              organization_image=False,
-                              organization_type=False,
-                              refresh_from_twitter=False,
-                              facebook_id=False,
-                              facebook_email=False,
-                              facebook_profile_image_url_https=False,
-                              chosen_domain_string=False,
-                              chosen_google_analytics_account_number=False,
-                              chosen_html_verification_string=False,
-                              chosen_hide_we_vote_logo=None,
-                              chosen_prevent_sharing_opinions=None,
-                              chosen_ready_introduction_text=False,
-                              chosen_ready_introduction_title=False,
-                              chosen_social_share_description=False,
-                              chosen_subdomain_string=False,
-                              chosen_subscription_plan=False):
+def organization_save_for_api(  # organizationSave
+        voter_device_id='',
+        organization_id=0,
+        organization_we_vote_id='',
+        organization_name=False,
+        organization_description=False,
+        organization_email=False,
+        organization_website=False,
+        organization_twitter_handle=False,
+        organization_facebook=False,
+        organization_instagram_handle=False,
+        organization_image=False,
+        organization_type=False,
+        refresh_from_twitter=False,
+        facebook_id=False,
+        facebook_email=False,
+        facebook_profile_image_url_https=False,
+        chosen_domain_string=False,
+        chosen_google_analytics_account_number=False,
+        chosen_html_verification_string=False,
+        chosen_hide_we_vote_logo=None,
+        chosen_prevent_sharing_opinions=None,
+        chosen_ready_introduction_text=False,
+        chosen_ready_introduction_title=False,
+        chosen_social_share_description=False,
+        chosen_subdomain_string=False,
+        chosen_subscription_plan=False):
     """
     We use this to store displayable organization data
     TODO: Make sure voter's can't change their Twitter handles here.
@@ -2321,6 +2322,7 @@ def organization_save_for_api(voter_device_id='',  # organizationSave
         # Voter guide names are currently locked to the organization name, so we want to update all voter guides
         voter_guide_manager = VoterGuideManager()
         results = voter_guide_manager.update_organization_voter_guides_with_organization_data(organization)
+        position_results = update_position_entered_details_from_organization(organization)
 
         # Favor the Twitter banner and profile image if they exist
         # From Dale September 1, 2017:  Eventually we would like to let a person choose which they want to display,

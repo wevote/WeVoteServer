@@ -1916,10 +1916,12 @@ def voter_update_view(request):  # voterUpdate
 
     external_voter_id = request.GET.get('external_voter_id', False)
     membership_organization_we_vote_id = request.GET.get('membership_organization_we_vote_id', False)
+    # Voter has visited a private-labeled We Vote site, and we want to store that voter's id from another database
     if external_voter_id is not False:
         external_voter_id = external_voter_id.strip()
         if external_voter_id.lower() == 'false':
             external_voter_id = False
+    # Voter has visited a private-labeled We Vote site, and we want to connect this voter to that organization
     if membership_organization_we_vote_id is not False:
         membership_organization_we_vote_id = membership_organization_we_vote_id.strip()
         if membership_organization_we_vote_id.lower() == 'false':
@@ -2149,6 +2151,7 @@ def voter_update_view(request):  # voterUpdate
     success = True
     voter_manager = VoterManager()
     voter_updated = False
+    linked_organization_we_vote_id = ''
     if at_least_one_variable_has_changed:
         results = voter_manager.update_voter_by_id(
             voter_id, facebook_email, facebook_profile_image_url_https,
@@ -2163,12 +2166,53 @@ def voter_update_view(request):  # voterUpdate
         success = results['success']
         voter = results['voter']
         voter_updated = results['voter_updated']
+        linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+
+    organization_manager = OrganizationManager()
     if external_voter_id_to_be_saved:
-        organization_manager = OrganizationManager()
         results = organization_manager.update_or_create_organization_membership_link_to_voter(
             membership_organization_we_vote_id, external_voter_id, voter_we_vote_id)
         status += results['status']
         success = results['success']
+
+    # When the first or last name is changed, we want to update the organization name if the organization name
+    #  starts with "Voter-" or organization.most_recent_name_update_from_first_and_last is True
+    voter_full_name = voter.get_full_name(real_name_only=True)
+    if positive_value_exists(voter_full_name) \
+            and (incoming_first_or_last_name or incoming_full_name_can_be_processed) \
+            and positive_value_exists(linked_organization_we_vote_id):
+        results = organization_manager.retrieve_organization_from_we_vote_id(linked_organization_we_vote_id)
+        if results['organization_found']:
+            organization = results['organization']
+            organization_changed = False
+            organization_name_changed = False
+            not_real_name = False
+            if positive_value_exists(organization.organization_name):
+                not_real_name = organization.organization_name.startswith('Voter-')
+            if positive_value_exists(organization.most_recent_name_update_from_voter_first_and_last) or not_real_name:
+                if not organization.most_recent_name_update_from_voter_first_and_last:
+                    organization.most_recent_name_update_from_voter_first_and_last = True
+                    organization_changed = True
+                if positive_value_exists(voter_full_name):
+                    organization.organization_name = voter_full_name
+                    organization_changed = True
+                    organization_name_changed = True
+            if organization_changed:
+                try:
+                    organization.save()
+                    if positive_value_exists(organization_name_changed):
+                        from voter_guide.models import VoterGuideManager
+                        voter_guide_manager = VoterGuideManager()
+                        results = voter_guide_manager.update_organization_voter_guides_with_organization_data(organization)
+                        status += results['status']
+                        from organization.controllers import update_position_entered_details_from_organization
+                        # TODO This can be made much more efficient
+                        position_results = update_position_entered_details_from_organization(organization)
+                        status += position_results['status']
+                except Exception as e:
+                    status += "COULD_NOT_SAVE_ORGANIZATION: " + str(e) + " "
+                    pass
+
     json_data = {
         'status':                                   status,
         'success':                                  success,

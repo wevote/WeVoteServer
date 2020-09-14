@@ -5230,6 +5230,7 @@ def reset_position_entered_image_details_from_organization(organization, twitter
 def update_position_entered_details_from_organization(organization):
     """
     Update all position image urls PositionEntered from organization details
+    TODO: This can be made MUCH more efficient by doing these updates in bulk
     :param organization:
     :return:
     """
@@ -5240,7 +5241,8 @@ def update_position_entered_details_from_organization(organization):
     update_all_position_image_urls_results = []
     update_all_position_org_data_results = []
     stance_we_are_looking_for = ANY_STANCE
-    friends_vs_public = PUBLIC_ONLY
+    friends_vs_public = FRIENDS_AND_PUBLIC
+    status = ""
 
     public_position_list = position_list_manager.retrieve_all_positions_for_organization(
         organization_id=organization.id,
@@ -5262,6 +5264,7 @@ def update_position_entered_details_from_organization(organization):
     update_all_position_results = [update_all_position_image_urls_results, update_all_position_org_data_results]
     results = {
         'success':                      True,
+        'status':                       status,
         'positions_updated_count':      positions_updated_count,
         'positions_not_updated_count':  positions_not_updated_count,
         'update_all_position_results':  update_all_position_results
