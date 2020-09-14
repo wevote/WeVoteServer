@@ -2666,14 +2666,15 @@ class PositionListManager(models.Model):
 
         return True
 
-    def retrieve_all_positions_for_organization(self, organization_id, organization_we_vote_id,
-                                                stance_we_are_looking_for, friends_vs_public,
-                                                show_positions_current_voter_election=False,
-                                                exclude_positions_current_voter_election=False,
-                                                voter_device_id='',
-                                                voter_we_vote_id='',
-                                                google_civic_election_id='',
-                                                state_code='', read_only=False):
+    def retrieve_all_positions_for_organization(
+            self, organization_id, organization_we_vote_id,
+            stance_we_are_looking_for, friends_vs_public,
+            show_positions_current_voter_election=False,
+            exclude_positions_current_voter_election=False,
+            voter_device_id='',
+            voter_we_vote_id='',
+            google_civic_election_id='',
+            state_code='', read_only=False):
         """
         Return a position list with all of the organization's positions.
         Incoming filters include: stance_we_are_looking_for, friends_vs_public, show_positions_current_voter_election,
@@ -7320,6 +7321,7 @@ class PositionManager(models.Model):
         """
         position_list_manager = PositionListManager()
         position_change = False
+        status = ""
         if positive_value_exists(organization.organization_name) and \
                 position_object.speaker_display_name != organization.organization_name:
             position_object.speaker_display_name = organization.organization_name
@@ -7341,13 +7343,13 @@ class PositionManager(models.Model):
                 position_object.save()
                 position_list_manager.update_position_network_scores_for_one_position(position_object)
                 success = True
-                status = "SAVED_POSITION_SPEAKER_DATA_FROM_ORGANIZATION"
+                status += "SAVED_POSITION_SPEAKER_DATA_FROM_ORGANIZATION "
             except Exception as e:
                 success = False
-                status = 'NOT_SAVED_POSITION_SPEAKER_DATA_FROM_ORGANIZATION'
+                status += 'NOT_SAVED_POSITION_SPEAKER_DATA_FROM_ORGANIZATION: ' + str(e) + " "
         else:
             success = True
-            status = "NO_CHANGES_SAVED_TO_POSITION_SPEAKER_DATA"
+            status += "NO_CHANGES_SAVED_TO_POSITION_SPEAKER_DATA "
         results = {
             'success':  success,
             'status':   status,

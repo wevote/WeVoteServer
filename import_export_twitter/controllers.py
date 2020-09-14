@@ -616,9 +616,12 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
             if save_voter_twitter_details_results['success']:
                 save_position_from_voter_results = update_position_for_friends_details_from_voter(
                     save_voter_twitter_details_results['voter'])
-            save_position_from_organization_results = update_position_entered_details_from_organization(
-                organization)
-
+            save_position_from_organization_results = \
+                update_position_entered_details_from_organization(organization)
+            from voter_guide.models import VoterGuideManager
+            voter_guide_manager = VoterGuideManager()
+            voter_guide_results = \
+                voter_guide_manager.update_organization_voter_guides_with_organization_data(organization)
     else:
         status += "ORGANIZATION_TWITTER_DETAILS-CLEARING_DETAILS "
         save_organization_results = organization_manager.clear_organization_twitter_details(organization)

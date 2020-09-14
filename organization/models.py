@@ -1127,6 +1127,7 @@ class OrganizationManager(models.Manager):
                 value_changed = False
                 if organization_name is not False:
                     organization_on_stage.organization_name = organization_name
+                    organization_on_stage.most_recent_name_update_from_voter_first_and_last = False
                     value_changed = True
                 if organization_description is not False:
                     organization_on_stage.organization_description = organization_description
@@ -1349,6 +1350,7 @@ class OrganizationManager(models.Manager):
                     value_changed = False
                     if organization_name is not False:
                         organization_on_stage.organization_name = organization_name
+                        organization_on_stage.most_recent_name_update_from_voter_first_and_last = False
                         value_changed = True
                     if organization_description is not False:
                         organization_on_stage.organization_description = organization_description
@@ -1379,7 +1381,8 @@ class OrganizationManager(models.Manager):
                         organization_on_stage.chosen_domain_string = chosen_domain_string
                     if chosen_google_analytics_account_number is not False:
                         value_changed = True
-                        organization_on_stage.chosen_google_analytics_account_number = chosen_google_analytics_account_number
+                        organization_on_stage.chosen_google_analytics_account_number = \
+                            chosen_google_analytics_account_number
                     if chosen_html_verification_string is not False:
                         value_changed = True
                         organization_on_stage.chosen_html_verification_string = chosen_html_verification_string
@@ -1436,13 +1439,14 @@ class OrganizationManager(models.Manager):
                         try:
                             organization_on_stage.save()
                             success = True
-                            status = found_with_status + " SAVED"
+                            status += found_with_status + " SAVED "
                         except Exception as e:
+                            status += "ORGANIZATION_SAVE_FAILED: " + str(e) + " "
                             logger.error("organization_on_stage.save() failed to save #2")
 
                     else:
                         success = True
-                        status = found_with_status + " NO_CHANGES_SAVED"
+                        status += found_with_status + " NO_CHANGES_SAVED "
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
 
@@ -1486,7 +1490,7 @@ class OrganizationManager(models.Manager):
                     new_organization_created = True
                     success = True
                     value_changed = False
-                    status = "NEW_ORGANIZATION_CREATED_IN_UPDATE_OR_CREATE"
+                    status += "NEW_ORGANIZATION_CREATED_IN_UPDATE_OR_CREATE "
                     organization_on_stage = results['organization']
 
                     if twitter_user_id or twitter_name or twitter_followers_count or twitter_profile_image_url_https \
@@ -1567,21 +1571,21 @@ class OrganizationManager(models.Manager):
                     if value_changed:
                         try:
                             organization_on_stage.save()
-                            status += " EXTRA_VALUES_SAVED"
+                            status += " EXTRA_VALUES_SAVED "
                         except Exception as e:
                             logger.error("organization_on_stage.save() failed to save #3")
                     else:
-                        status += " EXTRA_VALUES_NOT_SAVED"
+                        status += " EXTRA_VALUES_NOT_SAVED "
 
                 else:
                     success = False
-                    status = results['status']
+                    status += results['status']
                     organization_on_stage = Organization
 
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
                 success = False
-                status = "NEW_ORGANIZATION_COULD_NOT_BE_CREATED_OR_EXTRA_VALUES_ADDED"
+                status += "NEW_ORGANIZATION_COULD_NOT_BE_CREATED_OR_EXTRA_VALUES_ADDED: " + str(e) + " "
                 organization_on_stage = Organization
 
         results = {
@@ -2689,6 +2693,7 @@ class Organization(models.Model):
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True, db_index=True)
     organization_name = models.CharField(
         verbose_name="organization name", max_length=255, null=False, blank=False)
+    most_recent_name_update_from_voter_first_and_last = models.BooleanField(default=False)
     organization_website = models.URLField(
         verbose_name='url of the endorsing organization', max_length=255, blank=True, null=True)
     organization_email = models.EmailField(
