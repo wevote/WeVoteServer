@@ -22,7 +22,7 @@ from django.shortcuts import render
 from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
-from position.controllers import move_positions_to_another_measure
+from position.controllers import move_positions_to_another_measure, update_all_position_details_from_contest_measure
 from position.models import OPPOSE, PositionEntered, PositionListManager, SUPPORT
 from voter.models import voter_has_authority
 import wevote_functions.admin
@@ -591,6 +591,8 @@ def measure_edit_view(request, measure_id=0, measure_we_vote_id=""):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    # show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
+    show_all_elections = True
 
     messages_on_stage = get_messages(request)
     measure_id = convert_to_int(measure_id)
@@ -599,30 +601,47 @@ def measure_edit_view(request, measure_id=0, measure_we_vote_id=""):
         if positive_value_exists(measure_id):
             measure_on_stage = ContestMeasure.objects.get(id=measure_id)
             measure_on_stage_found = True
+            google_civic_election_id = measure_on_stage.google_civic_election_id
         elif positive_value_exists(measure_we_vote_id):
             measure_on_stage = ContestMeasure.objects.get(we_vote_id=measure_we_vote_id)
+            google_civic_election_id = measure_on_stage.google_civic_election_id
             measure_on_stage_found = True
         else:
-            measure_on_stage = ContestMeasure()
+            measure_on_stage = None
     except ContestMeasure.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
-        measure_on_stage = ContestMeasure()
+        measure_on_stage = None
     except ContestMeasure.DoesNotExist:
         # This is fine, create new
-        measure_on_stage = ContestMeasure()
+        measure_on_stage = None
         pass
 
-    if measure_on_stage_found:
-        template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'google_civic_election_id': google_civic_election_id,
-            'measure':                  measure_on_stage,
-        }
+    election_manager = ElectionManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
     else:
-        template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'google_civic_election_id': google_civic_election_id,
-        }
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+        # Make sure we always include the current election in the election_list, even if it is older
+        if positive_value_exists(google_civic_election_id):
+            this_election_found = False
+            for one_election in election_list:
+                if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                    this_election_found = True
+                    break
+            if not this_election_found:
+                results = election_manager.retrieve_election(google_civic_election_id)
+                if results['election_found']:
+                    one_election = results['election']
+                    election_list.append(one_election)
+
+    template_values = {
+        'election_list':            election_list,
+        'messages_on_stage':        messages_on_stage,
+        'google_civic_election_id': google_civic_election_id,
+        'measure':                  measure_on_stage,
+    }
     return render(request, 'measure/measure_edit.html', template_values)
 
 
@@ -646,6 +665,7 @@ def measure_edit_process_view(request):
     ballotpedia_yes_vote_description = request.POST.get('ballotpedia_yes_vote_description', False)
     measure_id = convert_to_int(request.POST['measure_id'])
     measure_title = request.POST.get('measure_title', False)
+    google_civic_election_id = request.POST.get('google_civic_election_id', False)
     google_civic_measure_title = request.POST.get('google_civic_measure_title', False)
     google_civic_measure_title2 = request.POST.get('google_civic_measure_title2', False)
     google_civic_measure_title3 = request.POST.get('google_civic_measure_title3', False)
@@ -654,7 +674,6 @@ def measure_edit_process_view(request):
     measure_subtitle = request.POST.get('measure_subtitle', False)
     measure_text = request.POST.get('measure_text', False)
     measure_url = request.POST.get('measure_url', False)
-    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     maplight_id = request.POST.get('maplight_id', False)
     vote_smart_id = request.POST.get('vote_smart_id', False)
     state_code = request.POST.get('state_code', False)
@@ -689,6 +708,8 @@ def measure_edit_process_view(request):
                     measure_on_stage.ballotpedia_no_vote_description = ballotpedia_no_vote_description
                 if ballotpedia_yes_vote_description is not False:
                     measure_on_stage.ballotpedia_yes_vote_description = ballotpedia_yes_vote_description
+                if google_civic_election_id is not False:
+                    measure_on_stage.google_civic_election_id = google_civic_election_id
                 if google_civic_measure_title is not False:
                     measure_on_stage.google_civic_measure_title = google_civic_measure_title
                 if google_civic_measure_title2 is not False:
@@ -707,8 +728,6 @@ def measure_edit_process_view(request):
                     measure_on_stage.measure_text = measure_text
                 if measure_url is not False:
                     measure_on_stage.measure_url = measure_url
-                if google_civic_election_id is not False:
-                    measure_on_stage.google_civic_election_id = google_civic_election_id
                 if maplight_id is not False:
                     measure_on_stage.maplight_id = maplight_id
                 if vote_smart_id is not False:
@@ -719,6 +738,7 @@ def measure_edit_process_view(request):
                 if positive_value_exists(measure_on_stage.we_vote_id):
                     measure_on_stage.save()
                     messages.add_message(request, messages.INFO, 'ContestMeasure updated.')
+                    update_position_results = update_all_position_details_from_contest_measure(measure_on_stage)
                 else:
                     messages.add_message(request, messages.ERROR, 'ContestMeasure NOT updated -- missing we_vote_id.')
             else:
@@ -730,6 +750,7 @@ def measure_edit_process_view(request):
                     ballotpedia_measure_url=ballotpedia_measure_url,
                     ballotpedia_no_vote_description=ballotpedia_no_vote_description,
                     ballotpedia_yes_vote_description=ballotpedia_yes_vote_description,
+                    google_civic_election_id=google_civic_election_id,
                     google_civic_measure_title=google_civic_measure_title,
                     google_civic_measure_title2=google_civic_measure_title2,
                     google_civic_measure_title3=google_civic_measure_title3,
@@ -739,7 +760,6 @@ def measure_edit_process_view(request):
                     measure_text=measure_text,
                     measure_title=measure_title,
                     measure_url=measure_url,
-                    google_civic_election_id=google_civic_election_id,
                     state_code=state_code,
                     maplight_id=maplight_id,
                     vote_smart_id=vote_smart_id,

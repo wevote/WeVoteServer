@@ -152,6 +152,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     success = True
     candidate_we_vote_id = ''
     date_first_shared = None
+    include_friends_only_positions = False
     is_ballot_share = False
     is_candidate_share = False
     is_measure_share = False
@@ -204,6 +205,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             'is_measure_share':             is_measure_share,
             'is_office_share':              is_office_share,
             'is_ready_share':               is_ready_share,
+            'include_friends_only_positions':   include_friends_only_positions,
             'google_civic_election_id':     google_civic_election_id,
             'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
             'shared_by_voter_we_vote_id':   shared_by_voter_we_vote_id,
@@ -354,6 +356,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         'is_measure_share':             shared_item.is_measure_share,
         'is_office_share':              shared_item.is_office_share,
         'is_ready_share':               shared_item.is_ready_share,
+        'include_friends_only_positions': include_friends_only_positions,
         'google_civic_election_id':     shared_item.google_civic_election_id,
         'shared_by_organization_type':  shared_item.shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_item.shared_by_organization_we_vote_id,

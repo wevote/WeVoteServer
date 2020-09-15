@@ -4,6 +4,7 @@
 {% block title %}{% if measure %}{{ measure.measure_title  }}{% else %}New Measure{% endif %}{% endblock %}
 
 {%  block content %}
+{% load template_filters %}
 <h1>{% if measure %}Edit {{ measure.measure_title }}{% else %}New Measure{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
@@ -124,19 +125,22 @@
     </div>
 </div>
 
-<input type="hidden" name="google_civic_election_id" value="{% if measure %}{{ measure.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
 <div class="form-group">
-    <label for="google_civic_election_id_id" class="col-sm-3 control-label">Google Civic Id</label>
+    <label for="google_civic_election_id_id" class="col-sm-3 control-label">
+        Google Civic Id
+    </label>
     <div class="col-sm-8">
-        {% if measure %}
-          {{ measure.google_civic_election_id }}
-          {% if measure.ballotpedia_election_id %}
-            <br />ballotpedia election id: {{ measure.ballotpedia_election_id }}
-            {% if measure.ballotpedia_district_id %}
-               &nbsp;(ballotpedia district id: {{ measure.ballotpedia_district_id }})
-            {% endif %}
-          {% endif %}
-        {% else %}{{ google_civic_election_id }}{% endif %}
+    {% if election_list %}
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
+            -- Filter by Election --</option>
+        {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}{# End of if election_list #}
     </div>
 </div>
 
