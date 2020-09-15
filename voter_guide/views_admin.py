@@ -1908,6 +1908,8 @@ def voter_guide_list_view(request):
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_individuals = request.GET.get('show_individuals', False)
     show_individuals = positive_value_exists(show_individuals)
+    show_statistics = request.GET.get('show_statistics', False)
+    show_statistics = positive_value_exists(show_statistics)
     sort_by = request.GET.get('sort_by', False)
     state_code = request.GET.get('state_code', '')
     voter_guide_search = request.GET.get('voter_guide_search', '')
@@ -1916,7 +1918,7 @@ def voter_guide_list_view(request):
     if positive_value_exists(show_all):
         limit_number = 0
     else:
-        limit_number = 75
+        limit_number = 50
 
     google_civic_election_id_list = []
     election_manager = ElectionManager()
@@ -2013,25 +2015,28 @@ def voter_guide_list_view(request):
     modified_voter_guide_list = []
     issue_list_manager = IssueListManager()
     position_list_manager = PositionListManager()
-    for one_voter_guide in voter_guide_list:
-        # How many Publicly visible positions are there in this election on this voter guide?
-        organization_we_vote_id_list = [one_voter_guide.organization_we_vote_id]
-        google_civic_election_id_list = [one_voter_guide.google_civic_election_id]
-        one_voter_guide.number_of_public_positions = position_list_manager.fetch_positions_count_for_voter_guide(
-            organization_we_vote_id_list=organization_we_vote_id_list,
-            google_civic_election_id_list=google_civic_election_id_list,
-            state_code=state_code,
-            retrieve_public_positions=True)
-        # How many Friends-only visible positions are there in this election on this voter guide?
-        one_voter_guide.number_of_friends_only_positions = position_list_manager.fetch_positions_count_for_voter_guide(
-            organization_we_vote_id_list=organization_we_vote_id_list,
-            google_civic_election_id_list=google_civic_election_id_list,
-            state_code=state_code,
-            retrieve_public_positions=False)
-        # What Issues are associated with this voter_guide?
-        one_voter_guide.issue_list = issue_list_manager.fetch_organization_issue_list(
-            one_voter_guide.organization_we_vote_id)
-        modified_voter_guide_list.append(one_voter_guide)
+    if positive_value_exists(show_statistics):
+        for one_voter_guide in voter_guide_list:
+            # How many Publicly visible positions are there in this election on this voter guide?
+            organization_we_vote_id_list = [one_voter_guide.organization_we_vote_id]
+            google_civic_election_id_list = [one_voter_guide.google_civic_election_id]
+            one_voter_guide.number_of_public_positions = position_list_manager.fetch_positions_count_for_voter_guide(
+                organization_we_vote_id_list=organization_we_vote_id_list,
+                google_civic_election_id_list=google_civic_election_id_list,
+                state_code=state_code,
+                retrieve_public_positions=True)
+            # How many Friends-only visible positions are there in this election on this voter guide?
+            one_voter_guide.number_of_friends_only_positions = position_list_manager.fetch_positions_count_for_voter_guide(
+                organization_we_vote_id_list=organization_we_vote_id_list,
+                google_civic_election_id_list=google_civic_election_id_list,
+                state_code=state_code,
+                retrieve_public_positions=False)
+            # What Issues are associated with this voter_guide?
+            one_voter_guide.issue_list = issue_list_manager.fetch_organization_issue_list(
+                one_voter_guide.organization_we_vote_id)
+            modified_voter_guide_list.append(one_voter_guide)
+    else:
+        modified_voter_guide_list = voter_guide_list
 
     messages.add_message(request, messages.INFO, 'We found {voter_guides_count} existing voter guides. '
                                                  ''.format(voter_guides_count=voter_guides_count))
@@ -2043,6 +2048,7 @@ def voter_guide_list_view(request):
         'show_individuals':         show_individuals,
         'show_all':                 show_all,
         'show_all_elections':       show_all_elections,
+        'show_statistics':          show_statistics,
         'sort_by':                  sort_by,
         'state_code':               state_code,
         'messages_on_stage':        messages_on_stage,

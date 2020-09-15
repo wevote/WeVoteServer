@@ -79,6 +79,11 @@
              {% if show_individuals %}checked{% endif %} /> Show Individuals
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="show_statistics_id">
+      <input type="checkbox" name="show_statistics" id="show_statistics_id" value="1"
+             {% if show_statistics %}checked{% endif %} /> Show Statistics
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
 
     {% if voter_guide_search %}
         <a href="{% url 'voter_guide:voter_guide_list' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_individuals={{ show_individuals }}&show_all={{ show_all }}">
@@ -117,10 +122,12 @@
             <th>Election Day</th>
         {% endif %}
             <th>Type</th>
+        {% if show_statistics %}
             <th>Public<br />
                 Positions</th>
             <th>Friends<br />
                 Only</th>
+        {% endif %}
             <th>Last Updated</th>
             <th>we vote id</th>
         </tr>
@@ -192,12 +199,18 @@
             <td>{{ voter_guide.election_day_text|default_if_none:"" }}</td>
         {% endif %}
             <td>{{ voter_guide.voter_guide_owner_type|default_if_none:"" }}</td>
-            <td>{{ voter_guide.number_of_public_positions|default_if_none:"" }}</td>
+        {% if show_statistics %}
+            <td>
+                {% if voter_guide.number_of_public_positions %}
+                {{ voter_guide.number_of_public_positions|default_if_none:"" }}
+                {% endif %}
+            </td>
             <td>
                 {% if voter_guide.number_of_friends_only_positions %}
                 {{ voter_guide.number_of_friends_only_positions|default_if_none:"" }}
                 {% endif %}
             </td>
+        {% endif %}
             <td>{{ voter_guide.last_updated }}</td>
             <td>
               <a href="{% url 'voter_guide:voter_guide_edit' voter_guide.we_vote_id %}" target="_blank">
@@ -224,17 +237,22 @@
     <br />
     <script>
     $(function() {
+        $('#show_all_elections_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
         $('#show_individuals_id').change(function() {
             this.form.submit();
         });
     });
     $(function() {
-        $('#google_civic_election_id').change(function() {
+        $('#show_statistics_id').change(function() {
             this.form.submit();
         });
     });
     $(function() {
-        $('#show_all_elections_id').change(function() {
+        $('#google_civic_election_id').change(function() {
             this.form.submit();
         });
     });

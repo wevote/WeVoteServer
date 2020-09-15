@@ -7190,10 +7190,15 @@ class PositionManager(models.Model):
         """
         Update position_object with measure data.
         :param position_object:
-        :param candidate_campaign:
+        :param contest_measure:
         :return:
         """
+        status = ""
         position_change = False
+        if positive_value_exists(contest_measure.google_civic_election_id) and \
+                position_object.google_civic_election_id != contest_measure.google_civic_election_id:
+            position_object.google_civic_election_id = contest_measure.google_civic_election_id
+            position_change = True
         if positive_value_exists(contest_measure.google_civic_measure_title) and \
                 position_object.google_civic_measure_title != contest_measure.google_civic_measure_title:
             position_object.google_civic_measure_title = contest_measure.google_civic_measure_title
@@ -7210,13 +7215,13 @@ class PositionManager(models.Model):
             try:
                 position_object.save()
                 success = True
-                status = "SAVED_POSITION_MEASURE_DATA_FROM_CONTEST_MEASURE"
+                status += "SAVED_POSITION_MEASURE_DATA_FROM_CONTEST_MEASURE "
             except Exception as e:
                 success = False
-                status = 'NOT_SAVED_POSITION_MEASURE_DATA_FROM_CONTEST_MEASURE'
+                status += 'NOT_SAVED_POSITION_MEASURE_DATA_FROM_CONTEST_MEASURE: ' + str(e) + ' '
         else:
             success = True
-            status = "NO_CHANGES_SAVED_TO_POSITION_MEASURE_DATA"
+            status += "NO_CHANGES_SAVED_TO_POSITION_MEASURE_DATA "
         results = {
             'success':  success,
             'status':   status,
