@@ -45,7 +45,13 @@ IMPORT_VOTER = 'IMPORT_VOTER'
 MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
 
-NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES = 4  # Four processes at a time
+# Note that as of Sept 2020 we are running 6 API servers. Each API server can be running up to
+#  7 processes simultaneously. Since each new batch processes could be started on any of these 6 servers,
+#  in the worst case, all of these NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES processes could get bunched up
+#  on only one server. Since incoming API calls might get routed to the API server with the bunched up processes,
+#  we could see voter-driven API calls rejected. That is why we keep the NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES
+#  relatively low.
+NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES = 5  # Five processes at a time
 
 def batch_process_next_steps():
     success = True
