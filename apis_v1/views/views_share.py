@@ -42,7 +42,9 @@ def shared_item_save_view(request):  # sharedItemSave
     is_candidate_share = positive_value_exists(request.GET.get('is_candidate_share', False))
     is_measure_share = positive_value_exists(request.GET.get('is_measure_share', False))
     is_office_share = positive_value_exists(request.GET.get('is_office_share', False))
+    is_organization_share = positive_value_exists(request.GET.get('is_organization_share', False))
     is_ready_share = positive_value_exists(request.GET.get('is_ready_share', False))
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', None)
     json_data = shared_item_save_for_api(
         voter_device_id=voter_device_id,
         destination_full_url=destination_full_url,
@@ -52,7 +54,9 @@ def shared_item_save_view(request):  # sharedItemSave
         is_candidate_share=is_candidate_share,
         is_measure_share=is_measure_share,
         is_office_share=is_office_share,
+        is_organization_share=is_organization_share,
         is_ready_share=is_ready_share,
+        organization_we_vote_id=organization_we_vote_id,
     )
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

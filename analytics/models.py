@@ -89,6 +89,8 @@ ACTION_UNSUBSCRIBE_EMAIL_PAGE = 71
 ACTION_UNSUBSCRIBE_SMS_PAGE = 72
 ACTION_MEASURE = 73
 ACTION_NEWS = 74
+ACTION_SHARE_ORGANIZATION = 75
+ACTION_SHARE_ORGANIZATION_ALL_OPINIONS = 76
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
@@ -1995,6 +1997,10 @@ def display_action_constant_human_readable(action_constant):
         return "SHARE_OFFICE"
     if action_constant == ACTION_SHARE_OFFICE_ALL_OPINIONS:
         return "SHARE_OFFICE_ALL_OPINIONS"
+    if action_constant == ACTION_SHARE_ORGANIZATION:
+        return "SHARE_ORGANIZATION"
+    if action_constant == ACTION_SHARE_ORGANIZATION_ALL_OPINIONS:
+        return "SHARE_ORGANIZATION_ALL_OPINIONS"
     if action_constant == ACTION_SHARE_READY:
         return "SHARE_READY"
     if action_constant == ACTION_SHARE_READY_ALL_OPINIONS:
@@ -2193,4 +2199,8 @@ def fetch_action_constant_number_from_constant_string(action_constant_string):
         return 73
     if action_constant_string in 'ACTION_NEWS':
         return 74
+    if action_constant_string in 'ACTION_SHARE_ORGANIZATION':
+        return 75
+    if action_constant_string in 'ACTION_SHARE_ORGANIZATION_ALL_OPINIONS':
+        return 76
     return 0

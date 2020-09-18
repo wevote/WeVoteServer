@@ -51,7 +51,7 @@ POLITICIAN = 'POLITICIAN'
 #  on only one server. Since incoming API calls might get routed to the API server with the bunched up processes,
 #  we could see voter-driven API calls rejected. That is why we keep the NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES
 #  relatively low.
-NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES = 5  # Five processes at a time
+NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES = 4  # Four processes at a time
 
 def batch_process_next_steps():
     success = True
