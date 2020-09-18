@@ -398,7 +398,9 @@ def shared_item_save_for_api(  # sharedItemSave
         is_candidate_share=False,
         is_measure_share=False,
         is_office_share=False,
-        is_ready_share=False):
+        is_organization_share=False,
+        is_ready_share=False,
+        organization_we_vote_id=''):
     status = ''
     success = True
     candidate_we_vote_id = ''
@@ -465,6 +467,7 @@ def shared_item_save_for_api(  # sharedItemSave
             'is_candidate_share':           is_candidate_share,
             'is_measure_share':             is_measure_share,
             'is_office_share':              is_office_share,
+            'is_organization_share':        is_organization_share,
             'is_ready_share':               is_ready_share,
             'google_civic_election_id':     google_civic_election_id,
             'shared_by_organization_type':  shared_by_organization_type,
@@ -486,6 +489,7 @@ def shared_item_save_for_api(  # sharedItemSave
         'is_candidate_share':                   is_candidate_share,
         'is_measure_share':                     is_measure_share,
         'is_office_share':                      is_office_share,
+        'is_organization_share':                is_organization_share,
         'is_ready_share':                       is_ready_share,
         'measure_we_vote_id':                   measure_we_vote_id,
         'office_we_vote_id':                    office_we_vote_id,
@@ -520,6 +524,7 @@ def shared_item_save_for_api(  # sharedItemSave
         'is_candidate_share':           is_candidate_share,
         'is_measure_share':             is_measure_share,
         'is_office_share':              is_office_share,
+        'is_organization_share':        is_organization_share,
         'is_ready_share':               is_ready_share,
         'google_civic_election_id':     google_civic_election_id,
         'shared_by_organization_type':  shared_by_organization_type,
