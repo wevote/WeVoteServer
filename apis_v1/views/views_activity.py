@@ -2,18 +2,20 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from activity.controllers import update_or_create_activity_notice_seed_for_activity_posts
-from activity.models import ActivityManager, NOTICE_ACTIVITY_POST_SEED, \
-    NOTICE_FRIEND_ACTIVITY_POSTS, NOTICE_FRIEND_ENDORSEMENTS, \
-    NOTICE_FRIEND_ENDORSEMENTS_SEED
-from config.base import get_environment_variable
+from datetime import datetime, timedelta
 from django.http import HttpResponse
 import json
+import time
+from activity.controllers import update_or_create_activity_notice_seed_for_activity_posts
+from activity.models import ActivityManager, NOTICE_FRIEND_ACTIVITY_POSTS, NOTICE_FRIEND_ENDORSEMENTS, \
+    NOTICE_FRIEND_ENDORSEMENTS_SEED
+from config.base import get_environment_variable
+from friend.models import FriendManager
+from google_firebase_api.cloud_messaging import send_single_message
 from twitter.models import TwitterUserManager
-from voter.models import fetch_voter_we_vote_id_from_voter_device_link, VoterManager
-import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, get_voter_device_id, is_voter_device_id_valid, \
-    positive_value_exists
+from voter.models import fetch_voter_we_vote_id_from_voter_device_link, VoterManager, VoterDeviceLinkManager, \
+    VoterDeviceLink
+from wevote_functions.functions import get_voter_device_id, positive_value_exists, wevote_functions
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -506,6 +508,12 @@ def activity_post_save_view(request):  # activityPostSave
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+    # This is in-line, not batch, and takes 1.3 sec for 10 notifications (with lots of logging) and running on a Mac.
+    # It could use the Python version of a linux/fork, or the Python version of a Java thread, or an AWS Lambda to make
+    # it run asynchronously if it started taking too long to complete
+    activity_post_send_notification_to_cordova_apps(voter.we_vote_id, voter.get_full_name(real_name_only=True),
+                                                    statement_text)
+
     results = activity_manager.update_or_create_activity_post(
         activity_post_we_vote_id=activity_post_we_vote_id,
         updated_values=updated_values,
@@ -551,3 +559,45 @@ def activity_post_save_view(request):  # activityPostSave
     activity_post_dict['status'] = status
     activity_post_dict['success'] = success
     return HttpResponse(json.dumps(activity_post_dict), content_type='application/json')
+
+
+def activity_post_send_notification_to_cordova_apps(activity_post_we_vote_id, speaker_name, statement_text):
+    """
+    Send a notification to all the speaker's friends on all of their devices that they have used in the last 15 days
+    This makes a best effort to send the messages, with no error handling on "not found" problems
+    Sept 18, 2020: temporary success logging for viewing in Splunk
+    :param activity_post_we_vote_id:
+    :param speaker_name:
+    :param statement_text:
+    :return:
+    """
+    start = time.time()
+    friend_manager = FriendManager()
+    activity_manager = ActivityManager()
+    voter_device_link_manager = VoterDeviceLinkManager()
+    friend_results = friend_manager.retrieve_friends_we_vote_id_list(activity_post_we_vote_id)
+    if friend_results['friends_we_vote_id_list_found']:
+        friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+        for recipient_voter_id in friends_we_vote_id_list:
+            try:
+                results = activity_manager.retrieve_activity_notice_list_for_recipient(
+                    recipient_voter_we_vote_id=recipient_voter_id)
+                activity_notice_list = results['activity_notice_list']
+                badge_number = activity_notice_list.count() + 1
+                body = speaker_name + " posted \"" + statement_text + "\""
+                time_threshold = datetime.now() - timedelta(days=15)
+                voter_id = ''.join(filter(str.isdigit, recipient_voter_id))
+                voter_device_link_query = VoterDeviceLink.objects.all()
+                voter_device_link_query = voter_device_link_query.filter(voter_id=voter_id)
+                voter_device_link_query = voter_device_link_query.filter(date_last_changed__gt=time_threshold)
+                device_list = list(voter_device_link_query)
+
+                for device in device_list:
+                    send_single_message(device.platform_type, device.firebase_fcm_token, "We Vote", body,
+                                        badge_number)
+                    logger.info('activity_post_send_notification_to_cordova_apps sent : ' + device.platform_type +
+                                device.firebase_fcm_token + "We Vote" + body + str(badge_number))
+                end = str(time.time() - start)
+                logger.info('activity_post_send_notification_to_cordova_apps elapsed time = ' + end)
+            except Exception as e:
+                logger.error('activity_post_send_notification_to_cordova_apps threw: ', e)

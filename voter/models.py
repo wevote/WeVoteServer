@@ -2499,6 +2499,9 @@ class VoterDeviceLinkManager(models.Model):
     Note:  Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     """
 
+    def __init__(self):
+        self.objects = None
+
     def __str__(self):              # __unicode__ on Python 2
         return "Voter Device Id Manager"
 

@@ -11,8 +11,6 @@ from search.controllers import search_all_for_api
 import wevote_functions.admin
 from voter.models import VoterDeviceLinkManager
 from wevote_functions.functions import generate_voter_device_id, get_voter_device_id, positive_value_exists
-# from google_firebase_api.controllers import initialize_sdk
-#from google_firebase_api import cloud_messaging
 
 logger = wevote_functions.admin.get_logger(__name__)
 
