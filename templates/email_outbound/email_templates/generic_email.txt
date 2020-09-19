@@ -1,6 +1,6 @@
 ========================================
 {% if confirm_friend_request_url %}
-Confirm Request
+Accept Invitation
 {{ confirm_friend_request_url }}
 
 {% endif %}

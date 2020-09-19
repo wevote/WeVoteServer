@@ -91,6 +91,8 @@ ACTION_MEASURE = 73
 ACTION_NEWS = 74
 ACTION_SHARE_ORGANIZATION = 75
 ACTION_SHARE_ORGANIZATION_ALL_OPINIONS = 76
+ACTION_VIEW_SHARED_ORGANIZATION = 77
+ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS = 77
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
@@ -2027,6 +2029,10 @@ def display_action_constant_human_readable(action_constant):
         return "VIEW_SHARED_OFFICE"
     if action_constant == ACTION_VIEW_SHARED_OFFICE_ALL_OPINIONS:
         return "VIEW_SHARED_OFFICE_ALL_OPINIONS"
+    if action_constant == ACTION_VIEW_SHARED_ORGANIZATION:
+        return "VIEW_SHARED_ORGANIZATION"
+    if action_constant == ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS:
+        return "VIEW_SHARED_ORGANIZATION_ALL_OPINIONS"
     if action_constant == ACTION_VIEW_SHARED_READY:
         return "VIEW_SHARED_READY"
     if action_constant == ACTION_VIEW_SHARED_READY_ALL_OPINIONS:
@@ -2203,4 +2209,8 @@ def fetch_action_constant_number_from_constant_string(action_constant_string):
         return 75
     if action_constant_string in 'ACTION_SHARE_ORGANIZATION_ALL_OPINIONS':
         return 76
+    if action_constant_string in 'ACTION_VIEW_SHARED_ORGANIZATION':
+        return 77
+    if action_constant_string in 'ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS':
+        return 78
     return 0

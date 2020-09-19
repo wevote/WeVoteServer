@@ -56,6 +56,11 @@ def shared_item_save_doc_template_values(url_root):
             'description':  'The kind of destination shared: Office page',
         },
         {
+            'name':         'is_organization_share',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'The kind of destination shared: Voter Guide page',
+        },
+        {
             'name':         'is_ready_share',
             'value':        'boolean',  # boolean, integer, long, string
             'description':  'The kind of destination shared: Ready page',
@@ -89,6 +94,7 @@ def shared_item_save_doc_template_values(url_root):
                    '  "is_candidate_share": boolean,\n' \
                    '  "is_measure_share": boolean,\n' \
                    '  "is_office_share": boolean,\n' \
+                   '  "is_organization_share": boolean,\n' \
                    '  "is_ready_share": boolean,\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "site_owner_organization_we_vote_id": string,\n' \
