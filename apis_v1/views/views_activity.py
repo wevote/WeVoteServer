@@ -5,6 +5,7 @@
 from datetime import datetime, timedelta
 from django.http import HttpResponse
 import json
+import threading
 import time
 from activity.controllers import update_or_create_activity_notice_seed_for_activity_posts
 from activity.models import ActivityManager, NOTICE_FRIEND_ACTIVITY_POSTS, NOTICE_FRIEND_ENDORSEMENTS, \
@@ -439,6 +440,7 @@ def activity_post_save_view(request):  # activityPostSave
     """
     status = ''
     activity_manager = ActivityManager()
+    start = time.time()
 
     activity_post_we_vote_id = request.GET.get('activity_post_we_vote_id', False)
     statement_text = request.GET.get('statement_text', False)
@@ -508,11 +510,19 @@ def activity_post_save_view(request):  # activityPostSave
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    # This is in-line, not batch, and takes 1.3 sec for 10 notifications (with lots of logging) and running on a Mac.
-    # It could use the Python version of a linux/fork, or the Python version of a Java thread, or an AWS Lambda to make
-    # it run asynchronously if it started taking too long to complete
-    activity_post_send_notification_to_cordova_apps(voter.we_vote_id, voter.get_full_name(real_name_only=True),
-                                                    statement_text)
+    # September 19, 2020: This uses the Python version of the Java threads API, but CPython is inherently single
+    # threaded -- it runs only one thread at a time.  Executing the firebase_notification_send_to_cordova_apps in a
+    # thread differs from Java threads, in that does not take advantage of intel processor hardware threads, nor does
+    # it run threads on other cores, but it does allow activity_post_save_view(request) to return quickly (in about 50
+    # to 90ms on a MacBookPro), and then runs the thread (loaded down with lots of temporary logging) in about
+    # 60 to 600ms for a single fcm notification send.  When I hacked firebase_notification_send_to_cordova_apps to be
+    # called 20 times for the same message in a loop, the time to execute activity_post_save_view was unchanged, but the
+    # thread took about 2 seconds to complete.  So with our load balancing setup, a Django instance will be tied up for
+    # the 90ms for the activity_post_save_view execution, then the 600ms for the thread to run to completion, but there
+    # is no longer any need to batch process the notifications.
+    t = threading.Thread(name='fcm_notification_send_thread', target=firebase_notification_send_to_cordova_apps,
+                         args=(voter.we_vote_id, voter.get_full_name(real_name_only=True), statement_text))
+    t.start()
 
     results = activity_manager.update_or_create_activity_post(
         activity_post_we_vote_id=activity_post_we_vote_id,
@@ -558,15 +568,19 @@ def activity_post_save_view(request):  # activityPostSave
 
     activity_post_dict['status'] = status
     activity_post_dict['success'] = success
+
+    end = str(time.time() - start)
+    logger.info('activity_post_save_view elapsed time = ' + end)
+
     return HttpResponse(json.dumps(activity_post_dict), content_type='application/json')
 
 
-def activity_post_send_notification_to_cordova_apps(activity_post_we_vote_id, speaker_name, statement_text):
+def firebase_notification_send_to_cordova_apps(we_vote_id, speaker_name, statement_text):
     """
     Send a notification to all the speaker's friends on all of their devices that they have used in the last 15 days
     This makes a best effort to send the messages, with no error handling on "not found" problems
     Sept 18, 2020: temporary success logging for viewing in Splunk
-    :param activity_post_we_vote_id:
+    :param we_vote_id:
     :param speaker_name:
     :param statement_text:
     :return:
@@ -575,7 +589,7 @@ def activity_post_send_notification_to_cordova_apps(activity_post_we_vote_id, sp
     friend_manager = FriendManager()
     activity_manager = ActivityManager()
     voter_device_link_manager = VoterDeviceLinkManager()
-    friend_results = friend_manager.retrieve_friends_we_vote_id_list(activity_post_we_vote_id)
+    friend_results = friend_manager.retrieve_friends_we_vote_id_list(we_vote_id)
     if friend_results['friends_we_vote_id_list_found']:
         friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
         for recipient_voter_id in friends_we_vote_id_list:
@@ -595,9 +609,9 @@ def activity_post_send_notification_to_cordova_apps(activity_post_we_vote_id, sp
                 for device in device_list:
                     send_single_message(device.platform_type, device.firebase_fcm_token, "We Vote", body,
                                         badge_number)
-                    logger.info('activity_post_send_notification_to_cordova_apps sent : ' + device.platform_type +
+                    logger.info('firebase_notification_send_to_cordova_apps sent : ' + device.platform_type +
                                 device.firebase_fcm_token + "We Vote" + body + str(badge_number))
-                end = str(time.time() - start)
-                logger.info('activity_post_send_notification_to_cordova_apps elapsed time = ' + end)
             except Exception as e:
-                logger.error('activity_post_send_notification_to_cordova_apps threw: ', e)
+                logger.error('firebase_notification_send_to_cordova_apps threw: ', e)
+    end = str(time.time() - start)
+    logger.info('firebase fcm_notification_send_thread terminated after = ' + end + ' seconds.')
