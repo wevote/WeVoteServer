@@ -4,8 +4,10 @@
 
 from .models import ShareManager
 from analytics.models import ACTION_VIEW_SHARED_BALLOT, ACTION_VIEW_SHARED_BALLOT_ALL_OPINIONS, \
-    ACTION_VIEW_SHARED_CANDIDATE, ACTION_VIEW_SHARED_CANDIDATE_ALL_OPINIONS, ACTION_VIEW_SHARED_MEASURE, \
-    ACTION_VIEW_SHARED_MEASURE_ALL_OPINIONS, ACTION_VIEW_SHARED_OFFICE, ACTION_VIEW_SHARED_OFFICE_ALL_OPINIONS, \
+    ACTION_VIEW_SHARED_CANDIDATE, ACTION_VIEW_SHARED_CANDIDATE_ALL_OPINIONS, \
+    ACTION_VIEW_SHARED_MEASURE, ACTION_VIEW_SHARED_MEASURE_ALL_OPINIONS, \
+    ACTION_VIEW_SHARED_OFFICE, ACTION_VIEW_SHARED_OFFICE_ALL_OPINIONS, \
+    ACTION_VIEW_SHARED_ORGANIZATION, ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS, \
     ACTION_VIEW_SHARED_READY, ACTION_VIEW_SHARED_READY_ALL_OPINIONS, \
     AnalyticsManager
 from follow.models import FOLLOWING, FollowOrganizationManager
@@ -157,6 +159,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     is_candidate_share = False
     is_measure_share = False
     is_office_share = False
+    is_organization_share = False
     is_ready_share = False
     google_civic_election_id = ''
     measure_we_vote_id = ''
@@ -204,6 +207,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             'is_candidate_share':           is_candidate_share,
             'is_measure_share':             is_measure_share,
             'is_office_share':              is_office_share,
+            'is_organization_share':        is_organization_share,
             'is_ready_share':               is_ready_share,
             'include_friends_only_positions':   include_friends_only_positions,
             'google_civic_election_id':     google_civic_election_id,
@@ -325,6 +329,12 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
                 # elif positive_value_exists(include_public_positions):  # Sharing only your public opinions
                 else:
                     action_view_type = ACTION_VIEW_SHARED_OFFICE
+            elif shared_item.is_organization_share:
+                if positive_value_exists(include_friends_only_positions):
+                    action_view_type = ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS
+                # elif positive_value_exists(include_public_positions):  # Sharing only your public opinions
+                else:
+                    action_view_type = ACTION_VIEW_SHARED_ORGANIZATION
             elif shared_item.is_ready_share:
                 if positive_value_exists(include_friends_only_positions):
                     action_view_type = ACTION_VIEW_SHARED_READY_ALL_OPINIONS
@@ -355,6 +365,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         'is_candidate_share':           shared_item.is_candidate_share,
         'is_measure_share':             shared_item.is_measure_share,
         'is_office_share':              shared_item.is_office_share,
+        'is_organization_share':        shared_item.is_organization_share,
         'is_ready_share':               shared_item.is_ready_share,
         'include_friends_only_positions': include_friends_only_positions,
         'google_civic_election_id':     shared_item.google_civic_election_id,

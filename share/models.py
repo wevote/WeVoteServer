@@ -394,12 +394,13 @@ class ShareManager(models.Model):
         )
         return convert_to_int(year_as_string)
 
-    def retrieve_shared_item(self, shared_item_id=0,
-                             shared_item_code='',
-                             destination_full_url='',
-                             shared_by_voter_we_vote_id='',
-                             google_civic_election_id='',
-                             read_only=False):
+    def retrieve_shared_item(
+            self, shared_item_id=0,
+            shared_item_code='',
+            destination_full_url='',
+            shared_by_voter_we_vote_id='',
+            google_civic_election_id='',
+            read_only=False):
         """
 
         :param shared_item_id:
@@ -517,13 +518,14 @@ class ShareManager(models.Model):
         }
         return results
 
-    def retrieve_shared_permissions_granted(self, shared_permissions_granted_id=0,
-                                            shared_by_voter_we_vote_id='',
-                                            shared_to_voter_we_vote_id='',
-                                            google_civic_election_id=0,
-                                            year_as_integer=0,
-                                            current_year_only=True,
-                                            read_only=False):
+    def retrieve_shared_permissions_granted(
+            self, shared_permissions_granted_id=0,
+            shared_by_voter_we_vote_id='',
+            shared_to_voter_we_vote_id='',
+            google_civic_election_id=0,
+            year_as_integer=0,
+            current_year_only=True,
+            read_only=False):
         """
         This implementation assumes we only ever get single item results
         :param shared_permissions_granted_id:

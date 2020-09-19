@@ -1,6 +1,6 @@
 ========================================{# Later we replace "Your   friend" with the sender name. #}
 {% if confirm_friend_request_url %}
-Confirm Request
+Accept Invitation
 {{ confirm_friend_request_url }}
 
 {% endif %}
