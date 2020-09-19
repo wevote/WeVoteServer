@@ -34,7 +34,7 @@ default_app = firebase_admin.initialize_app()
 
 def test_msg_to_my_phone():
     # test function
-    registration_token = 'eP80G8ReGU5OlHjNg75HGu:APA91bHv0fyc7dr_8Y1h2BL8Z7WSToQI24Uz4sbPYIewDtI7dDX3nRE_4P1RENJNs' \
+    registration_token = 'eGU5OlHjNg75HGu:APA91bHv0fyc7dr_8Y1h2BL8Z7WSToQI24Uz4sbPYIewDtI7dDX3nRE_4P1RENJNs' \
                          'VVboU142Z-pndTqhnMcCEqCGqkvp36n59Ly7EAPH_1kLJCea_u-6pnkDC8-vjt_oOvZow5r___t'
     send_single_message('IOS', registration_token, "Hello mom", "It is smokey today, like the day before", 2020)
     registration_token = 'c2k5Ew4EQaiyZGuXDpw35t:APA91bHr69JiOxA90hLc7U4pYmPRfYqOWjzijQIPrgiFZSnr4ZwbCv9UawQ_K1UnjOlSEZXij_eMYuK2vZ4FaYljKRRIPG3vctoVlfL4nIEOYgrcdBppAd3a6gdTTaFd7cnwW2jG1Ipi'
