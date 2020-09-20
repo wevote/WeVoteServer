@@ -510,16 +510,23 @@ def activity_post_save_view(request):  # activityPostSave
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    # September 19, 2020: This uses the Python version of the Java threads API, but CPython is inherently single
-    # threaded -- it runs only one thread at a time.  Executing the firebase_notification_send_to_cordova_apps in a
-    # thread differs from Java threads, in that does not take advantage of intel processor hardware threads, nor does
-    # it run threads on other cores, but it does allow activity_post_save_view(request) to return quickly (in about 50
-    # to 90ms on a MacBookPro), and then runs the thread (loaded down with lots of temporary logging) in about
-    # 60 to 600ms for a single fcm notification send.  When I hacked firebase_notification_send_to_cordova_apps to be
-    # called 20 times for the same message in a loop, the time to execute activity_post_save_view was unchanged, but the
-    # thread took about 2 seconds to complete.  So with our load balancing setup, a Django instance will be tied up for
-    # the 90ms for the activity_post_save_view execution, then the 600ms for the thread to run to completion, but there
-    # is no longer any need to batch process the notifications.
+    # September 19, 2020: Runs the cloud notification in a thread, so that the call to ActivityPostSave is not slowed
+    # down by the extra work.
+    # We are using the Python version of the Java threads API, but CPython is inherently single threaded -- it runs only
+    # one thread at a time, and switches execution between threads to simulate simultaneous execution. CPython does not
+    # provide the concurrent threading that you get in Java or C, where threads can be started up to run concurrently
+    # on other processor cores, but it does allow activity_post_save_view(request) to return quickly (in about 70ms on
+    # a MacBookPro), and then runs the thread (as currently loaded down with lots of temporary logging) in about 300ms
+    # for a single fcm notification send.
+    #
+    # (As an experiment I ran firebase_notification_send_to_cordova_apps 20 times in a loop within the thread and the
+    # time to execute activity_post_save_view was unchanged, but the thread took about 2 seconds to complete.)
+    #
+    # So with our load balancing setup, a Django instance would be tied up for an average of about 70ms for the
+    # ActivityPostSave execution, and would continue to be further tied up with the 300ms for the "notification send"
+    # thread to run to completion.
+    #
+    # This eliminates the need to batch process the notifications.
     t = threading.Thread(name='fcm_notification_send_thread', target=firebase_notification_send_to_cordova_apps,
                          args=(voter.we_vote_id, voter.get_full_name(real_name_only=True), statement_text))
     t.start()
