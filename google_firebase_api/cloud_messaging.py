@@ -25,11 +25,14 @@ import os
 from config.base import get_environment_variable
 
 # Create a real environment variable, from our cached configuration element
-creds_path_from_json = get_environment_variable("GOOGLE_APPLICATION_CREDENTIALS")
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path_from_json
-# initialize the firebase admin API, that we use to send Firebase Cloud Messaging (FCM) messages
-default_app = firebase_admin.initialize_app()
-# print('firebase initialized')
+try:
+    creds_path_from_json = get_environment_variable("GOOGLE_APPLICATION_CREDENTIALS")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path_from_json
+    # initialize the firebase admin API, that we use to send Firebase Cloud Messaging (FCM) messages
+    default_app = firebase_admin.initialize_app()
+    # print('firebase initialized')
+except Exception as e:
+    pass
 
 
 def test_msg_to_my_phone():
