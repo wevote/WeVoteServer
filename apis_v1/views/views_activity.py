@@ -527,9 +527,12 @@ def activity_post_save_view(request):  # activityPostSave
     # thread to run to completion.
     #
     # This eliminates the need to batch process the notifications.
-    t = threading.Thread(name='fcm_notification_send_thread', target=firebase_notification_send_to_cordova_apps,
-                         args=(voter.we_vote_id, voter.get_full_name(real_name_only=True), statement_text))
-    t.start()
+    try:
+        t = threading.Thread(name='fcm_notification_send_thread', target=firebase_notification_send_to_cordova_apps,
+                             args=(voter.we_vote_id, voter.get_full_name(real_name_only=True), statement_text))
+        t.start()
+    except Exception as e:
+        status += "FAILED_DURING-firebase_notification_send_to_cordova_apps " + str(e) + " "
 
     results = activity_manager.update_or_create_activity_post(
         activity_post_we_vote_id=activity_post_we_vote_id,

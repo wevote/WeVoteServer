@@ -1774,6 +1774,7 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                         organization_website = one_ballot_item_dict['organization_website'].lower()
                         # Remove the http... from the candidate website
                         organization_website_stripped = extract_website_from_url(organization_website)
+                        # Also search for extract_website_from_url
                         if organization_website_stripped not in \
                                 ('ballotpedia.org',
                                  'bit.ly',
@@ -1784,9 +1785,13 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                                  'nationbuilder.com',
                                  'secure.actblue.com',
                                  'secure.winred.com',
+                                 't.co',
                                  'tinyurl.com',
                                  'twitter.com',
+                                 'wix.com',
+                                 'wixsite.com',
                                  'youtube.com'):
+                            # We strip out straight 'wixsite.com', but not 'candidate.wixsite.com'
                             if organization_website_stripped in all_html_lower_case:
                                 organization_we_vote_ids_list.append(
                                     one_ballot_item_dict['organization_we_vote_id'])
@@ -1896,9 +1901,13 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                                  'nationbuilder.com',
                                  'secure.actblue.com',
                                  'secure.winred.com',
+                                 't.co',
                                  'tinyurl.com',
                                  'twitter.com',
+                                 'wix.com',
+                                 'wixsite.com',
                                  'youtube.com'):
+                            # We strip out straight 'wixsite.com', but not 'candidate.wixsite.com'
                             if organization_website_stripped in all_html_lower_case:
                                 organization_we_vote_ids_list.append(
                                     one_ballot_item_dict['organization_we_vote_id'])
@@ -2054,9 +2063,13 @@ def organization_endorsements_scanner(endorsement_list_light, text_to_search_low
                              'nationbuilder.com',
                              'secure.actblue.com',
                              'secure.winred.com',
+                             't.co',
                              'tinyurl.com',
                              'twitter.com',
+                             'wix.com',
+                             'wixsite.com',
                              'youtube.com'):
+                        # We strip out straight 'wixsite.com', but not 'candidate.wixsite.com'
                         if ballot_item_website_stripped in text_to_search_lower_case:
                             candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
                             endorsement_list_light_modified.append(one_ballot_item_dict)

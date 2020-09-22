@@ -2504,7 +2504,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
                     'google_ballot_placement':      ballot_item.google_ballot_placement,
                     'id':                           measure_id,
                     'kind_of_ballot_item':          kind_of_ballot_item,
-                    'local_ballot_order':           ballot_item.local_ballot_order,
+                    'local_ballot_order':           ballot_item.local_ballot_order + 100,  # Shift to bottom
                     'measure_subtitle':             ballot_item.measure_subtitle,
                     'measure_text':                 ballot_item.measure_text,
                     'measure_url':                  ballot_item.measure_url,
@@ -2518,11 +2518,14 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
                 }
                 ballot_items_to_display.append(one_ballot_item.copy())
 
+        from operator import itemgetter
+        ballot_item_list_ordered = sorted(ballot_items_to_display, key=itemgetter('local_ballot_order'), reverse=False)
+
         results = {
             'status': status,
             'success': True,
             'voter_device_id': voter_device_id,
-            'ballot_item_list': ballot_items_to_display,
+            'ballot_item_list': ballot_item_list_ordered,
             'google_civic_election_id': google_civic_election_id,
         }
     else:
