@@ -1304,6 +1304,99 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    def update_speaker_name_in_bulk(
+            self,
+            speaker_voter_we_vote_id='',
+            speaker_name=''):
+        status = ""
+        success = True
+        if not positive_value_exists(speaker_voter_we_vote_id):
+            success = False
+            status += 'VALID_VOTER_WE_VOTE_ID_MISSING '
+            results = {
+                'success':                      success,
+                'status':                       status,
+            }
+            return results
+
+        if not positive_value_exists(speaker_name):
+            success = False
+            status += 'SPEAKER_NAME_MUST_EXIST '
+            results = {
+                'success':                      success,
+                'status':                       status,
+            }
+            return results
+
+
+        try:
+            updated_count = ActivityComment.objects.all().filter(
+                commenter_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                deleted=False
+            ).update(
+                commenter_name=speaker_name)
+            status += 'ACTIVITY_COMMENTS_UPDATED: (' + str(updated_count) + ') '
+        except ActivityComment.DoesNotExist:
+            # No data found. Not a problem.
+            status += 'NO_ACTIVITY_COMMENTS_FOUND '
+        except Exception as e:
+            success = False
+            status += 'FAILED update_speaker_name_in_bulk ActivityComment ' + str(e) + ' '
+
+        try:
+            updated_count = ActivityNotice.objects.all().filter(
+                speaker_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                deleted=False
+            ).update(
+                speaker_name=speaker_name)
+            status += 'ACTIVITY_NOTICES_UPDATED: (' + str(updated_count) + ') '
+        except ActivityNotice.DoesNotExist:
+            # No data found. Not a problem.
+            status += 'NO_ACTIVITY_NOTICES_FOUND '
+        except Exception as e:
+            success = False
+            status += 'FAILED update_speaker_name_in_bulk ActivityNotice ' + str(e) + ' '
+
+        try:
+            updated_seed_count1 = ActivityNoticeSeed.objects.all().filter(
+                speaker_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                deleted=False
+            ).update(
+                speaker_name=speaker_name)
+            updated_seed_count2 = ActivityNoticeSeed.objects.all().filter(
+                recipient_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                deleted=False
+            ).update(
+                recipient_name=speaker_name)
+            status += 'ACTIVITY_NOTICE_SEEDS_UPDATED: ' \
+                      '(' + str(updated_seed_count1) + '/' + str(updated_seed_count2) + ') '
+        except ActivityNoticeSeed.DoesNotExist:
+            # No data found. Not a problem.
+            status += 'NO_ACTIVITY_NOTICE_SEEDS_FOUND '
+        except Exception as e:
+            success = False
+            status += 'FAILED update_speaker_name_in_bulk ActivityNoticeSeed ' + str(e) + ' '
+
+        try:
+            updated_count = ActivityPost.objects.all().filter(
+                speaker_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                deleted=False
+            ).update(
+                speaker_name=speaker_name)
+            status += 'ACTIVITY_POSTS_UPDATED: (' + str(updated_count) + ') '
+        except ActivityPost.DoesNotExist:
+            # No data found. Not a problem.
+            status += 'NO_ACTIVITY_POSTS_FOUND '
+        except Exception as e:
+            success = False
+            status += 'FAILED update_speaker_name_in_bulk ActivityPost ' + str(e) + ' '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+        }
+        return results
+
 
 class ActivityNotice(models.Model):
     """

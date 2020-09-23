@@ -1859,6 +1859,7 @@ def voter_update_view(request):  # voterUpdate
 
     status = ""
     voter_updated = False
+    voter_name_needs_to_be_updated_in_activity = False
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
 
@@ -2059,7 +2060,7 @@ def voter_update_view(request):  # voterUpdate
 
     voter = voter_results['voter']
     voter_we_vote_id = voter.we_vote_id
-
+    voter_full_name_at_start = voter.get_full_name(real_name_only=True)
     # At this point, we have a valid voter
 
     if at_least_one_variable_has_changed or external_voter_id_to_be_saved:
@@ -2178,6 +2179,10 @@ def voter_update_view(request):  # voterUpdate
     # When the first or last name is changed, we want to update the organization name if the organization name
     #  starts with "Voter-" or organization.most_recent_name_update_from_first_and_last is True
     voter_full_name = voter.get_full_name(real_name_only=True)
+    if positive_value_exists(voter_full_name):
+        if voter_full_name != voter_full_name_at_start:
+            voter_name_needs_to_be_updated_in_activity = True
+
     if positive_value_exists(voter_full_name) \
             and (incoming_first_or_last_name or incoming_full_name_can_be_processed) \
             and positive_value_exists(linked_organization_we_vote_id):
@@ -2203,7 +2208,8 @@ def voter_update_view(request):  # voterUpdate
                     if positive_value_exists(organization_name_changed):
                         from voter_guide.models import VoterGuideManager
                         voter_guide_manager = VoterGuideManager()
-                        results = voter_guide_manager.update_organization_voter_guides_with_organization_data(organization)
+                        results = \
+                            voter_guide_manager.update_organization_voter_guides_with_organization_data(organization)
                         status += results['status']
                         from organization.controllers import update_position_entered_details_from_organization
                         # TODO This can be made much more efficient
@@ -2212,6 +2218,13 @@ def voter_update_view(request):  # voterUpdate
                 except Exception as e:
                     status += "COULD_NOT_SAVE_ORGANIZATION: " + str(e) + " "
                     pass
+    if voter_name_needs_to_be_updated_in_activity:
+        from activity.models import ActivityManager
+        activity_manager = ActivityManager()
+        results = activity_manager.update_speaker_name_in_bulk(
+            speaker_voter_we_vote_id=voter_we_vote_id,
+            speaker_name=voter_full_name)
+        status += results['status']
 
     json_data = {
         'status':                                   status,
