@@ -969,6 +969,39 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
             wdate = candidate_campaign.withdrawal_date.strftime("%Y-%m-%d")
         if not positive_value_exists(candidate_campaign.contest_office_name):
             candidate_campaign = candidate_manager.refresh_cached_candidate_office_info(candidate_campaign)
+
+        office_list_for_candidate = []
+        office_link_results = candidate_manager.retrieve_candidate_to_office_link(
+            candidate_we_vote_id=candidate_campaign.we_vote_id,
+            read_only=True)
+        if office_link_results['list_found']:
+            office_manager = ContestOfficeManager()
+            election_manager = ElectionManager()
+            candidate_to_office_link_list = office_link_results['candidate_to_office_link_list']
+            for candidate_to_office_link in candidate_to_office_link_list:
+                contest_office_name = ''
+                results = office_manager.retrieve_contest_office_from_we_vote_id(
+                    candidate_to_office_link.contest_office_we_vote_id)
+                if results['contest_office_found']:
+                    contest_office = results['contest_office']
+                    if contest_office:
+                        contest_office_name = contest_office.office_name
+                election_day_text = ''
+                if positive_value_exists(candidate_to_office_link.google_civic_election_id):
+                    results = election_manager.retrieve_election(
+                        google_civic_election_id=candidate_to_office_link.google_civic_election_id,
+                        read_only=True)
+                    if results['election_found']:
+                        election = results['election']
+                        election_day_text = election.election_day_text
+                one_office_dict = {
+                    'contest_office_name': contest_office_name,
+                    'contest_office_we_vote_id': candidate_to_office_link.contest_office_we_vote_id,
+                    'election_day_text': election_day_text,
+                    'google_civic_election_id': candidate_to_office_link.google_civic_election_id,
+                    'state_code': candidate_to_office_link.state_code,
+                }
+                office_list_for_candidate.append(one_office_dict)
         json_data = {
             'status':                       status,
             'success':                      True,
@@ -991,6 +1024,7 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
             'contest_office_id':            candidate_campaign.contest_office_id,
             'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
             'contest_office_name':          candidate_campaign.contest_office_name,
+            'contest_office_list':          office_list_for_candidate,
             'politician_id':                candidate_campaign.politician_id,
             'politician_we_vote_id':        candidate_campaign.politician_we_vote_id,
             # 'google_civic_candidate_name': candidate_campaign.google_civic_candidate_name,
@@ -1063,16 +1097,46 @@ def candidates_retrieve_for_api(office_id=0, office_we_vote_id=''):  # candidate
         success = False
 
     if success:
-        # Reset office_we_vote_id and office_id so we are sure that it matches what we pull from the database
-        office_id = 0
-        office_we_vote_id = ''
+        candidate_manager = CandidateCampaignManager()
         for candidate_campaign in candidate_list:
             if not positive_value_exists(candidate_campaign.contest_office_name):
-                candidate_manager = CandidateCampaignManager()
                 candidate_campaign = candidate_manager.refresh_cached_candidate_office_info(candidate_campaign)
             wdate = ''
             if isinstance(candidate_campaign.withdrawal_date, the_other_datetime.date):
                 wdate = candidate_campaign.withdrawal_date.strftime("%Y-%m-%d")
+
+            office_list_for_candidate = []
+            office_link_results = candidate_manager.retrieve_candidate_to_office_link(
+                    candidate_we_vote_id=candidate_campaign.we_vote_id,
+                    read_only=True)
+            if office_link_results['list_found']:
+                office_manager = ContestOfficeManager()
+                election_manager = ElectionManager()
+                candidate_to_office_link_list = office_link_results['candidate_to_office_link_list']
+                for candidate_to_office_link in candidate_to_office_link_list:
+                    contest_office_name = ''
+                    results = office_manager.retrieve_contest_office_from_we_vote_id(
+                        candidate_to_office_link.contest_office_we_vote_id)
+                    if results['contest_office_found']:
+                        contest_office = results['contest_office']
+                        if contest_office:
+                            contest_office_name = contest_office.office_name
+                    election_day_text = ''
+                    if positive_value_exists(candidate_to_office_link.google_civic_election_id):
+                        results = election_manager.retrieve_election(
+                            google_civic_election_id=candidate_to_office_link.google_civic_election_id,
+                            read_only=True)
+                        if results['election_found']:
+                            election = results['election']
+                            election_day_text = election.election_day_text
+                    one_office_dict = {
+                        'contest_office_name':          contest_office_name,
+                        'contest_office_we_vote_id':    candidate_to_office_link.contest_office_we_vote_id,
+                        'election_day_text':            election_day_text,
+                        'google_civic_election_id':     candidate_to_office_link.google_civic_election_id,
+                        'state_code':                   candidate_to_office_link.state_code,
+                    }
+                    office_list_for_candidate.append(one_office_dict)
 
             # This should match voter_ballot_items_retrieve_for_one_election_for_api (voterBallotItemsRetrieve)
             one_candidate = {
@@ -1094,9 +1158,10 @@ def candidates_retrieve_for_api(office_id=0, office_we_vote_id=''):  # candidate
                 'candidate_photo_url_tiny':     candidate_campaign.we_vote_hosted_profile_image_url_tiny,
                 'candidate_url':                candidate_campaign.candidate_url,
                 'candidate_contact_form_url':   candidate_campaign.candidate_contact_form_url,
+                'contest_office_list':          office_list_for_candidate,
                 'contest_office_id':            candidate_campaign.contest_office_id,  # Deprecate
                 'contest_office_name':          candidate_campaign.contest_office_name,  # Deprecate
-                'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,  # Deprecate
+                'contest_office_we_vote_id':    office_we_vote_id,
                 'facebook_url':                 candidate_campaign.facebook_url,
                 'google_civic_election_id':     candidate_campaign.google_civic_election_id,  # Deprecate
                 'kind_of_ballot_item':          CANDIDATE,
@@ -1120,8 +1185,6 @@ def candidates_retrieve_for_api(office_id=0, office_we_vote_id=''):  # candidate
             # Capture the office_we_vote_id and google_civic_election_id so we can return
             if not positive_value_exists(office_id) and candidate_campaign.contest_office_id:
                 office_id = candidate_campaign.contest_office_id
-            if not positive_value_exists(office_we_vote_id) and candidate_campaign.contest_office_we_vote_id:
-                office_we_vote_id = candidate_campaign.contest_office_we_vote_id
             if not positive_value_exists(google_civic_election_id) and candidate_campaign.google_civic_election_id:
                 google_civic_election_id = candidate_campaign.google_civic_election_id
 
@@ -1134,7 +1197,7 @@ def candidates_retrieve_for_api(office_id=0, office_we_vote_id=''):  # candidate
         'status':                   status,
         'success':                  success,
         'contest_office_id':        office_id,  # Deprecate
-        'contest_office_we_vote_id': office_we_vote_id,  # Deprecate
+        'contest_office_we_vote_id': office_we_vote_id,
         'google_civic_election_id': google_civic_election_id,  # Deprecate
         'candidate_list':           candidates_to_display,
     }
