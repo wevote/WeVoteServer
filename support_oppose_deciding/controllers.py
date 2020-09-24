@@ -939,6 +939,7 @@ def voter_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # 
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
             'kind_of_ballot_item':      '',
+            'position_we_vote_id':      '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -950,6 +951,7 @@ def voter_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # 
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
             'kind_of_ballot_item':      '',
+            'position_we_vote_id':      '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -974,6 +976,7 @@ def voter_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # 
             'ballot_item_id':           convert_to_int(candidate_id),
             'ballot_item_we_vote_id':   candidate_we_vote_id,
             'kind_of_ballot_item':      CANDIDATE,
+            'position_we_vote_id':      results['position_we_vote_id'],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     elif positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):
@@ -995,6 +998,7 @@ def voter_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # 
             'ballot_item_id':           convert_to_int(measure_id),
             'ballot_item_we_vote_id':   measure_we_vote_id,
             'kind_of_ballot_item':      MEASURE,
+            'position_we_vote_id': results['position_we_vote_id'],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
@@ -1007,6 +1011,7 @@ def voter_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # 
         'ballot_item_id':           0,
         'ballot_item_we_vote_id':   '',
         'kind_of_ballot_item':      '',
+        'position_we_vote_id':      '',
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1022,6 +1027,7 @@ def voter_stop_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
             'kind_of_ballot_item':      '',
+            'position_we_vote_id':      '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1033,6 +1039,7 @@ def voter_stop_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
             'kind_of_ballot_item':      '',
+            'position_we_vote_id':      '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1056,6 +1063,7 @@ def voter_stop_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id
             'ballot_item_id':           convert_to_int(candidate_id),
             'ballot_item_we_vote_id':   candidate_we_vote_id,
             'kind_of_ballot_item':      CANDIDATE,
+            'position_we_vote_id':      results['position_we_vote_id'],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     elif positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):
@@ -1077,6 +1085,7 @@ def voter_stop_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id
             'ballot_item_id':           convert_to_int(measure_id),
             'ballot_item_we_vote_id':   measure_we_vote_id,
             'kind_of_ballot_item':      MEASURE,
+            'position_we_vote_id':      results['position_we_vote_id'],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
@@ -1089,6 +1098,7 @@ def voter_stop_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id
         'ballot_item_id':           0,
         'ballot_item_we_vote_id':   '',
         'kind_of_ballot_item':      '',
+        'position_we_vote_id':      '',
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1104,6 +1114,7 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
             'kind_of_ballot_item':      '',
+            'position_we_vote_id':      '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1115,6 +1126,7 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
             'kind_of_ballot_item':      '',
+            'position_we_vote_id':      '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1138,6 +1150,7 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_
             'ballot_item_id':           convert_to_int(candidate_id),
             'ballot_item_we_vote_id':   candidate_we_vote_id,
             'kind_of_ballot_item':      CANDIDATE,
+            'position_we_vote_id':      results['position_we_vote_id'],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     elif positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):
@@ -1159,6 +1172,7 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_
             'ballot_item_id':           convert_to_int(measure_id),
             'ballot_item_we_vote_id':   measure_we_vote_id,
             'kind_of_ballot_item':      MEASURE,
+            'position_we_vote_id':      results['position_we_vote_id'],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
@@ -1171,6 +1185,7 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_
         'ballot_item_id':           0,
         'ballot_item_we_vote_id':   '',
         'kind_of_ballot_item':      '',
+        'position_we_vote_id':      '',
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1199,6 +1214,7 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
             'kind_of_ballot_item':      '',
+            'position_we_vote_id':      '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1210,6 +1226,7 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
             'kind_of_ballot_item':      '',
+            'position_we_vote_id':      '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1233,6 +1250,7 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
             'ballot_item_id':           convert_to_int(candidate_id),
             'ballot_item_we_vote_id':   candidate_we_vote_id,
             'kind_of_ballot_item':      CANDIDATE,
+            'position_we_vote_id':      results['position_we_vote_id'],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     elif positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):
@@ -1254,6 +1272,7 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
             'ballot_item_id':           convert_to_int(measure_id),
             'ballot_item_we_vote_id':   measure_we_vote_id,
             'kind_of_ballot_item':      MEASURE,
+            'position_we_vote_id':      results['position_we_vote_id'],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
@@ -1266,5 +1285,6 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
         'ballot_item_id':           0,
         'ballot_item_we_vote_id':   '',
         'kind_of_ballot_item':      '',
+        'position_we_vote_id':      '',
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')

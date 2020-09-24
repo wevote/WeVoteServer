@@ -4249,11 +4249,13 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
         statement_text,
         statement_html,
         ):
+    status = ""
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         json_data_from_results = results['json_data']
+        status += json_data_from_results['status']
         json_data = {
-            'status':                   json_data_from_results['status'],
+            'status':                   status,
             'success':                  False,
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
@@ -4267,8 +4269,9 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
+        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID-VOTER_POSITION_COMMENT "
         json_data = {
-            'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID-VOTER_POSITION_COMMENT",
+            'status':                   status,
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'position_we_vote_id':      position_we_vote_id,
@@ -4299,8 +4302,9 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
         positive_value_exists(measure_we_vote_id)
         )
     if not unique_identifier_found:
+        status += "POSITION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING "
         json_data = {
-            'status':                   "POSITION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING",
+            'status':                   status,
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'position_we_vote_id':      position_we_vote_id,
@@ -4314,8 +4318,9 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
     elif not existing_unique_identifier_found and not required_variables_for_new_entry:
         # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
         # or is_oppose_or_negative_rating
+        status += "NEW_POSITION_REQUIRED_VARIABLES_MISSING "
         json_data = {
-            'status':                   "NEW_POSITION_REQUIRED_VARIABLES_MISSING",
+            'status':                   status,
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'position_we_vote_id':      position_we_vote_id,
@@ -4361,9 +4366,10 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
             ballot_item_id = None
             ballot_item_we_vote_id = None
 
+        status += save_results['status']
         json_data = {
             'success':                  save_results['success'],
-            'status':                   save_results['status'],
+            'status':                   status,
             'voter_device_id':          voter_device_id,
             'position_we_vote_id':      position.we_vote_id,
             'ballot_item_id':           ballot_item_id,
@@ -4375,9 +4381,10 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
         }
         return json_data
     else:
+        status += save_results['status']
         json_data = {
             'success':                  False,
-            'status':                   save_results['status'],
+            'status':                   status,
             'voter_device_id':          voter_device_id,
             'position_we_vote_id':      '',
             'ballot_item_id':           0,

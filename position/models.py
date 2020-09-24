@@ -6561,7 +6561,7 @@ class PositionManager(models.Model):
         elif voter_position_found:
             problem_with_duplicate = False
             success = False
-            status = "UPDATE_OR_CREATE_POSITION_COMMENT-CHECKING_FOR_DUPLICATE"
+            status += "UPDATE_OR_CREATE_POSITION_COMMENT-CHECKING_FOR_DUPLICATE "
             try:
                 # Check for duplicate in other table
                 position_we_vote_id = ""
@@ -6581,12 +6581,12 @@ class PositionManager(models.Model):
                 if duplicate_results['position_found']:
                     problem_with_duplicate = True
                     success = False
-                    status = 'UPDATE_OR_CREATE_POSITION_COMMENT-EXISTING_POSITION_CHECK_FAILED '
+                    status += 'UPDATE_OR_CREATE_POSITION_COMMENT-EXISTING_POSITION_CHECK_FAILED '
 
             except Exception as e:
                 problem_with_duplicate = True
                 success = False
-                status = 'UPDATE_OR_CREATE_POSITION_COMMENT-EXISTING_POSITION_CHECK_FAILED-EXCEPTION ' + str(e) + ' '
+                status += 'UPDATE_OR_CREATE_POSITION_COMMENT-EXISTING_POSITION_CHECK_FAILED-EXCEPTION ' + str(e) + ' '
 
             if problem_with_duplicate:
                 results = {
@@ -6678,9 +6678,9 @@ class PositionManager(models.Model):
                 position_list_manager.update_position_network_scores_for_one_position(voter_position_on_stage)
                 position_we_vote_id = voter_position_on_stage.we_vote_id
                 voter_position_on_stage_found = True
-                status = 'POSITION_COMMENT_UPDATED'
+                status += 'POSITION_COMMENT_UPDATED '
             except Exception as e:
-                status = 'POSITION_COMMENT_COULD_NOT_BE_UPDATED ' + str(e) + ' '
+                status += 'POSITION_COMMENT_COULD_NOT_BE_UPDATED ' + str(e) + ' '
         else:
             try:
                 # Create new
@@ -6801,9 +6801,9 @@ class PositionManager(models.Model):
                 position_we_vote_id = voter_position_on_stage.we_vote_id
                 voter_position_on_stage_found = True
                 is_public_position = False
-                status = 'NEW_POSITION_COMMENT_SAVED '
+                status += 'NEW_POSITION_COMMENT_SAVED '
             except Exception as e:
-                status = 'NEW_POSITION_COMMENT_COULD_NOT_BE_SAVED' + str(e) + ' '
+                status += 'NEW_POSITION_COMMENT_COULD_NOT_BE_SAVED' + str(e) + ' '
 
         if voter_position_on_stage_found:
             activity_results = update_or_create_activity_notice_seed_for_voter_position(
