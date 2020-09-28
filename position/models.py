@@ -157,7 +157,7 @@ class PositionEntered(models.Model):
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=255, null=True, blank=False, default=0, db_index=True)
     # The date of the last election this position relates to, converted to integer, ex/ 20201103
-    position_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
+    # position_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this endorsement was made
     position_year = models.PositiveIntegerField(default=None, null=True)
     state_code = models.CharField(verbose_name="us state of the ballot item position is for",
@@ -571,7 +571,7 @@ class PositionForFriends(models.Model):
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True, db_index=True)
     # The date of the last election this position relates to, converted to integer, ex/ 20201103
-    position_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
+    # position_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this endorsement was made
     position_year = models.PositiveIntegerField(default=None, null=True)
     state_code = models.CharField(verbose_name="us state of the ballot item position is for", max_length=2,
