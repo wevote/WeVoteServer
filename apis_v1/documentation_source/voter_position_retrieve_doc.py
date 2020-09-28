@@ -48,21 +48,23 @@ def voter_position_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \
                    '  "ballot_item_display_name": string (either measure name or candidate name),\n' \
-                   '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
+                   '  "ballot_item_we_vote_id": string,\n' \
+                   '  "candidate_we_vote_id": string,\n' \
+                   '  "google_civic_election_id": integer,\n' \
                    '  "is_support": boolean,\n' \
                    '  "is_oppose": boolean,\n' \
                    '  "is_information_only": boolean,\n' \
-                   '  "google_civic_election_id": integer,\n' \
-                   '  "office_we_vote_id": string,\n' \
-                   '  "candidate_we_vote_id": string,\n' \
-                   '  "measure_we_vote_id": string,\n' \
                    '  "kind_of_ballot_item": string (OFFICE, CANDIDATE, MEASURE),\n' \
-                   '  "ballot_item_we_vote_id": string,\n' \
+                   '  "last_updated": string,\n' \
+                   '  "measure_we_vote_id": string,\n' \
+                   '  "more_info_url": string,\n' \
+                   '  "office_we_vote_id": string,\n' \
+                   '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
+                   '  "position_ultimate_election_date": integer,\n' \
+                   '  "position_year": integer,\n' \
                    '  "stance": string (SUPPORT, OPPOSE, INFO_ONLY, or NO_STANCE),\n' \
                    '  "statement_text": string,\n' \
                    '  "statement_html": string,\n' \
-                   '  "more_info_url": string,\n' \
-                   '  "last_updated": string,\n' \
                    '}'
 
     template_values = {

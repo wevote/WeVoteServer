@@ -103,22 +103,11 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                    '  "ballot_item_we_vote_id": string,\n' \
                    '  "position_list": list\n' \
                    '   [\n' \
-                   '     "position_we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string (either measure name or candidate name),\n' \
                    '     "ballot_item_image_url_https_large": string,\n' \
                    '     "ballot_item_image_url_https_medium": string,\n' \
                    '     "ballot_item_image_url_https_tiny": string,\n' \
                    '     "ballot_item_we_vote_id": string,\n' \
-                   '     "speaker_display_name": string,\n' \
-                   '     "speaker_image_url_https_large": string,\n' \
-                   '     "speaker_image_url_https_medium": string,\n' \
-                   '     "speaker_image_url_https_tiny": string,\n' \
-                   '     "speaker_twitter_handle": string,\n' \
-                   '     "twitter_followers_count": integer,\n' \
-                   '     "speaker_type": string, ' \
-                   '      (One of these: \'ORGANIZATION\', \'VOTER\', \'PUBLIC_FIGURE\', \'UNKNOWN\',)\n' \
-                   '     "speaker_id": integer,\n' \
-                   '     "speaker_we_vote_id": string,\n' \
                    '     "is_support": boolean,\n' \
                    '     "is_positive_rating": boolean,\n' \
                    '     "is_support_or_positive_rating": boolean,\n' \
@@ -127,9 +116,22 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                    '     "is_oppose_or_negative_rating": boolean,\n' \
                    '     "is_information_only": boolean,\n' \
                    '     "is_public_position": boolean,\n' \
-                   '     "more_info_url": string,\n' \
-                   '     "statement_text": string,\n' \
                    '     "last_updated": string,\n' \
+                   '     "more_info_url": string,\n' \
+                   '     "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
+                   '     "position_ultimate_election_date": integer,\n' \
+                   '     "position_year": integer,\n' \
+                   '     "speaker_display_name": string,\n' \
+                   '     "speaker_image_url_https_large": string,\n' \
+                   '     "speaker_image_url_https_medium": string,\n' \
+                   '     "speaker_image_url_https_tiny": string,\n' \
+                   '     "speaker_twitter_handle": string,\n' \
+                   '     "speaker_type": string, ' \
+                   '      (One of these: \'ORGANIZATION\', \'VOTER\', \'PUBLIC_FIGURE\', \'UNKNOWN\',)\n' \
+                   '     "speaker_id": integer,\n' \
+                   '     "speaker_we_vote_id": string,\n' \
+                   '     "statement_text": string,\n' \
+                   '     "twitter_followers_count": integer,\n' \
                    '   ],\n' \
                    '}'
 

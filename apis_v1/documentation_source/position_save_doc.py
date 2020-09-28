@@ -172,7 +172,6 @@ def position_save_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
                    '  "new_position_created": boolean,\n' \
                    '  "ballot_item_display_name": string (either measure name or candidate name),\n' \
                    '  "speaker_display_name": string,\n' \
@@ -187,6 +186,9 @@ def position_save_doc_template_values(url_root):
                    '  "is_information_only": boolean,\n' \
                    '  "is_public_position": boolean,\n' \
                    '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
+                   '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
+                   '  "position_ultimate_election_date": integer,\n' \
+                   '  "position_year": integer,\n' \
                    '  "public_figure_we_vote_id": string,\n' \
                    '  "voter_we_vote_id": string,\n' \
                    '  "google_civic_election_id": integer,\n' \

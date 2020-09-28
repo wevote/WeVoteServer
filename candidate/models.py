@@ -1426,6 +1426,8 @@ class CandidateCampaign(models.Model):
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
+    # The date of the last election this candidate relates to, converted to integer, ex/ 20201103
+    candidate_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this candidate is running for office
     candidate_year = models.PositiveIntegerField(default=None, null=True)
     # State code
@@ -1777,9 +1779,9 @@ class CandidateCampaignManager(models.Model):
     def __unicode__(self):
         return "CandidateCampaignManager"
 
-    def retrieve_candidate_campaign_from_id(self, candidate_campaign_id):
+    def retrieve_candidate_campaign_from_id(self, candidate_campaign_id, read_only=False):
         candidate_campaign_manager = CandidateCampaignManager()
-        return candidate_campaign_manager.retrieve_candidate_campaign(candidate_campaign_id)
+        return candidate_campaign_manager.retrieve_candidate_campaign(candidate_campaign_id, read_only=read_only)
 
     def retrieve_candidate_campaign_from_we_vote_id(self, we_vote_id):
         candidate_campaign_id = 0
@@ -2580,21 +2582,101 @@ class CandidateCampaignManager(models.Model):
         }
         return results
 
-    def generate_candidate_year(self, candidate_we_vote_id):
+    def add_candidate_position_sorting_dates_if_needed(self, position_object=None, candidate_campaign=None):
+        generate_sorting_dates = False
+        position_object_updated = False
+        candidate_year_changed = False
+        candidate_ultimate_election_date_changed = False
+        status = ""
+        success = True
+
+        if positive_value_exists(candidate_campaign.candidate_year):
+            position_object.position_year = candidate_campaign.candidate_year
+            position_object_updated = True
+        else:
+            generate_sorting_dates = True
+        if positive_value_exists(candidate_campaign.candidate_ultimate_election_date):
+            position_object.position_ultimate_election_date = candidate_campaign.candidate_ultimate_election_date
+            position_object_updated = True
+        else:
+            generate_sorting_dates = True
+
+        if generate_sorting_dates:
+            largest_year_integer = None
+            largest_election_date_integer = None
+            candidate_campaign_manager = CandidateCampaignManager()
+            date_results = candidate_campaign_manager.generate_candidate_position_sorting_dates(
+                candidate_we_vote_id=candidate_campaign.we_vote_id)
+            if positive_value_exists(date_results['largest_year_integer']):
+                if candidate_campaign.candidate_year != date_results['largest_year_integer']:
+                    candidate_year_changed = True
+                if not position_object.position_year:
+                    position_object.position_year = date_results['largest_year_integer']
+                    position_object_updated = True
+                elif date_results['largest_year_integer'] > position_object.position_year:
+                    position_object.position_year = date_results['largest_year_integer']
+                    position_object_updated = True
+            if positive_value_exists(date_results['largest_election_date_integer']):
+                if candidate_campaign.candidate_ultimate_election_date != date_results['largest_election_date_integer']:
+                    candidate_ultimate_election_date_changed = True
+                if not position_object.position_ultimate_election_date:
+                    position_object.position_ultimate_election_date = date_results['largest_election_date_integer']
+                    position_object_updated = True
+                elif date_results['largest_election_date_integer'] > position_object.position_ultimate_election_date:
+                    position_object.position_ultimate_election_date = date_results['largest_election_date_integer']
+                    position_object_updated = True
+            if candidate_year_changed or candidate_ultimate_election_date_changed:
+                # Retrieve an editable copy of the candidate so we can update the date caches
+                results = \
+                    candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_campaign.we_vote_id)
+                if results['candidate_campaign_found']:
+                    editable_candidate = results['candidate_campaign']
+                    try:
+                        if candidate_year_changed:
+                            editable_candidate.candidate_year = largest_year_integer
+                        if candidate_ultimate_election_date_changed:
+                            editable_candidate.candidate_ultimate_election_date = largest_election_date_integer
+                        editable_candidate.save()
+                        status += "SAVED_EDITABLE_CAMPAIGN "
+                    except Exception as e:
+                        status += "FAILED_TO_SAVE_EDITABLE_CAMPAIGN: " + str(e) + " "
+
+        return {
+            'position_object_updated':  position_object_updated,
+            'position_object':          position_object,
+            'status':                   status,
+            'success':                  success,
+        }
+
+    def generate_candidate_position_sorting_dates(self, candidate_we_vote_id=''):
+        largest_year_integer = 0
+        largest_election_date_integer = 0
         results = self.retrieve_candidate_to_office_link(
             candidate_we_vote_id=candidate_we_vote_id,
             read_only=True)
         candidate_to_office_link_list = results['candidate_to_office_link_list']
         election_manager = ElectionManager()
+        google_civic_election_id_reviewed_list = []
         for one_link in candidate_to_office_link_list:
-            if positive_value_exists(one_link.google_civic_election_id):
+            if positive_value_exists(one_link.google_civic_election_id) and \
+                    one_link.google_civic_election_id not in google_civic_election_id_reviewed_list:
                 results = election_manager.retrieve_election(google_civic_election_id=one_link.google_civic_election_id)
                 if results['election_found']:
                     election = results['election']
                     if positive_value_exists(election.election_day_text):
                         year_string = election.election_day_text[:4]
-                        return convert_to_int(year_string)
-        return None
+                        year_integer = convert_to_int(year_string)
+                        if year_integer > largest_year_integer:
+                            largest_year_integer = year_integer
+                        election_day_text = election.election_day_text.replace('-', '')
+                        election_date_integer = convert_to_int(election_day_text)
+                        if election_date_integer > largest_election_date_integer:
+                            largest_election_date_integer = election_date_integer
+                google_civic_election_id_reviewed_list.append(one_link.google_civic_election_id)
+        return {
+            'largest_year_integer': largest_year_integer,
+            'largest_election_date_integer':  largest_election_date_integer,
+        }
 
     def get_or_create_candidate_to_office_link(
             self,
@@ -2634,6 +2716,45 @@ class CandidateCampaignManager(models.Model):
         except Exception as e:
             status += 'EXCEPTION_UPDATE_OR_CREATE_CANDIDATE_TO_OFFICE_LINK ' + str(e) + ' '
             success = False
+
+        if new_candidate_to_office_link_created:
+            election_manager = ElectionManager()
+            results = election_manager.retrieve_election(google_civic_election_id=google_civic_election_id)
+            position_year = None
+            position_ultimate_election_date = None
+            if results['election_found']:
+                election = results['election']
+                if positive_value_exists(election.election_day_text):
+                    year_string = election.election_day_text[:4]
+                    position_year = convert_to_int(year_string)
+                    election_day_text = election.election_day_text.replace('-', '')
+                    position_ultimate_election_date = convert_to_int(election_day_text)
+            if positive_value_exists(position_year) and positive_value_exists(position_ultimate_election_date):
+                from position.controllers import update_positions_and_candidate_position_year
+                results = update_positions_and_candidate_position_year(
+                    position_year=position_year, candidate_we_vote_id_list=[candidate_we_vote_id])
+                if results['success']:
+                    candidate_year_update_count = results['candidate_year_update_count']
+                    friends_position_year_candidate_update_count = \
+                        results['friends_position_year_candidate_update_count']
+                    public_position_year_candidate_update_count = \
+                        results['public_position_year_candidate_update_count']
+                    status += "[candidate_year_updates: " + str(candidate_year_update_count) + \
+                              ", friends_year_updates: " + str(friends_position_year_candidate_update_count) + \
+                              ", public_year_updates: " + str(public_position_year_candidate_update_count) + "] "
+
+                from position.controllers import update_positions_and_candidate_position_ultimate_election_date
+                results = update_positions_and_candidate_position_ultimate_election_date(
+                    position_ultimate_election_date=position_ultimate_election_date,
+                    candidate_we_vote_id_list=[candidate_we_vote_id])
+                if results['success']:
+                    candidate_ultimate_update_count = results['candidate_ultimate_update_count']
+                    friends_ultimate_candidate_update_count = results['friends_ultimate_candidate_update_count']
+                    public_ultimate_candidate_update_count = results['public_ultimate_candidate_update_count']
+                    status += \
+                        "[candidate_ultimate_updates: " + str(candidate_ultimate_update_count) + \
+                        ", friends_ultimate_updates: " + str(friends_ultimate_candidate_update_count) + \
+                        ", public_ultimate_updates: " + str(public_ultimate_candidate_update_count) + "] "
 
         results = {
             'success':                              success,
@@ -3383,6 +3504,7 @@ class CandidateToOfficeLink(models.Model):
     contest_office_we_vote_id = models.CharField(db_index=True, max_length=255, null=False, unique=False)
     google_civic_election_id = models.PositiveIntegerField(db_index=True, default=0, null=False, blank=False)
     state_code = models.CharField(db_index=True, max_length=2, null=True)
+    position_dates_set = models.BooleanField(default=False)  # Have we finished data update process?
 
     def election(self):
         try:

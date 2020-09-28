@@ -129,7 +129,6 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '  "is_ignoring": boolean (Is this voter ignoring this org/public_figure?),\n' \
                    '  "position_list": list\n' \
                    '   [\n' \
-                   '     "position_we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string (either measure name or candidate name),\n' \
                    '     "ballot_item_id": integer,\n' \
                    '     "ballot_item_image_url_https_large": string,\n' \
@@ -142,9 +141,7 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '     "contest_office_id": integer,\n' \
                    '     "contest_office_we_vote_id": string,\n' \
                    '     "contest_office_name": string (The name of the office if kind_of_ballot_item is CANDIDATE),\n' \
-                   '     "race_office_level": string, ' \
-                   '     "kind_of_ballot_item": string, ' \
-                   '      (One of these: \'CANDIDATE\', \'MEASURE\', \'OFFICE\', \'UNKNOWN\')\n' \
+                   '     "google_civic_election_id": integer,\n' \
                    '     "is_support": boolean,\n' \
                    '     "is_positive_rating": boolean,\n' \
                    '     "is_support_or_positive_rating": boolean,\n' \
@@ -152,13 +149,18 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '     "is_negative_rating": boolean,\n' \
                    '     "is_oppose_or_negative_rating": boolean,\n' \
                    '     "is_information_only": boolean,\n' \
+                   '     "kind_of_ballot_item": string, ' \
+                   '      (One of these: \'CANDIDATE\', \'MEASURE\', \'OFFICE\', \'UNKNOWN\')\n' \
+                   '     "last_updated": string,\n' \
                    '     "more_info_url": string,\n' \
+                   '     "position_we_vote_id": string,\n' \
+                   '     "position_ultimate_election_date": integer,\n' \
+                   '     "position_year": integer, ' \
+                   '     "race_office_level": string, ' \
                    '     "statement_text": string,\n' \
                    '     "statement_html": string,\n' \
-                   '     "google_civic_election_id": integer,\n' \
                    '     "vote_smart_rating": string,\n' \
                    '     "vote_smart_time_span": string,\n' \
-                   '     "last_updated": string,\n' \
                    '   ],\n' \
                    '  "filter_for_voter": boolean (True if only returning positions for voter\'s ballot),\n' \
                    '  "filter_out_voter": boolean (True if returning positions NOT on voter\'s ballot,\n' \

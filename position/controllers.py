@@ -8,15 +8,16 @@ from .models import PositionEntered, PositionForFriends, PositionManager, Positi
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching, \
     figure_out_google_civic_election_id_voter_is_watching_by_voter_id
 from ballot.models import BallotItemListManager, OFFICE, CANDIDATE, MEASURE
-from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
+from candidate.models import CandidateCampaign, CandidateCampaignManager, CandidateCampaignListManager, \
+    CandidateToOfficeLink
 from config.base import get_environment_variable
 from django.db.models import Q
 from django.http import HttpResponse
-from election.models import fetch_election_state
+from election.models import ElectionManager, fetch_election_state
 from exception.models import handle_record_not_saved_exception
 from follow.models import FollowOrganizationManager, FollowOrganizationList
 from friend.models import FriendManager
-from measure.models import ContestMeasureManager, ContestMeasureListManager
+from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasureListManager
 from office.models import ContestOfficeManager, ContestOfficeListManager
 from operator import itemgetter
 from organization.models import Organization, OrganizationManager, PUBLIC_FIGURE, UNKNOWN
@@ -828,6 +829,299 @@ def find_organizations_referenced_in_positions_for_this_voter(voter):
             related_organizations.append(organization)
 
     return related_organizations
+
+
+def update_positions_and_candidate_position_year(position_year=0, candidate_we_vote_id_list=[]):
+    status = ""
+    success = True
+    candidate_year_update_count = 0
+    exception_found = False
+    friends_position_year_candidate_update_count = 0
+    public_position_year_candidate_update_count = 0
+    try:
+        update_query = PositionEntered.objects.all()
+        update_query = update_query.filter(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
+        update_query = update_query.filter(Q(position_year__isnull=True) | Q(position_year=0))
+        public_position_year_candidate_update_count = update_query.update(position_year=position_year)
+
+        update_query = PositionForFriends.objects.all()
+        update_query = update_query.filter(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
+        update_query = update_query.filter(Q(position_year__isnull=True) | Q(position_year=0))
+        friends_position_year_candidate_update_count = update_query.update(position_year=position_year)
+
+        update_query = CandidateCampaign.objects.all()
+        update_query = update_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+        update_query = update_query.filter(Q(candidate_year__isnull=True) | Q(candidate_year__lt=position_year))
+        candidate_year_update_count = update_query.update(candidate_year=position_year)
+    except Exception as e:
+        exception_found = True
+        status += "FAILED_TRYING_TO_UPDATE_POSITIONS_FOR_POSITION_YEAR: " + str(e) + " "
+        success = False
+
+    return {
+        'candidate_year_update_count': candidate_year_update_count,
+        'exception_found': exception_found,
+        'friends_position_year_candidate_update_count': friends_position_year_candidate_update_count,
+        'public_position_year_candidate_update_count': public_position_year_candidate_update_count,
+        'status': status,
+        'success': success,
+    }
+
+
+def update_positions_and_candidate_position_ultimate_election_date(
+        position_ultimate_election_date=0, candidate_we_vote_id_list=[]):
+    status = ""
+    success = True
+    candidate_ultimate_update_count = 0
+    exception_found = False
+    friends_ultimate_candidate_update_count = 0
+    public_ultimate_candidate_update_count = 0
+    try:
+        update_query = PositionEntered.objects.all()
+        update_query = update_query.filter(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
+        update_query = update_query.filter(
+            Q(position_ultimate_election_date__isnull=True) |
+            Q(position_ultimate_election_date__lt=position_ultimate_election_date))
+        public_ultimate_candidate_update_count = update_query \
+            .update(position_ultimate_election_date=position_ultimate_election_date)
+
+        update_query = PositionForFriends.objects.all()
+        update_query = update_query.filter(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
+        update_query = update_query.filter(
+            Q(position_ultimate_election_date__isnull=True) |
+            Q(position_ultimate_election_date__lt=position_ultimate_election_date))
+        friends_ultimate_candidate_update_count = update_query \
+            .update(position_ultimate_election_date=position_ultimate_election_date)
+
+        update_query = CandidateCampaign.objects.all()
+        update_query = update_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+        update_query = update_query.filter(
+            Q(candidate_ultimate_election_date__isnull=True) |
+            Q(candidate_ultimate_election_date__lt=position_ultimate_election_date))
+        candidate_ultimate_update_count = \
+            update_query.update(candidate_ultimate_election_date=position_ultimate_election_date)
+    except Exception as e:
+        exception_found = True
+        status += "FAILED_TRYING_TO_UPDATE_POSITIONS_FOR_POSITION_ULTIMATE_ELECTION_DATE: " + str(e) + " "
+        success = False
+
+    return {
+        'candidate_ultimate_update_count': candidate_ultimate_update_count,
+        'exception_found': exception_found,
+        'friends_ultimate_candidate_update_count': friends_ultimate_candidate_update_count,
+        'public_ultimate_candidate_update_count': public_ultimate_candidate_update_count,
+        'status': status,
+        'success': success,
+    }
+
+
+def generate_position_sorting_dates_for_election(google_civic_election_id=0):
+    candidate_to_office_link_update_count = 0
+    candidate_ultimate_update_count = 0
+    candidate_year_update_count = 0
+    contest_measure_update_count = 0
+    election_manager = ElectionManager()
+    friends_position_year_candidate_update_count = 0
+    friends_position_year_measure_update_count = 0
+    friends_ultimate_candidate_update_count = 0
+    friends_ultimate_measure_update_count = 0
+    measure_ultimate_update_count = 0
+    measure_year_update_count = 0
+    no_exceptions_found = True
+    position_ultimate_election_date = None
+    position_year = None
+    public_position_year_candidate_update_count = 0
+    public_position_year_measure_update_count = 0
+    public_ultimate_candidate_update_count = 0
+    public_ultimate_measure_update_count = 0
+    status = ""
+    success = True
+
+    results = election_manager.retrieve_election(google_civic_election_id=google_civic_election_id)
+    if results['election_found']:
+        election = results['election']
+        if positive_value_exists(election.election_day_text):
+            year_string = election.election_day_text[:4]
+            position_year = convert_to_int(year_string)
+            election_day_text = election.election_day_text.replace('-', '')
+            position_ultimate_election_date = convert_to_int(election_day_text)
+
+    if not positive_value_exists(position_year) and not positive_value_exists(position_ultimate_election_date):
+        status += "MISSING_BOTH_POSITION_YEAR_AND_ULTIMATE_DATE "
+        results = {
+            'status': status,
+            'success': success,
+        }
+        return results
+
+    if not positive_value_exists(position_year):
+        status += "MISSING_POSITION_YEAR_WHICH_IS_STRANGE "
+    if not positive_value_exists(position_ultimate_election_date):
+        status += "MISSING_ULTIMATE_DATE_WHICH_IS_STRANGE "
+
+    loop_number = 0
+    maximum_number_of_loops = 100
+    all_candidates_finished = False
+    candidate_we_vote_id_list = []
+    while loop_number < maximum_number_of_loops and not all_candidates_finished and no_exceptions_found:
+        loop_number += 1
+        try:
+            # Get a list of candidate_we_vote_ids for this election which haven't been updated yet
+            query = CandidateToOfficeLink.objects.all()
+            query = query.filter(google_civic_election_id=google_civic_election_id)
+            query = query.filter(position_dates_set=False)
+            query = query.values_list('candidate_we_vote_id', flat=True).distinct()
+            candidate_we_vote_id_list = query[:500]
+            status += "CANDIDATE_WE_VOTE_ID_LIST_FOUND_FROM_CandidateToOfficeLink "
+
+            if len(candidate_we_vote_id_list) == 0:
+                # Break out of loop
+                all_candidates_finished = True
+                break
+        except Exception as e:
+            no_exceptions_found = False
+            status += "FAILED_TRYING_TO_RETRIEVE-CandidateToOfficeLink: " + str(e) + " "
+            success = False
+
+        if positive_value_exists(position_year):
+            results = update_positions_and_candidate_position_year(
+                position_year=position_year, candidate_we_vote_id_list=candidate_we_vote_id_list)
+            no_exceptions_found = not results['exception_found']
+            status += results['status']
+            if results['success']:
+                candidate_year_update_count += results['candidate_year_update_count']
+                friends_position_year_candidate_update_count += results['friends_position_year_candidate_update_count']
+                public_position_year_candidate_update_count += results['public_position_year_candidate_update_count']
+
+        if positive_value_exists(position_ultimate_election_date):
+            results = update_positions_and_candidate_position_ultimate_election_date(
+                position_ultimate_election_date=position_ultimate_election_date,
+                candidate_we_vote_id_list=candidate_we_vote_id_list)
+            no_exceptions_found = not results['exception_found']
+            status += results['status']
+            if results['success']:
+                candidate_ultimate_update_count += results['candidate_ultimate_update_count']
+                friends_ultimate_candidate_update_count += results['friends_ultimate_candidate_update_count']
+                public_ultimate_candidate_update_count += results['public_ultimate_candidate_update_count']
+
+        try:
+            if positive_value_exists(position_year) and positive_value_exists(position_ultimate_election_date):
+                query = CandidateToOfficeLink.objects.all()
+                query = query.filter(google_civic_election_id=google_civic_election_id)
+                query = query.filter(position_dates_set=False)
+                query = query.filter(candidate_we_vote_id__in=candidate_we_vote_id_list)
+                candidate_to_office_link_update_count += query.update(position_dates_set=True)
+        except Exception as e:
+            no_exceptions_found = False
+            status += "FAILED_TRYING_TO_UPDATE-CandidateToOfficeLink: " + str(e) + " "
+            success = False
+
+    loop_number = 0
+    maximum_number_of_loops = 100
+    all_measures_finished = False
+    measure_we_vote_id_list = []
+    while loop_number < maximum_number_of_loops and not all_measures_finished and no_exceptions_found:
+        loop_number += 1
+        try:
+            # Get a list of candidate_we_vote_ids for this election which haven't been updated yet
+            query = ContestMeasure.objects.all()
+            query = query.filter(google_civic_election_id=google_civic_election_id)
+            query = query.filter(position_dates_set=False)
+            query = query.values_list('we_vote_id', flat=True).distinct()
+            measure_we_vote_id_list = query[:500]
+            status += "MEASURE_WE_VOTE_ID_LIST_FOUND_FROM_ContestMeasure "
+
+            if len(measure_we_vote_id_list) == 0:
+                # Break out of loop
+                all_measures_finished = True
+                break
+        except Exception as e:
+            no_exceptions_found = False
+            status += "FAILED_TRYING_TO_RETRIEVE-ContestMeasure: " + str(e) + " "
+            success = False
+
+        try:
+            if positive_value_exists(position_year):
+                update_query = PositionEntered.objects.all()
+                update_query = update_query.filter(contest_measure_we_vote_id__in=measure_we_vote_id_list)
+                update_query = update_query.filter(Q(position_year__isnull=True) | Q(position_year=0))
+                public_position_year_measure_update_count += update_query.update(position_year=position_year)
+
+                update_query = PositionForFriends.objects.all()
+                update_query = update_query.filter(contest_measure_we_vote_id__in=measure_we_vote_id_list)
+                update_query = update_query.filter(Q(position_year__isnull=True) | Q(position_year=0))
+                friends_position_year_measure_update_count += update_query.update(position_year=position_year)
+
+                update_query = ContestMeasure.objects.all()
+                update_query = update_query.filter(we_vote_id__in=measure_we_vote_id_list)
+                update_query = update_query.filter(Q(measure_year__isnull=True) | Q(measure_year__lt=position_year))
+                measure_year_update_count += update_query.update(measure_year=position_year)
+        except Exception as e:
+            no_exceptions_found = False
+            status += "FAILED_TRYING_TO_UPDATE_MEASURE_POSITIONS_FOR_POSITION_YEAR: " + str(e) + " "
+            success = False
+
+        try:
+            if positive_value_exists(position_ultimate_election_date):
+                update_query = PositionEntered.objects.all()
+                update_query = update_query.filter(contest_measure_we_vote_id__in=measure_we_vote_id_list)
+                update_query = update_query.filter(
+                    Q(position_ultimate_election_date__isnull=True) |
+                    Q(position_ultimate_election_date__lt=position_ultimate_election_date))
+                public_ultimate_measure_update_count += update_query\
+                    .update(position_ultimate_election_date=position_ultimate_election_date)
+
+                update_query = PositionForFriends.objects.all()
+                update_query = update_query.filter(contest_measure_we_vote_id__in=measure_we_vote_id_list)
+                update_query = update_query.filter(
+                    Q(position_ultimate_election_date__isnull=True) |
+                    Q(position_ultimate_election_date__lt=position_ultimate_election_date))
+                friends_ultimate_measure_update_count += update_query\
+                    .update(position_ultimate_election_date=position_ultimate_election_date)
+
+                update_query = ContestMeasure.objects.all()
+                update_query = update_query.filter(we_vote_id__in=measure_we_vote_id_list)
+                update_query = update_query.filter(
+                    Q(measure_ultimate_election_date__isnull=True) |
+                    Q(measure_ultimate_election_date__lt=position_ultimate_election_date))
+                measure_ultimate_update_count += \
+                    update_query.update(measure_ultimate_election_date=position_ultimate_election_date)
+        except Exception as e:
+            no_exceptions_found = False
+            status += "FAILED_TRYING_TO_UPDATE_MEASURE_POSITIONS_FOR_ULTIMATE: " + str(e) + " "
+            success = False
+
+        try:
+            if positive_value_exists(position_year) and positive_value_exists(position_ultimate_election_date):
+                query = ContestMeasure.objects.all()
+                query = query.filter(google_civic_election_id=google_civic_election_id)
+                query = query.filter(position_dates_set=False)
+                query = query.filter(we_vote_id__in=measure_we_vote_id_list)
+                contest_measure_update_count += query.update(position_dates_set=True)
+        except Exception as e:
+            no_exceptions_found = False
+            status += "FAILED_TRYING_TO_UPDATE-ContestMeasure: " + str(e) + " "
+            success = False
+
+    results = {
+        'status': status,
+        'success': success,
+        'candidate_to_office_link_update_count': candidate_to_office_link_update_count,
+        'candidate_ultimate_update_count': candidate_ultimate_update_count,
+        'candidate_year_update_count': candidate_year_update_count,
+        'contest_measure_update_count': contest_measure_update_count,
+        'friends_position_year_candidate_update_count': friends_position_year_candidate_update_count,
+        'friends_position_year_measure_update_count': friends_position_year_measure_update_count,
+        'friends_ultimate_candidate_update_count': friends_ultimate_candidate_update_count,
+        'friends_ultimate_measure_update_count': friends_ultimate_measure_update_count,
+        'measure_ultimate_update_count': measure_ultimate_update_count,
+        'measure_year_update_count': measure_year_update_count,
+        'public_position_year_candidate_update_count': public_position_year_candidate_update_count,
+        'public_position_year_measure_update_count': public_position_year_measure_update_count,
+        'public_ultimate_candidate_update_count': public_ultimate_candidate_update_count,
+        'public_ultimate_measure_update_count': public_ultimate_measure_update_count,
+    }
+    return results
 
 
 def merge_duplicate_positions_for_voter(position_list_for_one_voter):
@@ -1920,15 +2214,9 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
         json_data = {
             'status':                           "POSITION_RETRIEVE_BOTH_IDS_MISSING",
             'success':                          False,
-            'position_we_vote_id':              position_we_vote_id,
             'ballot_item_display_name':         '',
-            'speaker_display_name':             '',
-            'speaker_image_url_https_large':    '',
-            'speaker_image_url_https_medium':   '',
-            'speaker_image_url_https_tiny':     '',
-            'speaker_twitter_handle':           '',
-            'twitter_followers_count':          '',
-            'speaker_type':                     '',
+            'candidate_we_vote_id':     '',
+            'google_civic_election_id': '',
             'is_support':                       False,
             'is_positive_rating':               False,
             'is_support_or_positive_rating':    False,
@@ -1936,20 +2224,28 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
             'is_negative_rating':               False,
             'is_oppose_or_negative_rating':     False,
             'is_information_only':              False,
-            'organization_we_vote_id':  '',
-            'google_civic_election_id': '',
-            'state_code':               '',
-            'voter_id':                 0,
-            'office_we_vote_id':        '',
-            'candidate_we_vote_id':     '',
+            'last_updated':             '',
             'measure_we_vote_id':       '',
+            'more_info_url':            '',
+            'office_we_vote_id':        '',
+            'organization_we_vote_id':          '',
+            'position_we_vote_id':              position_we_vote_id,
+            'position_ultimate_election_date':  '',
+            'position_year':                    '',
+            'speaker_display_name':             '',
+            'speaker_image_url_https_large':    '',
+            'speaker_image_url_https_medium':   '',
+            'speaker_image_url_https_tiny':     '',
+            'speaker_type':                     '',
+            'speaker_twitter_handle':           '',
             'stance':                   '',
+            'state_code':               '',
             'statement_text':           '',
             'statement_html':           '',
-            'more_info_url':            '',
+            'twitter_followers_count':          '',
+            'voter_id':                 0,
             'vote_smart_rating':        '',
             'vote_smart_time_span':     '',
-            'last_updated':             '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1970,6 +2266,8 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
             'success':                          True,
             'status':                           results['status'],
             'position_we_vote_id':              position.we_vote_id,
+            'position_ultimate_election_date':  position.position_ultimate_election_date,
+            'position_year':                    position.position_year,
             'ballot_item_display_name':         position.ballot_item_display_name,
             'speaker_display_name':             position.speaker_display_name,
             'speaker_image_url_https_large':    position.speaker_image_url_https_large
@@ -2008,6 +2306,8 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
             'status':                           results['status'],
             'success':                          results['success'],
             'position_we_vote_id':              we_vote_id,
+            'position_ultimate_election_date':  '',
+            'position_year':                    '',
             'ballot_item_display_name':         '',
             'speaker_display_name':             '',
             'speaker_image_url_https_large':    '',
@@ -2080,6 +2380,8 @@ def position_save_for_api(  # positionSave
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'position_we_vote_id':      position_we_vote_id,
+            'position_ultimate_election_date':  '',
+            'position_year':            '',
             'new_position_created':     False,
             'ballot_item_display_name': ballot_item_display_name,
             'speaker_display_name':     '',
@@ -2115,6 +2417,8 @@ def position_save_for_api(  # positionSave
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'position_we_vote_id':      position_we_vote_id,
+            'position_ultimate_election_date':  '',
+            'position_year':            '',
             'new_position_created':     False,
             'ballot_item_display_name': ballot_item_display_name,
             'speaker_display_name':     '',
@@ -2175,6 +2479,8 @@ def position_save_for_api(  # positionSave
             'status':                   save_results['status'],
             'voter_device_id':          voter_device_id,
             'position_we_vote_id':      position.we_vote_id,
+            'position_ultimate_election_date':  position.position_ultimate_election_date,
+            'position_year':            position.position_year,
             'new_position_created':     save_results['new_position_created'],
             'ballot_item_display_name': position.ballot_item_display_name,
             'speaker_display_name':     position.speaker_display_name,
@@ -2210,6 +2516,8 @@ def position_save_for_api(  # positionSave
             'status':                   save_results['status'],
             'voter_device_id':          voter_device_id,
             'position_we_vote_id':      position_we_vote_id,
+            'position_ultimate_election_date':  '',
+            'position_year':            '',
             'new_position_created':     False,
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
@@ -2439,6 +2747,8 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
         if one_position_success:
             one_position_dict_for_api = {
                 'position_we_vote_id':              one_position.we_vote_id,
+                'position_ultimate_election_date':  one_position.position_ultimate_election_date,
+                'position_year':                    one_position.position_year,
                 'ballot_item_display_name':         one_position.ballot_item_display_name,
                 'ballot_item_image_url_https_large':    one_position.ballot_item_image_url_https_large
                 if positive_value_exists(one_position.ballot_item_image_url_https_large)
@@ -2623,6 +2933,8 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
         if one_position_success:
             one_position_dict_for_api = {
                 'position_we_vote_id':              one_position.we_vote_id,
+                'position_ultimate_election_date':  one_position.position_ultimate_election_date,
+                'position_year':                    one_position.position_year,
                 'ballot_item_display_name':         one_position.ballot_item_display_name,
                 'kind_of_ballot_item':              one_position.get_kind_of_ballot_item(),
                 'ballot_item_id':                   one_position.get_ballot_item_id(),
@@ -3428,6 +3740,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 and positive_value_exists(one_position.candidate_campaign_we_vote_id)
             # REMOVED: or not positive_value_exists(one_position.state_code) \
             if force_update or not positive_value_exists(one_position.ballot_item_display_name) \
+                    or not positive_value_exists(one_position.position_ultimate_election_date) \
                     or not positive_value_exists(one_position.position_year) \
                     or not positive_value_exists(one_position.speaker_image_url_https) \
                     or one_position.speaker_type == UNKNOWN \
@@ -3489,6 +3802,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'vote_smart_rating':                    one_position.vote_smart_rating,
                 'vote_smart_time_span':                 one_position.vote_smart_time_span,
                 'google_civic_election_id':             one_position.google_civic_election_id,
+                'position_ultimate_election_date':      one_position.position_ultimate_election_date,
                 'position_year':                        one_position.position_year,
                 'state_code':                           one_position.state_code,
                 'more_info_url':                        one_position.more_info_url,
@@ -3695,6 +4009,8 @@ def position_list_for_voter_for_api(voter_device_id,
                 voters_dict = results['voters_dict']
             one_position_dict_for_api = {
                 'position_we_vote_id':                  one_position.we_vote_id,
+                'position_ultimate_election_date':      one_position.position_ultimate_election_date,
+                'position_year':                        one_position.position_year,
                 'ballot_item_display_name':             one_position.ballot_item_display_name,  # Candidate name or
                                                                                                 # Measure
                 'ballot_item_image_url_https_large':    one_position.ballot_item_image_url_https_large
@@ -3950,6 +4266,8 @@ def positions_import_from_structured_json(structured_json):
                 position_on_stage.more_info_url = one_position["more_info_url"]
                 position_on_stage.organization_id = organization_id
                 position_on_stage.organization_we_vote_id = one_position["organization_we_vote_id"]
+                position_on_stage.position_ultimate_election_date = one_position["position_ultimate_election_date"]
+                position_on_stage.position_year = one_position["position_year"]
                 position_on_stage.stance = one_position["stance"]
                 position_on_stage.statement_text = one_position["statement_text"]
                 position_on_stage.statement_html = one_position["statement_html"]
@@ -3971,6 +4289,8 @@ def positions_import_from_structured_json(structured_json):
                     more_info_url=one_position["more_info_url"],
                     organization_id=organization_id,
                     organization_we_vote_id=one_position["organization_we_vote_id"],
+                    position_ultimate_election_date=one_position["position_ultimate_election_date"],
+                    position_year=one_position["position_year"],
                     stance=one_position["stance"],
                     statement_html=one_position["statement_html"],
                     statement_text=one_position["statement_text"],
@@ -4051,6 +4371,8 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
             'success':                  False,
             'position_we_vote_id':      '',
+            'position_ultimate_election_date':  '',
+            'position_year':            '',
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
@@ -4089,6 +4411,8 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'status':                   "POSITION_RETRIEVE_MISSING_AT_LEAST_ONE_BALLOT_ITEM_ID",
             'success':                  False,
             'position_we_vote_id':      '',
+            'position_ultimate_election_date':  '',
+            'position_year':            '',
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
@@ -4136,6 +4460,8 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'success':                  True,
             'status':                   results['status'],
             'position_we_vote_id':      position.we_vote_id,
+            'position_ultimate_election_date': position.position_ultimate_election_date,
+            'position_year':            position.position_year,
             'ballot_item_display_name': position.ballot_item_display_name,
             'speaker_display_name':     position.speaker_display_name,
             'speaker_image_url_https':  position.speaker_image_url_https,
@@ -4167,6 +4493,8 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'status':                   results['status'],
             'success':                  True,
             'position_we_vote_id':      '',
+            'position_ultimate_election_date':  '',
+            'position_year':            '',
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',

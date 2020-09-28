@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import positions_import_from_master_server, refresh_cached_position_info_for_election, \
+from .controllers import generate_position_sorting_dates_for_election, positions_import_from_master_server, \
+    refresh_cached_position_info_for_election, \
     refresh_positions_with_candidate_details_for_election, \
     refresh_positions_with_contest_office_details_for_election, \
     refresh_positions_with_contest_measure_details_for_election
@@ -79,6 +80,7 @@ def positions_sync_out_view(request):  # positionsSyncOut
             'vote_smart_rating_name', 'contest_office_we_vote_id', 'race_office_level',
             'candidate_campaign_we_vote_id', 'google_civic_candidate_name',
             'politician_we_vote_id', 'contest_measure_we_vote_id', 'speaker_type', 'stance',
+            'position_ultimate_election_date', 'position_year',
             'statement_text', 'statement_html', 'twitter_followers_count', 'more_info_url', 'from_scraper',
             'organization_certified', 'volunteer_certified', 'voter_entering_position',
             'tweet_source_id', 'twitter_user_entered_position', 'is_private_citizen')
@@ -665,16 +667,55 @@ def refresh_cached_position_info_for_election_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
-    results = refresh_cached_position_info_for_election(google_civic_election_id=google_civic_election_id,
-                                                        state_code=state_code)
-    public_positions_updated = results['public_positions_updated']
-    friends_only_positions_updated = results['friends_only_positions_updated']
+    results = generate_position_sorting_dates_for_election(
+        google_civic_election_id=google_civic_election_id)
+    messages.add_message(
+        request, messages.INFO,
+        'candidate_to_office_link_update_count: {candidate_to_office_link_update_count}, '
+        'candidate_ultimate_update_count: {candidate_ultimate_update_count}, '
+        'candidate_year_update_count: {candidate_year_update_count}, '
+        'contest_measure_update_count: {contest_measure_update_count}, '
+        'friends_position_year_candidate_update_count: {friends_position_year_candidate_update_count}, '
+        'friends_position_year_measure_update_count: {friends_position_year_measure_update_count}, '
+        'friends_ultimate_candidate_update_count: {friends_ultimate_candidate_update_count}, '
+        'friends_ultimate_measure_update_count: {friends_ultimate_measure_update_count}, '
+        'measure_ultimate_update_count: {measure_ultimate_update_count}, '
+        'measure_year_update_count: {measure_year_update_count}, '
+        'public_position_year_candidate_update_count: {public_position_year_candidate_update_count}, '
+        'public_position_year_measure_update_count: {public_position_year_measure_update_count}, '
+        'public_ultimate_candidate_update_count: {public_ultimate_candidate_update_count}, '
+        'public_ultimate_measure_update_count: {public_ultimate_measure_update_count}, '
+        'status: {status}'
+        ''.format(
+            candidate_to_office_link_update_count=results['candidate_to_office_link_update_count'],
+            candidate_ultimate_update_count=results['candidate_ultimate_update_count'],
+            candidate_year_update_count=results['candidate_year_update_count'],
+            contest_measure_update_count=results['contest_measure_update_count'],
+            friends_position_year_candidate_update_count=results['friends_position_year_candidate_update_count'],
+            friends_position_year_measure_update_count=results['friends_position_year_measure_update_count'],
+            friends_ultimate_candidate_update_count=results['friends_ultimate_candidate_update_count'],
+            friends_ultimate_measure_update_count=results['friends_ultimate_measure_update_count'],
+            measure_ultimate_update_count=results['measure_ultimate_update_count'],
+            measure_year_update_count=results['measure_year_update_count'],
+            public_position_year_candidate_update_count=results['public_position_year_candidate_update_count'],
+            public_position_year_measure_update_count=results['public_position_year_measure_update_count'],
+            public_ultimate_candidate_update_count=results['public_ultimate_candidate_update_count'],
+            public_ultimate_measure_update_count=results['public_ultimate_measure_update_count'],
+            status=results['status']))
 
-    messages.add_message(request, messages.INFO,
-                         'public_positions_updated: {public_positions_updated}, '
-                         'friends_only_positions_updated: {friends_only_positions_updated}'
-                         ''.format(public_positions_updated=public_positions_updated,
-                                   friends_only_positions_updated=friends_only_positions_updated))
+    # September 2020: Dale commenting this out temporarily. It needs a testing run through, specifically around
+    #  how we are treating google_civic_election_id for positions about candidates.
+    # results = refresh_cached_position_info_for_election(
+    #     google_civic_election_id=google_civic_election_id,
+    #     state_code=state_code)
+    # public_positions_updated = results['public_positions_updated']
+    # friends_only_positions_updated = results['friends_only_positions_updated']
+    #
+    # messages.add_message(request, messages.INFO,
+    #                      'public_positions_updated: {public_positions_updated}, '
+    #                      'friends_only_positions_updated: {friends_only_positions_updated}'
+    #                      ''.format(public_positions_updated=public_positions_updated,
+    #                                friends_only_positions_updated=friends_only_positions_updated))
     return HttpResponseRedirect(reverse('position:position_list', args=()) +
                                 '?google_civic_election_id=' + str(google_civic_election_id) +
                                 '&state_code=' + str(state_code))
