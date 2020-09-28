@@ -1427,7 +1427,7 @@ class CandidateCampaign(models.Model):
         verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     # The date of the last election this candidate relates to, converted to integer, ex/ 20201103
-    # candidate_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
+    candidate_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this candidate is running for office
     candidate_year = models.PositiveIntegerField(default=None, null=True)
     # State code
@@ -3504,7 +3504,7 @@ class CandidateToOfficeLink(models.Model):
     contest_office_we_vote_id = models.CharField(db_index=True, max_length=255, null=False, unique=False)
     google_civic_election_id = models.PositiveIntegerField(db_index=True, default=0, null=False, blank=False)
     state_code = models.CharField(db_index=True, max_length=2, null=True)
-    # position_dates_set = models.BooleanField(default=False)  # Have we finished data update process?
+    position_dates_set = models.BooleanField(default=False)  # Have we finished data update process?
 
     def election(self):
         try:

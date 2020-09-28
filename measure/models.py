@@ -111,7 +111,7 @@ class ContestMeasure(models.Model):
     # would have id "34" and a scope of stateUpper.
     district_id = models.CharField(verbose_name="google civic district id", max_length=255, null=True, blank=True)
     # The date of the last election this measure relates to, converted to integer, ex/ 20201103
-    # measure_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
+    measure_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this measure is on the ballot
     measure_year = models.PositiveIntegerField(default=None, null=True)
     # State code
@@ -151,7 +151,7 @@ class ContestMeasure(models.Model):
     ballotpedia_no_vote_description = models.TextField(
         verbose_name="what a no vote means", null=True, blank=True, default=None)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
-    # position_dates_set = models.BooleanField(default=False)  # Have we finished data update process?
+    position_dates_set = models.BooleanField(default=False)  # Have we finished data update process?
 
     def get_measure_state(self):
         if positive_value_exists(self.state_code):
