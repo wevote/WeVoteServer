@@ -3504,7 +3504,7 @@ class CandidateToOfficeLink(models.Model):
     contest_office_we_vote_id = models.CharField(db_index=True, max_length=255, null=False, unique=False)
     google_civic_election_id = models.PositiveIntegerField(db_index=True, default=0, null=False, blank=False)
     state_code = models.CharField(db_index=True, max_length=2, null=True)
-    position_dates_set = models.BooleanField(default=False)  # Have we finished data update process?
+    # position_dates_set = models.BooleanField(default=False)  # Have we finished data update process?
 
     def election(self):
         try:
