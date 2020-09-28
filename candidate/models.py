@@ -1427,7 +1427,7 @@ class CandidateCampaign(models.Model):
         verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     # The date of the last election this candidate relates to, converted to integer, ex/ 20201103
-    candidate_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
+    # candidate_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this candidate is running for office
     candidate_year = models.PositiveIntegerField(default=None, null=True)
     # State code
