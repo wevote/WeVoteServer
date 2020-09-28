@@ -46,6 +46,8 @@ def positions_sync_out_doc_template_values(url_root):
                    '  "organization_certified": string,\n' \
                    '  "organization_we_vote_id": string,\n' \
                    '  "politician_we_vote_id": string,\n' \
+                   '  "position_ultimate_election_date": integer,\n' \
+                   '  "position_year": integer,\n' \
                    '  "public_figure_we_vote_id": string,\n' \
                    '  "speaker_display_name": string,\n' \
                    '  "speaker_image_url_https": string,\n' \

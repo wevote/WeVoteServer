@@ -76,7 +76,6 @@ def position_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \
                    '  "ballot_item_display_name": string (either measure name or candidate name),\n' \
-                   '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
                    '  "speaker_display_name": string,\n' \
                    '  "speaker_image_url_https_large": string,\n' \
                    '  "speaker_image_url_https_medium": string,\n' \
@@ -93,6 +92,9 @@ def position_retrieve_doc_template_values(url_root):
                    '  "is_information_only": boolean,\n' \
                    '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
                    '  "google_civic_election_id": integer,\n' \
+                   '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
+                   '  "position_ultimate_election_date": integer,\n' \
+                   '  "position_year": integer,\n' \
                    '  "voter_id": integer,\n' \
                    '  "vote_smart_rating": string,\n' \
                    '  "vote_smart_time_span": string,\n' \

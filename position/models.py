@@ -156,6 +156,8 @@ class PositionEntered(models.Model):
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=255, null=True, blank=False, default=0, db_index=True)
+    # The date of the last election this position relates to, converted to integer, ex/ 20201103
+    position_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this endorsement was made
     position_year = models.PositiveIntegerField(default=None, null=True)
     state_code = models.CharField(verbose_name="us state of the ballot item position is for",
@@ -568,6 +570,8 @@ class PositionForFriends(models.Model):
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True, db_index=True)
+    # The date of the last election this position relates to, converted to integer, ex/ 20201103
+    position_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this endorsement was made
     position_year = models.PositiveIntegerField(default=None, null=True)
     state_code = models.CharField(verbose_name="us state of the ballot item position is for", max_length=2,
@@ -5620,7 +5624,7 @@ class PositionManager(models.Model):
         return self.switch_position_visibility(existing_position, switch_to_public_position)
 
     def switch_position_visibility(self, existing_position, switch_to_public_position):
-
+        status = ""
         # We assume one does NOT exist in the other table
         position_deleted = False
         if switch_to_public_position:
@@ -5674,6 +5678,7 @@ class PositionManager(models.Model):
                 voter_we_vote_id=existing_position.voter_we_vote_id,
                 voter_id=existing_position.voter_id,
                 google_civic_election_id=existing_position.google_civic_election_id,
+                position_ultimate_election_date=existing_position.position_ultimate_election_date,
                 position_year=existing_position.position_year,
                 state_code=existing_position.state_code,
                 google_civic_candidate_name=existing_position.google_civic_candidate_name,
@@ -5711,7 +5716,7 @@ class PositionManager(models.Model):
                 twitter_followers_count=existing_position.twitter_followers_count,
                 speaker_type=existing_position.speaker_type,
             )
-            status = 'SWITCH_POSITION_VISIBILITY_SUCCESS'
+            status += 'SWITCH_POSITION_VISIBILITY_SUCCESS '
             position_copied = True
             success = True
             if switch_to_public_position:
@@ -5731,7 +5736,7 @@ class PositionManager(models.Model):
             else:
                 is_public_position = False
         except Exception as e:
-            status = 'SWITCH_POSITION_VISIBILITY_FAILED'
+            status += 'SWITCH_POSITION_VISIBILITY_FAILED: ' + str(e) + " "
             position_copied = False
             success = False
             if switch_to_public_position:
@@ -5745,7 +5750,7 @@ class PositionManager(models.Model):
                 existing_position.delete()
                 position_deleted = True
             except Exception as e:
-                status = 'SWITCH_POSITION_VISIBILITY_FAILED-UNABLE_TO_DELETE'
+                status += 'SWITCH_POSITION_VISIBILITY_FAILED-UNABLE_TO_DELETE: ' + str(e) + " "
                 position_deleted = False
                 success = False
 
@@ -5863,6 +5868,7 @@ class PositionManager(models.Model):
 
     def merge_position_visibility(self, position_to_keep, dead_position):
         # We want to see if dead_position has any values to save before we delete it.
+        status = ""
         data_transferred = False
         if not position_to_keep.stance == SUPPORT and not position_to_keep.stance == OPPOSE:
             if dead_position.stance == SUPPORT or dead_position.stance == OPPOSE:
@@ -5889,9 +5895,9 @@ class PositionManager(models.Model):
                 data_transferred = True
 
         if data_transferred:
-            status = "MERGE_POSITION_VISIBILITY-DATA_TRANSFERRED"
+            status += "MERGE_POSITION_VISIBILITY-DATA_TRANSFERRED "
         else:
-            status = "MERGE_POSITION_VISIBILITY-DATA_NOT_TRANSFERRED"
+            status += "MERGE_POSITION_VISIBILITY-DATA_NOT_TRANSFERRED "
 
         # Now delete the dead_position
         try:
@@ -5899,7 +5905,7 @@ class PositionManager(models.Model):
             position_deleted = True
             success = True
         except Exception as e:
-            status = 'SWITCH_POSITION_VISIBILITY_FAILED-UNABLE_TO_DELETE'
+            status += 'SWITCH_POSITION_VISIBILITY_FAILED-UNABLE_TO_DELETE: ' + str(e) + " "
             position_deleted = False
             success = False
 
@@ -6060,10 +6066,14 @@ class PositionManager(models.Model):
         position_we_vote_id = ''
         is_signed_in = False
         google_civic_election_id = 0
+        candidate_campaign = None
         candidate_campaign_we_vote_id = ""
+        contest_measure = None
         contest_measure_we_vote_id = ""
-        voter_manager = VoterManager()
+        candidate_campaign_manager = CandidateCampaignManager()
+        contest_measure_manager = ContestMeasureManager()
         position_list_manager = PositionListManager()
+        voter_manager = VoterManager()
 
         # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
         # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
@@ -6111,33 +6121,32 @@ class PositionManager(models.Model):
                 # print_to_log(logger=logger, exception_message_optional=message)
                 if voter_position_on_stage.candidate_campaign_id:
                     # Heal the data, and fill in the candidate_campaign_we_vote_id
-                    candidate_campaign_manager = CandidateCampaignManager()
                     results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(
-                        candidate_campaign_id)
+                        candidate_campaign_id, read_only=True)
                     if results['candidate_campaign_found']:
                         candidate_campaign = results['candidate_campaign']
                         candidate_campaign_we_vote_id = candidate_campaign.we_vote_id
                         voter_position_on_stage.candidate_campaign_we_vote_id = candidate_campaign.we_vote_id
+                        voter_position_on_stage.politician_id = candidate_campaign.politician_id
+                        voter_position_on_stage.politician_we_vote_id = candidate_campaign.politician_we_vote_id
+                        voter_position_on_stage.state_code = candidate_campaign.state_code
+                        voter_position_on_stage.ballot_item_display_name = candidate_campaign.candidate_name
+                        # Deprecate direct storing of contest_office
                         voter_position_on_stage.contest_office_id = candidate_campaign.contest_office_id
                         voter_position_on_stage.contest_office_we_vote_id = candidate_campaign.contest_office_we_vote_id
                         google_civic_election_id = candidate_campaign.google_civic_election_id
-                        voter_position_on_stage.politician_id = candidate_campaign.politician_id
-                        voter_position_on_stage.politician_we_vote_id = candidate_campaign.politician_we_vote_id
+                        # Deprecate google_civic_election_id
                         voter_position_on_stage.google_civic_election_id = candidate_campaign.google_civic_election_id
-                        voter_position_on_stage.state_code = candidate_campaign.state_code
-                        voter_position_on_stage.ballot_item_display_name = candidate_campaign.candidate_name
-                        if positive_value_exists(candidate_campaign.candidate_year):
-                            voter_position_on_stage.position_year = candidate_campaign.candidate_year
-                        else:
-                            candidate_year = \
-                                candidate_campaign_manager.generate_candidate_year(candidate_campaign.we_vote_id)
-                            if positive_value_exists(candidate_year):
-                                try:
-                                    candidate_campaign.candidate_year = candidate_year
-                                    candidate_campaign.save()
-                                except Exception as e:
-                                    status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
-                                voter_position_on_stage.position_year = candidate_year
+
+                        # FORMER generate_candidate_position_sorting_dates CANDIDATE
+                        if not positive_value_exists(voter_position_on_stage.position_year) \
+                                or not positive_value_exists(voter_position_on_stage.position_ultimate_election_date):
+                            date_results = candidate_campaign_manager.add_candidate_position_sorting_dates_if_needed(
+                                position_object=voter_position_on_stage,
+                                candidate_campaign=candidate_campaign)
+                            if date_results['position_object_updated']:
+                                voter_position_on_stage = date_results['position_object']
+                            status += date_results['status']
                     else:
                         candidate_campaign_we_vote_id = voter_position_on_stage.candidate_campaign_we_vote_id
                         google_civic_election_id = voter_position_on_stage.google_civic_election_id
@@ -6149,7 +6158,6 @@ class PositionManager(models.Model):
                 if voter_position_on_stage.contest_measure_id:
                     if not positive_value_exists(voter_position_on_stage.contest_measure_we_vote_id):
                         # Heal the data, and fill in the contest_measure_we_vote_id
-                        contest_measure_manager = ContestMeasureManager()
                         results = contest_measure_manager.retrieve_contest_measure_from_id(contest_measure_id)
                         if results['contest_measure_found']:
                             contest_measure = results['contest_measure']
@@ -6159,20 +6167,16 @@ class PositionManager(models.Model):
                             voter_position_on_stage.google_civic_election_id = contest_measure.google_civic_election_id
                             voter_position_on_stage.state_code = contest_measure.state_code
                             voter_position_on_stage.ballot_item_display_name = contest_measure.measure_title
-                            if not positive_value_exists(voter_position_on_stage.position_year):
-                                if positive_value_exists(contest_measure.measure_year):
-                                    voter_position_on_stage.position_year = contest_measure.measure_year
-                                else:
-                                    measure_year = contest_measure_manager.generate_measure_year(
-                                        contest_measure.google_civic_election_id)
-                                    if positive_value_exists(measure_year):
-                                        try:
-                                            contest_measure.measure_year = measure_year
-                                            contest_measure.save()
-                                        except Exception as e:
-                                            status += "FAILED_TO_SAVE_MEASURE: " + str(e) + " "
-                                        voter_position_on_stage.position_year = measure_year
 
+                            # FORMER generate_candidate_position_sorting_dates MEASURE
+                            if not positive_value_exists(voter_position_on_stage.position_year) or not \
+                                    positive_value_exists(voter_position_on_stage.position_ultimate_election_date):
+                                date_results = contest_measure_manager.add_measure_position_sorting_dates_if_needed(
+                                    position_object=voter_position_on_stage,
+                                    contest_measure=contest_measure)
+                                if date_results['position_object_updated']:
+                                    voter_position_on_stage = date_results['position_object']
+                                status += date_results['status']
                     else:
                         contest_measure_we_vote_id = voter_position_on_stage.contest_measure_we_vote_id
                         google_civic_election_id = voter_position_on_stage.google_civic_election_id
@@ -6212,9 +6216,7 @@ class PositionManager(models.Model):
                 politician_we_vote_id = ''
                 state_code = ''
                 ballot_item_display_name = ""
-                position_year = None
                 if candidate_campaign_id:
-                    candidate_campaign_manager = CandidateCampaignManager()
                     results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(
                         candidate_campaign_id)
                     if results['candidate_campaign_found']:
@@ -6227,22 +6229,9 @@ class PositionManager(models.Model):
                         politician_we_vote_id = candidate_campaign.politician_we_vote_id
                         state_code = candidate_campaign.state_code
                         ballot_item_display_name = candidate_campaign.candidate_name
-                        if positive_value_exists(candidate_campaign.candidate_year):
-                            position_year = candidate_campaign.candidate_year
-                        else:
-                            candidate_year = \
-                                candidate_campaign_manager.generate_candidate_year(candidate_campaign.we_vote_id)
-                            if positive_value_exists(candidate_year):
-                                try:
-                                    candidate_campaign.candidate_year = candidate_year
-                                    candidate_campaign.save()
-                                except Exception as e:
-                                    status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
-                                position_year = candidate_year
 
                 contest_measure_we_vote_id = ""
                 if contest_measure_id:
-                    contest_measure_manager = ContestMeasureManager()
                     results = contest_measure_manager.retrieve_contest_measure_from_id(contest_measure_id)
                     if results['contest_measure_found']:
                         contest_measure = results['contest_measure']
@@ -6250,19 +6239,6 @@ class PositionManager(models.Model):
                         google_civic_election_id = contest_measure.google_civic_election_id
                         state_code = contest_measure.state_code
                         ballot_item_display_name = contest_measure.measure_title
-                        if positive_value_exists(contest_measure.measure_year):
-                            position_year = contest_measure.measure_year
-                        else:
-                            measure_year = \
-                                contest_measure_manager.generate_measure_year(
-                                    contest_measure.google_civic_election_id)
-                            if positive_value_exists(measure_year):
-                                try:
-                                    contest_measure.measure_year = measure_year
-                                    contest_measure.save()
-                                except Exception as e:
-                                    status += "FAILED_TO_SAVE_MEASURE: " + str(e) + " "
-                                position_year = measure_year
 
                 if is_public_position:
                     voter_position_on_stage = PositionEntered(
@@ -6284,7 +6260,6 @@ class PositionManager(models.Model):
                         politician_we_vote_id=politician_we_vote_id,
                         ballot_item_display_name=ballot_item_display_name,
                         speaker_display_name=speaker_display_name,
-                        position_year=position_year,
                     )
                 else:
                     voter_position_on_stage = PositionForFriends(
@@ -6306,8 +6281,22 @@ class PositionManager(models.Model):
                         politician_we_vote_id=politician_we_vote_id,
                         ballot_item_display_name=ballot_item_display_name,
                         speaker_display_name=speaker_display_name,
-                        position_year=position_year,
                     )
+
+                if positive_value_exists(candidate_campaign_we_vote_id):
+                    date_results = candidate_campaign_manager.add_candidate_position_sorting_dates_if_needed(
+                        position_object=voter_position_on_stage,
+                        candidate_campaign=candidate_campaign)
+                    if date_results['position_object_updated']:
+                        voter_position_on_stage = date_results['position_object']
+                    status += date_results['status']
+                elif positive_value_exists(contest_measure_we_vote_id):
+                    date_results = contest_measure_manager.add_measure_position_sorting_dates_if_needed(
+                        position_object=voter_position_on_stage,
+                        contest_measure=contest_measure)
+                    if date_results['position_object_updated']:
+                        voter_position_on_stage = date_results['position_object']
+                    status += date_results['status']
 
                 try:
                     # Heal the data
@@ -6478,6 +6467,10 @@ class PositionManager(models.Model):
         is_public_position = False
         problem_with_duplicate_in_same_table = False
         status = ""
+        candidate_campaign = None
+        candidate_campaign_manager = CandidateCampaignManager()
+        contest_measure = None
+        contest_measure_manager = ContestMeasureManager()
         position_list_manager = PositionListManager()
 
         # Set this in case of error
@@ -6604,7 +6597,6 @@ class PositionManager(models.Model):
                 voter_position_on_stage.statement_text = statement_text
 
                 if positive_value_exists(voter_position_on_stage.candidate_campaign_we_vote_id):
-                    candidate_campaign_manager = CandidateCampaignManager()
                     results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
                         voter_position_on_stage.candidate_campaign_we_vote_id)
                     if results['candidate_campaign_found']:
@@ -6619,21 +6611,17 @@ class PositionManager(models.Model):
                         voter_position_on_stage.google_civic_election_id = candidate_campaign.google_civic_election_id
                         voter_position_on_stage.state_code = candidate_campaign.state_code
                         voter_position_on_stage.ballot_item_display_name = candidate_campaign.candidate_name
-                        if positive_value_exists(candidate_campaign.candidate_year):
-                            voter_position_on_stage.position_year = candidate_campaign.candidate_year
-                        else:
-                            candidate_year = \
-                                candidate_campaign_manager.generate_candidate_year(candidate_campaign.we_vote_id)
-                            if positive_value_exists(candidate_year):
-                                try:
-                                    candidate_campaign.candidate_year = candidate_year
-                                    candidate_campaign.save()
-                                except Exception as e:
-                                    status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
-                                voter_position_on_stage.position_year = candidate_year
 
+                        # FORMER generate_candidate_position_sorting_dates CANDIDATE
+                        if not positive_value_exists(voter_position_on_stage.position_year) \
+                                or not positive_value_exists(voter_position_on_stage.position_ultimate_election_date):
+                            date_results = candidate_campaign_manager.add_candidate_position_sorting_dates_if_needed(
+                                position_object=voter_position_on_stage,
+                                candidate_campaign=candidate_campaign)
+                            if date_results['position_object_updated']:
+                                voter_position_on_stage = date_results['position_object']
+                            status += date_results['status']
                 elif positive_value_exists(voter_position_on_stage.contest_measure_we_vote_id):
-                    contest_measure_manager = ContestMeasureManager()
                     results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
                         voter_position_on_stage.contest_measure_we_vote_id)
                     if results['contest_measure_found']:
@@ -6642,21 +6630,17 @@ class PositionManager(models.Model):
                         if not positive_value_exists(voter_position_on_stage.contest_measure_id):
                             # Heal the data, and fill in the contest_measure_id
                             voter_position_on_stage.contest_measure_id = contest_measure.id
-                        voter_position_on_stage.state_code = contest_measure.state_code
-                        if not positive_value_exists(voter_position_on_stage.position_year):
-                            if positive_value_exists(contest_measure.measure_year):
-                                voter_position_on_stage.position_year = contest_measure.measure_year
-                            else:
-                                measure_year = \
-                                    contest_measure_manager.generate_measure_year(
-                                        contest_measure.google_civic_election_id)
-                                if positive_value_exists(measure_year):
-                                    try:
-                                        contest_measure.measure_year = measure_year
-                                        contest_measure.save()
-                                    except Exception as e:
-                                        status += "FAILED_TO_SAVE_MEASURE: " + str(e) + " "
-                                    voter_position_on_stage.position_year = measure_year
+                            voter_position_on_stage.state_code = contest_measure.state_code
+
+                            # FORMER generate_candidate_position_sorting_dates MEASURE
+                            if not positive_value_exists(voter_position_on_stage.position_year) or not \
+                                    positive_value_exists(voter_position_on_stage.position_ultimate_election_date):
+                                date_results = contest_measure_manager.add_measure_position_sorting_dates_if_needed(
+                                    position_object=voter_position_on_stage,
+                                    contest_measure=contest_measure)
+                                if date_results['position_object_updated']:
+                                    voter_position_on_stage = date_results['position_object']
+                                status += date_results['status']
                 # elif positive_value_exists(voter_position_on_stage.contest_office_we_vote_id):
                 #     contest_office_manager = ContestOfficeManager()
                 #     results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
@@ -6691,13 +6675,11 @@ class PositionManager(models.Model):
                 google_civic_election_id = 0
                 politician_id = 0
                 politician_we_vote_id = ''
-                position_year = None
                 state_code = ''
                 speaker_display_name = ""
                 speaker_image_url_https_medium = '',
                 speaker_image_url_https_tiny = '',
                 if candidate_we_vote_id:
-                    candidate_campaign_manager = CandidateCampaignManager()
                     results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
                         candidate_we_vote_id)
                     if results['candidate_campaign_found']:
@@ -6710,22 +6692,8 @@ class PositionManager(models.Model):
                         politician_we_vote_id = candidate_campaign.politician_we_vote_id
                         state_code = candidate_campaign.state_code
                         ballot_item_display_name = candidate_campaign.candidate_name
-                        if positive_value_exists(candidate_campaign.candidate_year):
-                            position_year = candidate_campaign.candidate_year
-                        else:
-                            candidate_year = \
-                                candidate_campaign_manager.generate_candidate_year(candidate_campaign.we_vote_id)
-                            if positive_value_exists(candidate_year):
-                                try:
-                                    candidate_campaign.candidate_year = candidate_year
-                                    candidate_campaign.save()
-                                except Exception as e:
-                                    status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
-                                position_year = candidate_year
-
                 contest_measure_id = None
                 if measure_we_vote_id:
-                    contest_measure_manager = ContestMeasureManager()
                     results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(measure_we_vote_id)
                     if results['contest_measure_found']:
                         contest_measure = results['contest_measure']
@@ -6733,19 +6701,6 @@ class PositionManager(models.Model):
                         google_civic_election_id = contest_measure.google_civic_election_id
                         state_code = contest_measure.state_code
                         ballot_item_display_name = contest_measure.measure_title
-                        if positive_value_exists(contest_measure.measure_year):
-                            position_year = contest_measure.measure_year
-                        else:
-                            measure_year = \
-                                contest_measure_manager.generate_measure_year(
-                                    contest_measure.google_civic_election_id)
-                            if positive_value_exists(measure_year):
-                                try:
-                                    contest_measure.measure_year = measure_year
-                                    contest_measure.save()
-                                except Exception as e:
-                                    status += "FAILED_TO_SAVE_MEASURE: " + str(e) + " "
-                                position_year = measure_year
 
                 # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
                 # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
@@ -6788,13 +6743,33 @@ class PositionManager(models.Model):
                     organization_we_vote_id=organization_we_vote_id,
                     politician_id=politician_id,
                     politician_we_vote_id=politician_we_vote_id,
-                    position_year=position_year,
                     speaker_display_name=speaker_display_name,
                     speaker_image_url_https_medium=speaker_image_url_https_medium,
                     speaker_image_url_https_tiny=speaker_image_url_https_tiny,
                     stance=NO_STANCE,
                     statement_text=statement_text,
                 )
+
+                if positive_value_exists(candidate_we_vote_id):
+                    # FORMER generate_candidate_position_sorting_dates CANDIDATE
+                    if not positive_value_exists(voter_position_on_stage.position_year) \
+                            or not positive_value_exists(voter_position_on_stage.position_ultimate_election_date):
+                        date_results = candidate_campaign_manager.add_candidate_position_sorting_dates_if_needed(
+                            position_object=voter_position_on_stage,
+                            candidate_campaign=candidate_campaign)
+                        if date_results['position_object_updated']:
+                            voter_position_on_stage = date_results['position_object']
+                        status += date_results['status']
+                elif positive_value_exists(measure_we_vote_id):
+                    # FORMER generate_candidate_position_sorting_dates MEASURE
+                    if not positive_value_exists(voter_position_on_stage.position_year) or not \
+                            positive_value_exists(voter_position_on_stage.position_ultimate_election_date):
+                        date_results = contest_measure_manager.add_measure_position_sorting_dates_if_needed(
+                            position_object=voter_position_on_stage,
+                            contest_measure=contest_measure)
+                        if date_results['position_object_updated']:
+                            voter_position_on_stage = date_results['position_object']
+                        status += date_results['status']
 
                 voter_position_on_stage.save()
                 position_list_manager.update_position_network_scores_for_one_position(voter_position_on_stage)
@@ -6990,6 +6965,7 @@ class PositionManager(models.Model):
         :param candidate_campaign:
         :return:
         """
+        status = ""
         values_changed = False
         if positive_value_exists(candidate_campaign.candidate_photo_url()) and \
                 position_object.ballot_item_image_url_https != candidate_campaign.candidate_photo_url():
@@ -7016,14 +6992,14 @@ class PositionManager(models.Model):
             try:
                 position_object.save()
                 success = True
-                status = "POSITION_OBJECT_SAVED"
+                status += "POSITION_OBJECT_SAVED "
             except Exception as e:
                 success = False
-                status = 'POSITION_OBJECT_COULD_NOT_BE_SAVED'
+                status += 'POSITION_OBJECT_COULD_NOT_BE_SAVED '
 
         else:
             success = True
-            status = "NO_CHANGES_SAVED_TO_POSITION_IMAGE_URLS"
+            status += "NO_CHANGES_SAVED_TO_POSITION_IMAGE_URLS "
         results = {
             'success':  success,
             'status':   status,
@@ -7038,6 +7014,7 @@ class PositionManager(models.Model):
         :param organization:
         :return:
         """
+        status = ""
         values_changed = False
         if positive_value_exists(organization.organization_photo_url()) and \
                 position_object.speaker_image_url_https != organization.organization_photo_url():
@@ -7059,13 +7036,13 @@ class PositionManager(models.Model):
             try:
                 position_object.save()
                 success = True
-                status = "SAVED_POSITION_IMAGE_URLS_FROM_ORGANIZATION"
+                status += "SAVED_POSITION_IMAGE_URLS_FROM_ORGANIZATION "
             except Exception as e:
                 success = False
-                status = 'NOT_SAVED_POSITION_IMAGE_URLS_FROM_ORGANIZATION'
+                status += 'NOT_SAVED_POSITION_IMAGE_URLS_FROM_ORGANIZATION '
         else:
             success = True
-            status = "NO_CHANGES_SAVED_TO_POSITION_IMAGE_URLS"
+            status += "NO_CHANGES_SAVED_TO_POSITION_IMAGE_URLS "
         results = {
             'success':  success,
             'status':   status,
@@ -7080,6 +7057,7 @@ class PositionManager(models.Model):
         :param voter:
         :return:
         """
+        status = ""
         values_changed = False
         if positive_value_exists(voter.voter_photo_url()) and \
                 position_object.speaker_image_url_https != voter.voter_photo_url():
@@ -7101,13 +7079,13 @@ class PositionManager(models.Model):
             try:
                 position_object.save()
                 success = True
-                status = "SAVED_POSITION_IMAGE_URLS_FROM_VOTER"
+                status += "SAVED_POSITION_IMAGE_URLS_FROM_VOTER "
             except Exception as e:
                 success = False
-                status = 'NOT_SAVED_POSITION_IMAGE_URLS_FROM_VOTER'
+                status += 'NOT_SAVED_POSITION_IMAGE_URLS_FROM_VOTER '
         else:
             success = True
-            status = "NO_CHANGES_SAVED_TO_POSITION_IMAGE_URLS"
+            status += "NO_CHANGES_SAVED_TO_POSITION_IMAGE_URLS "
         results = {
             'success':  success,
             'status':   status,
@@ -7124,6 +7102,7 @@ class PositionManager(models.Model):
         :param speaker_image_url_https:
         :return:
         """
+        status = ""
         position_change = False
         if positive_value_exists(ballot_item_image_url_https):
             position_object.ballot_item_image_url_https = ballot_item_image_url_https
@@ -7141,10 +7120,10 @@ class PositionManager(models.Model):
         if position_change:
             position_object.save()
             success = True
-            status = "RESET_POSITION_IMAGE_DETAILS"
+            status += "RESET_POSITION_IMAGE_DETAILS "
         else:
             success = False
-            status = "NO_CHANGES_RESET_TO_POSITION_IMAGE_DETAILS"
+            status += "NO_CHANGES_RESET_TO_POSITION_IMAGE_DETAILS "
         results = {
             'success':  success,
             'status':   status,
@@ -7405,6 +7384,10 @@ class PositionManager(models.Model):
             position_on_stage = PositionForFriends()
         status = "ENTERING_UPDATE_OR_CREATE_POSITION "
 
+        candidate_campaign = None
+        candidate_campaign_manager = CandidateCampaignManager()
+        contest_measure = None
+        contest_measure_manager = ContestMeasureManager()
         position_manager = PositionManager()
         position_list_manager = PositionListManager()
 
@@ -7460,44 +7443,38 @@ class PositionManager(models.Model):
                 if candidate_we_vote_id:
                     position_on_stage.candidate_campaign_we_vote_id = candidate_we_vote_id
                     # Lookup candidate_campaign_id based on candidate_campaign_we_vote_id and update
-                    candidate_campaign_manager = CandidateCampaignManager()
                     candidate_results = \
                         candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
                     if candidate_results['candidate_campaign_found']:
                         candidate = candidate_results['candidate_campaign']
                         position_on_stage.candidate_campaign_id = candidate.id
-                        if positive_value_exists(candidate.candidate_year):
-                            position_on_stage.position_year = candidate.candidate_year
-                        else:
-                            candidate_year = \
-                                candidate_campaign_manager.generate_candidate_year(candidate.we_vote_id)
-                            if positive_value_exists(candidate_year):
-                                try:
-                                    candidate.candidate_year = candidate_year
-                                    candidate.save()
-                                except Exception as e:
-                                    status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
-                                position_on_stage.position_year = candidate_year
+
+                        # FORMER generate_candidate_position_sorting_dates CANDIDATE
+                        if not positive_value_exists(position_on_stage.position_year) \
+                                or not positive_value_exists(position_on_stage.position_ultimate_election_date):
+                            date_results = candidate_campaign_manager.add_candidate_position_sorting_dates_if_needed(
+                                position_object=position_on_stage,
+                                candidate_campaign=candidate)
+                            if date_results['position_object_updated']:
+                                position_on_stage = date_results['position_object']
+                            status += date_results['status']
                 if measure_we_vote_id:
                     position_on_stage.contest_measure_we_vote_id = measure_we_vote_id
                     # Lookup contest_measure_id based on contest_measure_we_vote_id and update
-                    contest_measure_manager = ContestMeasureManager()
                     results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(measure_we_vote_id)
                     if results['contest_measure_found']:
                         contest_measure = results['contest_measure']
                         position_on_stage.contest_measure_id = contest_measure.id
-                        if positive_value_exists(contest_measure.measure_year):
-                            position_on_stage.position_year = contest_measure.measure_year
-                        else:
-                            measure_year = \
-                                contest_measure_manager.generate_measure_year(contest_measure.google_civic_election_id)
-                            if positive_value_exists(measure_year):
-                                try:
-                                    contest_measure.measure_year = measure_year
-                                    contest_measure.save()
-                                except Exception as e:
-                                    status += "FAILED_TO_SAVE_MEASURE: " + str(e) + " "
-                                position_on_stage.position_year = measure_year
+
+                        # FORMER generate_candidate_position_sorting_dates MEASURE
+                        if not positive_value_exists(position_on_stage.position_year) or not \
+                                positive_value_exists(position_on_stage.position_ultimate_election_date):
+                            date_results = contest_measure_manager.add_measure_position_sorting_dates_if_needed(
+                                position_object=position_on_stage,
+                                contest_measure=contest_measure)
+                            if date_results['position_object_updated']:
+                                position_on_stage = date_results['position_object']
+                            status += date_results['status']
                 # if positive_value_exists(stance):
                 if stance:
                     # TODO Verify that "stance" contains a legal value
@@ -7526,17 +7503,17 @@ class PositionManager(models.Model):
                     position_list_manager.update_position_network_scores_for_one_position(position_on_stage)
                     success = True
                     if found_with_we_vote_id:
-                        status = "POSITION_SAVED_WITH_POSITION_WE_VOTE_ID"
+                        status += "POSITION_SAVED_WITH_POSITION_WE_VOTE_ID"
                     else:
-                        status = "POSITION_CHANGES_SAVED"
+                        status += "POSITION_CHANGES_SAVED"
                 else:
                     success = True
                     if found_with_we_vote_id:
-                        status = "NO_POSITION_CHANGES_SAVED_WITH_POSITION_WE_VOTE_ID"
+                        status += "NO_POSITION_CHANGES_SAVED_WITH_POSITION_WE_VOTE_ID"
                     else:
-                        status = "NO_POSITION_CHANGES_SAVED"
+                        status += "NO_POSITION_CHANGES_SAVED"
             else:
-                status = "POSITION_COULD_NOT_BE_FOUND_WITH_POSITION_ID_OR_WE_VOTE_ID"
+                status += "POSITION_COULD_NOT_BE_FOUND_WITH_POSITION_ID_OR_WE_VOTE_ID"
         # else for this: if positive_value_exists(position_we_vote_id):
         else:
             # We also want to retrieve a position with the following sets of variables:
@@ -7563,11 +7540,11 @@ class PositionManager(models.Model):
 
             if number_of_unique_ballot_item_identifiers > 1:
                 too_many_unique_ballot_item_variables_received = True
-                status = "FAILED-TOO_MANY_UNIQUE_BALLOT_ITEM_VARIABLES "
+                status += "FAILED-TOO_MANY_UNIQUE_BALLOT_ITEM_VARIABLES "
                 success = False
             elif number_of_unique_ballot_item_identifiers == 0:
                 no_unique_ballot_item_variables_received = True
-                status = "FAILED-NO_UNIQUE_BALLOT_ITEM_VARIABLES_RECEIVED "
+                status += "FAILED-NO_UNIQUE_BALLOT_ITEM_VARIABLES_RECEIVED "
                 success = False
 
             # Make sure that too many "actor" identifier variables weren't passed in
@@ -7581,11 +7558,11 @@ class PositionManager(models.Model):
 
             if number_of_unique_actor_identifiers > 1:
                 too_many_unique_actor_variables_received = True
-                status = "FAILED-TOO_MANY_UNIQUE_ACTOR_VARIABLES "
+                status += "FAILED-TOO_MANY_UNIQUE_ACTOR_VARIABLES "
                 success = False
             elif number_of_unique_actor_identifiers == 0:
                 no_unique_actor_variables_received = True
-                status = "FAILED-NO_UNIQUE_ACTOR_VARIABLES_RECEIVED "
+                status += "FAILED-NO_UNIQUE_ACTOR_VARIABLES_RECEIVED "
                 success = False
 
             # Only proceed if the correct number of unique identifiers was received
@@ -7628,7 +7605,7 @@ class PositionManager(models.Model):
                 #     except MultipleObjectsReturned as e:
                 #         handle_record_found_more_than_one_exception(e, logger)
                 #         exception_multiple_object_returned = True
-                #         status = "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID "
+                #         status += "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID "
                 #     except ObjectDoesNotExist as e:
                 #         # Not a problem -- a position matching this candidate_we_vote_id wasn't found
                 #         pass
@@ -7670,7 +7647,7 @@ class PositionManager(models.Model):
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        status = "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID_WITH_TIME_SPAN"
+                        status += "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID_WITH_TIME_SPAN "
                     except ObjectDoesNotExist as e:
                         # Not a problem -- a position matching this candidate_we_vote_id wasn't found
                         pass
@@ -7708,7 +7685,7 @@ class PositionManager(models.Model):
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        status = "FAILED-MULTIPLE_FOUND_WITH_MEASURE_AND_ORGANIZATION_WE_VOTE_ID"
+                        status += "FAILED-MULTIPLE_FOUND_WITH_MEASURE_AND_ORGANIZATION_WE_VOTE_ID "
                     except ObjectDoesNotExist as e:
                         # Not a problem -- a position matching this candidate_we_vote_id wasn't found
                         pass
@@ -7746,7 +7723,7 @@ class PositionManager(models.Model):
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        status = "FAILED-MULTIPLE_FOUND_WITH_OFFICE_AND_ORGANIZATION_WE_VOTE_ID"
+                        status += "FAILED-MULTIPLE_FOUND_WITH_OFFICE_AND_ORGANIZATION_WE_VOTE_ID "
                     except ObjectDoesNotExist as e:
                         # Not a problem -- a position matching this office_we_vote_id wasn't found
                         pass
@@ -7787,7 +7764,7 @@ class PositionManager(models.Model):
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        status = "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_PUBLIC_FIGURE_WE_VOTE_ID"
+                        status += "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_PUBLIC_FIGURE_WE_VOTE_ID "
                     except ObjectDoesNotExist as e:
                         # Not a problem -- a position matching this candidate_we_vote_id wasn't found
                         pass
@@ -7807,7 +7784,7 @@ class PositionManager(models.Model):
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        status = "FAILED-MULTIPLE_FOUND_WITH_MEASURE_AND_PUBLIC_FIGURE_WE_VOTE_ID"
+                        status += "FAILED-MULTIPLE_FOUND_WITH_MEASURE_AND_PUBLIC_FIGURE_WE_VOTE_ID "
                     except ObjectDoesNotExist as e:
                         # Not a problem -- a position matching this candidate_we_vote_id wasn't found
                         pass
@@ -7827,7 +7804,7 @@ class PositionManager(models.Model):
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        status = "FAILED-MULTIPLE_FOUND_WITH_OFFICE_AND_VOTER_WE_VOTE_ID"
+                        status += "FAILED-MULTIPLE_FOUND_WITH_OFFICE_AND_VOTER_WE_VOTE_ID "
                     except ObjectDoesNotExist as e:
                         # Not a problem -- a position matching this office_we_vote_id wasn't found
                         pass
@@ -7865,7 +7842,7 @@ class PositionManager(models.Model):
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        status = "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_VOTER_WE_VOTE_ID"
+                        status += "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_VOTER_WE_VOTE_ID "
                     except ObjectDoesNotExist as e:
                         # Not a problem -- a position matching this candidate_we_vote_id wasn't found
                         pass
@@ -7903,7 +7880,7 @@ class PositionManager(models.Model):
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        status = "FAILED-MULTIPLE_FOUND_WITH_MEASURE_AND_VOTER_WE_VOTE_ID"
+                        status += "FAILED-MULTIPLE_FOUND_WITH_MEASURE_AND_VOTER_WE_VOTE_ID "
                     except ObjectDoesNotExist as e:
                         # Not a problem -- a position matching this candidate_we_vote_id wasn't found
                         pass
@@ -7941,7 +7918,7 @@ class PositionManager(models.Model):
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        status = "FAILED-MULTIPLE_FOUND_WITH_OFFICE_AND_VOTER_WE_VOTE_ID"
+                        status += "FAILED-MULTIPLE_FOUND_WITH_OFFICE_AND_VOTER_WE_VOTE_ID "
                     except ObjectDoesNotExist as e:
                         # Not a problem -- a position matching this office wasn't found
                         pass
@@ -7965,10 +7942,10 @@ class PositionManager(models.Model):
                             position_on_stage.save()
                             position_list_manager.update_position_network_scores_for_one_position(position_on_stage)
                             success = True
-                            status = found_with_status + " SAVED"
+                            status += found_with_status + " SAVED "
                         else:
                             success = True
-                            status = found_with_status + " NO_CHANGES_SAVED"
+                            status += found_with_status + " NO_CHANGES_SAVED "
                     except Exception as e:
                         handle_record_not_saved_exception(e, logger=logger)
                         failed_saving_existing_position = True
@@ -7984,9 +7961,7 @@ class PositionManager(models.Model):
                 speaker_display_name = ""
 
                 candidate_campaign_id = None
-                position_year = None
                 if candidate_we_vote_id:
-                    candidate_campaign_manager = CandidateCampaignManager()
                     results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
                         candidate_we_vote_id)
                     if results['candidate_campaign_found']:
@@ -7995,25 +7970,12 @@ class PositionManager(models.Model):
                         google_civic_election_id = candidate_campaign.google_civic_election_id
                         state_code = candidate_campaign.state_code
                         ballot_item_display_name = candidate_campaign.candidate_name
-                        if positive_value_exists(candidate_campaign.candidate_year):
-                            position_year = candidate_campaign.candidate_year
-                        else:
-                            candidate_year = \
-                                candidate_campaign_manager.generate_candidate_year(candidate_campaign.we_vote_id)
-                            if positive_value_exists(candidate_year):
-                                try:
-                                    candidate_campaign.candidate_year = candidate_year
-                                    candidate_campaign.save()
-                                except Exception as e:
-                                    status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
-                                position_year = candidate_year
                 else:
                     # We don't need to ever look up the candidate_we_vote_id from the candidate_campaign_id
                     candidate_we_vote_id = None
 
                 contest_measure_id = None
                 if measure_we_vote_id:
-                    contest_measure_manager = ContestMeasureManager()
                     results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(measure_we_vote_id)
                     if results['contest_measure_found']:
                         contest_measure = results['contest_measure']
@@ -8106,7 +8068,6 @@ class PositionManager(models.Model):
                     voter_we_vote_id=voter_we_vote_id,
                     voter_id=voter_id,
                     google_civic_election_id=google_civic_election_id,
-                    position_year=position_year,
                     state_code=state_code,
                     ballot_item_display_name=ballot_item_display_name,
                     speaker_display_name=speaker_display_name,
@@ -8128,15 +8089,43 @@ class PositionManager(models.Model):
                     twitter_followers_count=twitter_followers_count,
                     speaker_type=speaker_type,
                 )
+
+                if positive_value_exists(candidate_we_vote_id):
+                    # FORMER generate_candidate_position_sorting_dates CANDIDATE
+                    date_results = candidate_campaign_manager.add_candidate_position_sorting_dates_if_needed(
+                        position_object=position_on_stage,
+                        candidate_campaign=candidate_campaign)
+                    if date_results['position_object_updated']:
+                        position_on_stage = date_results['position_object']
+                    status += date_results['status']
+                elif positive_value_exists(measure_we_vote_id):
+                    # FORMER generate_candidate_position_sorting_dates MEASURE
+                    date_results = contest_measure_manager.add_measure_position_sorting_dates_if_needed(
+                        position_object=position_on_stage,
+                        contest_measure=contest_measure)
+                    if date_results['position_object_updated']:
+                        position_on_stage = date_results['position_object']
+                    status += date_results['status']
+
+                if positive_value_exists(candidate_we_vote_id) or positive_value_exists(measure_we_vote_id):
+                    try:
+                        # Heal the data
+                        if not position_on_stage.date_entered:
+                            position_on_stage.date_entered = now()
+                        position_on_stage.save()
+                    except Exception as e:
+                        handle_record_not_saved_exception(e, logger=logger)
+                        status += 'STANCE_COULD_NOT_BE_UPDATED-UPDATE_OR_CREATE_POSITION '
+
                 position_list_manager.update_position_network_scores_for_one_position(position_on_stage)
-                status = "CREATE_POSITION_SUCCESSFUL"
+                status += "CREATE_POSITION_SUCCESSFUL "
                 success = True
 
                 new_position_created = True
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
                 success = False
-                status = "NEW_POSITION_COULD_NOT_BE_CREATED"
+                status += "NEW_POSITION_COULD_NOT_BE_CREATED "
                 if set_as_public_position:
                     position_on_stage = PositionEntered()
                 else:
@@ -8152,14 +8141,15 @@ class PositionManager(models.Model):
         }
         return results
 
-    def refresh_cached_position_info(self, position_object,
-                                     force_update=False,
-                                     offices_dict={},
-                                     candidates_dict={},
-                                     measures_dict={},
-                                     organizations_dict={},
-                                     voters_by_linked_org_dict={},
-                                     voters_dict={}):
+    def refresh_cached_position_info(
+            self, position_object,
+            force_update=False,
+            offices_dict={},
+            candidates_dict={},
+            measures_dict={},
+            organizations_dict={},
+            voters_by_linked_org_dict={},
+            voters_dict={}):
         """
         The position tables cache information from other tables. This function reaches out to the source tables
         and copies over the latest information to the position tables. In order to reduce the number of database calls
@@ -8373,9 +8363,10 @@ class PositionManager(models.Model):
                     pass
 
         # Now move onto "ballot_item" information
-        # Candidate
+        add_position_sorting_dates = False
         check_for_missing_office_data = False
         candidate_campaign_manager = CandidateCampaignManager()
+        contest_measure_manager = ContestMeasureManager()
         contest_office_id = 0
         contest_office_we_vote_id = ""
         if positive_value_exists(position_object.candidate_campaign_id) or \
@@ -8391,10 +8382,12 @@ class PositionManager(models.Model):
                     or not positive_value_exists(position_object.political_party) \
                     or not positive_value_exists(position_object.politician_id) \
                     or not positive_value_exists(position_object.politician_we_vote_id) \
+                    or not positive_value_exists(position_object.position_ultimate_election_date) \
                     or not positive_value_exists(position_object.position_year) \
                     or force_update:
                 try:
                     # We need to look in the voter table for speaker_display_name
+                    candidate = None
                     candidate_found = False
                     if positive_value_exists(position_object.candidate_campaign_we_vote_id) \
                             and position_object.candidate_campaign_we_vote_id in candidates_dict:
@@ -8411,6 +8404,7 @@ class PositionManager(models.Model):
                             candidates_dict[candidate.we_vote_id] = candidate
                     if candidate_found:
                         # Cache for further down
+                        # DEPRECATE pulling contest_office from candidate
                         contest_office_id = candidate.contest_office_id
                         contest_office_we_vote_id = candidate.contest_office_we_vote_id
                         if not positive_value_exists(position_object.contest_office_id) or force_update:
@@ -8451,22 +8445,23 @@ class PositionManager(models.Model):
                             # state_code is missing so look it up from source
                             position_object.state_code = candidate.get_candidate_state()
                             position_change = True
+                        # ################
+                        # position_sorting_dates
                         if not positive_value_exists(position_object.position_year) or force_update:
-                            # position_year is missing so look it up from source
-                            if positive_value_exists(candidate.candidate_year):
-                                position_object.position_year = candidate.candidate_year
+                            # position_year is missing so generate it
+                            add_position_sorting_dates = True
+                        if not positive_value_exists(position_object.position_ultimate_election_date) or force_update:
+                            # position_ultimate_election_date is missing so generate it
+                            add_position_sorting_dates = True
+                        if add_position_sorting_dates:
+                            # FORMER generate_candidate_position_sorting_dates CANDIDATE
+                            date_results = candidate_campaign_manager.add_candidate_position_sorting_dates_if_needed(
+                                position_object=position_object,
+                                candidate_campaign=candidate)
+                            if date_results['position_object_updated']:
+                                position_object = date_results['position_object']
                                 position_change = True
-                            else:
-                                candidate_year = \
-                                    candidate_campaign_manager.generate_candidate_year(candidate.we_vote_id)
-                                if positive_value_exists(candidate_year):
-                                    try:
-                                        candidate.candidate_year = candidate_year
-                                        candidate.save()
-                                    except Exception as e:
-                                        status += "FAILED_TO_SAVE_CANDIDATE: " + str(e) + " "
-                                    position_object.position_year = candidate_year
-                                    position_change = True
+                            status += date_results['status']
                         if not positive_value_exists(position_object.political_party) or force_update:
                             # political_party is missing so look it up from source
                             position_object.political_party = candidate.political_party_display()
@@ -8488,13 +8483,14 @@ class PositionManager(models.Model):
                     or position_object.ballot_item_display_name == "None" \
                     or positive_value_exists(position_object.ballot_item_image_url_https) \
                     or positive_value_exists(position_object.ballot_item_twitter_handle) \
+                    or not positive_value_exists(position_object.position_ultimate_election_date) \
                     or not positive_value_exists(position_object.position_year) \
                     or not positive_value_exists(position_object.state_code) \
                     or force_update:
                 try:
                     # We need to look in the voter table for speaker_display_name
+                    contest_measure = None
                     contest_measure_found = False
-                    contest_measure_manager = ContestMeasureManager()
                     if positive_value_exists(position_object.contest_measure_we_vote_id) \
                             and position_object.contest_measure_we_vote_id in measures_dict:
                         contest_measure = measures_dict[position_object.contest_measure_we_vote_id]
@@ -8521,23 +8517,23 @@ class PositionManager(models.Model):
                             # ballot_item_image_twitter_handle should not exist for measures
                             position_object.ballot_item_twitter_handle = ""
                             position_change = True
+                        # ################
+                        # position_sorting_dates
                         if not positive_value_exists(position_object.position_year) or force_update:
-                            # position_year is missing so look it up from source
-                            if positive_value_exists(contest_measure.measure_year):
-                                position_object.position_year = contest_measure.measure_year
+                            # position_year is missing so generate it
+                            add_position_sorting_dates = True
+                        if not positive_value_exists(position_object.position_ultimate_election_date) or force_update:
+                            # position_ultimate_election_date is missing so generate it
+                            add_position_sorting_dates = True
+                        if add_position_sorting_dates:
+                            # FORMER generate_candidate_position_sorting_dates MEASURE
+                            date_results = contest_measure_manager.add_measure_position_sorting_dates_if_needed(
+                                position_object=position_object,
+                                contest_measure=contest_measure)
+                            if date_results['position_object_updated']:
+                                position_object = date_results['position_object']
                                 position_change = True
-                            else:
-                                measure_year = \
-                                    contest_measure_manager.generate_measure_year(
-                                        contest_measure.google_civic_election_id)
-                                if positive_value_exists(measure_year):
-                                    try:
-                                        contest_measure.measure_year = measure_year
-                                        contest_measure.save()
-                                    except Exception as e:
-                                        status += "FAILED_TO_SAVE_MEASURE: " + str(e) + " "
-                                    position_object.position_year = measure_year
-                                    position_change = True
+                            status += date_results['status']
                         if not positive_value_exists(position_object.state_code) or force_update:
                             # state_code is missing so look it up from source
                             position_object.state_code = contest_measure.state_code

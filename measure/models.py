@@ -110,6 +110,8 @@ class ContestMeasure(models.Model):
     # An identifier for this district, relative to its scope. For example, the 34th State Senate district
     # would have id "34" and a scope of stateUpper.
     district_id = models.CharField(verbose_name="google civic district id", max_length=255, null=True, blank=True)
+    # The date of the last election this measure relates to, converted to integer, ex/ 20201103
+    measure_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this measure is on the ballot
     measure_year = models.PositiveIntegerField(default=None, null=True)
     # State code
@@ -149,6 +151,7 @@ class ContestMeasure(models.Model):
     ballotpedia_no_vote_description = models.TextField(
         verbose_name="what a no vote means", null=True, blank=True, default=None)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    position_dates_set = models.BooleanField(default=False)  # Have we finished data update process?
 
     def get_measure_state(self):
         if positive_value_exists(self.state_code):
@@ -636,15 +639,92 @@ class ContestMeasureManager(models.Model):
 
         return state_code
 
-    def generate_measure_year(self, google_civic_election_id):
+    def add_measure_position_sorting_dates_if_needed(self, position_object=None, contest_measure=None):
+        generate_sorting_dates = False
+        position_object_updated = False
+        measure_year_changed = False
+        measure_ultimate_election_date_changed = False
+        status = ""
+        success = True
+
+        if positive_value_exists(contest_measure.measure_year):
+            position_object.position_year = contest_measure.measure_year
+            position_object_updated = True
+        else:
+            generate_sorting_dates = True
+        if positive_value_exists(contest_measure.measure_ultimate_election_date):
+            position_object.position_ultimate_election_date = contest_measure.measure_ultimate_election_date
+            position_object_updated = True
+        else:
+            generate_sorting_dates = True
+
+        if generate_sorting_dates:
+            largest_year_integer = None
+            largest_election_date_integer = None
+            contest_measure_manager = ContestMeasureManager()
+            date_results = contest_measure_manager.generate_measure_position_sorting_dates(
+                google_civic_election_id=contest_measure.google_civic_election_id)
+            if positive_value_exists(date_results['largest_year_integer']):
+                if contest_measure.measure_year != date_results['largest_year_integer']:
+                    measure_year_changed = True
+                if not position_object.position_year:
+                    position_object.position_year = date_results['largest_year_integer']
+                    position_object_updated = True
+                elif date_results['largest_year_integer'] > position_object.position_year:
+                    position_object.position_year = date_results['largest_year_integer']
+                    position_object_updated = True
+            if positive_value_exists(date_results['largest_election_date_integer']):
+                if contest_measure.measure_ultimate_election_date != date_results['largest_election_date_integer']:
+                    measure_ultimate_election_date_changed = True
+                if not position_object.position_ultimate_election_date:
+                    position_object.position_ultimate_election_date = date_results['largest_election_date_integer']
+                    position_object_updated = True
+                elif date_results['largest_election_date_integer'] > position_object.position_ultimate_election_date:
+                    position_object.position_ultimate_election_date = date_results['largest_election_date_integer']
+                    position_object_updated = True
+            if measure_year_changed or measure_ultimate_election_date_changed:
+                # Retrieve an editable copy of the measure so we can update the date caches
+                results = \
+                    contest_measure_manager.retrieve_contest_measure_from_we_vote_id(contest_measure.we_vote_id)
+                if results['contest_measure_found']:
+                    editable_measure = results['contest_measure']
+                    try:
+                        if measure_year_changed:
+                            editable_measure.measure_year = largest_year_integer
+                        if measure_ultimate_election_date_changed:
+                            editable_measure.measure_ultimate_election_date = largest_election_date_integer
+                        editable_measure.save()
+                        status += "SAVED_EDITABLE_MEASURE "
+                    except Exception as e:
+                        status += "FAILED_TO_SAVE_EDITABLE_MEASURE: " + str(e) + " "
+
+        return {
+            'position_object_updated':  position_object_updated,
+            'position_object':          position_object,
+            'status':                   status,
+            'success':                  success,
+        }
+
+    def generate_measure_position_sorting_dates(self, google_civic_election_id=''):
+        largest_year_integer = 0
+        largest_election_date_integer = 0
         election_manager = ElectionManager()
         results = election_manager.retrieve_election(google_civic_election_id=google_civic_election_id)
         if results['election_found']:
             election = results['election']
             if positive_value_exists(election.election_day_text):
                 year_string = election.election_day_text[:4]
-                return convert_to_int(year_string)
-        return None
+                year_integer = convert_to_int(year_string)
+                if year_integer > largest_year_integer:
+                    largest_year_integer = year_integer
+                election_day_text = election.election_day_text.replace('-', '')
+                election_date_integer = convert_to_int(election_day_text)
+                if election_date_integer > largest_election_date_integer:
+                    largest_election_date_integer = election_date_integer
+        return {
+            'largest_year_integer': largest_year_integer,
+            'largest_election_date_integer':  largest_election_date_integer,
+        }
 
     def retrieve_measures_are_not_duplicates_list(self, contest_measure_we_vote_id, read_only=True):
         """

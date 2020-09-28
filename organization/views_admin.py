@@ -1533,7 +1533,9 @@ def organization_position_edit_process_view(request):
         except CandidateCampaign.DoesNotExist as e:
             handle_record_not_found_exception(e, logger=logger)
 
-        if not candidate_campaign_on_stage_found:
+        if candidate_campaign_on_stage_found:
+            pass
+        else:
             messages.add_message(
                 request, messages.ERROR,
                 "Could not find Candidate's campaign when trying to create or edit a new position.")
