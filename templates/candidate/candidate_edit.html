@@ -88,6 +88,18 @@ th, td {
     <label for="google_civic_election_id_id" class="col-sm-3 control-label">
         Candidate to Office Link
         (<span onclick="showElement('candidate_to_office_link_table_add');" style="color: royalblue" >add</span>)
+        <span style="color: slategray; font-weight: 400;">
+            {% if candidate.candidate_ultimate_election_date or candidate.candidate_year %}
+            <br />
+            {% endif %}
+            {% if candidate.candidate_year %}
+            {{ candidate.candidate_year }}
+            &nbsp;&nbsp;&nbsp;
+            {% endif %}
+            {% if candidate.candidate_ultimate_election_date %}
+            {{ candidate.candidate_ultimate_election_date }}
+            {% endif %}
+        </span>
     </label>
     <div class="col-sm-8">
     {% if office_name %}

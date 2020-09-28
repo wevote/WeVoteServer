@@ -281,8 +281,7 @@
         <td>Candidate/Measure</td>
         <td>Visibility?</td>
         <td>Stance</td>
-        <td>Election ID</td>
-        <td>Election Date</td>
+        <td>Election</td>
         <td>Rating Time Span</td>
         <td>&nbsp;</td>
     </tr>
@@ -302,8 +301,21 @@
         <td>{% if organization_position.is_public_position %}<strong>Public</strong>{% else %}Friends&nbsp;Only{% endif %}</td>
         <td>{{ organization_position.get_stance_display }}
             {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}</td>
-        <td>{{ organization_position.election.google_civic_election_id }}</td>
-        <td>{{ organization_position.election.election_day_text }}</td>
+        <td>
+            <span class="white-space: nowrap;">{{ organization_position.election.election_day_text }}</span> ({{ organization_position.election.google_civic_election_id }})
+            <span style="color: slategray; font-weight: 400;">
+                {% if organization_position.position_ultimate_election_date or organization_position.position_year %}
+                <br />
+                {% endif %}
+                {% if organization_position.position_year %}
+                {{ organization_position.position_year }}
+                &nbsp;&nbsp;&nbsp;
+                {% endif %}
+                {% if organization_position.position_ultimate_election_date %}
+                {{ organization_position.position_ultimate_election_date }}
+                {% endif %}
+            </span>
+        </td>
         <td>{{ organization_position.vote_smart_time_span|default_if_none:"" }}</td>
         <td><a href="{% url 'organization:organization_position_delete' organization.id organization_position.we_vote_id %}">
             delete</a></td>
