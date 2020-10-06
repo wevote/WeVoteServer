@@ -141,29 +141,29 @@ def batch_process_next_steps():
             )
 
     # ############################
-    # Twitter Search
-    number_of_candidates_to_analyze = fetch_number_of_candidates_needing_twitter_search()
-    if positive_value_exists(number_of_candidates_to_analyze):
-        results = batch_process_manager.create_batch_process(
-            kind_of_process=SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE)
-        status += results['status']
-        success = results['success']
-        if results['batch_process_saved']:
-            batch_process = results['batch_process']
-            batch_process_list.append(batch_process)
-            status += "SCHEDULED_SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE "
-            batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
-                kind_of_process=batch_process.kind_of_process,
-                status=status,
-            )
-        else:
-            status += "FAILED_TO_SCHEDULE-" + str(SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE) + " "
-            batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=0,
-                kind_of_process=SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE,
-                status=status,
-            )
+    # Twitter Search - Turned off temporarily
+    # number_of_candidates_to_analyze = fetch_number_of_candidates_needing_twitter_search()
+    # if positive_value_exists(number_of_candidates_to_analyze):
+    #     results = batch_process_manager.create_batch_process(
+    #         kind_of_process=SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE)
+    #     status += results['status']
+    #     success = results['success']
+    #     if results['batch_process_saved']:
+    #         batch_process = results['batch_process']
+    #         batch_process_list.append(batch_process)
+    #         status += "SCHEDULED_SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE "
+    #         batch_process_manager.create_batch_process_log_entry(
+    #             batch_process_id=batch_process.id,
+    #             kind_of_process=batch_process.kind_of_process,
+    #             status=status,
+    #         )
+    #     else:
+    #         status += "FAILED_TO_SCHEDULE-" + str(SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE) + " "
+    #         batch_process_manager.create_batch_process_log_entry(
+    #             batch_process_id=0,
+    #             kind_of_process=SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE,
+    #             status=status,
+    #         )
 
     # ############################
     # Processing Analytics
@@ -343,9 +343,10 @@ def batch_process_next_steps():
         elif batch_process.kind_of_process in [CALCULATE_SITEWIDE_DAILY_METRICS]:
             results = process_one_sitewide_daily_analytics_batch_process(batch_process)
             status += results['status']
-        elif batch_process.kind_of_process in [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
-            results = process_one_search_twitter_batch_process(batch_process)
-            status += results['status']
+        elif batch_process.kind_of_process in [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:  # Turned off
+            # results = process_one_search_twitter_batch_process(batch_process)
+            # status += results['status']
+            status += "SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE-TURNED_OFF "
         else:
             status += "KIND_OF_PROCESS_NOT_RECOGNIZED "
 
