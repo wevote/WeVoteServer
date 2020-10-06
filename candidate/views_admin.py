@@ -441,10 +441,13 @@ def candidate_list_view(request):
             for one_word in search_words:
                 filters = []
 
-                new_filter = Q(ballotpedia_candidate_summary__icontains=one_word)
+                new_filter = Q(ballotpedia_candidate_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(ballotpedia_candidate_id__icontains=one_word)
+                new_filter = Q(ballotpedia_candidate_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballotpedia_candidate_summary__icontains=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(ballotpedia_office_id__icontains=one_word)
@@ -469,6 +472,15 @@ def candidate_list_view(request):
                 filters.append(new_filter)
 
                 new_filter = Q(contest_office_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(google_civic_candidate_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(google_civic_candidate_name2__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(google_civic_candidate_name3__icontains=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(party__icontains=one_word)
