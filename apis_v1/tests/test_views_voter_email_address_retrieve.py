@@ -21,8 +21,9 @@ class WeVoteAPIsV1TestsVoterEmailAddressRetrieve(TestCase):
         json_data = json.loads(response.content.decode())
 
 
-
-
-
-
-
+        self.assertEqual('status' in json_data, True, "status expected in the json response, and not found")
+        self.assertEqual(json_data['status'],
+                         "VALID_VOTER_DEVICE_ID_MISSING",
+                         "status = {status} Expected status VALID_VOTER_DEVICE_ID_MISSING"
+                         "voter_device_id: {voter_device_id}".format(status=json_data['status'],
+                                                                     voter_device_id=json_data['voter_device_id']))
