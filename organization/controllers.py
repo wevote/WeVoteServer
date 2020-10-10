@@ -5,7 +5,7 @@
 from .controllers_fastly import add_wevote_subdomain_to_fastly, add_subdomain_route53_record, \
     get_wevote_subdomain_status
 from .models import Organization, OrganizationListManager, OrganizationManager, \
-    OrganizationReservedDomain, OrganizationMembershipLinkToVoter, \
+    OrganizationReservedDomain, ORGANIZATION_UNIQUE_IDENTIFIERS, OrganizationMembershipLinkToVoter, \
     CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
     POLITICAL_ACTION_COMMITTEE, ORGANIZATION, PUBLIC_FIGURE, UNKNOWN, VOTER, ORGANIZATION_TYPE_CHOICES
 from analytics.models import ACTION_BALLOT_VISIT, ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, \
@@ -176,6 +176,38 @@ def delete_organization_complete(from_organization_id, from_organization_we_vote
         'success':                  success,
     }
     return results
+
+
+def figure_out_organization_conflict_values(organization1, organization2):
+    organization_merge_conflict_values = {}
+
+    for attribute in ORGANIZATION_UNIQUE_IDENTIFIERS:
+        try:
+            organization1_attribute_value = getattr(organization1, attribute)
+            organization2_attribute_value = getattr(organization2, attribute)
+            if organization1_attribute_value is None and organization2_attribute_value is None:
+                organization_merge_conflict_values[attribute] = 'MATCHING'
+            elif organization1_attribute_value == "" and organization2_attribute_value == "":
+                organization_merge_conflict_values[attribute] = 'MATCHING'
+            elif organization1_attribute_value is None or organization1_attribute_value == "":
+                organization_merge_conflict_values[attribute] = 'CANDIDATE2'
+            elif organization2_attribute_value is None or organization2_attribute_value == "":
+                organization_merge_conflict_values[attribute] = 'CANDIDATE1'
+            else:
+                if attribute == "organization_twitter_handle" or attribute == "state_serving_code":
+                    if organization1_attribute_value.lower() == organization2_attribute_value.lower():
+                        organization_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        organization_merge_conflict_values[attribute] = 'CONFLICT'
+                else:
+                    if organization1_attribute_value == organization2_attribute_value:
+                        organization_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        organization_merge_conflict_values[attribute] = 'CONFLICT'
+        except AttributeError:
+            pass
+
+    return organization_merge_conflict_values
 
 
 def full_domain_string_available(full_domain_string, requesting_organization_id):
@@ -681,6 +713,129 @@ def organization_analyze_tweets(organization_we_vote_id):
         'cached_tweets':                        cached_tweets,
         'unique_hashtags':                      unique_hashtags,
         'organization_link_to_hashtag_results': organization_link_to_hashtag_results,
+    }
+    return results
+
+
+def merge_these_two_organizations(organization1_we_vote_id, organization2_we_vote_id, admin_merge_choices={}):
+    """
+    Process the merging of two organizations. Note: Organization1 is saved at the end. Organization2 is deleted at the end.
+    :param organization1_we_vote_id:
+    :param organization2_we_vote_id:
+    :param admin_merge_choices: Dictionary with the attribute name as the key, and the chosen value as the value
+    :return:
+    """
+    status = ""
+    organization_manager = OrganizationManager()
+    voter_manager = VoterManager()
+
+    # Check to make sure that organization2 isn't linked to a voter. If so, cancel out for now.
+    results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization2_we_vote_id, read_only=True)
+    if results['voter_found']:
+        results = {
+            'success': False,
+            'status': "MERGE_THESE_TWO_ORGANIZATIONS-ORGANIZATION2_LINKED_TO_A_VOTER ",
+            'organizations_merged': False,
+            'organization': None,
+        }
+        return results
+
+    # Candidate 1 is the one we keep, and Candidate 2 is the one we will merge into Candidate 1
+    organization1_results = \
+        organization_manager.retrieve_organization_from_we_vote_id(organization1_we_vote_id)
+    if organization1_results['organization_found']:
+        organization1_on_stage = organization1_results['organization']
+        organization1_id = organization1_on_stage.id
+    else:
+        results = {
+            'success': False,
+            'status': "MERGE_THESE_TWO_ORGANIZATIONS-COULD_NOT_RETRIEVE_ORGANIZATION1 ",
+            'organizations_merged': False,
+            'organization': None,
+        }
+        return results
+
+    organization2_results = \
+        organization_manager.retrieve_organization_from_we_vote_id(organization2_we_vote_id)
+    if organization2_results['organization_found']:
+        organization2_on_stage = organization2_results['organization']
+        organization2_id = organization2_on_stage.id
+    else:
+        results = {
+            'success': False,
+            'status': "MERGE_THESE_TWO_ORGANIZATIONS-COULD_NOT_RETRIEVE_ORGANIZATION2 ",
+            'organizations_merged': False,
+            'organization': None,
+        }
+        return results
+
+    # TODO: Migrate images?
+
+    # Merge attribute values chosen by the admin
+    for attribute in ORGANIZATION_UNIQUE_IDENTIFIERS:
+        try:
+            if attribute in admin_merge_choices:
+                setattr(organization1_on_stage, attribute, admin_merge_choices[attribute])
+        except Exception as e:
+            # Break out
+            status += "ATTRIBUTE_SETATTR_FAILED (" + str(attribute) + "): " + str(e) + " "
+            results = {
+                'success': False,
+                'status': status,
+                'organizations_merged': False,
+                'organization': None,
+            }
+            return results
+
+    # Merge public positions
+    public_positions_results = move_positions_to_another_organization(
+        from_organization_id=organization2_id,
+        from_organization_we_vote_id=organization2_we_vote_id,
+        to_organization_id=organization1_id,
+        to_organization_we_vote_id=organization1_we_vote_id)
+    if not public_positions_results['success'] \
+            or positive_value_exists(public_positions_results['position_entries_not_moved']) \
+            or positive_value_exists(public_positions_results['position_entries_not_deleted']):
+        status += public_positions_results['status']
+        status += "MERGE_THESE_TWO_ORGANIZATIONS-COULD_NOT_MOVE_PUBLIC_POSITIONS_TO_ORGANIZATION1 "
+        results = {
+            'success': False,
+            'status': status,
+            'organizations_merged': False,
+            'organization': None,
+        }
+        return results
+
+    # Merge friends-only positions
+    friends_positions_results = move_positions_to_another_organization(
+        organization2_id, organization2_we_vote_id,
+        organization1_id, organization1_we_vote_id,
+        False)
+    if not friends_positions_results['success'] \
+            or positive_value_exists(public_positions_results['position_entries_not_moved']) \
+            or positive_value_exists(public_positions_results['position_entries_not_deleted']):
+        status += friends_positions_results['status']
+        status += "MERGE_THESE_TWO_ORGANIZATIONS-COULD_NOT_MOVE_FRIENDS_POSITIONS_TO_ORGANIZATION1 "
+        results = {
+            'success': False,
+            'status': status,
+            'organizations_merged': False,
+            'organization': None,
+        }
+        return results
+
+    # Note: wait to wrap in try/except block
+    organization1_on_stage.save()
+    refresh_organization_data_from_master_tables(organization1_on_stage.we_vote_id)
+
+    # Remove organization 2
+    organization2_on_stage.delete()
+
+    results = {
+        'success': True,
+        'status': status,
+        'organizations_merged': True,
+        'organization': organization1_on_stage,
     }
     return results
 
@@ -1360,7 +1515,7 @@ def organizations_import_from_master_server(request, state_code=''):
 
 def filter_organizations_structured_json_for_local_duplicates(structured_json):
     """
-    With this function, we remove candidates that seem to be duplicates, but have different we_vote_id's.
+    With this function, we remove organizations that seem to be duplicates, but have different we_vote_id's.
     We do not check to see if we have a matching office this routine -- that is done elsewhere.
     :param structured_json:
     :return:
@@ -2574,7 +2729,7 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
                     organization.twitter_followers_count = 0
                     organization.save()
                 except Exception as e:
-                    status += "COULD_NOT_SAVE_ORGANIZATION "
+                    status += "COULD_NOT_SAVE_ORGANIZATION: " + str(e) + " "
             else:
                 # Not attached to other group, so create a TwitterLinkToOrganization entry
                 results = twitter_user_manager.create_twitter_link_to_organization(

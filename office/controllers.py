@@ -736,27 +736,32 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
 
     if success:
         contest_office = results['contest_office']
+        date_last_updated = ''
+        if positive_value_exists(contest_office.date_last_updated):
+            date_last_updated = contest_office.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
         json_data = {
             'status':                   status,
             'success':                  True,
-            'kind_of_ballot_item':      OFFICE,
-            'id':                       contest_office.id,
-            'we_vote_id':               contest_office.we_vote_id,
-            'google_civic_election_id': contest_office.google_civic_election_id,
-            'state_code':               contest_office.state_code,
             'ballot_item_display_name': contest_office.office_name,
-            'ocd_division_id':          contest_office.ocd_division_id,
-            'maplight_id':              contest_office.maplight_id,
             'ballotpedia_id':           contest_office.ballotpedia_id,
             'ballotpedia_district_id':  contest_office.ballotpedia_district_id,
             'ballotpedia_office_id':    contest_office.ballotpedia_office_id,
             'ballotpedia_office_url':   contest_office.ballotpedia_office_url,
             'ballotpedia_race_id':      contest_office.ballotpedia_race_id,
-            'wikipedia_id':             contest_office.wikipedia_id,
+            'ballotpedia_race_office_level':      contest_office.ballotpedia_race_office_level,
+            'district_name':            contest_office.district_name,
+            'google_civic_election_id': contest_office.google_civic_election_id,
+            'id':                       contest_office.id,
+            'kind_of_ballot_item':      OFFICE,
+            'last_updated':             date_last_updated,
+            'maplight_id':              contest_office.maplight_id,
             'number_voting_for':        contest_office.number_voting_for,
             'number_elected':           contest_office.number_elected,
+            'ocd_division_id':          contest_office.ocd_division_id,
             'primary_party':            contest_office.primary_party,
-            'district_name':            contest_office.district_name,
+            'state_code':               contest_office.state_code,
+            'we_vote_id':               contest_office.we_vote_id,
+            'wikipedia_id':             contest_office.wikipedia_id,
         }
     else:
         json_data = {

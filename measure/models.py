@@ -71,6 +71,7 @@ class ContestMeasure(models.Model):
                                      max_length=200, null=True, blank=True, unique=False)
     # The title of the measure (e.g. 'Proposition 42').
     measure_title = models.CharField(verbose_name="measure title", max_length=255, null=False, blank=False)
+    date_last_updated = models.DateTimeField(null=True, auto_now=True)
     # The measure's title as passed over by Google Civic. We save this so we can match to this measure even
     # if we edit the measure's name locally.
     google_civic_measure_title = models.CharField(verbose_name="measure name exactly as received from google civic",

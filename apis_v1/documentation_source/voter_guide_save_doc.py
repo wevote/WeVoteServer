@@ -62,7 +62,7 @@ def voter_guide_save_doc_template_values(url_root):
                    '(We Vote ID for the person that owns the voter guide),\n' \
                    '  "voter_guide_image_url_tiny": string ' \
                    '(We Vote ID for the person that owns the voter guide),\n' \
-                   '  "last_updated": string (time in this format %Y-%m-%d %H:%M),\n' \
+                   '  "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "twitter_description": string,\n' \
                    '  "twitter_followers_count": integer,\n' \

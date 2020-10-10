@@ -5,6 +5,8 @@
 
 {%  block content %}
 {% load template_filters %}
+{% load humanize %}
+
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a>&nbsp;&nbsp;&nbsp;
 <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Organizations</a>&nbsp;&nbsp;&nbsp;
 <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Voter Guides</a>&nbsp;&nbsp;&nbsp;
@@ -59,7 +61,7 @@
                                class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
                         {% endif %}
 
-                        ({{ organization.twitter_followers_count }} Followers)
+                        ({{ organization.twitter_followers_count|intcomma }} Followers)
                     {% else %}
                         {{ organization.organization_twitter_handle|default_if_none:"" }}
                     {% endif %} (<a href="{% url 'import_export_twitter:refresh_twitter_organization_details' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">refresh Twitter details</a>)
@@ -327,6 +329,59 @@
 {% else %}
     <p>(no positions found)</p>
 {% endif %}
+
+
+<h3>Merge with Another Organization</h3>
+<form name="find_another_to_merge" method="get" action="{% url 'organization:organization_we_vote_id_position_list' organization.we_vote_id %}">
+    {% csrf_token %}
+    {% if organization_search_for_merge %}
+        <a href="{% url 'organization:organization_we_vote_id_position_list' organization.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+             clear search</a>&nbsp;
+    {% endif %}
+    <input type="text" name="organization_search_for_merge" id="organization_search_for_merge_id" value="{{ organization_search_for_merge }}" style="width: 450px" />
+    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+    <input type="hidden" name="state_code" value="{{ state_code }}">
+    <input type="submit" value="Search for Duplicate Organization" />
+</form>
+
+{% if organization_search_results_list %}
+    <table class="table-condensed">
+        <tr>
+            <td>&nbsp;</td>
+            <td>Twitter</td>
+            <td>Organization Name</td>
+            <td>ID</td>
+            <td>We Vote ID</td>
+            <td>Description</td>
+        </tr>
+    {% for found_organization in organization_search_results_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {{ found_organization.organization_twitter_handle|default_if_none:"" }}
+                <span class="u-no-break" style="color: darkgray;">({{ found_organization.twitter_followers_count|intcomma }}&nbsp;Followers)</span>
+            </td>
+            <td>
+                {{ found_organization.organization_name }}
+                <br />
+                <a href="{% url 'organization:organization_position_list' found_organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_all_elections=1"
+                   target="_blank"
+                   class="u-no-break"
+                >view&nbsp;organization <span class="glyphicon glyphicon-new-window"></span></a>,
+                <a href="{% url 'organization:compare_two_organizations_for_merge' %}?organization1_we_vote_id={{ organization.we_vote_id }}&organization2_we_vote_id={{ found_organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   target="_blank"
+                   class="u-no-break"
+                >compare&nbsp;for&nbsp;merge <span class="glyphicon glyphicon-new-window"></span></a>
+            </td>
+            <td>{{ found_organization.id }}</td>
+            <td>{{ found_organization.we_vote_id }}</td>
+            <td>{{ found_organization.twitter_description|default_if_none:"" }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+<br/>
+
 
     <script>
     $(function() {

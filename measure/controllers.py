@@ -230,6 +230,9 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
             election_display_name = election.election_name
         else:
             election_display_name = ""
+        date_last_updated = ''
+        if positive_value_exists(contest_measure.date_last_updated):
+            date_last_updated = contest_measure.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
         json_data = {
             'status':                   status,
             'success':                  True,
@@ -239,6 +242,7 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
             'google_civic_election_id': contest_measure.google_civic_election_id,
             'id':                       contest_measure.id,
             'kind_of_ballot_item':      MEASURE,
+            'last_updated':             date_last_updated,
             'maplight_id':              contest_measure.maplight_id,
             'measure_subtitle':         contest_measure.measure_subtitle,
             'measure_text':             contest_measure.measure_text,

@@ -3996,6 +3996,104 @@ class PositionListManager(models.Model):
 
         return position_count
 
+    def fetch_public_positions_count_for_organization(
+            self, organization_id,
+            organization_we_vote_id,
+            stance_we_are_looking_for=ANY_STANCE):
+        return self.fetch_positions_count_for_organization(
+            organization_id,
+            organization_we_vote_id,
+            stance_we_are_looking_for,
+            PUBLIC_ONLY)
+
+    def fetch_friends_only_positions_count_for_organization(
+            self, candidate_campaign_id,
+            candidate_campaign_we_vote_id,
+            stance_we_are_looking_for=ANY_STANCE):
+        return self.fetch_positions_count_for_organization(
+            candidate_campaign_id,
+            candidate_campaign_we_vote_id,
+            stance_we_are_looking_for,
+            FRIENDS_ONLY)
+
+    @staticmethod
+    def fetch_positions_count_for_organization(
+            organization_id,
+            organization_we_vote_id,
+            stance_we_are_looking_for,
+            public_or_private=PUBLIC_ONLY,
+            friends_we_vote_id_list=False,
+            organizations_followed_we_vote_id_list=False):
+        if stance_we_are_looking_for not \
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+            stance_we_are_looking_for = ANY_STANCE
+
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
+        #  which means we want to return all stances
+
+        if not positive_value_exists(organization_id) and not \
+                positive_value_exists(organization_we_vote_id):
+            return 0
+
+        retrieve_public_positions = False
+        if public_or_private not in (PUBLIC_ONLY, FRIENDS_ONLY):
+            public_or_private = PUBLIC_ONLY
+        if public_or_private == FRIENDS_ONLY:
+            position_list_query = PositionForFriends.objects.using('readonly').all()
+        else:
+            retrieve_public_positions = True
+            position_list_query = PositionEntered.objects.using('readonly').all()
+
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
+        if retrieve_public_positions:
+            # If retrieving PositionEntered, make sure we have the necessary variables
+            if type(organizations_followed_we_vote_id_list) is list \
+                    and len(organizations_followed_we_vote_id_list) == 0:
+                return 0
+        else:
+            # If retrieving PositionForFriends, make sure we have the necessary variables
+            if type(friends_we_vote_id_list) is list and len(friends_we_vote_id_list) == 0:
+                return 0
+
+        # Retrieve the support positions for this organization_id
+        position_count = 0
+        try:
+            if positive_value_exists(organization_id):
+                position_list_query = position_list_query.filter(organization_id=organization_id)
+            else:
+                position_list_query = position_list_query.filter(
+                    organization_we_vote_id__iexact=organization_we_vote_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            if stance_we_are_looking_for != ANY_STANCE:
+                position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
+
+            # Only one of these blocks will be used at a time
+            if friends_we_vote_id_list is not False:
+                # Find positions from friends. Look for we_vote_id case insensitive.
+                we_vote_id_filter = Q()
+                for we_vote_id in friends_we_vote_id_list:
+                    we_vote_id_filter |= Q(voter_we_vote_id__iexact=we_vote_id)
+                position_list_query = position_list_query.filter(we_vote_id_filter)
+            if retrieve_public_positions and organizations_followed_we_vote_id_list is not False:
+                # Find positions from organizations voter follows.
+                we_vote_id_filter = Q()
+                for we_vote_id in organizations_followed_we_vote_id_list:
+                    we_vote_id_filter |= Q(organization_we_vote_id__iexact=we_vote_id)
+                position_list_query = position_list_query.filter(we_vote_id_filter)
+
+            # Limit to positions in the last x years - currently we are not limiting
+            # position_list = position_list.filter(election_id=election_id)
+            position_list = list(position_list_query)
+
+            position_count = len(position_list)
+            # position_count = position_list_query.count()
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        return position_count
+
     def retrieve_possible_duplicate_positions(self, google_civic_election_id, organization_we_vote_id,
                                               candidate_we_vote_id, measure_we_vote_id,
                                               we_vote_id_from_master=''):
@@ -4022,7 +4120,7 @@ class PositionListManager(models.Model):
             # Situation 1 organization_we_vote_id + candidate_we_vote_id matches an entry already in the db
             if positive_value_exists(organization_we_vote_id) and positive_value_exists(candidate_we_vote_id):
                 new_filter = (Q(organization_we_vote_id__iexact=organization_we_vote_id) &
-                              Q(candidate_campaign_we_vote_id__iexact=candidate_we_vote_id))
+                              Q(organization_we_vote_id__iexact=candidate_we_vote_id))
                 filters.append(new_filter)
 
             # Situation 2 organization_we_vote_id + measure_we_vote_id matches an entry already in the db
