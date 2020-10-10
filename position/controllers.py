@@ -1660,11 +1660,16 @@ def move_positions_to_another_office(from_contest_office_id, from_contest_office
     return results
 
 
-def move_positions_to_another_organization(from_organization_id, from_organization_we_vote_id,
-                                           to_organization_id, to_organization_we_vote_id,
-                                           to_voter_id, to_voter_we_vote_id):
+def move_positions_to_another_organization(
+        from_organization_id=0,
+        from_organization_we_vote_id='',
+        to_organization_id=0,
+        to_organization_we_vote_id='',
+        to_voter_id=0,
+        to_voter_we_vote_id=''):
     status = ''
     success = False
+    position_entries_not_deleted = 0
     position_entries_moved = 0
     position_entries_not_moved = 0
     position_manager = PositionManager()
@@ -1699,13 +1704,17 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
         empty_voter_we_vote_id = ''
 
         results = position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, to_organization_id, to_organization_we_vote_id,
-            empty_voter_id,
-            from_position_entry.contest_office_id, from_position_entry.candidate_campaign_id,
-            from_position_entry.contest_measure_id,
-            empty_voter_we_vote_id,
-            from_position_entry.contest_office_we_vote_id,
-            from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
+            position_we_vote_id=position_we_vote_id,
+            organization_id=to_organization_id,
+            organization_we_vote_id=to_organization_we_vote_id,
+            voter_id=empty_voter_id,
+            contest_office_id=from_position_entry.contest_office_id,
+            candidate_campaign_id=from_position_entry.candidate_campaign_id,
+            contest_measure_id=from_position_entry.contest_measure_id,
+            voter_we_vote_id=empty_voter_we_vote_id,
+            contest_office_we_vote_id=from_position_entry.contest_office_we_vote_id,
+            candidate_campaign_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
+            contest_measure_we_vote_id=from_position_entry.contest_measure_we_vote_id)
 
         if results['position_found']:
             # Look to see if there is a statement that can be preserved (i.e., moved from from_position to to_position
@@ -1732,8 +1741,10 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
                 to_position_entry.twitter_followers_count = to_twitter_followers_count
             try:
                 to_position_entry.save()
+                position_entries_moved += 1
             except Exception as e:
-                pass
+                position_entries_not_moved += 1
+                status += "TO_POSITION_COULD_NOT_SAVE: " + str(e) + " "
         else:
             # Change the position values to the new we_vote_id
             try:
@@ -1753,6 +1764,7 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
                 position_entries_moved += 1
             except Exception as e:
                 position_entries_not_moved += 1
+                status += "FROM_POSITION_COULD_NOT_SAVE: " + str(e) + " "
 
     from_position_private_list_remaining = position_list_manager.retrieve_all_positions_for_organization(
         organization_id=from_organization_id,
@@ -1764,7 +1776,8 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
         try:
             from_position_entry.delete()
         except Exception as e:
-            pass
+            position_entries_not_deleted += 1
+            status += "FROM_POSITION_NOT_DELETED: " + str(e) + " "
 
     # Find public positions for the "from_voter" that we are moving away from
     stance_we_are_looking_for = ANY_STANCE
@@ -1782,13 +1795,17 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
         empty_voter_id = 0
         empty_voter_we_vote_id = ''
         results = position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, to_organization_id, to_organization_we_vote_id,
-            empty_voter_id,
-            from_position_entry.contest_office_id, from_position_entry.candidate_campaign_id,
-            from_position_entry.contest_measure_id,
-            empty_voter_we_vote_id,
-            from_position_entry.contest_office_we_vote_id,
-            from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
+            position_we_vote_id=position_we_vote_id,
+            organization_id=to_organization_id,
+            organization_we_vote_id=to_organization_we_vote_id,
+            voter_id=empty_voter_id,
+            contest_office_id=from_position_entry.contest_office_id,
+            candidate_campaign_id = from_position_entry.candidate_campaign_id,
+            contest_measure_id=from_position_entry.contest_measure_id,
+            voter_we_vote_id=empty_voter_we_vote_id,
+            contest_office_we_vote_id=from_position_entry.contest_office_we_vote_id,
+            candidate_campaign_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
+            contest_measure_we_vote_id=from_position_entry.contest_measure_we_vote_id)
 
         if results['position_found']:
             # Look to see if there is a statement that can be preserved
@@ -1815,8 +1832,10 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
                 to_position_entry.twitter_followers_count = to_twitter_followers_count
             try:
                 to_position_entry.save()
+                position_entries_moved += 1
             except Exception as e:
-                pass
+                position_entries_not_moved += 1
+                status += "TO_POSITION_COULD_NOT_SAVE2: " + str(e) + " "
         else:
             # Change the position values to the new we_vote_id
             try:
@@ -1836,6 +1855,7 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
                 position_entries_moved += 1
             except Exception as e:
                 position_entries_not_moved += 1
+                status += "FROM_POSITION_COULD_NOT_SAVE2: " + str(e) + " "
 
     from_position_public_list_remaining = position_list_manager.retrieve_all_positions_for_organization(
         organization_id=from_organization_id,
@@ -1858,7 +1878,8 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
             # Leave this turned off until testing is finished
             from_position_entry.delete()
         except Exception as e:
-            pass
+            position_entries_not_deleted += 1
+            status += "FROM_POSITION_NOT_DELETED2: " + str(e) + " "
 
     results = {
         'status':                       status,
@@ -1868,6 +1889,7 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
         'to_voter_id':                  to_voter_id,
         'to_voter_we_vote_id':          to_voter_we_vote_id,
         'position_entries_moved':       position_entries_moved,
+        'position_entries_not_deleted': position_entries_not_deleted,
         'position_entries_not_moved':   position_entries_not_moved,
     }
     return results
@@ -2700,8 +2722,8 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
     voters_dict = {}
     for one_position in position_objects:
         # Is there sufficient information in the position to display it?
-        some_data_exists = True if one_position.is_support() \
-                           or one_position.is_oppose() \
+        some_data_exists = True if one_position.is_support_or_positive_rating() \
+                           or one_position.is_oppose_or_negative_rating() \
                            or one_position.is_information_only() \
                            or positive_value_exists(one_position.vote_smart_rating) \
                            or positive_value_exists(one_position.statement_text) \
@@ -2746,30 +2768,14 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
 
         if one_position_success:
             one_position_dict_for_api = {
-                'position_we_vote_id':              one_position.we_vote_id,
-                'position_ultimate_election_date':  one_position.position_ultimate_election_date,
-                'position_year':                    one_position.position_year,
                 'ballot_item_display_name':         one_position.ballot_item_display_name,
                 'ballot_item_image_url_https_large':    one_position.ballot_item_image_url_https_large
                 if positive_value_exists(one_position.ballot_item_image_url_https_large)
                 else one_position.ballot_item_image_url_https,
                 'ballot_item_image_url_https_medium':   one_position.ballot_item_image_url_https_medium,
                 'ballot_item_image_url_https_tiny':     one_position.ballot_item_image_url_https_tiny,
-                'kind_of_ballot_item':              one_position.get_kind_of_ballot_item(),
                 'ballot_item_id':                   one_position.get_ballot_item_id(),
                 'ballot_item_we_vote_id':           one_position.get_ballot_item_we_vote_id(),
-                'speaker_display_name':             speaker_display_name,
-                'speaker_image_url_https_large':    one_position.speaker_image_url_https_large
-                if positive_value_exists(one_position.speaker_image_url_https_large)
-                else one_position.speaker_image_url_https,
-                'speaker_image_url_https_medium':   one_position.speaker_image_url_https_medium,
-                'speaker_image_url_https_tiny':     one_position.speaker_image_url_https_tiny,
-                'speaker_twitter_handle':           one_position.speaker_twitter_handle,
-                'twitter_followers_count':          one_position.twitter_followers_count,
-                'speaker_type':                     one_position.speaker_type,
-                'speaker_id':                       speaker_id,
-                'speaker_we_vote_id':               speaker_we_vote_id,
-                'voter_we_vote_id':                 one_position.voter_we_vote_id,
                 'is_support':                       one_position.is_support(),
                 'is_positive_rating':               one_position.is_positive_rating(),
                 'is_support_or_positive_rating':    one_position.is_support_or_positive_rating(),
@@ -2779,11 +2785,27 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
                 'is_information_only':              one_position.is_information_only(),
                 'is_public_position':               one_position.is_public_position(),
                 'has_video':                        is_link_to_video(one_position.more_info_url),
+                'kind_of_ballot_item':              one_position.get_kind_of_ballot_item(),
+                'last_updated':                     one_position.last_updated(),
+                'more_info_url':                    one_position.more_info_url,
+                'position_we_vote_id':              one_position.we_vote_id,
+                'position_ultimate_election_date':  one_position.position_ultimate_election_date,
+                'position_year':                    one_position.position_year,
+                'speaker_type':                     one_position.speaker_type,
+                'speaker_id':                       speaker_id,
+                'speaker_we_vote_id':               speaker_we_vote_id,
+                'speaker_display_name':             speaker_display_name,
+                'speaker_image_url_https_large':    one_position.speaker_image_url_https_large
+                if positive_value_exists(one_position.speaker_image_url_https_large)
+                else one_position.speaker_image_url_https,
+                'speaker_image_url_https_medium':   one_position.speaker_image_url_https_medium,
+                'speaker_image_url_https_tiny':     one_position.speaker_image_url_https_tiny,
+                'speaker_twitter_handle':           one_position.speaker_twitter_handle,
+                'twitter_followers_count':          one_position.twitter_followers_count,
+                'statement_text':                   one_position.statement_text,
                 'vote_smart_rating':                one_position.vote_smart_rating,
                 'vote_smart_time_span':             one_position.vote_smart_time_span,
-                'statement_text':                   one_position.statement_text,
-                'more_info_url':                    one_position.more_info_url,
-                'last_updated':                     one_position.last_updated(),
+                'voter_we_vote_id':                 one_position.voter_we_vote_id,
             }
             position_list.append(one_position_dict_for_api)
 
@@ -2932,11 +2954,7 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
 
         if one_position_success:
             one_position_dict_for_api = {
-                'position_we_vote_id':              one_position.we_vote_id,
-                'position_ultimate_election_date':  one_position.position_ultimate_election_date,
-                'position_year':                    one_position.position_year,
                 'ballot_item_display_name':         one_position.ballot_item_display_name,
-                'kind_of_ballot_item':              one_position.get_kind_of_ballot_item(),
                 'ballot_item_id':                   one_position.get_ballot_item_id(),
                 'ballot_item_we_vote_id':           one_position.get_ballot_item_we_vote_id(),
                 'ballot_item_image_url_https_large':    one_position.ballot_item_image_url_https_large
@@ -2944,17 +2962,7 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
                 else one_position.ballot_item_image_url_https,
                 'ballot_item_image_url_https_medium':   one_position.ballot_item_image_url_https_medium,
                 'ballot_item_image_url_https_tiny':     one_position.ballot_item_image_url_https_tiny,
-                'speaker_display_name':             speaker_display_name,
-                'speaker_image_url_https_large':    one_position.speaker_image_url_https_large
-                if positive_value_exists(one_position.speaker_image_url_https_large)
-                else one_position.speaker_image_url_https,
-                'speaker_image_url_https_medium':   one_position.speaker_image_url_https_medium,
-                'speaker_image_url_https_tiny':     one_position.speaker_image_url_https_tiny,
-                'speaker_twitter_handle':           one_position.speaker_twitter_handle,
-                'twitter_followers_count':          one_position.twitter_followers_count,
-                'speaker_type':                     one_position.speaker_type,
-                'speaker_id':                       speaker_id,
-                'speaker_we_vote_id':               speaker_we_vote_id,
+                'has_video':                        is_link_to_video(one_position.more_info_url),
                 'is_support':                       one_position.is_support(),
                 'is_positive_rating':               one_position.is_positive_rating(),
                 'is_support_or_positive_rating':    one_position.is_support_or_positive_rating(),
@@ -2963,12 +2971,26 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
                 'is_oppose_or_negative_rating':     one_position.is_oppose_or_negative_rating(),
                 'is_information_only':              one_position.is_information_only(),
                 'is_public_position':               one_position.is_public_position(),
-                'has_video':                        is_link_to_video(one_position.more_info_url),
+                'kind_of_ballot_item':              one_position.get_kind_of_ballot_item(),
+                'last_updated':                     one_position.last_updated(),
+                'more_info_url':                    one_position.more_info_url,
+                'position_we_vote_id':              one_position.we_vote_id,
+                'position_ultimate_election_date':  one_position.position_ultimate_election_date,
+                'position_year':                    one_position.position_year,
+                'speaker_type':                     one_position.speaker_type,
+                'speaker_id':                       speaker_id,
+                'speaker_we_vote_id':               speaker_we_vote_id,
+                'statement_text':                   one_position.statement_text,
+                'speaker_display_name':             speaker_display_name,
+                'speaker_image_url_https_large':    one_position.speaker_image_url_https_large
+                if positive_value_exists(one_position.speaker_image_url_https_large)
+                else one_position.speaker_image_url_https,
+                'speaker_image_url_https_medium':   one_position.speaker_image_url_https_medium,
+                'speaker_image_url_https_tiny':     one_position.speaker_image_url_https_tiny,
+                'speaker_twitter_handle':           one_position.speaker_twitter_handle,
+                'twitter_followers_count':          one_position.twitter_followers_count,
                 'vote_smart_rating':                one_position.vote_smart_rating,
                 'vote_smart_time_span':             one_position.vote_smart_time_span,
-                'statement_text':                   one_position.statement_text,
-                'more_info_url':                    one_position.more_info_url,
-                'last_updated':                     one_position.last_updated(),
             }
             position_list.append(one_position_dict_for_api)
 
@@ -3763,7 +3785,6 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 voters_by_linked_org_dict = results['voters_by_linked_org_dict']
                 voters_dict = results['voters_dict']
             one_position_dict_for_api = {
-                'position_we_vote_id':                  one_position.we_vote_id,
                 'ballot_item_display_name':
                     one_position.ballot_item_display_name
                     if positive_value_exists(one_position.ballot_item_display_name) else "",  # Candidate or Measure
@@ -3774,14 +3795,13 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'ballot_item_image_url_https_tiny':     one_position.ballot_item_image_url_https_tiny,
                 'ballot_item_twitter_handle':           one_position.ballot_item_twitter_handle,
                 'ballot_item_political_party':          one_position.political_party,
-                'kind_of_ballot_item':                  kind_of_ballot_item,
                 'ballot_item_id':                       ballot_item_id,
                 'ballot_item_we_vote_id':               ballot_item_we_vote_id,
                 'ballot_item_state_code':               one_position.state_code,
                 'contest_office_id':                    one_position.contest_office_id,
                 'contest_office_we_vote_id':            one_position.contest_office_we_vote_id,
                 'contest_office_name':                  one_position.contest_office_name,
-                'race_office_level':                    one_position.race_office_level,
+                'google_civic_election_id':             one_position.google_civic_election_id,
                 'is_support':                           one_position.is_support(),
                 'is_positive_rating':                   one_position.is_positive_rating(),
                 'is_support_or_positive_rating':        one_position.is_support_or_positive_rating(),
@@ -3790,24 +3810,26 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'is_oppose_or_negative_rating':         one_position.is_oppose_or_negative_rating(),
                 'is_information_only':                  one_position.is_information_only(),
                 'is_public_position':                   one_position.is_public_position(),
+                'kind_of_ballot_item':                  kind_of_ballot_item,
+                'last_updated':                         one_position.last_updated(),
+                'more_info_url':                        one_position.more_info_url,
+                'organization_we_vote_id':              one_position.organization_we_vote_id,
+                'position_we_vote_id':                  one_position.we_vote_id,
+                'position_ultimate_election_date':      one_position.position_ultimate_election_date,
+                'position_year':                        one_position.position_year,
+                'race_office_level':                    one_position.race_office_level,
                 'speaker_display_name':                 one_position.speaker_display_name,  # Organization name
                 'speaker_image_url_https_large':        one_position.speaker_image_url_https_large,
                 'speaker_image_url_https_medium':       one_position.speaker_image_url_https_medium,
                 'speaker_image_url_https_tiny':         one_position.speaker_image_url_https_tiny,
                 'speaker_twitter_handle':               one_position.speaker_twitter_handle,
-                'twitter_followers_count':              one_position.twitter_followers_count,
                 'speaker_type':                         one_position.speaker_type,
-                'organization_we_vote_id':              one_position.organization_we_vote_id,
                 'speaker_we_vote_id':                   one_position.organization_we_vote_id,
+                'state_code':                           one_position.state_code,
+                'statement_text':                       one_position.statement_text,
+                'twitter_followers_count':              one_position.twitter_followers_count,
                 'vote_smart_rating':                    one_position.vote_smart_rating,
                 'vote_smart_time_span':                 one_position.vote_smart_time_span,
-                'google_civic_election_id':             one_position.google_civic_election_id,
-                'position_ultimate_election_date':      one_position.position_ultimate_election_date,
-                'position_year':                        one_position.position_year,
-                'state_code':                           one_position.state_code,
-                'more_info_url':                        one_position.more_info_url,
-                'statement_text':                       one_position.statement_text,
-                'last_updated':                         one_position.last_updated(),
             }
             position_list.append(one_position_dict_for_api)
 

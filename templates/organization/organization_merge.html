@@ -1,0 +1,206 @@
+{# templates/organization/organization_merge.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if organization_option1 %}Merge {{ organization_option1.organization_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
+
+{%  block content %}
+<a href="{% url 'organization:organization_list' %}">< Back to Organizations</a>
+  <br /></r />
+{# <a href="{% url 'organization:find_and_merge_duplicate_organizations' %}?google_civic_election_id={{ google_civic_election_id }}&find_number_of_duplicates=1" >Click to find out the number of possible duplicates</a> (takes 30-60 seconds) #}
+
+<h1>{% if organization_option1 %}Merge {{ organization_option1.organization_name }}{% else %}CANNOT MERGE{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'organization:organization_merge_process' %}" method="post">
+{% csrf_token %}
+{% if organization_option1 and organization_option2 %}
+<table>
+    <tr>
+        <th>&nbsp;</th>
+        <th>Organization Option 1</th>
+        <th>Organization Option 2</th>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td><a href="{% url 'organization:organization_edit_we_vote_id' organization_we_vote_id=organization_option1.we_vote_id %}"
+               target="_blank">view <span class="glyphicon glyphicon-new-window"></span></a></td>
+        <td><a href="{% url 'organization:organization_edit_we_vote_id' organization_we_vote_id=organization_option2.we_vote_id %}"
+               target="_blank">view <span class="glyphicon glyphicon-new-window"></span></a></td>
+    </tr>
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_name" field_label="Organization Name" conflict_status=conflict_values.organization_name organization1_field_value=organization_option1.organization_name organization2_field_value=organization_option2.organization_name organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_twitter_handle" field_label="Twitter Handle" conflict_status=conflict_values.organization_twitter_handle organization1_field_value=organization_option1.organization_twitter_handle organization2_field_value=organization_option2.organization_twitter_handle organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="twitter_name" field_label="Twitter Name" conflict_status=conflict_values.ballotpedia_organization_name organization1_field_value=organization_option1.ballotpedia_organization_name organization2_field_value=organization_option2.ballotpedia_organization_name organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="twitter_description" field_label="Twitter Description" conflict_status=conflict_values.twitter_description organization1_field_value=organization_option1.twitter_description organization2_field_value=organization_option2.twitter_description organization1=organization_option1 organization2=organization_option2 %}
+
+    {% if organization_option1.id != None or organization_option2.id != None %}
+    <tr>
+        <td>ID</td>
+        <td>{{ organization_option1.id|default_if_none:"" }}</td>
+        <td>{{ organization_option2.id|default_if_none:"" }}</td>
+    </tr>
+    {% endif %}
+    {% if organization_option1.we_vote_id != None or organization_option2.we_vote_id != None %}
+    <tr>
+        <td>We Vote ID</td>
+        <td>{{ organization_option1.we_vote_id|default_if_none:"" }}</td>
+        <td>{{ organization_option2.we_vote_id|default_if_none:"" }}</td>
+    </tr>
+    {% endif %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="ballotpedia_page_title" field_label="Ballotpedia Page" conflict_status=conflict_values.ballotpedia_page_title organization1_field_value=organization_option1.ballotpedia_page_title organization2_field_value=organization_option2.ballotpedia_page_title organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="ballotpedia_photo_url" field_label="Ballotpedia Photo" conflict_status=conflict_values.ballotpedia_photo_url organization1_field_value=organization_option1.ballotpedia_photo_url organization2_field_value=organization_option2.ballotpedia_photo_url organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_domain_string" field_label="Chosen Domain String" conflict_status=conflict_values.chosen_domain_string organization1_field_value=organization_option1.chosen_domain_string organization2_field_value=organization_option2.chosen_domain_string organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_favicon_url_https" field_label="Chosen Favicon" conflict_status=conflict_values.chosen_favicon_url_https organization1_field_value=organization_option1.chosen_favicon_url_https organization2_field_value=organization_option2.chosen_favicon_url_https organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_feature_package" field_label="Chosen Package" conflict_status=conflict_values.chosen_feature_package organization1_field_value=organization_option1.chosen_feature_package organization2_field_value=organization_option2.chosen_feature_package organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_google_analytics_account_number" field_label="Google Analytics" conflict_status=conflict_values.chosen_google_analytics_account_number organization1_field_value=organization_option1.chosen_google_analytics_account_number organization2_field_value=organization_option2.chosen_google_analytics_account_number organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_hide_we_vote_logo" field_label="Hide We Vote Logo" conflict_status=conflict_values.chosen_hide_we_vote_logo organization1_field_value=organization_option1.chosen_hide_we_vote_logo organization2_field_value=organization_option2.chosen_hide_we_vote_logo organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_html_verification_string" field_label="HTML Verification String" conflict_status=conflict_values.chosen_html_verification_string organization1_field_value=organization_option1.chosen_html_verification_string organization2_field_value=organization_option2.chosen_html_verification_string organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_logo_url_https" field_label="Chosen Logo" conflict_status=conflict_values.chosen_logo_url_https organization1_field_value=organization_option1.chosen_logo_url_https organization2_field_value=organization_option2.chosen_logo_url_https organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_organization_api_pass_code" field_label="API Passcode" conflict_status=conflict_values.chosen_organization_api_pass_code organization1_field_value=organization_option1.chosen_organization_api_pass_code organization2_field_value=organization_option2.chosen_organization_api_pass_code organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_prevent_sharing_options" field_label="Prevent Sharing" conflict_status=conflict_values.chosen_prevent_sharing_options organization1_field_value=organization_option1.chosen_prevent_sharing_options organization2_field_value=organization_option2.chosen_prevent_sharing_options organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_ready_introduction_text" field_label="Ready Intro Text" conflict_status=conflict_values.chosen_ready_introduction_text organization1_field_value=organization_option1.chosen_ready_introduction_text organization2_field_value=organization_option2.chosen_ready_introduction_text organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_ready_introduction_title" field_label="Ready Intro Title" conflict_status=conflict_values.chosen_ready_introduction_title organization1_field_value=organization_option1.chosen_ready_introduction_title organization2_field_value=organization_option2.chosen_ready_introduction_title organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_social_share_description" field_label="Social Share Description" conflict_status=conflict_values.chosen_social_share_description organization1_field_value=organization_option1.chosen_social_share_description organization2_field_value=organization_option2.chosen_social_share_description organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_social_share_image_256x256_url_https" field_label="Share Image Small" conflict_status=conflict_values.chosen_social_share_image_256x256_url_https organization1_field_value=organization_option1.chosen_social_share_image_256x256_url_https organization2_field_value=organization_option2.chosen_social_share_image_256x256_url_https organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_social_share_master_image_url_https" field_label="Share Image Large" conflict_status=conflict_values.chosen_social_share_master_image_url_https organization1_field_value=organization_option1.chosen_social_share_master_image_url_https organization2_field_value=organization_option2.chosen_social_share_master_image_url_https organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_subdomain_string" field_label="Chosen Subdomain" conflict_status=conflict_values.chosen_subdomain_string organization1_field_value=organization_option1.chosen_subdomain_string organization2_field_value=organization_option2.chosen_subdomain_string organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="chosen_subscription_plan" field_label="Subscription Plan" conflict_status=conflict_values.chosen_subscription_plan organization1_field_value=organization_option1.chosen_subscription_plan organization2_field_value=organization_option2.chosen_subscription_plan organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="facebook_background_image_url_https" field_label="Facebook Background" conflict_status=conflict_values.facebook_background_image_url_https organization1_field_value=organization_option1.facebook_background_image_url_https organization2_field_value=organization_option2.facebook_background_image_url_https organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="facebook_email" field_label="Facebook Email" conflict_status=conflict_values.facebook_email organization1_field_value=organization_option1.facebook_email organization2_field_value=organization_option2.facebook_email organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="facebook_id" field_label="Facebook ID" conflict_status=conflict_values.facebook_id organization1_field_value=organization_option1.facebook_id organization2_field_value=organization_option2.facebook_id organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="facebook_profile_image_url_https" field_label="Facebook Profile Image" conflict_status=conflict_values.facebook_profile_image_url_https organization1_field_value=organization_option1.facebook_profile_image_url_https organization2_field_value=organization_option2.facebook_profile_image_url_https organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="fb_username" field_label="Facebook Username" conflict_status=conflict_values.fb_username organization1_field_value=organization_option1.fb_username organization2_field_value=organization_option2.fb_username organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="issue_analysis_admin_notes" field_label="Issue Analysis Notes" conflict_status=conflict_values.issue_analysis_admin_notes organization1_field_value=organization_option1.issue_analysis_admin_notes organization2_field_value=organization_option2.issue_analysis_admin_notes organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="issue_analysis_done" field_label="Issue Analysis Done" conflict_status=conflict_values.issue_analysis_done organization1_field_value=organization_option1.issue_analysis_done organization2_field_value=organization_option2.issue_analysis_done organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="most_recent_name_update_from_voter_first_and_last" field_label="Recent Name Update" conflict_status=conflict_values.most_recent_name_update_from_voter_first_and_last organization1_field_value=organization_option1.most_recent_name_update_from_voter_first_and_last organization2_field_value=organization_option2.most_recent_name_update_from_voter_first_and_last organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_address" field_label="Address" conflict_status=conflict_values.organization_address organization1_field_value=organization_option1.organization_address organization2_field_value=organization_option2.organization_address organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_city" field_label="City" conflict_status=conflict_values.organization_city organization1_field_value=organization_option1.organization_city organization2_field_value=organization_option2.organization_city organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_contact_name" field_label="Contact Name" conflict_status=conflict_values.organization_contact_name organization1_field_value=organization_option1.organization_contact_name organization2_field_value=organization_option2.organization_contact_name organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_description" field_label="Description" conflict_status=conflict_values.organization_description organization1_field_value=organization_option1.organization_description organization2_field_value=organization_option2.organization_description organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_email" field_label="Email" conflict_status=conflict_values.organization_email organization1_field_value=organization_option1.organization_email organization2_field_value=organization_option2.organization_email organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_endorsements_api_url" field_label="Endorsements API" conflict_status=conflict_values.organization_endorsements_api_url organization1_field_value=organization_option1.organization_endorsements_api_url organization2_field_value=organization_option2.organization_endorsements_api_url organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_facebook" field_label="Facebook" conflict_status=conflict_values.organization_facebook organization1_field_value=organization_option1.organization_facebook organization2_field_value=organization_option2.organization_facebook organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_fax" field_label="Fax" conflict_status=conflict_values.organization_fax organization1_field_value=organization_option1.organization_fax organization2_field_value=organization_option2.organization_fax organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_image" field_label="Image" conflict_status=conflict_values.organization_image organization1_field_value=organization_option1.organization_image organization2_field_value=organization_option2.organization_image organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_instagram_handle" field_label="Instagram" conflict_status=conflict_values.organization_instagram_handle organization1_field_value=organization_option1.organization_instagram_handle organization2_field_value=organization_option2.organization_instagram_handle organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_phone1" field_label="Phone1" conflict_status=conflict_values.organization_phone1 organization1_field_value=organization_option1.organization_phone1 organization2_field_value=organization_option2.organization_phone1 organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_phone2" field_label="Phone2" conflict_status=conflict_values.organization_phone2 organization1_field_value=organization_option1.organization_phone2 organization2_field_value=organization_option2.organization_phone2 organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_state" field_label="Org State" conflict_status=conflict_values.organization_state organization1_field_value=organization_option1.organization_state organization2_field_value=organization_option2.organization_state organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_type" field_label="Org Type" conflict_status=conflict_values.organization_type organization1_field_value=organization_option1.organization_type organization2_field_value=organization_option2.organization_type organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_website" field_label="Website" conflict_status=conflict_values.organization_website organization1_field_value=organization_option1.organization_website organization2_field_value=organization_option2.organization_website organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_zip" field_label="ZIP" conflict_status=conflict_values.organization_zip organization1_field_value=organization_option1.organization_zip organization2_field_value=organization_option2.organization_zip organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="state_served_code" field_label="State" conflict_status=conflict_values.state_served_code organization1_field_value=organization_option1.state_served_code organization2_field_value=organization_option2.state_served_code organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="subscription_plan_end_day_text" field_label="Plan End Date" conflict_status=conflict_values.subscription_plan_end_day_text organization1_field_value=organization_option1.subscription_plan_end_day_text organization2_field_value=organization_option2.subscription_plan_end_day_text organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="subscription_plan_features_active" field_label="Features Active" conflict_status=conflict_values.subscription_plan_features_active organization1_field_value=organization_option1.subscription_plan_features_active organization2_field_value=organization_option2.subscription_plan_features_active organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="twitter_description" field_label="Twitter Description" conflict_status=conflict_values.twitter_description organization1_field_value=organization_option1.twitter_description organization2_field_value=organization_option2.twitter_description organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="twitter_followers_count" field_label="Twitter Followers" conflict_status=conflict_values.twitter_followers_count organization1_field_value=organization_option1.twitter_followers_count organization2_field_value=organization_option2.twitter_followers_count organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="twitter_user_id" field_label="Twitter User Id" conflict_status=conflict_values.twitter_user_id organization1_field_value=organization_option1.twitter_user_id organization2_field_value=organization_option2.twitter_user_id organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="vote_smart_id" field_label="Vote Smart Id" conflict_status=conflict_values.vote_smart_id organization1_field_value=organization_option1.vote_smart_id organization2_field_value=organization_option2.vote_smart_id organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_large" field_label="Image Large" conflict_status=conflict_values.we_vote_hosted_profile_image_url_large organization1_field_value=organization_option1.we_vote_hosted_profile_image_url_large organization2_field_value=organization_option2.we_vote_hosted_profile_image_url_large organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_medium" field_label="Image Medium" conflict_status=conflict_values.we_vote_hosted_profile_image_url_medium organization1_field_value=organization_option1.we_vote_hosted_profile_image_url_medium organization2_field_value=organization_option2.we_vote_hosted_profile_image_url_medium organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_tiny" field_label="Image Tiny" conflict_status=conflict_values.we_vote_hosted_profile_image_url_tiny organization1_field_value=organization_option1.we_vote_hosted_profile_image_url_tiny organization2_field_value=organization_option2.we_vote_hosted_profile_image_url_tiny organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="wikipedia_page_id" field_label="Wikipedia Page Id" conflict_status=conflict_values.wikipedia_page_id organization1_field_value=organization_option1.wikipedia_page_id organization2_field_value=organization_option2.wikipedia_page_id organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="wikipedia_page_title" field_label="Wikipedia Page Title" conflict_status=conflict_values.wikipedia_page_title organization1_field_value=organization_option1.wikipedia_page_title organization2_field_value=organization_option2.wikipedia_page_title organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="wikipedia_photo_url" field_label="Wikipedia Photo" conflict_status=conflict_values.wikipedia_photo_url organization1_field_value=organization_option1.wikipedia_photo_url organization2_field_value=organization_option2.wikipedia_photo_url organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="wikipedia_thumbnail_url" field_label="Thumbnail URL" conflict_status=conflict_values.wikipedia_thumbnail_url organization1_field_value=organization_option1.wikipedia_thumbnail_url organization2_field_value=organization_option2.wikipedia_thumbnail_url organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="wikipedia_thumbnail_width" field_label="Thumnail Width" conflict_status=conflict_values.wikipedia_thumbnail_width organization1_field_value=organization_option1.wikipedia_thumbnail_width organization2_field_value=organization_option2.wikipedia_thumbnail_width organization1=organization_option1 organization2=organization_option2 %}
+
+{% include "organization/organization_merge_one_field_decision.html" with field_name="wikipedia_thumbnail_height" field_label="Thumbnail Height" conflict_status=conflict_values.wikipedia_thumbnail_height organization1_field_value=organization_option1.wikipedia_thumbnail_height organization2_field_value=organization_option2.wikipedia_thumbnail_height organization1=organization_option1 organization2=organization_option2 %}
+
+    <tr>
+        <td>Public Positions Count</td>
+        <td>{{ organization_option1.public_positions_count }}</td>
+        <td>{{ organization_option2.public_positions_count }}</td>
+    </tr>
+    <tr>
+        <td>Friends Positions Count</td>
+        <td>{{ organization_option1.friends_positions_count }}</td>
+        <td>{{ organization_option2.friends_positions_count }}</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>
+            <a href="{% url 'organization:organization_list' %}">cancel</a>&nbsp;
+            <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;
+        </td>
+        <td></td>
+        <td><input type="submit" value="Merge Organizations" name="merge" /></td>
+    </tr>
+</table>
+<input type="hidden" name="remove_duplicate_process" value="{{ remove_duplicate_process }}" />
+<input type="hidden" name="state_code" value="{{ organization_option2.state_code }}" />
+<input type="hidden" name="google_civic_election_id" value="{{ organization_option1.google_civic_election_id }}" />
+<input type="hidden" name="organization1_we_vote_id" value="{{ organization_option1.we_vote_id }}" />
+<input type="hidden" name="organization2_we_vote_id" value="{{ organization_option2.we_vote_id }}" />
+{% else %}
+<input type="submit" value="CANNOT MERGE" />
+{% endif %}
+</form>
+
+<br />
+
+{% endblock %}

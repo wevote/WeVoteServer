@@ -54,40 +54,41 @@ def candidate_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "kind_of_ballot_item": string (CANDIDATE),\n' \
-                   '  "id": integer,\n' \
-                   '  "we_vote_id": string,\n' \
                    '  "ballot_item_display_name": string,\n' \
                    '  "candidate_photo_url_large": string,\n' \
                    '  "candidate_photo_url_medium": string,\n' \
                    '  "candidate_photo_url_tiny": string,\n' \
-                   '  "order_on_ballot": integer,\n' \
-                   '  "google_civic_election_id": integer,\n' \
                    '  "ballotpedia_candidate_id": integer,\n' \
                    '  "ballotpedia_candidate_summary": string,\n' \
                    '  "ballotpedia_candidate_url": string,\n' \
                    '  "ballotpedia_person_id": integer,\n' \
-                   '  "maplight_id": integer,\n' \
+                   '  "candidate_email": string,\n' \
+                   '  "candidate_phone": string,\n' \
                    '  "contest_office_id": integer,\n' \
                    '  "contest_office_we_vote_id": string,\n' \
                    '  "contest_office_name": string,\n' \
-                   '  "politician_id": integer,\n' \
-                   '  "politician_we_vote_id": string,\n' \
-                   '  "party": string,\n' \
-                   '  "ocd_division_id": string,\n' \
-                   '  "state_code": string,\n' \
                    '  "candidate_url": string,\n' \
                    '  "candidate_contact_form_url": string,\n' \
                    '  "facebook_url": string,\n' \
+                   '  "google_civic_election_id": integer,\n' \
+                   '  "id": integer,\n' \
+                   '  "kind_of_ballot_item": string (CANDIDATE),\n' \
+                   '  "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
+                   '  "maplight_id": integer,\n' \
+                   '  "ocd_division_id": string,\n' \
+                   '  "order_on_ballot": integer,\n' \
+                   '  "politician_id": integer,\n' \
+                   '  "politician_we_vote_id": string,\n' \
+                   '  "party": string,\n' \
+                   '  "state_code": string,\n' \
                    '  "twitter_url": string,\n' \
                    '  "twitter_handle": string,\n' \
                    '  "twitter_description": string,\n' \
                    '  "twitter_followers_count": integer,\n' \
-                   '  "youtube_url": string,\n' \
-                   '  "candidate_email": string,\n' \
-                   '  "candidate_phone": string,\n' \
+                   '  "we_vote_id": string,\n' \
                    '  "withdrawn_from_election": boolean,\n' \
                    '  "withdrawal_date": date,\n' \
+                   '  "youtube_url": string,\n' \
                    '}'
 
     template_values = {

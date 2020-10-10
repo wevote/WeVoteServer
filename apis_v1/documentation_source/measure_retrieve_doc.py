@@ -69,6 +69,7 @@ def measure_retrieve_doc_template_values(url_root):
                    '  "google_civic_election_id": integer,\n' \
                    '  "id": integer,\n' \
                    '  "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
+                   '  "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
                    '  "maplight_id": integer,\n' \
                    '  "measure_subtitle": string,\n' \
                    '  "measure_text": string,\n' \

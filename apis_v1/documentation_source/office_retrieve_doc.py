@@ -54,26 +54,27 @@ def office_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '  "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
-                   '  "id": integer,\n' \
-                   '  "we_vote_id": string,\n' \
-                   '  "google_civic_election_id": integer,\n' \
                    '  "ballot_item_display_name": string,\n' \
-                   '  "ocd_division_id": string,\n' \
-                   '  "maplight_id": string,\n' \
                    '  "ballotpedia_id": string,\n' \
                    '  "ballotpedia_office_id": integer,\n' \
                    '  "ballotpedia_office_name": string,\n' \
                    '  "ballotpedia_office_url": string,\n' \
                    '  "ballotpedia_race_id": integer,\n' \
                    '  "ballotpedia_race_office_level": string,\n' \
-                   '  "wikipedia_id": string,\n' \
+                   '  "district_name": string,\n' \
+                   '  "google_civic_election_id": integer,\n' \
+                   '  "id": integer,\n' \
+                   '  "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
+                   '  "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
+                   '  "maplight_id": string,\n' \
                    '  "number_voting_for": integer,\n' \
                    '  "number_elected": integer,\n' \
-                   '  "state_code": string,\n' \
+                   '  "ocd_division_id": string,\n' \
                    '  "primary_party": string,\n' \
-                   '  "district_name": string,\n' \
+                   '  "race_office_level": string,\n' \
+                   '  "state_code": string,\n' \
+                   '  "we_vote_id": string,\n' \
+                   '  "wikipedia_id": string,\n' \
                    '}'
 
     template_values = {

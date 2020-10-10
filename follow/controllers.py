@@ -558,6 +558,7 @@ def move_organization_followers_to_another_organization(from_organization_id, fr
                 follow_entries_moved += 1
             except Exception as e:
                 follow_entries_not_moved += 1
+                status += "ERROR: " + str(e) + ' '
 
     from_follow_list = follow_organization_list.retrieve_follow_organization_by_organization_we_vote_id(
         from_organization_we_vote_id)

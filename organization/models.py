@@ -62,6 +62,75 @@ ORGANIZATION_TYPE_MAP = {
     UNKNOWN:                    'Unknown Type',
 }
 
+# When merging organizations, these are the fields we check for figure_out_organization_conflict_values
+ORGANIZATION_UNIQUE_IDENTIFIERS = [
+    'ballotpedia_page_title',
+    'ballotpedia_photo_url',
+    'chosen_domain_string',
+    'chosen_favicon_url_https',
+    'chosen_feature_package',
+    'chosen_google_analytics_account_number',
+    'chosen_hide_we_vote_logo',
+    'chosen_html_verification_string',
+    'chosen_logo_url_https',
+    'chosen_organization_api_pass_code',
+    'chosen_prevent_sharing_opinions',
+    'chosen_ready_introduction_text',
+    'chosen_ready_introduction_title',
+    'chosen_social_share_description',
+    'chosen_social_share_image_256x256_url_https',
+    'chosen_social_share_master_image_url_https',
+    'chosen_subdomain_string',
+    'chosen_subscription_plan',
+    'facebook_background_image_url_https',
+    'facebook_email',
+    'facebook_id',
+    'facebook_profile_image_url_https',
+    'fb_username',
+    'issue_analysis_admin_notes',
+    'issue_analysis_done',
+    'most_recent_name_update_from_voter_first_and_last',
+    'organization_address',
+    'organization_city',
+    'organization_contact_name',
+    'organization_description',
+    'organization_email',
+    'organization_endorsements_api_url',
+    'organization_facebook',
+    'organization_fax',
+    'organization_image',
+    'organization_instagram_handle',
+    'organization_name',
+    'organization_phone1',
+    'organization_phone2',
+    'organization_state',
+    'organization_twitter_handle',
+    'organization_type',
+    'organization_website',
+    'organization_zip',
+    'state_served_code',
+    'subscription_plan_end_day_text',
+    'subscription_plan_features_active',
+    # 'twitter_description',
+    # 'twitter_followers_count',
+    # 'twitter_location',
+    # 'twitter_name',
+    # 'twitter_profile_background_image_url_https',
+    # 'twitter_profile_banner_url_https',
+    # 'twitter_profile_image_url_https',
+    # 'twitter_user_id',
+    'vote_smart_id',
+    'we_vote_hosted_profile_image_url_large',
+    'we_vote_hosted_profile_image_url_medium',
+    'we_vote_hosted_profile_image_url_tiny',
+    'wikipedia_page_id',
+    'wikipedia_page_title',
+    'wikipedia_photo_url',
+    'wikipedia_thumbnail_height',
+    'wikipedia_thumbnail_url',
+    'wikipedia_thumbnail_width',
+]
+
 # These are values used in features_provided_bitmap
 # Mirrored in WebApp/src/js/constants/VoterConstants.js
 # Related to MasterFeaturePackage in donate/models.py, features_provided_bitmap
@@ -2731,6 +2800,8 @@ class Organization(models.Model):
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
     organization_twitter_handle = models.CharField(
         verbose_name='organization twitter screen_name', max_length=255, null=True, unique=False)
+    # organization_twitter_handle2 = models.CharField(
+    #     verbose_name='organization twitter screen_name2', max_length=255, null=True, unique=False)
     twitter_name = models.CharField(
         verbose_name="org name from twitter", max_length=255, null=True, blank=True)
     twitter_location = models.CharField(
@@ -2777,7 +2848,7 @@ class Organization(models.Model):
 
     organization_type = models.CharField(
         verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
-    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    date_last_changed = models.DateTimeField(null=True, auto_now=True)
 
     # This is the domain name the client has configured for their We Vote configured site
     chosen_domain_string = models.CharField(

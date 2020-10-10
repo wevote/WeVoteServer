@@ -105,7 +105,7 @@ def position_retrieve_doc_template_values(url_root):
                    '  "statement_text": string,\n' \
                    '  "statement_html": string,\n' \
                    '  "more_info_url": string,\n' \
-                   '  "last_updated": string,\n' \
+                   '  "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
                    '}'
 
     template_values = {

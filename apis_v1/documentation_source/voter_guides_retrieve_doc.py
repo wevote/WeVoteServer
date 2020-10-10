@@ -47,7 +47,7 @@ def voter_guides_retrieve_doc_template_values(url_root):
                    '     "election_day_text": string (YYYY-MM-DD),\n' \
                    '     "google_civic_election_id": integer,\n' \
                    '     "organization_we_vote_id": string (We Vote ID for the org that owns the voter guide),\n' \
-                   '     "last_updated": string (time in this format %Y-%m-%d %H:%M),\n' \
+                   '     "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
                    '     "pledge_goal": integer,\n' \
                    '     "pledge_count": integer,\n' \
                    '     "state_code": string,\n' \

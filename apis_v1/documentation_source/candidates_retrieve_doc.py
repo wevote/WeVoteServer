@@ -65,6 +65,7 @@ def candidates_retrieve_doc_template_values(url_root):
                    '     "candidate_photo_url_medium": string,\n'\
                    '     "candidate_photo_url_tiny": string,\n' \
                    '     "kind_of_ballot_item": string,\n' \
+                   '     "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
                    '     "order_on_ballot": integer,\n' \
                    '     "party": string,\n' \
                    '     "we_vote_id": string,\n' \

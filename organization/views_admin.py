@@ -2,9 +2,11 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import full_domain_string_available, organizations_import_from_master_server, \
+from .controllers import full_domain_string_available, merge_these_two_organizations,\
+    move_organization_followers_to_another_organization, move_organization_membership_link_to_another_organization, \
+    organizations_import_from_master_server, \
     push_organization_data_to_other_table_caches, subdomain_string_available
-from .models import GROUP, INDIVIDUAL, Organization, OrganizationReservedDomain
+from .models import GROUP, INDIVIDUAL, Organization, OrganizationReservedDomain, ORGANIZATION_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from config.base import get_environment_variable
@@ -28,7 +30,8 @@ from measure.models import ContestMeasure, ContestMeasureListManager, ContestMea
 from office.models import ContestOfficeManager
 import operator
 from organization.models import OrganizationListManager, OrganizationManager, ORGANIZATION_TYPE_MAP, UNKNOWN
-from organization.controllers import organization_retrieve_tweets_from_twitter, organization_analyze_tweets
+from organization.controllers import figure_out_organization_conflict_values, \
+    organization_retrieve_tweets_from_twitter, organization_analyze_tweets
 from position.models import PositionEntered, PositionForFriends, PositionListManager, PositionManager, \
     INFORMATION_ONLY, OPPOSE, STILL_DECIDING, SUPPORT
 from twitter.models import TwitterUserManager
@@ -52,6 +55,47 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+
+@login_required
+def compare_two_organizations_for_merge_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    organization1_we_vote_id = request.GET.get('organization1_we_vote_id', 0)
+    organization2_we_vote_id = request.GET.get('organization2_we_vote_id', 0)
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    organization_manager = OrganizationManager()
+    organization_results = organization_manager.retrieve_organization_from_we_vote_id(organization1_we_vote_id)
+    if not organization_results['organization_found']:
+        messages.add_message(request, messages.ERROR, "Organization1 not found.")
+        return HttpResponseRedirect(reverse('organization:organization_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    organization_option1_for_template = organization_results['organization']
+
+    organization_results = organization_manager.retrieve_organization_from_we_vote_id(organization2_we_vote_id)
+    if not organization_results['organization_found']:
+        messages.add_message(request, messages.ERROR, "Organization2 not found.")
+        return HttpResponseRedirect(reverse('organization:organization_position_list',
+                                            args=(organization_option1_for_template.id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    organization_option2_for_template = organization_results['organization']
+
+    organization_merge_conflict_values = figure_out_organization_conflict_values(
+        organization_option1_for_template, organization_option2_for_template)
+
+    # This view function takes us to displaying a template
+    remove_duplicate_process = False  # Do not try to find another office to merge after finishing
+    return render_organization_merge_form(
+        request, organization_option1_for_template,
+        organization_option2_for_template,
+        organization_merge_conflict_values,
+        remove_duplicate_process)
 
 @login_required
 def organization_analyze_tweets_view(request, organization_we_vote_id):
@@ -367,6 +411,183 @@ def organization_list_view(request):
         'state_list':               sorted_state_list,
     }
     return render(request, 'organization/organization_list.html', template_values)
+
+
+@login_required
+def organization_merge_process_view(request):
+    """
+    Process the merging of two organizations using the Admin tool
+    :param request:
+    :return:
+    """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    organization_manager = OrganizationManager()
+
+    merge = request.POST.get('merge', False)
+    skip = request.POST.get('skip', False)
+
+    # Candidate 1 is the one we keep, and Candidate 2 is the one we will merge into Candidate 1
+    organization1_we_vote_id = request.POST.get('organization1_we_vote_id', 0)
+    organization2_we_vote_id = request.POST.get('organization2_we_vote_id', 0)
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    redirect_to_organization_list = request.POST.get('redirect_to_organization_list', False)
+    remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
+    state_code = request.POST.get('state_code', '')
+    status = ''
+
+    if positive_value_exists(skip):
+        messages.add_message(request, messages.ERROR, 'Skip is not implemented for organizations yet.')
+        # results = organization_manager.update_or_create_organizations_are_not_duplicates(
+        #     organization1_we_vote_id, organization2_we_vote_id)
+        # if not results['new_organizations_are_not_duplicates_created']:
+        #     messages.add_message(request, messages.ERROR, 'Could not save organizations_are_not_duplicates entry: ' +
+        #                          results['status'])
+        # messages.add_message(request, messages.INFO, 'Prior organizations skipped, and not merged.')
+        # return HttpResponseRedirect(reverse('organization:find_and_merge_duplicate_organizations', args=()) +
+        #                             "?google_civic_election_id=" + str(google_civic_election_id) +
+        #                             "&state_code=" + str(state_code))
+        return HttpResponseRedirect(reverse('organization:compare_two_organizations_for_merge', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code) +
+                                    "&organization1_we_vote_id=" + str(organization1_we_vote_id) +
+                                    "&organization2_we_vote_id=" + str(organization2_we_vote_id))
+
+    # Check to make sure that organization2 isn't linked to a voter. If so, cancel out for now.
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization2_we_vote_id, read_only=True)
+    if results['voter_found']:
+        status += "MERGE_PROCESS_VIEW-ORGANIZATION2_LINKED_TO_A_VOTER "
+        messages.add_message(request, messages.ERROR, status)
+        return HttpResponseRedirect(reverse('organization:compare_two_organizations_for_merge', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code) +
+                                    "&organization1_we_vote_id=" + str(organization1_we_vote_id) +
+                                    "&organization2_we_vote_id=" + str(organization2_we_vote_id))
+
+    # We want to check to see if organization2_we_vote_id has a TwitterLinkToOrganization entry.
+    #  If it does, it means that someone has signed in with that Twitter account for that organization.
+    #  As of Oct 2020 we have not set up the code to merge org2 data for voter with org1 data.
+    twitter_user_manager = TwitterUserManager()
+    twitter_link_to_organization_results = \
+        twitter_user_manager.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
+            organization2_we_vote_id)
+    if twitter_link_to_organization_results['twitter_link_to_organization_found']:
+        messages.add_message(request, messages.ERROR, 'Organization2 has TwitterLinkToOrganization entry. '
+                                                      'Merge cannot proceed.')
+        return HttpResponseRedirect(reverse('organization:compare_two_organizations_for_merge', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code) +
+                                    "&organization1_we_vote_id=" + str(organization1_we_vote_id) +
+                                    "&organization2_we_vote_id=" + str(organization2_we_vote_id))
+
+    organization1_results = organization_manager.retrieve_organization_from_we_vote_id(organization1_we_vote_id)
+    if organization1_results['organization_found']:
+        organization1_on_stage = organization1_results['organization']
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not retrieve organization 1.')
+        return HttpResponseRedirect(reverse('organization:organization_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
+
+    organization2_results = organization_manager.retrieve_organization_from_we_vote_id(organization2_we_vote_id)
+    if organization2_results['organization_found']:
+        organization2_on_stage = organization2_results['organization']
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not retrieve organization 2.')
+        return HttpResponseRedirect(reverse('organization:organization_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
+
+    from_organization_id = organization2_on_stage.id
+    from_organization_we_vote_id = organization2_on_stage.we_vote_id
+    to_organization_id = organization1_on_stage.id
+    to_organization_we_vote_id = organization1_on_stage.we_vote_id
+
+    # Make sure we have both from_organization values
+    if positive_value_exists(from_organization_id) and not positive_value_exists(from_organization_we_vote_id):
+        from_organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(from_organization_id)
+    elif positive_value_exists(from_organization_we_vote_id) and not positive_value_exists(from_organization_id):
+        from_organization_id = organization_manager.fetch_organization_id(from_organization_we_vote_id)
+
+    # Make sure we have both to_organization values
+    if positive_value_exists(to_organization_id) and not positive_value_exists(to_organization_we_vote_id):
+        to_organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(to_organization_id)
+    elif positive_value_exists(to_organization_we_vote_id) and not positive_value_exists(to_organization_id):
+        to_organization_id = organization_manager.fetch_organization_id(to_organization_we_vote_id)
+
+    # If anyone is following organization2, move those followers to organization1
+    move_organization_followers_results = move_organization_followers_to_another_organization(
+        from_organization_id, from_organization_we_vote_id,
+        to_organization_id, to_organization_we_vote_id)
+    status += " " + move_organization_followers_results['status']
+    if positive_value_exists(move_organization_followers_results['follow_entries_not_moved']):
+        messages.add_message(request, messages.ERROR, status)
+        return HttpResponseRedirect(reverse('organization:compare_two_organizations_for_merge', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code) +
+                                    "&organization1_we_vote_id=" + str(organization1_we_vote_id) +
+                                    "&organization2_we_vote_id=" + str(organization2_we_vote_id))
+
+    # If anyone has been linked with external_voter_id as a member of the old voter's organization,
+    #  move those followers to the new voter's organization
+    move_organization_membership_link_results = move_organization_membership_link_to_another_organization(
+        from_organization_we_vote_id, to_organization_we_vote_id)
+    status += " " + move_organization_membership_link_results['status']
+    if positive_value_exists(move_organization_followers_results['membership_link_entries_not_moved']):
+        messages.add_message(request, messages.ERROR, status)
+        return HttpResponseRedirect(reverse('organization:compare_two_organizations_for_merge', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code) +
+                                    "&organization1_we_vote_id=" + str(organization1_we_vote_id) +
+                                    "&organization2_we_vote_id=" + str(organization2_we_vote_id))
+
+    # Gather choices made from merge form
+    conflict_values = figure_out_organization_conflict_values(organization1_on_stage, organization2_on_stage)
+    admin_merge_choices = {}
+    for attribute in ORGANIZATION_UNIQUE_IDENTIFIERS:
+        conflict_value = conflict_values.get(attribute, None)
+        if conflict_value == "CONFLICT":
+            choice = request.POST.get(attribute + '_choice', '')
+            if organization2_we_vote_id == choice:
+                admin_merge_choices[attribute] = getattr(organization2_on_stage, attribute)
+        elif conflict_value == "CANDIDATE2":
+            admin_merge_choices[attribute] = getattr(organization2_on_stage, attribute)
+
+    merge_results = \
+        merge_these_two_organizations(organization1_we_vote_id, organization2_we_vote_id, admin_merge_choices)
+
+    if not positive_value_exists(merge_results['organizations_merged']):
+        # NOTE: We could also redirect to a page to look specifically at these two organizations, but this should
+        # also get you back to looking at the two organizations
+        error_message = "ORGANIZATION_COMPARISON_PROBLEM: " + merge_results['status']
+        messages.add_message(request, messages.ERROR, error_message)
+        # return HttpResponseRedirect(reverse('organization:find_and_merge_duplicate_organizations', args=()) +
+        #                             "?google_civic_election_id=" + str(google_civic_election_id) +
+        #                             "&auto_merge_off=1" +
+        #                             "&state_code=" + str(state_code))
+        return HttpResponseRedirect(reverse('organization:organization_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
+
+    organization = merge_results['organization']
+    messages.add_message(request, messages.INFO, "Organization '{organization_name}' merged."
+                                                 "".format(organization_name=organization.organization_name))
+
+    if redirect_to_organization_list:
+        return HttpResponseRedirect(reverse('organization:organization_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
+
+    # if remove_duplicate_process:
+    #     return HttpResponseRedirect(reverse('organization:find_and_merge_duplicate_organizations', args=()) +
+    #                                 "?google_civic_election_id=" + str(google_civic_election_id) +
+    #                                 "&state_code=" + str(state_code))
+
+    return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization1_on_stage.id,)))
 
 
 @login_required
@@ -1015,6 +1236,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     status = ""
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
+    organization_search_for_merge = request.GET.get('organization_search_for_merge', "")
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     candidate_campaign_id = request.GET.get('candidate_campaign_id', 0)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
@@ -1078,109 +1300,146 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         messages.add_message(request, messages.ERROR,
                              'Could not find organization when trying to retrieve positions.')
         return HttpResponseRedirect(reverse('organization:organization_list', args=()))
+
+    results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+        google_civic_election_id_list)
+    if not positive_value_exists(results['success']):
+        status += results['status']
+    candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
+    try:
+        public_position_query = PositionEntered.objects.all()
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        public_position_query = public_position_query.exclude(stance__iexact='PERCENT_RATING')
+        public_position_query = public_position_query.filter(organization_id=organization_id)
+        if positive_value_exists(google_civic_election_id):
+            public_position_query = public_position_query\
+                .filter(Q(google_civic_election_id=google_civic_election_id) |
+                        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+        elif len(google_civic_election_id_list):
+            public_position_query = public_position_query\
+                .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
+                        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+        public_position_query = public_position_query.order_by('-id')
+        public_position_list = list(public_position_query)
+
+        friends_only_position_query = PositionForFriends.objects.all()
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        friends_only_position_query = friends_only_position_query.exclude(stance__iexact='PERCENT_RATING')
+        friends_only_position_query = friends_only_position_query.filter(organization_id=organization_id)
+        if positive_value_exists(google_civic_election_id):
+            friends_only_position_query = friends_only_position_query\
+                .filter(Q(google_civic_election_id=google_civic_election_id) |
+                        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+        elif len(google_civic_election_id_list):
+            friends_only_position_query = friends_only_position_query\
+                .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
+                        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+        friends_only_position_query = friends_only_position_query.order_by('-id')
+        friends_only_position_list = list(friends_only_position_query)
+
+        organization_position_list = public_position_list + friends_only_position_list
+        if len(public_position_list) or len(friends_only_position_list):
+            organization_position_list_found = True
+
+        link_issue_list_manager = OrganizationLinkToIssueList()
+        organization_link_issue_list = link_issue_list_manager. \
+            retrieve_issue_list_by_organization_we_vote_id(organization_we_vote_id)
+        issue_manager = IssueManager()
+        for link_issue in organization_link_issue_list:
+            issue_object = issue_manager.fetch_issue_from_we_vote_id(link_issue.issue_we_vote_id)
+            organization_issues_list.append(issue_object)
+
+        organization_link_block_issue_list = link_issue_list_manager.\
+            retrieve_issue_blocked_list_by_organization_we_vote_id(organization_we_vote_id)
+        for blocked_issue in organization_link_block_issue_list:
+            issue_object = issue_manager.fetch_issue_from_we_vote_id(blocked_issue.issue_we_vote_id)
+            organization_blocked_issues_list.append(issue_object)
+
+    except Exception as e:
+        status += "COULD_NOT_RETRIEVE_POSITION_LIST " + str(e) + ' '
+        organization_position_list = []
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
     else:
-        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
-            google_civic_election_id_list)
-        if not positive_value_exists(results['success']):
-            status += results['status']
-        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+        voter = None
 
-        try:
-            public_position_query = PositionEntered.objects.all()
-            # As of Aug 2018 we are no longer using PERCENT_RATING
-            public_position_query = public_position_query.exclude(stance__iexact='PERCENT_RATING')
-            public_position_query = public_position_query.filter(organization_id=organization_id)
-            if positive_value_exists(google_civic_election_id):
-                public_position_query = public_position_query\
-                    .filter(Q(google_civic_election_id=google_civic_election_id) |
-                            Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
-            elif len(google_civic_election_id_list):
-                public_position_query = public_position_query\
-                    .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
-                            Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
-            public_position_query = public_position_query.order_by('-id')
-            public_position_list = list(public_position_query)
+    offices_dict = {}
+    candidates_dict = {}
+    measures_dict = {}
+    organizations_dict = {}
+    voters_by_linked_org_dict = {}
+    voters_dict = {}
+    for one_position in organization_position_list:
+        position_manager = PositionManager()
+        results = position_manager.refresh_cached_position_info(
+            one_position, offices_dict=offices_dict, candidates_dict=candidates_dict, measures_dict=measures_dict,
+            organizations_dict=organizations_dict, voters_by_linked_org_dict=voters_by_linked_org_dict,
+            voters_dict=voters_dict)
+        offices_dict = results['offices_dict']
+        candidates_dict = results['candidates_dict']
+        measures_dict = results['measures_dict']
+        organizations_dict = results['organizations_dict']
+        voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+        voters_dict = results['voters_dict']
 
-            friends_only_position_query = PositionForFriends.objects.all()
-            # As of Aug 2018 we are no longer using PERCENT_RATING
-            friends_only_position_query = friends_only_position_query.exclude(stance__iexact='PERCENT_RATING')
-            friends_only_position_query = friends_only_position_query.filter(organization_id=organization_id)
-            if positive_value_exists(google_civic_election_id):
-                friends_only_position_query = friends_only_position_query\
-                    .filter(Q(google_civic_election_id=google_civic_election_id) |
-                            Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
-            elif len(google_civic_election_id_list):
-                friends_only_position_query = friends_only_position_query\
-                    .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
-                            Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
-            friends_only_position_query = friends_only_position_query.order_by('-id')
-            friends_only_position_list = list(friends_only_position_query)
+    organization_search_results_list = []
+    if positive_value_exists(organization_search_for_merge) and positive_value_exists(organization_we_vote_id):
+        organization_query = Organization.objects.all()
+        organization_query = organization_query.exclude(we_vote_id__iexact=organization_we_vote_id)
 
-            organization_position_list = public_position_list + friends_only_position_list
-            if len(public_position_list) or len(friends_only_position_list):
-                organization_position_list_found = True
+        search_words = organization_search_for_merge.split()
+        for one_word in search_words:
+            filters = []  # Reset for each search word
+            new_filter = Q(organization_name__icontains=one_word)
+            filters.append(new_filter)
 
-            link_issue_list_manager = OrganizationLinkToIssueList()
-            organization_link_issue_list = link_issue_list_manager. \
-                retrieve_issue_list_by_organization_we_vote_id(organization_we_vote_id)
-            issue_manager = IssueManager()
-            for link_issue in organization_link_issue_list:
-                issue_object = issue_manager.fetch_issue_from_we_vote_id(link_issue.issue_we_vote_id)
-                organization_issues_list.append(issue_object)
+            new_filter = Q(we_vote_id__iexact=one_word)
+            filters.append(new_filter)
 
-            organization_link_block_issue_list = link_issue_list_manager.\
-                retrieve_issue_blocked_list_by_organization_we_vote_id(organization_we_vote_id)
-            for blocked_issue in organization_link_block_issue_list:
-                issue_object = issue_manager.fetch_issue_from_we_vote_id(blocked_issue.issue_we_vote_id)
-                organization_blocked_issues_list.append(issue_object)
+            new_filter = Q(organization_description__icontains=one_word)
+            filters.append(new_filter)
 
-        except Exception as e:
-            status += "COULD_NOT_RETRIEVE_POSITION_LIST " + str(e) + ' '
-            organization_position_list = []
+            new_filter = Q(organization_twitter_handle__icontains=one_word)
+            filters.append(new_filter)
 
-        voter_manager = VoterManager()
-        voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id)
-        if voter_results['voter_found']:
-            voter = voter_results['voter']
-        else:
-            voter = None
+            new_filter = Q(organization_instagram_handle__icontains=one_word)
+            filters.append(new_filter)
 
-        offices_dict = {}
-        candidates_dict = {}
-        measures_dict = {}
-        organizations_dict = {}
-        voters_by_linked_org_dict = {}
-        voters_dict = {}
-        for one_position in organization_position_list:
-            position_manager = PositionManager()
-            results = position_manager.refresh_cached_position_info(
-                one_position, offices_dict=offices_dict, candidates_dict=candidates_dict, measures_dict=measures_dict,
-                organizations_dict=organizations_dict, voters_by_linked_org_dict=voters_by_linked_org_dict,
-                voters_dict=voters_dict)
-            offices_dict = results['offices_dict']
-            candidates_dict = results['candidates_dict']
-            measures_dict = results['measures_dict']
-            organizations_dict = results['organizations_dict']
-            voters_by_linked_org_dict = results['voters_by_linked_org_dict']
-            voters_dict = results['voters_dict']
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
 
-        organization_type_display_text = ORGANIZATION_TYPE_MAP.get(organization_on_stage.organization_type,
-                                                                   ORGANIZATION_TYPE_MAP[UNKNOWN])
-        template_values = {
-            'messages_on_stage':                messages_on_stage,
-            'organization':                     organization_on_stage,
-            'organization_position_list':       organization_position_list,
-            'organization_num_positions':       len(organization_position_list),
-            'organization_type_display_text':   organization_type_display_text,
-            'election_list':                    election_list,
-            'google_civic_election_id':         google_civic_election_id,
-            'candidate_campaign_id':            candidate_campaign_id,
-            'candidate_we_vote_id':             candidate_we_vote_id,
-            'show_all_elections':               show_all_elections,
-            'voter':                            voter,
-            'organization_issues_list':         organization_issues_list,
-            'organization_blocked_issues_list': organization_blocked_issues_list,
-        }
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                organization_query = organization_query.filter(final_filters)
+
+        organization_search_results_list = list(organization_query)
+
+    organization_type_display_text = ORGANIZATION_TYPE_MAP.get(organization_on_stage.organization_type,
+                                                               ORGANIZATION_TYPE_MAP[UNKNOWN])
+    template_values = {
+        'messages_on_stage':                messages_on_stage,
+        'organization':                     organization_on_stage,
+        'organization_position_list':       organization_position_list,
+        'organization_num_positions':       len(organization_position_list),
+        'organization_search_for_merge':    organization_search_for_merge,
+        'organization_search_results_list': organization_search_results_list,
+        'organization_type_display_text':   organization_type_display_text,
+        'election_list':                    election_list,
+        'google_civic_election_id':         google_civic_election_id,
+        'candidate_campaign_id':            candidate_campaign_id,
+        'candidate_we_vote_id':             candidate_we_vote_id,
+        'show_all_elections':               show_all_elections,
+        'voter':                            voter,
+        'organization_issues_list':         organization_issues_list,
+        'organization_blocked_issues_list': organization_blocked_issues_list,
+    }
     return render(request, 'organization/organization_position_list.html', template_values)
 
 
@@ -1772,6 +2031,38 @@ def organization_position_edit_process_view(request):
     else:
         return HttpResponseRedirect(
             reverse('organization:organization_position_list', args=(organization_on_stage.id,)))
+
+
+def render_organization_merge_form(
+        request, organization_option1_for_template, organization_option2_for_template,
+        organization_merge_conflict_values, remove_duplicate_process=True):
+    organization_list_manager = OrganizationListManager()
+    position_list_manager = PositionListManager()
+
+    # Get positions counts for both organizations
+    organization_option1_for_template.public_positions_count = \
+        position_list_manager.fetch_public_positions_count_for_organization(
+            organization_option1_for_template.id, organization_option1_for_template.we_vote_id)
+    organization_option1_for_template.friends_positions_count = \
+        position_list_manager.fetch_friends_only_positions_count_for_organization(
+            organization_option1_for_template.id, organization_option1_for_template.we_vote_id)
+
+    organization_option2_for_template.public_positions_count = \
+        position_list_manager.fetch_public_positions_count_for_organization(
+            organization_option2_for_template.id, organization_option2_for_template.we_vote_id)
+    organization_option2_for_template.friends_positions_count = \
+        position_list_manager.fetch_friends_only_positions_count_for_organization(
+            organization_option2_for_template.id, organization_option2_for_template.we_vote_id)
+
+    messages_on_stage = get_messages(request)
+    template_values = {
+        'messages_on_stage': messages_on_stage,
+        'organization_option1': organization_option1_for_template,
+        'organization_option2': organization_option2_for_template,
+        'conflict_values': organization_merge_conflict_values,
+        'remove_duplicate_process': remove_duplicate_process,
+    }
+    return render(request, 'organization/organization_merge.html', template_values)
 
 
 @login_required

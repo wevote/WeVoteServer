@@ -151,7 +151,7 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '     "is_information_only": boolean,\n' \
                    '     "kind_of_ballot_item": string, ' \
                    '      (One of these: \'CANDIDATE\', \'MEASURE\', \'OFFICE\', \'UNKNOWN\')\n' \
-                   '     "last_updated": string,\n' \
+                   '     "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
                    '     "more_info_url": string,\n' \
                    '     "position_we_vote_id": string,\n' \
                    '     "position_ultimate_election_date": integer,\n' \

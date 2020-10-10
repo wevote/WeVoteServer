@@ -202,6 +202,7 @@ def reaction_like_status_retrieve_for_api(voter_device_id, liked_item_we_vote_id
             for reaction_like in reaction_like_object_list:
                 reaction_like_dict = {
                     'date_last_changed':            reaction_like.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+                    'last_updated':                 reaction_like.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
                     'activity_tidbit_we_vote_id':   reaction_like.activity_tidbit_we_vote_id,
                     'liked_item_we_vote_id':        reaction_like.liked_item_we_vote_id,
                     'voter_display_name':           reaction_like.voter_display_name,

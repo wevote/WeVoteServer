@@ -128,7 +128,7 @@ def position_list_for_ballot_item_from_friends_doc_template_values(url_root):
                    '     "is_public_position": boolean,\n' \
                    '     "more_info_url": string,\n' \
                    '     "statement_text": string,\n' \
-                   '     "last_updated": string,\n' \
+                   '     "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
                    '   ],\n' \
                    '}'
 

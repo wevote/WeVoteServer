@@ -61,6 +61,7 @@ class ContestOffice(models.Model):
         blank=True, unique=True, db_index=True)
     # The name of the office for this contest.
     office_name = models.CharField(verbose_name="name of the office", max_length=255, null=False, blank=False)
+    date_last_updated = models.DateTimeField(null=True, auto_now=True)
     # The offices' name as passed over by Google Civic. We save this so we can match to this office even
     # if we edit the office's name locally. Sometimes Google isn't consistent with office names.
     google_civic_office_name = models.CharField(verbose_name="office name exactly as received from google civic",
