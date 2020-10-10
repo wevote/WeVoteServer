@@ -71,6 +71,7 @@ def office_retrieve_doc_template_values(url_root):
                    '  "number_elected": integer,\n' \
                    '  "ocd_division_id": string,\n' \
                    '  "primary_party": string,\n' \
+                   '  "race_office_level": string,\n' \
                    '  "state_code": string,\n' \
                    '  "we_vote_id": string,\n' \
                    '  "wikipedia_id": string,\n' \
