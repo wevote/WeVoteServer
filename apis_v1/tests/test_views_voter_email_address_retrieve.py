@@ -27,3 +27,7 @@ class WeVoteAPIsV1TestsVoterEmailAddressRetrieve(TestCase):
                          "status = {status} Expected status VALID_VOTER_DEVICE_ID_MISSING"
                          "voter_device_id: {voter_device_id}".format(status=json_data['status'],
                                                                      voter_device_id=json_data['voter_device_id']))
+        self.assertEqual(len(json_data["email_address_list"]), 1,
+                         "Expected email_address_list to have length 0, "
+                         "actual length = {length}".format(length=len(json_data['email_address_list'])))
+
