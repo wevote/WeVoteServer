@@ -445,12 +445,18 @@ SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE = "SEARCH_TWITTER_FOR_CANDIDATE_TWIT
 KIND_OF_PROCESS_CHOICES = (
     (ACTIVITY_NOTICE_PROCESS,  'Create, update, or schedule to send Activity Notices'),
     (API_REFRESH_REQUEST,  'Make sure we have cached a recent return from a specific API'),
+    (AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID,  'Add election id to AnalyticsAction'),
+    (AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,  'Mark first AnalyticsAction per day'),
+    (CALCULATE_SITEWIDE_VOTER_METRICS,  'Sitewide voter metrics for all time'),
+    (CALCULATE_SITEWIDE_DAILY_METRICS,  'Sitewide daily metrics'),
+    (CALCULATE_SITEWIDE_ELECTION_METRICS,  'Sitewide election metrics'),
+    (CALCULATE_ORGANIZATION_DAILY_METRICS,  'Organization specific daily metrics'),
+    (CALCULATE_ORGANIZATION_ELECTION_METRICS,  'Organization specific election metrics'),
     (RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,  'Retrieve Ballot Items from Map Points'),
     (REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, 'Refresh Ballot Items from BallotReturned Map Points'),
     (REFRESH_BALLOT_ITEMS_FROM_VOTERS, 'Refresh Ballot Items from Voter Custom Addresses'),
     (SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE, 'Search for Candidate Twitter Handles'),
 )
-
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -4911,6 +4917,68 @@ class BatchProcessManager(models.Model):
             status += 'FAILED_COUNT_CHECKED_OUT_BATCH_PROCESSES ' + str(e) + ' '
         return batch_process_count
 
+    # ACTIVITY_NOTICE_PROCESS
+    # API_REFRESH_REQUEST
+    # AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID
+    # AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT
+    # CALCULATE_SITEWIDE_VOTER_METRICS
+    # CALCULATE_SITEWIDE_DAILY_METRICS
+    # CALCULATE_SITEWIDE_ELECTION_METRICS
+    # CALCULATE_ORGANIZATION_DAILY_METRICS
+    # CALCULATE_ORGANIZATION_ELECTION_METRICS
+    # REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
+    # REFRESH_BALLOT_ITEMS_FROM_VOTERS
+    # RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
+    # SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE
+    def count_next_steps(
+            self,
+            kind_of_process_list=[],
+            is_active=False,
+            is_checked_out=False,
+            is_in_upcoming_queue=False):
+        status = ""
+        success = True
+        batch_process_count = 0
+
+        google_civic_election_id_list = []
+        related_to_upcoming_election = \
+            REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS in kind_of_process_list or \
+            REFRESH_BALLOT_ITEMS_FROM_VOTERS in kind_of_process_list or \
+            RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS in kind_of_process_list
+        if related_to_upcoming_election:
+            election_manager = ElectionManager()
+            results = election_manager.retrieve_upcoming_elections()
+            election_list = results['election_list']
+            google_civic_election_id_list = []
+            for one_election in election_list:
+                google_civic_election_id_list.append(one_election.google_civic_election_id)
+
+        try:
+            batch_process_queryset = BatchProcess.objects.all()
+            batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=kind_of_process_list)
+            batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
+            if positive_value_exists(is_active):
+                batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
+                batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+            elif positive_value_exists(is_checked_out):
+                batch_process_queryset = batch_process_queryset.filter(date_checked_out__isnull=False)
+                batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+            elif positive_value_exists(is_in_upcoming_queue):
+                batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+            if related_to_upcoming_election:
+                batch_process_queryset = batch_process_queryset.filter(
+                    google_civic_election_id__in=google_civic_election_id_list)
+
+            batch_process_count = batch_process_queryset.count()
+        except Exception as e:
+            status += 'FAILED_COUNT_ACTIVE_BATCH_PROCESSES: ' + str(e) + ' '
+            success = False
+        return {
+            'status':               status,
+            'success':              success,
+            'batch_process_count':  batch_process_count,
+        }
+
     def is_batch_process_currently_scheduled(
             self, google_civic_election_id=0, state_code="", kind_of_process=""):
         status = ""
@@ -4969,7 +5037,13 @@ class BatchProcessManager(models.Model):
             status += 'FAILED_COUNT_CHECKED_OUT_BATCH_PROCESSES ' + str(e) + ' '
             return True
 
-    def retrieve_batch_process_list(self, process_active=True, process_queued=False, for_upcoming_elections=True):
+    def retrieve_batch_process_list(
+            self,
+            kind_of_process_list=[],
+            process_active=False,
+            process_needs_to_be_run=False,
+            process_queued=False,
+            for_upcoming_elections=True):
         status = ""
         success = True
         batch_process_list_found = False
@@ -4985,14 +5059,20 @@ class BatchProcessManager(models.Model):
 
         try:
             batch_process_queryset = BatchProcess.objects.all()
+            batch_process_queryset = batch_process_queryset.order_by("id")
+            if kind_of_process_list and len(kind_of_process_list) > 0:
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=kind_of_process_list)
             if positive_value_exists(process_active):
-                batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
-                batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
-                batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
+                batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)  # Has date_started
+                batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)  # No date_completed
+                batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)  # Not paused
             elif positive_value_exists(process_queued):
-                batch_process_queryset = batch_process_queryset.filter(date_started__isnull=True)
-                batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
-                batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
+                batch_process_queryset = batch_process_queryset.filter(date_started__isnull=True)  # Not started
+                batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)  # Not completed
+                batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)  # Not paused
+            elif positive_value_exists(process_needs_to_be_run):
+                batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)  # Not completed
+                batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)  # Not paused
 
             if positive_value_exists(for_upcoming_elections):
                 # Limit this search to upcoming_elections only, or no election specified
@@ -5006,7 +5086,6 @@ class BatchProcessManager(models.Model):
                 pass
             # if positive_value_exists(state_code):
             #     batch_process_queryset = batch_process_queryset.filter(state_code__iexact=state_code)
-            batch_process_queryset = batch_process_queryset.order_by("id")
             batch_process_list = list(batch_process_queryset)
 
             # Cycle through all processes retrieved and make sure they aren't being worked on by other processes
@@ -5014,11 +5093,25 @@ class BatchProcessManager(models.Model):
                 if batch_process.date_checked_out is None:
                     filtered_batch_process_list.append(batch_process)
                 else:
+                    # See also longest_activity_notice_processing_run_time_allowed
                     if batch_process.kind_of_process == ACTIVITY_NOTICE_PROCESS:
-                        # See also longest_activity_notice_processing_run_time_allowed
                         checked_out_expiration_time = 270  # 4.5 minutes * 60 seconds
+                    elif batch_process.kind_of_process == API_REFRESH_REQUEST:
+                        checked_out_expiration_time = 360  # 6 minutes * 60 seconds
+                    elif batch_process.kind_of_process in [
+                            REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_VOTERS,
+                            RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS]:
+                        checked_out_expiration_time = 1800  # 30 minutes * 60 seconds
+                    elif batch_process.kind_of_process in [
+                            AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
+                            CALCULATE_ORGANIZATION_DAILY_METRICS, CALCULATE_ORGANIZATION_ELECTION_METRICS,
+                            CALCULATE_SITEWIDE_ELECTION_METRICS, CALCULATE_SITEWIDE_VOTER_METRICS,
+                            CALCULATE_SITEWIDE_DAILY_METRICS]:
+                        checked_out_expiration_time = 270  # 4.5 minutes * 60 seconds
+                    elif batch_process.kind_of_process == SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE:
+                        checked_out_expiration_time = 120  # 2 minutes * 60 seconds
                     else:
-                        checked_out_expiration_time = 30 * 60  # 30 minutes * 60 seconds
+                        checked_out_expiration_time = 1800  # 30 minutes * 60 seconds
                     date_checked_out_time_out = \
                         batch_process.date_checked_out + timedelta(seconds=checked_out_expiration_time)
                     status += "CHECKED_OUT_PROCESS_FOUND "
@@ -5035,7 +5128,7 @@ class BatchProcessManager(models.Model):
             # No batch_process found. Not a problem.
             status += 'NO_BATCH_PROCESS_FOUND_DoesNotExist '
         except Exception as e:
-            status += 'FAILED_BATCH_PROCESS_LIST_RETRIEVE ' + str(e) + " "
+            status += 'FAILED_BATCH_PROCESS_LIST_RETRIEVE: ' + str(e) + " "
             success = False
 
         results = {

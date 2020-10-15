@@ -33,7 +33,9 @@ import json
 from voter_guide.controllers import voter_guides_upcoming_retrieve_for_api
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
-from wevote_settings.models import fetch_batch_process_system_on
+from wevote_settings.models import fetch_batch_process_system_on, fetch_batch_process_system_activity_notices_on, \
+    fetch_batch_process_system_api_refresh_on, fetch_batch_process_system_ballot_items_on, \
+    fetch_batch_process_system_calculate_analytics_on, fetch_batch_process_system_search_twitter_on
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -52,7 +54,11 @@ POLITICIAN = 'POLITICIAN'
 #  we could see voter-driven API calls rejected. That is why we keep the NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES
 #  relatively low.
 NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES = 4  # Four processes at a time
+NUMBER_OF_SIMULTANEOUS_BALLOT_ITEM_BATCH_PROCESSES = 4  # Four processes at a time
+NUMBER_OF_SIMULTANEOUS_GENERAL_MAINTENANCE_BATCH_PROCESSES = 1
 
+
+# WE ARE DEPRECATING THIS WHOLE FUNCTION
 def batch_process_next_steps():
     success = True
     status = ""
@@ -73,6 +79,8 @@ def batch_process_next_steps():
             'status': status,
         }
         return results
+
+    # WE ARE DEPRECATING THIS WHOLE FUNCTION
 
     # Retrieve list of active BatchProcess
     results = batch_process_manager.retrieve_batch_process_list(process_active=True, process_queued=False)
@@ -100,6 +108,8 @@ def batch_process_next_steps():
         if positive_value_exists(batch_process_list_count):
             batch_process_list.append(full_batch_process_list[0])
     status += "BATCH_PROCESS_COUNT: " + str(batch_process_list_count) + ", "
+
+    # WE ARE DEPRECATING THIS WHOLE FUNCTION
 
     # ############################
     # Are there any Api's that need to have their internal cache updated?
@@ -139,6 +149,8 @@ def batch_process_next_steps():
                 kind_of_process=API_REFRESH_REQUEST,
                 status=status,
             )
+
+    # WE ARE DEPRECATING THIS WHOLE FUNCTION
 
     # ############################
     # Twitter Search - Turned off temporarily
@@ -230,6 +242,8 @@ def batch_process_next_steps():
                     status=status,
                 )
 
+    # WE ARE DEPRECATING THIS WHOLE FUNCTION
+
     # ##################################
     # Generate or Update ActivityNotice entries from ActivityNoticeSeed entries
     activity_notice_process_is_currently_running = batch_process_manager.is_activity_notice_process_currently_running()
@@ -253,6 +267,8 @@ def batch_process_next_steps():
                 kind_of_process=ACTIVITY_NOTICE_PROCESS,
                 status=status,
             )
+
+    # WE ARE DEPRECATING THIS WHOLE FUNCTION
 
     # ############################
     # Processing Ballot Items
@@ -298,6 +314,8 @@ def batch_process_next_steps():
                     )
                 break
     status += "TOTAL_ACTIVE_BATCH_PROCESSES_BEFORE_PROCESS_LOOP: " + str(total_active_batch_processes) + " "
+
+    # WE ARE DEPRECATING THIS WHOLE FUNCTION
 
     for batch_process in batch_process_list:
         if batch_process.kind_of_process in \
@@ -347,6 +365,692 @@ def batch_process_next_steps():
             # results = process_one_search_twitter_batch_process(batch_process)
             # status += results['status']
             status += "SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE-TURNED_OFF "
+        else:
+            status += "KIND_OF_PROCESS_NOT_RECOGNIZED "
+
+    results = {
+        'success': success,
+        'status': status,
+    }
+    return results
+
+
+def process_next_activity_notices():
+    success = True
+    status = ""
+    batch_process_manager = BatchProcessManager()
+
+    kind_of_process_list = [ACTIVITY_NOTICE_PROCESS]
+
+    # DALE 2020-10-15 This just creates load on the database
+    # # Count all processes (checked out or not)
+    # results = batch_process_manager.count_next_steps(
+    #     kind_of_process_list=kind_of_process_list,
+    #     is_in_upcoming_queue=True)
+    # if not results['success']:
+    #     # Exit out -- we have database problem
+    #     status += "PROBLEM_COUNTING_NEXT_STEPS-IN_UPCOMING_QUEUE: "
+    #     status += results['status']
+    #     batch_process_manager.create_batch_process_log_entry(
+    #         critical_failure=True,
+    #         status=status,
+    #     )
+    #     results = {
+    #         'success': success,
+    #         'status': status,
+    #     }
+    #     return results
+    # total_active_batch_processes = results['batch_process_count']
+    # status += "BATCH_PROCESSES_IN_UPCOMING_QUEUE: " + str(total_active_batch_processes) + ", "
+
+    # DALE 2020-10-15 This just creates load on the database
+    # results = batch_process_manager.count_next_steps(
+    #     kind_of_process_list=kind_of_process_list,
+    #     is_checked_out=True)
+    # if not results['success']:
+    #     # Exit out -- we have database problem
+    #     status += "PROBLEM_COUNTING_NEXT_STEPS_FOR_COMPLETED: "
+    #     status += results['status']
+    #     batch_process_manager.create_batch_process_log_entry(
+    #         critical_failure=True,
+    #         status=status,
+    #     )
+    #     results = {
+    #         'success': success,
+    #         'status': status,
+    #     }
+    #     return results
+    # total_checked_out_batch_processes = results['batch_process_count']
+    # status += "CHECKED_OUT_BATCH_PROCESSES: " + str(total_checked_out_batch_processes) + ", "
+
+    if not fetch_batch_process_system_on():
+        status += "BATCH_PROCESS_SYSTEM_TURNED_OFF-ACTIVITY_NOTICES "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    if not fetch_batch_process_system_activity_notices_on():
+        status += "BATCH_PROCESS_SYSTEM_ACTIVITY_NOTICES_TURNED_OFF "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    # Retrieve list of all active ActivityNotice BatchProcess so we can decide what new batches to schedule
+    #  NOTE: We do not run directly from this list below
+    results = batch_process_manager.retrieve_batch_process_list(
+        kind_of_process_list=kind_of_process_list,
+        process_needs_to_be_run=True,
+        for_upcoming_elections=False)
+    if not positive_value_exists(results['success']):
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            critical_failure=True,
+            status=results['status'],
+        )
+        status += results['status']
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    # We only want to process one batch_process at a time. The next time this script runs, the next one will be
+    # picked up and processed.
+    batch_process_list_for_analysis = []
+    if positive_value_exists(results['batch_process_list_found']):
+        batch_process_list_for_analysis = results['batch_process_list']
+
+    status += "BATCH_PROCESS_LIST_QUEUED_AT_START_COUNT: " + str(len(batch_process_list_for_analysis)) + ", "
+
+    # ##################################
+    # Generate or Update ActivityNotice entries from ActivityNoticeSeed entries
+    # We only want one API Refresh process to be running at a time
+    # Check to see if one of the existing batches is for API Refresh. If so, skip creating a new one.
+    activity_notice_process_is_already_in_queue = False
+    for batch_process in batch_process_list_for_analysis:
+        if batch_process.kind_of_process in kind_of_process_list:
+            activity_notice_process_is_already_in_queue = True
+    if not activity_notice_process_is_already_in_queue:
+        activity_notice_process_is_currently_running = \
+            batch_process_manager.is_activity_notice_process_currently_running()
+        if not activity_notice_process_is_currently_running:
+            results = batch_process_manager.create_batch_process(
+                kind_of_process=ACTIVITY_NOTICE_PROCESS)
+            status += results['status']
+            success = results['success']
+            if results['batch_process_saved']:
+                batch_process = results['batch_process']
+                status += "SCHEDULED_ACTIVITY_NOTICE_PROCESS "
+                batch_process_manager.create_batch_process_log_entry(
+                    batch_process_id=batch_process.id,
+                    kind_of_process=batch_process.kind_of_process,
+                    status=status,
+                )
+            else:
+                status += "FAILED_TO_SCHEDULE-" + str(ACTIVITY_NOTICE_PROCESS) + " "
+                batch_process_manager.create_batch_process_log_entry(
+                    batch_process_id=0,
+                    kind_of_process=ACTIVITY_NOTICE_PROCESS,
+                    status=status,
+                )
+
+    # Finally, retrieve the ActivityNotice BatchProcess to run, and only use the first one returned
+    results = batch_process_manager.retrieve_batch_process_list(
+        kind_of_process_list=kind_of_process_list,
+        process_needs_to_be_run=True,
+        for_upcoming_elections=False)
+    if not positive_value_exists(results['success']):
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            critical_failure=True,
+            status=results['status'],
+        )
+        status += results['status']
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    batch_process = None
+    batch_process_found = False
+    batch_process_full_list = []
+    if positive_value_exists(results['batch_process_list_found']):
+        batch_process_found = True
+        batch_process_full_list = results['batch_process_list']
+        # Only use the first one
+        batch_process = batch_process_full_list[0]
+    status += "BATCH_PROCESS_LIST_NEEDS_TO_BE_RUN_COUNT: " + str(len(batch_process_full_list)) + ", "
+
+    # We should only run one per minute
+    if batch_process_found:
+        if batch_process.kind_of_process in [ACTIVITY_NOTICE_PROCESS]:
+            results = process_activity_notice_batch_process(batch_process)
+            status += results['status']
+        else:
+            status += "KIND_OF_PROCESS_NOT_RECOGNIZED "
+
+    results = {
+        'success': success,
+        'status': status,
+    }
+    return results
+
+
+def process_next_ballot_items():
+    success = True
+    status = ""
+
+    if not fetch_batch_process_system_on():
+        status += "BATCH_PROCESS_SYSTEM_TURNED_OFF-BALLOT_ITEMS "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    if not fetch_batch_process_system_ballot_items_on():
+        status += "BATCH_PROCESS_SYSTEM_BALLOT_ITEMS_TURNED_OFF "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    batch_process_manager = BatchProcessManager()
+    # If we have more than NUMBER_OF_SIMULTANEOUS_BALLOT_ITEM_BATCH_PROCESSES batch_processes that are still active,
+    # don't start a new import ballot item batch_process
+    kind_of_process_list = [
+        REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
+        REFRESH_BALLOT_ITEMS_FROM_VOTERS,
+        RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS]
+
+    # Retrieve list of all ballot item BatchProcesses which have been started but not completed so we can decide
+    #  our next steps
+    results = batch_process_manager.retrieve_batch_process_list(
+        kind_of_process_list=kind_of_process_list,
+        process_active=True,
+        for_upcoming_elections=True)
+    if not positive_value_exists(results['success']):
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            critical_failure=True,
+            status=results['status'],
+        )
+        status += results['status']
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    # Note this batch_process_list does not included checked out items that haven't timed out
+    #  These are all batch processes that need to be worked on
+    batch_process_list = []
+    if positive_value_exists(results['batch_process_list_found']):
+        batch_process_list = results['batch_process_list']
+    status += "BATCH_PROCESSES_TO_BE_RESTARTED: " + str(len(batch_process_list)) + ", "
+
+    # If there are any started processes that are not checked out, or checked out but timed out
+    process_restarted = False
+    if batch_process_list and len(batch_process_list) > 0:
+        for batch_process in batch_process_list:
+            if batch_process.kind_of_process in \
+                    [REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_VOTERS,
+                     RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS]:
+                process_restarted = True
+                # When a batch_process is running, we set date_checked_out to show it is being worked on
+                results = process_one_ballot_item_batch_process(batch_process)
+                status += results['status']
+                # Now that the process is complete, we reset date_checked_out to "NULL"
+                try:
+                    # Before saving batch_process, make sure we have the latest version, since there were
+                    #  updates in process_one_ballot_item_batch_process
+                    batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+                    if positive_value_exists(batch_process_results['batch_process_found']):
+                        batch_process = batch_process_results['batch_process']
+                    batch_process.date_checked_out = None
+                    batch_process.save()
+                except Exception as e:
+                    status += "COULD_NOT_SET_CHECKED_OUT_TIME_TO_NULL " + str(e) + " "
+                    handle_exception(e, logger=logger, exception_message=status)
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        google_civic_election_id=batch_process.google_civic_election_id,
+                        kind_of_process=batch_process.kind_of_process,
+                        state_code=batch_process.state_code,
+                        status=status,
+                    )
+            else:
+                status += "KIND_OF_PROCESS_NOT_RECOGNIZED "
+
+    # If a process was started immediately above, exit
+    if process_restarted:
+        status += "BATCH_PROCESS_STARTED_PREVIOUSLY_WAS_RESTARTED "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    # ############################
+    # Processing Ballot Items
+    results = batch_process_manager.count_next_steps(
+        kind_of_process_list=kind_of_process_list,
+        is_active=True)
+    if not results['success']:
+        # Exit out -- we have database problem
+        status += "PROBLEM_COUNTING_BATCH_PROCESSES-RUNNING: "
+        status += results['status']
+        batch_process_manager.create_batch_process_log_entry(
+            critical_failure=True,
+            status=status,
+        )
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+    batch_processes_running_count = results['batch_process_count']
+    status += "BATCH_PROCESSES_RUNNING_COUNT: " + str(batch_processes_running_count) + ", "
+
+    # If less than NUMBER_OF_SIMULTANEOUS_BALLOT_ITEM_BATCH_PROCESSES total active processes,
+    #  then add a new batch_process (importing ballot items) to the current queue
+    if batch_processes_running_count < NUMBER_OF_SIMULTANEOUS_BALLOT_ITEM_BATCH_PROCESSES:
+        results = batch_process_manager.retrieve_batch_process_list(
+            kind_of_process_list=kind_of_process_list,
+            process_active=False,
+            process_queued=True,
+            for_upcoming_elections=True)
+        if not positive_value_exists(results['success']):
+            success = False
+            batch_process_manager.create_batch_process_log_entry(
+                critical_failure=True,
+                status=results['status'],
+            )
+            status += results['status']
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        if positive_value_exists(results['batch_process_list_found']):
+            new_batch_process_list = results['batch_process_list']
+            new_batch_process_list_count = len(new_batch_process_list)
+            status += "NEW_BATCH_PROCESS_LIST_COUNT: " + str(new_batch_process_list_count) + ", ADDING ONE "
+            for batch_process in new_batch_process_list:
+                # Bring the batch_process_list up by 1 item
+                batch_process_started = False
+                kind_of_process = ""
+                try:
+                    kind_of_process = batch_process.kind_of_process
+                    batch_process.date_started = now()
+                    batch_process.save()
+                    batch_process_started = True
+                except Exception as e:
+                    status += "BATCH_PROCESS-CANNOT_SAVE_DATE_STARTED " + str(e) + " "
+                    handle_exception(e, logger=logger, exception_message=status)
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        kind_of_process=kind_of_process,
+                        status=status,
+                    )
+
+                if batch_process_started:
+                    if batch_process.kind_of_process in \
+                            [REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_VOTERS,
+                             RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS]:
+                        # Now process the batch
+                        results = process_one_ballot_item_batch_process(batch_process)
+                        status += results['status']
+
+                        # Before a batch_process runs, we set `date_checked_out`, like you check out a library book
+                        #  When the process is complete, we reset `date_checked_out` to "NULL"
+                        try:
+                            # Before saving batch_process, make sure we have the latest version.
+                            # (For example, it might have been paused since it was first retrieved.)
+                            batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+                            if positive_value_exists(batch_process_results['batch_process_found']):
+                                batch_process = batch_process_results['batch_process']
+
+                            batch_process.date_checked_out = None
+                            batch_process.save()
+                        except Exception as e:
+                            status += "COULD_NOT_SET_CHECKED_OUT_TIME_TO_NULL " + str(e) + " "
+                            handle_exception(e, logger=logger, exception_message=status)
+                            batch_process_manager.create_batch_process_log_entry(
+                                batch_process_id=batch_process.id,
+                                google_civic_election_id=batch_process.google_civic_election_id,
+                                kind_of_process=batch_process.kind_of_process,
+                                state_code=batch_process.state_code,
+                                status=status,
+                            )
+                    else:
+                        status += "KIND_OF_PROCESS_NOT_RECOGNIZED "
+
+                break
+
+    results = {
+        'success': success,
+        'status': status,
+    }
+    return results
+
+
+def process_next_general_maintenance():
+    success = True
+    status = ""
+    batch_process_manager = BatchProcessManager()
+
+    # Only include the processes if the process system is turned on
+    kind_of_process_list = []
+    if fetch_batch_process_system_api_refresh_on():
+        api_refresh_process_list = [API_REFRESH_REQUEST]
+        kind_of_process_list = kind_of_process_list + api_refresh_process_list
+    if fetch_batch_process_system_calculate_analytics_on():
+        analytics_process_list = [
+            AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID,
+            AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
+            CALCULATE_SITEWIDE_VOTER_METRICS,
+            CALCULATE_SITEWIDE_DAILY_METRICS,
+            CALCULATE_SITEWIDE_ELECTION_METRICS,
+            CALCULATE_ORGANIZATION_DAILY_METRICS,
+            CALCULATE_ORGANIZATION_ELECTION_METRICS]
+        kind_of_process_list = kind_of_process_list + analytics_process_list
+    if fetch_batch_process_system_search_twitter_on():
+        search_twitter_process_list = [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]
+        kind_of_process_list = kind_of_process_list + search_twitter_process_list
+
+    # DALE 2020-10-15 This just creates load on the database
+    # # Count all processes (checked out or not)
+    # results = batch_process_manager.count_next_steps(
+    #     kind_of_process_list=kind_of_process_list,
+    #     is_in_upcoming_queue=True)
+    # if not results['success']:
+    #     # Exit out -- we have database problem
+    #     status += "PROBLEM_COUNTING_NEXT_STEPS-IN_UPCOMING_QUEUE: "
+    #     status += results['status']
+    #     batch_process_manager.create_batch_process_log_entry(
+    #         critical_failure=True,
+    #         status=status,
+    #     )
+    #     results = {
+    #         'success': success,
+    #         'status': status,
+    #     }
+    #     return results
+    # batch_processes_in_upcoming_queue = results['batch_process_count']
+    # status += "BATCH_PROCESSES_IN_UPCOMING_QUEUE: " + str(batch_processes_in_upcoming_queue) + ", "
+
+    # DALE 2020-10-15 This just creates load on the database
+    # # Count active processes which are already checked out
+    # results = batch_process_manager.count_next_steps(
+    #     kind_of_process_list=kind_of_process_list,
+    #     is_checked_out=True)
+    # if not results['success']:
+    #     # Exit out -- we have database problem
+    #     status += "PROBLEM_COUNTING_NEXT_STEPS_FOR_COMPLETED: "
+    #     status += results['status']
+    #     batch_process_manager.create_batch_process_log_entry(
+    #         critical_failure=True,
+    #         status=status,
+    #     )
+    #     results = {
+    #         'success': success,
+    #         'status': status,
+    #     }
+    #     return results
+    # total_checked_out_batch_processes = results['batch_process_count']
+    # status += "CHECKED_OUT_BATCH_PROCESSES: " + str(total_checked_out_batch_processes) + ", "
+
+    if not fetch_batch_process_system_on():
+        status += "BATCH_PROCESS_SYSTEM_TURNED_OFF-GENERAL "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    if not positive_value_exists(len(kind_of_process_list)):
+        status += "ALL_BATCH_PROCESS_SYSTEM_KINDS_TURNED_OFF "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    # Retrieve list of all active General Maintenance BatchProcess so we can decide what new batches to schedule
+    #  NOTE: We do not run directly from this list below
+    results = batch_process_manager.retrieve_batch_process_list(
+        kind_of_process_list=kind_of_process_list,
+        process_needs_to_be_run=True,
+        for_upcoming_elections=False)
+    if not positive_value_exists(results['success']):
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            critical_failure=True,
+            status=results['status'],
+        )
+        status += results['status']
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    batch_process_list_for_analysis = []
+    if positive_value_exists(results['batch_process_list_found']):
+        batch_process_list_for_analysis = results['batch_process_list']
+    status += "BATCH_PROCESS_LIST_QUEUED_AT_START_COUNT: " + str(len(batch_process_list_for_analysis)) + ", "
+
+    # ############################
+    # Are there any API's that need to have their internal cache updated?
+    if not fetch_batch_process_system_api_refresh_on():
+        status += "BATCH_PROCESS_SYSTEM_API_REFRESH_TURNED_OFF "
+    else:
+        # We only want one API Refresh process to be running at a time
+        # Check to see if one of the existing batches is for API Refresh. If so, skip creating a new one.
+        api_refresh_process_is_already_in_queue = False
+        for batch_process in batch_process_list_for_analysis:
+            if batch_process.kind_of_process in [API_REFRESH_REQUEST]:
+                api_refresh_process_is_already_in_queue = True
+        if not api_refresh_process_is_already_in_queue:
+            api_internal_cache_manager = ApiInternalCacheManager()
+            results = api_internal_cache_manager.retrieve_next_api_refresh_request()
+            if positive_value_exists(results['api_refresh_request_found']):
+                api_refresh_request = results['api_refresh_request']
+                results = batch_process_manager.create_batch_process(
+                    kind_of_process=API_REFRESH_REQUEST,
+                    api_name=api_refresh_request.api_name,
+                    election_id_list_serialized=api_refresh_request.election_id_list_serialized)
+                status += results['status']
+                success = results['success']
+                if results['batch_process_saved']:
+                    batch_process = results['batch_process']
+                    status += "SCHEDULED_API_REFRESH_REQUEST "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        kind_of_process=batch_process.kind_of_process,
+                        status=status,
+                    )
+
+                    # Now mark api_refresh_request as checked out
+                    try:
+                        api_refresh_request.date_checked_out = now()
+                        api_refresh_request.save()
+                    except Exception as e:
+                        status += "COULD_NOT_MARK_API_REFRESH_REQUEST_WITH_DATE_CHECKED_OUT " + str(e) + " "
+                else:
+                    status += "FAILED_TO_SCHEDULE-" + str(API_REFRESH_REQUEST) + " "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=0,
+                        kind_of_process=API_REFRESH_REQUEST,
+                        status=status,
+                    )
+
+    # ############################
+    # Twitter Search
+    if not fetch_batch_process_system_search_twitter_on():
+        status += "BATCH_PROCESS_SYSTEM_SEARCH_TWITTER_TURNED_OFF "
+    else:
+        # We only want one Search Twitter process to be running at a time
+        # Check to see if one of the existing batches is for API Refresh. If so, skip creating a new one.
+        search_twitter_process_is_already_in_queue = False
+        for batch_process in batch_process_list_for_analysis:
+            if batch_process.kind_of_process in [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
+                search_twitter_process_is_already_in_queue = True
+        if not search_twitter_process_is_already_in_queue:
+            number_of_candidates_to_analyze = fetch_number_of_candidates_needing_twitter_search()
+            if positive_value_exists(number_of_candidates_to_analyze):
+                results = batch_process_manager.create_batch_process(
+                    kind_of_process=SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE)
+                status += results['status']
+                success = results['success']
+                if results['batch_process_saved']:
+                    batch_process = results['batch_process']
+                    status += "SCHEDULED_SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        kind_of_process=batch_process.kind_of_process,
+                        status=status,
+                    )
+                else:
+                    status += "FAILED_TO_SCHEDULE-" + str(SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE) + " "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=0,
+                        kind_of_process=SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE,
+                        status=status,
+                    )
+
+    # ############################
+    # Processing Analytics - Generate Next BatchProcess to run
+    if not fetch_batch_process_system_calculate_analytics_on():
+        status += "BATCH_PROCESS_SYSTEM_CALCULATE_ANALYTICS_TURNED_OFF "
+    else:
+        # We only want one analytics process to be running at a time
+        # Check to see if one of the existing batches is for analytics. If so,
+        analytics_process_is_already_in_queue = False
+        for batch_process in batch_process_list_for_analysis:
+            if batch_process.kind_of_process in [
+                    AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
+                    CALCULATE_ORGANIZATION_DAILY_METRICS, CALCULATE_ORGANIZATION_ELECTION_METRICS,
+                    CALCULATE_SITEWIDE_ELECTION_METRICS, CALCULATE_SITEWIDE_VOTER_METRICS]:
+                analytics_process_is_already_in_queue = True
+
+        if not analytics_process_is_already_in_queue:
+            analytics_process_is_currently_running = batch_process_manager.is_analytics_process_currently_running()
+            if not analytics_process_is_currently_running:
+                analytics_processing_status = retrieve_analytics_processing_next_step()
+                kind_of_process = None
+                analytics_date_as_integer = 0
+                status += analytics_processing_status['status']
+                if not analytics_processing_status['success']:
+                    status += "FAILURE_TRYING_TO_RETRIEVE_ANALYTICS_PROCESSING_NEXT_STEP "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=0,
+                        kind_of_process=kind_of_process,
+                        status=status,
+                    )
+                elif analytics_processing_status['analytics_processing_status_found']:
+                    analytics_date_as_integer = analytics_processing_status['analytics_date_as_integer']
+                    if analytics_processing_status['augment_analytics_action_with_election_id']:
+                        kind_of_process = AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID
+                    elif analytics_processing_status['augment_analytics_action_with_first_visit']:
+                        kind_of_process = AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT
+                    elif analytics_processing_status['calculate_sitewide_voter_metrics']:
+                        kind_of_process = CALCULATE_SITEWIDE_VOTER_METRICS
+                    elif analytics_processing_status['calculate_sitewide_daily_metrics']:
+                        kind_of_process = CALCULATE_SITEWIDE_DAILY_METRICS
+                    elif analytics_processing_status['calculate_sitewide_election_metrics']:
+                        kind_of_process = CALCULATE_SITEWIDE_ELECTION_METRICS
+                    elif analytics_processing_status['calculate_organization_daily_metrics']:
+                        kind_of_process = CALCULATE_ORGANIZATION_DAILY_METRICS
+                    elif analytics_processing_status['calculate_organization_election_metrics']:
+                        kind_of_process = CALCULATE_ORGANIZATION_ELECTION_METRICS
+                if kind_of_process:
+                    results = batch_process_manager.create_batch_process(
+                        kind_of_process=kind_of_process,
+                        analytics_date_as_integer=analytics_date_as_integer)
+                    status += results['status']
+                    success = results['success']
+                    if results['batch_process_saved']:
+                        batch_process = results['batch_process']
+                        try:
+                            batch_process.date_started = now()
+                            batch_process.save()
+                            status += "SCHEDULED_PROCESS: " + str(kind_of_process) + " "
+                            batch_process_manager.create_batch_process_log_entry(
+                                batch_process_id=batch_process.id,
+                                kind_of_process=batch_process.kind_of_process,
+                                status=status,
+                            )
+                        except Exception as e:
+                            status += "BATCH_PROCESS_ANALYTICS-CANNOT_SAVE_DATE_STARTED " + str(e) + " "
+                            handle_exception(e, logger=logger, exception_message=status)
+                            batch_process_manager.create_batch_process_log_entry(
+                                batch_process_id=batch_process.id,
+                                kind_of_process=kind_of_process,
+                                status=status,
+                            )
+                    else:
+                        status += "FAILED_TO_SCHEDULE-" + str(kind_of_process) + " "
+                        batch_process_manager.create_batch_process_log_entry(
+                            batch_process_id=0,
+                            kind_of_process=kind_of_process,
+                            status=status,
+                        )
+
+    # Finally, retrieve the General Maintenance BatchProcess to run, and only use the first one returned
+    results = batch_process_manager.retrieve_batch_process_list(
+        kind_of_process_list=kind_of_process_list,
+        process_needs_to_be_run=True,
+        for_upcoming_elections=False)
+    if not positive_value_exists(results['success']):
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            critical_failure=True,
+            status=results['status'],
+        )
+        status += results['status']
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    batch_process = None
+    batch_process_found = False
+    batch_process_full_list = []
+    if positive_value_exists(results['batch_process_list_found']):
+        batch_process_found = True
+        batch_process_full_list = results['batch_process_list']
+        # Only use the first one
+        batch_process = batch_process_full_list[0]
+    status += "BATCH_PROCESS_LIST_NEEDS_TO_BE_RUN_COUNT: " + str(len(batch_process_full_list)) + ", "
+
+    # We should only run one per minute
+    if batch_process_found:
+        if batch_process.kind_of_process in [API_REFRESH_REQUEST]:
+            results = process_one_api_refresh_request_batch_process(batch_process)
+            status += results['status']
+        elif batch_process.kind_of_process in [
+                AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
+                CALCULATE_ORGANIZATION_DAILY_METRICS, CALCULATE_ORGANIZATION_ELECTION_METRICS,
+                CALCULATE_SITEWIDE_ELECTION_METRICS, CALCULATE_SITEWIDE_VOTER_METRICS]:
+            results = process_one_analytics_batch_process(batch_process)
+            status += results['status']
+        elif batch_process.kind_of_process in [CALCULATE_SITEWIDE_DAILY_METRICS]:
+            results = process_one_sitewide_daily_analytics_batch_process(batch_process)
+            status += results['status']
+        elif batch_process.kind_of_process in [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
+            results = process_one_search_twitter_batch_process(batch_process)
+            status += results['status']
+            # status += "SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE-TURNED_OFF "
         else:
             status += "KIND_OF_PROCESS_NOT_RECOGNIZED "
 
@@ -705,6 +1409,7 @@ def process_one_ballot_item_batch_process(batch_process):
     try:
         # Before saving batch_process, make sure we have the latest version. (For example, it might have been
         #  paused since it was first retrieved.)
+        # DALE 2020-October after transition to three batches roots, we can get rid of retrieving this again
         batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
         if positive_value_exists(batch_process_results['batch_process_found']):
             batch_process = batch_process_results['batch_process']
@@ -712,7 +1417,7 @@ def process_one_ballot_item_batch_process(batch_process):
         batch_process.date_checked_out = now()
         batch_process.save()
     except Exception as e:
-        status += "CHECKED_OUT_TIME_NOT_SAVED " + str(e) + " "
+        status += "CHECKED_OUT_TIME_NOT_SAVED: " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)
         batch_process_manager.create_batch_process_log_entry(
             batch_process_id=batch_process.id,
@@ -1606,15 +2311,19 @@ def process_activity_notice_batch_process(batch_process):
             activity_notice_seed_count = activity_notice_results['activity_notice_seed_count']
             activity_notice_count = activity_notice_results['activity_notice_count']
             try:
-                batch_process.completion_summary = "ACTIVITY_NOTICE_RESULTS, " \
-                                                   "activity_notice_seed_count: {activity_notice_seed_count} " \
-                                                   "activity_notice_count: {activity_notice_count}" \
-                                                   "".format(activity_notice_seed_count=activity_notice_seed_count,
-                                                             activity_notice_count=activity_notice_count)
-                batch_process.date_checked_out = None
-                batch_process.date_completed = now()
-                batch_process.save()
-
+                if activity_notice_seed_count == 0 and activity_notice_count == 0:
+                    # We don't want to leave a bunch of empty batch_processes around
+                    batch_process.delete()
+                else:
+                    batch_process.completion_summary = "ACTIVITY_NOTICE_RESULTS, " \
+                                                       "activity_notice_seed_count: {activity_notice_seed_count} " \
+                                                       "activity_notice_count: {activity_notice_count}" \
+                                                       "".format(activity_notice_seed_count=activity_notice_seed_count,
+                                                                 activity_notice_count=activity_notice_count)
+                    batch_process.date_checked_out = None
+                    batch_process.date_completed = now()
+                    batch_process.save()
+                    status += "BATCH_PROCESS_SAVED "
                 if positive_value_exists(activity_notice_seed_count) or positive_value_exists(activity_notice_count):
                     batch_process_manager.create_batch_process_log_entry(
                         batch_process_id=batch_process.id,
@@ -1622,7 +2331,7 @@ def process_activity_notice_batch_process(batch_process):
                         status=status,
                     )
             except Exception as e:
-                status += "ACTIVITY_NOTICE-DATE_COMPLETED_TIME_NOT_SAVED " + str(e) + " "
+                status += "ACTIVITY_NOTICE-DATE_COMPLETED_TIME_NOT_SAVED: " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 batch_process_manager.create_batch_process_log_entry(
                     batch_process_id=batch_process.id,
@@ -1664,7 +2373,7 @@ def process_one_search_twitter_batch_process(batch_process):
         batch_process.date_checked_out = now()
         batch_process.save()
     except Exception as e:
-        status += "CHECKED_OUT_TIME_NOT_SAVED " + str(e) + " "
+        status += "CHECKED_OUT_TIME_NOT_SAVED: " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)
         success = False
         batch_process_manager.create_batch_process_log_entry(

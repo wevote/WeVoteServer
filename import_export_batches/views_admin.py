@@ -15,7 +15,8 @@ from .models import ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, \
     IMPORT_CREATE, IMPORT_DELETE, IMPORT_ALREADY_DELETED, IMPORT_ADD_TO_EXISTING, IMPORT_POLLING_LOCATION, IMPORT_VOTER
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     update_or_create_batch_header_mapping, export_voter_list_with_emails, import_data_from_batch_row_actions
-from .controllers_batch_process import batch_process_next_steps
+from .controllers_batch_process import batch_process_next_steps, process_next_activity_notices, \
+    process_next_ballot_items, process_next_general_maintenance
 from .controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager, MEASURE, CANDIDATE, POLITICIAN
@@ -1488,12 +1489,29 @@ def batch_process_system_toggle_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
-    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
-    batch_process_search = request.GET.get('batch_process_search', '')
+    # ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, BALLOT_ITEMS, SEARCH_TWITTER
+    kind_of_process = request.GET.get('kind_of_process', '')
+    kind_of_processes_to_show = request.GET.get('kind_of_processes_to_show', '')
+    show_checked_out_processes_only = request.GET.get('show_checked_out_processes_only', '')
+    show_active_processes_only = request.GET.get('show_active_processes_only', '')
+    show_paused_processes_only = request.GET.get('show_paused_processes_only', '')
+    include_frequent_processes = request.GET.get('include_frequent_processes', '')
 
     from wevote_settings.models import WeVoteSettingsManager
     we_vote_settings_manager = WeVoteSettingsManager()
-    results = we_vote_settings_manager.fetch_setting_results(setting_name='batch_process_system_on', read_only=False)
+    if kind_of_process == 'ACTIVITY_NOTICE_PROCESS':
+        setting_name = 'batch_process_system_activity_notices_on'
+    elif kind_of_process == 'API_REFRESH_REQUEST':
+        setting_name = 'batch_process_system_api_refresh_on'
+    elif kind_of_process == 'BALLOT_ITEMS':
+        setting_name = 'batch_process_system_ballot_items_on'
+    elif kind_of_process == 'CALCULATE_ANALYTICS':
+        setting_name = 'batch_process_system_calculate_analytics_on'
+    elif kind_of_process == 'SEARCH_TWITTER':
+        setting_name = 'batch_process_system_search_twitter_on'
+    else:
+        setting_name = 'batch_process_system_on'
+    results = we_vote_settings_manager.fetch_setting_results(setting_name=setting_name, read_only=False)
     if results['we_vote_setting_found']:
         we_vote_setting = results['we_vote_setting']
         we_vote_setting.boolean_value = not we_vote_setting.boolean_value
@@ -1503,7 +1521,13 @@ def batch_process_system_toggle_view(request):
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
-                                "&state_code=" + str(state_code))
+                                "&state_code=" + str(state_code) +
+                                "&kind_of_processes_to_show=" + str(kind_of_processes_to_show) +
+                                "&show_checked_out_processes_only=" + str(show_checked_out_processes_only) +
+                                "&show_active_processes_only=" + str(show_active_processes_only) +
+                                "&show_paused_processes_only=" + str(show_paused_processes_only) +
+                                "&include_frequent_processes=" + str(include_frequent_processes)
+                                )
 
 
 @login_required
@@ -1612,8 +1636,17 @@ def batch_process_list_view(request):
             batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
         if positive_value_exists(kind_of_processes_to_show):
             if kind_of_processes_to_show == "ACTIVITY_NOTICE_PROCESS":
-                api_refresh_processes = ['ACTIVITY_NOTICE_PROCESS']
-                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=api_refresh_processes)
+                activity_notice_processes = ['ACTIVITY_NOTICE_PROCESS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=activity_notice_processes)
+            elif kind_of_processes_to_show == "ANALYTICS_ACTION":
+                analytics_processes = [
+                    'AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID',
+                    'AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT',
+                    'CALCULATE_ORGANIZATION_DAILY_METRICS',
+                    'CALCULATE_ORGANIZATION_ELECTION_METRICS',
+                    'CALCULATE_SITEWIDE_DAILY_METRICS',
+                    'CALCULATE_SITEWIDE_VOTER_METRICS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=analytics_processes)
             elif kind_of_processes_to_show == "API_REFRESH_REQUEST":
                 api_refresh_processes = ['API_REFRESH_REQUEST']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=api_refresh_processes)
@@ -1754,8 +1787,15 @@ def batch_process_list_view(request):
 
     messages_on_stage = get_messages(request)
 
-    from wevote_settings.models import fetch_batch_process_system_on
+    from wevote_settings.models import fetch_batch_process_system_on, fetch_batch_process_system_activity_notices_on, \
+        fetch_batch_process_system_api_refresh_on, fetch_batch_process_system_ballot_items_on, \
+        fetch_batch_process_system_calculate_analytics_on, fetch_batch_process_system_search_twitter_on
     batch_process_system_on = fetch_batch_process_system_on()
+    batch_process_system_activity_notices_on = fetch_batch_process_system_activity_notices_on()
+    batch_process_system_api_refresh_on = fetch_batch_process_system_api_refresh_on()
+    batch_process_system_ballot_items_on = fetch_batch_process_system_ballot_items_on()
+    batch_process_system_calculate_analytics_on = fetch_batch_process_system_calculate_analytics_on()
+    batch_process_system_search_twitter_on = fetch_batch_process_system_search_twitter_on()
 
     ballot_returned_oldest_date = ""
     ballot_returned_voter_oldest_date = ""
@@ -1767,6 +1807,18 @@ def batch_process_list_view(request):
         ballot_returned_voter_oldest_date = ballot_returned_list_manager.fetch_oldest_date_last_updated(
             google_civic_election_id, state_code, for_voter=True)
 
+    toggle_system_url_variables = "s=1"  # Add a dummy variable at the start so all remaining variables have &
+    if positive_value_exists(include_frequent_processes):
+        toggle_system_url_variables += "&include_frequent_processes=1"
+    if positive_value_exists(kind_of_processes_to_show):
+        toggle_system_url_variables += "&kind_of_processes_to_show=" + str(kind_of_processes_to_show)
+    if positive_value_exists(show_active_processes_only):
+        toggle_system_url_variables += "&show_active_processes_only=1"
+    if positive_value_exists(show_checked_out_processes_only):
+        toggle_system_url_variables += "&show_checked_out_processes_only=1"
+    if positive_value_exists(show_paused_processes_only):
+        toggle_system_url_variables += "&show_paused_processes_only=1"
+
     template_values = {
         'messages_on_stage':                    messages_on_stage,
         'ballot_returned_oldest_date':          ballot_returned_oldest_date,
@@ -1774,6 +1826,11 @@ def batch_process_list_view(request):
         'batch_process_id':                     batch_process_id,
         'batch_process_list':                   batch_process_list,
         'batch_process_system_on':              batch_process_system_on,
+        'batch_process_system_activity_notices_on': batch_process_system_activity_notices_on,
+        'batch_process_system_api_refresh_on':  batch_process_system_api_refresh_on,
+        'batch_process_system_ballot_items_on': batch_process_system_ballot_items_on,
+        'batch_process_system_calculate_analytics_on': batch_process_system_calculate_analytics_on,
+        'batch_process_system_search_twitter_on': batch_process_system_search_twitter_on,
         'batch_process_search':                 batch_process_search,
         'election_list':                        election_list,
         'google_civic_election_id':             google_civic_election_id,
@@ -1785,12 +1842,34 @@ def batch_process_list_view(request):
         'show_checked_out_processes_only':      show_checked_out_processes_only,
         'state_code':                           state_code,
         'state_list':                           sorted_state_list,
+        'toggle_system_url_variables':          toggle_system_url_variables,
     }
     return render(request, 'import_export_batches/batch_process_list.html', template_values)
 
 
 def batch_process_next_steps_view(request):
     json_results = batch_process_next_steps()
+
+    response = HttpResponse(json.dumps(json_results), content_type='application/json')
+    return response
+
+
+def process_next_activity_notices_view(request):
+    json_results = process_next_activity_notices()
+
+    response = HttpResponse(json.dumps(json_results), content_type='application/json')
+    return response
+
+
+def process_next_ballot_items_view(request):
+    json_results = process_next_ballot_items()
+
+    response = HttpResponse(json.dumps(json_results), content_type='application/json')
+    return response
+
+
+def process_next_general_maintenance_view(request):
+    json_results = process_next_general_maintenance()
 
     response = HttpResponse(json.dumps(json_results), content_type='application/json')
     return response

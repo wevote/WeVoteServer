@@ -10,19 +10,57 @@
 <h1>
   Batch Processes{% if batch_process_list %} ({{ batch_process_list|length }}){% endif %}
   {% if not batch_process_system_on %} - BATCH SYSTEM OFF{% endif %}
+    {% if not batch_process_system_activity_notices_on %} <span style="color: darkred;">[Activity Processing OFF]</span>{% endif %}
+    {% if not batch_process_system_api_refresh_on %} <span style="color: darkred;">[API Refresh OFF]</span>{% endif %}
+    {% if not batch_process_system_ballot_items_on %} <span style="color: darkred;">[Ballot Item Processing OFF]</span>{% endif %}
+    {% if not batch_process_system_calculate_analytics_on %} <span style="color: darkred;">[Analytics Processing OFF]</span>{% endif %}
+    {% if not batch_process_system_search_twitter_on %} <span style="color: darkred;">[Twitter Processing OFF]</span>{% endif %}
 </h1>
 
 <ul>
-    <li><a href="{% url 'import_export_batches:batch_process_system_toggle' %}" >
-       {% if batch_process_system_on %}Turn Batch System Off{% else %}Turn Batch System On{% endif %}
-       </a></li>
+    <li>
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_on %}Turn OFF Entire Batch System{% else %}<strong>Turn ON Entire Batch System</strong>{% endif %}
+        </a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=ACTIVITY_NOTICE_PROCESS&{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_activity_notices_on %}Turn OFF Activity Processing{% else %}<strong>Turn ON Activity Processing</strong>{% endif %}
+        </a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=API_REFRESH_REQUEST&{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_api_refresh_on %}Turn OFF API Refresh{% else %}<strong>Turn ON API Refresh</strong>{% endif %}
+        </a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=BALLOT_ITEMS&{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_ballot_items_on %}Turn OFF Ballot Item Processing{% else %}<strong>Turn ON Ballot Item Processing</strong>{% endif %}
+        </a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=CALCULATE_ANALYTICS&{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_calculate_analytics_on %}Turn OFF Analytics Processing{% else %}<strong>Turn ON Analytics Processing</strong>{% endif %}
+        </a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=SEARCH_TWITTER&{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_search_twitter_on %}Turn OFF Twitter Processing{% else %}<strong>Turn ON Twitter Processing</strong>{% endif %}
+        </a>
+    </li>
     <li><a href="{% url 'import_export_batches:batch_set_list' %}" target="_blank" >
       Batch Set List <span class="glyphicon glyphicon-new-window"></span></a></li>
     <li><a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
       Batch Process Log <span class="glyphicon glyphicon-new-window"></span></a></li>
-    <li><a href="{% url 'import_export_batches:batch_process_next_steps' %}" target="_blank" >
-       Manually Start One Process <span class="glyphicon glyphicon-new-window"></span>
-       </a></li>
+    <li>
+        <a href="{% url 'import_export_batches:process_next_activity_notices' %}" target="_blank" >
+           Start Activity Processing <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:process_next_ballot_items' %}" target="_blank" >
+           Start Ballot Item Processing <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:process_next_general_maintenance' %}" target="_blank" >
+           Start General Maintenance (Analytics, API Refresh, Search Twitter) <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+        &nbsp;&nbsp;&nbsp;
+    </li>
 </ul>
 
 <form name="organization_position_choose_election" method="get" action="{% url 'import_export_batches:batch_process_list' %}">
@@ -85,6 +123,9 @@
         <option value="ACTIVITY_NOTICE_PROCESS"
         {% if kind_of_processes_to_show == "ACTIVITY_NOTICE_PROCESS" %} selected="selected"{% endif %}>
             Activity Notice Processing</option>
+        <option value="ANALYTICS_ACTION"
+        {% if kind_of_processes_to_show == "ANALYTICS_ACTION" %} selected="selected"{% endif %}>
+            Analytics Processing</option>
         <option value="API_REFRESH_REQUEST"
         {% if kind_of_processes_to_show == "API_REFRESH_REQUEST" %} selected="selected"{% endif %}>
             API Cache Refresh</option>
