@@ -86,11 +86,17 @@ class GetOutOfLoopLocal(Exception):
     pass
 
 
-def analyze_twitter_search_results(search_results, search_results_length, candidate_name,
-                                   candidate_campaign, possible_twitter_handles_list):
+def analyze_twitter_search_results(
+        search_results=[],
+        candidate_name={},
+        candidate_campaign=None,
+        possible_twitter_handles_list=[]):
     search_term = candidate_campaign.candidate_name
     state_code = candidate_campaign.state_code
     state_full_name = convert_state_code_to_state_text(state_code)
+    search_results_length = 0
+    if search_results and len(search_results) > 0:
+        search_results_length = len(search_results)
 
     for possible_candidate_index in range(search_results_length):
         one_result = search_results[possible_candidate_index]
@@ -677,7 +683,8 @@ def retrieve_possible_twitter_handles(candidate_campaign):
     search_results = api.search_users(q=search_term, page=1)
 
     search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
-    search_results_found = len(search_results)
+    search_results_length = len(search_results)
+    search_results_found = len(search_results) > 0
 
     name_handling_regex = r"[^ \w'-]"
     candidate_name = {
@@ -689,8 +696,12 @@ def retrieve_possible_twitter_handles(candidate_campaign):
         'nickname':    sub(name_handling_regex, "", candidate_campaign.extract_nickname()),
     }
 
-    analyze_twitter_search_results(search_results, search_results_found, candidate_name, candidate_campaign,
-                                   possible_twitter_handles_list)
+    if search_results_found:
+        analyze_twitter_search_results(
+            search_results=search_results,
+            candidate_name=candidate_name,
+            candidate_campaign=candidate_campaign,
+            possible_twitter_handles_list=possible_twitter_handles_list)
 
     # Also include search results omitting any single-letter initials and periods in name.
     # Example: "A." is ignored while "A.J." becomes "AJ"
@@ -708,20 +719,28 @@ def retrieve_possible_twitter_handles(candidate_campaign):
     if search_term != modified_search_term:
         modified_search_results = api.search_users(q=modified_search_term, page=1)
         modified_search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
-        modified_search_results_found = len(modified_search_results)
-        analyze_twitter_search_results(modified_search_results, modified_search_results_found,
-                                       candidate_name, candidate_campaign, possible_twitter_handles_list)
+        modified_search_results_found = len(modified_search_results) > 0
+        if modified_search_results_found:
+            analyze_twitter_search_results(
+                search_results=modified_search_results,
+                candidate_name=candidate_name,
+                candidate_campaign=candidate_campaign,
+                possible_twitter_handles_list=possible_twitter_handles_list)
 
     # If nickname exists, try searching with nickname instead of first name
     if len(candidate_name['nickname']):
         modified_search_term_2 = candidate_name['nickname'] + " " + modified_search_term_base
         modified_search_results_2 = api.search_users(q=modified_search_term_2, page=1)
         modified_search_results_2.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
-        modified_search_results_2_found = len(modified_search_results_2)
-        analyze_twitter_search_results(modified_search_results_2, modified_search_results_2_found,
-                                       candidate_name, candidate_campaign, possible_twitter_handles_list)
+        modified_search_results_2_found = len(modified_search_results_2) > 0
+        if modified_search_results_2_found:
+            analyze_twitter_search_results(
+                search_results=modified_search_results_2,
+                candidate_name=candidate_name,
+                candidate_campaign=candidate_campaign,
+                possible_twitter_handles_list=possible_twitter_handles_list)
 
-    twitter_handles_found = bool(possible_twitter_handles_list)
+    twitter_handles_found = len(possible_twitter_handles_list) > 0
     status += "NUMBER_POSSIBLE_TWITTER_HANDLES_FOUND: " + str(len(possible_twitter_handles_list)) + " "
 
     if twitter_handles_found:

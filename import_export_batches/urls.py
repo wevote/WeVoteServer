@@ -37,10 +37,17 @@ urlpatterns = [
     url(r'^batch_process_list/$', views_admin.batch_process_list_view, name='batch_process_list',),
     url(r'^batch_process_log_entry_list/$',
         views_admin.batch_process_log_entry_list_view, name='batch_process_log_entry_list',),
+    # DEPRECATE batch_process_next_steps
     url(r'^batch_process_next_steps/$',
         views_admin.batch_process_next_steps_view, name='batch_process_next_steps'),
     url(r'^batch_process_pause_toggle/$',
         views_admin.batch_process_pause_toggle_view, name='batch_process_pause_toggle', ),
     url(r'^batch_process_system_toggle/$',
         views_admin.batch_process_system_toggle_view, name='batch_process_system_toggle', ),
+    url(r'^process_next_activity_notices/$',
+        views_admin.process_next_activity_notices_view, name='process_next_activity_notices'),
+    url(r'^process_next_ballot_items/$',
+        views_admin.process_next_ballot_items_view, name='process_next_ballot_items'),
+    url(r'^process_next_general_maintenance/$',
+        views_admin.process_next_general_maintenance_view, name='process_next_general_maintenance'),
 ]
