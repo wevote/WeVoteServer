@@ -5107,9 +5107,9 @@ class BatchProcessManager(models.Model):
                             CALCULATE_ORGANIZATION_DAILY_METRICS, CALCULATE_ORGANIZATION_ELECTION_METRICS,
                             CALCULATE_SITEWIDE_ELECTION_METRICS, CALCULATE_SITEWIDE_VOTER_METRICS,
                             CALCULATE_SITEWIDE_DAILY_METRICS]:
-                        checked_out_expiration_time = 270  # 4.5 minutes * 60 seconds
+                        checked_out_expiration_time = 600  # 10 minutes * 60 seconds
                     elif batch_process.kind_of_process == SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE:
-                        checked_out_expiration_time = 120  # 2 minutes * 60 seconds
+                        checked_out_expiration_time = 300  # 5 minutes * 60 seconds - See SEARCH_TWITTER_TIMED_OUT
                     else:
                         checked_out_expiration_time = 1800  # 30 minutes * 60 seconds
                     date_checked_out_time_out = \
