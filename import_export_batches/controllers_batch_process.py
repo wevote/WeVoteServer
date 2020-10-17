@@ -604,7 +604,7 @@ def process_next_ballot_items():
                     batch_process.date_checked_out = None
                     batch_process.save()
                 except Exception as e:
-                    status += "COULD_NOT_SET_CHECKED_OUT_TIME_TO_NULL " + str(e) + " "
+                    status += "ERROR-COULD_NOT_SET_CHECKED_OUT_TIME_TO_NULL " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     batch_process_manager.create_batch_process_log_entry(
                         batch_process_id=batch_process.id,
@@ -681,7 +681,7 @@ def process_next_ballot_items():
                     batch_process.save()
                     batch_process_started = True
                 except Exception as e:
-                    status += "BATCH_PROCESS-CANNOT_SAVE_DATE_STARTED " + str(e) + " "
+                    status += "ERROR-BATCH_PROCESS-CANNOT_SAVE_DATE_STARTED " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     batch_process_manager.create_batch_process_log_entry(
                         batch_process_id=batch_process.id,
@@ -709,7 +709,7 @@ def process_next_ballot_items():
                             batch_process.date_checked_out = None
                             batch_process.save()
                         except Exception as e:
-                            status += "COULD_NOT_SET_CHECKED_OUT_TIME_TO_NULL " + str(e) + " "
+                            status += "ERROR-COULD_NOT_SET_CHECKED_OUT_TIME_TO_NULL " + str(e) + " "
                             handle_exception(e, logger=logger, exception_message=status)
                             batch_process_manager.create_batch_process_log_entry(
                                 batch_process_id=batch_process.id,
@@ -872,7 +872,7 @@ def process_next_general_maintenance():
                         api_refresh_request.date_checked_out = now()
                         api_refresh_request.save()
                     except Exception as e:
-                        status += "COULD_NOT_MARK_API_REFRESH_REQUEST_WITH_DATE_CHECKED_OUT " + str(e) + " "
+                        status += "ERROR-COULD_NOT_MARK_API_REFRESH_REQUEST_WITH_DATE_CHECKED_OUT " + str(e) + " "
                 else:
                     status += "FAILED_TO_SCHEDULE-" + str(API_REFRESH_REQUEST) + " "
                     batch_process_manager.create_batch_process_log_entry(
@@ -888,11 +888,23 @@ def process_next_general_maintenance():
     else:
         # We only want one Search Twitter process to be running at a time
         # Check to see if one of the existing batches is for API Refresh. If so, skip creating a new one.
+        local_batch_process_id = 0
         search_twitter_process_is_already_in_queue = False
         for batch_process in batch_process_list_for_analysis:
             if batch_process.kind_of_process in [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
+                local_batch_process_id = batch_process.id
+                status += "SEARCH_TWITTER_ALREADY_RUNNING(" + str(local_batch_process_id) + ") "
                 search_twitter_process_is_already_in_queue = True
-        if not search_twitter_process_is_already_in_queue:
+            if batch_process.date_checked_out is not None:
+                status += "SEARCH_TWITTER_TIMED_OUT_AND_BEING_RE_PROCESSED "  # See SEARCH_TWITTER_TIMED_OUT
+        if search_twitter_process_is_already_in_queue:
+            status += "DO_NOT_CREATE_SEARCH_TWITTER-ALREADY_RUNNING "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=local_batch_process_id,
+                kind_of_process=SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE,
+                status=status,
+            )
+        else:
             number_of_candidates_to_analyze = fetch_number_of_candidates_needing_twitter_search()
             if positive_value_exists(number_of_candidates_to_analyze):
                 results = batch_process_manager.create_batch_process(
@@ -978,7 +990,7 @@ def process_next_general_maintenance():
                                 status=status,
                             )
                         except Exception as e:
-                            status += "BATCH_PROCESS_ANALYTICS-CANNOT_SAVE_DATE_STARTED " + str(e) + " "
+                            status += "ERROR-BATCH_PROCESS_ANALYTICS-CANNOT_SAVE_DATE_STARTED " + str(e) + " "
                             handle_exception(e, logger=logger, exception_message=status)
                             batch_process_manager.create_batch_process_log_entry(
                                 batch_process_id=batch_process.id,
@@ -1066,7 +1078,7 @@ def process_one_analytics_batch_process(batch_process):
         batch_process.date_checked_out = now()
         batch_process.save()
     except Exception as e:
-        status += "ANALYTICS_BATCH-CHECKED_OUT_TIME_NOT_SAVED " + str(e) + " "
+        status += "ERROR-ANALYTICS_BATCH-CHECKED_OUT_TIME_NOT_SAVED " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)
         batch_process_manager.create_batch_process_log_entry(
             batch_process_id=batch_process.id,
@@ -1151,7 +1163,7 @@ def process_one_analytics_batch_process(batch_process):
                 status=status,
             )
         except Exception as e:
-            status += "BATCH_PROCESS_ANALYTICS_CHUNK_TIMED_OUT-DATE_COMPLETED_TIME_NOT_SAVED: " + str(e) + " "
+            status += "ERROR-BATCH_PROCESS_ANALYTICS_CHUNK_TIMED_OUT-DATE_COMPLETED_TIME_NOT_SAVED: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
@@ -1185,7 +1197,7 @@ def process_one_analytics_batch_process(batch_process):
             }
             return results
         except Exception as e:
-            status += "TIMED_OUT-DATE_COMPLETED_TIME_NOT_SAVED: " + str(e) + " "
+            status += "ERROR-TIMED_OUT-DATE_COMPLETED_TIME_NOT_SAVED: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
@@ -1202,7 +1214,7 @@ def process_one_analytics_batch_process(batch_process):
         batch_process_analytics_chunk.date_started = now()
         batch_process_analytics_chunk.save()
     except Exception as e:
-        status += "ANALYTICS_CHUNK_DATE_STARTED_TIME_NOT_SAVED " + str(e) + " "
+        status += "ERROR-ANALYTICS_CHUNK_DATE_STARTED_TIME_NOT_SAVED " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)
         batch_process_manager.create_batch_process_log_entry(
             batch_process_id=batch_process.id,
@@ -1255,7 +1267,7 @@ def process_one_analytics_batch_process(batch_process):
         batch_process.date_checked_out = None
         batch_process.save()
     except Exception as e:
-        status += "CHECKED_OUT_TIME_NOT_RESET: " + str(e) + " "
+        status += "ERROR-CHECKED_OUT_TIME_NOT_RESET: " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)
         batch_process_manager.create_batch_process_log_entry(
             batch_process_id=batch_process.id,
@@ -1286,7 +1298,7 @@ def process_one_api_refresh_request_batch_process(batch_process):
         batch_process.date_checked_out = now()
         batch_process.save()
     except Exception as e:
-        status += "API_REFRESH_REQUEST-CHECKED_OUT_TIME_NOT_SAVED " + str(e) + " "
+        status += "ERROR-API_REFRESH_REQUEST-CHECKED_OUT_TIME_NOT_SAVED " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)
         success = False
         batch_process_manager.create_batch_process_log_entry(
@@ -1341,7 +1353,7 @@ def process_one_api_refresh_request_batch_process(batch_process):
                 status=status,
             )
         except Exception as e:
-            status += "DATE_COMPLETED_TIME_NOT_SAVED " + str(e) + " "
+            status += "ERROR-DATE_COMPLETED_TIME_NOT_SAVED " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
@@ -1414,7 +1426,7 @@ def process_one_ballot_item_batch_process(batch_process):
         batch_process.date_checked_out = now()
         batch_process.save()
     except Exception as e:
-        status += "CHECKED_OUT_TIME_NOT_SAVED: " + str(e) + " "
+        status += "ERROR-CHECKED_OUT_TIME_NOT_SAVED: " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)
         batch_process_manager.create_batch_process_log_entry(
             batch_process_id=batch_process.id,
@@ -1491,7 +1503,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 status=status,
             )
         except Exception as e:
-            status += "RETRIEVE_DATE_STARTED-CANNOT_SAVE_RETRIEVE_DATE_STARTED " + str(e) + " "
+            status += "ERROR-RETRIEVE_DATE_STARTED-CANNOT_SAVE_RETRIEVE_DATE_STARTED " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
@@ -1583,7 +1595,7 @@ def process_one_ballot_item_batch_process(batch_process):
                         status=status,
                     )
                 except Exception as e:
-                    status += "RETRIEVE_DATE_STARTED-CANNOT_SAVE_RETRIEVE_DATE_COMPLETED " + str(e) + " "
+                    status += "ERROR-RETRIEVE_DATE_STARTED-CANNOT_SAVE_RETRIEVE_DATE_COMPLETED " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     batch_process_manager.create_batch_process_log_entry(
                         batch_process_id=batch_process.id,
@@ -1649,7 +1661,7 @@ def process_one_ballot_item_batch_process(batch_process):
                         status=results['status'],
                     )
                 except Exception as e:
-                    status += "CANNOT_SAVE_RETRIEVE_DATE_STARTED " + str(e) + " "
+                    status += "ERROR-CANNOT_SAVE_RETRIEVE_DATE_STARTED " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     batch_process_manager.create_batch_process_log_entry(
                         batch_process_id=batch_process.id,
@@ -1733,7 +1745,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 batch_process_ballot_item_chunk.retrieve_timed_out = True
                 batch_process_ballot_item_chunk.save()
             except Exception as e:
-                status += "RETRIEVE_DATE_COMPLETED-CANNOT_SAVE_RETRIEVE_DATE_COMPLETED " + str(e) + " "
+                status += "ERROR-RETRIEVE_DATE_COMPLETED-CANNOT_SAVE_RETRIEVE_DATE_COMPLETED " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 batch_process_manager.create_batch_process_log_entry(
                     batch_process_id=batch_process.id,
@@ -1777,7 +1789,7 @@ def process_one_ballot_item_batch_process(batch_process):
                     status=status,
                 )
             except Exception as e:
-                status += "ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " + str(e) + " "
+                status += "ERROR-ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 batch_process_manager.create_batch_process_log_entry(
                     batch_process_id=batch_process.id,
@@ -1817,7 +1829,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 status=status,
             )
         except Exception as e:
-            status += "ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_STARTED " + str(e) + " "
+            status += "ERROR-ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_STARTED " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
@@ -1887,7 +1899,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 status=status,
             )
         except Exception as e:
-            status += "ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " + str(e) + " "
+            status += "ERROR-ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
@@ -1924,7 +1936,7 @@ def process_one_ballot_item_batch_process(batch_process):
                     status=status,
                 )
             except Exception as e:
-                status += "ANALYZE_DATE_COMPLETED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " + str(e) + " "
+                status += "ERROR-ANALYZE_DATE_COMPLETED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 batch_process_manager.create_batch_process_log_entry(
                     batch_process_id=batch_process.id,
@@ -1986,7 +1998,7 @@ def process_one_ballot_item_batch_process(batch_process):
                             status=status,
                         )
                     except Exception as e:
-                        status += "RESTARTED_FAILED_ANALYZE_PROCESS-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " \
+                        status += "ERROR-RESTARTED_FAILED_ANALYZE_PROCESS-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " \
                                   "" + str(e) + " "
                         handle_exception(e, logger=logger, exception_message=status)
                         results = {
@@ -2013,7 +2025,7 @@ def process_one_ballot_item_batch_process(batch_process):
                             status=status,
                         )
                     except Exception as e:
-                        status += "ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " + str(e) + " "
+                        status += "ERROR-ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED " + str(e) + " "
                         handle_exception(e, logger=logger, exception_message=status)
                         results = {
                             'success': success,
@@ -2060,7 +2072,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 status=status,
             )
         except Exception as e:
-            status += "CREATE_DATE_STARTED-CANNOT_SAVE_CREATE_DATE_STARTED " + str(e) + " "
+            status += "ERROR-CREATE_DATE_STARTED-CANNOT_SAVE_CREATE_DATE_STARTED " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
@@ -2137,7 +2149,7 @@ def process_one_ballot_item_batch_process(batch_process):
                                 election_on_stage.state_code_list_raw = state_code_list_raw
                                 election_on_stage.save()
                             except Exception as e:
-                                status += "COULD_NOT_SAVE_ELECTION: " + str(e) + " "
+                                status += "ERROR-COULD_NOT_SAVE_ELECTION: " + str(e) + " "
                         else:
                             status += results['status']
                 else:
@@ -2154,7 +2166,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 status=status,
             )
         except Exception as e:
-            status += "CREATE_DATE_STARTED-CANNOT_SAVE_CREATE_DATE_COMPLETED " + str(e) + " "
+            status += "ERROR-CREATE_DATE_STARTED-CANNOT_SAVE_CREATE_DATE_COMPLETED " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
@@ -2203,7 +2215,7 @@ def process_one_ballot_item_batch_process(batch_process):
                                     election_on_stage.state_code_list_raw = state_code_list_raw
                                     election_on_stage.save()
                                 except Exception as e:
-                                    status += "COULD_NOT_SAVE_ELECTION: " + str(e) + " "
+                                    status += "ERROR-COULD_NOT_SAVE_ELECTION: " + str(e) + " "
                             else:
                                 status += results['status']
                     else:
@@ -2220,7 +2232,7 @@ def process_one_ballot_item_batch_process(batch_process):
                     status=status,
                 )
             except Exception as e:
-                status += "CREATE_DATE_STARTED-CANNOT_SAVE_CREATE_DATE_COMPLETED " + str(e) + " "
+                status += "ERROR-CREATE_DATE_STARTED-CANNOT_SAVE_CREATE_DATE_COMPLETED " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 batch_process_manager.create_batch_process_log_entry(
                     batch_process_id=batch_process.id,
@@ -2274,7 +2286,7 @@ def process_activity_notice_batch_process(batch_process):
             batch_process.date_checked_out = now()
             batch_process.save()
         except Exception as e:
-            status += "ACTIVITY_NOTICE-CHECKED_OUT_TIME_NOT_SAVED " + str(e) + " "
+            status += "ERROR-ACTIVITY_NOTICE-CHECKED_OUT_TIME_NOT_SAVED " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             success = False
             batch_process_manager.create_batch_process_log_entry(
@@ -2328,7 +2340,7 @@ def process_activity_notice_batch_process(batch_process):
                         status=status,
                     )
             except Exception as e:
-                status += "ACTIVITY_NOTICE-DATE_COMPLETED_TIME_NOT_SAVED: " + str(e) + " "
+                status += "ERROR-ACTIVITY_NOTICE-DATE_COMPLETED_TIME_NOT_SAVED: " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 batch_process_manager.create_batch_process_log_entry(
                     batch_process_id=batch_process.id,
@@ -2370,7 +2382,7 @@ def process_one_search_twitter_batch_process(batch_process, status=""):
         batch_process.date_checked_out = now()
         batch_process.save()
     except Exception as e:
-        status += "CHECKED_OUT_TIME_NOT_SAVED: " + str(e) + " "
+        status += "ERROR-CHECKED_OUT_TIME_NOT_SAVED: " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)
         success = False
         batch_process_manager.create_batch_process_log_entry(
@@ -2408,7 +2420,7 @@ def process_one_search_twitter_batch_process(batch_process, status=""):
                 status=status,
             )
         except Exception as e:
-            status += "DATE_COMPLETED_TIME_NOT_SAVED: " + str(e) + " "
+            status += "ERROR-DATE_COMPLETED_TIME_NOT_SAVED: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
@@ -2439,7 +2451,7 @@ def process_one_search_twitter_batch_process(batch_process, status=""):
                 status=status,
             )
         except Exception as e:
-            status += "COMPLETION_SUMMARY_NOT_SAVED: " + str(e) + " "
+            status += "ERROR-COMPLETION_SUMMARY_NOT_SAVED: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
@@ -2469,7 +2481,7 @@ def process_one_sitewide_daily_analytics_batch_process(batch_process):
         batch_process.date_checked_out = now()
         batch_process.save()
     except Exception as e:
-        status += "CHECKED_OUT_TIME_NOT_SAVED-SITEWIDE_DAILY: " + str(e) + " "
+        status += "ERROR-CHECKED_OUT_TIME_NOT_SAVED-SITEWIDE_DAILY: " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)
         batch_process_manager.create_batch_process_log_entry(
             batch_process_id=batch_process.id,
@@ -2530,7 +2542,7 @@ def process_one_sitewide_daily_analytics_batch_process(batch_process):
         batch_process.date_checked_out = None
         batch_process.save()
     except Exception as e:
-        status += "CHECKED_OUT_TIME_NOT_RESET: " + str(e) + " "
+        status += "ERROR-CHECKED_OUT_TIME_NOT_RESET: " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)
         batch_process_manager.create_batch_process_log_entry(
             batch_process_id=batch_process.id,
@@ -2711,7 +2723,7 @@ def mark_batch_process_as_complete(batch_process=None,
             status += "BATCH_PROCESS_MARKED_COMPLETE "
         except Exception as e:
             success = False
-            status += "CANNOT_MARK_BATCH_PROCESS_AS_COMPLETE " + str(e) + " "
+            status += "ERROR-CANNOT_MARK_BATCH_PROCESS_AS_COMPLETE " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process_id,
@@ -2743,7 +2755,7 @@ def mark_batch_process_as_complete(batch_process=None,
             status += "BATCH_PROCESS_BALLOT_ITEM_CHUNK_MARKED_COMPLETE "
         except Exception as e:
             success = False
-            status += "CANNOT_MARK_BATCH_PROCESS_BALLOT_ITEM_CHUNK_AS_COMPLETE " + str(e) + " "
+            status += "ERROR-CANNOT_MARK_BATCH_PROCESS_BALLOT_ITEM_CHUNK_AS_COMPLETE " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process_id,
