@@ -633,16 +633,22 @@ def process_sitewide_voter_metrics(batch_process, batch_process_analytics_chunk)
     success = True
     sitewide_voter_metrics_updated = 0
 
+    analytics_manager = AnalyticsManager()
+    batch_process_manager = BatchProcessManager()
+
     if not batch_process or not batch_process_analytics_chunk or not batch_process.analytics_date_as_integer:
         status += "MISSING_REQUIRED_VARIABLES-VOTER_METRICS "
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            status=status,
+        )
         results = {
             'success':              success,
             'status':               status,
         }
         return results
-
-    analytics_manager = AnalyticsManager()
-    batch_process_manager = BatchProcessManager()
 
     # Start by finding voters already processed for analytics_date_as_integer or more recent
     exclude_voter_we_vote_id_list = []
@@ -683,7 +689,17 @@ def process_sitewide_voter_metrics(batch_process, batch_process_analytics_chunk)
 
             status += "ROWS_BEING_REVIEWED-VOTER_METRICS: " + str(len(voter_analytics_list)) + " "
         except Exception as e:
-            status += "NUMBER_OF_ROWS_BEING_REVIEWED_NOT_SAVED-VOTER_METRICS " + str(e) + " "
+            status += "NUMBER_OF_ROWS_BEING_REVIEWED_NOT_SAVED-VOTER_METRICS: " + str(e) + " "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=batch_process.kind_of_process,
+                status=status,
+            )
+            results = {
+                'success':              success,
+                'status':               status,
+            }
+            return results
 
     for voter_we_vote_id in voter_analytics_list:
         analysis_success = True
@@ -765,6 +781,12 @@ def process_sitewide_voter_metrics(batch_process, batch_process_analytics_chunk)
             batch_process.analytics_date_as_integer,
             defaults=defaults)
         status += status_results['status']
+
+    batch_process_manager.create_batch_process_log_entry(
+        batch_process_id=batch_process.id,
+        kind_of_process=batch_process.kind_of_process,
+        status=status,
+    )
 
     results = {
         'success':              success,

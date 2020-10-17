@@ -1349,7 +1349,8 @@ class AnalyticsManager(models.Model):
                 sitewide_daily_metrics_saved = True
             except Exception as e:
                 success = False
-                status += 'SITEWIDE_DAILY_METRICS_UPDATE_OR_CREATE_FAILED ' + str(e) + ' '
+                status += 'SITEWIDE_DAILY_METRICS_UPDATE_OR_CREATE_FAILED ' \
+                          '(' + str(date_as_integer) + '): ' + str(e) + ' '
         else:
             status += "SITEWIDE_DAILY_METRICS-MISSING_DATE_AS_INTEGER "
 

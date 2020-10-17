@@ -830,28 +830,32 @@ def retrieve_possible_twitter_handles_in_bulk(
             candidate_queryset = candidate_queryset.exclude(we_vote_id__in=remote_request_list)
     except Exception as e:
         status += "PROBLEM_RETRIEVING_TWITTER_LINK_POSSIBILITY " + str(e) + " "
+        success = False
 
-    # Limit so we don't overwhelm Twitter's rate limiting
-    # https://developer.twitter.com/en/docs/basics/rate-limits
-    # GET users/search is limited to 900 per 15 minutes
-    # Since we run one batch per minute, that means that 900 / 15 = 60
-    # retrieve_possible_twitter_handles *might* search as many as 3 times per candidate, so we limit the number of
-    # candidates we analyze to 20 per minute
-    if positive_value_exists(limit):
-        number_of_candidates_limit = limit
-    else:
-        number_of_candidates_limit = 20
-    candidates_to_analyze = candidate_queryset.count()
-    candidate_list = candidate_queryset[:number_of_candidates_limit]
-
+    candidates_to_analyze = 0
     candidates_analyzed = 0
-    status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES_LOOP-TOTAL: " + str(candidates_to_analyze) + " "
-    for one_candidate in candidate_list:
-        # Twitter account search and analysis has not been run on this candidate yet
-        results = retrieve_possible_twitter_handles(one_candidate)
-        if results['success']:
-            candidates_analyzed += 1
-        status += results['status']
+    if positive_value_exists(success):
+        # Limit so we don't overwhelm Twitter's rate limiting
+        # https://developer.twitter.com/en/docs/basics/rate-limits
+        # GET users/search is limited to 900 per 15 minutes
+        # Since we run one batch per minute, that means that 900 / 15 = 60
+        # retrieve_possible_twitter_handles *might* search as many as 3 times per candidate, so we limit the number of
+        # candidates we analyze to 20 per minute
+        if positive_value_exists(limit):
+            number_of_candidates_limit = limit
+        else:
+            number_of_candidates_limit = 20
+        candidates_to_analyze = candidate_queryset.count()
+        candidate_list = candidate_queryset[:number_of_candidates_limit]
+
+        candidates_analyzed = 0
+        status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES_LOOP-TOTAL: " + str(candidates_to_analyze) + " "
+        for one_candidate in candidate_list:
+            # Twitter account search and analysis has not been run on this candidate yet
+            results = retrieve_possible_twitter_handles(one_candidate)
+            if results['success']:
+                candidates_analyzed += 1
+            status += results['status']
 
     results = {
         'success':                  success,

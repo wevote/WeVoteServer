@@ -15,8 +15,8 @@ from .models import ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, \
     IMPORT_CREATE, IMPORT_DELETE, IMPORT_ALREADY_DELETED, IMPORT_ADD_TO_EXISTING, IMPORT_POLLING_LOCATION, IMPORT_VOTER
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     update_or_create_batch_header_mapping, export_voter_list_with_emails, import_data_from_batch_row_actions
-from .controllers_batch_process import batch_process_next_steps, process_next_activity_notices, \
-    process_next_ballot_items, process_next_general_maintenance
+from .controllers_batch_process import process_next_activity_notices, process_next_ballot_items, \
+    process_next_general_maintenance
 from .controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager, MEASURE, CANDIDATE, POLITICIAN
@@ -1848,8 +1848,12 @@ def batch_process_list_view(request):
 
 
 def batch_process_next_steps_view(request):
-    json_results = batch_process_next_steps()
-
+    # json_results = batch_process_next_steps()
+    status = "batch_process_next_steps_view-DEPRECATED "
+    json_results = {
+        'success': False,
+        'status': status,
+    }
     response = HttpResponse(json.dumps(json_results), content_type='application/json')
     return response
 
