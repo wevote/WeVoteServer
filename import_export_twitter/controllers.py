@@ -673,36 +673,43 @@ def retrieve_possible_twitter_handles(candidate_campaign):
             except Exception as e:
                 status += "FAILED_TO_SAVE_CANDIDATE_CAMPAIGN: " + str(e) + " "
 
-    search_term = candidate_campaign.candidate_name
+    name_handling_regex = r"[^ \w'-]"
+    candidate_name = {
+        'title': sub(name_handling_regex, "", candidate_campaign.extract_title()),
+        'first_name': sub(name_handling_regex, "", candidate_campaign.extract_first_name()),
+        'middle_name': sub(name_handling_regex, "", candidate_campaign.extract_middle_name()),
+        'last_name': sub(name_handling_regex, "", candidate_campaign.extract_last_name()),
+        'suffix': sub(name_handling_regex, "", candidate_campaign.extract_suffix()),
+        'nickname': sub(name_handling_regex, "", candidate_campaign.extract_nickname()),
+    }
 
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
     # results = {'possible_twitter_handles_list': []}
     possible_twitter_handles_list = []
-    search_results = api.search_users(q=search_term, page=1)
 
-    search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
-    search_results_length = len(search_results)
-    search_results_found = len(search_results) > 0
+    # ##############
+    # Search 1
+    search_term = candidate_campaign.candidate_name
+    try:
+        search_results = api.search_users(q=search_term, page=1)
 
-    name_handling_regex = r"[^ \w'-]"
-    candidate_name = {
-        'title':       sub(name_handling_regex, "", candidate_campaign.extract_title()),
-        'first_name':  sub(name_handling_regex, "", candidate_campaign.extract_first_name()),
-        'middle_name': sub(name_handling_regex, "", candidate_campaign.extract_middle_name()),
-        'last_name':   sub(name_handling_regex, "", candidate_campaign.extract_last_name()),
-        'suffix':      sub(name_handling_regex, "", candidate_campaign.extract_suffix()),
-        'nickname':    sub(name_handling_regex, "", candidate_campaign.extract_nickname()),
-    }
+        search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
+        search_results_length = len(search_results)
+        search_results_found = len(search_results) > 0
 
-    if search_results_found:
-        analyze_twitter_search_results(
-            search_results=search_results,
-            candidate_name=candidate_name,
-            candidate_campaign=candidate_campaign,
-            possible_twitter_handles_list=possible_twitter_handles_list)
+        if search_results_found:
+            analyze_twitter_search_results(
+                search_results=search_results,
+                candidate_name=candidate_name,
+                candidate_campaign=candidate_campaign,
+                possible_twitter_handles_list=possible_twitter_handles_list)
+    except Exception as e:
+        status += "ERROR_RETURNED_FROM_TWITTER_SEARCH1: " + str(e) + " "
 
+    # ##############
+    # Search 2
     # Also include search results omitting any single-letter initials and periods in name.
     # Example: "A." is ignored while "A.J." becomes "AJ"
     modified_search_term = ""
@@ -717,28 +724,37 @@ def retrieve_possible_twitter_handles(candidate_campaign):
         modified_search_term_base += " " + candidate_name['suffix']
     modified_search_term += modified_search_term_base
     if search_term != modified_search_term:
-        modified_search_results = api.search_users(q=modified_search_term, page=1)
-        modified_search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
-        modified_search_results_found = len(modified_search_results) > 0
-        if modified_search_results_found:
-            analyze_twitter_search_results(
-                search_results=modified_search_results,
-                candidate_name=candidate_name,
-                candidate_campaign=candidate_campaign,
-                possible_twitter_handles_list=possible_twitter_handles_list)
+        try:
+            modified_search_results = api.search_users(q=modified_search_term, page=1)
+            modified_search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
+            modified_search_results_found = len(modified_search_results) > 0
+            if modified_search_results_found:
+                analyze_twitter_search_results(
+                    search_results=modified_search_results,
+                    candidate_name=candidate_name,
+                    candidate_campaign=candidate_campaign,
+                    possible_twitter_handles_list=possible_twitter_handles_list)
+        except Exception as e:
+            status += "ERROR_RETURNED_FROM_TWITTER_SEARCH2: " + str(e) + " "
 
+    # ##############
+    # Search 3
     # If nickname exists, try searching with nickname instead of first name
     if len(candidate_name['nickname']):
         modified_search_term_2 = candidate_name['nickname'] + " " + modified_search_term_base
-        modified_search_results_2 = api.search_users(q=modified_search_term_2, page=1)
-        modified_search_results_2.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
-        modified_search_results_2_found = len(modified_search_results_2) > 0
-        if modified_search_results_2_found:
-            analyze_twitter_search_results(
-                search_results=modified_search_results_2,
-                candidate_name=candidate_name,
-                candidate_campaign=candidate_campaign,
-                possible_twitter_handles_list=possible_twitter_handles_list)
+
+        try:
+            modified_search_results_2 = api.search_users(q=modified_search_term_2, page=1)
+            modified_search_results_2.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
+            modified_search_results_2_found = len(modified_search_results_2) > 0
+            if modified_search_results_2_found:
+                analyze_twitter_search_results(
+                    search_results=modified_search_results_2,
+                    candidate_name=candidate_name,
+                    candidate_campaign=candidate_campaign,
+                    possible_twitter_handles_list=possible_twitter_handles_list)
+        except Exception as e:
+            status += "ERROR_RETURNED_FROM_TWITTER_SEARCH3: " + str(e) + " "
 
     twitter_handles_found = len(possible_twitter_handles_list) > 0
     status += "NUMBER_POSSIBLE_TWITTER_HANDLES_FOUND: " + str(len(possible_twitter_handles_list)) + " "
