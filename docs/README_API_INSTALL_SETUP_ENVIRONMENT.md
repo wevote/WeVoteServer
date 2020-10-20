@@ -18,6 +18,9 @@ New variables needed by WeVoteServer will be added to
 "environment_variables-template.json" from time to time, so please check for updates by comparing your local version
 with the template file.
 
+To start with, enter DATABASE_USER as "postgres" and DATABASE_PASSWORD as whatever you set previously in [step 1b](README_API_INSTALL_POSTGRES_LINUX.md).  
+You will also need to set DATABASE_USER_READONLY and DATABASE_PASSWORD_READONLY with the same values.
+
 ### LOG_FILE
 Create a file on your computer to match the one expected in the environment_variables.json file:
 
