@@ -51,10 +51,14 @@
                 </tr>
                 {% endif %}
                 <tr>
-                    <th>Twitter Handle:</th>
+                    <th>Twitter Link To Organization:&nbsp;</th>
+                    <td>{% if twitter_link_to_organization and twitter_link_to_organization.twitter_id %}{{ twitter_link_to_organization.fetch_twitter_handle_locally_or_remotely|default_if_none:"" }}{% else %}no link{% endif %}</td>
+                </tr>
+                <tr>
+                    <th><span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Handle{% if twitter_handle_mismatch %} (MISMATCH WITH TWITTER LINK){% endif %}:</span></th>
                     <td>
+                    {{ organization.organization_twitter_handle|default_if_none:"" }}
                     {% if organization.generate_twitter_link %}
-                        {{ organization.organization_twitter_handle }}
                         {% if organization.organization_twitter_handle %}
                             <a href="{{ organization.generate_twitter_link }}"
                                target="_blank"
@@ -62,21 +66,25 @@
                         {% endif %}
 
                         ({{ organization.twitter_followers_count|intcomma }} Followers)
+                    {% endif %}
+                    {% if twitter_handle_mismatch %}
+                        (cannot refresh Twitter details with mismatch)
                     {% else %}
-                        {{ organization.organization_twitter_handle|default_if_none:"" }}
-                    {% endif %} (<a href="{% url 'import_export_twitter:refresh_twitter_organization_details' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">refresh Twitter details</a>)
-                    (<a href="{% url 'import_export_twitter:delete_images_view'%}?organization_id={{ organization.id }}&google_civic_election_id={{ google_civic_election_id }}">Delete Cached Images</a>)</td>
+                        (<a href="{% url 'import_export_twitter:refresh_twitter_organization_details' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">refresh Twitter details</a>)
+                    {% endif %}
+                    (<a href="{% url 'import_export_twitter:delete_images_view'%}?organization_id={{ organization.id }}&google_civic_election_id={{ google_civic_election_id }}">Delete Cached Images</a>)
+                    </td>
                 </tr>
                 <tr>
-                    <th>Twitter Descriptive Name:</th>
+                    <th><span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Descriptive Name:</span></th>
                     <td>{{ organization.twitter_name|default_if_none:"" }}</td>
                 </tr>
                 <tr>
-                    <th>Twitter Description:</th>
+                    <th><span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Description:</span></th>
                     <td>{{ organization.twitter_description|default_if_none:"" }}</td>
                 </tr>
                 <tr>
-                    <th>Twitter Location:</th>
+                    <th><span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Location:</span></th>
                     <td>{{ organization.twitter_location|default_if_none:"" }}</td>
                 </tr>
                 <tr>
