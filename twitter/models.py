@@ -303,6 +303,16 @@ class TwitterUserManager(models.Model):
         }
         return results
 
+    def create_twitter_link_to_organization_from_twitter_handle(self, twitter_handle, organization_we_vote_id):
+        twitter_user_id = 0
+        results = self.retrieve_twitter_user_locally_or_remotely(twitter_user_id, twitter_handle, read_only=True)
+        if results['twitter_user_found']:
+            twitter_user = results['twitter_user']
+            twitter_user_id = twitter_user.twitter_id
+        return self.create_twitter_link_to_organization(
+            twitter_id=twitter_user_id,
+            organization_we_vote_id=organization_we_vote_id)
+
     def create_twitter_link_to_organization(self, twitter_id, organization_we_vote_id):
         if not positive_value_exists(twitter_id) or not \
                 positive_value_exists(organization_we_vote_id):
@@ -329,7 +339,7 @@ class TwitterUserManager(models.Model):
             twitter_link_to_organization_saved = False
             twitter_link_to_organization = TwitterLinkToOrganization()
             success = False
-            status = "TWITTER_LINK_TO_ORGANIZATION_NOT_CREATED"
+            status = "TWITTER_LINK_TO_ORGANIZATION_NOT_CREATED: " + str(e) + " "
 
         results = {
             'success':                              success,
@@ -507,7 +517,7 @@ class TwitterUserManager(models.Model):
         except Exception as e:
             twitter_link_to_organization_found = False
             success = False
-            status = 'FAILED retrieve_twitter_link_to_organization'
+            status = 'FAILED retrieve_twitter_link_to_organization: ' + str(e) + " "
 
         results = {
             'success':      success,
@@ -1127,11 +1137,11 @@ class TwitterUserManager(models.Model):
                 twitter_user.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 values_changed = True
 
-            if 'description' in twitter_json and positive_value_exists(twitter_json['description']):
+            if 'description' in twitter_json:  # No value required to update description (so we can clear out)
                 if twitter_json['description'] != twitter_user.twitter_description:
                     twitter_user.twitter_description = twitter_json['description']
                     values_changed = True
-            if 'location' in twitter_json and positive_value_exists(twitter_json['location']):
+            if 'location' in twitter_json:  # No value required to update location (so we can clear out)
                 if twitter_json['location'] != twitter_user.twitter_location:
                     twitter_user.twitter_location = twitter_json['location']
                     values_changed = True

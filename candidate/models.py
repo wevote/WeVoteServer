@@ -2925,11 +2925,11 @@ class CandidateCampaignManager(models.Model):
                 candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 values_changed = True
 
-            if 'description' in twitter_json and positive_value_exists(twitter_json['description']):
+            if 'description' in twitter_json:  # No value required to update description (so we can clear out)
                 if twitter_json['description'] != candidate.twitter_description:
                     candidate.twitter_description = twitter_json['description']
                     values_changed = True
-            if 'location' in twitter_json and positive_value_exists(twitter_json['location']):
+            if 'location' in twitter_json:  # No value required to update location (so we can clear out)
                 if twitter_json['location'] != candidate.twitter_location:
                     candidate.twitter_location = twitter_json['location']
                     values_changed = True

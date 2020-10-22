@@ -537,7 +537,7 @@ def organization_merge_process_view(request):
     move_organization_membership_link_results = move_organization_membership_link_to_another_organization(
         from_organization_we_vote_id, to_organization_we_vote_id)
     status += " " + move_organization_membership_link_results['status']
-    if positive_value_exists(move_organization_followers_results['membership_link_entries_not_moved']):
+    if positive_value_exists(move_organization_membership_link_results['membership_link_entries_not_moved']):
         messages.add_message(request, messages.ERROR, status)
         return HttpResponseRedirect(reverse('organization:compare_two_organizations_for_merge', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
@@ -634,15 +634,18 @@ def organization_edit_view(request, organization_id=0, organization_we_vote_id="
     organization_id = convert_to_int(organization_id)
     organization_on_stage_found = False
     organization_manager = OrganizationManager()
-    organization_on_stage = Organization()
+    organization_on_stage = None
     state_served_code = ''
     new_issue_list = []
     results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
 
+    organization_twitter_handle = ""
     if results['organization_found']:
         organization_on_stage = results['organization']
         state_served_code = organization_on_stage.state_served_code
         organization_on_stage_found = True
+        organization_we_vote_id = organization_on_stage.we_vote_id
+        organization_twitter_handle = organization_on_stage.organization_twitter_handle
         issue_list_manager = IssueListManager()
         issue_list_results = issue_list_manager.retrieve_issues(ALPHABETICAL_ASCENDING, show_hidden_issues=True)
         if issue_list_results["issue_list_found"]:
@@ -658,6 +661,22 @@ def organization_edit_view(request, organization_id=0, organization_we_vote_id="
                     issue.followed_by_organization = False
                 new_issue_list.append(issue)
 
+    twitter_link_to_organization = None
+    twitter_link_to_organization_handle = ""
+    twitter_handle_mismatch = False
+    if organization_on_stage_found:
+        # TwitterLinkToOrganization
+        twitter_user_manager = TwitterUserManager()
+        results = twitter_user_manager.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
+            organization_we_vote_id)
+        if results['twitter_link_to_organization_found']:
+            twitter_link_to_organization = results['twitter_link_to_organization']
+            twitter_link_to_organization_handle = \
+                twitter_link_to_organization.fetch_twitter_handle_locally_or_remotely()
+            if twitter_link_to_organization_handle and organization_twitter_handle:
+                if twitter_link_to_organization_handle.lower() != organization_twitter_handle.lower():
+                    twitter_handle_mismatch = True
+
     election_manager = ElectionManager()
     upcoming_election_list = []
     results = election_manager.retrieve_upcoming_elections()
@@ -671,25 +690,19 @@ def organization_edit_view(request, organization_id=0, organization_we_vote_id="
     # Sort by organization_type value (instead of key)
     organization_types_list = sorted(organization_types_map.items(), key=operator.itemgetter(1))
 
-    if organization_on_stage_found:
-        template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'organization':             organization_on_stage,
-            'organization_types':       organization_types_list,
-            'upcoming_election_list':   upcoming_election_list,
-            'google_civic_election_id': google_civic_election_id,
-            'state_list':               sorted_state_list,
-            'state_served_code':        state_served_code,
-            'issue_list':               new_issue_list,
-        }
-    else:
-        template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'upcoming_election_list':   upcoming_election_list,
-            'google_civic_election_id': google_civic_election_id,
-            'state_list':               sorted_state_list,
-            'issue_list':               new_issue_list,
-        }
+    template_values = {
+        'google_civic_election_id':             google_civic_election_id,
+        'issue_list':                           new_issue_list,
+        'messages_on_stage':                    messages_on_stage,
+        'organization':                         organization_on_stage,
+        'organization_types':                   organization_types_list,
+        'state_list':                           sorted_state_list,
+        'state_served_code':                    state_served_code,
+        'twitter_handle_mismatch':              twitter_handle_mismatch,
+        'twitter_link_to_organization':         twitter_link_to_organization,
+        'twitter_link_to_organization_handle':  twitter_link_to_organization_handle,
+        'upcoming_election_list':               upcoming_election_list,
+    }
     return render(request, 'organization/organization_edit.html', template_values)
 
 
@@ -880,16 +893,50 @@ def organization_edit_process_view(request):
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
 
     # Check to see if this organization is already being used anywhere
-    organization_on_stage_found = False
     new_organization_created = False
+    organization_on_stage = None
+    organization_on_stage_found = False
+    organization_we_vote_id = ""
     status = ""
     try:
         organization_query = Organization.objects.filter(id=organization_id)
         if organization_query.count():
             organization_on_stage = organization_query[0]
             organization_on_stage_found = True
+            organization_we_vote_id = organization_on_stage.we_vote_id
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
+
+    # Find out if there is a TwitterLinkToOrganization for the incoming organization_twitter_handle
+    twitter_handle_can_be_saved_without_conflict = True
+    twitter_link_to_organization_retrieve_failed = False
+    twitter_link_to_organization_we_vote_id = ""
+    twitter_user_manager = TwitterUserManager()
+    if positive_value_exists(organization_twitter_handle):
+        # TwitterLinkToOrganization
+        results = twitter_user_manager.retrieve_twitter_user(
+            twitter_user_id=0,
+            twitter_handle=organization_twitter_handle,
+            read_only=True
+        )
+        if not positive_value_exists(results['success']):
+            twitter_handle_can_be_saved_without_conflict = False
+            twitter_link_to_organization_retrieve_failed = True
+        elif results['twitter_user_found']:
+            twitter_user = results['twitter_user']
+
+            results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(
+                twitter_user.twitter_id)
+            if results['twitter_link_to_organization_found']:
+                twitter_link_to_organization = results['twitter_link_to_organization']
+                twitter_link_to_organization_we_vote_id = twitter_link_to_organization.organization_we_vote_id
+
+    if not twitter_link_to_organization_retrieve_failed and \
+            positive_value_exists(twitter_link_to_organization_we_vote_id):
+        # If here, make sure the TwitterLinkToOrganization is attached to this organization
+        if twitter_link_to_organization_we_vote_id != organization_we_vote_id:
+            # If here we cannot save a change to Twitter
+            twitter_handle_can_be_saved_without_conflict = False
 
     try:
         if organization_on_stage_found:
@@ -911,7 +958,8 @@ def organization_edit_process_view(request):
             if organization_name is not False:
                 organization_on_stage.organization_name = organization_name.strip()
             if organization_twitter_handle is not False:
-                organization_on_stage.organization_twitter_handle = organization_twitter_handle.strip()
+                if twitter_handle_can_be_saved_without_conflict:
+                    organization_on_stage.organization_twitter_handle = organization_twitter_handle.strip()
             if organization_email is not False:
                 organization_on_stage.organization_email = organization_email.strip()
             if organization_facebook is not False:
@@ -1008,7 +1056,8 @@ def organization_edit_process_view(request):
             if issue_analysis_done is not False:
                 organization_on_stage.issue_analysis_done = issue_analysis_done
             if organization_twitter_handle is not False:
-                organization_on_stage.organization_twitter_handle = organization_twitter_handle
+                if twitter_handle_can_be_saved_without_conflict:
+                    organization_on_stage.organization_twitter_handle = organization_twitter_handle
             if organization_email is not False:
                 organization_on_stage.organization_email = organization_email
             if organization_facebook is not False:
@@ -1036,22 +1085,52 @@ def organization_edit_process_view(request):
                                                                                              error_type=type(e)))
         return HttpResponseRedirect(reverse('organization:organization_list', args=()))
 
-    new_organization_and_new_twitter_handle = positive_value_exists(new_organization_created) \
-        and positive_value_exists(organization_we_vote_id) \
-        and positive_value_exists(organization_twitter_handle)
-    # Update Twitter information
-    if new_organization_and_new_twitter_handle or current_organization_with_new_twitter_handle:
-        # Pull Twitter information
-        results = refresh_twitter_organization_details(organization_on_stage)
-        status += results['status']
-        organization_on_stage = results['organization']
-        twitter_user_id = results['twitter_user_id']
+    delete_twitter_link_to_organization_entry = False
+    if not positive_value_exists(twitter_handle_can_be_saved_without_conflict):
+        messages.add_message(request, messages.ERROR,
+                             'Twitter handle already linked to another organization. Twitter handle not saved/changed.')
+    else:
+        new_organization_and_new_twitter_handle = positive_value_exists(new_organization_created) \
+            and positive_value_exists(organization_we_vote_id) \
+            and positive_value_exists(organization_twitter_handle)
+        # Update Twitter information
+        if new_organization_and_new_twitter_handle or current_organization_with_new_twitter_handle:
+            # We have confirmed above that this Twitter handle isn't linked to another organization
 
-        if positive_value_exists(twitter_user_id):
-            # Try to link Twitter to this organization. If already linked, this function will fail because of
-            # database unique field requirements.
-            twitter_user_manager = TwitterUserManager()
-            results = twitter_user_manager.create_twitter_link_to_organization(twitter_user_id, organization_we_vote_id)
+            # Check to see if there is a TwitterLinkToOrganization entry
+            link_results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
+                twitter_handle=organization_twitter_handle)
+            if not link_results['success']:
+                messages.add_message(request, messages.ERROR, 'Could not retrieve TwitterLinkToOrganization by handle.')
+            elif link_results['twitter_link_to_organization_found']:
+                # Last check - is it linked to this org?
+                twitter_link_to_organization = link_results['twitter_link_to_organization']
+                if twitter_link_to_organization.organization_we_vote_id != organization_we_vote_id:
+                    messages.add_message(request, messages.ERROR, 'TwitterLinkToOrganization mismatch.')
+                    delete_twitter_link_to_organization_entry = True
+                else:
+                    # Pull the latest Twitter information
+                    results = refresh_twitter_organization_details(organization_on_stage)
+                    status += results['status']
+                    organization_on_stage = results['organization']
+                    # twitter_user_id = results['twitter_user_id']
+            elif positive_value_exists(organization_twitter_handle) and positive_value_exists(organization_we_vote_id):
+                # Add TwitterLinkToOrganization entry
+                results = twitter_user_manager.create_twitter_link_to_organization_from_twitter_handle(
+                    organization_twitter_handle, organization_we_vote_id)
+                if not results['success']:
+                    messages.add_message(request, messages.ERROR, 'Could not add TwitterLinkToOrganization.')
+                    delete_twitter_link_to_organization_entry = False
+        elif positive_value_exists(organization_we_vote_id) and not positive_value_exists(organization_twitter_handle):
+            delete_twitter_link_to_organization_entry = True
+
+        # The correct TwitterLinkToOrganization entries are saved, so delete all others associated with this org
+        if delete_twitter_link_to_organization_entry:
+            delete_results = twitter_user_manager.delete_twitter_link_to_organization(
+                twitter_id=0,
+                organization_we_vote_id=organization_we_vote_id)
+            if not delete_results['success']:
+                messages.add_message(request, messages.ERROR, 'Could not delete TwitterLinkToOrganization.')
 
     if positive_value_exists(organization_we_vote_id):
         push_organization_data_to_other_table_caches(organization_we_vote_id)
@@ -1281,6 +1360,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     organization_on_stage_found = False
     organization_issues_list = []
     organization_blocked_issues_list = []
+    organization_twitter_handle = ""
     try:
         if positive_value_exists(organization_id):
             organization_query = Organization.objects.filter(id=organization_id)
@@ -1291,9 +1371,25 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             organization_on_stage_found = True
             organization_we_vote_id = organization_on_stage.we_vote_id
             organization_id = organization_on_stage.id
+            organization_twitter_handle = organization_on_stage.organization_twitter_handle
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
         organization_on_stage_found = False
+
+    twitter_link_to_organization = None
+    twitter_handle_mismatch = False
+    if organization_on_stage_found:
+        # TwitterLinkToOrganization
+        twitter_user_manager = TwitterUserManager()
+        results = twitter_user_manager.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
+            organization_we_vote_id)
+        if results['twitter_link_to_organization_found']:
+            twitter_link_to_organization = results['twitter_link_to_organization']
+            twitter_link_to_organization_handle = \
+                twitter_link_to_organization.fetch_twitter_handle_locally_or_remotely()
+            if twitter_link_to_organization_handle and organization_twitter_handle:
+                if twitter_link_to_organization_handle.lower() != organization_twitter_handle.lower():
+                    twitter_handle_mismatch = True
 
     candidate_list_manager = CandidateCampaignListManager()
     if not organization_on_stage_found:
@@ -1373,8 +1469,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     organizations_dict = {}
     voters_by_linked_org_dict = {}
     voters_dict = {}
+    position_manager = PositionManager()
     for one_position in organization_position_list:
-        position_manager = PositionManager()
         results = position_manager.refresh_cached_position_info(
             one_position, offices_dict=offices_dict, candidates_dict=candidates_dict, measures_dict=measures_dict,
             organizations_dict=organizations_dict, voters_by_linked_org_dict=voters_by_linked_org_dict,
@@ -1424,21 +1520,23 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     organization_type_display_text = ORGANIZATION_TYPE_MAP.get(organization_on_stage.organization_type,
                                                                ORGANIZATION_TYPE_MAP[UNKNOWN])
     template_values = {
+        'candidate_campaign_id':            candidate_campaign_id,
+        'candidate_we_vote_id':             candidate_we_vote_id,
+        'election_list':                    election_list,
+        'google_civic_election_id':         google_civic_election_id,
         'messages_on_stage':                messages_on_stage,
         'organization':                     organization_on_stage,
+        'organization_issues_list':         organization_issues_list,
+        'organization_blocked_issues_list': organization_blocked_issues_list,
         'organization_position_list':       organization_position_list,
         'organization_num_positions':       len(organization_position_list),
         'organization_search_for_merge':    organization_search_for_merge,
         'organization_search_results_list': organization_search_results_list,
         'organization_type_display_text':   organization_type_display_text,
-        'election_list':                    election_list,
-        'google_civic_election_id':         google_civic_election_id,
-        'candidate_campaign_id':            candidate_campaign_id,
-        'candidate_we_vote_id':             candidate_we_vote_id,
         'show_all_elections':               show_all_elections,
+        'twitter_handle_mismatch':          twitter_handle_mismatch,
+        'twitter_link_to_organization':     twitter_link_to_organization,
         'voter':                            voter,
-        'organization_issues_list':         organization_issues_list,
-        'organization_blocked_issues_list': organization_blocked_issues_list,
     }
     return render(request, 'organization/organization_position_list.html', template_values)
 
