@@ -44,9 +44,9 @@ class WeVoteAPIsV1TestsVoterEmailAddressRetrieve(TestCase):
                          "status expected in the voterEmailAddressRetrieveView json response but not found")
         self.assertEqual('voter_device_id' in json_data2, True,
                          "voter_device_id expected in the voterEmailAddressRetrieveView json response but not found")
-        
+
+        # Retrieve voter's email address (verify that voter does not an email address)
         response3 = self.client.get(self.voter_email_address_retrieve_url, {'voter_device_id': voter_device_id})
-        
         json_data3 = json.loads(response3.content.decode())
         
         self.assertEqual('status' in json_data3, True, "status expected in the json response, and not found")
@@ -59,4 +59,17 @@ class WeVoteAPIsV1TestsVoterEmailAddressRetrieve(TestCase):
         self.assertEqual(len(json_data3["email_address_list"]), 0,
                          "Expected email_address_list to have length 0, "
                          "actual length = {length}".format(length=len(json_data3['email_address_list'])))
-        
+
+        # Save an email address for the voter
+        response4 = self.client.get(self.voter_email_address_save_url, {'text_for_email_address':
+                                                                            'test321@gmail.com',
+                                                                        'voter_device_id': voter_device_id})
+
+        # Retrieve the voter's email address
+        response5 = self.client.get(self.voter_email_address_retrieve_url, {'voter_device_id': voter_device_id})
+        json_data5 = json.loads(response5.content.decode())
+
+        # Verify that the response contains one email address
+        self.assertEqual(len(json_data5["email_address_list"]), 1,
+                         "Expected email_address_list to have length 1, "
+                         "actual length = {length}".format(length=len(json_data5["email_address_list"])))
