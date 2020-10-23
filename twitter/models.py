@@ -627,7 +627,7 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def retrieve_twitter_user_locally_or_remotely(self, twitter_user_id, twitter_handle='', read_only=False):
+    def retrieve_twitter_user_locally_or_remotely(self, twitter_user_id=0, twitter_handle='', read_only=False):
         """
         We use this routine to quickly store and retrieve twitter user information, whether it is already in the
         database, or if we have to reach out to Twitter to get it.

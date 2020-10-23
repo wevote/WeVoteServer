@@ -565,13 +565,11 @@ def organization_merge_process_view(request):
         # also get you back to looking at the two organizations
         error_message = "ORGANIZATION_COMPARISON_PROBLEM: " + merge_results['status']
         messages.add_message(request, messages.ERROR, error_message)
-        # return HttpResponseRedirect(reverse('organization:find_and_merge_duplicate_organizations', args=()) +
-        #                             "?google_civic_election_id=" + str(google_civic_election_id) +
-        #                             "&auto_merge_off=1" +
-        #                             "&state_code=" + str(state_code))
-        return HttpResponseRedirect(reverse('organization:organization_list', args=()) +
-                                    '?google_civic_election_id=' + str(google_civic_election_id) +
-                                    '&state_code=' + str(state_code))
+        return HttpResponseRedirect(reverse('organization:compare_two_organizations_for_merge', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code) +
+                                    "&organization1_we_vote_id=" + str(organization1_we_vote_id) +
+                                    "&organization2_we_vote_id=" + str(organization2_we_vote_id))
 
     organization = merge_results['organization']
     messages.add_message(request, messages.INFO, "Organization '{organization_name}' merged."
@@ -907,50 +905,79 @@ def organization_edit_process_view(request):
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
 
-    # Find out if there is a TwitterLinkToOrganization for the incoming organization_twitter_handle
-    twitter_handle_can_be_saved_without_conflict = True
-    twitter_link_to_organization_retrieve_failed = False
-    twitter_link_to_organization_we_vote_id = ""
     twitter_user_manager = TwitterUserManager()
-    if positive_value_exists(organization_twitter_handle):
-        # TwitterLinkToOrganization
-        results = twitter_user_manager.retrieve_twitter_user(
-            twitter_user_id=0,
-            twitter_handle=organization_twitter_handle,
-            read_only=True
-        )
-        if not positive_value_exists(results['success']):
+    create_twitter_link_to_organization_for_handle = False
+    preserve_twitter_link_to_organization_if_twitter_id = 0
+    twitter_link_to_organization_from_handle_twitter_id = 0
+    twitter_handle_can_be_saved_without_conflict = True
+    if not positive_value_exists(organization_twitter_handle):
+        # Delete TwitterLinkToOrganization
+        delete_results = twitter_user_manager.delete_twitter_link_to_organization(
+            twitter_id=0,
+            organization_we_vote_id=organization_we_vote_id)
+        if not delete_results['success']:
+            messages.add_message(request, messages.ERROR, 'Could not delete TwitterLinkToOrganization 1.')
+    else:
+        # Check to see if there is a TwitterLinkToOrganization entry tied to this twitter_handle
+        link_results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
+            twitter_handle=organization_twitter_handle)
+        if not link_results['success']:
+            messages.add_message(request, messages.ERROR, 'Could not retrieve TwitterLinkToOrganization by handle.')
             twitter_handle_can_be_saved_without_conflict = False
-            twitter_link_to_organization_retrieve_failed = True
-        elif results['twitter_user_found']:
-            twitter_user = results['twitter_user']
+        elif link_results['twitter_link_to_organization_found']:
+            twitter_link_to_organization_from_handle = link_results['twitter_link_to_organization']
+            if twitter_link_to_organization_from_handle.organization_we_vote_id == organization_we_vote_id:
+                preserve_twitter_link_to_organization_if_twitter_id = \
+                    twitter_link_to_organization_from_handle.twitter_id
+            else:
+                twitter_handle_can_be_saved_without_conflict = False
+                messages.add_message(
+                    request, messages.ERROR,
+                    'Twitter handle already linked to another organization. Twitter handle not saved/changed.')
+        else:
+            # If not found, then make note that we can create a TwitterLinkToOrganization
+            create_twitter_link_to_organization_for_handle = True
+            results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(
+                twitter_handle=organization_twitter_handle)
+            if not results['success']:
+                messages.add_message(request, messages.ERROR, 'Could not retrieve TwitterUser by handle.')
+                twitter_handle_can_be_saved_without_conflict = False
+            elif results['twitter_user_found']:
+                twitter_user = results['twitter_user']
+                twitter_link_to_organization_from_handle_twitter_id = twitter_user.twitter_id
 
-            results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(
-                twitter_user.twitter_id)
-            if results['twitter_link_to_organization_found']:
-                twitter_link_to_organization = results['twitter_link_to_organization']
-                twitter_link_to_organization_we_vote_id = twitter_link_to_organization.organization_we_vote_id
+    if positive_value_exists(organization_we_vote_id) and twitter_handle_can_be_saved_without_conflict:
+        # Check to see if there is a TwitterLinkToOrganization entry tied to this organization_we_vote_id
+        link_results = twitter_user_manager.retrieve_twitter_link_to_organization(
+            organization_we_vote_id=organization_we_vote_id)
+        if not link_results['success']:
+            messages.add_message(request, messages.ERROR, 'Could not retrieve TwitterLinkToOrganization by we_vote_id.')
+            twitter_handle_can_be_saved_without_conflict = False
+        elif link_results['twitter_link_to_organization_found']:
+            twitter_link_to_organization_from_org = link_results['twitter_link_to_organization']
+            if twitter_link_to_organization_from_org.twitter_id == preserve_twitter_link_to_organization_if_twitter_id:
+                # Is the same so do not delete
+                pass
+            else:
+                # Delete TwitterLinkToOrganization
+                delete_results = twitter_user_manager.delete_twitter_link_to_organization(
+                    twitter_id=0,
+                    organization_we_vote_id=organization_we_vote_id)
+                if not delete_results['success']:
+                    messages.add_message(request, messages.ERROR, 'Could not delete TwitterLinkToOrganization.')
 
-    if not twitter_link_to_organization_retrieve_failed and \
-            positive_value_exists(twitter_link_to_organization_we_vote_id):
-        # If here, make sure the TwitterLinkToOrganization is attached to this organization
-        if twitter_link_to_organization_we_vote_id != organization_we_vote_id:
-            # If here we cannot save a change to Twitter
+    if twitter_handle_can_be_saved_without_conflict and create_twitter_link_to_organization_for_handle \
+            and positive_value_exists(twitter_link_to_organization_from_handle_twitter_id):
+        create_results = twitter_user_manager.create_twitter_link_to_organization(
+            twitter_id=twitter_link_to_organization_from_handle_twitter_id,
+            organization_we_vote_id=organization_we_vote_id)
+        if not create_results['success']:
+            messages.add_message(request, messages.ERROR, 'Could not create TwitterLinkToOrganization.')
             twitter_handle_can_be_saved_without_conflict = False
 
     try:
         if organization_on_stage_found:
             # Update
-            if positive_value_exists(organization_on_stage.organization_twitter_handle):
-                if positive_value_exists(organization_twitter_handle):
-                    if organization_on_stage.organization_twitter_handle != organization_twitter_handle:
-                        # Twitter handle has changed
-                        current_organization_with_new_twitter_handle = True
-            else:
-                if positive_value_exists(organization_twitter_handle):
-                    # Twitter handle added where before there wasn't one
-                    current_organization_with_new_twitter_handle = True
-
             if issue_analysis_admin_notes is not False:
                 organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes.strip()
             if issue_analysis_done is not False:
@@ -983,7 +1010,6 @@ def organization_edit_process_view(request):
             messages.add_message(request, messages.INFO, 'Organization updated.')
         else:
             # Create new
-
             # But first double-check that we don't have an org entry already
             organization_email = ''
             organization_list_manager = OrganizationListManager()
@@ -1085,52 +1111,10 @@ def organization_edit_process_view(request):
                                                                                              error_type=type(e)))
         return HttpResponseRedirect(reverse('organization:organization_list', args=()))
 
-    delete_twitter_link_to_organization_entry = False
-    if not positive_value_exists(twitter_handle_can_be_saved_without_conflict):
-        messages.add_message(request, messages.ERROR,
-                             'Twitter handle already linked to another organization. Twitter handle not saved/changed.')
-    else:
-        new_organization_and_new_twitter_handle = positive_value_exists(new_organization_created) \
-            and positive_value_exists(organization_we_vote_id) \
-            and positive_value_exists(organization_twitter_handle)
-        # Update Twitter information
-        if new_organization_and_new_twitter_handle or current_organization_with_new_twitter_handle:
-            # We have confirmed above that this Twitter handle isn't linked to another organization
-
-            # Check to see if there is a TwitterLinkToOrganization entry
-            link_results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
-                twitter_handle=organization_twitter_handle)
-            if not link_results['success']:
-                messages.add_message(request, messages.ERROR, 'Could not retrieve TwitterLinkToOrganization by handle.')
-            elif link_results['twitter_link_to_organization_found']:
-                # Last check - is it linked to this org?
-                twitter_link_to_organization = link_results['twitter_link_to_organization']
-                if twitter_link_to_organization.organization_we_vote_id != organization_we_vote_id:
-                    messages.add_message(request, messages.ERROR, 'TwitterLinkToOrganization mismatch.')
-                    delete_twitter_link_to_organization_entry = True
-                else:
-                    # Pull the latest Twitter information
-                    results = refresh_twitter_organization_details(organization_on_stage)
-                    status += results['status']
-                    organization_on_stage = results['organization']
-                    # twitter_user_id = results['twitter_user_id']
-            elif positive_value_exists(organization_twitter_handle) and positive_value_exists(organization_we_vote_id):
-                # Add TwitterLinkToOrganization entry
-                results = twitter_user_manager.create_twitter_link_to_organization_from_twitter_handle(
-                    organization_twitter_handle, organization_we_vote_id)
-                if not results['success']:
-                    messages.add_message(request, messages.ERROR, 'Could not add TwitterLinkToOrganization.')
-                    delete_twitter_link_to_organization_entry = False
-        elif positive_value_exists(organization_we_vote_id) and not positive_value_exists(organization_twitter_handle):
-            delete_twitter_link_to_organization_entry = True
-
-        # The correct TwitterLinkToOrganization entries are saved, so delete all others associated with this org
-        if delete_twitter_link_to_organization_entry:
-            delete_results = twitter_user_manager.delete_twitter_link_to_organization(
-                twitter_id=0,
-                organization_we_vote_id=organization_we_vote_id)
-            if not delete_results['success']:
-                messages.add_message(request, messages.ERROR, 'Could not delete TwitterLinkToOrganization.')
+    # Pull the latest Twitter information
+    results = refresh_twitter_organization_details(organization_on_stage)
+    status += results['status']
+    organization_on_stage = results['organization']
 
     if positive_value_exists(organization_we_vote_id):
         push_organization_data_to_other_table_caches(organization_we_vote_id)
