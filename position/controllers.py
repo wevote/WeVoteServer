@@ -1668,7 +1668,7 @@ def move_positions_to_another_organization(
         to_voter_id=0,
         to_voter_we_vote_id=''):
     status = ''
-    success = False
+    success = True
     position_entries_not_deleted = 0
     position_entries_moved = 0
     position_entries_not_moved = 0
@@ -1745,6 +1745,7 @@ def move_positions_to_another_organization(
             except Exception as e:
                 position_entries_not_moved += 1
                 status += "TO_POSITION_COULD_NOT_SAVE: " + str(e) + " "
+                success = False
         else:
             # Change the position values to the new we_vote_id
             try:
@@ -1765,6 +1766,7 @@ def move_positions_to_another_organization(
             except Exception as e:
                 position_entries_not_moved += 1
                 status += "FROM_POSITION_COULD_NOT_SAVE: " + str(e) + " "
+                success = False
 
     from_position_private_list_remaining = position_list_manager.retrieve_all_positions_for_organization(
         organization_id=from_organization_id,
@@ -1778,6 +1780,7 @@ def move_positions_to_another_organization(
         except Exception as e:
             position_entries_not_deleted += 1
             status += "FROM_POSITION_NOT_DELETED: " + str(e) + " "
+            success = False
 
     # Find public positions for the "from_voter" that we are moving away from
     stance_we_are_looking_for = ANY_STANCE
@@ -1800,7 +1803,7 @@ def move_positions_to_another_organization(
             organization_we_vote_id=to_organization_we_vote_id,
             voter_id=empty_voter_id,
             contest_office_id=from_position_entry.contest_office_id,
-            candidate_campaign_id = from_position_entry.candidate_campaign_id,
+            candidate_campaign_id=from_position_entry.candidate_campaign_id,
             contest_measure_id=from_position_entry.contest_measure_id,
             voter_we_vote_id=empty_voter_we_vote_id,
             contest_office_we_vote_id=from_position_entry.contest_office_we_vote_id,
@@ -1836,6 +1839,7 @@ def move_positions_to_another_organization(
             except Exception as e:
                 position_entries_not_moved += 1
                 status += "TO_POSITION_COULD_NOT_SAVE2: " + str(e) + " "
+                success = False
         else:
             # Change the position values to the new we_vote_id
             try:
@@ -1856,6 +1860,7 @@ def move_positions_to_another_organization(
             except Exception as e:
                 position_entries_not_moved += 1
                 status += "FROM_POSITION_COULD_NOT_SAVE2: " + str(e) + " "
+                success = False
 
     from_position_public_list_remaining = position_list_manager.retrieve_all_positions_for_organization(
         organization_id=from_organization_id,
@@ -1880,6 +1885,7 @@ def move_positions_to_another_organization(
         except Exception as e:
             position_entries_not_deleted += 1
             status += "FROM_POSITION_NOT_DELETED2: " + str(e) + " "
+            success = False
 
     results = {
         'status':                       status,
