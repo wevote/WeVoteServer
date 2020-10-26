@@ -878,7 +878,12 @@ class CandidateCampaignListManager(models.Model):
                 candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
-                candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name)
+                candidate_query = candidate_query.filter(
+                    Q(candidate_name__iexact=candidate_name) |
+                    Q(google_civic_candidate_name__iexact=candidate_name) |
+                    Q(google_civic_candidate_name2__iexact=candidate_name) |
+                    Q(google_civic_candidate_name3__iexact=candidate_name)
+                )
 
                 if positive_value_exists(ignore_candidate_id_list):
                     candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
@@ -920,7 +925,12 @@ class CandidateCampaignListManager(models.Model):
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
                 first_name = extract_first_name_from_full_name(candidate_name)
-                candidate_query = candidate_query.filter(candidate_name__icontains=first_name)
+                candidate_query = candidate_query.filter(
+                    Q(candidate_name__icontains=first_name) |
+                    Q(google_civic_candidate_name__icontains=first_name) |
+                    Q(google_civic_candidate_name2__icontains=first_name) |
+                    Q(google_civic_candidate_name3__icontains=first_name)
+                )
                 last_name = extract_last_name_from_full_name(candidate_name)
                 candidate_query = candidate_query.filter(candidate_name__icontains=last_name)
 
