@@ -1332,7 +1332,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
                 position = results['position']
                 try:
                     if which_marking == "delete_position":
-                        # position.delete()
+                        position.delete()
                         items_processed_successfully += 1
                     else:
                         status += 'ACTION_NOT_SPECIFIED '
