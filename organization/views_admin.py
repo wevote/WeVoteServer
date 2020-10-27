@@ -1305,6 +1305,49 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
 
+    # Bulk delete
+    select_for_changing_position_ids = request.POST.getlist('select_for_marking_checks[]')
+    which_marking = request.POST.get("which_marking", None)  # What to do with check marks
+
+    # Make sure 'which_marking' is one of the allowed Filter fields
+    if which_marking and which_marking not in ["delete_position", None]:
+        messages.add_message(request, messages.ERROR,
+                             'The action you chose from the dropdown is not recognized: {which_marking}'
+                             ''.format(which_marking=which_marking))
+        return HttpResponseRedirect(reverse('organization:organization_position_list', args=([organization_id])))
+
+    error_count = 0
+    items_processed_successfully = 0
+    if which_marking and select_for_changing_position_ids:
+        # Get these values from hidden POST fields
+        google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+        show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
+        state_code = request.POST.get('state_code', '')  # Already retrieved with GET, now retrieving with POST
+
+        position_manager = PositionManager()
+
+        for position_we_vote_id in select_for_changing_position_ids:
+            results = position_manager.retrieve_position_from_we_vote_id(position_we_vote_id)
+            if results['position_found']:
+                position = results['position']
+                try:
+                    if which_marking == "delete_position":
+                        # position.delete()
+                        items_processed_successfully += 1
+                    else:
+                        status += 'ACTION_NOT_SPECIFIED '
+                except Exception as e:
+                    status += 'POSITION_ERROR: ' + str(e) + " "
+                    error_count += 1
+            else:
+                status += 'POSITION_NOT_FOUND '
+
+        messages.add_message(request, messages.INFO,
+                             'Position List Actions successful: {items_processed_successfully}, '
+                             'errors: {error_count}'
+                             ''.format(error_count=error_count,
+                                       items_processed_successfully=items_processed_successfully))
+
     election_manager = ElectionManager()
     if positive_value_exists(show_all_elections):
         results = election_manager.retrieve_elections()
@@ -1387,6 +1430,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         status += results['status']
     candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
+    friends_only_position_count = 0
+    public_position_count = 0
     try:
         public_position_query = PositionEntered.objects.all()
         # As of Aug 2018 we are no longer using PERCENT_RATING
@@ -1401,7 +1446,9 @@ def organization_position_list_view(request, organization_id=0, organization_we_
                 .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
                         Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
         public_position_query = public_position_query.order_by('-id')
-        public_position_list = list(public_position_query)
+        public_position_count = public_position_query.count()
+        public_position_list = public_position_query[:50]
+        public_position_list = list(public_position_list)
 
         friends_only_position_query = PositionForFriends.objects.all()
         # As of Aug 2018 we are no longer using PERCENT_RATING
@@ -1416,7 +1463,9 @@ def organization_position_list_view(request, organization_id=0, organization_we_
                 .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
                         Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
         friends_only_position_query = friends_only_position_query.order_by('-id')
-        friends_only_position_list = list(friends_only_position_query)
+        friends_only_position_count = friends_only_position_query.count()
+        friends_only_position_list = friends_only_position_query[:50]
+        friends_only_position_list = list(friends_only_position_list)
 
         organization_position_list = public_position_list + friends_only_position_list
         if len(public_position_list) or len(friends_only_position_list):
@@ -1507,16 +1556,18 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         'candidate_campaign_id':            candidate_campaign_id,
         'candidate_we_vote_id':             candidate_we_vote_id,
         'election_list':                    election_list,
+        'friends_only_position_count':      friends_only_position_count,
         'google_civic_election_id':         google_civic_election_id,
         'messages_on_stage':                messages_on_stage,
         'organization':                     organization_on_stage,
         'organization_issues_list':         organization_issues_list,
         'organization_blocked_issues_list': organization_blocked_issues_list,
         'organization_position_list':       organization_position_list,
-        'organization_num_positions':       len(organization_position_list),
+        'organization_num_positions':       friends_only_position_count + public_position_count,
         'organization_search_for_merge':    organization_search_for_merge,
         'organization_search_results_list': organization_search_results_list,
         'organization_type_display_text':   organization_type_display_text,
+        'public_position_count':            public_position_count,
         'show_all_elections':               show_all_elections,
         'twitter_handle_mismatch':          twitter_handle_mismatch,
         'twitter_link_to_organization':     twitter_link_to_organization,
