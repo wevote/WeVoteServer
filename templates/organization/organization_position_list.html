@@ -285,22 +285,42 @@
 </form>
 
 {% if organization_position_list %}
+<form name="organization_position_list_markings" method="post" action="{% url 'organization:organization_position_list' organization_id=organization.id %}">
+    {% csrf_token %}
+    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+    <input type="hidden" name="show_all_elections" value="{{ show_all_elections }}">
+    <input type="hidden" name="state_code" value="{{ state_code }}">
+    <div class="pull-right">
+        <label for="which_marking_id" class="control-label">
+          <span class="u-no-break">Process selected row:</span>
+        </label>
+        <select id="which_marking_id" name="which_marking">
+            {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
+            <option value="delete_position">Delete</option>
+        </select>
+        <input type="submit" value="Go" />
+    </div>
     <h3>{{ organization_num_positions }} Position{{ organization_num_positions|pluralize }}</h3>
-    <table border="1">
+    <table class="table">
+    <thead>
     <tr>
-        <td></td>
-        <td>Candidate/Measure</td>
-        <td>Visibility?</td>
-        <td>Stance</td>
-        <td>Election</td>
-        <td>Rating Time Span</td>
-        <td>&nbsp;</td>
+        <th></th>
+        <th>Candidate/Measure</th>
+        <th>Visibility?</th>
+        <th>Stance</th>
+        <th>Election</th>
+        <th>
+            Select<br />
+            (all
+            <input type="checkbox" name="toggle_all" id="toggle_all_id" value="1"/>)
+        </th>
     </tr>
+    </thead>
 
     {% for organization_position in organization_position_list %}
     <tr>
         <td>{{ forloop.counter }}</td>
-        <td><a href="{% url 'organization:organization_position_edit' organization.id organization_position.we_vote_id %}">
+        <td width="50%"><a href="{% url 'organization:organization_position_edit' organization.id organization_position.we_vote_id %}">
             {% if organization_position.ballot_item_display_name %}
                 {{ organization_position.ballot_item_display_name }}
             {% else %}
@@ -310,31 +330,30 @@
         <span style="color: darkgray">&nbsp;{{ organization_position.statement_text|default_if_none:"" }}</span>
         </td>
         <td>{% if organization_position.is_public_position %}<strong>Public</strong>{% else %}Friends&nbsp;Only{% endif %}</td>
-        <td>{{ organization_position.get_stance_display }}
-            {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}</td>
         <td>
-            <span class="white-space: nowrap;">{{ organization_position.election.election_day_text }}</span> ({{ organization_position.election.google_civic_election_id }})
+            {{ organization_position.get_stance_display }}
+            {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}<br />
+            <a href="{% url 'organization:organization_position_delete' organization.id organization_position.we_vote_id %}">
+                delete</a>
+        </td>
+        <td>
+        <div width="100%">
+            <div>{{ organization_position.election.election_day_text }}&nbsp;({{ organization_position.election.google_civic_election_id }})</div>
             <span style="color: slategray; font-weight: 400;">
                 {% if organization_position.position_ultimate_election_date or organization_position.position_year %}
-                <br />
                 {% endif %}
-                {% if organization_position.position_year %}
-                {{ organization_position.position_year }}
-                &nbsp;&nbsp;&nbsp;
-                {% endif %}
-                {% if organization_position.position_ultimate_election_date %}
-                {{ organization_position.position_ultimate_election_date }}
-                {% endif %}
+                {% if organization_position.position_year %}{{ organization_position.position_year }}&nbsp;&nbsp;&nbsp;{% endif %}{% if organization_position.position_ultimate_election_date %}{{ organization_position.position_ultimate_election_date }}{% endif %}
             </span>
+        </div>
         </td>
-        <td>{{ organization_position.vote_smart_time_span|default_if_none:"" }}</td>
-        <td><a href="{% url 'organization:organization_position_delete' organization.id organization_position.we_vote_id %}">
-            delete</a></td>
-
+        <td>
+            <input type="checkbox" name="select_for_marking_checks[]" id="select_for_marking_id" value="{{ organization_position.we_vote_id }}"/>
+        </td>
     </tr>
     {% endfor %}
 
     </table>
+</form>
 {% else %}
     <p>(no positions found)</p>
 {% endif %}
@@ -401,6 +420,19 @@
     $(function() {
         $('#show_all_elections_id').change(function() {
             this.form.submit();
+        });
+    });
+
+    $(function() {
+        $('#toggle_all_id').change(function() {
+            var inputs = document.getElementsByName("select_for_marking_checks[]");
+            for(var i = 0; i < inputs.length; i++) {
+              if (inputs[i].checked === false) {
+                inputs[i].checked = true;
+              } else {
+                inputs[i].checked = false;
+              }
+            }
         });
     });
     </script>

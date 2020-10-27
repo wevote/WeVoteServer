@@ -1554,7 +1554,7 @@ def batch_process_list_view(request):
     batch_process_list = []
 
     select_for_changing_batch_process_ids = request.POST.getlist('select_for_marking_checks[]')
-    which_marking = request.POST.get("which_marking", None)
+    which_marking = request.POST.get("which_marking", None)  # What to do with check marks
 
     # Make sure 'which_marking' is one of the allowed Filter fields
     if which_marking and which_marking not in ["pause_process", "unpause_process", None]:
