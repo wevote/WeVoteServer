@@ -45,7 +45,7 @@ class WeVoteAPIsV1TestsVoterEmailAddressRetrieve(TestCase):
         self.assertEqual('voter_device_id' in json_data2, True,
                          "voter_device_id expected in the voterEmailAddressRetrieveView json response but not found")
 
-        # Retrieve voter's email address (verify that voter does not an email address)
+        # Retrieve voter's email address (verify that voter does not have an email address)
         response3 = self.client.get(self.voter_email_address_retrieve_url, {'voter_device_id': voter_device_id})
         json_data3 = json.loads(response3.content.decode())
         
@@ -61,7 +61,7 @@ class WeVoteAPIsV1TestsVoterEmailAddressRetrieve(TestCase):
                          "actual length = {length}".format(length=len(json_data3['email_address_list'])))
 
         # Save an email address for the voter
-        response4 = self.client.get(self.voter_email_address_save_url, {'text_for_email_address':
+        self.client.get(self.voter_email_address_save_url, {'text_for_email_address':
                                                                             'test321@gmail.com',
                                                                         'voter_device_id': voter_device_id})
 
@@ -73,3 +73,10 @@ class WeVoteAPIsV1TestsVoterEmailAddressRetrieve(TestCase):
         self.assertEqual(len(json_data5["email_address_list"]), 1,
                          "Expected email_address_list to have length 1, "
                          "actual length = {length}".format(length=len(json_data5["email_address_list"])))
+        
+        # Verify that the response's email address is correct
+        response_email = json_data5["email_address_list"][0]["normalized_email_address"]
+        
+        self.assertEqual(response_email, 'test321@gmail.com',
+                         "Expected email address to be test321@gmail.com, "
+                         "actual email address = {email_address}".format(email_address=response_email))
