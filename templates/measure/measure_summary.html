@@ -10,6 +10,36 @@
 {% if measure %}
 
     <h1>{{ measure.measure_title }}</h1>
+    <div>
+        <strong>Measure Title Alternate 1:</strong>
+        {% if measure.google_civic_measure_title %}
+        {{ measure.google_civic_measure_title }}
+        {% endif %}
+    </div>
+    {% if measure.google_civic_measure_title2 %}
+    <div>
+        <strong>Measure Title Alternate 2:</strong>
+        {{ measure.google_civic_measure_title2 }}
+    </div>
+    {% endif %}
+    {% if measure.google_civic_measure_title3 %}
+    <div>
+        <strong>Measure Title Alternate 3:</strong>
+        {{ measure.google_civic_measure_title3 }}
+    </div>
+    {% endif %}
+    {% if measure.google_civic_measure_title4 %}
+    <div>
+        <strong>Measure Title Alternate 4:</strong>
+        {{ measure.google_civic_measure_title4 }}
+    </div>
+    {% endif %}
+    {% if measure.google_civic_measure_title5 %}
+    <div>
+        <strong>Measure Title Alternate 5:</strong>
+        {{ measure.google_civic_measure_title5 }}
+    </div>
+    {% endif %}
     <p>{{ measure.measure_subtitle|default_if_none:"" }}</p>
     <p>{{ measure.measure_text|default_if_none:"" }}</p>
     <p>A yes vote means...: {{ measure.ballotpedia_yes_vote_description|default_if_none:"" }}</p>

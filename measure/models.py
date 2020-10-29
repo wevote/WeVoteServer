@@ -1151,9 +1151,17 @@ class ContestMeasureListManager(models.Model):
                 contest_measure_query = ContestMeasure.objects.all()
             # TODO Is there a way to filter with "dash" insensitivity? - vs --
             contest_measure_query = contest_measure_query.filter(
-                measure_title__iexact=contest_measure_title,
-                state_code__iexact=incoming_state_code,
                 google_civic_election_id__in=google_civic_election_id_list)
+            contest_measure_query = contest_measure_query.filter(
+                Q(google_civic_measure_title__iexact=contest_measure_title) |
+                Q(google_civic_measure_title2__iexact=contest_measure_title) |
+                Q(google_civic_measure_title3__iexact=contest_measure_title) |
+                Q(google_civic_measure_title4__iexact=contest_measure_title) |
+                Q(google_civic_measure_title5__iexact=contest_measure_title) |
+                Q(measure_title__iexact=contest_measure_title)
+            )
+            if positive_value_exists(incoming_state_code):
+                contest_measure_query = contest_measure_query.filter(state_code__iexact=incoming_state_code)
             if positive_value_exists(district_id):
                 contest_measure_query = contest_measure_query.filter(district_id=district_id)
             elif positive_value_exists(district_name):
@@ -1226,7 +1234,13 @@ class ContestMeasureListManager(models.Model):
                 stripped_down_contest_measure_title = stripped_down_contest_measure_title.strip()
 
                 contest_measure_query = contest_measure_query.filter(
-                    measure_title__icontains=stripped_down_contest_measure_title)
+                    Q(google_civic_measure_title__icontains=stripped_down_contest_measure_title) |
+                    Q(google_civic_measure_title2__icontains=stripped_down_contest_measure_title) |
+                    Q(google_civic_measure_title3__icontains=stripped_down_contest_measure_title) |
+                    Q(google_civic_measure_title4__icontains=stripped_down_contest_measure_title) |
+                    Q(google_civic_measure_title5__icontains=stripped_down_contest_measure_title) |
+                    Q(measure_title__icontains=stripped_down_contest_measure_title)
+                )
 
                 contest_measure_list = list(contest_measure_query)
 

@@ -68,6 +68,9 @@
                    target="_blank"
                    class="u-no-break">
                 <i class="fa fa-twitter"></i> {{ organization.organization_twitter_handle }}
+                {% if organization.twitter_followers_count %}
+                    ({{ organization.twitter_followers_count }} followers)
+                {% endif %}
                 &nbsp;
                 <span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
@@ -202,7 +205,11 @@
                     <td>{% if possible_organization.organization_twitter_handle %}
                         <a href="https://twitter.com/{{ possible_organization.organization_twitter_handle }}"
                            target="_blank"
-                           class="u-no-break"><i class="fa fa-twitter"></i> {{ possible_organization.organization_twitter_handle }}
+                           class="u-no-break"><i class="fa fa-twitter"></i>
+                            {{ possible_organization.organization_twitter_handle }}
+                            {% if possible_organization.organization_twitter_followers_count %}
+                            ({{ possible_organization.organization_twitter_followers_count }} followers)
+                            {% endif %}
                         <span class="glyphicon glyphicon-new-window"></span></a>
                     {% endif %}
                     {% if organization.organization_twitter_handle and organization.organization_website %}<br />{% endif %}
@@ -311,22 +318,22 @@
    {% endif %}
 {% endif %}{# ABOVE THIS: if organization_found and organization AND elif organizations_list #}
 
-{% if has_suggested_voter_guide_rights and state_list %}
-    <div class="form-group">
-        <label for="ballot_items_raw_id" class="col-sm-3 control-label">Limit to this State</label>
-        <div class="col-sm-8">
-            <select id="state_code_id" name="state_code">
-                <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
-                    -- Any State --</option>
-            {% for key, state in state_list %}
-                <option value="{{ key|lower }}"
-                        {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-                    {{ state }}</option>
-            {% endfor %}
-            </select>
-        </div>
-    </div>
-{% endif %}
+{#{% if has_suggested_voter_guide_rights and state_list %}#}
+{#    <div class="form-group">#}
+{#        <label for="ballot_items_raw_id" class="col-sm-3 control-label">Limit to this State</label>#}
+{#        <div class="col-sm-8">#}
+{#            <select id="state_code_id" name="state_code">#}
+{#                <option value="" {% if '' == state_code %} selected="selected"{% endif %}>#}
+{#                    -- Any State --</option>#}
+{#            {% for key, state in state_list %}#}
+{#                <option value="{{ key|lower }}"#}
+{#                        {% if key|lower == state_code|lower %} selected="selected"{% endif %}>#}
+{#                    {{ state }}</option>#}
+{#            {% endfor %}#}
+{#            </select>#}
+{#        </div>#}
+{#    </div>#}
+{#{% endif %}#}
 
 {% if has_suggested_voter_guide_rights %}
     {# Don't show comments or 'Your email' fields #}
@@ -394,7 +401,7 @@
             <div class="col-sm-8">
                 <textarea name="ballot_items_additional"
                           class="form-control animated"
-                          placeholder="Please enter one candidate or measure per line, or separated by commas..."
+                          placeholder="Please enter one candidate or measure per line..."
                           rows="2"
                           >{{ ballot_items_additional|default_if_none:"" }}</textarea>
             </div>
@@ -427,7 +434,7 @@
                 <div class="col-sm-8">
                     <textarea name="ballot_items_raw"
                               class="form-control animated"
-                              placeholder="Please enter one candidate or measure per line, or separated by commas..."
+                              placeholder="Please enter one candidate or measure per line..."
                               rows="3"
                               >{{ ballot_items_raw|default_if_none:"" }}</textarea>
                 </div>

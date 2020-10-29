@@ -72,13 +72,13 @@
            target="_blank"
            class="u-no-break">
             <span>
-                <strong>POSITION STORED </strong>
+                <strong>POSITION LIVE </strong>
                 <span class="glyphicon glyphicon-new-window"></span>
             </span>
         </a>
         {% else %}
             <span>
-                <strong>POSITION ALREADY STORED </strong>
+                <strong>POSITION ALREADY LIVE </strong>
             </span>
         {% endif %}
     </div>
@@ -90,23 +90,50 @@
           delete
         </div>
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            <label class="btn{% if possible_endorsement.position_stance == "SUPPORT" %} btn-success active{% else %} btn-outline-success{% endif %}">
-              <input type="radio" name="position_stance_{{ possible_endorsement.possibility_position_number }}"
-                     id="support_{{ possible_endorsement.possibility_position_number }}" autocomplete="off"
-                     value="SUPPORT" {% if possible_endorsement.position_stance == "SUPPORT" %}checked{% endif %}
-              > Support
+            <label
+              class="btn{% if possible_endorsement.position_stance == "SUPPORT" %} btn-success active{% else %} btn-outline-success{% endif %}"
+              for="support_{{ possible_endorsement.possibility_position_number }}"
+              id="support_label_{{ possible_endorsement.possibility_position_number }}"
+            >
+                <input
+                    autocomplete="off"
+                    type="radio"
+                    name="position_stance_{{ possible_endorsement.possibility_position_number }}"
+                    id="support_{{ possible_endorsement.possibility_position_number }}"
+                    value="SUPPORT"
+                    {% if possible_endorsement.position_stance == "SUPPORT" %}checked{% endif %}
+                >
+                Support
             </label>
-            <label class="btn{% if possible_endorsement.position_stance == "OPPOSE" %} btn-danger active{% else %} btn-outline-danger{% endif %}">
-              <input type="radio" name="position_stance_{{ possible_endorsement.possibility_position_number }}"
-                     id="oppose_{{ possible_endorsement.possibility_position_number }}" autocomplete="off"
-                     value="OPPOSE" {% if possible_endorsement.position_stance == "OPPOSE" %}checked{% endif %}
-              > Oppose
+            <label
+              class="btn{% if possible_endorsement.position_stance == "OPPOSE" %} btn-danger active{% else %} btn-outline-danger{% endif %}"
+              for="oppose_{{ possible_endorsement.possibility_position_number }}"
+              id="oppose_label_{{ possible_endorsement.possibility_position_number }}"
+            >
+                <input
+                    autocomplete="off"
+                    type="radio"
+                    name="position_stance_{{ possible_endorsement.possibility_position_number }}"
+                    id="oppose_{{ possible_endorsement.possibility_position_number }}"
+                    value="OPPOSE"
+                    {% if possible_endorsement.position_stance == "OPPOSE" %}checked{% endif %}
+                >
+                Oppose
             </label>
-            <label class="btn{% if possible_endorsement.position_stance == "NO_STANCE" %} btn-secondary active{% else %} btn-outline-secondary{% endif %}">
-              <input type="radio" name="position_stance_{{ possible_endorsement.possibility_position_number }}"
-                     id="no_stance_{{ possible_endorsement.possibility_position_number }}" autocomplete="off"
-                     value="NO_STANCE" {% if possible_endorsement.position_stance == "NO_STANCE" %}checked{% endif %}
-              > No Stance
+            <label
+              class="btn{% if possible_endorsement.position_stance == "NO_STANCE" %} btn-secondary active{% else %} btn-outline-secondary{% endif %}"
+              for="no_stance_{{ possible_endorsement.possibility_position_number }}"
+              id="no_stance_label_{{ possible_endorsement.possibility_position_number }}"
+            >
+                <input
+                    autocomplete="off"
+                    type="radio"
+                    name="position_stance_{{ possible_endorsement.possibility_position_number }}"
+                    id="no_stance_{{ possible_endorsement.possibility_position_number }}"
+                    value="NO_STANCE"
+                    {% if possible_endorsement.position_stance == "NO_STANCE" %}checked{% endif %}
+                >
+                No Stance
             </label>
             <input type="hidden" name="possibility_position_id_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.id }}"
         </div>
@@ -149,17 +176,23 @@
 <script>
 $(function() {
     $('#support_{{ possible_endorsement.possibility_position_number }}').change(function() {
-        this.form.submit();
+        $('#no_stance_{{ possible_endorsement.possibility_position_number }}').attr('class', 'btn btn-outline-secondary');
+        $('#oppose_{{ possible_endorsement.possibility_position_number }}').attr('class', 'btn btn-outline-danger');
+        $('#support_{{ possible_endorsement.possibility_position_number }}').attr('class', 'btn btn-success active');
     });
 });
 $(function() {
     $('#oppose_{{ possible_endorsement.possibility_position_number }}').change(function() {
-        this.form.submit();
+        $('#no_stance_label_{{ possible_endorsement.possibility_position_number }}').attr('class', 'btn btn-outline-secondary');
+        $('#oppose_label_{{ possible_endorsement.possibility_position_number }}').attr('class', 'btn btn-danger active');
+        $('#support_label_{{ possible_endorsement.possibility_position_number }}').attr('class', 'btn btn-outline-success');
     });
 });
 $(function() {
     $('#no_stance_{{ possible_endorsement.possibility_position_number }}').change(function() {
-        this.form.submit();
+        $('#no_stance_label_{{ possible_endorsement.possibility_position_number }}').attr('class', 'btn btn-secondary active');
+        $('#oppose_label_{{ possible_endorsement.possibility_position_number }}').attr('class', 'btn btn-outline-danger');
+        $('#support_label_{{ possible_endorsement.possibility_position_number }}').attr('class', 'btn btn-outline-success');
     });
 });
 </script>

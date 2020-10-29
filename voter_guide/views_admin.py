@@ -715,6 +715,7 @@ def voter_guide_create_process_view(request):
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
 
     voter_manager = VoterManager()
+    organization_twitter_followers_count = 0
     voter_who_submitted_name = ""
     voter_found = False
     if not positive_value_exists(voter_who_submitted_we_vote_id):
@@ -799,6 +800,7 @@ def voter_guide_create_process_view(request):
                 organization_name = organization.organization_name
                 organization_twitter_handle = twitter_user_manager.fetch_twitter_handle_from_organization_we_vote_id(
                     organization_we_vote_id)
+                organization_twitter_followers_count = organization.twitter_followers_count
 
         if not positive_value_exists(organization_found):
             one_organization_found = False
@@ -808,6 +810,7 @@ def voter_guide_create_process_view(request):
                     organization = results['organization']
                     organization_found = True
                     organization_name = organization.organization_name
+                    organization_twitter_followers_count = organization.twitter_followers_count
                     organization_we_vote_id = organization.we_vote_id
                 if not positive_value_exists(organization_found):
                     results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
@@ -819,6 +822,7 @@ def voter_guide_create_process_view(request):
                         if organization_results['organization_found']:
                             one_organization_found = True
                             organization = organization_results['organization']
+                            organization_twitter_followers_count = organization.twitter_followers_count
                             organization_we_vote_id = organization.we_vote_id
                     twitter_user_id = 0
                     twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(
@@ -1227,6 +1231,7 @@ def voter_guide_create_process_view(request):
             'contributor_comments':             contributor_comments,
             'contributor_email':                contributor_email,
             'organization_name':                organization_name,
+            'organization_twitter_followers_count': organization_twitter_followers_count,
             'organization_twitter_handle':      organization_twitter_handle,
             'organization_we_vote_id':          organization_we_vote_id,
             'state_code':                       state_code,
@@ -1341,15 +1346,12 @@ def break_up_text_into_possible_endorsement_list(ballot_items, starting_endorsem
                                                  candidate_we_vote_id_to_include='',
                                                  organization_we_vote_id_to_include=''):
     names_list = []
-    # First break up multiple lines
-    ballot_items_list1 = ballot_items.splitlines()
-    for one_line in ballot_items_list1:
-        # Then break up by comma
-        ballot_items_list2 = one_line.split(",")
-        for one_item in ballot_items_list2:
-            one_item_stripped = one_item.strip()
-            if positive_value_exists(one_item_stripped):
-                names_list.append(one_item_stripped)
+    # Break up multiple lines
+    ballot_items_list = ballot_items.splitlines()
+    for one_line in ballot_items_list:
+        one_line_stripped = one_line.strip()
+        if positive_value_exists(one_line_stripped):
+            names_list.append(one_line_stripped)
 
     possible_endorsement_list_results = \
         convert_list_of_names_to_possible_endorsement_list(

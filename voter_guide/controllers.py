@@ -962,6 +962,12 @@ def match_endorsement_list_with_measures_in_database(
                 possible_endorsement['google_civic_election_id'] = measure.google_civic_election_id
             possible_endorsement_matched = True
             possible_endorsement_list_modified.append(possible_endorsement)
+        elif 'candidate_we_vote_id' in possible_endorsement \
+                and positive_value_exists(possible_endorsement['candidate_we_vote_id']):
+            possible_endorsement_matched = True
+            possible_endorsement_list_modified.append(possible_endorsement)
+            # Go to the next entry in this possible_endorsement_list loop
+            continue
         elif 'ballot_item_name' in possible_endorsement and \
                 positive_value_exists(possible_endorsement['ballot_item_name']):
             # If here search for possible measure matches
@@ -971,7 +977,7 @@ def match_endorsement_list_with_measures_in_database(
             if matching_results['contest_measure_found']:
                 measure = matching_results['contest_measure']
 
-                # If one candidate found, add we_vote_id here
+                # If one measure found, add we_vote_id here
                 possible_endorsement['measure_we_vote_id'] = measure.we_vote_id
                 if positive_value_exists(attach_objects):
                     possible_endorsement['measure'] = measure
