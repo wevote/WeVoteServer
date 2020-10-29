@@ -45,6 +45,11 @@
                            class="u-no-break"
                            target="_blank">
                         <i class="fa fa-twitter"></i>
+                        {% if voter_guide_possibility.organization_twitter_followers_count %}
+                            <span>
+                            ({{ voter_guide_possibility.organization_twitter_followers_count }} followers)
+                            </span>
+                        {% endif %}
                         <span class="glyphicon glyphicon-new-window"></span>
                         </a>
                         &nbsp;

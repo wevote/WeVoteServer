@@ -2795,6 +2795,7 @@ class VoterGuidePossibility(models.Model):
         verbose_name="organization name", max_length=255, null=True, blank=True, unique=False)
     organization_twitter_handle = models.CharField(
         verbose_name="organization twitter handle", max_length=255, null=True, blank=True, unique=False)
+    organization_twitter_followers_count = models.PositiveIntegerField(null=False, blank=True, default=0)
     # These are the candidates or measures on the voter guide (comma separated, or on own lines)
     ballot_items_raw = models.TextField(null=True, blank=True,)
 
