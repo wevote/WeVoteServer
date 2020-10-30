@@ -1419,6 +1419,8 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.google_civic_candidate_name2 = google_civic_candidate_name2
             if google_civic_candidate_name3 is not False:
                 candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
+            if state_code is not False:
+                candidate_on_stage.state_code = state_code
             if twitter_url is not False:
                 candidate_on_stage.twitter_url = twitter_url
             candidate_on_stage.withdrawn_from_election = withdrawn_from_election
