@@ -848,26 +848,36 @@ def issue_partisan_analysis_view(request):
             organization_link_to_issue_list = list(organization_link_to_issue_list_query)
         # Go through all of these linkages and create a list of organizations under each issue
         for one_organization_link_to_issue in organization_link_to_issue_list:
-            if one_organization_link_to_issue.organization_we_vote_id not in organization_issues_lists:
-                # Make sure we have an empty list for every single organization
-                organization_issues_lists[one_organization_link_to_issue.organization_we_vote_id] = []
-            if one_organization_link_to_issue.organization_we_vote_id not in organization_retrieved_list:
-                # If here, we need to retrieve the organization
-                organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-                    one_organization_link_to_issue.organization_we_vote_id)
-                if organization_results['organization_found']:
-                    organization_object = organization_results['organization']
-                    organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id] = \
-                        organization_object
-            if one_organization_link_to_issue.issue_we_vote_id not in organizations_attached_to_this_issue:
-                organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id] = []
-            organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id].\
-                append(organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id])
-            if one_organization_link_to_issue.organization_we_vote_id \
-                    and one_organization_link_to_issue.organization_we_vote_id \
-                    not in organization_we_vote_id_has_at_least_one_issue:
-                organization_we_vote_id_has_at_least_one_issue.append(
-                    one_organization_link_to_issue.organization_we_vote_id)
+            organization_we_vote_id_exists = \
+                one_organization_link_to_issue and hasattr(one_organization_link_to_issue, 'organization_we_vote_id') \
+                and positive_value_exists(one_organization_link_to_issue.organization_we_vote_id)
+            issue_we_vote_id_exists = \
+                one_organization_link_to_issue and hasattr(one_organization_link_to_issue, 'issue_we_vote_id') \
+                and positive_value_exists(one_organization_link_to_issue.issue_we_vote_id)
+            if organization_we_vote_id_exists:
+                if one_organization_link_to_issue.organization_we_vote_id not in organization_issues_lists:
+                    # Make sure we have an empty list for every single organization
+                    organization_issues_lists[one_organization_link_to_issue.organization_we_vote_id] = []
+                if one_organization_link_to_issue.organization_we_vote_id not in organization_retrieved_list:
+                    # If here, we need to retrieve the organization
+                    organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                        one_organization_link_to_issue.organization_we_vote_id)
+                    if organization_results['organization_found']:
+                        organization_object = organization_results['organization']
+                        organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id] = \
+                            organization_object
+            if issue_we_vote_id_exists:
+                if one_organization_link_to_issue.issue_we_vote_id not in organizations_attached_to_this_issue:
+                    organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id] = []
+                if organization_we_vote_id_exists and \
+                        organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id]:
+                    organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id].\
+                        append(organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id])
+                if organization_we_vote_id_exists and \
+                        one_organization_link_to_issue.organization_we_vote_id not in \
+                        organization_we_vote_id_has_at_least_one_issue:
+                    organization_we_vote_id_has_at_least_one_issue.append(
+                        one_organization_link_to_issue.organization_we_vote_id)
 
     issue_list_left = []
     organization_list_left = []
