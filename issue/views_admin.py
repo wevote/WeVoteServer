@@ -870,7 +870,7 @@ def issue_partisan_analysis_view(request):
                 if one_organization_link_to_issue.issue_we_vote_id not in organizations_attached_to_this_issue:
                     organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id] = []
                 if organization_we_vote_id_exists and \
-                        organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id]:
+                        one_organization_link_to_issue.organization_we_vote_id in organization_retrieved_list:
                     organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id].\
                         append(organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id])
                 if organization_we_vote_id_exists and \
