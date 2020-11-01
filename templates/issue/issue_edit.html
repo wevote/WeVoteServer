@@ -5,6 +5,8 @@
 
 {%  block content %}
 {% load template_filters %}
+{% load humanize %}
+
 <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     < Back to Values/Issues</a>
 
@@ -129,7 +131,7 @@
               {% endif %}
             </td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
-                ({{ organization.twitter_followers_count }} followers){% endif %}</td>
+                ({{ organization.twitter_followers_count|intcomma }} followers){% endif %}</td>
             <td>{% if organization.vote_smart_id %}{{ organization.vote_smart_id }}{% endif %}</td>
             <td>{{ organization.state_served_code }}</td>
         </tr>

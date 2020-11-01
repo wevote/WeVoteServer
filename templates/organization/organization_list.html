@@ -4,6 +4,8 @@
 {% block title %}Organizations{% endblock %}
 
 {%  block content %}
+{% load humanize %}
+
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
 <p>Jump to:
     <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elections</a> -
@@ -168,7 +170,7 @@
               {% endif %}
             </td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
-                ({{ organization.twitter_followers_count }} followers){% endif %}</td>
+                ({{ organization.twitter_followers_count|intcomma }} followers){% endif %}</td>
             <td>{{ organization.organization_type_display }}</td>
             <td>
               {% if organization.issue_analysis_done %}

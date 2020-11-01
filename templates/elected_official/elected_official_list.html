@@ -5,6 +5,8 @@
 
 {%  block content %}
 {% load template_filters %}
+{% load humanize %}
+
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
 <p>Jump to:
     <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elections</a> -
@@ -91,7 +93,7 @@ Note: Please update Elected Officials (via Google Civic) from the "Elected Offic
             <td>{{ elected_official.state_code }}</td>
             <td>{% if elected_official.elected_official_twitter_handle %}<a href="https://twitter.com/{{ elected_official.elected_official_twitter_handle }}"
                     target="_blank">{{ elected_official.elected_official_twitter_handle }}</a><br />
-                ({{ elected_official.twitter_followers_count }} followers){% endif %}</td>
+                ({{ elected_official.twitter_followers_count|intcomma }} followers){% endif %}</td>
             <td>{% if elected_official.elected_official_url %}<a href="{{ elected_official.elected_official_url }}" target="_blank">{{ elected_official.elected_official_url }}</a>{% endif %}</td>
             <td>{{ elected_official.we_vote_id }}</td>
             <td>{{ elected_official.vote_smart_id|default_if_none:"" }}</td>

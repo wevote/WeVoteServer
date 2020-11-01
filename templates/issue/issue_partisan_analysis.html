@@ -5,6 +5,7 @@
 
 {%  block content %}
 {% load template_filters %}
+{% load humanize %}
 
 <h1>Breakdown of Endorsements, by Partisan Leaning</h1>
 <p>
@@ -55,17 +56,17 @@
 <tr>
     <td>
       <h4>{{ endorsement_percent_left|floatformat:1 }}% From Left-Leaning Sources</h4>
-      <p><strong>{{ endorsement_count_left }}</strong> out of {{ total_endorsement_count }} Endorsements</p>
+      <p><strong>{{ endorsement_count_left|intcomma }}</strong> out of {{ total_endorsement_count|intcomma }} Endorsements</p>
     </td>
     <td>&nbsp;</td>
     <td>
       <h4>{{ endorsement_percent_center|floatformat:1 }}% Other</h4>
-      <p><strong>{{ endorsement_count_center }}</strong> out of {{ total_endorsement_count }} Endorsements</p>
+      <p><strong>{{ endorsement_count_center|intcomma }}</strong> out of {{ total_endorsement_count|intcomma }} Endorsements</p>
     </td>
     <td>&nbsp;</td>
     <td>
       <h4>{{ endorsement_percent_right|floatformat:1 }}% From Right-Leaning Sources</h4>
-      <p><strong>{{ endorsement_count_right }}</strong> out of {{ total_endorsement_count }} Endorsements</p>
+      <p><strong>{{ endorsement_count_right|intcomma }}</strong> out of {{ total_endorsement_count|intcomma }} Endorsements</p>
     </td>
 </tr>
 
@@ -138,7 +139,7 @@
                   {% endfor %}
                 </span>
                 {% if organization.twitter_followers_count %}
-                    <span style="color: darkgray" class="u-no-break">({{ organization.twitter_followers_count }} Twitter Followers)</span>
+                    <span style="color: darkgray" class="u-no-break">({{ organization.twitter_followers_count|intcomma }} Twitter Followers)</span>
                 {% endif %}
             </td>
         </tr>
@@ -183,7 +184,7 @@
                   {% endfor %}
                 </span>
                 {% if organization.twitter_followers_count %}
-                    <span style="color: darkgray" class="u-no-break">({{ organization.twitter_followers_count }} Twitter Followers)</span>
+                    <span style="color: darkgray" class="u-no-break">({{ organization.twitter_followers_count|intcomma }} Twitter Followers)</span>
                 {% endif %}
             </td>
         </tr>
@@ -228,7 +229,7 @@
                   {% endfor %}
                 </span>
                 {% if organization.twitter_followers_count %}
-                    <span style="color: darkgray" class="u-no-break">({{ organization.twitter_followers_count }} Twitter Followers)</span>
+                    <span style="color: darkgray" class="u-no-break">({{ organization.twitter_followers_count|intcomma }} Twitter Followers)</span>
                 {% endif %}
             </td>
         </tr>

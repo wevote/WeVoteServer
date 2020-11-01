@@ -4,6 +4,7 @@
 {% block title %}Edit {% if voter %}{{ voter.get_full_name }}{% else %}Create New Voter Account{% endif %}{% endblock %}
 
 {%  block content %}
+{% load humanize %}
 
     <a href="{% url 'voter:voter_list' %}">< Back to Voters</a><br />
     <br />
@@ -158,7 +159,7 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
                 {% if organization.organization_name %}{{ organization.organization_name }}{% else %}(no org name)
             {% endif %}</a></td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
-                ({{ organization.twitter_followers_count }} followers)<br />{% endif %}
+                ({{ organization.twitter_followers_count|intcomma }} followers)<br />{% endif %}
                 {% if organization.twitter_user_id %}{{ organization.twitter_user_id }}{% endif %}
             </td>
             <td>{% if organization.vote_smart_id %}{{ organization.vote_smart_id }}{% endif %}</td>
@@ -393,7 +394,7 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
                    target="_blank">
                 {% if organization.organization_name %}{{ organization.organization_name }}{% else %}(no org name){% endif %}</a></td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
-                ({{ organization.twitter_followers_count }} followers)<br />{% endif %}
+                ({{ organization.twitter_followers_count|intcomma }} followers)<br />{% endif %}
                 {% if organization.twitter_user_id %}{{ organization.twitter_user_id }}{% endif %}
             </td>
             <td>{% if organization.vote_smart_id %}{{ organization.vote_smart_id }}{% endif %}</td>

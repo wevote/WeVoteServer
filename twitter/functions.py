@@ -18,9 +18,14 @@ TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
+EXCLUDE_FROM_LOG = [
+    "{'code': 50, 'message': 'User not found.'}",
+    "User not found."
+]
 
 def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
     status = ""
+    write_to_error_logs = False
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
 
@@ -69,7 +74,10 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
         for error_dict in error_tuple:
             for one_error in error_dict:
                 status += '[' + one_error['message'] + '] '
-        handle_exception(error_instance, logger=logger, exception_message=status)
+                if one_error['message'] not in EXCLUDE_FROM_LOG:
+                    write_to_error_logs = True
+        if write_to_error_logs:
+            handle_exception(error_instance, logger=logger, exception_message=status)
 
     try:
         if positive_value_exists(twitter_json.get('profile_banner_url')):

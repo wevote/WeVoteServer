@@ -1,5 +1,7 @@
 {# templates/analytics/organization_election_metrics_table.html #}
 
+{% load humanize %}
+
 <table border="1" cellpadding="5" cellspacing="5" class="table">
 {% for one_row in organization_election_metrics_list %}
 {% if forloop.counter == 1 or forloop.counter|divisibleby:10 %}
@@ -23,35 +25,35 @@
             (<a href="{% url 'analytics:organization_analytics_index' %}?organization_we_vote_id={{ one_row.organization_we_vote_id }}"
                target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)</td>
         <td>
-            {% if one_row.visitors_total %}<span class="u-no-break">all: {{ one_row.visitors_total }}</span>{% endif %}
-            {% if one_row.authenticated_visitors_total %}<br /><span class="u-no-break">signed_in: {{ one_row.authenticated_visitors_total }}</span>{% endif %}
+            {% if one_row.visitors_total %}<span class="u-no-break">all: {{ one_row.visitors_total|intcomma }}</span>{% endif %}
+            {% if one_row.authenticated_visitors_total %}<br /><span class="u-no-break">signed_in: {{ one_row.authenticated_visitors_total|intcomma }}</span>{% endif %}
         </td>
-        <td>{% if one_row.followers_at_time_of_election %}<span class="u-no-break">total: {{ one_row.followers_at_time_of_election }}</span>{% endif %}
-            {% if one_row.new_followers %}<br /><span class="u-no-break">new: {{ one_row.new_followers }}</span>{% endif %}
-            {% if one_row.new_auto_followers %}<br /><span class="u-no-break">auto: {{ one_row.new_auto_followers }}</span>{% endif %}</td>
-        <td>{% if one_row.followers_visited_ballot %}{{ one_row.followers_visited_ballot }}{% endif %}</td>
+        <td>{% if one_row.followers_at_time_of_election %}<span class="u-no-break">total: {{ one_row.followers_at_time_of_election|intcomma }}</span>{% endif %}
+            {% if one_row.new_followers %}<br /><span class="u-no-break">new: {{ one_row.new_followers|intcomma }}</span>{% endif %}
+            {% if one_row.new_auto_followers %}<br /><span class="u-no-break">auto: {{ one_row.new_auto_followers|intcomma }}</span>{% endif %}</td>
+        <td>{% if one_row.followers_visited_ballot %}{{ one_row.followers_visited_ballot|intcomma }}{% endif %}</td>
         <td>
-            {% if one_row.followers_took_position %}{{ one_row.followers_took_position }}{% endif %}
-            {% if one_row.followers_public_positions or one_row.followers_public_positions_with_comments %}
-            <br /><span class="u-no-break">public: {{ one_row.followers_public_positions }}</span>
-            <br /><span class="u-no-break">with comments: {{ one_row.followers_public_positions_with_comments }}</span>
+            {% if one_row.followers_took_position %}{{ one_row.followers_took_position|intcomma }}{% endif %}
+            {% if one_row.followers_public_positions or one_row.followers_public_positions_with_comments|intcomma %}
+            <br /><span class="u-no-break">public: {{ one_row.followers_public_positions|intcomma }}</span>
+            <br /><span class="u-no-break">with comments: {{ one_row.followers_public_positions_with_comments|intcomma }}</span>
             {% endif %}
             {% if one_row.followers_friends_only_positions or one_row.followers_friends_only_positions_with_comments %}
-            <br /><span class="u-no-break">friends only: {{ one_row.followers_friends_only_positions }}</span>
-            <br /><span class="u-no-break">with comments: {{ one_row.followers_friends_only_positions_with_comments }}</span>
+            <br /><span class="u-no-break">friends only: {{ one_row.followers_friends_only_positions|intcomma }}</span>
+            <br /><span class="u-no-break">with comments: {{ one_row.followers_friends_only_positions_with_comments|intcomma }}</span>
             {% endif %}
         </td>
-        <td>{% if one_row.voter_guide_entrants %}{{ one_row.voter_guide_entrants }}{% endif %}</td>
-        <td>{% if one_row.entrants_visited_ballot %}{{ one_row.entrants_visited_ballot }}{% endif %}</td>
+        <td>{% if one_row.voter_guide_entrants %}{{ one_row.voter_guide_entrants|intcomma }}{% endif %}</td>
+        <td>{% if one_row.entrants_visited_ballot %}{{ one_row.entrants_visited_ballot|intcomma }}{% endif %}</td>
         <td>
-            {% if one_row.entrants_took_position %}{{ one_row.entrants_took_position }}{% endif %}
+            {% if one_row.entrants_took_position %}{{ one_row.entrants_took_position|intcomma }}{% endif %}
             {% if one_row.entrants_public_positions or one_row.entrants_public_positions_with_comments %}
-            <br /><span class="u-no-break">public: {{ one_row.entrants_public_positions }}</span>
-            <br /><span class="u-no-break">with comments: {{ one_row.entrants_public_positions_with_comments }}</span>
+            <br /><span class="u-no-break">public: {{ one_row.entrants_public_positions|intcomma }}</span>
+            <br /><span class="u-no-break">with comments: {{ one_row.entrants_public_positions_with_comments|intcomma }}</span>
             {% endif %}
             {% if one_row.entrants_friends_only_positions or one_row.entrants_friends_only_positions_with_comments %}
-            <br /><span class="u-no-break">friends only: {{ one_row.entrants_friends_only_positions }}</span>
-            <br /><span class="u-no-break">with comments: {{ one_row.entrants_friends_only_positions_with_comments }}</span>
+            <br /><span class="u-no-break">friends only: {{ one_row.entrants_friends_only_positions|intcomma }}</span>
+            <br /><span class="u-no-break">with comments: {{ one_row.entrants_friends_only_positions_with_comments|intcomma }}</span>
             {% endif %}
         </td>
     </tr>

@@ -1,4 +1,5 @@
 {# templates/voter_guide/voter_guide_possibility_table.html #}
+{% load humanize %}
 {% if voter_guide_possibility_list %}
     <table class="table table-condensed">
         <thead>
@@ -47,7 +48,7 @@
                         <i class="fa fa-twitter"></i>
                         {% if voter_guide_possibility.organization_twitter_followers_count %}
                             <span>
-                            ({{ voter_guide_possibility.organization_twitter_followers_count }} followers)
+                            ({{ voter_guide_possibility.organization_twitter_followers_count|intcomma }} followers)
                             </span>
                         {% endif %}
                         <span class="glyphicon glyphicon-new-window"></span>
