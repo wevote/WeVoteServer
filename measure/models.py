@@ -1057,11 +1057,21 @@ class ContestMeasureListManager(models.Model):
         }
         return results
 
-    def retrieve_all_measures_for_upcoming_election(self, google_civic_election_id_list=[], state_code='',
-                                                    return_list_of_objects=False, limit=300, read_only=False):
+    def retrieve_all_measures_for_upcoming_election(
+            self,
+            google_civic_election_id_list=[],
+            state_code='',
+            search_string=False,
+            return_list_of_objects=False,
+            limit=300,
+            read_only=False):
         measure_list_objects = []
         measure_list_light = []
         measure_list_found = False
+        if positive_value_exists(search_string):
+            search_words = search_string.split()
+        else:
+            search_words = []
         status = ""
 
         try:
@@ -1085,6 +1095,36 @@ class ContestMeasureListManager(models.Model):
                 return results
             if positive_value_exists(state_code):
                 measure_queryset = measure_queryset.filter(state_code__iexact=state_code)
+            if positive_value_exists(search_string):
+                # This is an "OR" search for each term, but an "AND" search across all search_words
+                for search_word in search_words:
+                    filters = []
+
+                    # We want to find candidates with *any* of these values
+                    new_filter = Q(ballotpedia_measure_name__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_measure_title__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_measure_title2__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_measure_title3__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_measure_title4__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_measure_title5__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(measure_title__icontains=search_word)
+                    filters.append(new_filter)
+
+                    # Add the first query
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    # Add as new filter for "AND"
+                    measure_queryset = measure_queryset.filter(final_filters)
             measure_queryset = measure_queryset.order_by("measure_title")
             # We never expect more than 300 measures for one election
             if positive_value_exists(limit):

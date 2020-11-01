@@ -961,6 +961,12 @@ def issue_partisan_analysis_view(request):
         altered_issue_list = []
         pass
 
+    # Order entries in the organization_lists by "twitter_followers_count"
+    from operator import attrgetter
+    organization_list_left = sorted(organization_list_left, key=attrgetter('twitter_followers_count'), reverse=True)
+    organization_list_center = sorted(organization_list_center, key=attrgetter('twitter_followers_count'), reverse=True)
+    organization_list_right = sorted(organization_list_right, key=attrgetter('twitter_followers_count'), reverse=True)
+
     for one_voter_guide in voter_guide_list:
         if one_voter_guide.organization_we_vote_id not in organization_we_vote_id_has_at_least_one_issue:
             if one_voter_guide.organization_we_vote_id not in organization_we_vote_id_list_center:
