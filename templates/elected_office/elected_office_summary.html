@@ -85,7 +85,7 @@
             <!--<td>{{ candidate.get_candidate_state }}</td>-->
             <!--<td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"-->
                     <!--target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />-->
-                <!--({{ candidate.twitter_followers_count }} followers){% endif %}</td>-->
+                <!--({{ candidate.twitter_followers_count|intcomma }} followers){% endif %}</td>-->
             <!--<td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>-->
             <!--<td>{% if candidate.candidate_contact_form_url %}<a href="{{ candidate.candidate_contact_form_url }}" target="_blank">{{ candidate.candidate_contact_form_url }}</a>{% endif %}</td>-->
             <!--<td>{{ candidate.id }}</td>-->

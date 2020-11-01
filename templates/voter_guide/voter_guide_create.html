@@ -5,7 +5,7 @@
 
 {%  block content %}
 {% load template_filters %}
-
+{% load humanize %}
 
 <form
   id="the_form"
@@ -69,7 +69,7 @@
                    class="u-no-break">
                 <i class="fa fa-twitter"></i> {{ organization.organization_twitter_handle }}
                 {% if organization.twitter_followers_count %}
-                    ({{ organization.twitter_followers_count }} followers)
+                    ({{ organization.twitter_followers_count|intcomma }} followers)
                 {% endif %}
                 &nbsp;
                 <span class="glyphicon glyphicon-new-window"></span></a>
@@ -208,7 +208,7 @@
                            class="u-no-break"><i class="fa fa-twitter"></i>
                             {{ possible_organization.organization_twitter_handle }}
                             {% if possible_organization.organization_twitter_followers_count %}
-                            ({{ possible_organization.organization_twitter_followers_count }} followers)
+                            ({{ possible_organization.organization_twitter_followers_count|intcomma }} followers)
                             {% endif %}
                         <span class="glyphicon glyphicon-new-window"></span></a>
                     {% endif %}

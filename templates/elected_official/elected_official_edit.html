@@ -57,7 +57,7 @@
         Twitter Name: {{ elected_official.twitter_name }}<br />
         Twitter Description: {{ elected_official.twitter_description }}<br />
         Twitter Location: {{ elected_official.twitter_location }}<br />
-        Twitter Followers: {{ elected_official.twitter_followers_count }}<br />
+        Twitter Followers: {{ elected_official.twitter_followers_count|intcomma }}<br />
     {% endif %}
     {% if elected_official.twitter_url %}Twitter URL (from Google Civic): {{ elected_official.twitter_url }}{% endif %}
     </div>
@@ -141,7 +141,7 @@
             </td>
             <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
                     target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
-                ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
+                ({{ candidate.twitter_followers_count|intcomma }} followers){% endif %}</td>
             <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
             <td>{% if candidate.candidate_contact_form_url %}<a href="{{ candidate.candidate_contact_form_url }}" target="_blank">{{ candidate.candidate_contact_form_url }}</a>{% endif %}</td>
             <td>{{ candidate.id }}</td>
@@ -203,7 +203,7 @@
             </td>
             <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
                     target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
-                ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
+                ({{ candidate.twitter_followers_count|intcomma }} followers){% endif %}</td>
             <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
             <td>{% if candidate.candidate_contact_form_url %}<a href="{{ candidate.candidate_contact_form_url }}" target="_blank">{{ candidate.candidate_contact_form_url }}</a>{% endif %}</td>
             <td>{{ candidate.id }}</td>
@@ -249,7 +249,7 @@
             <td>{{ elected_official.state_code }}</td>
             <td>{% if elected_official.elected_official_twitter_handle %}<a href="https://twitter.com/{{ elected_official.elected_official_twitter_handle }}"
                     target="_blank">{{ elected_official.elected_official_twitter_handle }}</a><br />
-                ({{ elected_official.twitter_followers_count }} followers){% endif %}</td>
+                ({{ elected_official.twitter_followers_count|intcomma }} followers){% endif %}</td>
             <td>{% if elected_official.elected_official_url %}<a href="{{ elected_official.elected_official_url }}" target="_blank">{{ elected_official.elected_official_url }}</a>{% endif %}</td>
             <td>{{ elected_official.id }}</td>
             <td>{{ elected_official.we_vote_id }}</td>
@@ -391,7 +391,7 @@
             <td>{{ elected_official.state_code }}</td>
             <td>{% if elected_official.elected_official_twitter_handle %}<a href="https://twitter.com/{{ elected_official.elected_official_twitter_handle }}"
                     target="_blank">{{ elected_official.elected_official_twitter_handle }}</a><br />
-                ({{ elected_official.twitter_followers_count }} followers){% endif %}</td>
+                ({{ elected_official.twitter_followers_count|intcomma }} followers){% endif %}</td>
             <td>{% if elected_official.elected_official_url %}<a href="{{ elected_official.elected_official_url }}" target="_blank">{{ elected_official.elected_official_url }}</a>{% endif %}</td>
             <td>{{ elected_official.id }}</td>
             <td>{{ elected_official.we_vote_id }}</td>

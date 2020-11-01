@@ -76,6 +76,8 @@ STATE_CODE_MAP = {
     'WY': 'Wyoming',
 }
 
+ELASTIC_SEARCH_TURNED_ON = False
+
 
 def convert_state_code_to_state_text(incoming_state_code):
     for state_code, state_name in STATE_CODE_MAP.items():
@@ -97,7 +99,7 @@ if positive_value_exists(ELASTIC_SEARCH_CONNECTION_STRING):
 @receiver(post_save, sender=CandidateCampaign)
 def save_candidate_campaign_signal(sender, instance, **kwargs):
     # logger.debug("search.save_candidate_campaign_signal")
-    if 'elastic_search_object' in globals():
+    if ELASTIC_SEARCH_TURNED_ON and 'elastic_search_object' in globals():
         doc = {
             "candidate_name": instance.candidate_name,
             "candidate_twitter_handle": instance.candidate_twitter_handle,
@@ -119,7 +121,7 @@ def save_candidate_campaign_signal(sender, instance, **kwargs):
 @receiver(post_delete, sender=CandidateCampaign)
 def delete_candidate_campaign_signal(sender, instance, **kwargs):
     # logger.debug("search.delete_CandidateCampaign_signal")
-    if 'elastic_search_object' in globals():
+    if ELASTIC_SEARCH_TURNED_ON and 'elastic_search_object' in globals():
         try:
             res = elastic_search_object.delete(index="candidates", doc_type='candidate', id=instance.id)
             if res["_shards"]["successful"] <= 1:
@@ -133,7 +135,7 @@ def delete_candidate_campaign_signal(sender, instance, **kwargs):
 @receiver(post_save, sender=ContestMeasure)
 def save_contest_measure_signal(sender, instance, **kwargs):
     # logger.debug("search.save_ContestMeasure_signal")
-    if 'elastic_search_object' in globals():
+    if ELASTIC_SEARCH_TURNED_ON and 'elastic_search_object' in globals():
         doc = {
             "we_vote_id": instance.we_vote_id,
             "measure_subtitle": instance.measure_subtitle,
@@ -154,7 +156,7 @@ def save_contest_measure_signal(sender, instance, **kwargs):
 @receiver(post_delete, sender=ContestMeasure)
 def delete_contest_measure_signal(sender, instance, **kwargs):
     # logger.debug("search.delete_ContestMeasure_signal")
-    if 'elastic_search_object' in globals():
+    if ELASTIC_SEARCH_TURNED_ON and 'elastic_search_object' in globals():
         try:
             res = elastic_search_object.delete(index="measures", doc_type='measure', id=instance.id)
             if res["_shards"]["successful"] <= 1:
@@ -168,7 +170,7 @@ def delete_contest_measure_signal(sender, instance, **kwargs):
 @receiver(post_save, sender=ContestOffice)
 def save_contest_office_signal(sender, instance, **kwargs):
     # logger.debug("search.save_ContestOffice_signal")
-    if 'elastic_search_object' in globals():
+    if ELASTIC_SEARCH_TURNED_ON and 'elastic_search_object' in globals():
         doc = {
             "we_vote_id": instance.we_vote_id,
             "office_name": instance.office_name,
@@ -187,7 +189,7 @@ def save_contest_office_signal(sender, instance, **kwargs):
 @receiver(post_delete, sender=ContestOffice)
 def delete_contest_office_signal(sender, instance, **kwargs):
     # logger.debug("search.delete_ContestOffice_signal")
-    if 'elastic_search_object' in globals():
+    if ELASTIC_SEARCH_TURNED_ON and 'elastic_search_object' in globals():
         try:
             res = elastic_search_object.delete(index="offices", doc_type='office', id=instance.id)
             if res["_shards"]["successful"] <= 1:
@@ -201,7 +203,7 @@ def delete_contest_office_signal(sender, instance, **kwargs):
 @receiver(post_save, sender=Election)
 def save_election_signal(sender, instance, **kwargs):
     # logger.debug("search.save_Election_signal")
-    if 'elastic_search_object' in globals():
+    if ELASTIC_SEARCH_TURNED_ON and 'elastic_search_object' in globals():
         ballot_returned_manager = BallotReturnedManager()
         if ballot_returned_manager.should_election_search_data_be_saved(instance.google_civic_election_id):
             doc = {
@@ -231,7 +233,7 @@ def save_election_signal(sender, instance, **kwargs):
 @receiver(post_delete, sender=Election)
 def delete_election_signal(sender, instance, **kwargs):
     # logger.debug("search.delete_Election_signal")
-    if 'elastic_search_object' in globals():
+    if ELASTIC_SEARCH_TURNED_ON and 'elastic_search_object' in globals():
         try:
             res = elastic_search_object.delete(index="elections", doc_type='election', id=instance.id)
             if res["_shards"]["successful"] <= 1:
@@ -245,7 +247,7 @@ def delete_election_signal(sender, instance, **kwargs):
 @receiver(post_save, sender=Organization)
 def save_organization_signal(sender, instance, **kwargs):
     # logger.debug("search.save_Organization_signal")
-    if 'elastic_search_object' in globals():
+    if ELASTIC_SEARCH_TURNED_ON and 'elastic_search_object' in globals():
         doc = {
             "we_vote_id": instance.we_vote_id,
             "organization_name": instance.organization_name,
@@ -266,7 +268,7 @@ def save_organization_signal(sender, instance, **kwargs):
 @receiver(post_delete, sender=Organization)
 def delete_organization_signal(sender, instance, **kwargs):
     # logger.debug("search.delete_Organization_signal")
-    if 'elastic_search_object' in globals():
+    if ELASTIC_SEARCH_TURNED_ON and 'elastic_search_object' in globals():
         try:
             res = elastic_search_object.delete(index="organizations", doc_type='organization', id=instance.id)
             if res["_shards"]["successful"] <= 1:
