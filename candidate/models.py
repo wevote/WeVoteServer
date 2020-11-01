@@ -174,11 +174,19 @@ class CandidateCampaignListManager(models.Model):
         }
         return results
 
-    def retrieve_all_candidates_for_upcoming_election(self, google_civic_election_id_list=[], state_code='',
-                                                      return_list_of_objects=False):
+    def retrieve_all_candidates_for_upcoming_election(
+            self,
+            google_civic_election_id_list=[],
+            state_code='',
+            search_string=False,
+            return_list_of_objects=False):
         candidate_list_objects = []
         candidate_list_light = []
         candidate_list_found = False
+        if positive_value_exists(search_string):
+            search_words = search_string.split()
+        else:
+            search_words = []
         status = ""
 
         results = self.retrieve_candidate_we_vote_id_list_from_election_list(
@@ -195,6 +203,34 @@ class CandidateCampaignListManager(models.Model):
                 candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
             if positive_value_exists(state_code):
                 candidate_query = candidate_query.filter(state_code__iexact=state_code)
+            if positive_value_exists(search_string):
+                # This is an "OR" search for each term, but an "AND" search across all search_words
+                for search_word in search_words:
+                    filters = []
+
+                    # We want to find candidates with *any* of these values
+                    new_filter = Q(ballotpedia_candidate_name__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_candidate_name__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(candidate_name__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(candidate_twitter_handle__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(contest_office_name__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(twitter_name__icontains=search_word)
+                    filters.append(new_filter)
+
+                    # Add the first query
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    # Add as new filter for "AND"
+                    candidate_query = candidate_query.filter(final_filters)
             candidate_query = candidate_query.order_by("candidate_name")
             if positive_value_exists(google_civic_election_id_list) and len(google_civic_election_id_list):
                 candidate_list_objects = list(candidate_query)

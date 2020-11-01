@@ -13,6 +13,9 @@
     clear: both;
     padding-top: 20px;
   }
+  select.form-control {
+      height: auto !important;
+  }
 </style>
 
     <p><a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
@@ -104,8 +107,14 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
         <option value="0">-- no candidates found --</option>
         {% endif %}
         </select>
+
+        <input type="text" name="candidate_search" id="candidate_search_id" value="{{ candidate_search }}" />
+        <input type="submit" value="Search for Candidate" />
+
         {% if voter_authority.is_admin or voter_authority.is_political_data_manager or voter_authority.is_verified_volunteer %}
-            <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">To Add New Candidate Start from Office Page</a>,
+            <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+                To Add New Candidate Start from Office Page&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+            </a>
             <br />
         {% endif %}
     </div>
@@ -130,9 +139,13 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
         <option value="0">-- no measures found --</option>
         {% endif %}
         </select>
+
+        <input type="text" name="measure_search" id="measure_search_id" value="{{ measure_search }}" />
+        <input type="submit" value="Search for Measure" />
+
         {% if voter_authority.is_admin or voter_authority.is_political_data_manager or voter_authority.is_verified_volunteer %}
             <a href="{% url 'measure:measure_new' %}?google_civic_election_id={{ google_civic_election_id }}"
-               target="_blank">Add new measure</a> (open in new window)
+               target="_blank">Add new measure&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
             <br />
         {% endif %}
     </div>
@@ -227,16 +240,20 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 </p>
 {% endif %}
 
-<div class="col-sm-5" style="clear:both; padding-bottom: 20px">
+    <br />
+    <br />
+<div style="clear:both; padding-bottom: 20px">
   <h3>{{ organization_num_positions }} Existing Position{{ organization_num_positions|pluralize }}</h3>
   {% if organization_position_list %}
-      <table border="1">
-      <tr>
-          <td>Candidate/Measure</td>
-          <td>Stance</td>
-          <td>Election ID</td>
-          <td>Election Date</td>
-      </tr>
+      <table class="table">
+      <thead>
+          <tr>
+              <td>Candidate/Measure</td>
+              <td>Stance</td>
+              <td>Election ID</td>
+              <td>Election Date</td>
+          </tr>
+      </thead>
 
       {% for organization_position in organization_position_list %}
       <tr>
