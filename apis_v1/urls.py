@@ -14,7 +14,7 @@ from apis_v1.views import views_activity, views_apple, views_docs, views_analyti
     views_candidate, views_donation, \
     views_election, views_extension, views_facebook, views_friend, \
     views_issues, views_measure, views_misc, views_organization, \
-    views_pledge_to_vote, views_position, views_reaction, \
+    views_pledge_to_vote, views_position, views_reaction, views_retrieve_tables, \
     views_task, views_share, views_twitter, views_voter, views_voter_guide
 from analytics.views_admin import analytics_action_sync_out_view, organization_daily_metrics_sync_out_view, \
     organization_election_metrics_sync_out_view, sitewide_daily_metrics_sync_out_view, \
@@ -84,6 +84,7 @@ urlpatterns = [
     url(r'^emailBallotData/', views_ballot.email_ballot_data_view, name='emailBallotDataView'),
     url(r'^facebookDisconnect/', views_facebook.facebook_disconnect_view, name='facebookDisconnectView'),
     url(r'^facebookFriendsAction/', views_facebook.facebook_friends_action_view, name='facebookFriendsActionView'),
+    url(r'retrieveSQLTables/', views_retrieve_tables.retrieve_sql_tables, name='retrieveSQLTables'),
     url(r'^friendInvitationByEmailSend/',
         views_friend.friend_invitation_by_email_send_view, name='friendInvitationByEmailSendView'),
     url(r'^friendInvitationByEmailVerify/',
