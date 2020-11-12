@@ -1557,6 +1557,7 @@ def process_one_ballot_item_batch_process(batch_process):
         elif batch_process.kind_of_process == RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS:
             from import_export_ballotpedia.views_admin import \
                 retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view
+            # Steve, Oct 2020: This line took 35 seconds to execute on my local, in the debugger
             results = retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                 google_civic_election_id=batch_process.google_civic_election_id,
                 state_code=batch_process.state_code,
