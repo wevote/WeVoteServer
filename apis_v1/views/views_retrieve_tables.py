@@ -4,7 +4,7 @@
 from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
-from retrieve_tables.controllers import retrieve_sql_files_as_csv
+from retrieve_tables.controllers import retrieve_sql_tables_as_csv
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -18,6 +18,6 @@ def retrieve_sql_tables(request):  # retrieveSQLTables
     :param request:
     :return:
     """
-    json_data = retrieve_sql_files_as_csv()
+    json_data = retrieve_sql_tables_as_csv()
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
