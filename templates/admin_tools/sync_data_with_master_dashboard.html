@@ -7,6 +7,26 @@
 {% load template_filters %}
 <a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
 
+<h1>Fast Load Data From We Vote Master Servers</h1>
+    <div style="padding: 25px 25px 75px 25px; font-size: 18px">
+        If you are loading election data for the first time to your local postgres, press the "FAST LOAD" button below, and within a
+        minute it will have loaded and stored about 100 MB of data that includes all the election data we have for all elections and
+        for all the states.
+        <div style="padding-left: 33%; padding-top: 30px; padding-bottom: 30px">
+            {% comment %}<form name="retrieve_tables_form" method="get" action="{% url 'retrieve_tables:retrieve_sql_files_from_master_server'  %}">{% endcomment %}
+            <button id="fastLoadButton" type="submit" value="1" onClick="fastLoadClick()">FAST LOAD ALL OF THE ELECTION DATA, TO YOUR LOCAL POSTGRES</button>
+            {% comment %}</form>{% endcomment %}
+        </div>
+        If you want to update to current election data, and don't care about overwriting your existing election data,
+        "FAST LOAD" is all you need.
+        <br><br>
+        If you are working with specific election data, and may have made local changes that you want to preserve, then the
+        "Sync Data With Master We Vote Servers" tools that follow are for you.  (Syncing data can take many hours for a big
+        state, or a national election.)
+    </div>
+
+
+
 <h1>Sync Data With Master We Vote Servers</h1>
 
 <p>These imports are best run in order from top-to-bottom.</p>
@@ -260,6 +280,31 @@
         });
       }
     }, 1000);
+
+    function fastLoadClick() {
+    console.log("ON CLICK fastLoadButton");
+        // http://localhost:8000/retrieve_tables/import/?
+        if (!$("#fastLoadButton").html().includes('.....')) {
+            $("#fastLoadButton").html("... Loading all data from the master server, this takes about 60 seconds ...")
+                .css('background-color', 'gold');
+            let origin = new URL('{{request.build_absolute_uri}}').origin;
+            let apiURL = origin + '/retrieve_tables/import/?';
+            $.ajax({
+              type: "GET",
+              url: apiURL,
+              success: function (data) {
+                let status = data.text;
+                console.log(status);
+                $("#fastLoadButton").html("DONE: Successfully loaded election data from the master server").css('background-color', 'MEDIUMSPRINGGREEN');
+              },
+              error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $("#fastLoadButton").html("FAILURE: Look at the Python console log to figure out what went wrong").css('background-color', 'LIGHTCORAL');
+              },
+            });
+        } else {
+            console.log("fastLoadButton clicked while loading");
+        }
+    }
 </script>
 
 {%  endblock %}

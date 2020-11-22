@@ -66,6 +66,7 @@ urlpatterns = [
     url(r'^politician_list/', include(('politician.urls', 'politician_list'), namespace="politician_list")),
     url(r'^politician/', include(('politician.urls', 'politician'), namespace="politician")),
     url(r'^pos/', include(('position.urls', 'position'), namespace="position")),
+    url(r'^retrieve_tables/', include(('retrieve_tables.urls', 'retrieve_tables'), namespace="retrieve_tables")),
     url(r'^scheduled_tasks/', include(('scheduled_tasks.urls', 'scheduled_tasks'), namespace="scheduled_tasks")),
     url(r'^sod/', include(('support_oppose_deciding.urls', 'support_oppose_deciding'), namespace="support_oppose_deciding")),
     url(r'^tag/', include(('tag.urls', 'tag'), namespace="tag")),

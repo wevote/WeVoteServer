@@ -138,6 +138,7 @@ INSTALLED_APPS = (
     'quick_info',
     'reaction',
     'rest_framework',    # Jan 2019, looks abandoned
+    'retrieve_tables',
     'scheduled_tasks',
     'search',
     'share',
