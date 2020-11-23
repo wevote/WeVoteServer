@@ -21,7 +21,6 @@ def retrieve_sql_tables_as_csv():
         'ballot_ballotitem',
         'ballot_ballotreturned',
         'candidate_candidatecampaign',
-        'candidate_candidatecampaignlist',
         'candidate_candidatetoofficelink',
         'election_election',
         'issue_issue',
