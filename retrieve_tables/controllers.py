@@ -21,6 +21,7 @@ def retrieve_sql_tables_as_csv():
         'ballot_ballotitem',
         'ballot_ballotreturned',
         'candidate_candidatecampaign',
+        'candidate_candidatecampaignlist',
         'candidate_candidatetoofficelink',
         'election_election',
         'issue_issue',
@@ -107,7 +108,7 @@ def retrieve_sql_files_from_master_server(request, state_code=''):
     response = requests.get("https://api.wevoteusa.org/apis/v1/retrieveSQLTables/", params={})
     dt = time.time() - t0
     structured_json = json.loads(response.text)
-    print('Retrieving the ' + str(len(structured_json['files'])) + ' tables took ' + "{:.3f}".format(dt) +
+    print('Retrieving the ' + str(len(structured_json['files'])) + ' tables (as JSON) took ' + "{:.3f}".format(dt) +
           ' seconds, and retrieved ' + "{:,}".format(len(response.text)) + ' bytes')
 
     status = ''
