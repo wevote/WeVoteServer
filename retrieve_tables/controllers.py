@@ -83,6 +83,7 @@ def retrieve_sql_tables_as_csv():
     except Exception as e:
         status += "retrieve_tables export_sync_files_to_csv caught " + str(e)
         logger.error(status)
+        logger.error("retrieve_tables export_sync_files_to_csv caught " + str(e))
         results = {
             'status': status,
         }
