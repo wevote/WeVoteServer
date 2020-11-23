@@ -61,6 +61,7 @@ def retrieve_sql_tables_as_csv():
             with open(csv_name, 'r') as file2:
                 csv_files[table_name] = file2.read()
             file2.close()
+            logger.error("retrieve_tables removing: " + csv_name)
             os.remove(csv_name)
             status += "exported " + table_name + ", "
         conn.commit()
