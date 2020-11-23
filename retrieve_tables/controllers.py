@@ -117,7 +117,9 @@ def retrieve_sql_files_from_master_server(request, state_code=''):
           ' seconds, and retrieved ' + "{:,}".format(len(response.text)) + ' bytes')
 
     status = ''
-    if 'files' in structured_json:
+    if 'files' not  in structured_json:
+        status = "Received zero files from server"
+    else:
         try:
             conn = psycopg2.connect(
                 database=get_environment_variable('DATABASE_NAME'),
@@ -271,8 +273,6 @@ def retrieve_sql_files_from_master_server(request, state_code=''):
         except Exception as e:
             status += "retrieve_tables retrieve_sql_files_from_master_server caught " + str(e)
             logger.error(status)
-    else:
-        status = "Received zero files from server"
 
     results = {
         'status': status,
