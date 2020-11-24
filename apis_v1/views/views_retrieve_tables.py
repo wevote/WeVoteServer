@@ -18,6 +18,7 @@ def retrieve_sql_tables(request):  # retrieveSQLTables
     :param request:
     :return:
     """
-    json_data = retrieve_sql_tables_as_csv()
+    table = request.GET.get('table', '')
+    json_data = retrieve_sql_tables_as_csv(table)
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
