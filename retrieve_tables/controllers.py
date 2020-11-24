@@ -58,12 +58,12 @@ def retrieve_sql_tables_as_csv(table_name):
             with open(csv_name, 'w') as file:
                 sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N' "  # Option+z = Ω
                 cur.copy_expert(sql, file, size=8192)
-                logger.error("retrieve_tables sql: " + sql)
+                # logger.error("retrieve_tables sql: " + sql)
             file.close()
             with open(csv_name, 'r') as file2:
                 csv_files[table_name] = file2.read()
             file2.close()
-            logger.error("retrieve_tables removing: " + csv_name)
+            # logger.error("retrieve_tables removing: " + csv_name)
             os.remove(csv_name)
             status += "exported " + table_name + ", "
             conn.commit()
@@ -114,7 +114,7 @@ def retrieve_sql_files_from_master_server(request, state_code=''):
     for table_name in allowable_tables:
         t1 = time.time()
         response = requests.get("https://api.wevoteusa.org/apis/v1/retrieveSQLTables/", 
-        params={table_name: 'table_name'})
+        params={table_name: table_name})
         structured_json = json.loads(response.text)
         dt = time.time() - t1
 
