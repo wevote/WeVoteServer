@@ -7,9 +7,11 @@ import time
 from config.base import get_environment_variable
 from django.http import HttpResponse
 import wevote_functions.admin
+from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+# This api will only return the data from the following tables
 allowable_tables = {
     'ballot_ballotitem',
     'ballot_ballotreturned',
@@ -29,11 +31,12 @@ allowable_tables = {
 }
 
 
-def retrieve_sql_tables_as_csv(table_name):
+def retrieve_sql_tables_as_csv(table_name, limit, offset):
     """
     Extract one of the 15 allowable database tables to CSV (pipe delimited) and send it to the
     developer's local WeVoteServer instance
-    :return:
+    limit is used to specify a number of rows to return (this is the SQL LIMIT clause), non-zero or ignored
+    offset is used to specify the first row to return (this is the SQL OFFSET clause), non-zero or ignored
     """
     t0 = time.time()
 
@@ -56,9 +59,13 @@ def retrieve_sql_tables_as_csv(table_name):
             csv_name = table_name + '.csv'
             print("exporting to: " + csv_name)
             with open(csv_name, 'w') as file:
-                sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N' "  # Option+z = Ω
+                if positive_value_exists(limit) and positive_value_exists(offset):
+                    sql = "COPY (SELECT * FROM public." + table_name + " ORDER BY id LIMIT " + limit + " OFFSET " + offset +\
+                          ") TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
+                else:
+                    sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
                 cur.copy_expert(sql, file, size=8192)
-                # logger.error("retrieve_tables sql: " + sql)
+                logger.error("retrieve_tables sql: " + sql)
             file.close()
             with open(csv_name, 'r') as file2:
                 csv_files[table_name] = file2.read()
@@ -77,7 +84,7 @@ def retrieve_sql_tables_as_csv(table_name):
             logger.error(status)
 
         results = {
-            'success:': True,
+            'success': True,
             'status': status,
             'files': csv_files,
         }
@@ -89,7 +96,7 @@ def retrieve_sql_tables_as_csv(table_name):
         logger.error(status)
         logger.error("retrieve_tables export_sync_files_to_csv caught " + str(e))
         results = {
-            'success:': False,
+            'success': False,
             'status': status,
         }
         return results
@@ -103,6 +110,13 @@ def substitute_null(row, index, sub):
     if row[index] == '\\N' or row[index] == '':
         row[index] = sub
 
+def dump_row_col_labels_and_errors(table_name, header, row, index):
+    if row[0] == index:
+        cnt = 0
+        for element in header:
+            print(table_name + "." + element + " [" + str(cnt) + "]: " + row[cnt])
+            cnt += 1
+
 
 def retrieve_sql_files_from_master_server(request, state_code=''):
     """
@@ -114,13 +128,15 @@ def retrieve_sql_files_from_master_server(request, state_code=''):
     for table_name in allowable_tables:
         t1 = time.time()
         response = requests.get("https://api.wevoteusa.org/apis/v1/retrieveSQLTables/", 
-        params={table_name: table_name})
+        params={'table': table_name})
         structured_json = json.loads(response.text)
         dt = time.time() - t1
 
         if structured_json['success'] == False:
             print("FAILED:  Did not receive '" + table_name + " from server")
-        else: 
+        elif len(structured_json['files']) == 0:
+            print(table_name + " " + structured_json['status'])
+        else:
             print('Retrieved the ' + table_name + ' table (as JSON) in ' + "{:.3f}".format(dt) +
               ' seconds, and retrieved ' + "{:,}".format(len(response.text)) + ' bytes')
 
@@ -133,38 +149,40 @@ def retrieve_sql_files_from_master_server(request, state_code=''):
                     port=get_environment_variable('DATABASE_PORT')
                 )
     
-                print("retrieve_sql_files_from_master_server psycopg2 Connected to DB")
+                # print("retrieve_sql_files_from_master_server psycopg2 Connected to DB")
     
                 cur = conn.cursor()
     
-                print("Started processing " + table_name + " data from master server.")
+                print("... Started processing " + table_name + " data from master server.")
                 cur.execute("DELETE FROM " + table_name)  # Delete all existing data in this one of 15 allowable_tables
                 conn.commit()
                 with open(table_name + '.csv', 'w') as csv_file:
                     csv_file.write(structured_json['files'][table_name])
                     csv_file.close()
 
-                json_to_clean_csv_file2(table_name)
+                header = csv_file_to_clean_csv_file2(table_name)
 
                 try:
                     with open(table_name + '2.csv', 'r') as file:
                         cur.copy_from(file, table_name, sep='|', size=16384, columns=header)
                         file.close()
-                    print("... Table " + table_name + " was overwritten with data from the master server.")
+                    # print("... Table " + table_name + " was overwritten with data from the master server.")
                 except Exception as e0:
                     print("FAILED " + table_name + " -- " + str(e0))
                 conn.commit()
                 conn.close()
-                dt = time.time() - t0
-                stat = 'Processing and loading the ' + str(len(allowable_tables)) + ' tables took '\
-                       + "{:.3f}".format(dt) + ' seconds'
-                print(stat)
-                status += stat
-    
+                dt = time.time() - t1
+                print('... Processing and overwriting the ' + table_name + ' table took ' + "{:.3f}".format(dt) + ' secs')
+                status += ", " + " loaded " + table_name
+
             except Exception as e:
                 status += "retrieve_tables retrieve_sql_files_from_master_server caught " + str(e)
                 logger.error(status)
 
+    stat = 'Processing and loading the ' + str(len(allowable_tables)) + ' tables took ' \
+           + "{:.3f}".format(dt) + ' seconds'
+    print(stat)
+    status += stat
     results = {
         'status': status,
         'status_code': status,
@@ -172,13 +190,13 @@ def retrieve_sql_files_from_master_server(request, state_code=''):
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 
-def json_to_clean_csv_file2( table_name ):
+def csv_file_to_clean_csv_file2( table_name ):
     csv_rows = []
     with open(table_name + '.csv', 'r') as csv_file2:
         line_reader = csv.reader(csv_file2, delimiter='|')
         header = None
-        dummy_unique_id = 0
-        skipped_rows = 'Skipped rows in ' + table_name + ': '
+        dummy_unique_id = 10000000
+        skipped_rows = '... Skipped rows in ' + table_name + ': '
         for row in line_reader:
             if header is None:
                 header = row
@@ -187,12 +205,17 @@ def json_to_clean_csv_file2( table_name ):
             if len(header) != len(row) or '|' in str(row):
                 skipped_rows += row[0] + ", "
                 continue
+            if table_name == "ballot_ballotreturned":
+                clean_row(row, 6)                       # text_for_map_search
+                substitute_null(row, 7, '0.0')      # latitude
+                substitute_null(row, 8, '0.0')      # longitude
+                # dump_row_col_labels_and_errors(table_name, header, row, '50490')
             if table_name == "candidate_candidatetoofficelink":
                 if row[1] == '':  # candidate_we_vote_id
                     continue
             elif table_name == "election_election":
                 substitute_null(row, 2, '0')  # google_civic_election_id_new is an integer
-                if row[8] == '':
+                if row[8] == '' or row[8] == '\\N' or row[8] == '0':
                     dummy_unique_id += 1
                     row[8] = str(dummy_unique_id)  # ballotpedia_election_id
                 substitute_null(row, 8, '0')  #
@@ -233,54 +256,65 @@ def json_to_clean_csv_file2( table_name ):
                 substitute_null(row, 41, 'f')  # is_battleground_race is a bool
             elif table_name == "candidate_candidatecampaign":
                 dummy_unique_id += 1
-                row[2] = str(dummy_unique_id)  # maplight_id, looks like we don't even use this anymore
-                substitute_null(row, 6, '0')  # politician_id
-                clean_row(row, 8)  # candidate_name |"Elizabeth Nelson ""Liz"" Johnson"|
-                clean_row(row, 9)  # google_civic_candidate_name
-                clean_row(row, 24)  # candidate_email
-                substitute_null(row, 28, '0')  # wikipedia_page_id
-                clean_row(row, 32)  # twitter_description
-                substitute_null(row, 33, '0')  # twitter_followers_count
-                clean_row(row, 34)  # twitter_location
-                clean_row(row, 35)  # twitter_name
-                clean_row(row, 36)  # twitter_profile_background_image_url_https
-                substitute_null(row, 39, '0')  # twitter_user_id
-                clean_row(row, 40)  # ballot_guide_official_statement
-                clean_row(row, 41)  # contest_office_name
-                substitute_null(row, 53, '0')  # ballotpedia_candidate_id
-                clean_row(row, 57)  # ballotpedia_candidate_summary
-                substitute_null(row, 58, '0')  # ballotpedia_election_id
-                substitute_null(row, 59, '0')  # ballotpedia_image_id
-                substitute_null(row, 60, '0')  # ballotpedia_office_id
-                substitute_null(row, 61, '0')  # ballotpedia_person_id
-                substitute_null(row, 62, '0')  # ballotpedia_race_id
-                substitute_null(row, 65, '0')  # crowdpac_candidate_id
-                substitute_null(row, 71, '\\N')  # withdrawal_date
-                substitute_null(row, 75, '0')  # candidate_year
-                substitute_null(row, 76, '0')  # candidate_ultimate_election_date
-                # if row[0] == '4261':
-                #     elcnt = 0
-                #     for element in header:
-                #         print(table_name + "." + element + " [" + str(elcnt) + "]: " + row[elcnt])
-                #         elcnt += 1
+                row[2] = str(dummy_unique_id)           # maplight_id, looks like we don't even use this anymore
+                substitute_null(row, 6, '0')            # politician_id
+                clean_row(row, 8)                       # candidate_name |"Elizabeth Nelson ""Liz"" Johnson"|
+                clean_row(row, 9)                       # google_civic_candidate_name
+                clean_row(row, 24)                      # candidate_email
+                substitute_null(row, 28, '0')           # wikipedia_page_id
+                clean_row(row, 32)                      # twitter_description
+                substitute_null(row, 33, '0')           # twitter_followers_count
+                clean_row(row, 34)                      # twitter_location
+                clean_row(row, 35)                      # twitter_name
+                clean_row(row, 36)                      # twitter_profile_background_image_url_https
+                substitute_null(row, 39, '0')           # twitter_user_id
+                clean_row(row, 40)                      # ballot_guide_official_statement
+                clean_row(row, 41)                      # contest_office_name
+                substitute_null(row, 53, '0')           # ballotpedia_candidate_id
+                clean_row(row, 57)                      # ballotpedia_candidate_summary
+                substitute_null(row, 58, '0')           # ballotpedia_election_id
+                substitute_null(row, 59, '0')           # ballotpedia_image_id
+                substitute_null(row, 60, '0')           # ballotpedia_office_id
+                substitute_null(row, 61, '0')           # ballotpedia_person_id
+                substitute_null(row, 62, '0')           # ballotpedia_race_id
+                substitute_null(row, 65, '0')           # crowdpac_candidate_id
+                substitute_null(row, 71, '\\N')         # withdrawal_date
+                substitute_null(row, 75, '0')           # candidate_year
+                substitute_null(row, 76, '0')           # candidate_ultimate_election_date
+                # dump_row_col_labels_and_errors(table_name, header, row, '4441')
             elif table_name == "measure_contestmeasure":
-                row[3] = row[3].replace('\n', '  ')  # measure_title
-                clean_row(row, 4)  #
-                clean_row(row, 5)  #
-                clean_row(row, 6)  # measure_url
-                substitute_null(row, 17, '0')  # wikipedia_page_id is a bigint
-                clean_row(row, 26)  # ballotpedia_measure_name
-                clean_row(row, 28)  # ballotpedia_measure_summ
-                clean_row(row, 29)  # ballotpedia_measure_text
-                clean_row(row, 32)  # ballotpedia_no_vote_desc
-                clean_row(row, 33)  # ballotpedia_yes_vote_des
-                substitute_null(row, 34, '0')  # google_ballot_placement is a bigint
-                substitute_null(row, 39, '0')  # measure_year is an integer
-                substitute_null(row, 40, '0')  # measure_ultimate_election_date is an integer
+                row[3] = row[3].replace('\n', '  ')     # measure_title
+                clean_row(row, 4)                       #
+                clean_row(row, 5)                       #
+                clean_row(row, 6)                       # measure_url
+                substitute_null(row, 17, '0')           # wikipedia_page_id is a bigint
+                clean_row(row, 26)                      # ballotpedia_measure_name
+                clean_row(row, 28)                      # ballotpedia_measure_summ
+                clean_row(row, 29)                      # ballotpedia_measure_text
+                clean_row(row, 32)                      # ballotpedia_no_vote_desc
+                clean_row(row, 33)                      # ballotpedia_yes_vote_des
+                substitute_null(row, 34, '0')           # google_ballot_placement is a bigint
+                substitute_null(row, 39, '0')           # measure_year is an integer
+                substitute_null(row, 40, '0')           # measure_ultimate_election_date is an integer
             # elif table_name == 'office_contestofficevisitingotherelection':
             #     pass   # no fixes needed
-            # if table_name == "measure_contestmeasure":
-            #     pass # no fixes needed
+            elif table_name == 'organization_organization':
+                clean_row(row, 11)                      # organization_description
+                clean_row(row, 12)                      # organization_address
+                substitute_null(row, 23, '0')           # twitter_followers_count
+                clean_row(row, 22)                      # twitter_description
+                clean_row(row, 33)                      # wikipedia_thumbnail_width
+                clean_row(row, 47)                      # issue_analysis_admin_notes
+                # dump_row_col_labels_and_errors(table_name, header, row, '697')
+            elif table_name == 'position_positionentered':
+                clean_row(row, 4)                       # ballot_item_display_name
+                substitute_null(row, 5, '1970-01-01 00:00:00+00')
+                clean_row(row, 16)                      # vote_smart_rating_name
+                clean_row(row, 28)                      # statement_text
+                # dump_row_col_labels_and_errors(table_name, header, row, '33085')
+            elif table_name == 'voter_guide_voterguide':
+                clean_row(row, 28)                      # statement_text
+                dump_row_col_labels_and_errors(table_name, header, row, '3482')
             csv_rows.append(row)
         csv_file2.close()
         if ',' in skipped_rows:
@@ -291,3 +325,4 @@ def json_to_clean_csv_file2( table_name ):
         for row in csv_rows:
             csvwriter.writerow(row)
     csv_file.close()
+    return header
