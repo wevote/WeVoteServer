@@ -121,7 +121,7 @@ def dump_row_col_labels_and_errors(table_name, header, row, index):
             cnt += 1
 
 
-def retrieve_sql_files_from_master_server():
+def retrieve_sql_files_from_master_server(request):
     """
     Get the json data, and create new entries in the developers local database
     :return:
