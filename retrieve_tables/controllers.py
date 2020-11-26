@@ -31,7 +31,7 @@ allowable_tables = {
 }
 
 
-def retrieve_sql_tables_as_csv(table_name, limit, offset):
+def retrieve_sql_tables_as_csv(table_name, start, end):
     """
     Extract one of the 15 allowable database tables to CSV (pipe delimited) and send it to the
     developer's local WeVoteServer instance
@@ -59,9 +59,10 @@ def retrieve_sql_tables_as_csv(table_name, limit, offset):
             csv_name = table_name + '.csv'
             print("exporting to: " + csv_name)
             with open(csv_name, 'w') as file:
-                if positive_value_exists(limit) and positive_value_exists(offset):
-                    sql = "COPY (SELECT * FROM public." + table_name + " ORDER BY id LIMIT " + limit + " OFFSET " + offset +\
-                          ") TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
+                if positive_value_exists(end):
+                    # SELECT * FROM public.ballot_ballotitem WHERE id BETWEEN 0 AND 1000 ORDER BY id;
+                    sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + end +\
+                          " ORDER BY id) TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
                 else:
                     sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
                 cur.copy_expert(sql, file, size=8192)
@@ -72,15 +73,16 @@ def retrieve_sql_tables_as_csv(table_name, limit, offset):
             file2.close()
             # logger.error("retrieve_tables removing: " + csv_name)
             os.remove(csv_name)
-            status += "exported " + table_name + ", "
+            if "exported" not in status:
+                status += "exported "
+            status += table_name + "(" + start + "," + end + "), "
             conn.commit()
             conn.close()
             dt = time.time() - t0
-            # This takes 0.532 seconds on my mac
-            logger.error('Extracting the ' + table_name + ' table took ' + "{:.3f}".format(dt) +
-                         ' seconds')
+            logger.error('Extracting the "' + table_name + '" table took ' + "{:.3f}".format(dt) +
+                         ' seconds.  start = ' + start + ', end = ' + end)
         else:
-            status = "the table_name " + table_name + "is not in the table list, no table returned"
+            status = "the table_name '" + table_name + "' is not in the table list, therefore no table was returned"
             logger.error(status)
 
         results = {
@@ -110,6 +112,7 @@ def substitute_null(row, index, sub):
     if row[index] == '\\N' or row[index] == '':
         row[index] = sub
 
+
 def dump_row_col_labels_and_errors(table_name, header, row, index):
     if row[0] == index:
         cnt = 0
@@ -118,27 +121,48 @@ def dump_row_col_labels_and_errors(table_name, header, row, index):
             cnt += 1
 
 
-def retrieve_sql_files_from_master_server(request, state_code=''):
+def retrieve_sql_files_from_master_server():
     """
     Get the json data, and create new entries in the developers local database
     :return:
     """
-    t0 = time.time()
     status = ''
     for table_name in allowable_tables:
         t1 = time.time()
-        response = requests.get("https://api.wevoteusa.org/apis/v1/retrieveSQLTables/", 
-        params={'table': table_name})
-        structured_json = json.loads(response.text)
+        start = 0
+        end = 0
+        bytes_in = 0
+        final_lines = []
+        header = None
+        while end < 10000000:
+            end += 1000000
+            response = requests.get("https://api.wevoteusa.org/apis/v1/retrieveSQLTables/",
+                                    params={'table': table_name, 'start': start, 'end': end})
+            bytes_in = len(response.text)
+            start += 1000000
+            structured_json = json.loads(response.text)
+            if header is None and structured_json['success'] is False:
+                print("FAILED:  Did not receive '" + table_name + " from server")
+                break
+
+            if structured_json['success'] is True:
+                data = structured_json['files'][table_name]
+                lines = data.splitlines()
+                print('len lines = ' + str(len(lines)))
+                if len(lines) == 1:
+                    print('... end of lines found')
+                    break
+                if not positive_value_exists(header):
+                    header = lines[0]
+                else:
+                    lines.remove(lines[0])
+                final_lines = final_lines + lines
+        print('final_lines len = ' + str(len(final_lines)))
         dt = time.time() - t1
 
-        if structured_json['success'] == False:
-            print("FAILED:  Did not receive '" + table_name + " from server")
-        elif len(structured_json['files']) == 0:
-            print(table_name + " " + structured_json['status'])
-        else:
+        if len(final_lines) > 0:
             print('Retrieved the ' + table_name + ' table (as JSON) in ' + "{:.3f}".format(dt) +
-              ' seconds, and retrieved ' + "{:,}".format(len(response.text)) + ' bytes')
+                  ' seconds, and retrieved ' + "{:,}".format(bytes_in) + ' bytes')
 
             try:
                 conn = psycopg2.connect(
@@ -157,10 +181,11 @@ def retrieve_sql_files_from_master_server(request, state_code=''):
                 cur.execute("DELETE FROM " + table_name)  # Delete all existing data in this one of 15 allowable_tables
                 conn.commit()
                 with open(table_name + '.csv', 'w') as csv_file:
-                    csv_file.write(structured_json['files'][table_name])
+                    csv_file.write(header)
+                    csv_file.write(final_lines)
                     csv_file.close()
 
-                header = csv_file_to_clean_csv_file2(table_name)
+                csv_file_to_clean_csv_file2(table_name)
 
                 try:
                     with open(table_name + '2.csv', 'r') as file:
@@ -172,17 +197,18 @@ def retrieve_sql_files_from_master_server(request, state_code=''):
                 conn.commit()
                 conn.close()
                 dt = time.time() - t1
-                print('... Processing and overwriting the ' + table_name + ' table took ' + "{:.3f}".format(dt) + ' secs')
+                print('... Processing and overwriting the ' + table_name + ' table took ' + "{:.3f}".format(dt) +
+                      ' seconds')
                 status += ", " + " loaded " + table_name
+                stat = 'Processing and loading the ' + str(len(allowable_tables)) + ' tables took ' +\
+                       "{:.3f}".format(dt) + ' seconds'
+                print(stat)
+                status += stat
 
             except Exception as e:
                 status += "retrieve_tables retrieve_sql_files_from_master_server caught " + str(e)
                 logger.error(status)
 
-    stat = 'Processing and loading the ' + str(len(allowable_tables)) + ' tables took ' \
-           + "{:.3f}".format(dt) + ' seconds'
-    print(stat)
-    status += stat
     results = {
         'status': status,
         'status_code': status,
