@@ -19,7 +19,7 @@ def retrieve_sql_tables(request):  # retrieveSQLTables
     :return:
     """
     table = request.GET.get('table', '')
-    start = request.GET.get('begin', '')
+    start = request.GET.get('start', '')
     end = request.GET.get('end', '')
     json_data = retrieve_sql_tables_as_csv(table, start, end)
     return HttpResponse(json.dumps(json_data), content_type='application/json')
