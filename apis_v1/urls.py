@@ -237,6 +237,7 @@ urlpatterns = [
         name='voterBookmarkStatusRetrieveView'),
     url(r'^voterCount/', views_voter.voter_count_view, name='voterCountView'),
     url(r'^voterCreate/', views_voter.voter_create_view, name='voterCreateView'),
+    url(r'^voterCreateNewAccount/', views_voter.voter_create_new_account_view, name='voterCreateNewAccount'),
     url(r'^voterEmailAddressRetrieve/', views_voter.voter_email_address_retrieve_view,
         name='voterEmailAddressRetrieveView'),
     url(r'^voterEmailAddressSave/', views_voter.voter_email_address_save_view, name='voterEmailAddressSaveView'),

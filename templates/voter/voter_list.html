@@ -10,7 +10,48 @@
 
 <h1>Voters</h1>
 
-<a href="{% url 'voter:voter_edit' 0 %}">Create New Voter Account</a>
+<div id="dialog-form" title="Create new voter account" style="display: none">
+  <p class="validateTips" style="margin: 10px 0 14px 0">All data entry fields are required, permissions are optional.</p>
+
+  <form>
+    <fieldset>
+      <label for="firstname">First Name</label>
+      <input type="text" name="firstname" id="firstname" class="text ui-widget-content ui-corner-all"
+             style="float: right; padding-left: 5px; width: 70%;"><br />
+      <label for="lastname">First Name</label>
+      <input type="text" name="lastname" id="lastname" class="text ui-widget-content ui-corner-all"
+             style="float: right; padding-left: 5px; width: 70%;"><br />
+      <label for="email">Email</label>
+      <input type="text" name="email" id="email" class="text ui-widget-content ui-corner-all"
+             style="float: right; padding-left: 5px; width: 70%;"><br />
+      <label for="password">Password</label>
+      <input type="text" name="password" id="password" class="text ui-widget-content ui-corner-all"
+             style="float: right; padding-left: 5px; width: 70%;"><br /><br />
+
+      <input type="checkbox" name="checkbox-admin" id="checkbox-admin">
+      <label for="checkbox-admin">Is Admin</label><br />
+
+      <input type="checkbox" name="checkbox-analytics" id="checkbox-analytics">
+      <label for="checkbox-analytics">Is Analytics Admin</label><br />
+
+      <input type="checkbox" name="checkbox-partner" id="checkbox-partner">
+      <label for="checkbox-partner">Is Partner Organization</label><br />
+
+      <input type="checkbox" name="checkbox-datamanager" id="checkbox-datamanager">
+      <label for="checkbox-datamanager"> Is Political Data Manager </label><br />
+
+      <input type="checkbox" name="checkbox-dataviewer" id="checkbox-dataviewer">
+      <label for="checkbox-dataviewer">Is Political Data Viewer</label><br />
+
+      <input type="checkbox" name="checkbox-volunteer" id="checkbox-volunteer">
+      <label for="checkbox-volunteer">Is Verified Volunteer</label><br />
+      <!-- Allow form submission with keyboard without duplicating the dialog button -->
+      <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+    </fieldset>
+  </form>
+</div>
+
+<button id="create-user" style="Margin: 12px 0; font-size: 12pt">Create New Voter Account</button>
 <br />
 <a href="{% url 'image:cache_images_locally_for_all_voters' %}">Cache images locally for all voters</a>,
 <a href="{% url 'voter:process_maintenance_status_flags' %}">Process Maintenance Status Flags</a>
@@ -205,5 +246,135 @@
             this.form.submit();
         });
     });
+</script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"></script>
+<script src="https://jqueryui.com/resources/demos/style.css"></script>
+
+<script>
+  $( function() {
+    var dialog, form,
+
+      // From http://www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#e-mail-state-%28type=email%29
+      emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+      firstname = $( "#firstname" ),
+      lastname = $( "#lastname" ),
+      email = $( "#email" ),
+      password = $( "#password" ),
+
+      allFields = $( [] ).add( firstname ).add( lastname ).add( email ).add( password ),
+      tips = $( ".validateTips" );
+
+    function updateTips( t ) {
+      tips
+        .text( t )
+        .addClass( "ui-state-highlight" );
+      setTimeout(function() {
+        tips.removeClass( "ui-state-highlight", 1500 );
+      }, 500 );
+    }
+
+    function checkLength( o, n, min, max ) {
+      if ( o.val().length > max || o.val().length < min ) {
+        o.addClass( "ui-state-error" );
+        updateTips( "Length of " + n + " must be between " +
+          min + " and " + max + "." );
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    function checkRegexp( o, regexp, n ) {
+      if ( !( regexp.test( o.val() ) ) ) {
+        o.addClass( "ui-state-error" );
+        updateTips( n );
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    function addUser() {
+      var valid = true;
+      allFields.removeClass( "ui-state-error" );
+
+      valid = valid && checkLength( firstname, "username", 3, 16 );
+      valid = valid && checkLength( lastname, "username", 3, 16 );
+      valid = valid && checkLength( email, "email", 6, 80 );
+      valid = valid && checkLength( password, "password", 5, 16 );
+
+      // valid = valid && checkRegexp( firstname, /^[a-z]([0-9a-z_\s])+$/i, "Username may consist of a-z, 0-9, underscores, spaces and must begin with a letter." );
+      // valid = valid && checkRegexp( lastname, /^[a-z]([0-9a-z_\s])+$/i, "Username may consist of a-z, 0-9, underscores, spaces and must begin with a letter." );
+      valid = valid && checkRegexp( email, emailRegex, "eg. ui@jquery.com" );
+      // valid = valid && checkRegexp( password, /^([0-9a-zA-Z])+$/, "Password field only allows : a-z 0-9" );
+
+      if ( valid ) {
+        $( "#users tbody" ).append( "<tr>" +
+          "<td>" + firstname.val() + "</td>" +
+          "<td>" + lastname.val() + "</td>" +
+          "<td>" + email.val() + "</td>" +
+          "<td>" + password.val() + "</td>" +
+        "</tr>" );
+
+      const apiURL = `${window.location.origin}/apis/v1/voterCreateNewAccount`;
+      const createAccountData = {
+        firstname: firstname.val(),
+        lastname: lastname.val(),
+        email: email.val(),
+        password: password.val(),
+        is_admin:  $("#checkbox-admin").prop('checked'),
+        is_analytics_admin: $("#checkbox-analytics").prop('checked'),
+        is_partner_organization: $("#checkbox-partner").prop('checked'),
+        is_political_data_manager: $("#checkbox-datamanager").prop('checked'),
+        is_political_data_viewer: $("#checkbox-dataviewer").prop('checked'),
+        is_verified_volunteer: $("#checkbox-volunteer").prop('checked'),
+      }
+
+      $.getJSON(apiURL, createAccountData, (result) => {
+        if (result['duplicate_email'] == true) {
+           $("#email").addClass( "ui-state-error" )
+           updateTips("The email for a new voter must be unique.  That one has been taken.")
+        } else if (result['has_permission'] == false) {
+           $("#email").addClass( "ui-state-error" )
+           updateTips("Failed to Save:  You need 'admin' permission.")
+        } else {
+          dialog.dialog('close');
+          location.reload();
+        }
+      }).fail((err) => {
+        console.log('error', err);
+        dialog.dialog( "close" );
+        });
+      }
+      return valid;
+    }
+
+    dialog = $( "#dialog-form" ).dialog({
+      autoOpen: false,
+      height: 500,
+      width: 400,
+      modal: true,
+      buttons: {
+        "Create an account": addUser,
+        Cancel: function() {
+          dialog.dialog( "close" );
+        }
+      },
+      close: function() {
+        form[ 0 ].reset();
+        allFields.removeClass( "ui-state-error" );
+      }
+    });
+
+    form = dialog.find( "form" ).on( "submit", function( event ) {
+      event.preventDefault();
+      addUser();
+    });
+
+    $( "#create-user" ).button().on( "click", function() {
+      dialog.dialog( "open" );
+    });
+  } );
 </script>
 {% endblock %}

@@ -36,7 +36,7 @@ from voter.controllers import voter_address_retrieve_for_api, voter_create_for_a
     voter_merge_two_accounts_action, voter_photo_save_for_api, voter_retrieve_for_api, voter_sign_out_for_api, \
     voter_split_into_two_accounts_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_we_vote_id_from_voter_device_link, VoterAddress, \
-    VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager
+    VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager, Voter, voter_has_authority
 
 from voter_guide.controllers import voter_follow_all_organizations_followed_by_organization_for_api
 import wevote_functions.admin
@@ -747,6 +747,42 @@ def voter_count_view(request):  # voterCountView
 def voter_create_view(request):  # voterCreate
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     return voter_create_for_api(voter_device_id)
+
+
+def voter_create_new_account_view(request):  # voterCreateNewAccount
+    authority_required = {'admin'}
+    if voter_has_authority(request, authority_required):
+        # voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+        first_name = request.GET.get('firstname', '')
+        last_name = request.GET.get('lastname', '')
+        email = request.GET.get('email', '')
+        password = request.GET.get('password', '')
+        is_admin = request.GET.get('is_admin', False) == 'true'
+        is_analytics_admin = request.GET.get('is_analytics_admin', False) == 'true'
+        is_partner_organization = request.GET.get('is_partner_organization', False) == 'true'
+        is_political_data_manager = request.GET.get('is_political_data_manager', False) == 'true'
+        is_political_data_viewer = request.GET.get('is_political_data_viewer', False) == 'true'
+        is_verified_volunteer = request.GET.get('is_verified_volunteer', False) == 'true'
+
+        results = Voter.objects.create_new_voter_account(
+            first_name, last_name, email, password, is_admin, is_analytics_admin, is_partner_organization,
+            is_political_data_manager, is_political_data_viewer, is_verified_volunteer)
+
+        json_data = {
+            'status': results['status'],
+            'success': results['success'],
+            'duplicate_email': results['duplicate_email'],
+            'has_permisson': True,
+        }
+    else:
+        json_data = {
+            'status': "Insufficient rights to add user",
+            'success': True,
+            'duplicate_email': False,
+            'has_permisson': False,
+        }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_email_address_retrieve_view(request):  # voterEmailAddressRetrieve

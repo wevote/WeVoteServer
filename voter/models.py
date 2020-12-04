@@ -79,6 +79,9 @@ MAINTENANCE_STATUS_FLAGS_COMPLETED = MAINTENANCE_STATUS_FLAGS_TASK_ONE + MAINTEN
 # See AUTH_USER_MODEL in config/base.py
 class VoterManager(BaseUserManager):
 
+    def __repr__(self):
+        return '__repr__ for VoterManager'
+
     def clear_out_collisions_for_linked_organization_we_vote_id(self, current_voter_we_vote_id,
                                                                 organization_we_vote_id):
         status = ""
@@ -325,6 +328,64 @@ class VoterManager(BaseUserManager):
             logger.debug("create_voter general exception: " + str(e))
 
         return voter
+
+    def create_new_voter_account(self, first_name, last_name, email, password, is_admin, is_analytics_admin,
+                                 is_partner_organization, is_political_data_manager, is_political_data_viewer,
+                                 is_verified_volunteer):
+        """
+        Create a new voter, called from the api.wevote.us/voter page
+        :param first_name:
+        :param last_name:
+        :param email:
+        :param password:
+        :param is_admin:
+        :param is_analytics_admin:
+        :param is_partner_organization:
+        :param is_political_data_manager:
+        :param is_political_data_viewer:
+        :param is_verified_volunteer:
+        :return:
+        """
+        voter = Voter()
+        success = False
+        status = "Failed to create voter"
+        duplicate_email = False
+        try:
+            voter.set_password(password)
+            voter.first_name = first_name
+            voter.last_name = last_name
+            voter.email = email
+            voter.is_admin = is_admin
+            voter.is_analytics_admin = is_analytics_admin
+            voter.is_partner_organization = is_partner_organization
+            voter.is_political_data_manager = is_political_data_manager
+            voter.is_political_data_viewer = is_political_data_viewer
+            voter.is_verified_volunteer = is_verified_volunteer
+            voter.is_active = True
+            voter.save()
+            success = True
+            status = "Created voter " + voter.we_vote_id
+            logger.debug("create_new_voter_account successfully created (voter) : " + first_name)
+
+        except IntegrityError as e:
+            status += ", " + str(e)
+            handle_record_not_saved_exception(e, logger=logger)
+            print("create_new_voter_account IntegrityError exception:" + str(e))
+            if "voter_voter_email_key" in str(e):
+                duplicate_email = True
+        except Exception as e:
+            status += ", " + str(e)
+            handle_record_not_saved_exception(e, logger=logger)
+            logger.debug("create_new_voter_account general exception: " + str(e))
+
+        results = {
+            'success': success,
+            'status': status,
+            'duplicate_email': duplicate_email,
+            'voter': voter,
+        }
+
+        return results
 
 
     def delete_voter(self, email):
@@ -2062,6 +2123,10 @@ class Voter(AbstractBaseUser):
 
     No fields are required, since at its very simplest, we only need the voter_id based on a voter_device_id.
     """
+
+    def __repr__(self):
+        return '__repr__ for Voter'
+
     alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric characters are allowed.')
 
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our voter info with other
@@ -2222,7 +2287,7 @@ class Voter(AbstractBaseUser):
                 full_name = self.email.split("@", 1)[0]
 
         if not positive_value_exists(full_name):
-            if allow_placeholder_name:
+            if allow_placeholder_name and positive_value_exists(self.we_vote_id):
                 full_name = "Voter-" + self.we_vote_id
 
         return full_name
@@ -2487,7 +2552,7 @@ class VoterDeviceLink(models.Model):
         return generate_voter_device_id()
 
 
-class VoterDeviceLinkManager(models.Model):
+class VoterDeviceLinkManager(models.Manager):
     """
     In order to start gathering information about a voter prior to authentication, we use a long randomized string
     stored as a browser cookie. As soon as we get any other identifiable information from a voter (like an email
@@ -2496,7 +2561,6 @@ class VoterDeviceLinkManager(models.Model):
 
     Since (prior to authentication) every voter_device_id will have its own voter_id record, we merge and delete Voter
     records whenever we can.
-    Note:  Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     """
 
     def __init__(self):
@@ -3221,9 +3285,7 @@ class VoterAddress(models.Model):
             return ""
 
 
-class VoterAddressManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
-
+class VoterAddressManager(models.Manager):
     def __unicode__(self):
         return "VoterAddressManager"
 
@@ -3649,9 +3711,7 @@ def voter_setup(request):
     return final_results
 
 
-class VoterMetricsManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
-
+class VoterMetricsManager(models.Manager):
     def fetch_voter_count_with_sign_in(self):
         return self.fetch_voter_count(
             or_filter=True, has_twitter=True, has_facebook=True, has_verified_email=True, has_verified_sms=True)
