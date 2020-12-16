@@ -2737,6 +2737,9 @@ class CandidateCampaignManager(models.Model):
         candidate_to_office_link = None
         status = ""
 
+        candidate_we_vote_id = str(candidate_we_vote_id).strip()
+        contest_office_we_vote_id = str(contest_office_we_vote_id).strip()
+        google_civic_election_id = str(google_civic_election_id).strip()
         google_civic_election_id = convert_to_int(google_civic_election_id)
         try:
             state_code = state_code.upper()

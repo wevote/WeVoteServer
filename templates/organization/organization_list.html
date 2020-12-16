@@ -149,7 +149,7 @@
               <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_issues=1">
               (show)</a>
             {% endif %}</th>
-            <th>Vote Smart</th>
+{#            <th>Vote Smart</th>#}
             <th>State</th>
             <th>Email</th>
         </tr>
@@ -181,12 +181,12 @@
               {% if organization.display_we_vote_issues %}
                   {{ organization.display_we_vote_issues }}
                 {% endif %}</td>
-            <td>{% if organization.vote_smart_id %}<a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id }}</a>{% endif %}
-            {% if organization.display_vote_smart_issues %}
-              <br />
-              {{ organization.display_vote_smart_issues }}
-            {% endif %}
-            </td>
+{#            <td>{% if organization.vote_smart_id %}<a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id }}</a>{% endif %}#}
+{#            {% if organization.display_vote_smart_issues %}#}
+{#              <br />#}
+{#              {{ organization.display_vote_smart_issues }}#}
+{#            {% endif %}#}
+{#            </td>#}
             <td>{{ organization.state_served_code|default_if_none:"" }}</td>
             <td>{{ organization.organization_email|default_if_none:"" }}</td>
         </tr>
