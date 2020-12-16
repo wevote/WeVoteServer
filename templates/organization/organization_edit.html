@@ -6,7 +6,10 @@
 {%  block content %}
 {% load template_filters %}
 <style>
-span.nobr { white-space: nowrap; }
+    span.nobr { white-space: nowrap; }
+    select.form-control {
+      height: auto !important;
+    }
 </style>
 
 <h1>{% if organization %}{{ organization.organization_name }}{% else %}New Organization{% endif %}</h1>

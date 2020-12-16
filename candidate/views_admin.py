@@ -1201,6 +1201,9 @@ def candidate_edit_process_view(request):
     if positive_value_exists(candidate_to_office_link_add_election) and \
             positive_value_exists(candidate_to_office_link_add_state_code) and \
             positive_value_exists(candidate_to_office_link_add_office_we_vote_id):
+        candidate_to_office_link_add_election = candidate_to_office_link_add_election.strip()
+        candidate_to_office_link_add_office_we_vote_id = candidate_to_office_link_add_office_we_vote_id.strip()
+        candidate_to_office_link_add_state_code = candidate_to_office_link_add_state_code.strip()
         if positive_value_exists(candidate_we_vote_id):
             results = candidate_campaign_manager.get_or_create_candidate_to_office_link(
                 candidate_we_vote_id=candidate_we_vote_id,
