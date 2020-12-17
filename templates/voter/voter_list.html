@@ -11,7 +11,7 @@
 <h1>Voters</h1>
 
 <div id="dialog-form" title="Create new voter account" style="display: none">
-  <p class="validateTips" style="margin: 10px 0 14px 0">All data entry fields are required, permissions are optional.</p>
+  <p class="validateTips" style="margin: 10px 0 14px 0">All data entry fields are required, permissions are optional. Suggested password below can be changed by you if desired.</p>
 
   <form>
     <fieldset>
@@ -26,7 +26,7 @@
              style="float: right; padding-left: 5px; width: 70%;"><br />
       <label for="password">Password</label>
       <input type="text" name="password" id="password" class="text ui-widget-content ui-corner-all"
-             style="float: right; padding-left: 5px; width: 70%;"><br /><br />
+             style="float: right; padding-left: 5px; width: 70%;" value="{{ password_proposed }}"><br /><br />
 
       <input type="checkbox" name="checkbox-admin" id="checkbox-admin">
       <label for="checkbox-admin">Is Admin</label><br />
@@ -334,7 +334,7 @@
       $.getJSON(apiURL, createAccountData, (result) => {
         if (result['duplicate_email'] == true) {
            $("#email").addClass( "ui-state-error" )
-           updateTips("The email for a new voter must be unique.  That one has been taken.")
+           updateTips("The email for a new voter must be unique. That one has been taken -- please search to find existing account.")
         } else if (result['has_permission'] == false) {
            $("#email").addClass( "ui-state-error" )
            updateTips("Failed to Save:  You need 'admin' permission.")

@@ -85,7 +85,7 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
             banner = twitter_json.get('profile_banner_url') + '/1500x500'
             twitter_json['profile_banner_url'] = banner
     except Exception as e:
-        status += "FAILED_PROFILE_BANNER_URL " + str(e) + " "
+        status += "FAILED_PROFILE_BANNER_URL: " + str(e) + " "
 
     results = {
         'status':               status,
