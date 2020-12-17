@@ -1364,13 +1364,24 @@ def delete_voter_api_device_id_cookie(response):
     delete_cookie(response, 'voter_api_device_id')
 
 
-def generate_random_string(string_length=88, chars=string.ascii_lowercase + string.ascii_uppercase + string.digits):
+def generate_random_string(
+        string_length=88,
+        chars=string.ascii_lowercase + string.ascii_uppercase + string.digits,
+        remove_confusing_digits=False,
+    ):
     """
     Generate a random string.
     :param string_length:
     :param chars:
+    :param remove_confusing_digits: do not offer these often confused letter/number
     :return:
     """
+    if remove_confusing_digits:
+        chars = chars.replace("0", "")
+        chars = chars.replace("o", "")
+        chars = chars.replace("O", "")
+        chars = chars.replace("1", "")
+        chars = chars.replace("l", "")
     return ''.join(random.SystemRandom().choice(chars) for _ in range(string_length))
 
 

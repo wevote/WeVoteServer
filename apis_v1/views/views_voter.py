@@ -14,7 +14,7 @@ from django.http import HttpResponse
 from django_user_agents.utils import get_user_agent
 from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
     voter_email_address_sign_in_for_api, voter_email_address_verify_for_api
-from email_outbound.models import EmailManager
+from email_outbound.models import EmailAddress, EmailManager
 from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
 from follow.controllers import voter_issue_follow_for_api
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
@@ -751,6 +751,7 @@ def voter_create_view(request):  # voterCreate
 
 def voter_create_new_account_view(request):  # voterCreateNewAccount
     authority_required = {'admin'}
+    status = ""
     if voter_has_authority(request, authority_required):
         # voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
         first_name = request.GET.get('firstname', '')
@@ -764,22 +765,39 @@ def voter_create_new_account_view(request):  # voterCreateNewAccount
         is_political_data_viewer = request.GET.get('is_political_data_viewer', False) == 'true'
         is_verified_volunteer = request.GET.get('is_verified_volunteer', False) == 'true'
 
-        results = Voter.objects.create_new_voter_account(
-            first_name, last_name, email, password, is_admin, is_analytics_admin, is_partner_organization,
-            is_political_data_manager, is_political_data_viewer, is_verified_volunteer)
+        # Check to make sure email isn't attached to existing account in EmailAddress table
+        email_address_queryset = EmailAddress.objects.all()
+        email_address_queryset = email_address_queryset.filter(
+            normalized_email_address__iexact=email,
+            deleted=False
+        )
+        email_address_list = list(email_address_queryset)
+        email_already_in_use = True if len(email_address_list) > 0 else False
+        if email_already_in_use:
+            status += "EMAIL_ADDRESS_ALREADY_IN_USE "
+            json_data = {
+                'status':           status,
+                'success':          False,
+                'duplicate_email':  True,
+                'has_permission':   True,
+            }
+        else:
+            results = Voter.objects.create_new_voter_account(
+                first_name, last_name, email, password, is_admin, is_analytics_admin, is_partner_organization,
+                is_political_data_manager, is_political_data_viewer, is_verified_volunteer)
 
-        json_data = {
-            'status': results['status'],
-            'success': results['success'],
-            'duplicate_email': results['duplicate_email'],
-            'has_permisson': True,
-        }
+            json_data = {
+                'status':           results['status'],
+                'success':          results['success'],
+                'duplicate_email':  results['duplicate_email'],
+                'has_permission':   True,
+            }
     else:
         json_data = {
-            'status': "Insufficient rights to add user",
-            'success': True,
-            'duplicate_email': False,
-            'has_permisson': False,
+            'status':           "Insufficient rights to add user",
+            'success':          True,
+            'duplicate_email':  False,
+            'has_permission':   False,
         }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')

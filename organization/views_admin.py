@@ -922,7 +922,8 @@ def organization_edit_process_view(request):
         link_results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
             twitter_handle=organization_twitter_handle)
         if not link_results['success']:
-            messages.add_message(request, messages.ERROR, 'Could not retrieve TwitterLinkToOrganization by handle.')
+            messages.add_message(request, messages.ERROR,
+                                 'Could not retrieve TwitterLinkToOrganization by handle: ' + link_results['status'])
             twitter_handle_can_be_saved_without_conflict = False
         elif link_results['twitter_link_to_organization_found']:
             twitter_link_to_organization_from_handle = link_results['twitter_link_to_organization']

@@ -416,11 +416,19 @@ class TwitterUserManager(models.Model):
         return self.retrieve_twitter_link_to_organization(twitter_user_id)
 
     def retrieve_twitter_link_to_organization_from_twitter_handle(self, twitter_handle, read_only=False):
+        status = ""
         twitter_user_id = 0
         results = self.retrieve_twitter_user_locally_or_remotely(twitter_user_id, twitter_handle, read_only=read_only)
         if results['twitter_user_found']:
             twitter_user = results['twitter_user']
             twitter_user_id = twitter_user.twitter_id
+        else:
+            status += "TWITTER_USER_ID_MISSING: " + results['status']
+            results = {
+                'success':  False,
+                'status':   status,
+            }
+            return results
 
         return self.retrieve_twitter_link_to_organization(twitter_user_id)
 
@@ -639,7 +647,7 @@ class TwitterUserManager(models.Model):
         twitter_user_found = False
         twitter_user = TwitterUser()
         success = False
-        status = "TWITTER_USER_NOT_FOUND"
+        status = ""
 
         # Strip out the twitter handles "False" or "None"
         if twitter_handle:
@@ -651,6 +659,8 @@ class TwitterUserManager(models.Model):
         twitter_results = self.retrieve_twitter_user(twitter_user_id, twitter_handle, read_only=read_only)
         if twitter_results['twitter_user_found']:
             return twitter_results
+        else:
+            status += "TWITTER_USER_NOT_FOUND_LOCALLY "
 
         # If here, we want to reach out to Twitter to get info for this twitter_handle
         twitter_results = retrieve_twitter_user_info(twitter_user_id, twitter_handle)
@@ -663,6 +673,12 @@ class TwitterUserManager(models.Model):
                                                                     twitter_user.twitter_handle)
                 if twitter_second_results['twitter_user_found']:
                     return twitter_second_results
+                else:
+                    status += "TWITTER_USER_NOT_FOUND_LOCALLY2: " + twitter_second_results['status']
+            else:
+                status += "TWITTER_UPDATE_OR_CREATE_PROBLEM: " + twitter_save_results['status']
+        else:
+            status += "TWITTER_USER_NOT_FOUND_FROM_TWITTER: " + twitter_results['status']
 
         results = {
             'success':                  success,

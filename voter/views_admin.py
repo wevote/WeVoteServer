@@ -14,16 +14,18 @@ from django.contrib.messages import get_messages
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from email_outbound.models import EmailAddress
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception, handle_exception
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from organization.models import Organization, OrganizationManager, INDIVIDUAL
 from position.controllers import merge_duplicate_positions_for_voter
 from position.models import PositionEntered, PositionForFriends
+import string
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, get_voter_api_device_id, set_voter_api_device_id, \
-    positive_value_exists
+from wevote_functions.functions import convert_to_int, generate_random_string, get_voter_api_device_id, \
+    set_voter_api_device_id, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -914,6 +916,13 @@ def voter_list_view(request):
 
     messages_on_stage = get_messages(request)
     if positive_value_exists(voter_search):
+        # Search for a verified email address
+        voter_we_vote_ids_with_email = EmailAddress.objects.filter(
+            normalized_email_address__icontains=voter_search,
+            email_ownership_is_verified=True
+        ).values_list('voter_we_vote_id', flat=True)
+
+        # Now search voter object
         voter_query = Voter.objects.all()
         filters = []
         new_filter = Q(first_name__icontains=voter_search)
@@ -927,6 +936,10 @@ def voter_list_view(request):
 
         new_filter = Q(we_vote_id__icontains=voter_search)
         filters.append(new_filter)
+
+        if len(voter_we_vote_ids_with_email) > 0:
+            new_filter = Q(we_vote_id__in=voter_we_vote_ids_with_email)
+            filters.append(new_filter)
 
         new_filter = Q(email__icontains=voter_search)
         filters.append(new_filter)
@@ -953,9 +966,10 @@ def voter_list_view(request):
 
             voter_query = voter_query.filter(final_filters)
     else:
-        voter_query = Voter.objects.order_by('-is_admin', '-is_verified_volunteer', 'email', 'twitter_screen_name',
-                                            'linked_organization_we_vote_id', 'facebook_email',
-                                            'last_name', 'first_name')
+        voter_query = Voter.objects.order_by(
+            '-is_admin', '-is_verified_volunteer', 'email', 'twitter_screen_name',
+            'linked_organization_we_vote_id', 'facebook_email',
+            'last_name', 'first_name')
 
     if positive_value_exists(is_admin):
         voter_query = voter_query.filter(is_admin=True)
@@ -980,6 +994,15 @@ def voter_list_view(request):
         one_voter.retrieved_facebook_id = facebook_manager.fetch_facebook_id_from_voter_we_vote_id(one_voter.we_vote_id)
         modified_voter_list.append(one_voter)
 
+    # For the create new voter account form, create a proposed default password
+    # string.ascii_lowercase +
+    password_proposed = \
+        generate_random_string(
+            string_length=8,
+            chars=string.ascii_uppercase + string.digits + "!*$",
+            remove_confusing_digits=True
+        )
+
     template_values = {
         'is_admin':                     is_admin,
         'is_analytics_admin':           is_analytics_admin,
@@ -988,6 +1011,7 @@ def voter_list_view(request):
         'is_political_data_viewer':     is_political_data_viewer,
         'is_verified_volunteer':        is_verified_volunteer,
         'messages_on_stage':            messages_on_stage,
+        'password_proposed':            password_proposed,
         'voter_list':                   modified_voter_list,
         'voter_id_signed_in':           voter_id,
         'voter_search':                 voter_search,

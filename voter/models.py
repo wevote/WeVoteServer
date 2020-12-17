@@ -333,7 +333,7 @@ class VoterManager(BaseUserManager):
                                  is_partner_organization, is_political_data_manager, is_political_data_viewer,
                                  is_verified_volunteer):
         """
-        Create a new voter, called from the api.wevote.us/voter page
+        Create a new voter, called from the api.wevoteusa.org/voter page
         :param first_name:
         :param last_name:
         :param email:
@@ -386,7 +386,6 @@ class VoterManager(BaseUserManager):
         }
 
         return results
-
 
     def delete_voter(self, email):
         email = self.normalize_email(email)
