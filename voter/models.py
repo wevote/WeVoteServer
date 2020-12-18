@@ -3563,16 +3563,16 @@ class VoterAddressManager(models.Manager):
 
     def fetch_address_full_address_count(self):
         or_filter = True
-        refreshed_from_google = True  # This tells us the person entered their full address
+        refreshed_from_google = False  # This tells us the person entered their full address
         has_election = False
         google_civic_election_id = False
         has_latitude_longitude = False
         return self.fetch_address_count(or_filter, refreshed_from_google, has_election, google_civic_election_id,
-                                        has_latitude_longitude)
+                                        has_latitude_longitude, longer_than_this_number=22)
 
     def fetch_address_count(self, or_filter=True,
                             refreshed_from_google=False, has_election=False, google_civic_election_id=False,
-                            has_latitude_longitude=False):
+                            has_latitude_longitude=False, longer_than_this_number=0):
         voter_address_queryset = VoterAddress.objects.using('readonly').all()
 
         voter_raw_filters = []
@@ -3592,6 +3592,7 @@ class VoterAddressManager(models.Manager):
             if positive_value_exists(has_latitude_longitude):
                 new_voter_filter = Q(latitude__isnull=False)
                 voter_raw_filters.append(new_voter_filter)
+
         else:
             # Add "and" filter here
             pass
@@ -3605,6 +3606,12 @@ class VoterAddressManager(models.Manager):
                     final_voter_filters |= item
 
                 voter_address_queryset = voter_address_queryset.filter(final_voter_filters)
+
+        if positive_value_exists(longer_than_this_number):
+            from django.db.models.functions import Length
+            voter_address_queryset = \
+                voter_address_queryset.annotate(text_len=Length('text_for_map_search'))\
+                .filter(text_len__gt=longer_than_this_number)
 
         voter_address_count = 0
         try:
