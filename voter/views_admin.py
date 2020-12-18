@@ -14,13 +14,14 @@ from django.contrib.messages import get_messages
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from email_outbound.models import EmailAddress
+from email_outbound.models import EmailAddress, EmailManager
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception, handle_exception
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from organization.models import Organization, OrganizationManager, INDIVIDUAL
 from position.controllers import merge_duplicate_positions_for_voter
 from position.models import PositionEntered, PositionForFriends
+from sms.models import SMSManager, SMSPhoneNumber
 import string
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 import wevote_functions.admin
@@ -265,6 +266,8 @@ def voter_edit_process_view(request):
     twitter_handle = request.POST.get('twitter_handle', False)
     email = request.POST.get('email', False)
     password_text = request.POST.get('password_text', False)
+    sms_phone_number = request.POST.get('sms_phone_number', False)
+    voter_we_vote_id = None
 
     # Check to see if this voter is already being used anywhere
     voter_on_stage_found = False
@@ -273,10 +276,146 @@ def voter_edit_process_view(request):
         if len(voter_query):
             voter_on_stage = voter_query[0]
             voter_on_stage_found = True
+            voter_we_vote_id = voter_on_stage.we_vote_id
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
 
+    email_already_belongs_to_other_voter = False
+    email_needs_to_be_created = False
+    error_with_email_retrieve = False
     if voter_on_stage_found:
+        # Search for this email address in the EmailAddress table
+        if positive_value_exists(email):
+            try:
+                email_belonging_to_other_voter = EmailAddress.objects.exclude(voter_we_vote_id=voter_we_vote_id).get(
+                    normalized_email_address__iexact=email,
+                    email_ownership_is_verified=True,
+                    deleted=False,
+                )
+                email_already_belongs_to_other_voter = True
+                messages.add_message(request, messages.ERROR,
+                                     "Email address '{email}' already owned by another voter."
+                                     "".format(email=email))
+            except EmailAddress.DoesNotExist:
+                pass
+            except Exception as e:
+                error_with_email_retrieve = True
+                messages.add_message(request, messages.ERROR,
+                                     "Error retrieving email address '{email}': {error}"
+                                     "".format(email=email, error=e))
+
+            if not positive_value_exists(email_already_belongs_to_other_voter) and not error_with_email_retrieve:
+                # See if there is an EmailAddress for this voter and update the voter table
+                try:
+                    email_for_this_voter = EmailAddress.objects.get(
+                        normalized_email_address__iexact=email,
+                        voter_we_vote_id=voter_we_vote_id
+                    )
+                    if email_for_this_voter.deleted is True:
+                        email_for_this_voter.deleted = False
+                        email_for_this_voter.save()
+                    # Update data in core voter record
+                    voter_on_stage.email = email.lower()
+                    voter_on_stage.primary_email_we_vote_id = email_for_this_voter.we_vote_id
+                    voter_on_stage.email_ownership_is_verified = email_for_this_voter.email_ownership_is_verified
+                    at_least_one_value_changed = True
+                except EmailAddress.DoesNotExist:
+                    email_needs_to_be_created = True
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR,
+                                         "Error retrieving email address for this voter '{email}': {error}"
+                                         "".format(email=email, error=e))
+
+                if email_needs_to_be_created:
+                    email_manager = EmailManager()
+                    email_results = email_manager.create_email_address(
+                        normalized_email_address=email,
+                        voter_we_vote_id=voter_we_vote_id,
+                        email_ownership_is_verified=True)
+                    if email_results['success'] and email_results['email_address_object_saved']:
+                        # Update data in core voter record
+                        email_for_this_voter = email_results['email_address_object']
+                        voter_on_stage.email = email.lower()
+                        voter_on_stage.primary_email_we_vote_id = email_for_this_voter.we_vote_id
+                        voter_on_stage.email_ownership_is_verified = True
+                        at_least_one_value_changed = True
+        else:
+            # If email is empty, wipe out existing email from voter record, but don't delete from EmailAddress table
+            voter_on_stage.email = None
+            voter_on_stage.email_ownership_is_verified = False
+            voter_on_stage.primary_email_we_vote_id = None
+            at_least_one_value_changed = True
+
+        # ########################
+        # Search for this sms phone number in the SMSPhoneNumber table
+        error_with_sms_phone_number_retrieve = False
+        sms_phone_number_already_belongs_to_other_voter = False
+        sms_phone_number_needs_to_be_created = False
+        if positive_value_exists(sms_phone_number):
+            try:
+                sms_phone_number_belonging_to_other_voter = \
+                    SMSPhoneNumber.objects.exclude(voter_we_vote_id=voter_we_vote_id).get(
+                        normalized_sms_phone_number__iexact=sms_phone_number,
+                        sms_ownership_is_verified=True,
+                        deleted=False,
+                    )
+                sms_phone_number_already_belongs_to_other_voter = True
+                messages.add_message(request, messages.ERROR,
+                                     "SMS Phone number '{sms_phone_number}' already owned by another voter."
+                                     "".format(sms_phone_number=sms_phone_number))
+            except SMSPhoneNumber.DoesNotExist:
+                pass
+            except Exception as e:
+                error_with_sms_phone_number_retrieve = True
+                messages.add_message(request, messages.ERROR,
+                                     "Error retrieving SMS Phone number '{sms_phone_number}': {error}"
+                                     "".format(sms_phone_number=sms_phone_number, error=e))
+
+            if not positive_value_exists(sms_phone_number_already_belongs_to_other_voter) \
+                    and not error_with_sms_phone_number_retrieve:
+                # See if there is an SMSPhoneNumber for this voter and update the voter table
+                try:
+                    sms_phone_number_for_this_voter = SMSPhoneNumber.objects.get(
+                        normalized_sms_phone_number__iexact=sms_phone_number,
+                        voter_we_vote_id=voter_we_vote_id
+                    )
+                    if sms_phone_number_for_this_voter.deleted is True:
+                        sms_phone_number_for_this_voter.deleted = False
+                        sms_phone_number_for_this_voter.save()
+                    # Update data in core voter record
+                    voter_on_stage.normalized_sms_phone_number = \
+                        sms_phone_number_for_this_voter.normalized_sms_phone_number
+                    voter_on_stage.primary_sms_we_vote_id = sms_phone_number_for_this_voter.we_vote_id
+                    voter_on_stage.sms_ownership_is_verified = sms_phone_number_for_this_voter.sms_ownership_is_verified
+                    at_least_one_value_changed = True
+                except SMSPhoneNumber.DoesNotExist:
+                    sms_phone_number_needs_to_be_created = True
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR,
+                                         "Error retrieving phone number for this voter '{sms_phone_number}': {error}"
+                                         "".format(sms_phone_number=sms_phone_number, error=e))
+
+                if sms_phone_number_needs_to_be_created:
+                    sms_manager = SMSManager()
+                    sms_results = sms_manager.create_sms_phone_number(
+                        normalized_sms_phone_number=sms_phone_number,
+                        voter_we_vote_id=voter_we_vote_id,
+                        sms_ownership_is_verified=True)
+                    if sms_results['success'] and sms_results['sms_phone_number_saved']:
+                        # Update data in core voter record
+                        sms_phone_number_for_this_voter = sms_results['sms_phone_number']
+                        voter_on_stage.normalized_sms_phone_number = \
+                            sms_phone_number_for_this_voter.normalized_sms_phone_number
+                        voter_on_stage.primary_sms_we_vote_id = sms_phone_number_for_this_voter.we_vote_id
+                        voter_on_stage.sms_ownership_is_verified = True
+                        at_least_one_value_changed = True
+        else:
+            # If phone number is empty, wipe out from voter record, but don't delete from SMSPhoneNumber
+            voter_on_stage.normalized_sms_phone_number = None
+            voter_on_stage.primary_sms_we_vote_id = None
+            voter_on_stage.sms_ownership_is_verified = False
+            at_least_one_value_changed = True
+
         try:
             # Update existing voter
             if first_name is not False:
@@ -287,9 +426,6 @@ def voter_edit_process_view(request):
                 at_least_one_value_changed = True
             if twitter_handle is not False:
                 voter_on_stage.twitter_screen_name = twitter_handle
-                at_least_one_value_changed = True
-            if email is not False:
-                voter_on_stage.email = email
                 at_least_one_value_changed = True
             if password_text is not False:
                 voter_on_stage.set_password(password_text)
@@ -304,7 +440,7 @@ def voter_edit_process_view(request):
             messages.add_message(request, messages.INFO, 'Voter information updated.')
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
-            messages.add_message(request, messages.ERROR, 'Could not save voter.')
+            messages.add_message(request, messages.ERROR, 'Could not save voter: {error}'.format(error=e))
     else:
         try:
             # Create new
@@ -366,6 +502,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
         elif positive_value_exists(voter_we_vote_id):
             voter_on_stage = Voter.objects.get(we_vote_id=voter_we_vote_id)
         voter_on_stage_found = True
+        voter_we_vote_id = voter_on_stage.we_vote_id
     except Voter.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
     except Voter.DoesNotExist:
@@ -564,6 +701,18 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
 
             linked_organization_we_vote_id_list_updated.append(one_linked_organization)
 
+        # Search for all email addresses tied to this voter
+        email_addresses_query = EmailAddress.objects.filter(
+            voter_we_vote_id=voter_we_vote_id,
+        )
+        email_addresses_list = list(email_addresses_query)
+
+        # Search for all phone numbers tied to this voter
+        sms_phone_numbers_query = SMSPhoneNumber.objects.filter(
+            voter_we_vote_id=voter_we_vote_id,
+        )
+        sms_phone_numbers_list = list(sms_phone_numbers_query)
+
         # Do some checks on all of the public positions owned by this voter
         position_filters = []
         new_filter = Q(voter_we_vote_id__iexact=voter_on_stage.we_vote_id)
@@ -751,15 +900,17 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
         messages_on_stage = get_messages(request)
 
         template_values = {
-            'messages_on_stage':                    messages_on_stage,
-            'voter_id':                             voter_on_stage.id,
-            'voter':                                voter_on_stage,
-            'voter_list_duplicate_facebook':        voter_list_duplicate_facebook_updated,
-            'voter_list_duplicate_twitter':         voter_list_duplicate_twitter_updated,
+            'email_addresses_list':                     email_addresses_list,
+            'linked_organization_we_vote_id_list':      linked_organization_we_vote_id_list_updated,
+            'messages_on_stage':                        messages_on_stage,
             'organization_list_with_duplicate_twitter': organization_list_with_duplicate_twitter_updated,
-            'linked_organization_we_vote_id_list':  linked_organization_we_vote_id_list_updated,
-            'public_positions_owned_by_this_voter': public_positions_owned_by_this_voter,
+            'public_positions_owned_by_this_voter':     public_positions_owned_by_this_voter,
             'positions_for_friends_owned_by_this_voter':    positions_for_friends_owned_by_this_voter,
+            'sms_phone_numbers_list':                   sms_phone_numbers_list,
+            'voter_id':                                 voter_on_stage.id,
+            'voter':                                    voter_on_stage,
+            'voter_list_duplicate_facebook':            voter_list_duplicate_facebook_updated,
+            'voter_list_duplicate_twitter':             voter_list_duplicate_twitter_updated,
         }
     else:
         messages_on_stage = get_messages(request)
@@ -916,10 +1067,14 @@ def voter_list_view(request):
 
     messages_on_stage = get_messages(request)
     if positive_value_exists(voter_search):
-        # Search for a verified email address
+        # Search for an email address - do not require to be verified
         voter_we_vote_ids_with_email = EmailAddress.objects.filter(
             normalized_email_address__icontains=voter_search,
-            email_ownership_is_verified=True
+        ).values_list('voter_we_vote_id', flat=True)
+
+        # Search for a phone number
+        voter_we_vote_ids_with_sms_phone_number = SMSPhoneNumber.objects.filter(
+            normalized_sms_phone_number__icontains=voter_search,
         ).values_list('voter_we_vote_id', flat=True)
 
         # Now search voter object
@@ -941,7 +1096,14 @@ def voter_list_view(request):
             new_filter = Q(we_vote_id__in=voter_we_vote_ids_with_email)
             filters.append(new_filter)
 
+        if len(voter_we_vote_ids_with_sms_phone_number) > 0:
+            new_filter = Q(we_vote_id__in=voter_we_vote_ids_with_sms_phone_number)
+            filters.append(new_filter)
+
         new_filter = Q(email__icontains=voter_search)
+        filters.append(new_filter)
+
+        new_filter = Q(normalized_sms_phone_number__icontains=voter_search)
         filters.append(new_filter)
 
         new_filter = Q(facebook_email__icontains=voter_search)
@@ -984,6 +1146,8 @@ def voter_list_view(request):
     if positive_value_exists(is_verified_volunteer):
         voter_query = voter_query.filter(is_verified_volunteer=True)
 
+    voter_list_found_count = voter_query.count()
+
     voter_list = voter_query[:50]
     modified_voter_list = []
 
@@ -1013,6 +1177,7 @@ def voter_list_view(request):
         'messages_on_stage':            messages_on_stage,
         'password_proposed':            password_proposed,
         'voter_list':                   modified_voter_list,
+        'voter_list_found_count':       voter_list_found_count,
         'voter_id_signed_in':           voter_id,
         'voter_search':                 voter_search,
     }
