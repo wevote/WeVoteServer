@@ -316,9 +316,11 @@ class ElectionManager(models.Model):
 
     def retrieve_elections_between_dates(
             self,
-            starting_date_as_integer,
-            ending_date_as_integer):
+            starting_date_as_integer=0,
+            ending_date_as_integer=0,
+            restrict_to_elections_visible_to_voters=False):
         status = ""
+        election_list_found = False
 
         starting_date = convert_date_as_integer_to_date(starting_date_as_integer)
         starting_date_as_we_vote_date = convert_date_to_we_vote_date_string(starting_date)
@@ -326,9 +328,17 @@ class ElectionManager(models.Model):
         ending_date_as_we_vote_date = convert_date_to_we_vote_date_string(ending_date)
         try:
             election_list_query = Election.objects.using('readonly').all()
-            election_list_query = election_list_query.filter(election_day_text__gte=starting_date_as_we_vote_date)
-            election_list_query = election_list_query.filter(election_day_text__lte=ending_date_as_we_vote_date)
+            if positive_value_exists(starting_date_as_integer):
+                election_list_query = election_list_query.filter(election_day_text__gte=starting_date_as_we_vote_date)
+            if positive_value_exists(ending_date_as_integer):
+                election_list_query = election_list_query.filter(election_day_text__lte=ending_date_as_we_vote_date)
+            if positive_value_exists(restrict_to_elections_visible_to_voters):
+                election_list_query = election_list_query.filter(include_in_list_for_voters=True)
+            election_list_query = election_list_query.exclude(ignore_this_election=True)
+            election_list_query = election_list_query.exclude(google_civic_election_id=2000)
             election_list = list(election_list_query)
+            if len(election_list) > 0:
+                election_list_found = True
             status += 'ELECTIONS_FOUND '
             success = True
         except Election.DoesNotExist as e:
@@ -337,9 +347,10 @@ class ElectionManager(models.Model):
             election_list = []
 
         results = {
-            'success':          success,
-            'status':           status,
-            'election_list':    election_list,
+            'success':              success,
+            'status':               status,
+            'election_list':        election_list,
+            'election_list_found':  election_list_found,
         }
         return results
 

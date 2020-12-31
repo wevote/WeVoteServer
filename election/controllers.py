@@ -313,3 +313,25 @@ def retrieve_upcoming_election_id_list(limit_to_this_state_code='', require_incl
                 google_civic_election_id_list.append(one_election.google_civic_election_id)
 
     return google_civic_election_id_list
+
+
+def retrieve_election_id_list_by_year_list(election_year_list_to_show=[]):
+    # Figure out the elections we care about
+    google_civic_election_id_list = []
+    election_manager = ElectionManager()
+    # For each year, get all of the elections in that year
+    for year in election_year_list_to_show:
+        year_integer = convert_to_int(year)
+        starting_date_as_integer = year_integer * 10000 + 101  # Change 2022 to 20220101
+        ending_date_as_integer = year_integer * 10000 + 1231  # Change 2022 to 20221231
+        results = election_manager.retrieve_elections_between_dates(
+            starting_date_as_integer=starting_date_as_integer,
+            ending_date_as_integer=ending_date_as_integer,
+            restrict_to_elections_visible_to_voters=True)
+        if results['election_list_found']:
+            upcoming_election_list = results['election_list']
+            for one_election in upcoming_election_list:
+                if positive_value_exists(one_election.google_civic_election_id):
+                    google_civic_election_id_list.append(one_election.google_civic_election_id)
+
+    return google_civic_election_id_list

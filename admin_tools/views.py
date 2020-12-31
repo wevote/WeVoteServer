@@ -83,6 +83,11 @@ def admin_home_view(request):
     voter_address_basic_count = voter_address_manager.fetch_address_basic_count()
     voter_address_full_address_count = voter_address_manager.fetch_address_full_address_count()
 
+    friend_manager = FriendManager()
+    voters_with_friends_count = friend_manager.fetch_voters_with_friends_count()
+    voters_with_3_plus_friends_count = friend_manager.fetch_voters_with_friends_count(this_many_friends_or_more=3)
+    voter_friendships_count = friend_manager.fetch_voter_friendships_count()
+
     template_values = {
         'google_civic_election_id':         google_civic_election_id,
         'python_version':                   get_python_version(),
@@ -94,6 +99,9 @@ def admin_home_view(request):
         'voter_facebook_accounts_count':    voter_facebook_accounts_count,
         'voter_twitter_accounts_count':     voter_twitter_accounts_count,
         'voter_sms_accounts_count':         voter_sms_accounts_count,
+        'voters_with_friends_count':        voters_with_friends_count,
+        'voters_with_3_plus_friends_count': voters_with_3_plus_friends_count,
+        'voter_friendships_count':          voter_friendships_count,
     }
     response = render(request, 'admin_tools/index.html', template_values)
 
