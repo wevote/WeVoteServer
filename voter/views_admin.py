@@ -211,7 +211,7 @@ def voter_delete_process_view(request):
     confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
 
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}
+    authority_required = {'admin'}  # We may want to add a "voter_admin"
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -250,7 +250,7 @@ def voter_edit_process_view(request):
     :return:
     """
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'political_data_manager'}
+    authority_required = {'admin'}  # We may want to add a "voter_admin"
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -473,7 +473,7 @@ def voter_edit_process_view(request):
 @login_required
 def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'political_data_manager'}
+    authority_required = {'admin'}  # We may want to add a "voter_admin"
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1005,6 +1005,11 @@ def voter_change_authority_process_view(request):
 
 @login_required
 def voter_remove_facebook_auth_process_view(request, voter_id=0, voter_we_vote_id=""):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     voter_id = request.GET.get('voter_id', 0)
     voter_id = convert_to_int(voter_id)
     voter_we_vote_id = request.GET.get('voter_we_vote_id', "")
@@ -1044,7 +1049,7 @@ def voter_remove_facebook_auth_process_view(request, voter_id=0, voter_we_vote_i
 @login_required
 def voter_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'political_data_manager'}
+    authority_required = {'admin'}  # We may want to add a "voter_admin"
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1187,7 +1192,7 @@ def voter_list_view(request):
 @login_required
 def voter_summary_view(request, voter_id):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'political_data_manager'}
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

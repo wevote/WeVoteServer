@@ -14,7 +14,11 @@
         (Twitter: {{ voter_twitter_accounts_count|intcomma }},
         Facebook: {{ voter_facebook_accounts_count|intcomma }},
         Email: {{ voter_email_accounts_count|intcomma }},
-        SMS: {{ voter_sms_accounts_count|intcomma }})
+        SMS: {{ voter_sms_accounts_count|intcomma }})<br />
+
+    Voters With 1+ Friends: {{ voters_with_friends_count|intcomma }}
+{#        3+ Friends: {{ voters_with_3_plus_friends_count|intcomma }}#}
+        (Friendships: {{ voter_friendships_count|intcomma }})
 
 {# ################## #}
 <h2>Election Data</h2>

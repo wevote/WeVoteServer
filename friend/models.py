@@ -1570,6 +1570,39 @@ class FriendManager(models.Model):
                     we_vote_id_list.append(friend_invitation.sender_voter_we_vote_id)
         return we_vote_id_list
 
+    def fetch_voter_friendships_count(self):
+        current_friend_count = 0
+        try:
+            current_friend_count = CurrentFriend.objects.using('readonly').count()
+        except Exception as e:
+            pass
+
+        return current_friend_count
+
+    def fetch_voters_with_friends_count(self, this_many_friends_or_more=0):
+        voters_with_friends_count = 0
+        if positive_value_exists(this_many_friends_or_more):
+            # TODO We need to figure out how to count number of voter_we_vote_ids in either column, so we can limit
+            #  the count of the number of friendships to those voter_we_vote_ids which
+            #  appear "this_many_friends_or_more" times or more
+            #  Started Google searching with "django python count distinct"
+            pass
+        else:
+            from django.db.models import F
+            try:
+                friends_query = CurrentFriend.objects.using('readonly')\
+                    .annotate(voter_we_vote_id=F('viewee_voter_we_vote_id')).values_list('voter_we_vote_id', flat=True)\
+                    .union(
+                    CurrentFriend.objects.using('readonly')
+                        .annotate(voter_we_vote_id=F('viewer_voter_we_vote_id'))
+                        .values_list('voter_we_vote_id', flat=True)
+                )
+                voters_with_friends_count = friends_query.count()
+            except Exception as e:
+                pass
+
+        return voters_with_friends_count
+
     def retrieve_friend_invitations_sent_to_me(self, recipient_voter_we_vote_id, read_only=False):
         status = ''
         friend_list_found = False

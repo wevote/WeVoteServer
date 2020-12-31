@@ -13,7 +13,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
-from election.controllers import retrieve_upcoming_election_id_list
+from election.controllers import retrieve_election_id_list_by_year_list, retrieve_upcoming_election_id_list
 from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception
 from image.controllers import cache_issue_image_master, cache_resized_image_locally, delete_cached_images_for_issue
@@ -800,24 +800,41 @@ def organization_link_to_issue_sync_out_view(request):  # organizationLinkToIssu
 # Open to the web
 def issue_partisan_analysis_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    show_statistics_for_all_elections = \
+        positive_value_exists(request.GET.get('show_statistics_for_all_elections', False))
+    show_this_year_of_elections = convert_to_int(request.GET.get('show_this_year_of_elections', 0))
+
     state_code = request.GET.get('state_code', '')
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
     issue_search = request.GET.get('issue_search', '')
     show_hidden_issues = False
-    show_all_elections = False
+    election_years_available = [2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015]
 
     organization_we_vote_id_in_this_election_list = []
     organization_retrieved_list = {}
     organization_link_to_issue_list = []
     organizations_attached_to_this_issue = {}
     voter_guide_list_manager = VoterGuideListManager()
-    all_upcoming_google_civic_election_id_list = retrieve_upcoming_election_id_list()
-    if positive_value_exists(google_civic_election_id):
-        google_civic_election_id_list = [google_civic_election_id]
+
+    if show_statistics_for_all_elections:
+        election_year_list_to_show = election_years_available
+        show_stats_for_this_google_civic_election_id_list = \
+            retrieve_election_id_list_by_year_list(election_year_list_to_show=election_year_list_to_show)
+        google_civic_election_id_list_for_dropdown = show_stats_for_this_google_civic_election_id_list
+    elif positive_value_exists(show_this_year_of_elections):
+        election_year_list_to_show = [show_this_year_of_elections]
+        show_stats_for_this_google_civic_election_id_list = \
+            retrieve_election_id_list_by_year_list(election_year_list_to_show=election_year_list_to_show)
+        google_civic_election_id_list_for_dropdown = show_stats_for_this_google_civic_election_id_list
+    elif positive_value_exists(google_civic_election_id):
+        show_stats_for_this_google_civic_election_id_list = [google_civic_election_id]
+        google_civic_election_id_list_for_dropdown = retrieve_upcoming_election_id_list()
     else:
-        google_civic_election_id_list = retrieve_upcoming_election_id_list(state_code)
+        # Else, default to all upcoming elections
+        show_stats_for_this_google_civic_election_id_list = retrieve_upcoming_election_id_list(state_code)
+        google_civic_election_id_list_for_dropdown = retrieve_upcoming_election_id_list()
 
     voter = fetch_api_voter_from_request(request)
     try:
@@ -832,7 +849,7 @@ def issue_partisan_analysis_view(request):
     organization_we_vote_id_has_at_least_one_issue = []
     exclude_voter_guide_owner_type_list = [INDIVIDUAL]
     results = voter_guide_list_manager.retrieve_voter_guides_for_election(
-        google_civic_election_id_list, exclude_voter_guide_owner_type_list)
+        show_stats_for_this_google_civic_election_id_list, exclude_voter_guide_owner_type_list)
     voter_guide_list = []
     if results['voter_guide_list_found']:
         voter_guide_list = results['voter_guide_list']
@@ -999,13 +1016,13 @@ def issue_partisan_analysis_view(request):
     position_list_manager = PositionListManager()
     retrieve_public_positions = True
     endorsement_count_left = position_list_manager.fetch_positions_count_for_voter_guide(
-        organization_we_vote_id_list_left, google_civic_election_id_list, state_code,
+        organization_we_vote_id_list_left, show_stats_for_this_google_civic_election_id_list, state_code,
         retrieve_public_positions)
     endorsement_count_center = position_list_manager.fetch_positions_count_for_voter_guide(
-        organization_we_vote_id_list_center, google_civic_election_id_list, state_code,
+        organization_we_vote_id_list_center, show_stats_for_this_google_civic_election_id_list, state_code,
         retrieve_public_positions)
     endorsement_count_right = position_list_manager.fetch_positions_count_for_voter_guide(
-        organization_we_vote_id_list_right, google_civic_election_id_list, state_code,
+        organization_we_vote_id_list_right, show_stats_for_this_google_civic_election_id_list, state_code,
         retrieve_public_positions)
 
     total_endorsement_count = endorsement_count_left + endorsement_count_center + endorsement_count_right
@@ -1030,7 +1047,7 @@ def issue_partisan_analysis_view(request):
 
     messages_on_stage = get_messages(request)
 
-    # Dale 2020-05-19 Changed to only use: all_upcoming_google_civic_election_id_list
+    # Dale 2020-05-19 Changed to only use: google_civic_election_id_list_for_dropdown
     # google_civic_election_id_list_with_voter_guides = []
     # results = voter_guide_list_manager.retrieve_google_civic_election_id_list_for_elections_with_voter_guides()
     # if positive_value_exists(results['google_civic_election_id_list_found']):
@@ -1038,11 +1055,12 @@ def issue_partisan_analysis_view(request):
 
     election_manager = ElectionManager()
     results = election_manager.retrieve_elections_by_google_civic_election_id_list(
-        all_upcoming_google_civic_election_id_list, read_only=True)
+        google_civic_election_id_list_for_dropdown, read_only=True)
     election_list = results['election_list']
 
     template_values = {
         'election_list':                election_list,
+        'election_years_available':     election_years_available,
         'endorsement_count_left':       endorsement_count_left,
         'endorsement_count_center':     endorsement_count_center,
         'endorsement_count_right':      endorsement_count_right,
@@ -1065,8 +1083,9 @@ def issue_partisan_analysis_view(request):
         'organization_percent_left':    organization_percent_left,
         'organization_percent_center':  organization_percent_center,
         'organization_percent_right':   organization_percent_right,
-        'show_all_elections':           show_all_elections,
+        'show_statistics_for_all_elections': show_statistics_for_all_elections,
         'show_hidden_issues':           positive_value_exists(show_hidden_issues),
+        'show_this_year_of_elections':  convert_to_int(show_this_year_of_elections),
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
         'total_endorsement_count':      total_endorsement_count,
