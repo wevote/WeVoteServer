@@ -1340,7 +1340,8 @@ class PositionListManager(models.Model):
                                               google_civic_election_id_list,
                                               state_code,
                                               retrieve_public_positions=True,
-                                              stance_we_are_looking_for=ANY_STANCE):
+                                              stance_we_are_looking_for=ANY_STANCE,
+                                              require_commentary=False):
         status = ''
         # Don't proceed unless we have a correct stance identifier
         if stance_we_are_looking_for not \
@@ -1398,6 +1399,9 @@ class PositionListManager(models.Model):
 
             if stance_we_are_looking_for != ANY_STANCE:
                 position_query = position_query.filter(stance__iexact=stance_we_are_looking_for)
+
+            if positive_value_exists(require_commentary):
+                position_query = position_query.exclude(Q(statement_text__isnull=True) | Q(statement_text=""))
 
             # Limit to positions in the last x years - currently we are not limiting
             # position_query = position_query.filter(election_id=election_id)
