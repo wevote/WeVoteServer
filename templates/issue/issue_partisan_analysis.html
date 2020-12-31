@@ -30,22 +30,6 @@
         There is no data for upcoming elections.&nbsp;&nbsp;&nbsp;&nbsp;
     {% endif %}{# End of if election_list #}
 
-    {% if state_list and never_going_to_happen %}
-        <select id="state_code_id" name="state_code">
-            <option value="">
-                -- Filter by State Served --</option>
-        {% for key, state in state_list %}
-            <option value="{{ key }}"
-                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-                {{ state }}</option>
-        {% endfor %}
-        </select>
-        {% if state_code != "" %}
-        <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&issue_search={{ issue_search }}">
-            show all states</a>
-        {% endif %}
-    {% endif %}{# End of if state_list #}
-
     {% if election_years_available %}
     <select id="show_this_year_of_elections_id" name="show_this_year_of_elections">
         <option value="0" {% if 0 == show_this_year_of_elections|convert_to_int %} selected="selected"{% endif %}>
@@ -57,19 +41,36 @@
             {{ year }}</option>
         {% endfor %}
     </select>
-    &nbsp;&nbsp;&nbsp;
     {% endif %}{# End of if election_list #}
 
+    {% if state_list %}
+        <select id="state_code_id" name="state_code">
+            <option value="">
+                -- Choose State --</option>
+        {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                {% if key|lower == state_code|lower %}Limited To {% endif %}
+                {{ state }}</option>
+        {% endfor %}
+        </select>
+    {% endif %}{# End of if state_list #}
+
     {# Show Statistics for all We Vote elections ever? #}
+    &nbsp;&nbsp;&nbsp;
     <label for="show_statistics_for_all_elections_id">
       <input type="checkbox" name="show_statistics_for_all_elections" id="show_statistics_for_all_elections_id" value="1"
-             {% if show_statistics_for_all_elections %}checked{% endif %} /> Show Breakdown for All Elections
+             {% if show_statistics_for_all_elections %}checked{% endif %} /> Show All Elections (30 Seconds to Load)
     </label>
 
 </form>
 
-<table border="0" cellpadding="0" cellspacing="0">
+<h2>Endorsements Totals</h2>
+<p>Given filters above, these are the totals.</p>
+<h4>{{ total_endorsement_count|intcomma }} Endorsements from Organizations or Public Figures</h4>
+<h4>{{ total_endorsement_with_commentary_count|intcomma }} Endorsements with Explanations</h4>
 
+<table border="0" cellpadding="0" cellspacing="0">
 <tr>
     <td colspan="5">
         <h2>Percentage of Endorsements, by the Source's Political Leaning</h2>
@@ -78,17 +79,26 @@
 <tr>
     <td>
       <h4>{{ endorsement_percent_left|floatformat:1 }}% From Left-Leaning Sources</h4>
-      <p><strong>{{ endorsement_count_left|intcomma }}</strong> out of {{ total_endorsement_count|intcomma }} Endorsements</p>
+      <p>
+          <strong>{{ endorsement_count_left|intcomma }}</strong> out of {{ total_endorsement_count|intcomma }} endorsements<br />
+          <strong>{{ endorsement_with_commentary_count_left|intcomma }}</strong> of those {{ endorsement_count_left|intcomma }} endorsements have explanations
+      </p>
     </td>
     <td>&nbsp;</td>
     <td>
       <h4>{{ endorsement_percent_center|floatformat:1 }}% Other</h4>
-      <p><strong>{{ endorsement_count_center|intcomma }}</strong> out of {{ total_endorsement_count|intcomma }} Endorsements</p>
+      <p>
+          <strong>{{ endorsement_count_center|intcomma }}</strong> out of {{ total_endorsement_count|intcomma }} endorsements<br />
+          <strong>{{ endorsement_with_commentary_count_center|intcomma }}</strong> of those {{ endorsement_count_center|intcomma }} endorsements have explanations
+      </p>
     </td>
     <td>&nbsp;</td>
     <td>
       <h4>{{ endorsement_percent_right|floatformat:1 }}% From Right-Leaning Sources</h4>
-      <p><strong>{{ endorsement_count_right|intcomma }}</strong> out of {{ total_endorsement_count|intcomma }} Endorsements</p>
+      <p>
+          <strong>{{ endorsement_count_right|intcomma }}</strong> out of {{ total_endorsement_count|intcomma }} endorsements<br />
+          <strong>{{ endorsement_with_commentary_count_right|intcomma }}</strong> of those {{ endorsement_count_right|intcomma }} endorsements have explanations
+      </p>
     </td>
 </tr>
 

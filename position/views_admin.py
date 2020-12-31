@@ -18,6 +18,7 @@ from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.db.models import Q
+from election.controllers import retrieve_election_id_list_by_year_list
 from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
@@ -245,27 +246,34 @@ def position_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_statistics = positive_value_exists(request.GET.get('show_statistics', False))
+    show_this_year_of_elections = convert_to_int(request.GET.get('show_this_year_of_elections', 0))
     state_code = request.GET.get('state_code', '')
     state_list = STATE_CODE_MAP
     state_list_modified = {}
+    election_years_available = [2022, 2021, 2020, 2019, 2018, 2017, 2016]
 
     position_search = request.GET.get('position_search', '')
 
     candidate_list_manager = CandidateCampaignListManager()
     election_manager = ElectionManager()
-    office_manager = ContestOfficeManager()
-    google_civic_election_id_list = []
-    if positive_value_exists(show_all_elections):
+    google_civic_election_id_list_for_dropdown = []
+    if positive_value_exists(show_this_year_of_elections):
+        election_year_list_to_show = [show_this_year_of_elections]
+        google_civic_election_id_list_for_dropdown = \
+            retrieve_election_id_list_by_year_list(election_year_list_to_show=election_year_list_to_show)
+    elif positive_value_exists(show_all_elections):
         results = election_manager.retrieve_elections()
-        election_list = results['election_list']
+        temp_election_list = results['election_list']
+        for one_election in temp_election_list:
+            google_civic_election_id_list_for_dropdown.append(one_election.google_civic_election_id)
     else:
         results = election_manager.retrieve_upcoming_elections()
-        election_list = results['election_list']
+        temp_election_list = results['election_list']
 
         # Make sure we always include the current election in the election_list, even if it is older
         if positive_value_exists(google_civic_election_id):
             this_election_found = False
-            for one_election in election_list:
+            for one_election in temp_election_list:
                 if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
                     this_election_found = True
                     break
@@ -273,16 +281,29 @@ def position_list_view(request):
                 results = election_manager.retrieve_election(google_civic_election_id)
                 if results['election_found']:
                     one_election = results['election']
-                    election_list.append(one_election)
-    for one_election in election_list:
-        google_civic_election_id_list.append(one_election.google_civic_election_id)
+                    temp_election_list.append(one_election)
 
-    results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
-        google_civic_election_id_list=google_civic_election_id_list,
-        limit_to_this_state_code=state_code)
-    if not positive_value_exists(results['success']):
-        success = False
-    candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+        for one_election in temp_election_list:
+            google_civic_election_id_list_for_dropdown.append(one_election.google_civic_election_id)
+
+    if positive_value_exists(google_civic_election_id):
+        google_civic_election_id_list_for_display = [google_civic_election_id]
+    elif positive_value_exists(show_this_year_of_elections):
+        google_civic_election_id_list_for_display = google_civic_election_id_list_for_dropdown
+    elif positive_value_exists(show_all_elections):
+        google_civic_election_id_list_for_display = google_civic_election_id_list_for_dropdown
+    else:
+        google_civic_election_id_list_for_display = google_civic_election_id_list_for_dropdown
+
+    if len(google_civic_election_id_list_for_display) > 0:
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=google_civic_election_id_list_for_display,
+            limit_to_this_state_code=state_code)
+        if not positive_value_exists(results['success']):
+            success = False
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+    else:
+        candidate_we_vote_id_list = []
 
     public_position_list_clean_count = 0
     friend_position_list_clean_count = 0
@@ -291,7 +312,7 @@ def position_list_view(request):
         if positive_value_exists(google_civic_election_id):
             public_position_list_clean_query = PositionEntered.objects.all()
             public_position_list_clean_query = public_position_list_clean_query.filter(
-                Q(google_civic_election_id__in=google_civic_election_id_list) |
+                Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
                 Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
             public_position_list_clean_query = public_position_list_clean_query.filter(
                 speaker_type=UNKNOWN,
@@ -303,7 +324,7 @@ def position_list_view(request):
 
             friend_position_list_clean_query = PositionForFriends.objects.all()
             friend_position_list_clean_query = friend_position_list_clean_query.filter(
-                Q(google_civic_election_id__in=google_civic_election_id_list) |
+                Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
                 Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
             friend_position_list_clean_query = friend_position_list_clean_query.filter(
                 speaker_type=UNKNOWN,
@@ -320,7 +341,7 @@ def position_list_view(request):
         if positive_value_exists(google_civic_election_id):
             public_position_list_candidate_clean_query = PositionEntered.objects.all()
             public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.filter(
-                Q(google_civic_election_id__in=google_civic_election_id_list) |
+                Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
                 Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
             public_position_list_candidate_clean_query = public_position_list_candidate_clean_query.exclude(
                 Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
@@ -331,7 +352,7 @@ def position_list_view(request):
 
             friend_position_list_candidate_clean_query = PositionForFriends.objects.all()
             friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.filter(
-                Q(google_civic_election_id__in=google_civic_election_id_list) |
+                Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
                 Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
             friend_position_list_candidate_clean_query = friend_position_list_candidate_clean_query.exclude(
                 Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
@@ -344,7 +365,7 @@ def position_list_view(request):
     public_position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
     public_position_list_query = public_position_list_query.exclude(stance__iexact=PERCENT_RATING)
     public_position_list_query = public_position_list_query.filter(
-        Q(google_civic_election_id__in=google_civic_election_id_list) |
+        Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
         Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
     if positive_value_exists(state_code):
         public_position_list_query = public_position_list_query.filter(state_code__iexact=state_code)
@@ -411,7 +432,7 @@ def position_list_view(request):
     # As of Aug 2018 we are no longer using PERCENT_RATING
     friends_only_position_list_query = friends_only_position_list_query.exclude(stance__iexact=PERCENT_RATING)
     friends_only_position_list_query = friends_only_position_list_query.filter(
-        Q(google_civic_election_id__in=google_civic_election_id_list) |
+        Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
         Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
     if positive_value_exists(state_code):
         friends_only_position_list_query = friends_only_position_list_query.filter(state_code__iexact=state_code)
@@ -502,29 +523,36 @@ def position_list_view(request):
             )
 
     position_list_manager = PositionListManager()
-    for one_state_code, one_state_name in state_list.items():
-        state_name_modified = one_state_name
-        if positive_value_exists(show_statistics):
-            count_result = position_list_manager.retrieve_position_counts_for_election_and_state(
-                google_civic_election_id_list, one_state_code)
-            if positive_value_exists(count_result['public_count']) \
-                    or positive_value_exists(count_result['friends_only_count']):
-                state_name_modified += " - " + str(count_result['public_count']) + \
-                                       '/' + str(count_result['friends_only_count'])
-            else:
-                state_name_modified += ""
-        state_list_modified[one_state_code] = state_name_modified
+    if len(google_civic_election_id_list_for_display) > 0:
+        for one_state_code, one_state_name in state_list.items():
+            state_name_modified = one_state_name
+            if positive_value_exists(show_statistics):
+                count_result = position_list_manager.retrieve_position_counts_for_election_and_state(
+                    google_civic_election_id_list_for_display, one_state_code)
+                if positive_value_exists(count_result['public_count']) \
+                        or positive_value_exists(count_result['friends_only_count']):
+                    state_name_modified += " - " + str(count_result['public_count']) + \
+                                           '/' + str(count_result['friends_only_count'])
+                else:
+                    state_name_modified += ""
+            state_list_modified[one_state_code] = state_name_modified
 
     sorted_state_list = sorted(state_list_modified.items())
+
+    results = election_manager.retrieve_elections_by_google_civic_election_id_list(
+        google_civic_election_id_list_for_dropdown, read_only=True)
+    election_list = results['election_list']
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'position_list':            position_list,
         'position_search':          position_search,
         'election_list':            election_list,
+        'election_years_available': election_years_available,
         'google_civic_election_id': google_civic_election_id,
         'show_all_elections':       show_all_elections,
         'show_statistics':          show_statistics,
+        'show_this_year_of_elections':  show_this_year_of_elections,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
     }

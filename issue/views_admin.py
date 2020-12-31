@@ -810,7 +810,7 @@ def issue_partisan_analysis_view(request):
 
     issue_search = request.GET.get('issue_search', '')
     show_hidden_issues = False
-    election_years_available = [2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015]
+    election_years_available = [2022, 2021, 2020, 2019, 2018, 2017, 2016]
 
     organization_we_vote_id_in_this_election_list = []
     organization_retrieved_list = {}
@@ -830,11 +830,13 @@ def issue_partisan_analysis_view(request):
         google_civic_election_id_list_for_dropdown = show_stats_for_this_google_civic_election_id_list
     elif positive_value_exists(google_civic_election_id):
         show_stats_for_this_google_civic_election_id_list = [google_civic_election_id]
-        google_civic_election_id_list_for_dropdown = retrieve_upcoming_election_id_list()
+        google_civic_election_id_list_for_dropdown = \
+            retrieve_upcoming_election_id_list(require_include_in_list_for_voters=True)
     else:
         # Else, default to all upcoming elections
-        show_stats_for_this_google_civic_election_id_list = retrieve_upcoming_election_id_list(state_code)
-        google_civic_election_id_list_for_dropdown = retrieve_upcoming_election_id_list()
+        show_stats_for_this_google_civic_election_id_list = \
+            retrieve_upcoming_election_id_list(require_include_in_list_for_voters=True)  # Removed state_code
+        google_civic_election_id_list_for_dropdown = show_stats_for_this_google_civic_election_id_list
 
     voter = fetch_api_voter_from_request(request)
     try:
@@ -1018,14 +1020,26 @@ def issue_partisan_analysis_view(request):
     endorsement_count_left = position_list_manager.fetch_positions_count_for_voter_guide(
         organization_we_vote_id_list_left, show_stats_for_this_google_civic_election_id_list, state_code,
         retrieve_public_positions)
+    endorsement_with_commentary_count_left = position_list_manager.fetch_positions_count_for_voter_guide(
+        organization_we_vote_id_list_left, show_stats_for_this_google_civic_election_id_list, state_code,
+        retrieve_public_positions, require_commentary=True)
     endorsement_count_center = position_list_manager.fetch_positions_count_for_voter_guide(
         organization_we_vote_id_list_center, show_stats_for_this_google_civic_election_id_list, state_code,
         retrieve_public_positions)
+    endorsement_with_commentary_count_center = position_list_manager.fetch_positions_count_for_voter_guide(
+        organization_we_vote_id_list_center, show_stats_for_this_google_civic_election_id_list, state_code,
+        retrieve_public_positions, require_commentary=True)
     endorsement_count_right = position_list_manager.fetch_positions_count_for_voter_guide(
         organization_we_vote_id_list_right, show_stats_for_this_google_civic_election_id_list, state_code,
         retrieve_public_positions)
+    endorsement_with_commentary_count_right = position_list_manager.fetch_positions_count_for_voter_guide(
+        organization_we_vote_id_list_right, show_stats_for_this_google_civic_election_id_list, state_code,
+        retrieve_public_positions, require_commentary=True)
 
     total_endorsement_count = endorsement_count_left + endorsement_count_center + endorsement_count_right
+    total_endorsement_with_commentary_count = \
+        endorsement_with_commentary_count_left + endorsement_with_commentary_count_center + \
+        endorsement_with_commentary_count_right
     total_organization_count = \
         len(organization_list_left) + len(organization_list_center) + len(organization_list_right)
     if positive_value_exists(total_endorsement_count):
@@ -1062,8 +1076,11 @@ def issue_partisan_analysis_view(request):
         'election_list':                election_list,
         'election_years_available':     election_years_available,
         'endorsement_count_left':       endorsement_count_left,
+        'endorsement_with_commentary_count_left': endorsement_with_commentary_count_left,
         'endorsement_count_center':     endorsement_count_center,
+        'endorsement_with_commentary_count_center': endorsement_with_commentary_count_center,
         'endorsement_count_right':      endorsement_count_right,
+        'endorsement_with_commentary_count_right': endorsement_with_commentary_count_right,
         'endorsement_percent_left':     endorsement_percent_left,
         'endorsement_percent_center':   endorsement_percent_center,
         'endorsement_percent_right':    endorsement_percent_right,
@@ -1089,5 +1106,6 @@ def issue_partisan_analysis_view(request):
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
         'total_endorsement_count':      total_endorsement_count,
+        'total_endorsement_with_commentary_count': total_endorsement_with_commentary_count,
     }
     return render(request, 'issue/issue_partisan_analysis.html', template_values)

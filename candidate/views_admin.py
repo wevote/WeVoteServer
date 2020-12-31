@@ -2295,6 +2295,11 @@ def candidate_summary_view(request, candidate_id):
         # This is fine, create new
         pass
 
+    candidate_list_manager = CandidateCampaignListManager()
+    results = candidate_list_manager.retrieve_candidate_to_office_link_list(
+        candidate_we_vote_id_list=[candidate_we_vote_id])
+    candidate_to_office_link_list = results['candidate_to_office_link_list']
+
     if positive_value_exists(candidate_we_vote_id):
         position_list_manager = PositionListManager()
 
@@ -2401,12 +2406,13 @@ def candidate_summary_view(request, candidate_id):
         candidate_position_list = []
 
     template_values = {
-        'messages_on_stage': messages_on_stage,
-        'candidate': candidate_on_stage,
-        'candidate_search_results_list': candidate_search_results_list,
-        'google_civic_election_id': google_civic_election_id,
-        'state_code': state_code,
-        'candidate_position_list': candidate_position_list,
+        'messages_on_stage':                messages_on_stage,
+        'candidate':                        candidate_on_stage,
+        'candidate_to_office_link_list':    candidate_to_office_link_list,
+        'candidate_search_results_list':    candidate_search_results_list,
+        'google_civic_election_id':         google_civic_election_id,
+        'state_code':                       state_code,
+        'candidate_position_list':          candidate_position_list,
     }
     return render(request, 'candidate/candidate_summary.html', template_values)
 

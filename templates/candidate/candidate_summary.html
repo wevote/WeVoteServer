@@ -20,8 +20,45 @@
       </td>
     </tr>
     <tr>
-      <td>Google Civic Election ID:</td>
-      <td><strong>{{ candidate.google_civic_election_id }}</strong></td>
+      <td>
+      Candidate to Office Link:
+        <span style="color: slategray; font-weight: 400;">
+            {% if candidate.candidate_ultimate_election_date or candidate.candidate_year %}
+            <br />
+            {% endif %}
+            {% if candidate.candidate_year %}
+            {{ candidate.candidate_year }}
+            &nbsp;&nbsp;&nbsp;
+            {% endif %}
+            {% if candidate.candidate_ultimate_election_date %}
+            {{ candidate.candidate_ultimate_election_date }}
+            {% endif %}
+        </span>
+
+      </td>
+      <td><strong>OLD Google Civic Election ID: {{ candidate.google_civic_election_id }}</strong>
+    <table border="1">
+    {% for candidate_to_office_link in candidate_to_office_link_list %}
+        <tr>
+            <td>
+                id: {{ candidate_to_office_link.id }}
+            </td>
+            <td>
+                {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
+                ({{ candidate_to_office_link.google_civic_election_id }})
+            </td>
+            <td>
+                {{ candidate_to_office_link.state_code }}
+            </td>
+            <td>
+                <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
+                   target="_blank">{% if candidate_to_office_link.office.office_name %}{{ candidate_to_office_link.office.office_name }}{% else %}MISSING OFFICE OBJECT{% endif %} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a><br />
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+
+      </td>
     </tr>
     <tr>
       <td>Contest Office:</td>

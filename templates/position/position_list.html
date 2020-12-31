@@ -4,6 +4,8 @@
 {% block title %}Opinions/Positions{% endblock %}
 
 {%  block content %}
+{% load template_filters %}
+{% load humanize %}
 <p>
   <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a>&nbsp;&nbsp;&nbsp;
   <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
@@ -69,6 +71,19 @@
              {% if show_all_elections %}checked{% endif %} /> Include Past Elections
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
+
+    {% if election_years_available %}
+    <select id="show_this_year_of_elections_id" name="show_this_year_of_elections">
+        <option value="0" {% if 0 == show_this_year_of_elections|convert_to_int %} selected="selected"{% endif %}>
+            -- Choose Year --</option>
+        {% for year in election_years_available %}
+        <option value="{{ year }}"
+                {% if show_this_year_of_elections|slugify == year|slugify %} selected="selected"{% endif %}>
+            {% if show_this_year_of_elections|slugify == year|slugify %}Limited To {% endif %}
+            {{ year }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}{# End of if election_list #}
 
     {% if state_list %}
         <select id="state_code_id" name="state_code">
@@ -197,6 +212,11 @@
     });
     $(function() {
         $('#show_statistics_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_this_year_of_elections_id').change(function() {
             this.form.submit();
         });
     });
