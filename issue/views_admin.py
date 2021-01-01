@@ -805,7 +805,13 @@ def issue_partisan_analysis_view(request):
     show_this_year_of_elections = convert_to_int(request.GET.get('show_this_year_of_elections', 0))
 
     state_code = request.GET.get('state_code', '')
+    state_code_name = ''
     state_list = STATE_CODE_MAP
+    if positive_value_exists(state_code):
+        try:
+            state_code_name = state_list[state_code]
+        except TypeError:
+            pass
     sorted_state_list = sorted(state_list.items())
 
     issue_search = request.GET.get('issue_search', '')
@@ -832,6 +838,8 @@ def issue_partisan_analysis_view(request):
         show_stats_for_this_google_civic_election_id_list = [google_civic_election_id]
         google_civic_election_id_list_for_dropdown = \
             retrieve_upcoming_election_id_list(require_include_in_list_for_voters=True)
+        if google_civic_election_id not in google_civic_election_id_list_for_dropdown:
+            google_civic_election_id_list_for_dropdown.append(google_civic_election_id)
     else:
         # Else, default to all upcoming elections
         show_stats_for_this_google_civic_election_id_list = \
@@ -1104,6 +1112,7 @@ def issue_partisan_analysis_view(request):
         'show_hidden_issues':           positive_value_exists(show_hidden_issues),
         'show_this_year_of_elections':  convert_to_int(show_this_year_of_elections),
         'state_code':                   state_code,
+        'state_code_name':              state_code_name,
         'state_list':                   sorted_state_list,
         'total_endorsement_count':      total_endorsement_count,
         'total_endorsement_with_commentary_count': total_endorsement_with_commentary_count,

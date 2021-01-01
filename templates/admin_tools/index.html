@@ -6,6 +6,10 @@
 {%  block content %}
 {% load humanize %}
 <h1>We Vote Admin Menu</h1>
+    Public Opinions: {{ total_public_endorsements_count|intcomma }}
+        (w/ commentary:  {{ total_public_endorsements_with_commentary_count|intcomma }})
+        Friends-Only Opinions: {{ total_friends_only_endorsements_count|intcomma }}
+        (w/ commentary:  {{ total_friends_only_endorsements_with_commentary_count|intcomma }})<br />
 
     Total Ballot Requests: {{ voter_address_basic_count|intcomma }}
         (Full Address: {{ voter_address_full_address_count|intcomma }})<br />
@@ -18,7 +22,9 @@
 
     Voters With 1+ Friends: {{ voters_with_friends_count|intcomma }}
 {#        3+ Friends: {{ voters_with_3_plus_friends_count|intcomma }}#}
-        (Friendships: {{ voter_friendships_count|intcomma }})
+        (Friendships: {{ voter_friendships_count|intcomma }})<br />
+    Total Vote Plans Made: {{ voters_with_plan_count|intcomma }}
+
 
 {# ################## #}
 <h2>Election Data</h2>
