@@ -66,7 +66,17 @@
 </form>
 
 <h2>Endorsements Totals</h2>
-<p>Given filters above, these are the totals.</p>
+<p>
+
+    {% if show_statistics_for_all_elections or google_civic_election_id or show_this_year_of_elections or state_code %}
+        These are the totals, given the filters chosen above:
+        {% if google_civic_election_id %}One Election&nbsp;&nbsp;&nbsp;{% elif show_this_year_of_elections %}Limit to the Year {{ show_this_year_of_elections }}&nbsp;&nbsp;&nbsp;{% endif %}
+        {% if state_code %}Limit to {{ state_code_name }}&nbsp;&nbsp;&nbsp;{% endif %}
+        {% if show_statistics_for_all_elections %}Show Totals for All Elections&nbsp;&nbsp;&nbsp;{% elif not google_civic_election_id and not show_this_year_of_elections %}Limit to Upcoming Elections&nbsp;&nbsp;&nbsp;{% endif %}
+    {% else %}
+        These are the totals for upcoming elections.
+    {% endif %}
+</p>
 <h4>{{ total_endorsement_count|intcomma }} Endorsements from Organizations or Public Figures</h4>
 <h4>{{ total_endorsement_with_commentary_count|intcomma }} Endorsements with Explanations</h4>
 

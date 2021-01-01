@@ -78,6 +78,7 @@ def admin_home_view(request):
     voter_facebook_accounts_count = voter_metrics_manager.fetch_voter_count_with_facebook()
     voter_email_accounts_count = voter_metrics_manager.fetch_voter_count_with_verified_email()
     voter_sms_accounts_count = voter_metrics_manager.fetch_voter_count_with_verified_sms()
+    voters_with_plan_count = voter_metrics_manager.fetch_voters_with_plan_count()
 
     voter_address_manager = VoterAddressManager()
     voter_address_basic_count = voter_address_manager.fetch_address_basic_count()
@@ -88,10 +89,21 @@ def admin_home_view(request):
     voters_with_3_plus_friends_count = friend_manager.fetch_voters_with_friends_count(this_many_friends_or_more=3)
     voter_friendships_count = friend_manager.fetch_voter_friendships_count()
 
+    position_metrics_manager = PositionMetricsManager()
+    total_public_endorsements_count = position_metrics_manager.fetch_positions_public()
+    total_public_endorsements_with_commentary_count = position_metrics_manager.fetch_positions_public_with_comments()
+    total_friends_only_endorsements_count = position_metrics_manager.fetch_positions_friends_only()
+    total_friends_only_endorsements_with_commentary_count = \
+        position_metrics_manager.fetch_positions_friends_only_with_comments()
+
     template_values = {
         'google_civic_election_id':         google_civic_election_id,
         'python_version':                   get_python_version(),
         'state_code':                       state_code,
+        'total_public_endorsements_count':  total_public_endorsements_count,
+        'total_public_endorsements_with_commentary_count':  total_public_endorsements_with_commentary_count,
+        'total_friends_only_endorsements_count':  total_friends_only_endorsements_count,
+        'total_friends_only_endorsements_with_commentary_count':  total_friends_only_endorsements_with_commentary_count,
         'voter_accounts_count':             voter_accounts_count,
         'voter_address_basic_count':        voter_address_basic_count,
         'voter_address_full_address_count': voter_address_full_address_count,
@@ -101,6 +113,7 @@ def admin_home_view(request):
         'voter_sms_accounts_count':         voter_sms_accounts_count,
         'voters_with_friends_count':        voters_with_friends_count,
         'voters_with_3_plus_friends_count': voters_with_3_plus_friends_count,
+        'voters_with_plan_count':           voters_with_plan_count,
         'voter_friendships_count':          voter_friendships_count,
     }
     response = render(request, 'admin_tools/index.html', template_values)

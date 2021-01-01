@@ -3796,6 +3796,27 @@ class VoterMetricsManager(models.Manager):
             pass
         return positive_value_exists(count_result)
 
+    def fetch_voters_with_plan_count(self, google_civic_election_id_list=[], state_code_list=[]):
+        if 'test' in sys.argv:
+            # If coming from a test, we cannot use readonly
+            plan_queryset = VoterPlan.objects.all()
+        else:
+            plan_queryset = VoterPlan.objects.using('readonly').all()
+
+        if positive_value_exists(len(google_civic_election_id_list)):
+            plan_queryset = plan_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+        if positive_value_exists(len(state_code_list)):
+            plan_queryset = plan_queryset.filter(state_code__in=state_code_list)
+        plan_queryset = plan_queryset.values('voter_we_vote_id').distinct()
+
+        plan_count = 0
+        try:
+            plan_count = plan_queryset.count()
+        except Exception as e:
+            pass
+
+        return plan_count
+
 
 class VoterPlan(models.Model):
     """
