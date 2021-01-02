@@ -32,6 +32,7 @@ from polling_location.controllers import import_and_save_all_polling_locations_d
 from position.controllers import find_organizations_referenced_in_positions_for_this_voter, \
     positions_import_from_sample_file
 from position.models import PositionEntered, PositionForFriends, PositionMetricsManager
+from share.models import ShareManager
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLinkManager, \
     VoterManager, VoterMetricsManager, \
@@ -96,9 +97,19 @@ def admin_home_view(request):
     total_friends_only_endorsements_with_commentary_count = \
         position_metrics_manager.fetch_positions_friends_only_with_comments()
 
+    share_manager = ShareManager()
+    shared_link_clicked_unique_sharer_count = share_manager.fetch_shared_link_clicked_unique_sharer_count()
+    shared_link_clicked_unique_viewer_count = share_manager.fetch_shared_link_clicked_unique_viewer_count()
+    shared_links_count = share_manager.fetch_shared_link_clicked_shared_links_count()
+    shared_links_click_count = share_manager.fetch_shared_link_clicked_shared_links_click_count()
+
     template_values = {
         'google_civic_election_id':         google_civic_election_id,
         'python_version':                   get_python_version(),
+        'shared_link_clicked_unique_sharer_count': shared_link_clicked_unique_sharer_count,
+        'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
+        'shared_links_count':               shared_links_count,
+        'shared_links_click_count':         shared_links_click_count,
         'state_code':                       state_code,
         'total_public_endorsements_count':  total_public_endorsements_count,
         'total_public_endorsements_with_commentary_count':  total_public_endorsements_with_commentary_count,

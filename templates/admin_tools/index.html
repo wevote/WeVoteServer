@@ -23,7 +23,13 @@
     Voters With 1+ Friends: {{ voters_with_friends_count|intcomma }}
 {#        3+ Friends: {{ voters_with_3_plus_friends_count|intcomma }}#}
         (Friendships: {{ voter_friendships_count|intcomma }})<br />
-    Total Vote Plans Made: {{ voters_with_plan_count|intcomma }}
+
+    Total Vote Plans Made: {{ voters_with_plan_count|intcomma }}<br />
+
+    Shared Links, Unique Sharers: {{ shared_link_clicked_unique_sharer_count|intcomma }}
+        (Unique Viewers: {{ shared_link_clicked_unique_viewer_count|intcomma }},
+        Shared Links: {{ shared_links_count|intcomma }},
+        Link Clicks: {{ shared_links_click_count|intcomma }})
 
 
 {# ################## #}
