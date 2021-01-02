@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils.timezone import localtime, now
 from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN
+import sys
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
 
@@ -28,6 +29,7 @@ class SharedItem(models.Model):
     shared_by_organization_type = models.CharField(
         verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
     shared_by_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    shared_by_state_code = models.CharField(max_length=2, null=True, db_index=True)
     # The owner of the custom site this share was from
     site_owner_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=False, db_index=True)
     google_civic_election_id = models.PositiveIntegerField(default=0, null=True, blank=True)
@@ -100,9 +102,11 @@ class SharedLinkClicked(models.Model):
     shared_by_organization_type = models.CharField(
         verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
     shared_by_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    shared_by_state_code = models.CharField(max_length=2, null=True, db_index=True)
     # The person clicking the link
     viewed_by_voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
     viewed_by_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    viewed_by_state_code = models.CharField(max_length=2, null=True, db_index=True)
     # Information about the share item clicked
     shared_item_id = models.PositiveIntegerField(default=0, null=True, blank=True)
     shared_item_code = models.CharField(max_length=50, null=True, blank=True, db_index=True)
@@ -110,6 +114,8 @@ class SharedLinkClicked(models.Model):
     include_public_positions = models.BooleanField(default=False)
     include_friends_only_positions = models.BooleanField(default=False)
     date_clicked = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
+    # We store YYYY as an integer for very fast lookup (ex/ "2017" for the year 2017)
+    year_as_integer = models.PositiveIntegerField(null=True, unique=False, db_index=True)
 
 
 class ShareManager(models.Model):
@@ -136,8 +142,11 @@ class ShareManager(models.Model):
         try:
             include_public_positions = positive_value_exists(include_public_positions)
             include_friends_only_positions = positive_value_exists(include_friends_only_positions)
+            year_as_integer = self.generate_year_as_integer()
             shared_link_clicked = SharedLinkClicked.objects.create(
                 destination_full_url=destination_full_url,
+                include_public_positions=include_public_positions,
+                include_friends_only_positions=include_friends_only_positions,
                 shared_item_code=shared_item_code,
                 shared_item_id=shared_item_id,
                 shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
@@ -146,8 +155,7 @@ class ShareManager(models.Model):
                 site_owner_organization_we_vote_id=site_owner_organization_we_vote_id,
                 viewed_by_voter_we_vote_id=viewed_by_voter_we_vote_id,
                 viewed_by_organization_we_vote_id=viewed_by_organization_we_vote_id,
-                include_public_positions=include_public_positions,
-                include_friends_only_positions=include_friends_only_positions,
+                year_as_integer=year_as_integer,
             )
             shared_link_clicked_saved = True
             success = True
@@ -385,6 +393,66 @@ class ShareManager(models.Model):
             'shared_permissions_granted':          shared_permissions_granted,
         }
         return results
+
+    def fetch_shared_link_clicked_unique_sharer_count(
+            self, shared_by_state_code_list=[], viewed_by_state_code_list=[], year_as_integer_list=[]):
+        return self.fetch_shared_link_clicked_count(
+            shared_by_state_code_list=shared_by_state_code_list,
+            viewed_by_state_code_list=viewed_by_state_code_list,
+            year_as_integer_list=year_as_integer_list,
+            field_for_distinct_filter='shared_by_voter_we_vote_id')
+
+    def fetch_shared_link_clicked_unique_viewer_count(
+            self, shared_by_state_code_list=[], viewed_by_state_code_list=[], year_as_integer_list=[]):
+        return self.fetch_shared_link_clicked_count(
+            shared_by_state_code_list=shared_by_state_code_list,
+            viewed_by_state_code_list=viewed_by_state_code_list,
+            year_as_integer_list=year_as_integer_list,
+            field_for_distinct_filter='viewed_by_voter_we_vote_id')
+
+    def fetch_shared_link_clicked_shared_links_count(
+            self, shared_by_state_code_list=[], viewed_by_state_code_list=[], year_as_integer_list=[]):
+        return self.fetch_shared_link_clicked_count(
+            shared_by_state_code_list=shared_by_state_code_list,
+            viewed_by_state_code_list=viewed_by_state_code_list,
+            year_as_integer_list=year_as_integer_list,
+            field_for_distinct_filter='shared_item_id')
+
+    def fetch_shared_link_clicked_shared_links_click_count(
+            self, shared_by_state_code_list=[], viewed_by_state_code_list=[], year_as_integer_list=[]):
+        return self.fetch_shared_link_clicked_count(
+            shared_by_state_code_list=shared_by_state_code_list,
+            viewed_by_state_code_list=viewed_by_state_code_list,
+            year_as_integer_list=year_as_integer_list,
+            field_for_distinct_filter='id')
+
+    def fetch_shared_link_clicked_count(
+            self, shared_by_state_code_list=[],
+            viewed_by_state_code_list=[],
+            year_as_integer_list=[],
+            field_for_distinct_filter=''):
+        if 'test' in sys.argv:
+            # If coming from a test, we cannot use readonly
+            queryset = SharedLinkClicked.objects.all()
+        else:
+            queryset = SharedLinkClicked.objects.using('readonly').all()
+
+        if positive_value_exists(len(shared_by_state_code_list)):
+            queryset = queryset.filter(shared_by_state_code__in=shared_by_state_code_list)
+        if positive_value_exists(len(viewed_by_state_code_list)):
+            queryset = queryset.filter(viewed_by_state_code__in=viewed_by_state_code_list)
+        if positive_value_exists(len(year_as_integer_list)):
+            queryset = queryset.filter(year_as_integer__in=year_as_integer_list)
+        if positive_value_exists(field_for_distinct_filter):
+            queryset = queryset.values(field_for_distinct_filter).distinct()
+
+        shared_link_clicked_count = 0
+        try:
+            shared_link_clicked_count = queryset.count()
+        except Exception as e:
+            pass
+
+        return shared_link_clicked_count
 
     def generate_year_as_integer(self):
         # We want to store the day as an integer for extremely quick database indexing and lookup
