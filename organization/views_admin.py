@@ -1661,8 +1661,8 @@ def organization_position_new_view(request, organization_id):
     contest_measure_list = ContestMeasureListManager()
     contest_measures_for_this_election_list = []
     results = contest_measure_list.retrieve_all_measures_for_upcoming_election(
-        google_civic_election_id_list,
-        state_code,
+        google_civic_election_id_list=google_civic_election_id_list,
+        state_code=state_code,
         search_string=measure_search,
         return_list_of_objects=True)
     if results['measure_list_found']:

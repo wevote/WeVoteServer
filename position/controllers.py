@@ -5067,7 +5067,9 @@ def refresh_positions_with_contest_measure_details_for_election(google_civic_ele
     return_list_of_objects = True
     google_civic_election_id_list = [google_civic_election_id]
     contest_measures_results = contest_measure_list_manager.retrieve_all_measures_for_upcoming_election(
-        google_civic_election_id_list, state_code, return_list_of_objects)
+        google_civic_election_id_list=google_civic_election_id_list,
+        state_code=state_code,
+        return_list_of_objects=return_list_of_objects)
     if contest_measures_results['measure_list_found']:
         measure_list = contest_measures_results['measure_list_objects']
 
