@@ -1068,11 +1068,14 @@ class ContestMeasureListManager(models.Model):
         measure_list_objects = []
         measure_list_light = []
         measure_list_found = False
-        if positive_value_exists(search_string):
-            search_words = search_string.split()
-        else:
-            search_words = []
+        search_words = []
         status = ""
+
+        if positive_value_exists(search_string):
+            try:
+                search_words = search_string.split()
+            except Exception as e:
+                status += "SEARCH_STRING_CANNOT_BE_SPLIT: " + str(e) + " "
 
         try:
             if positive_value_exists(read_only):
@@ -1637,7 +1640,11 @@ class ContestMeasureListManager(models.Model):
         measure_list_json = []
         measure_list_found = False
 
-        search_words = search_string.split()
+        search_words = []
+        try:
+            search_words = search_string.split()
+        except Exception as e:
+            status += "SEARCH_STRING_CANNOT_BE_SPLIT: " + str(e) + " "
 
         try:
             measure_queryset = ContestMeasure.objects.all()
