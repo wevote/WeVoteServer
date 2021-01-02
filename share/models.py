@@ -454,6 +454,31 @@ class ShareManager(models.Model):
 
         return shared_link_clicked_count
 
+    def fetch_shared_link_clicked_shared_links_click_without_reclick_count(
+            self, shared_by_state_code_list=[], viewed_by_state_code_list=[], year_as_integer_list=[]):
+        if 'test' in sys.argv:
+            # If coming from a test, we cannot use readonly
+            queryset = SharedLinkClicked.objects.all()
+        else:
+            queryset = SharedLinkClicked.objects.using('readonly').all()
+
+        if positive_value_exists(len(shared_by_state_code_list)):
+            queryset = queryset.filter(shared_by_state_code__in=shared_by_state_code_list)
+        if positive_value_exists(len(viewed_by_state_code_list)):
+            queryset = queryset.filter(viewed_by_state_code__in=viewed_by_state_code_list)
+        if positive_value_exists(len(year_as_integer_list)):
+            queryset = queryset.filter(year_as_integer__in=year_as_integer_list)
+        queryset = queryset.order_by('shared_item_id', 'viewed_by_voter_we_vote_id')\
+            .distinct('shared_item_id', 'viewed_by_voter_we_vote_id')
+
+        shared_link_clicked_count = 0
+        try:
+            shared_link_clicked_count = queryset.count()
+        except Exception as e:
+            pass
+
+        return shared_link_clicked_count
+
     def generate_year_as_integer(self):
         # We want to store the day as an integer for extremely quick database indexing and lookup
         datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE

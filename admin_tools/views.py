@@ -101,7 +101,9 @@ def admin_home_view(request):
     shared_link_clicked_unique_sharer_count = share_manager.fetch_shared_link_clicked_unique_sharer_count()
     shared_link_clicked_unique_viewer_count = share_manager.fetch_shared_link_clicked_unique_viewer_count()
     shared_links_count = share_manager.fetch_shared_link_clicked_shared_links_count()
-    shared_links_click_count = share_manager.fetch_shared_link_clicked_shared_links_click_count()
+    # shared_links_click_count = share_manager.fetch_shared_link_clicked_shared_links_click_count()
+    shared_links_click_without_reclick_count = \
+        share_manager.fetch_shared_link_clicked_shared_links_click_without_reclick_count()
 
     template_values = {
         'google_civic_election_id':         google_civic_election_id,
@@ -109,7 +111,8 @@ def admin_home_view(request):
         'shared_link_clicked_unique_sharer_count': shared_link_clicked_unique_sharer_count,
         'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
         'shared_links_count':               shared_links_count,
-        'shared_links_click_count':         shared_links_click_count,
+        # 'shared_links_click_count':         shared_links_click_count,
+        'shared_links_click_without_reclick_count': shared_links_click_without_reclick_count,
         'state_code':                       state_code,
         'total_public_endorsements_count':  total_public_endorsements_count,
         'total_public_endorsements_with_commentary_count':  total_public_endorsements_with_commentary_count,
