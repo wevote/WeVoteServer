@@ -59,6 +59,19 @@
     <input type="hidden" name="organization_id" value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
 
 <div class="form-group">
+    <label class="col-sm-3 control-label">
+        {% if organization %}
+            <a href="{% url 'organization:organization_position_list' organization.id %}">cancel</a>
+        {% else %}
+            <a href="{% url 'organization:organization_list' %}">cancel</a>
+        {% endif %}
+    </label>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-primary">{% if organization %}Update Advocate{% else %}Save New Advocate{% endif %}</button>
+    </div>
+</div>
+
+<div class="form-group">
     <label for="organization_name_id" class="col-sm-3 control-label">Advocate Name</label>
     <div class="col-sm-8">
         <input type="text" name="organization_name" id="organization_name_id" class="form-control"
@@ -104,6 +117,28 @@
 </div>
 
 <div class="form-group">
+    <label for="organization_contact_form_url_id" class="col-sm-3 control-label">Contact Form Website
+    {% if organization.organization_contact_form_url %}
+    <a href="{{ organization.organization_contact_form_url }}"
+               target="_blank"
+               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+    {% endif %}
+    </label>
+    <div class="col-sm-8">
+    <input type="text" name="organization_contact_form_url" id="organization_contact_form_url_id" class="form-control"
+           value="{% if organization %}{{ organization.organization_contact_form_url|default_if_none:"" }}{% else %}{{ organization_contact_form_url }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="organization_email_id" class="col-sm-3 control-label">Contact Email</label>
+    <div class="col-sm-8">
+    <input type="text" name="organization_email" id="organization_email_id" class="form-control"
+           value="{% if organization %}{{ organization.organization_email|default_if_none:"" }}{% else %}{{ organization_email }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
     <label for="organization_twitter_handle_id" class="col-sm-3 control-label">
     <span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>
         Twitter Handle
@@ -129,40 +164,32 @@
     </div>
 </div>
 
-<div class="form-group">
-    <label for="organization_email_id" class="col-sm-3 control-label">Contact Email</label>
-    <div class="col-sm-8">
-    <input type="text" name="organization_email" id="organization_email_id" class="form-control"
-           value="{% if organization %}{{ organization.organization_email|default_if_none:"" }}{% else %}{{ organization_email }}{% endif %}" />
-    </div>
-</div>
-
 {% if organization %}
-<div class="form-group">
-    <label for="wikipedia_page_title_id" class="col-sm-3 control-label">Wikipedia Page URL / Page Name</label>
-    <div class="col-sm-8">
-        <input type="text" name="wikipedia_page_title" id="wikipedia_page_title_id" class="form-control"
-               placeholder="The Wikipedia Full URL, or Wikipedia Page Identifier"
-               value="{% if organization %}{{ organization.wikipedia_page_title|default_if_none:"" }}{% else %}{{ wikipedia_page_title }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="wikipedia_photo_url_id" class="col-sm-3 control-label">Wikipedia Photo URL</label>
-    <div class="col-sm-8">
-        <input type="text" name="wikipedia_photo_url" id="wikipedia_photo_url_id" class="form-control"
-               value="{% if organization %}{{ organization.wikipedia_photo_url|default_if_none:"" }}{% else %}{{ wikipedia_photo_url }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="organization_endorsements_api_url" class="col-sm-3 control-label">Endorsements Importer URL</label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_endorsements_api_url" id="organization_endorsements_api_url" class="form-control"
-               value="{% if organization %}{{ organization.organization_endorsements_api_url|default_if_none:"" }}{% else %}{{ organization_endorsements_api_url }}{% endif %}" />
-            (<a href="https://docs.google.com/document/d/1D90CslIjOPSxyB6XIBPSV07vDlVp5oMNyQPlOrq1Qj4/edit" target="_blank">see importer specification</a>)
-    </div>
-</div>
+{#<div class="form-group">#}
+{#    <label for="wikipedia_page_title_id" class="col-sm-3 control-label">Wikipedia Page URL / Page Name</label>#}
+{#    <div class="col-sm-8">#}
+{#        <input type="text" name="wikipedia_page_title" id="wikipedia_page_title_id" class="form-control"#}
+{#               placeholder="The Wikipedia Full URL, or Wikipedia Page Identifier"#}
+{#               value="{% if organization %}{{ organization.wikipedia_page_title|default_if_none:"" }}{% else %}{{ wikipedia_page_title }}{% endif %}" />#}
+{#    </div>#}
+{#</div>#}
+{##}
+{#<div class="form-group">#}
+{#    <label for="wikipedia_photo_url_id" class="col-sm-3 control-label">Wikipedia Photo URL</label>#}
+{#    <div class="col-sm-8">#}
+{#        <input type="text" name="wikipedia_photo_url" id="wikipedia_photo_url_id" class="form-control"#}
+{#               value="{% if organization %}{{ organization.wikipedia_photo_url|default_if_none:"" }}{% else %}{{ wikipedia_photo_url }}{% endif %}" />#}
+{#    </div>#}
+{#</div>#}
+{##}
+{#<div class="form-group">#}
+{#    <label for="organization_endorsements_api_url" class="col-sm-3 control-label">Endorsements Importer URL</label>#}
+{#    <div class="col-sm-8">#}
+{#        <input type="text" name="organization_endorsements_api_url" id="organization_endorsements_api_url" class="form-control"#}
+{#               value="{% if organization %}{{ organization.organization_endorsements_api_url|default_if_none:"" }}{% else %}{{ organization_endorsements_api_url }}{% endif %}" />#}
+{#            (<a href="https://docs.google.com/document/d/1D90CslIjOPSxyB6XIBPSV07vDlVp5oMNyQPlOrq1Qj4/edit" target="_blank">see importer specification</a>)#}
+{#    </div>#}
+{#</div>#}
 
 {% if issue_list %}
 <div class="form-group">
@@ -241,14 +268,19 @@
 </div>
 {% endif %}{# End of if state_list #}
 
-<p>
-{% if organization %}
-    <a href="{% url 'organization:organization_position_list' organization.id %}">cancel</a>
-{% else %}
-    <a href="{% url 'organization:organization_list' %}">cancel</a>
-{% endif %}
-    <button type="submit" class="btn btn-default">{% if organization %}Update Advocate{% else %}Save New Advocate{% endif %}</button>
-</p>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+        {% if organization %}
+            <a href="{% url 'organization:organization_position_list' organization.id %}">cancel</a>
+        {% else %}
+            <a href="{% url 'organization:organization_list' %}">cancel</a>
+        {% endif %}
+    </label>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-primary">{% if organization %}Update Advocate{% else %}Save New Advocate{% endif %}</button>
+    </div>
+</div>
 </form>
 
 

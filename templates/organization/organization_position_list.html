@@ -25,13 +25,13 @@
                     <td> {{ organization.we_vote_id }}
                         (<a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">edit</a>) (<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a> in new window)</td>
                 </tr>
-                <tr>
-                    <th>Vote Smart ID:</th>
-                    <td>{% if organization.vote_smart_id %}
-                        <a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id|default_if_none:"" }}</a>
-                        {% endif %}
-                    </td>
-                </tr>
+{#                <tr>#}
+{#                    <th>Vote Smart ID:</th>#}
+{#                    <td>{% if organization.vote_smart_id %}#}
+{#                        <a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id|default_if_none:"" }}</a>#}
+{#                        {% endif %}#}
+{#                    </td>#}
+{#                </tr>#}
                 <tr>
                     <th>Website:</th>
                     <td>
@@ -41,6 +41,23 @@
                            target="_blank"
                            class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
                         {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Contact Form Website:</th>
+                    <td>
+                        {{ organization.organization_contact_form_url }}
+                        {% if organization.organization_contact_form_url %}
+                        <a href="{{ organization.organization_contact_form_url }}"
+                           target="_blank"
+                           class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Contact Email: </th>
+                    <td>
+                        {{ organization.organization_email|default_if_none:"" }}
                     </td>
                 </tr>
                 {% if voter %}
@@ -97,19 +114,13 @@
                         {% endif %}
                     </td>
                 </tr>
-                <tr>
-                    <th>Contact Email: </th>
-                    <td>
-                        {{ organization.organization_email|default_if_none:"" }}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Wikipedia Page:</th>
-                    <td>{% if organization.wikipedia_page_title %}
-                            <a href="{{ organization.generate_wikipedia_link }}" target="_blank">{{ organization.wikipedia_page_title }}</a>
-                        {% endif %}
-                    </td>
-                </tr>
+{#                <tr>#}
+{#                    <th>Wikipedia Page:</th>#}
+{#                    <td>{% if organization.wikipedia_page_title %}#}
+{#                            <a href="{{ organization.generate_wikipedia_link }}" target="_blank">{{ organization.wikipedia_page_title }}</a>#}
+{#                        {% endif %}#}
+{#                    </td>#}
+{#                </tr>#}
                 {% if organization.organization_endorsements_api_url %}
                 <tr>
                     <th>Endorsements Importer URL:</th>
@@ -254,6 +265,7 @@
     <li><a href="{% url 'voter_guide:voter_guide_list' %}?voter_guide_search={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}"
            target="_blank">Find Voter Guides for this Advocate</a> (new window)</li>
     <li>Assorted tools:
+    &nbsp;&nbsp;&nbsp; <a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a>,
         <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
         <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape advocate website for Twitter Accounts</a>,
         <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}">Retrieve tweets for advocate</a>,

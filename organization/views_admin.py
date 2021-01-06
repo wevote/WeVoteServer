@@ -169,7 +169,7 @@ def organizations_sync_out_view(request):  # organizationsSyncOut
             'twitter_profile_image_url_https',
             'twitter_profile_background_image_url_https',
             'twitter_profile_banner_url_https', 'organization_facebook',
-            'vote_smart_id', 'organization_contact_name',
+            'vote_smart_id', 'organization_contact_form_url', 'organization_contact_name',
             'organization_address', 'organization_city',
             'organization_state', 'organization_zip',
             'organization_phone1', 'organization_phone2',
@@ -244,6 +244,8 @@ def organization_list_view(request):
     show_all = request.GET.get('show_all', False)
     show_more = request.GET.get('show_more', False)  # Show up to 1,000 organizations
     show_issues = request.GET.get('show_issues', '')
+    show_organizations_without_email = request.GET.get('show_organizations_without_email', False)
+    show_organizations_to_be_analyzed = request.GET.get('show_organizations_to_be_analyzed', False)
 
     messages_on_stage = get_messages(request)
     organization_list_query = Organization.objects.all()
@@ -255,6 +257,15 @@ def organization_list_view(request):
             organization_list_query = organization_list_query.order_by('organization_name')
     else:
         organization_list_query = organization_list_query.order_by('organization_name')
+
+    if positive_value_exists(show_organizations_without_email):
+        organization_list_query = organization_list_query.filter(
+            Q(organization_email__isnull=True) |
+            Q(organization_email__exact='')
+        )
+
+    if positive_value_exists(show_organizations_to_be_analyzed):
+        organization_list_query = organization_list_query.filter(issue_analysis_done=False)
 
     if positive_value_exists(state_code):
         organization_list_query = organization_list_query.filter(state_served_code__iexact=state_code)
@@ -406,6 +417,8 @@ def organization_list_view(request):
         'show_all':                 show_all,
         'show_issues':              show_issues,
         'show_more':                show_more,
+        'show_organizations_without_email': show_organizations_without_email,
+        'show_organizations_to_be_analyzed': show_organizations_to_be_analyzed,
         'sort_by':                  sort_by,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
@@ -866,6 +879,7 @@ def organization_edit_process_view(request):
     organization_id = convert_to_int(request.POST.get('organization_id', 0))
     organization_link_issue_we_vote_ids = request.POST.getlist('selected_issues', False)
     organization_name = request.POST.get('organization_name', '')
+    organization_contact_form_url = request.POST.get('organization_contact_form_url', False)
     organization_twitter_handle = request.POST.get('organization_twitter_handle', False)
     organization_email = request.POST.get('organization_email', False)
     organization_facebook = request.POST.get('organization_facebook', False)
@@ -988,6 +1002,8 @@ def organization_edit_process_view(request):
             if organization_twitter_handle is not False:
                 if twitter_handle_can_be_saved_without_conflict:
                     organization_on_stage.organization_twitter_handle = organization_twitter_handle.strip()
+            if organization_contact_form_url is not False:
+                organization_on_stage.organization_contact_form_url = organization_contact_form_url.strip()
             if organization_email is not False:
                 organization_on_stage.organization_email = organization_email.strip()
             if organization_facebook is not False:

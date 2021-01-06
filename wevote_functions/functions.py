@@ -1411,6 +1411,7 @@ def generate_voter_device_id():
 def list_intersection(list1, list2):
     return list(set(list1) & set(list2))
 
+
 def positive_value_exists(value):
     """
     This is a test to see if a positive value exists. All of these return false:
@@ -1484,6 +1485,15 @@ def convert_state_code_to_state_text(incoming_state_code):
 
 def convert_state_code_to_utc_offset(state_code):
     return UTC_OFFSET_MAP.get(state_code, None)
+
+
+def convert_integer_to_string_with_comma_for_thousands_separator(integer_number):
+    try:
+        number_with_commas = "{:,}".format(integer_number)
+    except Exception:
+        number_with_commas = ""
+
+    return number_with_commas
 
 
 def process_request_from_master(request, message_text, get_url, get_params):

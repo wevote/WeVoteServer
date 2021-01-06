@@ -29,6 +29,7 @@ def organizations_sync_out_doc_template_values(url_root):
                    '  "ballotpedia_photo_url": string,\n' \
                    '  "organization_address": string,\n' \
                    '  "organization_city": string,\n' \
+                   '  "organization_contact_form_url": string,\n' \
                    '  "organization_contact_name": string,\n' \
                    '  "organization_description": string,\n' \
                    '  "organization_email": string,\n' \
