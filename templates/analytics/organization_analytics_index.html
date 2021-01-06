@@ -16,7 +16,7 @@
     View Raw Log</a>
 </p>
 
-<h2>Organization Election Metrics</h2>
+<h2>Advocate Election Metrics</h2>
     <p>
         Show activity related to how voters are viewing one organization, for one election.
         <a href="{% url 'analytics:organization_election_metrics' %}?organization_we_vote_id={{ organization_we_vote_id }}">see all</a>
@@ -25,7 +25,7 @@
     {% include "analytics/organization_election_metrics_table.html" %}
 
 
-<h2>Organization Daily Metrics</h2>
+<h2>Advocate Daily Metrics</h2>
     <p>
         Show activity day-to-day related to this organization.
         <a href="{% url 'analytics:organization_daily_metrics' %}?organization_we_vote_id={{ organization_we_vote_id }}">see all</a>

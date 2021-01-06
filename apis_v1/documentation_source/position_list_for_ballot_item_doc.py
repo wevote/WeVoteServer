@@ -81,7 +81,7 @@ def position_list_for_ballot_item_doc_template_values(url_root):
         },
         {
             'code':         'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED',
-            'description':  'The number of organizations that oppose this ballot item that voter is NOT following.',
+            'description':  'The number of Advocates that oppose this ballot item that voter is NOT following.',
         },
     ]
 
@@ -140,7 +140,7 @@ def position_list_for_ballot_item_doc_template_values(url_root):
         'api_slug': 'positionListForBallotItem',
         'api_introduction':
             "A list of all positions (support/oppose/info) for this Ballot Item (Office, Candidate or Measure) "
-            "from organizations, friends, and public figures this voter follows. "
+            "from Advocates, friends, and public figures this voter follows. "
             "(Or show the positions the voter is NOT following if show_positions_this_voter_follows is False.)",
         'try_now_link': 'apis_v1:positionListForBallotItemView',
         'try_now_link_variables_dict': try_now_link_variables_dict,

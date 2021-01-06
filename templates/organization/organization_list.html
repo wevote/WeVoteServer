@@ -1,7 +1,7 @@
 {# templates/organization/organization_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Organizations{% endblock %}
+{% block title %}Advocates{% endblock %}
 
 {%  block content %}
 {% load humanize %}
@@ -16,33 +16,33 @@
     <a href="{% url 'elected_official:elected_official_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Officials</a> -
     <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Politicians</a> -
     <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Values/Issues</a> -
-    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Organizations</a> -
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Advocates</a> -
     <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Opinions/Positions</a> -
     <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guide Possibilities</a> -
     <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Map Points</a>
 </p>
 
-<h1>Organizations</h1>
+<h1>Advocates</h1>
 
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
       target="_blank">
-        Import New Organizations ></a> (open in new window)
+        Import New Advocates ></a> (open in new window)
 </p>
 
 <p><a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}">
-    Add New Organization / Voter Guide</a>.
+    Add New Advocate / Voter Guide</a>.
     Vote Smart special interest groups
     <a href="{% url 'import_export_vote_smart:vote_smart_special_interest_group_list' %}">here</a>.
 
-    <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}">Organization List Analysis</a>.
+    <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}">Advocate List Analysis</a>.
 
     <a href="{% url 'organization:reserved_domain_list' %}">Reserved Website Domains</a>.
 </p>
 
 <p>
     <a href="{% url 'import_export_twitter:scrape_social_media_from_all_organizations' %}?organization_state={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}">
-        Scrape org website for social media handles (only when data missing)</a>,
+        Scrape advocate website for social media handles (only when data missing)</a>,
 
     <a href="{% url 'import_export_twitter:refresh_twitter_data_for_organizations' %}?organization_state={{ state_code }}&first_retrieve_only=1&google_civic_election_id={{ google_civic_election_id }}">
         Retrieve all twitter data (only when data missing)</a>,
@@ -82,9 +82,9 @@
     <select id="organization_type_filter_id" name="organization_type_filter">
         <option value="" {% if '' ==  organization_type_filter %} selected="selected" {% endif %}>
         {% if '' ==  organization_type_filter %}
-            -- Filter by Organization Type --
+            -- Filter by Advocate Type --
         {% else %}
-            -- Show All Organization Types --
+            -- Show All Advocate Types --
         {% endif %}
         </option>
     {% for key, organization_type in organization_types %}
@@ -112,7 +112,7 @@
          clear search</a>&nbsp;
 {% endif %}
     <input type="text" name="organization_search" id="organization_search_id" value="{{ organization_search }}" />
-    <input type="submit" value="Search for Organization" />
+    <input type="submit" value="Search for Advocate" />
 
 </form>
 
@@ -127,7 +127,7 @@
             <th></th>
             <th>
               <a href="{% url 'organization:organization_list' %}?sort_by=organization&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
-              {% if sort_by == "organization" %}<strong>Organization</strong>{% else %}Organization{% endif %}
+              {% if sort_by == "organization" %}<strong>Advocate</strong>{% else %}Advocate{% endif %}
               </a>
             </th>
             <th>
@@ -208,15 +208,15 @@
 
     <p></p>
     <p>
-        <a href="{% url 'apis_v1:organizationsSyncOutView' %}?format=json" target="_blank" >Export Organizations</a>
+        <a href="{% url 'apis_v1:organizationsSyncOutView' %}?format=json" target="_blank" >Export Advocates</a>
     </p>
 {% else %}
-    <p>(no organizations found)</p>
+    <p>(no advocates found)</p>
 {% endif %}
 
     <p></p>
 {#    <p>#}
-{#        <a href="{% url 'organization:organizations_import' %}" >Import Organizations From Master Server</a>#}
+{#        <a href="{% url 'organization:organizations_import' %}" >Import Advocates From Master Server</a>#}
 {#    </p>#}
 
     <script>

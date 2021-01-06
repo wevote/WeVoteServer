@@ -1,16 +1,16 @@
 {# templates/admin_tools/data_cleanup_organization_list_analysis.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Organization List Analysis{% endblock %}
+{% block title %}Advocate List Analysis{% endblock %}
 
 {%  block content %}
 <a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a>
 
-<h1>Organization List Analysis</h1>
+<h1>Advocate List Analysis</h1>
 
 
 {% if organizations_with_unique_twitter_data %}
-<h2>Organizations with Unique Twitter Data (Local Data)</h2>
+<h2>Advocates with Unique Twitter Data (Local Data)</h2>
     <p>This list does not include organizations with correct TwitterLinkToVoter and TwitterLinkToOrganization.</p>
 
     <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}?create_twitter_link_to_organization=1">Create TwitterLinkToOrganization Entries Now</a><br />
@@ -19,7 +19,7 @@
         <tr>
             <td></td>
             <td></td>
-            <td>Organization</td>
+            <td>Advocate</td>
             <td>organization_twitter_handle</td>
             <td>Vote Smart ID</td>
             <td>State</td>
@@ -83,13 +83,13 @@
 {% endif %}
 
 
-<h2>Organizations with Twitter Collision (Local Data)</h2>
+<h2>Advocates with Twitter Collision (Local Data)</h2>
 {% if organizations_with_a_twitter_collision %}
     <table cellpadding="5" cellspacing="5" border="1">
         <tr>
             <td></td>
             <td></td>
-            <td>Organization</td>
+            <td>Advocate</td>
             <td>organization_twitter_handle</td>
             <td>Vote Smart ID</td>
             <td>State</td>
@@ -118,20 +118,20 @@
     {% endfor %}
     </table>
 {% else %}
-    <p>(no organizations found)</p>
+    <p>(no advocates found)</p>
 {% endif %}
 <br />
 
 
 {% if organizations_with_correctly_linked_twitter_data %}
-<h2>Organizations with Correctly Linked Twitter Data</h2>
+<h2>Advocates with Correctly Linked Twitter Data</h2>
     <p></p>
 
     <table cellpadding="5" cellspacing="5" border="1">
         <tr>
             <td></td>
             <td></td>
-            <td>Organization</td>
+            <td>Advocate</td>
             <td>organization_twitter_handle</td>
             <td>Vote Smart ID</td>
             <td>State</td>

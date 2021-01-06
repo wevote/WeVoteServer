@@ -745,7 +745,7 @@ def organization_link_to_issue_import_from_master_server_view(request):
         messages.add_message(request, messages.ERROR, results['status'])
     else:
         messages.add_message(request, messages.INFO,
-                             'Organization Links import completed. '
+                             'Advocate Links import completed. '
                              'Saved: {saved}, Updated: {updated}, '
                              'Not processed: {not_processed}'
                              ''.format(saved=results['organization_link_to_issue_saved'],

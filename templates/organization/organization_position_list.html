@@ -8,10 +8,10 @@
 {% load humanize %}
 
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a>&nbsp;&nbsp;&nbsp;
-<a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Organizations</a>&nbsp;&nbsp;&nbsp;
+<a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Advocates</a>&nbsp;&nbsp;&nbsp;
 <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Voter Guides</a>&nbsp;&nbsp;&nbsp;
 <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}">
-    Analyze Organization Data ></a></p>
+    Analyze Advocate Data ></a></p>
 
 {% if organization %}
 <h1>{{ organization.organization_name }}: Position List</h1>
@@ -51,7 +51,7 @@
                 </tr>
                 {% endif %}
                 <tr>
-                    <th>Twitter Link To Organization:&nbsp;</th>
+                    <th>Twitter Link To Advocate:&nbsp;</th>
                     <td>{% if twitter_link_to_organization and twitter_link_to_organization.twitter_id %}{{ twitter_link_to_organization.fetch_twitter_handle_locally_or_remotely|default_if_none:"" }}{% else %}no link{% endif %}</td>
                 </tr>
                 <tr>
@@ -156,7 +156,7 @@
                 {% endif %}
                 {% if organization_type_display_text %}
                 <tr>
-                    <th> Organization Type:</th>
+                    <th> Advocate Type:</th>
                     <td>{{ organization_type_display_text }}</td>
                 </tr>
                 {% endif %}
@@ -252,11 +252,11 @@
     <li><a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}" >
         Refresh Voter Guides</a></li>
     <li><a href="{% url 'voter_guide:voter_guide_list' %}?voter_guide_search={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}"
-           target="_blank">Find Voter Guides for this Organization</a> (new window)</li>
+           target="_blank">Find Voter Guides for this Advocate</a> (new window)</li>
     <li>Assorted tools:
         <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
-        <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape org website for Twitter Acounts</a>,
-        <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}">Retrieve tweets for organization</a>,
+        <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape advocate website for Twitter Accounts</a>,
+        <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}">Retrieve tweets for advocate</a>,
         <a href="{% url 'organization:organization_analyze_tweets' organization.we_vote_id %}">Link issues from twitter feed</a>
     </li>
 </ul>
@@ -359,7 +359,7 @@
 {% endif %}
 
 
-<h3>Merge with Another Organization</h3>
+<h3>Merge with Another Advocate</h3>
 <form name="find_another_to_merge" method="get" action="{% url 'organization:organization_we_vote_id_position_list' organization.we_vote_id %}">
     {% csrf_token %}
     {% if organization_search_for_merge %}
@@ -369,7 +369,7 @@
     <input type="text" name="organization_search_for_merge" id="organization_search_for_merge_id" value="{{ organization_search_for_merge }}" style="width: 450px" />
     <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
     <input type="hidden" name="state_code" value="{{ state_code }}">
-    <input type="submit" value="Search for Duplicate Organization" />
+    <input type="submit" value="Search for Duplicate Advocate" />
 </form>
 
 {% if organization_search_results_list %}
@@ -377,7 +377,7 @@
         <tr>
             <td>&nbsp;</td>
             <td>Twitter</td>
-            <td>Organization Name</td>
+            <td>Advocate Name</td>
             <td>ID</td>
             <td>We Vote ID</td>
             <td>Description</td>

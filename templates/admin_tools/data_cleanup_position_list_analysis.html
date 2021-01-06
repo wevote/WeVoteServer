@@ -12,7 +12,7 @@
     <a href="{% url 'admin_tools:data_cleanup_position_list_analysis' %}?add_election_id=1">
         Add Election Id to Positions Missing It</a>,
     <a href="{% url 'admin_tools:data_cleanup_position_list_analysis' %}?add_organization_to_position_owner=1">
-        Add Organization Voters & Positions Missing It</a>,
+        Add Advocate Voters & Positions Missing It</a>,
 
     <br />
 {% endif %}
@@ -35,14 +35,14 @@
 
 
 {% if public_positions_without_organization %}
-    <h2>Public Positions without Organization We Vote Id</h2>
+    <h2>Public Positions without Advocate We Vote Id</h2>
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
             <td></td>
             <td>ID</td>
             <td>Voter</td>
             <td>Voter Id</td>
-            <td>Organization</td>
+            <td>Advocate</td>
             <td>Org Id</td>
             <td>Stance</td>
             <td>Candidate/Measure</td>
@@ -119,7 +119,7 @@
             <td>ID</td>
             <td>Voter</td>
             <td>Voter Id</td>
-            <td>Organization</td>
+            <td>Advocate</td>
             <td>Org Id</td>
             <td>Stance</td>
             <td>Candidate/Measure</td>

@@ -853,7 +853,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
         if create_organization_for_voter:
             do_not_create_organization = linked_organization_found
             if do_not_create_organization:
-                do_not_create_organization_message = "Organization could not be created. "
+                do_not_create_organization_message = "Advocate could not be created. "
                 if linked_organization_found:
                     do_not_create_organization_message += "Linked organization found. "
 
@@ -876,7 +876,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
                     try:
                         voter_on_stage.linked_organization_we_vote_id = organization.we_vote_id
                         voter_on_stage.save()
-                        status_print_list += "Organization created.<br />"
+                        status_print_list += "Advocate created.<br />"
 
                         if twitter_id_from_link_to_voter:
                             results = twitter_user_manager.create_twitter_link_to_organization(

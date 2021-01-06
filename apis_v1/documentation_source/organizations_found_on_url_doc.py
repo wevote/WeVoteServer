@@ -11,7 +11,7 @@ def organizations_found_on_url_doc_template_values(url_root):
         {
             'name':         'url_to_scan',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'The URL we want to scan for organizations (typically for endorsements).',
+            'description':  'The URL we want to scan for Advocates (typically for endorsements).',
         },
         {
             'name':         'api_key',
@@ -23,7 +23,7 @@ def organizations_found_on_url_doc_template_values(url_root):
         {
             'name': 'state_code',
             'value': 'string',  # boolean, integer, long, string
-            'description': 'Limit the search to organizations in this state.',
+            'description': 'Limit the search to Advocates in this state.',
         },
     ]
 
@@ -57,7 +57,7 @@ def organizations_found_on_url_doc_template_values(url_root):
         'api_name': 'organizationsFoundOnUrl',
         'api_slug': 'organizationsFoundOnUrl',
         'api_introduction':
-            "Call this to find all organizations that have a Twitter handle, Facebook page, or name on this page.",
+            "Call this to find all Advocates that have a Twitter handle, Facebook page, or name on this page.",
         'try_now_link': 'apis_v1:organizationsFoundOnUrlView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

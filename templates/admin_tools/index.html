@@ -53,7 +53,7 @@
         <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
             >Values/Issues</a> -
         <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-            >Organizations</a> -
+            >Advocates</a> -
         <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
             >Opinions/Positions</a> -
         <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
@@ -88,7 +88,7 @@
     <p><a href="{% url 'admin_tools:sync_dashboard' %}">Sync Data with Master We Vote Servers</a></p>
     <p><a href="{% url 'import_export_vote_smart:vote_smart_index' %}">Vote Smart Tools</a></p>
     <p><a href="{% url 'scheduled_tasks:task_list' %}">Scheduled Tasks</a></p>
-    <p><a href="{% url 'organization_plans:plan_list' %}">Paid Subscriptions for Organizations</a></p>
+    <p><a href="{% url 'organization_plans:plan_list' %}">Paid Subscriptions for Advocates</a></p>
     {% if user and not user.is_anonymous %}
     <p>
             <span>Hello {{ user.get_full_name|default:"Voter" }}!</span>

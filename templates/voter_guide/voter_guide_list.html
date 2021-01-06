@@ -16,7 +16,7 @@
     <a href="{% url 'elected_official:elected_official_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Officials</a> -
     <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Politicians</a> -
     <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Values/Issues</a> -
-    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Organizations</a> -
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Advocates</a> -
     <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Opinions/Positions</a> -
     <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guide Possibilities</a> -
@@ -32,7 +32,7 @@
                    target="_blank">Suggest a Voter Guide</a></strong> (in new window).
         Quick public tools that feeds into import_export_batch system.</li>
     <li><a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}"
-           target="_blank">Add Organization / Voter Guide</a> (in new window).
+           target="_blank">Add Advocate / Voter Guide</a> (in new window).
         Data Manager tools that create organization and voter guide.</li>
 
 {% if google_civic_election_id %}
@@ -44,7 +44,7 @@
 
 {% if voter_guide_list and google_civic_election_id %}
     <li>Prepare: <a href="{% url 'import_export_twitter:refresh_twitter_data_for_organizations' %}?organization_state={{ state_code }}&first_retrieve_only=0&google_civic_election_id={{ google_civic_election_id }}&return_to_voter_guide_list=1"
-                    target="_blank">Refresh Organization Twitter Data (For Organizations in this Election)</a></li>
+                    target="_blank">Refresh Advocate Twitter Data (For Advocates in this Election)</a></li>
     <li>Prepare: <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}"
                     target="_blank">Refresh Voter Guides for this Election</a> (in new window)</li>
 {% endif %}
@@ -103,7 +103,7 @@
         <tr>
             <th></th>
             <th>&nbsp;</th>
-            <th>Organization</th>
+            <th>Advocate</th>
             <th></th>
             <th></th>
             <th>

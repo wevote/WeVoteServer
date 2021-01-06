@@ -494,7 +494,7 @@ def measure_list_view(request):
         if positive_value_exists(google_civic_election_id):
             for one_measure in measure_list:
                 support_and_oppose_total = 0
-                # Find the count of Voters that support this candidate (Organizations are not included in this)
+                # Find the count of Voters that support this candidate (Advocates are not included in this)
                 one_measure.support_count = position_list_manager.fetch_voter_positions_count_for_contest_measure(
                     one_measure.id, "", SUPPORT)
                 one_measure.oppose_count = position_list_manager.fetch_voter_positions_count_for_contest_measure(

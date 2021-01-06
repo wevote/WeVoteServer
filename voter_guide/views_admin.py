@@ -1057,7 +1057,7 @@ def voter_guide_create_process_view(request):
                     candidate_we_vote_id = candidate.we_vote_id
 
         # #########################################
-        # Figure out the Possible Organizations from one candidate's perspective
+        # Figure out the Possible Advocates from one candidate's perspective
         possible_endorsement_list_from_form = []
         possible_endorsement_list_results = take_in_possible_endorsement_list_from_form(
             request)

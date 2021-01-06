@@ -14,7 +14,7 @@
     {% if voter_we_vote_id %}
         for One Voter : {{ voter_we_vote_id }}
     {% elif organization_we_vote_id %}
-        for One Organization : {{ organization_we_vote_id }}
+        for One Advocate : {{ organization_we_vote_id }}
     {% endif %}
 </h2>
     <p>
@@ -194,7 +194,7 @@
 {% elif organization_we_vote_id %}
     For Testing:
     <a href="{% url 'analytics:organization_election_metrics_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&organization_we_vote_id={{ organization_we_vote_id }}">
-         Update Election Metrics for this Organization for Election: {{ google_civic_election_id }}</a>
+         Update Election Metrics for this Advocate for Election: {{ google_civic_election_id }}</a>
 {% endif %}
 <br />
 <br />

@@ -44,12 +44,12 @@
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
-        Voter's Organization</label>
+        Voter's Advocate Object</label>
     <div class="col-sm-9 form-control-plaintext">
         {{ voter.linked_organization_we_vote_id|default_if_none:"" }}
         {% if not voter.linked_organization_we_vote_id %}
              <a href="{% url 'voter:voter_edit' voter.id %}?create_organization_for_voter=1">
-                 Create Organization</a>
+                 Create Advocate Object</a>
         {% endif %}
     </div>
 </div>
@@ -293,18 +293,18 @@
 
 
 {% if linked_organization_we_vote_id_list %}
-<h4>Linked Organization by We Vote ID</h4>
+<h4>Linked Advocate by We Vote ID</h4>
     <table class="table">
       <thead>
         <tr>
             <th></th>
             <th></th>
-            <th>Organization</th>
+            <th>Advocate</th>
             <th>organization_twitter_handle</th>
             <th>Vote Smart ID</th>
             <th>State</th>
             <th>Voter from organization.linked_voter.we_vote_id</th>
-            <th>Organization We Vote ID</th>
+            <th>Advocate We Vote ID</th>
         </tr>
       </thead>
     {% for organization in linked_organization_we_vote_id_list %}
@@ -350,7 +350,7 @@
             <th>TwitterLinkToVoter</th>
             <th>Email</th>
             <th>Admin</th>
-            <th>Partner Organization</th>
+            <th>Partner Advocate</th>
             <th>Political Data</th>
             <th>Verified Volunteer</th>
             <th>linked_organization_we_vote_id</th>
@@ -448,7 +448,7 @@
             <th>TwitterLinkToVoter</th>
             <th>Email</th>
             <th>Admin</th>
-            <th>Partner Organization</th>
+            <th>Partner Advocate</th>
             <th>Political Data</th>
             <th>Verified Volunteer</th>
             <th>linked_organization_we_vote_id</th>
@@ -533,13 +533,13 @@
 
 
 {% if organization_list_with_duplicate_twitter %}
-<h2>Organizations with Duplicate (Local) Twitter Info</h2>
+<h2>Advocates with Duplicate (Local) Twitter Info</h2>
     <table class="table">
       <thead>
         <tr>
             <th></th>
             <th></th>
-            <th>Organization</th>
+            <th>Advocate</th>
             <th>organization_twitter_handle</th>
             <th>Vote Smart ID</th>
             <th>State</th>
@@ -575,7 +575,7 @@
     </table>
 {% else %}
     {% if voter.twitter_id_from_link_to_voter or voter.twitter_id %}
-    <h3>GOOD: No other organizations found with duplicate local Twitter info (aside from TwitterLinkToOrganization)</h3>
+    <h3>GOOD: No other advocates found with duplicate local Twitter info (aside from TwitterLinkToOrganization)</h3>
     {% endif %}
 {% endif %}
 
@@ -597,7 +597,7 @@
             <th></th>
             <th>ID</th>
             <th>Voter</th>
-            <th>Organization</th>
+            <th>Advocate</th>
             <th>Stance</th>
             <th>Candidate/Measure</th>
             <th>Election</th>
@@ -672,7 +672,7 @@
             <th></th>
             <th>ID</th>
             <th>Voter</th>
-            <th>Organization</th>
+            <th>Advocate</th>
             <th>Stance</th>
             <th>Candidate/Measure</th>
             <th>Election</th>
