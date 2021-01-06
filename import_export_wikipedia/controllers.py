@@ -107,7 +107,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
         wikipedia_page_title_guess6 = insensitive_org_name_with_the.sub('', organization.organization_name)
 
         # Try it with just the initials tacked on the end
-        # ex/ American Federation of Labor and Congress of Industrial Organizations (AFL-CIO)
+        # ex/ American Federation of Labor and Congress of Industrial Advocates (AFL-CIO)
         parenthesis_start_index = organization.organization_name.find(" (")
         if positive_value_exists(parenthesis_start_index):
             parenthesis_end_index = organization.organization_name.find(")")
@@ -115,7 +115,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
                 wikipedia_page_title_guess7 = \
                     organization.organization_name[parenthesis_start_index+2:parenthesis_end_index]
                 # Try it without the initials tacked on the end
-                # ex/ American Federation of Labor and Congress of Industrial Organizations (AFL-CIO)
+                # ex/ American Federation of Labor and Congress of Industrial Advocates (AFL-CIO)
                 wikipedia_page_title_guess8 = organization.organization_name[:parenthesis_start_index]
 
         if positive_value_exists(wikipedia_page_title_guess7):

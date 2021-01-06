@@ -134,22 +134,22 @@
         <td>Note: Values/Issues are independent of elections and state_codes</td>
     </tr>
 
-    <tr><td><h4>Organizations</h4></td></tr>
+    <tr><td><h4>Advocates</h4></td></tr>
     <tr>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;
             <a href="{% url 'organization:organizations_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    Retrieve Organizations</a>{% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
+    Retrieve Advocates</a>{% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
         </td>
         <td>The list of organizations that make ballot recomendations</td>
     </tr>
 
-    <tr><td><h4>Organization Links to Values/Issues</h4></td></tr>
+    <tr><td><h4>Advocate Links to Values/Issues</h4></td></tr>
     <tr>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;
             <a href="{% url 'issue:organization_link_to_issue_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                Retrieve Organization Links to Values/Issues</a>
+                Retrieve Advocate Links to Values/Issues</a>
         </td>
-        <td>Organization Links to Values/Issues are independent of elections and state_codes</td>
+        <td>Advocate Links to Values/Issues are independent of elections and state_codes</td>
     </tr>
 
     <tr><td><h4>Positions</h4></td></tr>

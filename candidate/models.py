@@ -1418,7 +1418,7 @@ class CandidateCampaignListManager(models.Model):
 
 class CandidateCampaign(models.Model):
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
-    # organizations
+    # Advocates
     # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
     # then the string "cand", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_candidate_campaign_integer

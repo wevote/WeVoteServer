@@ -25,7 +25,7 @@ def organization_count():
         # We will want to cache a json file and only refresh it every couple of seconds (so it doesn't become
         # a bottle neck as we grow)
     except Exception as e:
-        exception_message = "organizationCount: Unable to count list of Organizations from db."
+        exception_message = "organizationCount: Unable to count list of Advocates from db."
         handle_exception(e, logger=logger, exception_message=exception_message)
         success = False
 

@@ -113,7 +113,7 @@ def organization_analyze_tweets_view(request, organization_we_vote_id):
                                                  'Hash tags retrieved: {hash_tags_retrieved}, '
                                                  'Number of unique hashtags found in cached tweets: '
                                                  '{unique_hashtags}, '
-                                                 'Organization links to hashtags: '
+                                                 'Advocate links to hashtags: '
                                                  '{organization_link_to_hashtag_results}'
                                                  ''.format(cached_tweets=org_hashtags['cached_tweets'],
                                                            hash_tags_retrieved=org_hashtags['hash_tags_retrieved'],
@@ -139,7 +139,7 @@ def organization_retrieve_tweets_view(request, organization_we_vote_id):
     state_code = request.GET.get('state_code', False)
 
     org_tweets_results = organization_retrieve_tweets_from_twitter(organization_we_vote_id)
-    messages.add_message(request, messages.INFO, 'Organization retrieve tweets executed, '
+    messages.add_message(request, messages.INFO, 'Advocate retrieve tweets executed, '
                                                  'Tweets retrieved: {tweets_saved}, '
                                                  'Tweets not retrieved: {tweets_not_saved}, '
                                                  ''.format(tweets_saved=org_tweets_results['tweets_saved'],
@@ -213,7 +213,7 @@ def organizations_import_from_master_server_view(request):
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])
     else:
-        messages.add_message(request, messages.INFO, 'Organizations import completed. '
+        messages.add_message(request, messages.INFO, 'Advocates import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
                                                      'Duplicates skipped: '
                                                      '{duplicates_removed}, '
@@ -356,7 +356,7 @@ def organization_list_view(request):
 
     organization_count = organization_list_query.count()
     messages.add_message(request, messages.INFO,
-                         '{organization_count:,} organizations found.'.format(organization_count=organization_count))
+                         '{organization_count:,} advocates found.'.format(organization_count=organization_count))
 
     # Limit to only showing 200 on screen
     if positive_value_exists(show_more):
@@ -572,7 +572,7 @@ def organization_merge_process_view(request):
                                     "&organization2_we_vote_id=" + str(organization2_we_vote_id))
 
     organization = merge_results['organization']
-    messages.add_message(request, messages.INFO, "Organization '{organization_name}' merged."
+    messages.add_message(request, messages.INFO, "Advocate '{organization_name}' merged."
                                                  "".format(organization_name=organization.organization_name))
 
     if redirect_to_organization_list:
@@ -841,9 +841,9 @@ def organization_delete_process_view(request):
                                         "&state_code=" + str(state_code))
 
         organization.delete()
-        messages.add_message(request, messages.INFO, 'Organization deleted.')
+        messages.add_message(request, messages.INFO, 'Advocate deleted.')
     else:
-        messages.add_message(request, messages.ERROR, 'Organization not found.')
+        messages.add_message(request, messages.ERROR, 'Advocate not found.')
 
     return HttpResponseRedirect(reverse('organization:organization_list', args=()))
 
@@ -1008,7 +1008,7 @@ def organization_edit_process_view(request):
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id
 
-            messages.add_message(request, messages.INFO, 'Organization updated.')
+            messages.add_message(request, messages.INFO, 'Advocate updated.')
         else:
             # Create new
             # But first double-check that we don't have an org entry already
@@ -1275,7 +1275,7 @@ def organization_edit_account_process_view(request):
             organization_on_stage.save()
             organization_id = organization_on_stage.id
 
-            messages.add_message(request, messages.INFO, 'Organization account information updated.')
+            messages.add_message(request, messages.INFO, 'Advocate account information updated.')
         else:
             # We do not create organizations in this view
             pass

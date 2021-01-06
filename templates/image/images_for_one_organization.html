@@ -8,11 +8,11 @@
 
 {%  block content %}
 <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}">
-    < Back to Organization List Analysis</a><br />
+    < Back to Advocate List Analysis</a><br />
 
 <a href="{% url 'image:cache_images_locally_for_all_organizations' %}">< Back to Cache images locally for all organizations</a>
 <br />
-<h1>Images for One Organization{% if organization_we_vote_id %}: {{ organization.organization_name }}{% endif %}</h1>
+<h1>Images for One Advocate{% if organization_we_vote_id %}: {{ organization.organization_name }}{% endif %}</h1>
 
 <a href="{% url 'image:create_resized_images_for_organization' organization_we_vote_id %}">Create resized images for this organization</a><br />
 

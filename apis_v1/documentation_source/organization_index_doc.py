@@ -18,7 +18,7 @@ def organization_index_doc_template_values(url_root):
     try_now_link_variables_dict = {
     }
 
-    api_response = 'The raw HTML for index.html is returned, using the organizations custom settings'
+    api_response = 'The raw HTML for index.html is returned, using the Advocates custom settings'
 
     template_values = {
         'api_name': 'organizationIndex',

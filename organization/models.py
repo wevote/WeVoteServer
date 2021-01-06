@@ -2030,7 +2030,7 @@ class OrganizationManager(models.Manager):
 
 class OrganizationListManager(models.Manager):
     """
-    A class for working with lists of Organizations
+    A class for working with lists of Advocates
     """
 
     def organization_search_find_any_possibilities(self, organization_name='', organization_twitter_handle='',

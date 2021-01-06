@@ -66,7 +66,7 @@ def position_support_count_for_ballot_item_doc_template_values(url_root):
         },
         {
             'code':         'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED',
-            'description':  'The number of organizations that support this ballot item that voter is NOT following.',
+            'description':  'The number of Advocates that support this ballot item that voter is NOT following.',
         },
     ]
 

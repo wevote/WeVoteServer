@@ -17,7 +17,7 @@
 {% elif kind_of_batch == "MEASURE" %}
     Import Measures
 {% elif kind_of_batch == "ORGANIZATION" %}
-    Import Organizations
+    Import Advocates
 {% elif kind_of_batch == "POLITICIAN" %}
     Import Politicians
 {% elif kind_of_batch == "POSITION" %}
@@ -50,7 +50,7 @@
           target="_blank">Current Measures{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
 {% elif kind_of_batch == "ORGANIZATION" %}
     <p><a href="{% url 'organization:organization_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-          target="_blank">Current Organizations{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
+          target="_blank">Current Advocates{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
 {% elif kind_of_batch == "POLITICIAN" %}
 {% elif kind_of_batch == "POSITION" %}
     <p><a href="{% url 'position:position_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
@@ -73,7 +73,7 @@
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         Elected Office</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-        Organization</a> -
+        Advocate</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POLITICIAN&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         Politician</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_POLLING_LOCATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
@@ -98,7 +98,7 @@
     {% elif kind_of_batch == "MEASURE" %}
         Import Measure Data in Bulk
     {% elif kind_of_batch == "ORGANIZATION" %}
-        Import Organization Data in Bulk
+        Import Advocate Data in Bulk
     {% elif kind_of_batch == "POLITICIAN" %}
         Import Politician Data in Bulk
     {% elif kind_of_batch == "POSITION" %}

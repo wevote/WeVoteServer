@@ -319,7 +319,7 @@ def data_cleanup_organization_analysis_view(request):
 @login_required
 def data_cleanup_organization_list_analysis_view(request):
     """
-    Analyze all organizations
+    Analyze all advocates
     :param request:
     :return:
     """
@@ -335,7 +335,7 @@ def data_cleanup_organization_list_analysis_view(request):
     # Goal: Create TwitterLinkToOrganization
     # Goal: Look for opportunities to link Voters with Orgs
 
-    # Cycle through all organizations and identify which ones have duplicate Twitter data so we know
+    # Cycle through all advocates and identify which ones have duplicate Twitter data so we know
     #  we need to take a deeper look
     organizations_with_twitter_id = {}
     organizations_with_twitter_handle = {}
@@ -361,7 +361,7 @@ def data_cleanup_organization_list_analysis_view(request):
                 # Only update the counter the first time we find more than one entry
                 duplicate_twitter_handle_count += 1
 
-    # Cycle through the organizations again. If the organization has a unique twitter_id and twitter_handle,
+    # Cycle through the advocates again. If the organization has a unique twitter_id and twitter_handle,
     #  proceed with tests:
     #  *) Is there a voter who is linked to this same Twitter account?
     #    *) Is that voter linked to a different Organization? (If so: Merge them,
@@ -1499,7 +1499,7 @@ def data_voter_statistics_view(request):
         #     election_values_exist = True
 
         # ################################
-        # For this election, how many organizations shared at least one Public PositionEntered entry?
+        # For this election, how many advocates shared at least one Public PositionEntered entry?
         organization_position_entered_query = PositionEntered.objects.all()
         organization_position_entered_query = organization_position_entered_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
@@ -1512,7 +1512,7 @@ def data_voter_statistics_view(request):
         #     election_values_exist = True
 
         # ################################
-        # For this election, how many Public PositionEntered entries were for organizations?
+        # For this election, how many Public PositionEntered entries were for advocates?
         organization_position_entered_query = PositionEntered.objects.all()
         organization_position_entered_query = organization_position_entered_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
@@ -1652,7 +1652,7 @@ def import_sample_data_view(request):
                          ' not_processed: {offices_not_processed} <br />'
                          'Candidates saved: {candidates_saved}, updated: {candidates_updated},'
                          ' not_processed: {candidates_not_processed} <br />'
-                         'Organizations saved: {organizations_saved}, updated: {organizations_updated},'
+                         'Advocates saved: {organizations_saved}, updated: {organizations_updated},'
                          ' not_processed: {organizations_not_processed} <br />'
                          'Positions saved: {positions_saved}, updated: {positions_updated},'
                          ' not_processed: {positions_not_processed} <br />'
