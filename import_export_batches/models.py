@@ -262,6 +262,7 @@ BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES = {
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS = {
     'organization_address': 'organization_address',
     'organization_city': 'organization_city',
+    'organization_contact_form_url': 'organization_contact_form_url',
     'organization_contact_name': 'organization_contact_name',
     'organization_facebook': 'organization_facebook',
     'organization_instagram': 'organization_instagram',
@@ -5900,6 +5901,8 @@ class BatchRowActionOrganization(models.Model):
         verbose_name='url of the endorsing organization', max_length=255, blank=True, null=True)
     organization_email = models.EmailField(
         verbose_name='organization contact email address', max_length=255, unique=False, null=True, blank=True)
+    organization_contact_form_url = models.URLField(
+        verbose_name='url of the organization contact form', max_length=255, blank=True, null=True)
     organization_contact_name = models.CharField(max_length=255, null=True, unique=False)
     organization_facebook = models.URLField(verbose_name='url of facebook page', blank=True, null=True)
     organization_image = models.CharField(verbose_name='organization image', max_length=255, null=True, unique=False)

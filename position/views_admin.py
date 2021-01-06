@@ -29,7 +29,8 @@ from organization.models import OrganizationManager
 from politician.models import PoliticianManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, convert_integer_to_string_with_comma_for_thousands_separator, \
+    positive_value_exists, STATE_CODE_MAP
 from django.http import HttpResponse
 import json
 
@@ -500,26 +501,42 @@ def position_list_view(request):
     position_list = public_position_list + friends_only_position_list
 
     if positive_value_exists(show_statistics):
+        public_position_list_count_string = \
+            convert_integer_to_string_with_comma_for_thousands_separator(public_position_list_count)
+        public_position_list_comments_count_string = \
+            convert_integer_to_string_with_comma_for_thousands_separator(public_position_list_comments_count)
+        friends_only_position_list_count_string = \
+            convert_integer_to_string_with_comma_for_thousands_separator(friends_only_position_list_count)
+        friends_only_position_list_comments_count_string = \
+            convert_integer_to_string_with_comma_for_thousands_separator(friends_only_position_list_comments_count)
         messages.add_message(
             request, messages.INFO,
-            str(public_position_list_count) + ' public positions found ' +
-            '(' + str(public_position_list_comments_count) + ' with commentary). ' +
-            str(friends_only_position_list_count) + ' friends-only positions found ' +
-            '(' + str(friends_only_position_list_comments_count) + ' with commentary). '
+            public_position_list_count_string + ' public positions found ' +
+            '(' + public_position_list_comments_count_string + ' with commentary). ' +
+            friends_only_position_list_count_string + ' friends-only positions found ' +
+            '(' + friends_only_position_list_comments_count_string + ' with commentary). '
             )
 
         if public_position_list_clean_count or friend_position_list_clean_count:
+            public_position_list_clean_count_string = \
+                convert_integer_to_string_with_comma_for_thousands_separator(public_position_list_clean_count)
+            friend_position_list_clean_count_string = \
+                convert_integer_to_string_with_comma_for_thousands_separator(friend_position_list_clean_count)
             messages.add_message(
                 request, messages.INFO,
-                str(public_position_list_clean_count) + ' public positions updated with speaker_type. ' +
-                str(friend_position_list_clean_count) + ' friends-only positions updated with speaker_type. '
+                public_position_list_clean_count_string + ' public positions updated with speaker_type. ' +
+                friend_position_list_clean_count_string + ' friends-only positions updated with speaker_type. '
             )
 
         if public_position_list_candidate_clean_count or friend_position_list_candidate_clean_count:
+            public_position_list_candidate_clean_count_string = \
+                convert_integer_to_string_with_comma_for_thousands_separator(public_position_list_candidate_clean_count)
+            friend_position_list_candidate_clean_count_string = \
+                convert_integer_to_string_with_comma_for_thousands_separator(friend_position_list_candidate_clean_count)
             messages.add_message(
                 request, messages.INFO,
-                str(public_position_list_candidate_clean_count) + ' public positions updated with office info. ' +
-                str(friend_position_list_candidate_clean_count) + ' friends-only positions updated with office info. '
+                public_position_list_candidate_clean_count_string + ' public positions updated with office info. ' +
+                friend_position_list_candidate_clean_count_string + ' friends-only positions updated with office info. '
             )
 
     position_list_manager = PositionListManager()

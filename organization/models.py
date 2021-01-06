@@ -92,6 +92,7 @@ ORGANIZATION_UNIQUE_IDENTIFIERS = [
     'most_recent_name_update_from_voter_first_and_last',
     'organization_address',
     'organization_city',
+    'organization_contact_form_url',
     'organization_contact_name',
     'organization_description',
     'organization_email',
@@ -2767,6 +2768,8 @@ class Organization(models.Model):
         verbose_name='url of the endorsing organization', max_length=255, blank=True, null=True)
     organization_email = models.EmailField(
         verbose_name='organization contact email address', max_length=255, unique=False, null=True, blank=True)
+    organization_contact_form_url = models.URLField(
+        verbose_name='url of the contact us form', max_length=255, blank=True, null=True)
     organization_contact_name = models.CharField(max_length=255, null=True, unique=False)
     organization_facebook = models.URLField(verbose_name='url of facebook page', blank=True, null=True)
     organization_image = models.CharField(verbose_name='organization image', max_length=255, null=True, unique=False)

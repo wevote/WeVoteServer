@@ -477,6 +477,8 @@ def create_batch_row_action_organization(batch_description, batch_header_map, on
     state_served_code = batch_manager.retrieve_value_from_batch_row("state_served_code", batch_header_map, one_batch_row)
     organization_type = batch_manager.retrieve_value_from_batch_row(
         "organization_type", batch_header_map, one_batch_row)
+    organization_contact_form_url = batch_manager.retrieve_value_from_batch_row(
+        "organization_contact_form_url", batch_header_map, one_batch_row)
     organization_contact_name = batch_manager.retrieve_value_from_batch_row(
         "organization_contact_name", batch_header_map, one_batch_row)
 
@@ -543,6 +545,7 @@ def create_batch_row_action_organization(batch_description, batch_header_map, on
         batch_row_action_organization.organization_zip = organization_zip
         batch_row_action_organization.state_served_code = state_served_code
         batch_row_action_organization.organization_type = organization_type_transformed
+        batch_row_action_organization.organization_contact_form_url = organization_contact_form_url
         batch_row_action_organization.organization_contact_name = organization_contact_name
         batch_row_action_organization.kind_of_action = kind_of_action
         batch_row_action_organization.save()
@@ -4453,6 +4456,7 @@ def import_organization_data_from_batch_row_actions(
                 organization.organization_phone1 = one_batch_row_action.organization_phone1
                 organization.organization_type = one_batch_row_action.organization_type
                 organization.state_served_code = one_batch_row_action.state_served_code
+                organization.organization_contact_form_url = one_batch_row_action.organization_contact_form_url
                 organization.organization_contact_name = one_batch_row_action.organization_contact_name
                 organization.save()
             except Exception as e:

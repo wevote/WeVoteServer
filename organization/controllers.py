@@ -966,6 +966,8 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
         save_to_organization = True
     if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_email'):
         save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_contact_form_url'):
+        save_to_organization = True
     if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_contact_name'):
         save_to_organization = True
     if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_facebook'):
@@ -1590,6 +1592,8 @@ def organizations_import_from_structured_json(structured_json):
                 if 'organization_website' in one_organization else False
             organization_email = one_organization["organization_email"] \
                 if 'organization_email' in one_organization else False
+            organization_contact_form_url = one_organization["organization_contact_form_url"] \
+                if 'organization_contact_form_url' in one_organization else False
             organization_contact_name = one_organization["organization_contact_name"] \
                 if 'organization_contact_name' in one_organization else False
             organization_facebook = one_organization["organization_facebook"] \
@@ -1678,6 +1682,8 @@ def organizations_import_from_structured_json(structured_json):
                 organization_on_stage.organization_website = organization_website
             if organization_email is not False:
                 organization_on_stage.organization_email = organization_email
+            if organization_contact_form_url is not False:
+                organization_on_stage.organization_contact_form_url = organization_contact_form_url
             if organization_contact_name is not False:
                 organization_on_stage.organization_contact_name = organization_contact_name
             if organization_facebook is not False:

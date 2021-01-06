@@ -95,6 +95,20 @@
     </select>
 {% endif %} {# End of if organization_types #}
 
+    &nbsp;&nbsp;&nbsp;
+
+    {#  #}
+    <label for="show_organizations_without_email_id">
+      <input type="checkbox" name="show_organizations_without_email" id="show_organizations_without_email_id" value="1"
+             {% if show_organizations_without_email %}checked{% endif %} /> Show Emails Missing&nbsp;&nbsp;&nbsp;
+    </label>
+
+    {#  #}
+    <label for="show_organizations_to_be_analyzed_id">
+      <input type="checkbox" name="show_organizations_to_be_analyzed" id="show_organizations_to_be_analyzed_id" value="1"
+             {% if show_organizations_to_be_analyzed %}checked{% endif %} /> To Be Analyzed
+    </label>
+
     <br />
 
 {% if issue_list %}
@@ -163,8 +177,8 @@
             <td><a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}"
                    target="_blank">
                 {{ organization.organization_name }} <span class="glyphicon glyphicon-new-window"></span></a><br />
-                &nbsp;&nbsp;&nbsp;(<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}"
-                                      target="_blank">See images</a> in new window)
+                &nbsp;&nbsp;&nbsp;(<a href="{% url 'organization:organization_edit' organization.id %}"
+                                      target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>)
               {% if organization.linked_issues_count %}
                 {{ organization.linked_issues_count }} Values/Issues Linked
               {% endif %}
@@ -221,10 +235,16 @@
 
     <script>
         $(function() {
-            $('#state_code_id').change(function() {
+            $('#organization_type_filter_id').change(function() {
                 this.form.submit();
             });
-            $('#organization_type_filter_id').change(function() {
+            $('#show_organizations_without_email_id').change(function() {
+                this.form.submit();
+            });
+            $('#show_organizations_to_be_analyzed_id').change(function() {
+                this.form.submit();
+            });
+            $('#state_code_id').change(function() {
                 this.form.submit();
             });
         });
