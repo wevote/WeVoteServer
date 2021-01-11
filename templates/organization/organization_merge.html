@@ -4,7 +4,7 @@
 {% block title %}{% if organization_option1 %}Merge {{ organization_option1.organization_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
 
 {%  block content %}
-<a href="{% url 'organization:organization_list' %}">< Back to Advocates</a>
+<a href="{% url 'organization:organization_list' %}">< Back to Endorsers</a>
   <br /></r />
 {# <a href="{% url 'organization:find_and_merge_duplicate_organizations' %}?google_civic_election_id={{ google_civic_election_id }}&find_number_of_duplicates=1" >Click to find out the number of possible duplicates</a> (takes 30-60 seconds) #}
 
@@ -190,7 +190,7 @@
             <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;
         </td>
         <td></td>
-        <td><input type="submit" value="Merge Advocates" name="merge" /></td>
+        <td><input type="submit" value="Merge Endorsers" name="merge" /></td>
     </tr>
 </table>
 <input type="hidden" name="remove_duplicate_process" value="{{ remove_duplicate_process }}" />

@@ -2,13 +2,13 @@
 {% extends "template_base.html" %}
 
 {% block title %}
-    Cached Images for All Advocates
+    Cached Images for All Endorsers
 {% endblock %}
 
 {%  block content %}
-<a href="{% url 'organization:organization_list' %}">< Back to Advocates</a><br />
+<a href="{% url 'organization:organization_list' %}">< Back to Endorsers</a><br />
 <br />
-<a href="{% url 'image:create_resized_images_for_all_organizations' %}">Create resized images for all Advocates</a>
+<a href="{% url 'image:create_resized_images_for_all_organizations' %}">Create resized images for all Endorsers</a>
 <br />
 <h1>Cached images for all organizations</h1>
 
@@ -50,7 +50,7 @@
 
     </table>
 {% else %}
-    <p>(no advocates found)</p>
+    <p>(no endorsers found)</p>
 {% endif %}
 <br />
 

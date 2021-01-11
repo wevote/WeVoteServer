@@ -29,8 +29,8 @@ def organization_link_to_issue_sync_out_doc_template_values(url_root):
         'api_name': 'organizationLinkToIssueSyncOut',
         'api_slug': 'organizationLinkToIssueSyncOut',
         'api_introduction':
-            "This is the summary of the way that public Advocates are categorized by issues. "
-            "For example, if I want to find all Advocates that are related to climate change, "
+            "This is the summary of the way that public endorsers are categorized by issues. "
+            "For example, if I want to find all endorsers that are related to climate change, "
             "this is the data that tells me this.",
         'try_now_link': 'apis_v1:organizationLinkToIssueSyncOutView',
         'try_now_link_variables_dict': try_now_link_variables_dict,

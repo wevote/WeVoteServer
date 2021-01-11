@@ -134,11 +134,11 @@
         <td>Note: Values/Issues are independent of elections and state_codes</td>
     </tr>
 
-    <tr><td><h4>Advocates</h4></td></tr>
+    <tr><td><h4>Endorsers</h4></td></tr>
     <tr>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;
             <a href="{% url 'organization:organizations_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    Retrieve Advocates</a>{% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
+    Retrieve Endorsers</a>{% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
         </td>
         <td>The list of organizations that make ballot recomendations</td>
     </tr>

@@ -22,7 +22,7 @@ def organization_retrieve_doc_template_values(url_root):
         {
             'name':         'organization_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'We Vote unique identifier so we can move Advocates from server-to-server '
+            'description':  'We Vote unique identifier so we can move endorsers from server-to-server '
                             '(one identifier required, either id or we_vote_id)',
         },
     ]

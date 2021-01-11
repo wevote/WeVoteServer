@@ -261,7 +261,7 @@ def elected_office_summary_view(request, elected_office_id):
     #     candidate_list = candidate_list.order_by('candidate_name')
     #     support_total = 0
     #     for one_candidate in candidate_list:
-    #         # Find the count of Voters that support this candidate (Advocates are not included in this)
+    #         # Find the count of Voters that support this candidate (Endorsers are not included in this)
     #         one_candidate.support_count = position_list_manager.fetch_voter_positions_count_for_candidate_campaign(
     #             one_candidate.id, "", SUPPORT)
     #         one_candidate.oppose_count = position_list_manager.fetch_voter_positions_count_for_candidate_campaign(

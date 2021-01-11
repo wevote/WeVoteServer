@@ -53,7 +53,7 @@ def position_public_oppose_count_for_ballot_item_doc_template_values(url_root):
         },
         {
             'code':         'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED',
-            'description':  'The number of Advocates that oppose this ballot item that voter is NOT following.',
+            'description':  'The number of endorsers that oppose this ballot item that voter is NOT following.',
         },
     ]
 
@@ -73,7 +73,7 @@ def position_public_oppose_count_for_ballot_item_doc_template_values(url_root):
         'api_slug': 'positionPublicOpposeCountForBallotItem',
         'api_introduction':
             "A single number showing the total that oppose this Ballot Item (Candidate or Measure) from "
-            "any Advocates and public figures. (Not just the ones a voter follows.)",
+            "any organizations and public figures. (Not just the ones a voter follows.)",
         'try_now_link': 'apis_v1:positionPublicOpposeCountForBallotItemView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

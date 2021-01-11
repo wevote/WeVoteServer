@@ -11,7 +11,7 @@ def issues_to_link_to_for_organization_doc_template_values(url_root):
         {
             'name': 'organization_we_vote_id',
             'value': 'string',  # boolean, integer, long, string
-            'description': 'The Advocates\'s we vote id',
+            'description': 'The Endorser\'s we vote id',
         },
     ]
 

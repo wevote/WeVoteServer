@@ -99,7 +99,7 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
         },
         {
             'code':         'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED',
-            'description':  'The number of Advocates that oppose this ballot item that voter is NOT following.',
+            'description':  'The number of endorsers that oppose this ballot item that voter is NOT following.',
         },
     ]
 
