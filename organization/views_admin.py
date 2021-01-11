@@ -213,7 +213,7 @@ def organizations_import_from_master_server_view(request):
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])
     else:
-        messages.add_message(request, messages.INFO, 'Advocates import completed. '
+        messages.add_message(request, messages.INFO, 'Endorsers import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
                                                      'Duplicates skipped: '
                                                      '{duplicates_removed}, '
@@ -244,8 +244,9 @@ def organization_list_view(request):
     show_all = request.GET.get('show_all', False)
     show_more = request.GET.get('show_more', False)  # Show up to 1,000 organizations
     show_issues = request.GET.get('show_issues', '')
-    show_organizations_without_email = request.GET.get('show_organizations_without_email', False)
-    show_organizations_to_be_analyzed = request.GET.get('show_organizations_to_be_analyzed', False)
+    show_organizations_without_email = positive_value_exists(request.GET.get('show_organizations_without_email', False))
+    show_organizations_to_be_analyzed = \
+        positive_value_exists(request.GET.get('show_organizations_to_be_analyzed', False))
 
     messages_on_stage = get_messages(request)
     organization_list_query = Organization.objects.all()
@@ -367,7 +368,7 @@ def organization_list_view(request):
 
     organization_count = organization_list_query.count()
     messages.add_message(request, messages.INFO,
-                         '{organization_count:,} advocates found.'.format(organization_count=organization_count))
+                         '{organization_count:,} endorsers found.'.format(organization_count=organization_count))
 
     # Limit to only showing 200 on screen
     if positive_value_exists(show_more):

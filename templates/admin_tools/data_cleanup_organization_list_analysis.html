@@ -10,7 +10,7 @@
 
 
 {% if organizations_with_unique_twitter_data %}
-<h2>Advocates with Unique Twitter Data (Local Data)</h2>
+<h2>Endorsers with Unique Twitter Data (Local Data)</h2>
     <p>This list does not include organizations with correct TwitterLinkToVoter and TwitterLinkToOrganization.</p>
 
     <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}?create_twitter_link_to_organization=1">Create TwitterLinkToOrganization Entries Now</a><br />
@@ -83,7 +83,7 @@
 {% endif %}
 
 
-<h2>Advocates with Twitter Collision (Local Data)</h2>
+<h2>Endorsers with Twitter Collision (Local Data)</h2>
 {% if organizations_with_a_twitter_collision %}
     <table cellpadding="5" cellspacing="5" border="1">
         <tr>
@@ -118,13 +118,13 @@
     {% endfor %}
     </table>
 {% else %}
-    <p>(no advocates found)</p>
+    <p>(no endorsers found)</p>
 {% endif %}
 <br />
 
 
 {% if organizations_with_correctly_linked_twitter_data %}
-<h2>Advocates with Correctly Linked Twitter Data</h2>
+<h2>Endorsers with Correctly Linked Twitter Data</h2>
     <p></p>
 
     <table cellpadding="5" cellspacing="5" border="1">

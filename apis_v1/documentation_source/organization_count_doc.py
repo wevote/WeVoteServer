@@ -47,7 +47,7 @@ def organization_count_doc_template_values(url_root):
         'api_name': 'organizationCount',
         'api_slug': 'organizationCount',
         'api_introduction':
-            "Return the number of Advocates in the database.",
+            "Return the number of endorsers in the database.",
         'try_now_link': 'apis_v1:organizationCountView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

@@ -23,9 +23,9 @@ def organizations_followed_retrieve_doc_template_values(url_root):
         {
             'name':         'auto_followed_from_twitter_suggestion',
             'value':        'boolean',  # boolean, integer, long, string
-            'description':  'True default retrieve auto followed Advocates.'
-                            'If False, retrieve all Advocates followed by voter'
-                            '(includes twitter auto followed Advocates)',
+            'description':  'True default retrieve auto followed endorsers.'
+                            'If False, retrieve all endorsers followed by voter'
+                            '(includes twitter auto followed endorsers)',
         },
     ]
 
@@ -75,8 +75,8 @@ def organizations_followed_retrieve_doc_template_values(url_root):
         'api_name': 'organizationsFollowedRetrieve',
         'api_slug': 'organizationsFollowedRetrieve',
         'api_introduction':
-            "A list of all Advocates followed by this voter includes automatically followed from twitter. "
-            "(Or show the Advocates this voter is following automatically from twitter only "
+            "A list of all endorsers followed by this voter includes automatically followed from twitter. "
+            "(Or show the endorsers this voter is following automatically from twitter only "
             "if auto_followed_from_twitter_suggestion is True.)",
         'try_now_link': 'apis_v1:organizationsFollowedRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,

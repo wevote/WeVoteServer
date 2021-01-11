@@ -1493,7 +1493,7 @@ def organizations_import_from_master_server(request, state_code=''):
     :return:
     """
     import_results, structured_json = process_request_from_master(
-        request, "Loading Advocates from We Vote Master servers",
+        request, "Loading endorsers from We Vote Master servers",
         ORGANIZATIONS_SYNC_URL, {
             "key":               WE_VOTE_API_KEY,  # This comes from an environment variable
             "format":            'json',

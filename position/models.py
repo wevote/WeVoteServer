@@ -2892,7 +2892,7 @@ class PositionListManager(models.Model):
                     organization_manager = OrganizationManager()
                     organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(organization_id)
 
-                # Find the Voter id for the organization showing the positions. Advocates that sign in with
+                # Find the Voter id for the organization showing the positions. Endorsers that sign in with
                 #  their Twitter accounts get a Voter entry, with "voter.linked_organization_we_vote_id" containing
                 #  the organizations we_vote_id.
                 results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id,

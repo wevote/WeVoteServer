@@ -16,7 +16,7 @@ def voter_follow_all_organizations_followed_by_organization_doc_template_values(
         {
             'name':         'organization_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'The we vote id for the Advocates',
+            'description':  'The we vote id for the endorser',
         },
         {
             'name':         'api_key',

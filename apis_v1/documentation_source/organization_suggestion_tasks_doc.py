@@ -63,7 +63,7 @@ def organization_suggestion_tasks_doc_template_values(url_root):
         'api_name': 'organizationSuggestionTasks',
         'api_slug': 'organizationSuggestionTasks',
         'api_introduction':
-            "This will provide list of suggested Advocates to follow. "
+            "This will provide list of suggested endorsers to follow. "
             "These suggestions are generated from twitter ids i follow, or organization of my friends follow",
         'try_now_link': 'apis_v1:organizationSuggestionTasksView',
         'try_now_link_variables_dict': try_now_link_variables_dict,

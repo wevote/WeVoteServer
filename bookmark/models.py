@@ -47,7 +47,7 @@ class BookmarkItem(models.Model):
     # The date the voter bookmarked or unbookmarked this ballot_item
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
-    # This is used when we want to export the Advocates that a voter is following
+    # This is used when we want to export the endorsers that a voter is following
     def voter_we_vote_id(self):
         voter_manager = VoterManager()
         return voter_manager.fetch_we_vote_id_from_local_id(self.voter_id)

@@ -347,7 +347,7 @@ def refresh_twitter_data_for_organizations_view(request):
         number_of_organizations_updated = results['number_of_organizations_updated']
         messages.add_message(request, messages.INFO,
                              "Twitter accounts queried: {number_of_twitter_accounts_queried}, "
-                             "Advocates updated: {number_of_organizations_updated}".format(
+                             "Endorsers updated: {number_of_organizations_updated}".format(
                                  number_of_twitter_accounts_queried=number_of_twitter_accounts_queried,
                                  number_of_organizations_updated=number_of_organizations_updated))
 

@@ -67,11 +67,11 @@ def organization_search_doc_template_values(url_root):
         },
         {
             'code':         'ORGANIZATIONS_RETRIEVED',
-            'description':  'Successfully returned a list of Advocates that match search query.',
+            'description':  'Successfully returned a list of endorsers that match search query.',
         },
         {
             'code':         'NO_ORGANIZATIONS_RETRIEVED',
-            'description':  'Successfully searched, but no Advocates found that match search query.',
+            'description':  'Successfully searched, but no endorsers found that match search query.',
         },
     ]
 
@@ -107,7 +107,7 @@ def organization_search_doc_template_values(url_root):
         'api_name': 'organizationSearch',
         'api_slug': 'organizationSearch',
         'api_introduction':
-            "Find a list of all Advocates that match any of the search terms.",
+            "Find a list of all endorsers that match any of the search terms.",
         'try_now_link': 'apis_v1:organizationSearchView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

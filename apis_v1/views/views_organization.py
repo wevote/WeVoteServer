@@ -227,7 +227,7 @@ def organization_index_view(request, organization_incoming_domain=''):  # organi
 
 def organizations_found_on_url_api_view(request):  # organizationsFoundOnUrl
     """
-    Take in a web page and find all Advocates that have a Twitter handle or Facebook page listed on that web page
+    Take in a web page and find all endorsers that have a Twitter handle or Facebook page listed on that web page
     :param request:
     :return:
     """
@@ -562,7 +562,7 @@ def organization_save_view(request):  # organizationSave
 
 def organization_search_view(request):  # organizationSearch
     """
-    Search for Advocates based on a few search terms
+    Search for endorsers based on a few search terms
     :param request:
     :return:
     """
@@ -582,7 +582,7 @@ def organization_search_view(request):  # organizationSearch
 
 def organization_suggestion_tasks_view(request):
     """
-    This will provide list of suggested Advocates to follow.
+    This will provide list of suggested endorsers to follow.
     These suggestions are generated from twitter ids i follow, or organization of my friends follow.
     :param request:
     :return:

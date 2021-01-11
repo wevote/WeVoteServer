@@ -8,7 +8,7 @@
 {% load humanize %}
 
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a>&nbsp;&nbsp;&nbsp;
-<a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Advocates</a>&nbsp;&nbsp;&nbsp;
+<a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Endorsers</a>&nbsp;&nbsp;&nbsp;
 <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Voter Guides</a>&nbsp;&nbsp;&nbsp;
 <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}">
     Analyze Advocate Data ></a></p>
@@ -267,8 +267,8 @@
     <li>Assorted tools:
     &nbsp;&nbsp;&nbsp; <a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a>,
         <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
-        <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape advocate website for Twitter Accounts</a>,
-        <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}">Retrieve tweets for advocate</a>,
+        <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape endorser website for Twitter Accounts</a>,
+        <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}">Retrieve tweets for endorser</a>,
         <a href="{% url 'organization:organization_analyze_tweets' organization.we_vote_id %}">Link issues from twitter feed</a>
     </li>
 </ul>
