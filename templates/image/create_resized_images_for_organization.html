@@ -3,13 +3,13 @@
 
 {% block title %}
     {% if organization_we_vote_id %}organization_we_vote_id: {{ organization_we_vote_id }}
-    {% else %}No Advocate Found {% endif %}
+    {% else %}No Endorser Found {% endif %}
 {% endblock %}
 
 {%  block content %}
 <a href="{% url 'image:cache_images_locally_for_all_organizations' %}">< Back to Cache images locally for all organizations</a>
 <br />
-<h1>Created Resized Images for Advocate{% if organization_we_vote_id %}: {{ organization.organization_name }}{% endif %}</h1>
+<h1>Created Resized Images for Endorser{% if organization_we_vote_id %}: {{ organization.organization_name }}{% endif %}</h1>
 
 {% if organization_we_vote_id %}
 <a href="{% url 'image:images_for_one_organization' organization_we_vote_id %}" target="_blank">See images</a> (in new window)

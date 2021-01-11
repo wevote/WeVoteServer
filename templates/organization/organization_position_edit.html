@@ -19,7 +19,7 @@
 </style>
 
     <p><a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
-        < Back to Advocate Positions</a></p>
+        < Back to Endorser Positions</a></p>
 
 <h1>{% if not organization_position %}Enter Position for {% endif %}{% if organization.organization_name %}{{ organization.organization_name }}{% else %}(org name missing){% endif %}{% if organization_position %}<br />
 Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>

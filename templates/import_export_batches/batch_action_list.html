@@ -15,7 +15,7 @@
     {% elif kind_of_batch == "MEASURE" %}
         Process Measure Data
     {% elif kind_of_batch == "ORGANIZATION" %}
-        Process Advocate Data
+        Process Endorser Data
     {% elif kind_of_batch == "POLITICIAN" %}
         Process Politician Data
     {% elif kind_of_batch == "POSITION" %}
@@ -77,7 +77,7 @@
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}">
         Measure</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}">
-        Advocate</a> -
+        Endorser</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POLITICIAN&google_civic_election_id={{ google_civic_election_id }}">
         Politician</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_POLLING_LOCATION&google_civic_election_id={{ google_civic_election_id }}">
@@ -100,7 +100,7 @@
     {% elif kind_of_batch == "MEASURE" %}
         Process Measure Data:
     {% elif kind_of_batch == "ORGANIZATION" %}
-        Process Advocate Data:
+        Process Endorser Data:
     {% elif kind_of_batch == "POLITICIAN" %}
         Process Politician Data:
     {% elif kind_of_batch == "IMPORT_POLLING_LOCATION" %}
