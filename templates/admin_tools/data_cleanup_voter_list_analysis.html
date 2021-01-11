@@ -149,7 +149,7 @@
                 {{ voter.linked_organization_we_vote_id }}</a>
             {% elif voter.is_signed_in %}
                 <a href="{% url 'voter:voter_edit' voter.id %}?create_organization_for_voter=1" target="_blank">
-                Create Advocate</a>
+                Create Endorser</a>
             {% endif %}
             </td>
             <td>

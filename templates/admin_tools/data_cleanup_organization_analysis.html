@@ -1,7 +1,7 @@
 {# templates/admin_tools/data_cleanup_organization_analysis.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Advocate Analysis: {% if organization %}{{ organization.organization_name  }}{% else %}Error: Name Missing{% endif %}{% endblock %}
+{% block title %}Endorser Analysis: {% if organization %}{{ organization.organization_name  }}{% else %}Error: Name Missing{% endif %}{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
@@ -10,12 +10,12 @@
     <a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a><br />
     <br />
     <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
-        < Back to '{% if organization %}{{ organization.organization_name  }}{% endif %}' Advocate Admin Page</a><br />
+        < Back to '{% if organization %}{{ organization.organization_name  }}{% endif %}' Endorser Admin Page</a><br />
 
 </p>
 
 {% if organization %}
-<h1>Advocate Analysis: {{ organization.organization_name  }}</h1>
+<h1>Endorser Analysis: {{ organization.organization_name  }}</h1>
 
     <p>
     We Vote ID: {{ organization.we_vote_id }} (<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a> in new window)<br />
@@ -59,15 +59,15 @@
 {% endif %}{# End of if election_list #}
 
 {% if twitter_link_to_this_organization_exists %}
- <h3>TwitterLinkToOrganization exists for THIS Advocate</h3>
+ <h3>TwitterLinkToOrganization exists for THIS Endorser</h3>
 {% elif twitter_link_to_another_organization_exists %}
- <h3>WARNING: TwitterLinkToOrganization exists for another Advocate</h3>
+ <h3>WARNING: TwitterLinkToOrganization exists for another Endorser</h3>
 {% else %}
  <h3>This Twitter handle unclaimed by TwitterLinkToOrganization</h3>
 {% endif %}
 
 {% if voter_linked_organization_we_vote_id_list %}
- <h3>Voter from Linked Advocate Id</h3>
+ <h3>Voter from Linked Endorser Id</h3>
     <table border="1" cellpadding="10">
         <tr>
             <td>ID</td>
@@ -159,7 +159,7 @@
         <tr>
             <td></td>
             <td></td>
-            <td>Advocate</td>
+            <td>Endorser</td>
             <td>organization_twitter_handle</td>
             <td>Vote Smart ID</td>
             <td>State</td>

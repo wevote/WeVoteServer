@@ -1,7 +1,7 @@
 {# templates/organization/organization_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if organization %}{{ organization.organization_name  }}{% else %}New Advocate{% endif %}{% endblock %}
+{% block title %}{% if organization %}{{ organization.organization_name  }}{% else %}New Endorser{% endif %}{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
@@ -12,7 +12,7 @@
     }
 </style>
 
-<h1>{% if organization %}{{ organization.organization_name }}{% else %}New Advocate{% endif %}</h1>
+<h1>{% if organization %}{{ organization.organization_name }}{% else %}New Endorser{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 
@@ -22,7 +22,7 @@
         <tr>
             <td></td>
             <td></td>
-            <td>Advocate</td>
+            <td>Endorser</td>
             <td>Twitter</td>
             <td>Facebook</td>
             <td>Website</td>
@@ -67,12 +67,12 @@
         {% endif %}
     </label>
     <div class="col-sm-8">
-        <button type="submit" class="btn btn-primary">{% if organization %}Update Advocate{% else %}Save New Advocate{% endif %}</button>
+        <button type="submit" class="btn btn-primary">{% if organization %}Update Endorser{% else %}Save New Endorser{% endif %}</button>
     </div>
 </div>
 
 <div class="form-group">
-    <label for="organization_name_id" class="col-sm-3 control-label">Advocate Name</label>
+    <label for="organization_name_id" class="col-sm-3 control-label">Endorser Name</label>
     <div class="col-sm-8">
         <input type="text" name="organization_name" id="organization_name_id" class="form-control"
                value="{% if organization %}{{ organization.organization_name }}{% else %}{{ organization_name }}{% endif %}" />
@@ -87,11 +87,11 @@
 
 {% if organization_types %}
 <div class="form-group">
-    <label for="organization_type_id" class="col-sm-3 control-label">Advocate Type</label>
+    <label for="organization_type_id" class="col-sm-3 control-label">Endorser Type</label>
     <div class="col-sm-8">
         <select id="organization_type_id" name="organization_type" class="form-control">
             <option value="" {% if '' ==  organization_type %} selected="selected" {% endif %}>
-                -- Filter by Advocate Type --</option>
+                -- Filter by Endorser Type --</option>
         {% for key, organization_type in organization_types %}
             <option value="{{ key }}"
                     {% if key|lower == organization.organization_type|lower %} selected="selected"{% endif %}>
@@ -103,7 +103,7 @@
 {% endif %} {# End of if organization_types #}
 
 <div class="form-group">
-    <label for="organization_website_id" class="col-sm-3 control-label">Advocate Website
+    <label for="organization_website_id" class="col-sm-3 control-label">Endorser Website
     {% if organization.organization_website %}
     <a href="{{ organization.organization_website }}"
                target="_blank"
@@ -278,7 +278,7 @@
         {% endif %}
     </label>
     <div class="col-sm-8">
-        <button type="submit" class="btn btn-primary">{% if organization %}Update Advocate{% else %}Save New Advocate{% endif %}</button>
+        <button type="submit" class="btn btn-primary">{% if organization %}Update Endorser{% else %}Save New Endorser{% endif %}</button>
     </div>
 </div>
 </form>
@@ -290,7 +290,7 @@
 <form action="{% url "organization:organization_delete_process" %}" method="post" class="form-horizontal">
 {% csrf_token %}
   <input type="hidden" name="organization_id" value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
-  <button type="submit" class="btn btn-danger">Delete Advocate</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <button type="submit" class="btn btn-danger">Delete Endorser</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <label for="confirm_delete_id">
     <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> Check to confirm that you want to permanently delete this organization
   </label>

@@ -17,8 +17,8 @@
 <table>
     <tr>
         <th>&nbsp;</th>
-        <th>Advocate Option 1</th>
-        <th>Advocate Option 2</th>
+        <th>Endorser Option 1</th>
+        <th>Endorser Option 2</th>
     </tr>
     <tr>
         <td>&nbsp;</td>
@@ -28,7 +28,7 @@
                target="_blank">view <span class="glyphicon glyphicon-new-window"></span></a></td>
     </tr>
 
-{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_name" field_label="Advocate Name" conflict_status=conflict_values.organization_name organization1_field_value=organization_option1.organization_name organization2_field_value=organization_option2.organization_name organization1=organization_option1 organization2=organization_option2 %}
+{% include "organization/organization_merge_one_field_decision.html" with field_name="organization_name" field_label="Endorser Name" conflict_status=conflict_values.organization_name organization1_field_value=organization_option1.organization_name organization2_field_value=organization_option2.organization_name organization1=organization_option1 organization2=organization_option2 %}
 
 {% include "organization/organization_merge_one_field_decision.html" with field_name="organization_twitter_handle" field_label="Twitter Handle" conflict_status=conflict_values.organization_twitter_handle organization1_field_value=organization_option1.organization_twitter_handle organization2_field_value=organization_option2.organization_twitter_handle organization1=organization_option1 organization2=organization_option2 %}
 

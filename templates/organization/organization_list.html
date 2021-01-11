@@ -31,11 +31,11 @@
 </p>
 
 <p><a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}">
-    Add New Advocate / Voter Guide</a>.
+    Add New Endorser / Voter Guide</a>.
     Vote Smart special interest groups
     <a href="{% url 'import_export_vote_smart:vote_smart_special_interest_group_list' %}">here</a>.
 
-    <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}">Advocate List Analysis</a>.
+    <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}">Endorser List Analysis</a>.
 
     <a href="{% url 'organization:reserved_domain_list' %}">Reserved Website Domains</a>.
 </p>
@@ -82,9 +82,9 @@
     <select id="organization_type_filter_id" name="organization_type_filter">
         <option value="" {% if '' ==  organization_type_filter %} selected="selected" {% endif %}>
         {% if '' ==  organization_type_filter %}
-            -- Filter by Advocate Type --
+            -- Filter by Endorser Type --
         {% else %}
-            -- Show All Advocate Types --
+            -- Show All Endorser Types --
         {% endif %}
         </option>
     {% for key, organization_type in organization_types %}
@@ -126,7 +126,7 @@
          clear search</a>&nbsp;
 {% endif %}
     <input type="text" name="organization_search" id="organization_search_id" value="{{ organization_search }}" />
-    <input type="submit" value="Search for Advocate" />
+    <input type="submit" value="Search for Endorser" />
 
 </form>
 
@@ -141,7 +141,7 @@
             <th></th>
             <th>
               <a href="{% url 'organization:organization_list' %}?sort_by=organization&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
-              {% if sort_by == "organization" %}<strong>Advocate</strong>{% else %}Advocate{% endif %}
+              {% if sort_by == "organization" %}<strong>Endorser</strong>{% else %}Endorser{% endif %}
               </a>
             </th>
             <th>

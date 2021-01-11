@@ -914,7 +914,7 @@ def organization_link_to_issue_import_from_master_server(request):
     :return:
     """
     import_results, structured_json = process_request_from_master(
-        request, "Loading Advocate's Links To Issues data from We Vote Master servers",
+        request, "Loading Endorser's Links To Issues data from We Vote Master servers",
         ORGANIZATION_LINK_TO_ISSUE_SYNC_URL, {
             "key": WE_VOTE_API_KEY,
         }

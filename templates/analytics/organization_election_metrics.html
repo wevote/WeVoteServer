@@ -2,7 +2,7 @@
 {% extends "template_base.html" %}
 
 {% block title %}
-    Advocate Election Metrics
+    Endorser Election Metrics
 {% endblock %}
 
 {%  block content %}
@@ -10,7 +10,7 @@
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
 <p><a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a></p>
 
-<h2>Advocate Election Metrics</h2>
+<h2>Endorser Election Metrics</h2>
 
 <p>
     Show activity relating to one organization, for one election.
