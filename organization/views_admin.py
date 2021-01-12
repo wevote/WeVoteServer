@@ -20,7 +20,7 @@ from django.shortcuts import render
 from donate.models import MasterFeaturePackage
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception
-from election.controllers import retrieve_upcoming_election_id_list
+from election.controllers import retrieve_election_id_list_by_year_list, retrieve_upcoming_election_id_list
 from election.models import Election, ElectionManager
 from import_export_twitter.controllers import refresh_twitter_organization_details
 from import_export_vote_smart.models import VoteSmartSpecialInterestGroupManager
@@ -236,6 +236,8 @@ def organization_list_view(request):
 
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
+    limit_to_opinions_in_state_code = request.GET.get('limit_to_opinions_in_state_code', '')
+    limit_to_opinions_in_this_year = convert_to_int(request.GET.get('limit_to_opinions_in_this_year', 0))
     organization_search = request.GET.get('organization_search', '')
     organization_type_filter = request.GET.get('organization_type_filter', '')
     selected_issue_vote_id_list = request.GET.getlist('selected_issues', '')
@@ -247,6 +249,8 @@ def organization_list_view(request):
     show_organizations_without_email = positive_value_exists(request.GET.get('show_organizations_without_email', False))
     show_organizations_to_be_analyzed = \
         positive_value_exists(request.GET.get('show_organizations_to_be_analyzed', False))
+
+    election_years_available = [2022, 2021, 2020, 2019, 2018, 2017, 2016]
 
     messages_on_stage = get_messages(request)
     organization_list_query = Organization.objects.all()
@@ -366,6 +370,30 @@ def organization_list_view(request):
             # NOTE this is "exclude"
             organization_list_query = organization_list_query.exclude(final_filters)
 
+    # Limit to organizations with opinions in this year and state
+    position_list_manager = PositionListManager()
+    elections_not_found_in_year = False
+    google_civic_election_id_list = []
+    if positive_value_exists(limit_to_opinions_in_this_year):
+        election_year_list_to_show = [limit_to_opinions_in_this_year]
+        google_civic_election_id_list = \
+            retrieve_election_id_list_by_year_list(election_year_list_to_show=election_year_list_to_show)
+        if not positive_value_exists(len(google_civic_election_id_list)):
+            elections_not_found_in_year = True
+
+    if elections_not_found_in_year:
+        # No organizations should be found
+        organization_we_vote_id_list = []
+        organization_list_query = organization_list_query.filter(we_vote_id__in=organization_we_vote_id_list)
+    elif positive_value_exists(len(google_civic_election_id_list)) or \
+            positive_value_exists(limit_to_opinions_in_state_code):
+        results = position_list_manager.retrieve_organization_we_vote_id_list_for_election_and_state(
+            google_civic_election_id_list=google_civic_election_id_list,
+            state_code=limit_to_opinions_in_state_code)
+        if results['success']:
+            organization_we_vote_id_list = results['organization_we_vote_id_list']
+            organization_list_query = organization_list_query.filter(we_vote_id__in=organization_we_vote_id_list)
+
     organization_count = organization_list_query.count()
     messages.add_message(request, messages.INFO,
                          '{organization_count:,} endorsers found.'.format(organization_count=organization_count))
@@ -406,11 +434,14 @@ def organization_list_view(request):
     organization_types_list = sorted(organization_types_map.items(), key=operator.itemgetter(1))
 
     template_values = {
-        'messages_on_stage':        messages_on_stage,
         'candidate_we_vote_id':     candidate_we_vote_id,
+        'election_years_available': election_years_available,
         'google_civic_election_id': google_civic_election_id,
         'issue_list':               issue_list,
         'issues_selected':          issues_selected,
+        'limit_to_opinions_in_state_code': limit_to_opinions_in_state_code,
+        'limit_to_opinions_in_this_year': limit_to_opinions_in_this_year,
+        'messages_on_stage':        messages_on_stage,
         'organization_type_filter': organization_type_filter,
         'organization_types':       organization_types_list,
         'organization_list':        modified_organization_list,
