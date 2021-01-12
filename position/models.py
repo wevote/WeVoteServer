@@ -3650,6 +3650,72 @@ class PositionListManager(models.Model):
 
         return position_list_filtered
 
+    def retrieve_organization_we_vote_id_list_for_election_and_state(
+            self,
+            google_civic_election_id_list=[],
+            state_code=''
+            ):
+        candidate_list_manager = CandidateCampaignListManager()
+        organization_we_vote_id_list = []
+        status = ''
+        success = True
+        if not positive_value_exists(google_civic_election_id_list) and not positive_value_exists(state_code):
+            status += 'RETRIEVE_POSITIONS-VALID_ELECTION_ID_AND_STATE_CODE_MISSING '
+            results = {
+                'success':                          False,
+                'status':                           status,
+                'organization_we_vote_id_list':     [],
+            }
+            return results
+
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=google_civic_election_id_list,
+            limit_to_this_state_code=state_code)
+        if not positive_value_exists(results['success']):
+            status += results['status']
+            success = False
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
+        try:
+            position_entered_query = PositionEntered.objects.using('readonly').all()
+            position_entered_query = \
+                position_entered_query.filter(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
+            if positive_value_exists(state_code):
+                position_entered_query = position_entered_query.filter(state_code__iexact=state_code)
+            status += "PUBLIC_QUERY_OK "
+        except Exception as e:
+            status += 'PROBLEM_WITH_PUBLIC_QUERY: ' + str(e) + ' '
+            handle_exception(e, logger=logger)
+            success = False
+
+        try:
+            position_for_friends_query = PositionForFriends.objects.using('readonly').all()
+            position_for_friends_query = \
+                position_for_friends_query.filter(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
+            if positive_value_exists(state_code):
+                position_for_friends_query = position_for_friends_query.filter(state_code__iexact=state_code)
+            status += "FRIENDS_ONLY_QUERY_OK "
+        except Exception as e:
+            status += 'PROBLEM_WITH_FRIENDS_ONLY_QUERY: ' + str(e) + ' '
+            handle_exception(e, logger=logger)
+            success = False
+
+        if positive_value_exists(success):
+            try:
+                combined_query = position_entered_query.values_list('organization_we_vote_id', flat=True).union(
+                    position_for_friends_query.values_list('organization_we_vote_id', flat=True)
+                )
+                organization_we_vote_id_list = list(combined_query)
+            except Exception as e:
+                status += "PROBLEM_WITH_COMBINED_QUERY: " + str(e) + " "
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'organization_we_vote_id_list': organization_we_vote_id_list,
+        }
+        return results
+
     def retrieve_position_counts_for_election_and_state(self, google_civic_election_id_list=[], state_code=''):
         friends_only_count = 0
         candidate_list_manager = CandidateCampaignListManager()
