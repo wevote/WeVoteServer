@@ -6,32 +6,161 @@
 {%  block content %}
 {% load humanize %}
 <h1>We Vote Admin Menu</h1>
-    Public Opinions: {{ total_public_endorsements_count|intcomma }}
-        (w/ commentary:  {{ total_public_endorsements_with_commentary_count|intcomma }})
-        Friends-Only Opinions: {{ total_friends_only_endorsements_count|intcomma }}
-        (w/ commentary:  {{ total_friends_only_endorsements_with_commentary_count|intcomma }})<br />
-
-    Total Ballot Requests: {{ voter_address_basic_count|intcomma }}
-        (Full Address: {{ voter_address_full_address_count|intcomma }})<br />
-
-    Total Voter Accounts: {{ voter_accounts_count|intcomma }}
-        (Twitter: {{ voter_twitter_accounts_count|intcomma }},
-        Facebook: {{ voter_facebook_accounts_count|intcomma }},
-        Email: {{ voter_email_accounts_count|intcomma }},
-        SMS: {{ voter_sms_accounts_count|intcomma }})<br />
-
-    Voters With 1+ Friends: {{ voters_with_friends_count|intcomma }}
-{#        3+ Friends: {{ voters_with_3_plus_friends_count|intcomma }}#}
-        (Friendships: {{ voter_friendships_count|intcomma }})<br />
-
-    Total Vote Plans Made: {{ voters_with_plan_count|intcomma }}<br />
-
-    Shared Links, Unique Sharers: {{ shared_link_clicked_unique_sharer_count|intcomma }}
-        (Unique Viewers: {{ shared_link_clicked_unique_viewer_count|intcomma }},
-        Shared Links: {{ shared_links_count|intcomma }},
-        Link Clicks Without Re-clicks: {{ shared_links_click_without_reclick_count|intcomma }})
-{#        Link Clicks With Re-clicks: {{ shared_links_click_count|intcomma }})#}
-
+    <table style="margin-left: 20px; width: 55%">
+        <tr style="border-bottom: 1px solid black" >
+            <th style="width: fit-content; padding: 4px 10px 4px 0px !important">Statistics</th>
+            <th style="width: fit-content; padding: 4px 20px !important"></th>
+            <th style="width: fit-content; padding: 4px 10px !important"></th>
+            <th style="width: fit-content; padding: 4px 20px !important"></th>
+            <th style="width: fit-content; padding: 4px 10px !important"></th>
+            <th style="width: fit-content; padding: 4px 20px !important"></th>
+            <th style="width: fit-content; padding: 4px 10px !important"></th>
+            <th style="width: fit-content; padding: 4px 20px !important"></th>
+            <th style="width: fit-content; padding: 4px 10px !important"></th>
+            <th style="width: fit-content; padding: 4px 20px !important"></th>
+        </tr>
+        <tr>
+            <td>
+                Public Opinions:
+            </td>
+            <td>
+                {{ total_public_endorsements_count|intcomma }}
+            </td>
+            <td>
+                W/Commentary:
+            </td>
+            <td>
+                {{ total_public_endorsements_with_commentary_count|intcomma }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Friends-Only Opinions:
+            </td>
+            <td>
+                {{ total_friends_only_endorsements_count|intcomma }}
+            </td>
+            <td>
+                W/Commentary:
+            </td>
+            <td>
+                {{ total_friends_only_endorsements_with_commentary_count|intcomma }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Total Ballot Requests:
+            </td>
+            <td>
+                {{ voter_address_basic_count|intcomma }}
+            </td>
+            <td>
+                Full Address:
+            </td>
+            <td>
+                {{ voter_address_full_address_count|intcomma }}
+            </td>
+      </tr>
+        <tr>
+            <td>
+                Total Voter Accounts:
+            </td>
+            <td>
+                {{ voter_accounts_count|intcomma }}
+            </td>
+            <td>
+                Twitter:
+            </td>
+            <td>
+                {{ voter_twitter_accounts_count|intcomma }}
+            </td>
+            <td>
+                Facebook:
+            </td>
+            <td>
+                {{ voter_facebook_accounts_count|intcomma }}
+            </td>
+            <td>
+                Email:
+            </td>
+            <td>
+                {{ voter_email_accounts_count|intcomma }}
+            </td>
+            <td>
+                SMS:
+            </td>
+            <td>
+                {{ voter_sms_accounts_count|intcomma }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Friendships:
+            </td>
+           <td>
+                {{ voter_friendships_count|intcomma }}
+            </td>
+            <td>
+                Voters With 1+ Friends:
+            </td>
+            <td>
+                {{ voters_with_friends_count|intcomma }}
+            </td>
+            <td>
+                3+ Friends:
+            </td>
+            <td>
+                {{ voters_with_3_plus_friends_count|intcomma }}
+            </td>
+            <td>
+                10+ Friends:
+            </td>
+            <td>
+                {{ voters_with_10_plus_friends_count|intcomma }}
+            </td>
+            <td>
+                20+ Friends:
+            </td>
+            <td>
+                {{ voters_with_20_plus_friends_count|intcomma }}
+            </td>
+         </tr>
+        <tr>
+            <td>
+                Total Vote Plans Made:
+            </td>
+            <td>
+                {{ voters_with_plan_count|intcomma }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Shared Links, Unique Sharers:
+            </td>
+            <td>
+                {{ shared_link_clicked_unique_sharer_count|intcomma }}
+            </td>
+            <td>
+                Unique Viewers:
+            </td>
+            <td>
+                {{ shared_link_clicked_unique_viewer_count|intcomma }}
+            </td>
+            <td>
+                Shared Links:
+            </td>
+            <td>
+                {{ shared_links_count|intcomma }}
+            </td>
+            <td>
+                Link Clicks w/o Reclicks:
+            </td>
+            <td>
+                {{ shared_links_click_without_reclick_count|intcomma }}
+                {#        Link Clicks With Reclicks: {{ shared_links_click_count|intcomma }})#}
+            </td>
+        </tr>
+    </table>
 
 {# ################## #}
 <h2>Election Data</h2>

@@ -124,7 +124,7 @@ that the instance is running Python 3.7, when Python 3.8 comes out, feel free to
     'Unable to set the SECRET_KEY variable from os.environ or JSON file' error.
     
     **There are a number of secret values in `environment_variables.json` that are not in source control,
-    you will need to check in with Dale as you find that you need them.**
+    you will need to check in with Dale, as you find that you need them.**
 
 1. In PyCharm, open up the Terminal window (from the list of options on the second from the bottom line in the IDE).  Note that
 the terminal opens up with the project root directory set as the pwd (which is handy).

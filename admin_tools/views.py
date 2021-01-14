@@ -87,7 +87,10 @@ def admin_home_view(request):
 
     friend_manager = FriendManager()
     voters_with_friends_count = friend_manager.fetch_voters_with_friends_count()
-    voters_with_3_plus_friends_count = friend_manager.fetch_voters_with_friends_count(this_many_friends_or_more=3)
+    # voters_with_3_plus_friends_count = friend_manager.fetch_voters_with_friends_count(this_many_friends_or_more=3)
+    voters_with_3_plus_friends_count = friend_manager.fetch_voters_with_friends_count_new("3", ">=")
+    voters_with_10_plus_friends_count = friend_manager.fetch_voters_with_friends_count_new("10", ">=")
+    voters_with_20_plus_friends_count = friend_manager.fetch_voters_with_friends_count_new("20", ">=")
     voter_friendships_count = friend_manager.fetch_voter_friendships_count()
 
     position_metrics_manager = PositionMetricsManager()
@@ -127,6 +130,8 @@ def admin_home_view(request):
         'voter_sms_accounts_count':         voter_sms_accounts_count,
         'voters_with_friends_count':        voters_with_friends_count,
         'voters_with_3_plus_friends_count': voters_with_3_plus_friends_count,
+        'voters_with_10_plus_friends_count': voters_with_10_plus_friends_count,
+        'voters_with_20_plus_friends_count': voters_with_20_plus_friends_count,
         'voters_with_plan_count':           voters_with_plan_count,
         'voter_friendships_count':          voter_friendships_count,
     }
