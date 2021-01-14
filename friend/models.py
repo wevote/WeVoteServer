@@ -2,11 +2,17 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import psycopg2
+from config.base import get_environment_variable
 from django.db import models
 from django.db.models import Q
 from email_outbound.models import EmailManager
-from wevote_functions.functions import convert_to_int, positive_value_exists
 from voter.models import VoterManager
+from wevote_functions.functions import positive_value_exists
+import wevote_functions.admin
+
+
+logger = wevote_functions.admin.get_logger(__name__)
 
 NO_RESPONSE = 'NO_RESPONSE'
 PENDING_EMAIL_VERIFICATION = 'PENDING_EMAIL_VERIFICATION'
@@ -1600,6 +1606,42 @@ class FriendManager(models.Model):
                 voters_with_friends_count = friends_query.count()
             except Exception as e:
                 pass
+
+        return voters_with_friends_count
+
+    # Run in the phpPgAdmin console to find the top friendly voters, then change viewer to viewee to see the back direct
+    # SELECT "viewer_voter_we_vote_id", COUNT("viewer_voter_we_vote_id") FROM "public"."friend_currentfriend"
+    #   GROUP BY "viewer_voter_we_vote_id" ORDER BY count DESC;
+    def fetch_voters_with_friends_count_new(self, number_of_friends, sql_comparison=">=" ):
+        voters_with_friends_count = 0
+        try:
+            conn = psycopg2.connect(
+                database=get_environment_variable('DATABASE_NAME'),
+                user=get_environment_variable('DATABASE_USER'),
+                password=get_environment_variable('DATABASE_PASSWORD'),
+                host=get_environment_variable('DATABASE_HOST'),
+                port=get_environment_variable('DATABASE_PORT')
+            )
+            cur = conn.cursor()
+            sql_viewer = 'SELECT "viewer_voter_we_vote_id", ' \
+                         'COUNT("viewer_voter_we_vote_id") ' \
+                         'FROM "public"."friend_currentfriend" ' \
+                         'GROUP BY "viewer_voter_we_vote_id" ' \
+                         'HAVING COUNT("viewer_voter_we_vote_id") ' + sql_comparison + ' ' + number_of_friends + ';'
+            cur.execute(sql_viewer)
+            logger.debug('fetch_voters_with_friends_count_new first row sql_viewer:', cur.fetchone())
+            voters_with_friends_count += cur.rowcount
+            # Now the other direction
+            cur = conn.cursor() # replace the cursor with a new one
+            sql_viewee = sql_viewer.replace('viewer', 'viewee')
+            cur.execute(sql_viewee)
+            logger.debug('fetch_voters_with_friends_count_new first row sql_viewee:', cur.fetchone())
+            voters_with_friends_count += cur.rowcount
+            conn.close()
+
+        except Exception as e:
+            print("Exception in fetch_voters_with_friends_count_new", e)
+            pass
 
         return voters_with_friends_count
 
