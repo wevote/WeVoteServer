@@ -9,10 +9,7 @@ from django.db.models import Q
 from email_outbound.models import EmailManager
 from voter.models import VoterManager
 from wevote_functions.functions import positive_value_exists
-import wevote_functions.admin
 
-
-logger = wevote_functions.admin.get_logger(__name__)
 
 NO_RESPONSE = 'NO_RESPONSE'
 PENDING_EMAIL_VERIFICATION = 'PENDING_EMAIL_VERIFICATION'
@@ -1609,7 +1606,7 @@ class FriendManager(models.Model):
 
         return voters_with_friends_count
 
-    # Run in the phpPgAdmin console to find the top friendly voters, then change viewer to viewee to see the back direct
+    # Run in the phpPgAdmin console to find the top friendly voters, then change viewer to viewee for the back direction
     # SELECT "viewer_voter_we_vote_id", COUNT("viewer_voter_we_vote_id") FROM "public"."friend_currentfriend"
     #   GROUP BY "viewer_voter_we_vote_id" ORDER BY count DESC;
     def fetch_voters_with_friends_count_new(self, number_of_friends, sql_comparison=">=" ):
@@ -1629,13 +1626,13 @@ class FriendManager(models.Model):
                          'GROUP BY "viewer_voter_we_vote_id" ' \
                          'HAVING COUNT("viewer_voter_we_vote_id") ' + sql_comparison + ' ' + number_of_friends + ';'
             cur.execute(sql_viewer)
-            logger.debug('fetch_voters_with_friends_count_new first row sql_viewer:', cur.fetchone())
+            print('fetch_voters_with_friends_count_new first row sql_viewer:', cur.fetchone())
             voters_with_friends_count += cur.rowcount
             # Now the other direction
             cur = conn.cursor() # replace the cursor with a new one
             sql_viewee = sql_viewer.replace('viewer', 'viewee')
             cur.execute(sql_viewee)
-            logger.debug('fetch_voters_with_friends_count_new first row sql_viewee:', cur.fetchone())
+            print('fetch_voters_with_friends_count_new first row sql_viewee:', cur.fetchone())
             voters_with_friends_count += cur.rowcount
             conn.close()
 
