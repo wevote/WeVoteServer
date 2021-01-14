@@ -1630,7 +1630,7 @@ class FriendManager(models.Model):
             # print('fetch_voters_with_friends_count_new first row sql_viewer:', cur.fetchone())
             voters_with_friends_count += cur.rowcount
             # Now the other direction
-            cur = conn.cursor() # replace the cursor with a new one
+            cur = conn.cursor()  # replace the cursor with a new one
             sql_viewee = sql_viewer.replace('viewer', 'viewee')
             cur.execute(sql_viewee)
             print('fetch_voters_with_friends_count_new first row sql_viewee:', cur.fetchone())
