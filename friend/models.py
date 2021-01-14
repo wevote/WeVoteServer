@@ -1638,7 +1638,7 @@ class FriendManager(models.Model):
             conn.close()
             dt = time.time() - t0
             secs = "{:.3f}".format(dt)
-            print('fetch_voters_with_friends_count_new (without django ORM) took ' + secs + ' seconds to retrieve')
+            print('fetch_voters_with_friends_count_new took ' + secs + ' seconds to retrieve')
         except Exception as e:
             print("Exception in fetch_voters_with_friends_count_new", e)
             pass
