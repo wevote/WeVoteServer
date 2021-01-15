@@ -36,7 +36,7 @@
             <td>{{ voter_address_basic_count|intcomma }}</td>
             <td>Full Address:</td>
             <td>{{ voter_address_full_address_count|intcomma }}</td>
-      </tr>
+        </tr>
         <tr>
             <td>Total Voter Accounts:</td>
             <td>{{ voter_accounts_count|intcomma }}</td>
@@ -60,7 +60,7 @@
             <td>{{ voters_with_10_plus_friends_count|intcomma }}</td>
             <td>20+ Friends:</td>
             <td>{{ voters_with_20_plus_friends_count|intcomma }}</td>
-         </tr>
+        </tr>
         <tr>
             <td>Total Vote Plans Made:</td>
             <td>{{ voters_with_plan_count|intcomma }}</td>
@@ -77,6 +77,42 @@
             {#        Link Clicks With Reclicks: {{ shared_links_click_count|intcomma }})#}
         </tr>
     </table>
+
+  <!-- https://simpleisbetterthancomplex.com/tutorial/2020/01/19/how-to-use-chart-js-with-django.html -->
+  <button id="showChart" style="margin: 16px 0 10px 20px">Show Chart</button>
+  <div id="chartContainer"></div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  <script>
+      $('#showChart').click(function(evt) {
+          if ($("#showChart").text() === "Hide Chart") {
+              $('#showChart').text("Show Chart");  // toggle
+              // console.log('after the state change to Show: ' +$('#showChart').text());
+              // console.log("Before remove");
+              $("#chartCanvas").remove();
+              $("#chartContainer").removeAttr("style");
+              return;
+          }
+          $('#showChart').text("Hide Chart");  // toggle
+          const chartContainer = $('#chartContainer');
+          chartContainer.append('<canvas id="chartCanvas"></canvas>');
+          chartContainer.css({width: "75%", margin: "1% 5% 1% 5%", border: "1px solid black"});
+          const $chartCanvas = $("#chartCanvas");
+          const ctx = $chartCanvas[0].getContext("2d");
+          new Chart(ctx, {
+              type: 'bar',
+              data: {
+              labels: {{ voters_with_friends_for_graph | safe}},
+              datasets: [{
+                  label: 'Voters With Friends',
+                  data: {{ voter_with_friends_counts | safe }},
+              }],
+              },
+              options: {
+                  responsive: true
+              }
+          });
+      });
+  </script>
 
 {# ################## #}
 <h2>Election Data</h2>

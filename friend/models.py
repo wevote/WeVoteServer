@@ -2,10 +2,11 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import json
 import psycopg2
-from config.base import get_environment_variable
 from django.db import models
 from django.db.models import Q
+from config.base import get_environment_variable
 from email_outbound.models import EmailManager
 from voter.models import VoterManager
 from wevote_functions.functions import positive_value_exists
@@ -1641,6 +1642,53 @@ class FriendManager(models.Model):
             pass
 
         return voters_with_friends_count
+
+    def fetch_voters_with_friends_for_graph(self, minimum_number_of_friends=2 ):
+        reduced_friendlies = []
+        sorted_reduced_friendlies = []
+
+        try:
+            conn = psycopg2.connect(
+                database=get_environment_variable('DATABASE_NAME'),
+                user=get_environment_variable('DATABASE_USER'),
+                password=get_environment_variable('DATABASE_PASSWORD'),
+                host=get_environment_variable('DATABASE_HOST'),
+                port=get_environment_variable('DATABASE_PORT')
+            )
+            cur = conn.cursor()
+            sql_viewer = 'SELECT "viewer_voter_we_vote_id", COUNT("viewer_voter_we_vote_id") FROM ' \
+                         '"public"."friend_currentfriend" GROUP BY "viewer_voter_we_vote_id" ORDER BY count DESC'
+            cur.execute(sql_viewer)
+            fetch1 = cur.fetchall()
+            filtered1 = list(filter(lambda x: x[1] >= minimum_number_of_friends, fetch1))
+            # Now the other direction
+            cur = conn.cursor() # replace the cursor with a new one
+            sql_viewee = sql_viewer.replace('viewer', 'viewee')
+            cur.execute(sql_viewee)
+            fetch2 = cur.fetchall()
+            filtered2 = list(filter(lambda x: x[1] >= minimum_number_of_friends, fetch2))
+            conn.close()
+            filtered = filtered1 + filtered2
+            friendlies = sorted(filtered, key=lambda tup: tup[0])
+            prior_voter = ''
+            for voter in friendlies:
+                if voter[0] != prior_voter:
+                    reduced_friendlies.append(voter)
+                    prior_voter = voter[0]
+                else:
+                    sum = voter[1] + reduced_friendlies[len(reduced_friendlies) -1][1]
+                    reduced_friendlies[len(reduced_friendlies) -1] = tuple([prior_voter, sum])
+            sorted_reduced_friendlies = sorted(reduced_friendlies, key=lambda tup: tup[1], reverse=True)
+
+        except Exception as e:
+            print("Exception in fetch_voters_with_friends_count_new", e)
+            pass
+        voters, counts = zip(*sorted_reduced_friendlies)
+        voters_json = json.dumps(voters)
+        counts_json = json.dumps(counts)
+
+        return voters_json, counts_json
+
 
     def retrieve_friend_invitations_sent_to_me(self, recipient_voter_we_vote_id, read_only=False):
         status = ''
