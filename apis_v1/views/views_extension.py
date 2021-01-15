@@ -42,6 +42,12 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+    json_data = process_pdf_to_html(pdf_url)
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def process_pdf_to_html(pdf_url):
     file_name, headers = urllib.request.urlretrieve(pdf_url)
     pdf_name = os.path.basename(pdf_url)
     dirname, basename = os.path.split(file_name)
@@ -57,14 +63,13 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
 
     # https://github.com/pdf2htmlEX/pdf2htmlEX  !Not the abandoned coolwanglu original branch!
     # https://github.com/pdf2htmlEX/pdf2htmlEX/wiki/Command-Line-Options
+    # In December 2020, we installed a docker image in AWS/EC2: https://hub.docker.com/r/cardboardci/pdf2htmlex
     # pdf2htmlEX -zoom 1.3 Cook-18-Primary-Web.pdf
     # Test cases:
     # https://www.iuoe399.org/media/filer_public/45/77/457700c9-dd70-4cfc-be49-a81cb3fba0a6/2020_lu399_primary_endorsement.pdf
     # http://www.local150.org/wp-content/uploads/2018/02/Cook-18-Primary-Web.pdf
     # http://www.sddemocrats.org/sites/sdcdp/files/pdf/Endorsements_Flyer_P2020b.pdf
     # https://crpa.org/wp-content/uploads/2020-CA-Primary-Candidate-Final.pdf
-    # TODO: Note there is some post processing of the html in fixupForPdf2htmlEX() in the chrome extension that will be
-    #  needed here, if we use this on the server and process the resulting HTML in Python
 
     process = subprocess.run(['pdf2htmlEX', '--dest-dir', dirname, temp_file_name])
     output = process.stdout
@@ -82,8 +87,7 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
         'output_from_subprocess': output,
         's3_url_for_html': s3_url_for_html,
     }
-
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    return json_data
 
 
 def store_temporary_html_file_to_aws(temp_file_name):
