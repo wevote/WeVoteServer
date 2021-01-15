@@ -1,4 +1,5 @@
-# README for API Installation: 3a. Installing Python/Django on Mac
+# README for API Installation: 3a. Installing 
+Python/Django on Mac
 
 [Back to Install Table of Contents](README_API_INSTALL.md)
 
