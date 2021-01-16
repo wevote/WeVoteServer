@@ -54,8 +54,14 @@ def get_environment_variable_default(var_name, default_value):
 
 
 def get_python_version():
-    version = os.popen('python --version').read()
+    version = os.popen('python --version').read().strip()
     print(version)    # Something like 'Python 3.7.2'
+    return version
+
+
+def get_node_version():
+    version = "Node " + os.popen('node -v').read().strip()
+    print(version)    # Something like 'v14.15.1'
     return version
 
 

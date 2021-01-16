@@ -1,15 +1,17 @@
 # candidate/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
-from .models import CandidateCampaignListManager, CandidateCampaign, CandidateCampaignManager, \
-    CANDIDATE_UNIQUE_IDENTIFIERS
+import datetime as the_other_datetime
+import json
+import urllib.request
+from socket import timeout
+from django.http import HttpResponse
+from django.utils.timezone import now
+import wevote_functions.admin
+from apis_v1.views.views_extension import process_pdf_to_html
 from ballot.models import CANDIDATE
 from bookmark.models import BookmarkItemList
 from config.base import get_environment_variable
-import datetime as the_other_datetime
-from django.http import HttpResponse
-from django.utils.timezone import now
 from election.models import ElectionManager
 from exception.models import handle_exception
 from image.controllers import retrieve_all_images_for_one_candidate, cache_master_and_resized_image, \
@@ -17,20 +19,17 @@ from image.controllers import retrieve_all_images_for_one_candidate, cache_maste
     LINKEDIN, TWITTER, WIKIPEDIA, FACEBOOK
 from import_export_vote_smart.controllers import retrieve_and_match_candidate_from_vote_smart, \
     retrieve_candidate_photo_from_vote_smart
-import json
 from office.models import ContestOfficeManager
 from politician.models import PoliticianManager
 from position.controllers import move_positions_to_another_candidate, update_all_position_details_from_candidate
-import re
-from socket import timeout
 from twitter.models import TwitterUserManager
-import urllib.request
-import wevote_functions.admin
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
     convert_date_to_we_vote_date_string, \
-    convert_to_political_party_constant, positive_value_exists, process_request_from_master, convert_to_int, \
+    convert_to_political_party_constant, positive_value_exists, process_request_from_master, \
     extract_twitter_handle_from_text_string, extract_website_from_url, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
+from .models import CandidateCampaignListManager, CandidateCampaign, CandidateCampaignManager, \
+    CANDIDATE_UNIQUE_IDENTIFIERS
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -2030,6 +2029,13 @@ def find_organization_endorsements_of_candidates_on_one_web_page(site_url, endor
             'endorsement_list_light':           endorsement_list_light_modified,
         }
         return results
+
+    if site_url.lower().endswith(".pdf"):
+        print("PDF Detected ", site_url)
+        response = process_pdf_to_html(site_url)
+        if positive_value_exists(response['s3_url_for_html']):
+            # Overwrite the the site_url parameter, with a url to an html representation of the PDF file
+            site_url = response['s3_url_for_html']
 
     urllib._urlopener = FakeFirefoxURLopener()
     headers = {
