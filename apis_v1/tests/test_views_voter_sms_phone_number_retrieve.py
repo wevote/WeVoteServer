@@ -1,4 +1,4 @@
-# apis_v1/test_views_voter_email_address_save.py
+# apis_v1/tests/test_views_voter_sms_phone_number_retrieve.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
