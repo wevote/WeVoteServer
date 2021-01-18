@@ -2543,8 +2543,7 @@ class VoterDeviceLink(models.Model):
         verbose_name="Platform type string {IOS, ANDROID, WEBAPP}", max_length=32, null=True,
         blank=True)
     firebase_fcm_token = models.CharField(
-        verbose_name="the Firebase Cloud Messaging (FCW) token for this device", max_length=255, null=True,
-        blank=True)
+        verbose_name="the Firebase Cloud Messaging (FCW) token for this device", max_length=255, null=True, blank=True)
 
     def generate_voter_device_id(self):
         # A simple mapping to this function
