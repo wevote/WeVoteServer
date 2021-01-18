@@ -87,7 +87,6 @@ def admin_home_view(request):
 
     friend_manager = FriendManager()
     friendlinks = friend_manager.fetch_voters_with_friends_dataset_improved()
-    voters_with_friends_count = friend_manager.fetch_voters_with_friends_count()
     voters_with_friends_for_graph, voter_with_friends_counts = friend_manager.fetch_voters_with_friends_for_graph(friendlinks)
     voter_friendships_count = friend_manager.fetch_voter_friendships_count()
 
@@ -127,7 +126,6 @@ def admin_home_view(request):
         'voter_facebook_accounts_count':      voter_facebook_accounts_count,
         'voter_twitter_accounts_count':       voter_twitter_accounts_count,
         'voter_sms_accounts_count':           voter_sms_accounts_count,
-        'voters_with_friends_count':          voters_with_friends_count,
         'voters_with_1_friend_count':         friend_manager.get_count_of_friendlinks(friendlinks, "==", 1),
         'voters_with_1_plus_friend_count':    friend_manager.get_count_of_friendlinks(friendlinks, ">=", 1),
         'voters_with_2_friends_count':        friend_manager.get_count_of_friendlinks(friendlinks, "==", 2),
