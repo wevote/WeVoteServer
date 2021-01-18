@@ -1691,10 +1691,11 @@ class FriendManager(models.Model):
             )
             cur = conn.cursor()
             sql_viewer = \
-                'SELECT id, COUNT(*) COUNT from ( ' \
+                'SELECT id, COUNT(*) AS we_count FROM ( ' \
                 'SELECT viewee_voter_we_vote_id id FROM "public"."friend_currentfriend" ' \
-                'UNION all ' \
-                'SELECT viewer_voter_we_vote_id id FROM "public"."friend_currentfriend") t ' \
+                'UNION ALL ' \
+                'SELECT viewer_voter_we_vote_id id FROM "public"."friend_currentfriend") ' \
+                'AS throwaway_variable ' \
                 'GROUP BY id  ' \
                 'ORDER BY COUNT(*) desc'
             cur.execute(sql_viewer)
