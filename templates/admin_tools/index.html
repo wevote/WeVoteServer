@@ -50,14 +50,18 @@
             <td>{{ voter_sms_accounts_count|intcomma }}</td>
         </tr>
         <tr>
-            <td>Friendships:</td>
+            <td>Total Friend Links:</td>
             <td>{{ voter_friendships_count|intcomma }}</td>
-            <td>Voters With 1+ Friends:</td>
-            <td>{{ voters_with_friends_count|intcomma }}</td>
-            <td>3+ Friends:</td>
-            <td>{{ voters_with_3_plus_friends_count|intcomma }}</td>
-            <td>10+ Friends:</td>
-            <td>{{ voters_with_10_plus_friends_count|intcomma }}</td>
+        </tr>
+        <tr>
+            <td>Voters With 1 Friend:</td>
+            <td>{{ voters_with_1_friend_count|intcomma }}</td>
+            <td>2 Friends:</td>
+            <td>{{ voters_with_2_friends_count|intcomma }}</td>
+            <td>3 Friends:</td>
+            <td>{{ voters_with_3_friends_count|intcomma }}</td>
+            <td>10-19 Friends:</td>
+            <td>{{ voters_with_10_to_20_friends_count|intcomma }}</td>
             <td>20+ Friends:</td>
             <td>{{ voters_with_20_plus_friends_count|intcomma }}</td>
         </tr>
@@ -79,13 +83,13 @@
     </table>
 
   <!-- https://simpleisbetterthancomplex.com/tutorial/2020/01/19/how-to-use-chart-js-with-django.html -->
-  <button id="showChart" style="margin: 16px 0 10px 20px">Show Chart</button>
+  <button id="showChart" style="margin: 16px 0 10px 20px">Show Friends Frequency Chart</button>
   <div id="chartContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
   <script>
       $('#showChart').click(function(evt) {
           if ($("#showChart").text() === "Hide Chart") {
-              $('#showChart').text("Show Chart");  // toggle
+              $('#showChart').text("Show Friends Frequency Chart");  // toggle
               // console.log('after the state change to Show: ' +$('#showChart').text());
               // console.log("Before remove");
               $("#chartCanvas").remove();
@@ -95,7 +99,7 @@
           $('#showChart').text("Hide Chart");  // toggle
           const chartContainer = $('#chartContainer');
           chartContainer.append('<canvas id="chartCanvas"></canvas>');
-          chartContainer.css({width: "75%", margin: "1% 5% 1% 5%", border: "1px solid black"});
+          chartContainer.css({width: "40%", margin: "1% 5% 1% 5%", border: "1px solid black"});
           const $chartCanvas = $("#chartCanvas");
           const ctx = $chartCanvas[0].getContext("2d");
           new Chart(ctx, {
@@ -103,7 +107,7 @@
               data: {
               labels: {{ voters_with_friends_for_graph | safe}},
               datasets: [{
-                  label: 'Voters With Friends',
+                  label: 'Friends Frequency, for Voters With Friends',
                   data: {{ voter_with_friends_counts | safe }},
               }],
               },

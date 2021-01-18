@@ -86,12 +86,9 @@ def admin_home_view(request):
     voter_address_full_address_count = voter_address_manager.fetch_address_full_address_count()
 
     friend_manager = FriendManager()
+    friendlinks = friend_manager.fetch_voters_with_friends_dataset_improved()
     voters_with_friends_count = friend_manager.fetch_voters_with_friends_count()
-    # voters_with_3_plus_friends_count = friend_manager.fetch_voters_with_friends_count(this_many_friends_or_more=3)
-    voters_with_3_plus_friends_count = friend_manager.fetch_voters_with_friends_count_new("3", ">=")
-    voters_with_10_plus_friends_count = friend_manager.fetch_voters_with_friends_count_new("10", ">=")
-    voters_with_20_plus_friends_count = friend_manager.fetch_voters_with_friends_count_new("20", ">=")
-    voters_with_friends_for_graph, voter_with_friends_counts = friend_manager.fetch_voters_with_friends_for_graph(3)
+    voters_with_friends_for_graph, voter_with_friends_counts = friend_manager.fetch_voters_with_friends_for_graph(friendlinks)
     voter_friendships_count = friend_manager.fetch_voter_friendships_count()
 
     position_metrics_manager = PositionMetricsManager()
@@ -110,34 +107,39 @@ def admin_home_view(request):
         share_manager.fetch_shared_link_clicked_shared_links_click_without_reclick_count()
 
     template_values = {
-        'google_civic_election_id':         google_civic_election_id,
-        'python_version':                   get_python_version(),
-        'node_version':                     get_node_version(),
+        'google_civic_election_id':           google_civic_election_id,
+        'python_version':                     get_python_version(),
+        'node_version':                       get_node_version(),
         'shared_link_clicked_unique_sharer_count': shared_link_clicked_unique_sharer_count,
         'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
-        'shared_links_count':               shared_links_count,
+        'shared_links_count':                 shared_links_count,
         # 'shared_links_click_count':         shared_links_click_count,
         'shared_links_click_without_reclick_count': shared_links_click_without_reclick_count,
-        'state_code':                       state_code,
-        'total_public_endorsements_count':  total_public_endorsements_count,
+        'state_code':                         state_code,
+        'total_public_endorsements_count':    total_public_endorsements_count,
         'total_public_endorsements_with_commentary_count':  total_public_endorsements_with_commentary_count,
         'total_friends_only_endorsements_count':  total_friends_only_endorsements_count,
         'total_friends_only_endorsements_with_commentary_count':  total_friends_only_endorsements_with_commentary_count,
-        'voter_accounts_count':             voter_accounts_count,
-        'voter_address_basic_count':        voter_address_basic_count,
-        'voter_address_full_address_count': voter_address_full_address_count,
-        'voter_email_accounts_count':       voter_email_accounts_count,
-        'voter_facebook_accounts_count':    voter_facebook_accounts_count,
-        'voter_twitter_accounts_count':     voter_twitter_accounts_count,
-        'voter_sms_accounts_count':         voter_sms_accounts_count,
-        'voters_with_friends_count':        voters_with_friends_count,
-        'voters_with_3_plus_friends_count': voters_with_3_plus_friends_count,
-        'voters_with_10_plus_friends_count': voters_with_10_plus_friends_count,
-        'voters_with_20_plus_friends_count': voters_with_20_plus_friends_count,
-        'voters_with_friends_for_graph':    voters_with_friends_for_graph,
-        'voter_with_friends_counts':        voter_with_friends_counts,
-        'voters_with_plan_count':           voters_with_plan_count,
-        'voter_friendships_count':          voter_friendships_count,
+        'voter_accounts_count':               voter_accounts_count,
+        'voter_address_basic_count':          voter_address_basic_count,
+        'voter_address_full_address_count':   voter_address_full_address_count,
+        'voter_email_accounts_count':         voter_email_accounts_count,
+        'voter_facebook_accounts_count':      voter_facebook_accounts_count,
+        'voter_twitter_accounts_count':       voter_twitter_accounts_count,
+        'voter_sms_accounts_count':           voter_sms_accounts_count,
+        'voters_with_friends_count':          voters_with_friends_count,
+        'voters_with_1_friend_count':         friend_manager.get_count_of_friendlinks(friendlinks, "==", 1),
+        'voters_with_1_plus_friend_count':    friend_manager.get_count_of_friendlinks(friendlinks, ">=", 1),
+        'voters_with_2_friends_count':        friend_manager.get_count_of_friendlinks(friendlinks, "==", 2),
+        'voters_with_3_friends_count':        friend_manager.get_count_of_friendlinks(friendlinks, "==", 3),
+        'voters_with_3_plus_friends_count':   friend_manager.get_count_of_friendlinks(friendlinks, ">=", 3),
+        'voters_with_10_plus_friends_count':  friend_manager.get_count_of_friendlinks(friendlinks, ">=", 10),
+        'voters_with_10_to_20_friends_count': friend_manager.get_count_of_friendlinks(friendlinks, "range", 10, 19),
+        'voters_with_20_plus_friends_count':  friend_manager.get_count_of_friendlinks(friendlinks, ">=", 20),
+        'voters_with_friends_for_graph':      voters_with_friends_for_graph,
+        'voter_with_friends_counts':          voter_with_friends_counts,
+        'voters_with_plan_count':             voters_with_plan_count,
+        'voter_friendships_count':            friend_manager.get_count_of_friendships(friendlinks),
     }
     response = render(request, 'admin_tools/index.html', template_values)
 
