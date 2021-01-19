@@ -11,7 +11,6 @@ from email_outbound.models import EmailManager
 from voter.models import VoterManager
 from wevote_functions.functions import positive_value_exists
 
-
 NO_RESPONSE = 'NO_RESPONSE'
 PENDING_EMAIL_VERIFICATION = 'PENDING_EMAIL_VERIFICATION'
 ACCEPTED = 'ACCEPTED'
@@ -1264,12 +1263,13 @@ class FriendManager(models.Model):
             status += 'FRIEND_INVITATIONS_PROCESSED-NO_FRIEND_INVITATION_EMAIL_LINK_LIST_RETRIEVED_DoesNotExist '
         except Exception as e:
             friend_invitation_from_email_list_found = False
-            status += 'FRIEND_INVITATIONS_PROCESSED-FAILED retrieve_friend_invitations_processed FriendInvitationEmailLink ' + str(e) + " "
+            status += 'FRIEND_INVITATIONS_PROCESSED-FAILED retrieve_friend_invitations_processed ' \
+                      'FriendInvitationEmailLink ' + str(e) + " "
 
         if friend_invitation_from_voter_list_found and friend_invitation_from_email_list_found:
             friend_invitation_from_list_found = True
             friend_invitation_from_list = list(friend_invitation_from_voter_list) + \
-                list(friend_invitation_from_email_list)
+                                          list(friend_invitation_from_email_list)
         elif friend_invitation_from_voter_list_found:
             friend_invitation_from_list_found = True
             friend_invitation_from_list = friend_invitation_from_voter_list
@@ -1583,112 +1583,147 @@ class FriendManager(models.Model):
 
         return current_friend_count
 
-    def fetch_voters_with_friends_count(self, this_many_friends_or_more=0):
-        voters_with_friends_count = 0
-        if positive_value_exists(this_many_friends_or_more):
-            # TODO We need to figure out how to count number of voter_we_vote_ids in either column, so we can limit
-            #  the count of the number of friendships to those voter_we_vote_ids which
-            #  appear "this_many_friends_or_more" times or more
-            #  Started Google searching with "django python count distinct"
-            pass
-        else:
-            from django.db.models import F
-            try:
-                friends_query = CurrentFriend.objects.using('readonly')\
-                    .annotate(voter_we_vote_id=F('viewee_voter_we_vote_id')).values_list('voter_we_vote_id', flat=True)\
-                    .union(
-                    CurrentFriend.objects.using('readonly')
-                        .annotate(voter_we_vote_id=F('viewer_voter_we_vote_id'))
-                        .values_list('voter_we_vote_id', flat=True)
-                )
-                voters_with_friends_count = friends_query.count()
-            except Exception as e:
-                pass
-
-        return voters_with_friends_count
+    # def fetch_voters_with_friends_count(self, this_many_friends_or_more=0):
+    #     voters_with_friends_count = 0
+    #     if positive_value_exists(this_many_friends_or_more):
+    #         # TODO We need to figure out how to count number of voter_we_vote_ids in either column, so we can limit
+    #         #  the count of the number of friendships to those voter_we_vote_ids which
+    #         #  appear "this_many_friends_or_more" times or more
+    #         #  Started Google searching with "django python count distinct"
+    #         pass
+    #     else:
+    #         from django.db.models import F
+    #         try:
+    #             friends_query = CurrentFriend.objects.using('readonly') \
+    #                 .annotate(voter_we_vote_id=F('viewee_voter_we_vote_id')).values_list('voter_we_vote_id', flat=True) \
+    #                 .union(
+    #                 CurrentFriend.objects.using('readonly')
+    #                     .annotate(voter_we_vote_id=F('viewer_voter_we_vote_id'))
+    #                     .values_list('voter_we_vote_id', flat=True)
+    #             )
+    #             voters_with_friends_count = friends_query.count()
+    #         except Exception as e:
+    #             pass
+    #
+    #     return voters_with_friends_count
 
     # Run in the phpPgAdmin console to find the top friendly voters, then change viewer to viewee for the back direction
     # SELECT "viewer_voter_we_vote_id", COUNT("viewer_voter_we_vote_id") FROM "public"."friend_currentfriend"
     #   GROUP BY "viewer_voter_we_vote_id" ORDER BY count DESC;
-    def fetch_voters_with_friends_count_new(self, number_of_friends, sql_comparison=">=" ):
-        voters_with_friends_count = 0
-        try:
-            conn = psycopg2.connect(
-                database=get_environment_variable('DATABASE_NAME'),
-                user=get_environment_variable('DATABASE_USER'),
-                password=get_environment_variable('DATABASE_PASSWORD'),
-                host=get_environment_variable('DATABASE_HOST'),
-                port=get_environment_variable('DATABASE_PORT')
-            )
-            cur = conn.cursor()
-            sql_viewer = 'SELECT "viewer_voter_we_vote_id", ' \
-                         'COUNT("viewer_voter_we_vote_id") ' \
-                         'FROM "public"."friend_currentfriend" ' \
-                         'GROUP BY "viewer_voter_we_vote_id" ' \
-                         'HAVING COUNT("viewer_voter_we_vote_id") ' + sql_comparison + ' ' + number_of_friends + ';'
-            cur.execute(sql_viewer)
-            print('fetch_voters_with_friends_count_new first row sql_viewer:', cur.fetchone())
-            voters_with_friends_count += cur.rowcount
-            # Now the other direction
-            cur = conn.cursor() # replace the cursor with a new one
-            sql_viewee = sql_viewer.replace('viewer', 'viewee')
-            cur.execute(sql_viewee)
-            print('fetch_voters_with_friends_count_new first row sql_viewee:', cur.fetchone())
-            voters_with_friends_count += cur.rowcount
-            conn.close()
-
-        except Exception as e:
-            print("Exception in fetch_voters_with_friends_count_new", e)
-            pass
-
-        return voters_with_friends_count
-
-    def fetch_voters_with_friends_for_graph(self, minimum_number_of_friends=2 ):
+    def fetch_voters_with_friends_for_graph(self, friendlinks):
         reduced_friendlies = []
-        sorted_reduced_friendlies = []
+        # index    0    1    2    3    4    5    6    7    8      9        10       11     12
+        voters = ["2", "3", "4", "5", "6", "7", "8", "9", "10-19", "20-29", "30-39", "40+"]
+        counts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
         try:
-            conn = psycopg2.connect(
-                database=get_environment_variable('DATABASE_NAME'),
-                user=get_environment_variable('DATABASE_USER'),
-                password=get_environment_variable('DATABASE_PASSWORD'),
-                host=get_environment_variable('DATABASE_HOST'),
-                port=get_environment_variable('DATABASE_PORT')
-            )
-            cur = conn.cursor()
-            sql_viewer = 'SELECT "viewer_voter_we_vote_id", COUNT("viewer_voter_we_vote_id") FROM ' \
-                         '"public"."friend_currentfriend" GROUP BY "viewer_voter_we_vote_id" ORDER BY count DESC'
-            cur.execute(sql_viewer)
-            fetch1 = cur.fetchall()
-            filtered1 = list(filter(lambda x: x[1] >= minimum_number_of_friends, fetch1))
-            # Now the other direction
-            cur = conn.cursor() # replace the cursor with a new one
-            sql_viewee = sql_viewer.replace('viewer', 'viewee')
-            cur.execute(sql_viewee)
-            fetch2 = cur.fetchall()
-            filtered2 = list(filter(lambda x: x[1] >= minimum_number_of_friends, fetch2))
-            conn.close()
-            filtered = filtered1 + filtered2
-            friendlies = sorted(filtered, key=lambda tup: tup[0])
-            prior_voter = ''
-            for voter in friendlies:
-                if voter[0] != prior_voter:
-                    reduced_friendlies.append(voter)
-                    prior_voter = voter[0]
-                else:
-                    sum = voter[1] + reduced_friendlies[len(reduced_friendlies) -1][1]
-                    reduced_friendlies[len(reduced_friendlies) -1] = tuple([prior_voter, sum])
-            sorted_reduced_friendlies = sorted(reduced_friendlies, key=lambda tup: tup[1], reverse=True)
+            counts[0] = self.get_count_of_friendlinks(friendlinks, "==", 2)
+            counts[1] = self.get_count_of_friendlinks(friendlinks, "==", 3)
+            counts[2] = self.get_count_of_friendlinks(friendlinks, "==", 4)
+            counts[3] = self.get_count_of_friendlinks(friendlinks, "==", 5)
+            counts[4] = self.get_count_of_friendlinks(friendlinks, "==", 6)
+            counts[5] = self.get_count_of_friendlinks(friendlinks, "==", 7)
+            counts[6] = self.get_count_of_friendlinks(friendlinks, "==", 8)
+            counts[7] = self.get_count_of_friendlinks(friendlinks, "==", 9)
+            counts[8] = self.get_count_of_friendlinks(friendlinks, "range", 10, 19)
+            counts[9] = self.get_count_of_friendlinks(friendlinks, "range", 20, 29)
+            counts[10] = self.get_count_of_friendlinks(friendlinks, "range", 30, 39)
+            counts[11] = self.get_count_of_friendlinks(friendlinks, ">=", 40)
 
         except Exception as e:
-            print("Exception in fetch_voters_with_friends_count_new", e)
+            print("Exception in fetch_voters_with_friends_count_improved", e)
             pass
-        voters, counts = zip(*sorted_reduced_friendlies)
         voters_json = json.dumps(voters)
         counts_json = json.dumps(counts)
 
         return voters_json, counts_json
 
+    # def fetch_voters_with_friends_dataset(self):
+    #     reduced_friendlies = []
+    #     friendlies = []
+    #
+    #     try:
+    #         conn = psycopg2.connect(
+    #             database=get_environment_variable('DATABASE_NAME'),
+    #             user=get_environment_variable('DATABASE_USER'),
+    #             password=get_environment_variable('DATABASE_PASSWORD'),
+    #             host=get_environment_variable('DATABASE_HOST'),
+    #             port=get_environment_variable('DATABASE_PORT')
+    #         )
+    #         cur = conn.cursor()
+    #         sql_viewer = 'SELECT "viewer_voter_we_vote_id", COUNT("viewer_voter_we_vote_id") FROM ' \
+    #                      '"public"."friend_currentfriend" GROUP BY "viewer_voter_we_vote_id" ORDER BY count'
+    #         cur.execute(sql_viewer)
+    #         viewers = list(cur.fetchall())
+    #         # Now the other direction
+    #         cur = conn.cursor()  # replace the cursor with a new one
+    #         sql_viewee = sql_viewer.replace('viewer', 'viewee')
+    #         cur.execute(sql_viewee)
+    #         viewees = list(cur.fetchall())
+    #         conn.close()
+    #         friendlies = sorted(viewers + viewees, key=lambda tup: tup[0])
+    #         prior_voter = ''
+    #         for voter in friendlies:
+    #             if voter[0] != prior_voter:
+    #                 reduced_friendlies.append(voter)
+    #                 prior_voter = voter[0]
+    #             else:
+    #                 sumo = voter[1] + reduced_friendlies[len(reduced_friendlies) - 1][1]
+    #                 reduced_friendlies[len(reduced_friendlies) - 1] = tuple([prior_voter, sumo])
+    #
+    #     except Exception as e:
+    #         print("Exception in fetch_voters_with_friends_count_improved", e)
+    #         pass
+    #
+    #     return sorted(reduced_friendlies, key=lambda tup: tup[1], reverse=True)
+
+    # https://stackoverflow.com/questions/65764804/count-of-group-of-two-fields-in-sql-query-postgres/65765087#65765087
+    def fetch_voters_with_friends_dataset_improved(self):
+        friendlies = []
+
+        try:
+            conn = psycopg2.connect(
+                database=get_environment_variable('DATABASE_NAME'),
+                user=get_environment_variable('DATABASE_USER'),
+                password=get_environment_variable('DATABASE_PASSWORD'),
+                host=get_environment_variable('DATABASE_HOST'),
+                port=get_environment_variable('DATABASE_PORT')
+            )
+            cur = conn.cursor()
+            sql_viewer = \
+                'SELECT id, COUNT(*) AS we_count FROM ( ' \
+                'SELECT viewee_voter_we_vote_id id FROM "public"."friend_currentfriend" ' \
+                'UNION ALL ' \
+                'SELECT viewer_voter_we_vote_id id FROM "public"."friend_currentfriend") ' \
+                'AS throwaway_variable ' \
+                'GROUP BY id  ' \
+                'ORDER BY COUNT(*) desc'
+            cur.execute(sql_viewer)
+            friendlies = list(cur.fetchall())
+
+        except Exception as e:
+            print("Exception in fetch_voters_with_friends_count_improved", e)
+            pass
+
+        return friendlies
+
+    def get_count_of_friendships(self, friendlinks):
+        count = 0
+        for link in friendlinks:
+            count += link[1]
+        return count
+
+    def get_count_of_friendlinks(self, friendlinks, comparison, num1, num2=0):
+        matches = []
+        if comparison == "==":
+            matches = list(filter(lambda x: x[1] == num1, friendlinks))
+        elif comparison == ">=":
+            matches = list(filter(lambda x: x[1] >= num1, friendlinks))
+        elif comparison == "range":
+            matches = list(filter(lambda x: num1 <= x[1] <= num2, friendlinks))
+        else:
+            print("Unknown comparison in get_count_of_friendlinks")
+        return len(matches)
 
     def retrieve_friend_invitations_sent_to_me(self, recipient_voter_we_vote_id, read_only=False):
         status = ''
