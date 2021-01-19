@@ -1356,7 +1356,10 @@ def set_voter_device_id(request, response, voter_device_id):
 
 
 def set_voter_api_device_id(request, response, voter_api_device_id):
-    if 'voter_api_device_id' not in request.COOKIES:
+    overwrite_cookie = False
+    if 'voter_api_device_id' in request.COOKIES:
+        overwrite_cookie = request.COOKIES['voter_api_device_id']  != voter_api_device_id
+    if 'voter_api_device_id' not in request.COOKIES or overwrite_cookie:
         set_cookie(response, 'voter_api_device_id', voter_api_device_id)
 
 
