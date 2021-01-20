@@ -2,10 +2,15 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import datetime
+import glob
 import json
 # import logging
 import os
+import pathlib
+import re
 from django.core.exceptions import ImproperlyConfigured
+
 # Consider switching to the way that Two Scoops of Django 1.8 suggests file path handling, section 5.6
 # from unipath import Path
 
@@ -60,9 +65,24 @@ def get_python_version():
 
 
 def get_node_version():
-    version = "Node " + os.popen('node -v').read().strip()
+    version = "Node " + os.popen('node -v').read().replace('\n', '').strip()
     print(version)    # Something like 'v14.15.1'
     return version
+
+
+def get_git_merge_date():
+    # Assume the latest source file has a timestamp that is the git merge date
+    pattern = '""gm'
+    list_of_files = [fn for fn in glob.glob('./*/**')
+                     if not os.path.basename(fn).endswith(('/', '_')) and
+                     re.search(r"/+.*?\..*?$", fn)]  # exclude new directories
+    latest_file_string = max(list_of_files, key=os.path.getctime)
+    posix_filepath = pathlib.Path(latest_file_string)
+    stat_of_file = posix_filepath.stat()
+    git_merge_date = str(datetime.datetime.fromtimestamp(stat_of_file.st_mtime)).split('.', 1)[0]
+    out_string = git_merge_date + '  (' + latest_file_string + ')'
+    # print(out_string)
+    return out_string
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
