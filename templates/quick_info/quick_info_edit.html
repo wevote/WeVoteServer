@@ -6,7 +6,6 @@
 {%  block content %}
 
 <a href="{% url 'quick_info:quick_info_list' %}">< Back</a>&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="{% url 'admin_tools:admin_home' %}">Back to Admin Home</a>
 
 <h1>{% if quick_info.id %}Edit {{ quick_info.ballot_item_display_name }}{% else %}New Quick Info for Ballot Item{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}

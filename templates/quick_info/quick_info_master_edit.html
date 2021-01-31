@@ -6,7 +6,6 @@
 {%  block content %}
 
 <a href="{% url 'quick_info:quick_info_master_list' %}">< Back</a>&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="{% url 'admin_tools:admin_home' %}">Back to Admin Home</a>
 
 <h1>{% if quick_info_master.id %}Edit Master Entry '{{ quick_info_master.master_entry_name }}'{% else %}New Quick Info Master Entry{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}

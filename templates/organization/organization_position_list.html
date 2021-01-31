@@ -7,9 +7,6 @@
 {% load template_filters %}
 {% load humanize %}
 
-<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a>&nbsp;&nbsp;&nbsp;
-<a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Endorsers</a>&nbsp;&nbsp;&nbsp;
-<a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Voter Guides</a>&nbsp;&nbsp;&nbsp;
 <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}">
     Analyze Endorser Data ></a></p>
 

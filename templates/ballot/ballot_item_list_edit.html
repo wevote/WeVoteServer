@@ -7,7 +7,6 @@
 {% block content %}
 {% load template_filters %}
 <p>
-    <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a>
     {% if election and election.id %}
     <br />
     <a href="{% url 'election:election_summary' election.id %}?google_civic_election_id={{ google_civic_election_id }}">
