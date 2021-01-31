@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from config.base import get_environment_variable, get_node_version, get_python_version, LOGIN_URL
+from config.base import get_environment_variable, get_git_merge_date, get_node_version, get_python_version, LOGIN_URL
 from ballot.models import BallotReturned, VoterBallotSaved
 from candidate.models import CandidateCampaign, CandidateCampaignManager
 from candidate.controllers import candidates_import_from_sample_file
@@ -109,6 +109,7 @@ def admin_home_view(request):
         'google_civic_election_id':           google_civic_election_id,
         'python_version':                     get_python_version(),
         'node_version':                       get_node_version(),
+        'git_merge_date':                     get_git_merge_date(),
         'shared_link_clicked_unique_sharer_count': shared_link_clicked_unique_sharer_count,
         'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
         'shared_links_count':                 shared_links_count,

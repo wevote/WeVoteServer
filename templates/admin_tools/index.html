@@ -185,10 +185,12 @@
 <br>
 <br>
 {# ################## #}
+{# This information does not have to be on the front page, as long as it can be found somewhere #}
 <h4>Technical Information</h4>
 <p>
     Running: {{ python_version }}<br>
-    Running: {{ node_version }}
+    Running: {{ node_version }}<br>
+    Git date:&nbsp; {{git_merge_date}}<br>
 </p>
 
 {%  endblock %}
