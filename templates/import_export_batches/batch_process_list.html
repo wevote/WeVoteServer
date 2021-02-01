@@ -5,7 +5,6 @@
 {% block title %}Batch Processes{% endblock %}
 
 {%  block content %}
-<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
 
 <h1>
   Batch Processes{% if batch_process_list %} ({{ batch_process_list|length }}){% endif %}

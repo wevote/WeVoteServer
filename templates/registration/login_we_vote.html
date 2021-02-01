@@ -3,7 +3,6 @@
 
 {% block content %}
 {% if request.user.is_authenticated %}
-<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
 {% endif %}
 
 {% if form.errors %}

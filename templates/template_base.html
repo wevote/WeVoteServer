@@ -60,8 +60,10 @@
         }
         .navbar-inverse {
           width: 100% !important;
-          background-color: #0d5470; !important;
+          background-color: rgb(41, 59, 96) !important;
           border-radius: 0;
+          margin-bottom: 0 !important;
+          border-bottom: gray solid 2px;
         }
         .u-no-break { // Replacement for nobr and &nbsp;
           white-space: nowrap;
@@ -78,6 +80,44 @@
         }
         input[type="radio"]:checked + .bold-select {
           font-weight: bold;
+        }
+        .sidebar {
+          width: 75px;
+          background: rgb(41, 59, 96);
+          padding: 20px 16px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+        }
+        .sidebar-item {
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+          color: #ffffff;
+          font-size: 13px;
+          font-family: 'Raleway';
+          opacity: 0.7;
+          transition: 0.2s;
+          cursor: pointer;
+          margin-bottom: 12px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.596);
+          width: 100%;
+          text-align: center;
+        }
+        .sidebar-item:hover {
+          opacity: 1;
+        }
+        .sidebar-item img {
+          width: 35px;
+          margin-bottom: 6px;
+        }
+        .flex-container {
+            display: flex;
+            }
+        .main {
+            flex: 1
         }
     </style>
 
@@ -96,28 +136,33 @@
                 {% endblock %}
             </div>
         </div>
-        <div class="wrapper">
-            <div id="content" class="container-fluid">
-                {# Display django.contrib.messages #}
-                {% if messages %}
-                    {% for message in messages %}
-                        <div
-                        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}class="alert alert-danger" role="alert"
-                        {% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}class="alert alert-primary" role="alert"
+       <div class="flex-container">
+            {% include "sidebar_navigation.html" %}
+            <div class="main">
+                 <div class="wrapper">
+                    <div id="content" class="container-fluid" style="padding-top: 10px">
+                        {# Display django.contrib.messages #}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div
+                                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}class="alert alert-danger" role="alert"
+                                {% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}class="alert alert-primary" role="alert"
+                                {% endif %}
+                                >
+                                {{ message|linebreaksbr }}
+                                </div>
+                            {% endfor %}
                         {% endif %}
-                        >
-                        {{ message|linebreaksbr }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
 
-                {% block content %}
-                {% endblock %}
-            </div>
-            <div id="footer" class="clearfix container-fluid">
-                {% block footer_navigation %}
-                    {% include "footer_navigation.html" %}
-                {% endblock %}
+                        {% block content %}
+                        {% endblock %}
+                    </div>
+                    <div id="footer" class="clearfix container-fluid">
+                        {% block footer_navigation %}
+                            {% include "footer_navigation.html" %}
+                        {% endblock %}
+                    </div>
+                </div>
             </div>
         </div>
     {% endblock %}

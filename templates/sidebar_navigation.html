@@ -1,0 +1,87 @@
+<div class="sidebar">
+  {% load staticfiles %}
+  <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/Home.svg" %}" alt="">
+      Admin Home
+    </div>
+  </a>
+  <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/Elections.svg" %}" alt="">
+      Elections
+    </div>
+  </a>
+  <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/Measures.svg" %}" alt="">
+      Measures
+    </div>
+  </a>
+  <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/Officies 2.svg" %}" alt="">
+      Offices
+    </div>
+  </a>
+  <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/Candidates.svg" %}" alt="" />
+      Candidates
+    </div>
+  </a>
+  <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/Elected Offices.svg" %}" alt="" />
+      Elected Offices
+    </div>
+  </a>
+  <a href="{% url 'elected_official:elected_official_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/Elected Officials.svg" %}" alt="" />
+      Elected Officials
+    </div>
+  </a>
+  <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/Politicans.svg" %}" alt="" />
+      Politicians
+    </div>
+  </a>
+  <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/Issues.svg" %}" alt="" />
+      Issues
+    </div>
+  </a>
+  <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/Organization.svg" %}" alt="" />
+      Organization
+    </div>
+  </a>
+  <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/Opinions.svg" %}" alt="">
+      Opinions
+    </div>
+  </a>
+  <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/Voter Guides.svg" %}" alt="">
+      Voter Guides
+    </div>
+  </a>
+  <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/VoterGuidePossibilities.svg" %}" alt="">
+        Voter Guide Possibilities
+    </div>
+  </a>
+  <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="{% static "apis_v1/Polling Locations.svg" %}" alt="">
+      Map Points
+    </div>
+  </a>
+</div>

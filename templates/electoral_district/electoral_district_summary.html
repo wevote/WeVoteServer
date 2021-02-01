@@ -5,10 +5,6 @@
 
 {%  block content %}
 {% load template_filters %}
-<p>
-  <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a>&nbsp;&nbsp;&nbsp;
-  <a href="{% url 'election:election_list' %}">< Back to Elections</a>
-</p>
 
 {% if electoral_district %}
 
