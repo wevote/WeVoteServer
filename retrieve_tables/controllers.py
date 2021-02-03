@@ -1,6 +1,8 @@
 import csv
 import json
 import os
+import re
+
 import psycopg2
 import requests
 import time
@@ -27,6 +29,7 @@ allowable_tables = [
     'politician_politician',
     'polling_location_pollinglocation',
     'position_positionentered',
+    'voter_guide_voterguidepossibility',
     'voter_guide_voterguide'
 ]
 
@@ -105,7 +108,21 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
 
 
 def clean_row(row, index):
-    row[index] = ''.join(ch for ch in row[index] if ch != '\n' and ch != '\r' and ch != '\"')
+    newstring = ''.join(ch for ch in row[index] if ch.isdigit() or ch.isalnum() or ch == ' ' or ch == '.' or ch == '_')
+    row[index] = newstring.strip()
+
+
+def clean_bigint_row(row, index):
+    if row is 31836:
+        print(row)
+    if not row[index].isnumeric() and row[index] != '\\N':
+        row[index] = 0
+
+
+def clean_url(row, index):
+    if "," in row[index]:
+        # ','' is technically valid in a URL, but is a reserved char
+        row[index] = row[index].replace(",", "")
 
 
 def substitute_null(row, index, sub):
@@ -119,6 +136,14 @@ def dump_row_col_labels_and_errors(table_name, header, row, index):
         for element in header:
             print(table_name + "." + element + " [" + str(cnt) + "]: " + row[cnt])
             cnt += 1
+
+
+def check_for_non_ascii(table_name, row):
+    field_no = 0
+    for field in row:
+        if (re.sub('[ -~]', '', field)) != "":
+            print("check_for_non_ascii - table: " + table_name + ", row id:  " + str(row[0]) + ", field no: " + str(field_no))
+        field_no += 1
 
 
 def get_dummy_unique_id():
@@ -233,7 +258,17 @@ def retrieve_sql_files_from_master_server(request):
     }
     return HttpResponse(json.dumps(results), content_type='application/json')
 
-
+# We don't check every field for garbage, although maybe we should...
+# Since the error reporting in the python console is pretty good, you should be able to figure out what field has
+# garbage in it.
+# Because we export to csv (comma separated values) files, that end up the the WeVoterServer root dir, you can stop
+# processing with the debugger, open the csv files in Excel, and get a decent view of what is happening.  The diagnostic
+# function dump_row_col_labels_and_errors(table_name, header, row, '2000060') also is really good at figuring out what
+# field has problems, and it dumps the field numbers and names which helps determine what row processing functions need
+# to be added, like 'clean_row(row, 10)                      # ballot_item_display_name'
+# The data provided to the developers local is pretty good, but some of the cleanups removes commas, and other niceities
+# from text fields.  It should be good enough, and if not, this function is where it can be improved.
+# hint: temporarily comment out some lines in allowable_tables, so you can get to the problem table quicker
 def csv_file_to_clean_csv_file2(table_name):
     csv_rows = []
     with open(table_name + '.csvTemp', 'r') as csv_file2:
@@ -242,6 +277,7 @@ def csv_file_to_clean_csv_file2(table_name):
 
         skipped_rows = '... Skipped rows in ' + table_name + ': '
         for row in line_reader:
+            # check_for_non_ascii(table_name, row)
             try:
                 if header is None:
                     header = row
@@ -354,11 +390,22 @@ def csv_file_to_clean_csv_file2(table_name):
                     clean_row(row, 47)                      # issue_analysis_admin_notes
                     # dump_row_col_labels_and_errors(table_name, header, row, '697')
                 elif table_name == 'position_positionentered':
+                    if row[0] == "31836":
+                        continue  # spent too much time on this one, not worth it
                     clean_row(row, 4)                       # ballot_item_display_name
                     substitute_null(row, 5, '1970-01-01 00:00:00+00')
                     clean_row(row, 16)                      # vote_smart_rating_name
+                    clean_bigint_row(row, 18)               # contest_office_id
+                    clean_row(row, 22)                      # google_civic_candidate_name
                     clean_row(row, 28)                      # statement_text
-                    # dump_row_col_labels_and_errors(table_name, header, row, '33085')
+                    clean_url(row, 30)                      # more_info_url
+                    clean_row(row, 37)                      # speaker_display_name
+                    clean_row(row, 43)                      # google_civic_measure_title
+                    clean_row(row, 44)                      # contest_office_name
+                    clean_row(row, 45)                      # political_party
+                    # dump_row_col_labels_and_errors(table_name, header, row, '31836')
+                elif table_name == 'voter_guide_voterguidepossibility':
+                    dump_row_col_labels_and_errors(table_name, header, row, '4')
                 elif table_name == 'voter_guide_voterguide':
                     clean_row(row, 14)                      # twitter_description
                     # dump_row_col_labels_and_errors(table_name, header, row, '3482')
