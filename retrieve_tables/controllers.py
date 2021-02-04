@@ -108,20 +108,20 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
 
 
 def clean_row(row, index):
-    newstring = ''.join(ch for ch in row[index] if ch.isdigit() or ch.isalnum() or ch == ' ' or ch == '.' or ch == '_')
+    newstring = row[index].replace('\n', ' ').replace(',', ' ')
+    newstring = ''.join(ch for ch in newstring if ch.isdigit() or ch.isalnum() or ch == ' ' or ch == '.' or ch == '_')
     row[index] = newstring.strip()
 
 
 def clean_bigint_row(row, index):
-    if row is 31836:
-        print(row)
     if not row[index].isnumeric() and row[index] != '\\N':
         row[index] = 0
 
 
 def clean_url(row, index):
     if "," in row[index]:
-        # ','' is technically valid in a URL, but is a reserved char
+        # ','' is technically valid in a URL, but is a reserved char, can mess up some ".xml" urls, but "ok" for
+        # developer data
         row[index] = row[index].replace(",", "")
 
 
@@ -142,7 +142,8 @@ def check_for_non_ascii(table_name, row):
     field_no = 0
     for field in row:
         if (re.sub('[ -~]', '', field)) != "":
-            print("check_for_non_ascii - table: " + table_name + ", row id:  " + str(row[0]) + ", field no: " + str(field_no))
+            print("check_for_non_ascii - table: " + table_name + ", row id:  " + str(row[0]) + ", field no: " +
+                  str(field_no))
         field_no += 1
 
 
@@ -171,6 +172,7 @@ def retrieve_sql_files_from_master_server(request):
     for table_name in allowable_tables:
         print('Starting on the ' + table_name + ' table, requesting up to 1,000,000 rows')
         t1 = time.time()
+        dt = 0
         start = 0
         end = 999999
         final_lines_count = 0
@@ -188,7 +190,7 @@ def retrieve_sql_files_from_master_server(request):
             if len(lines) == 1:
                 dt = time.time() - t1
                 print('... Retrieved ' + str(final_lines_count) + ' lines from the ' + table_name +
-                      ' table (as JSON) in ' + "{:.3f}".format(dt) + ' seconds)')
+                      ' table (as JSON) in ' + str(int(dt)) + ' seconds)')
                 break
             final_lines_count += len(lines)
             print('... Intermediate line count from this request of 1M, returned ' + str(len(lines)) +
@@ -230,8 +232,9 @@ def retrieve_sql_files_from_master_server(request):
                     conn.close()
                     dt = time.time() - t1
                     dt2 = time.time() - t2
+                    dtc = time.time() - t0
                     print('... Processing and inserting the chunk of 1M from ' + table_name + ' table took ' +
-                          "{:.3f}".format(dt2) + ' seconds, cumulative ' + "{:.3f}".format(dt))
+                          str(int(dt2)) + ' seconds, cumulative ' + str(int(dtc)) + ' seconds')
 
                 except Exception as e:
                     status += "retrieve_tables retrieve_sql_files_from_master_server caught " + str(e)
@@ -242,13 +245,12 @@ def retrieve_sql_files_from_master_server(request):
                     end += 1000000
 
         status += ", " + " loaded " + table_name
-        stat = 'Processing and loading table: ' + table_name + '  took ' +\
-               "{:.3f}".format(dt) + ' seconds'
+        stat = 'Processing and loading table: ' + table_name + '  took ' + str(int(dt)) + ' seconds'
         print("... " + stat)
         status += stat
 
-    dt0 = time.time() - t0
-    print("Processing and loading " + str(len(allowable_tables)) + " tables took {:.3f}".format(dt0/60) + ' minutes')
+    minutes = (time.time() - t0)/60
+    print("Processing and loading " + str(len(allowable_tables)) + " tables took {:.1f}".format(minutes) + ' minutes')
 
     os.system('rm *.csvTemp')    # Clean up all the temp files
 
@@ -257,6 +259,7 @@ def retrieve_sql_files_from_master_server(request):
         'status_code': status,
     }
     return HttpResponse(json.dumps(results), content_type='application/json')
+
 
 # We don't check every field for garbage, although maybe we should...
 # Since the error reporting in the python console is pretty good, you should be able to figure out what field has
@@ -269,6 +272,7 @@ def retrieve_sql_files_from_master_server(request):
 # The data provided to the developers local is pretty good, but some of the cleanups removes commas, and other niceities
 # from text fields.  It should be good enough, and if not, this function is where it can be improved.
 # hint: temporarily comment out some lines in allowable_tables, so you can get to the problem table quicker
+# hint: Access https://pg.admin.wevote.us/  (view access to the production server Postgres) can really help, ask Dale
 def csv_file_to_clean_csv_file2(table_name):
     csv_rows = []
     with open(table_name + '.csvTemp', 'r') as csv_file2:
@@ -386,14 +390,14 @@ def csv_file_to_clean_csv_file2(table_name):
                     clean_row(row, 12)                      # organization_address
                     substitute_null(row, 23, '0')           # twitter_followers_count
                     clean_row(row, 22)                      # twitter_description
-                    clean_row(row, 33)                      # wikipedia_thumbnail_width
+                    substitute_null(row, 31, '0')           # wikipedia_thumbnail_height
+                    substitute_null(row, 33, '0')           # wikipedia_thumbnail_width
                     clean_row(row, 47)                      # issue_analysis_admin_notes
-                    # dump_row_col_labels_and_errors(table_name, header, row, '697')
+                    # dump_row_col_labels_and_errors(table_name, header, row, '1')
                 elif table_name == 'position_positionentered':
-                    if row[0] == "31836":
-                        continue  # spent too much time on this one, not worth it
                     clean_row(row, 4)                       # ballot_item_display_name
                     substitute_null(row, 5, '1970-01-01 00:00:00+00')
+                    clean_row(row, 15)                      #
                     clean_row(row, 16)                      # vote_smart_rating_name
                     clean_bigint_row(row, 18)               # contest_office_id
                     clean_row(row, 22)                      # google_civic_candidate_name
@@ -403,9 +407,16 @@ def csv_file_to_clean_csv_file2(table_name):
                     clean_row(row, 43)                      # google_civic_measure_title
                     clean_row(row, 44)                      # contest_office_name
                     clean_row(row, 45)                      # political_party
-                    # dump_row_col_labels_and_errors(table_name, header, row, '31836')
+                    # dump_row_col_labels_and_errors(table_name, header, row, '33083')
                 elif table_name == 'voter_guide_voterguidepossibility':
-                    dump_row_col_labels_and_errors(table_name, header, row, '4')
+                    clean_url(row, 1)                       # voter_guide_possibility_url
+                    clean_row(row, 5)                       # ballot_items_raw
+                    clean_row(row, 6)                       # organization_name
+                    clean_row(row, 7)                       # organization_twitter_handle
+                    clean_row(row, 11)                      # internal_notes
+                    clean_row(row, 20)                      # contributor_comments
+                    clean_row(row, 22)                      # candidate_name
+                    # dump_row_col_labels_and_errors(table_name, header, row, '4')
                 elif table_name == 'voter_guide_voterguide':
                     clean_row(row, 14)                      # twitter_description
                     # dump_row_col_labels_and_errors(table_name, header, row, '3482')
