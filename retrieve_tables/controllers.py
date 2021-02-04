@@ -190,7 +190,7 @@ def retrieve_sql_files_from_master_server(request):
             if len(lines) == 1:
                 dt = time.time() - t1
                 print('... Retrieved ' + str(final_lines_count) + ' lines from the ' + table_name +
-                      ' table (as JSON) in ' + "{:.3f}".format(dt) + ' seconds)')
+                      ' table (as JSON) in ' + str(int(dt)) + ' seconds)')
                 break
             final_lines_count += len(lines)
             print('... Intermediate line count from this request of 1M, returned ' + str(len(lines)) +
@@ -232,8 +232,9 @@ def retrieve_sql_files_from_master_server(request):
                     conn.close()
                     dt = time.time() - t1
                     dt2 = time.time() - t2
+                    dtc = time.time() - t0
                     print('... Processing and inserting the chunk of 1M from ' + table_name + ' table took ' +
-                          "{:.3f}".format(dt2) + ' seconds, cumulative ' + "{:.3f}".format(dt))
+                          str(int(dt2)) + ' seconds, cumulative ' + str(int(dtc)) + ' seconds')
 
                 except Exception as e:
                     status += "retrieve_tables retrieve_sql_files_from_master_server caught " + str(e)
@@ -244,13 +245,12 @@ def retrieve_sql_files_from_master_server(request):
                     end += 1000000
 
         status += ", " + " loaded " + table_name
-        stat = 'Processing and loading table: ' + table_name + '  took ' +\
-               "{:.3f}".format(dt) + ' seconds'
+        stat = 'Processing and loading table: ' + table_name + '  took ' + str(int(dt)) + ' seconds'
         print("... " + stat)
         status += stat
 
-    dt0 = time.time() - t0
-    print("Processing and loading " + str(len(allowable_tables)) + " tables took {:.3f}".format(dt0/60) + ' minutes')
+    minutes = (time.time() - t0)/60
+    print("Processing and loading " + str(len(allowable_tables)) + " tables took {:.1f}".format(minutes) + ' minutes')
 
     os.system('rm *.csvTemp')    # Clean up all the temp files
 
@@ -390,9 +390,10 @@ def csv_file_to_clean_csv_file2(table_name):
                     clean_row(row, 12)                      # organization_address
                     substitute_null(row, 23, '0')           # twitter_followers_count
                     clean_row(row, 22)                      # twitter_description
-                    clean_row(row, 33)                      # wikipedia_thumbnail_width
+                    substitute_null(row, 31, '0')           # wikipedia_thumbnail_height
+                    substitute_null(row, 33, '0')           # wikipedia_thumbnail_width
                     clean_row(row, 47)                      # issue_analysis_admin_notes
-                    # dump_row_col_labels_and_errors(table_name, header, row, '697')
+                    # dump_row_col_labels_and_errors(table_name, header, row, '1')
                 elif table_name == 'position_positionentered':
                     clean_row(row, 4)                       # ballot_item_display_name
                     substitute_null(row, 5, '1970-01-01 00:00:00+00')
