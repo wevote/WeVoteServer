@@ -72,10 +72,9 @@ ELECTED_OFFICIAL_UNIQUE_IDENTIFIERS = [
 ]
 
 
-class ElectedOfficialListManager(models.Model):
+class ElectedOfficialListManager(models.Manager):
     """
     This is a class to make it easy to retrieve lists of Elected Officials
-    Note: Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     """
 
     def retrieve_all_elected_officials_for_office(self, office_id, office_we_vote_id):
@@ -949,8 +948,7 @@ def mimic_google_civic_initials(name):
     return modified_name
 
 
-class ElectedOfficialManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class ElectedOfficialManager(models.Manager):
 
     def __unicode__(self):
         return "ElectedOfficialManager"

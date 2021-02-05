@@ -89,8 +89,7 @@ class FollowIssue(models.Model):
         return False
 
 
-class FollowIssueManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class FollowIssueManager(models.Manager):
 
     def __unicode__(self):
         return "FollowIssueManager"
@@ -398,8 +397,7 @@ class FollowIssueManager(models.Model):
         return results
 
 
-class FollowMetricsManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class FollowMetricsManager(models.Manager):
 
     def __unicode__(self):
         return "FollowMetricsManager"
@@ -657,8 +655,7 @@ class FollowOrganization(models.Model):
         return False
 
 
-class FollowOrganizationManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class FollowOrganizationManager(models.Manager):
 
     def __unicode__(self):
         return "FollowOrganizationManager"

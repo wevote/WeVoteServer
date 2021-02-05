@@ -120,8 +120,7 @@ class ElectedOffice(models.Model):
         super(ElectedOffice, self).save(*args, **kwargs)
 
 
-class ElectedOfficeManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class ElectedOfficeManager(models.Manager):
 
     def __unicode__(self):
         return "ElectedOfficeManager"
@@ -391,10 +390,9 @@ class ElectedOfficeManager(models.Model):
         return results
 
 
-class ElectedOfficeListManager(models.Model):
+class ElectedOfficeListManager(models.Manager):
     """
     This is a class to make it easy to retrieve lists of Offices
-    Note: Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     """
 
     def __unicode__(self):

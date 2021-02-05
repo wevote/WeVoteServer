@@ -106,8 +106,7 @@ class PollingLocation(models.Model):
         super(PollingLocation, self).save(*args, **kwargs)
 
 
-class PollingLocationManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class PollingLocationManager(models.Manager):
 
     def update_or_create_polling_location(
             self,
@@ -680,8 +679,7 @@ class PollingLocationManager(models.Model):
             return results
 
 
-class PollingLocationListManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class PollingLocationListManager(models.Manager):
 
     def retrieve_duplicate_polling_locations(
             self,

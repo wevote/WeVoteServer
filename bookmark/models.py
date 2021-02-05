@@ -82,8 +82,7 @@ class BookmarkItem(models.Model):
         return False
 
 
-class BookmarkItemManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class BookmarkItemManager(models.Manager):
 
     def __unicode__(self):
         return "BookmarkItemManager"

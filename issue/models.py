@@ -66,10 +66,9 @@ class HashtagLinkedToIssue():
     pass
 
 
-class IssueListManager(models.Model):
+class IssueListManager(models.Manager):
     """
     This is a class to make it easy to retrieve lists of Issues
-    Note: Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     """
 
     def fetch_visible_issue_we_vote_ids(self):
@@ -312,8 +311,7 @@ class Issue(models.Model):
         super(Issue, self).save(*args, **kwargs)
 
 
-class IssueManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class IssueManager(models.Manager):
 
     def __unicode__(self):
         return "IssueManager"
@@ -616,9 +614,8 @@ class OrganizationLinkToIssue(models.Model):
         return not self.is_linked()
 
 
-class OrganizationLinkToIssueList(models.Model):
+class OrganizationLinkToIssueList(models.Manager):
     # A way to retrieve all of the organization and issue linking information
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def retrieve_issue_list_by_organization_we_vote_id(self, organization_we_vote_id, show_hidden_issues=False,
                                                        read_only=False):
@@ -774,8 +771,7 @@ class OrganizationLinkToIssueList(models.Model):
         return results
 
 
-class OrganizationLinkToIssueManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class OrganizationLinkToIssueManager(models.Manager):
 
     def __unicode__(self):
         return "OrganizationLinkToIssueManager"

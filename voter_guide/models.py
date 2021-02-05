@@ -1179,11 +1179,10 @@ class VoterGuide(models.Model):
 
 # This is the class that we use to rapidly show lists of voter guides, regardless of whether they are from an
 # organization, public figure, or voter
-class VoterGuideListManager(models.Model):
+class VoterGuideListManager(models.Manager):
     """
     A set of methods to retrieve a list of voter_guides
     """
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     # NOTE: This is extremely simple way to retrieve voter guides, used by admin tools. Being replaced by:
     #  retrieve_voter_guides_by_ballot_item(ballot_item_we_vote_id) AND

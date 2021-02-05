@@ -113,8 +113,7 @@ class BallotItem(models.Model):
         return candidates_list_temp
 
 
-class BallotItemManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class BallotItemManager(models.Manager):
 
     def remove_duplicate_ballot_item_entries(
             self, google_civic_election_id, contest_measure_id, contest_office_id,
@@ -811,10 +810,9 @@ class BallotItemManager(models.Model):
         return results
 
 
-class BallotItemListManager(models.Model):
+class BallotItemListManager(models.Manager):
     """
     A way to work with a list of ballot_items
-    Note: Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     """
 
     def delete_all_ballot_items_for_voter(self, voter_id, google_civic_election_id):
@@ -1678,9 +1676,8 @@ class BallotReturned(models.Model):
             return ""
 
 
-class BallotReturnedManager(models.Model):
+class BallotReturnedManager(models.Manager):
     """
-    Note: Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     Scenario where we get an incomplete address and Google Civic can't find it:
     1. A voter enters an address into text_for_map_search.
     2. Try to get ballot from Google Civic, if no response found...
@@ -2709,9 +2706,8 @@ class BallotReturnedManager(models.Model):
         return results
 
 
-class BallotReturnedListManager(models.Model):
+class BallotReturnedListManager(models.Manager):
     """
-    Note: Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     A way to work with a list of ballot_returned entries
     """
 
@@ -3300,8 +3296,7 @@ class VoterBallotSaved(models.Model):
         return message
 
 
-class VoterBallotSavedManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class VoterBallotSavedManager(models.Manager):
 
     def retrieve_ballots_per_voter_id(self, voter_id):
         voter_ballot_list = []

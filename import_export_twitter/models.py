@@ -47,8 +47,7 @@ class TwitterAuthResponse(models.Model):
     twitter_access_secret = models.TextField(verbose_name='twitter access secret', null=True, blank=True)
 
 
-class TwitterAuthManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class TwitterAuthManager(models.Manager):
 
     def __unicode__(self):
         return "TwitterAuthManager"

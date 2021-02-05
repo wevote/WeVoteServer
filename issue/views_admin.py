@@ -15,7 +15,7 @@ from django.contrib.messages import get_messages
 from django.shortcuts import render
 from election.controllers import retrieve_election_id_list_by_year_list, retrieve_upcoming_election_id_list
 from election.models import ElectionManager
-from exception.models import handle_record_found_more_than_one_exception
+from exception.models import handle_record_found_more_than_one_exception, handle_exception
 from image.controllers import cache_issue_image_master, cache_resized_image_locally, delete_cached_images_for_issue
 from image.models import WeVoteImageManager
 from organization.models import INDIVIDUAL, OrganizationManager, OrganizationListManager
@@ -187,7 +187,7 @@ def issue_list_view(request):
             voter_guide_list = results['voter_guide_list']
             for one_voter_guide in voter_guide_list:
                 organization_we_vote_id_in_this_election_list.append(one_voter_guide.organization_we_vote_id)
-            # try:
+
             if positive_value_exists(len(organization_we_vote_id_in_this_election_list)):
                 organization_link_to_issue_list_query = OrganizationLinkToIssue.objects.all()
                 organization_link_to_issue_list_query = organization_link_to_issue_list_query.filter(
@@ -204,14 +204,16 @@ def issue_list_view(request):
                             organization_object
                 if one_organization_link_to_issue.issue_we_vote_id not in organizations_attached_to_this_issue:
                     organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id] = []
-                organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id].\
-                    append(
-                    organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id])
-                # if one_organization_link_to_issue.issue_we_vote_id not in issue_we_vote_id_list:
-                #     issue_we_vote_id_list.append(one_organization_link_to_issue.issue_we_vote_id)
+                try:
+                    if one_organization_link_to_issue.organization_we_vote_id in organization_retrieved_list:
+                        organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id].\
+                            append(
+                            organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id])
+                    # if one_organization_link_to_issue.issue_we_vote_id not in issue_we_vote_id_list:
+                    #     issue_we_vote_id_list.append(one_organization_link_to_issue.issue_we_vote_id)
 
-            # except Exception as e:
-            #     pass
+                except Exception as e:
+                    handle_exception(e, logger, exception_message="In organization list")
 
     try:
         issue_list_query = Issue.objects.all()

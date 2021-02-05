@@ -498,8 +498,7 @@ def get_header_map_value_if_index_in_list(incoming_list, index, kind_of_batch=""
         return ""
 
 
-class BatchManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class BatchManager(models.Manager):
 
     def __unicode__(self):
         return "BatchManager"
@@ -4625,8 +4624,7 @@ class BatchHeaderTranslationSuggestion(models.Model):
     incoming_alternate_header_value = models.TextField(null=True, blank=True)
 
 
-class BatchProcessManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class BatchProcessManager(models.Manager):
 
     def __unicode__(self):
         return "BatchProcessManager"

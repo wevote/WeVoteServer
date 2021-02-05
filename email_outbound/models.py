@@ -146,8 +146,8 @@ class EmailScheduled(models.Model):
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
 
-class EmailManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class EmailManager(models.Manager):
+
     def __unicode__(self):
         return "EmailManager"
 

@@ -185,8 +185,7 @@ class ElectoralDistrictLinkToPollingLocation(models.Model):
         return self.id
 
 
-class ElectoralDistrictManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class ElectoralDistrictManager(models.Manager):
 
     def delete_electoral_district_link(self, polling_location_we_vote_id="", electoral_district_we_vote_id="",
                                        ballotpedia_district_id=0):
