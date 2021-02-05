@@ -181,10 +181,9 @@ class Politician(models.Model):
         return self.gender in (self.FEMALE, self.GENDER_NEUTRAL, self.MALE)
 
 
-class PoliticianManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class PoliticianManager(models.Manager):
+
     def __init__(self):
-        # TODO Recommend by Hy Carrel
         pass
 
     def politician_photo_url(self, politician_id):

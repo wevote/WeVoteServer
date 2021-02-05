@@ -150,8 +150,7 @@ class TwitterUser(models.Model):
                                            max_length=255, null=True, blank=True)
 
 
-class TwitterUserManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class TwitterUserManager(models.Manager):
 
     def __unicode__(self):
         return "TwitterUserManager"

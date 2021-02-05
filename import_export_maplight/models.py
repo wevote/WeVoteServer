@@ -36,8 +36,7 @@ class MapLightContestOffice(models.Model):
     url = models.CharField(verbose_name='url', max_length=255, null=False, blank=False, unique=False)
 
 
-class MapLightContestOfficeManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class MapLightContestOfficeManager(models.Manager):
 
     def __unicode__(self):
         return "MapLightContestOfficeManager"
@@ -132,8 +131,7 @@ class MapLightCandidate(models.Model):
     url = models.CharField(verbose_name='url', max_length=255, null=False, blank=True, unique=False)
 
 
-class MapLightCandidateManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class MapLightCandidateManager(models.Manager):
 
     def __unicode__(self):
         return "MapLightCandidateManager"

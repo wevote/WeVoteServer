@@ -118,8 +118,7 @@ class SharedLinkClicked(models.Model):
     year_as_integer = models.PositiveIntegerField(null=True, unique=False, db_index=True)
 
 
-class ShareManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class ShareManager(models.Manager):
 
     def __unicode__(self):
         return "ShareManager"

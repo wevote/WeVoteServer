@@ -201,8 +201,7 @@ class ContestOffice(models.Model):
         super(ContestOffice, self).save(*args, **kwargs)
 
 
-class ContestOfficeManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class ContestOfficeManager(models.Manager):
 
     def __unicode__(self):
         return "ContestOfficeManager"
@@ -1186,10 +1185,9 @@ class ContestOfficeManager(models.Model):
         return results
 
 
-class ContestOfficeListManager(models.Model):
+class ContestOfficeListManager(models.Manager):
     """
     This is a class to make it easy to retrieve lists of Offices
-    Note: Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
     """
 
     def __unicode__(self):

@@ -49,11 +49,10 @@ class WeVoteSetting(models.Model):
     boolean_value = models.BooleanField(verbose_name='boolean value', blank=True, default=None, null=True)
 
 
-class WeVoteSettingsManager(models.Model):
+class WeVoteSettingsManager(models.Manager):
     """
     Manage all of the site settings
     """
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
 
     def fetch_setting(self, setting_name):
         setting_name = setting_name.strip()
@@ -475,8 +474,7 @@ class RemoteRequestHistory(models.Model):
     status = models.CharField(verbose_name="Request status message", max_length=255, default="", null=True, blank=True)
 
 
-class RemoteRequestHistoryManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class RemoteRequestHistoryManager(models.Manager):
 
     def __unicode__(self):
         return "RemoteRequestHistoryManager"

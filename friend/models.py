@@ -164,8 +164,7 @@ class FriendInvitationVoterLink(models.Model):
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
 
-class FriendManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class FriendManager(models.Manager):
 
     def __unicode__(self):
         return "FriendManager"

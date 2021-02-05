@@ -54,8 +54,8 @@ class PledgeToVote(models.Model):
         super(PledgeToVote, self).save(*args, **kwargs)
 
 
-class PledgeToVoteManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class PledgeToVoteManager(models.Manager):
+
     def __unicode__(self):
         return "PledgeToVoteManager"
 

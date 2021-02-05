@@ -149,8 +149,8 @@ class FacebookFriendsUsingWeVote(models.Model):
     facebook_id_of_my_friend = models.BigIntegerField(verbose_name="facebook id of my friend", null=False, unique=False)
 
 
-class FacebookManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class FacebookManager(models.Manager):
+
     def __unicode__(self):
         return "FacebookManager"
 

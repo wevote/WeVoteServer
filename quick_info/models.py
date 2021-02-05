@@ -189,8 +189,7 @@ class QuickInfo(models.Model):
         return ""
 
 
-class QuickInfoManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class QuickInfoManager(models.Manager):
 
     def __unicode__(self):
         return "QuickInfoManager"
@@ -689,8 +688,7 @@ class QuickInfoMaster(models.Model):
         return ""
 
 
-class QuickInfoMasterManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class QuickInfoMasterManager(models.Manager):
 
     def __unicode__(self):
         return "QuickInfoMasterManager"

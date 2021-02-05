@@ -156,8 +156,7 @@ class WeVoteImage(models.Model):
         return ""
 
 
-class WeVoteImageManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class WeVoteImageManager(models.Manager):
 
     def __unicode__(self):
         return "WeVoteImageManager"

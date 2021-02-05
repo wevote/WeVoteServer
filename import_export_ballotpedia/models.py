@@ -39,8 +39,8 @@ class BallotpediaApiCounterMonthlySummary(models.Model):
 
 
 # noinspection PyBroadException
-class BallotpediaApiCounterManager(models.Model):
-    # Extending models.Models creates a useless empty table, we probably want to extend models.Manager here
+class BallotpediaApiCounterManager(models.Manager):
+
     def create_counter_entry(self, kind_of_action, google_civic_election_id=0, ballotpedia_election_id=0):
         """
         Create an entry that records that a call to the Ballotpedia Api was made.
