@@ -119,7 +119,7 @@ def voter_stance_for_candidate_view(request, candidate_id):
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
     position_manager = PositionManager()
-    results = position_manager.retrieve_voter_candidate_campaign_position(voter_id, candidate_id)
+    results = position_manager.retrieve_voter_candidate_position(voter_id, candidate_id)
     if results['position_found']:
         if results['is_support']:
             return JsonResponse({0: "support"})

@@ -133,7 +133,7 @@ def candidates_import_from_sample_file():
     # Load saved json from local file
     logger.info("Loading CandidateCampaigns from local file")
 
-    with open("candidate/import_data/candidate_campaigns_sample.json") as json_data:
+    with open("candidate/import_data/candidates_sample.json") as json_data:
         structured_json = json.load(json_data)
 
     return candidates_import_from_structured_json(structured_json)

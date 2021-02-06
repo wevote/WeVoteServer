@@ -2490,7 +2490,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     if keep_looking_for_duplicates:
         if candidate_found and organization_found:
             position_results = \
-                position_manager.retrieve_organization_candidate_campaign_position_with_we_vote_id(
+                position_manager.retrieve_organization_candidate_position_with_we_vote_id(
                     organization_id, candidate_we_vote_id, google_civic_election_id)
             if position_results['position_found']:
                 position = position_results['position']

@@ -268,10 +268,10 @@ def voter_bookmark_status_retrieve_for_api(voter_device_id,
 
         # Zero out the unused values
         bookmark_item_id = 0
-        candidate_campaign_id = 0
+        candidate_id = 0
         contest_measure_id = 0
         results = bookmark_item_manager.retrieve_bookmark_item(bookmark_item_id, voter_id, office_id,
-                                                       candidate_campaign_id, contest_measure_id)
+                                                       candidate_id, contest_measure_id)
         status = results['status']
         success = results['success']
         is_bookmarked = results['is_bookmarked']
@@ -301,8 +301,8 @@ def voter_bookmark_status_retrieve_for_api(voter_device_id,
         bookmark_item_id = 0
         contest_office_id = 0
         contest_measure_id = 0
-        results = bookmark_item_manager.retrieve_bookmark_item(bookmark_item_id, voter_id, contest_office_id, candidate_id,
-                                                       contest_measure_id)
+        results = bookmark_item_manager.retrieve_bookmark_item(
+            bookmark_item_id, voter_id, contest_office_id, candidate_id, contest_measure_id)
         status = results['status']
         success = results['success']
         is_bookmarked = results['is_bookmarked']
@@ -311,7 +311,7 @@ def voter_bookmark_status_retrieve_for_api(voter_device_id,
             'status':                   status,
             'success':                  success,
             'voter_device_id':          voter_device_id,
-            'is_bookmarked':               is_bookmarked,
+            'is_bookmarked':            is_bookmarked,
             'ballot_item_id':           convert_to_int(candidate_id),
             'ballot_item_we_vote_id':   candidate_we_vote_id,
             'kind_of_ballot_item':      CANDIDATE,
@@ -331,9 +331,9 @@ def voter_bookmark_status_retrieve_for_api(voter_device_id,
         # Zero out the unused values
         bookmark_item_id = 0
         contest_office_id = 0
-        candidate_campaign_id = 0
-        results = bookmark_item_manager.retrieve_bookmark_item(bookmark_item_id, voter_id, contest_office_id, candidate_campaign_id,
-                                                       measure_id)
+        candidate_id = 0
+        results = bookmark_item_manager.retrieve_bookmark_item(
+            bookmark_item_id, voter_id, contest_office_id, candidate_id, measure_id)
         status = results['status']
         success = results['success']
         is_bookmarked = results['is_bookmarked']

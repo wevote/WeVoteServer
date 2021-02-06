@@ -174,7 +174,7 @@ def update_position_list_with_contest_office_info(position_list):
     politician_manager = PoliticianManager()
     politician_dict = {}
     for one_position in position_list:
-        candidate_campaign_id = 0
+        candidate_id = 0
         contest_office_we_vote_id = ''
         contest_office_id = 0
         politician_we_vote_id = ''
@@ -182,7 +182,7 @@ def update_position_list_with_contest_office_info(position_list):
         position_change = False
         if one_position.candidate_campaign_we_vote_id in candidate_dict:
             candidate = candidate_dict[one_position.candidate_campaign_we_vote_id]
-            candidate_campaign_id = candidate.id
+            candidate_id = candidate.id
             contest_office_we_vote_id = candidate.contest_office_we_vote_id
             contest_office_id = candidate.contest_office_id
             politician_we_vote_id = candidate.politician_we_vote_id
@@ -193,13 +193,13 @@ def update_position_list_with_contest_office_info(position_list):
             if results['candidate_found']:
                 candidate = results['candidate']
                 candidate_dict[one_position.candidate_campaign_we_vote_id] = candidate
-                candidate_campaign_id = candidate.id
+                candidate_id = candidate.id
                 contest_office_we_vote_id = candidate.contest_office_we_vote_id
                 contest_office_id = candidate.contest_office_id
                 politician_we_vote_id = candidate.politician_we_vote_id
                 politician_id = candidate.politician_id
-        if positive_value_exists(candidate_campaign_id):
-            one_position.candidate_campaign_id = candidate_campaign_id
+        if positive_value_exists(candidate_id):
+            one_position.candidate_campaign_id = candidate_id
             position_change = True
         if positive_value_exists(contest_office_we_vote_id):
             one_position.contest_office_we_vote_id = contest_office_we_vote_id

@@ -227,7 +227,7 @@ def candidates_import_from_sample_file_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    # We are importing candidate_campaigns data (and not politician data) because all we are doing is making sure we
+    # We are importing candidate data (and not politician data) because all we are doing is making sure we
     #  sync to the same We Vote ID. This is critical so we can link Positions to Organization & CandidateCampaign.
     # At this point (June 2015) we assume the politicians have been imported from Google Civic. We aren't assigning
     # the politicians a We Vote id, but instead use their full name as the identifier
@@ -897,7 +897,7 @@ def candidate_new_view(request):
 
 
 @login_required
-def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id=""):
+def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -944,7 +944,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
         if positive_value_exists(candidate_id):
             candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
         else:
-            candidate_on_stage = CandidateCampaign.objects.get(we_vote_id=candidate_campaign_we_vote_id)
+            candidate_on_stage = CandidateCampaign.objects.get(we_vote_id=candidate_we_vote_id)
         candidate_on_stage_found = True
         candidate_id = candidate_on_stage.id
         candidate_we_vote_id = candidate_on_stage.we_vote_id

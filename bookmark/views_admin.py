@@ -49,15 +49,15 @@ logger = wevote_functions.admin.get_logger(__name__)
 #             bookmark_status = ITEM_NOT_BOOKMARKED
 #         bookmark_duplicates_query = BookmarkItem.objects.order_by('id')
 #
-#         # filter by voter_id and candidate_campaign_id and candidate_campaign_we_vote_id to find duplicate rows
-#         # filter duplicate queries based on candidate_campaign_id and candidate_campaign_we_vote_id
-#         if positive_value_exists(star_item.candidate_campaign_id) or \
-#                 positive_value_exists(star_item.candidate_campaign_we_vote_id):
-#             bookmark_candidate_campaign_duplicates_query = bookmark_duplicates_query.filter(
+#         # filter by voter_id and candidate_id and candidate_we_vote_id to find duplicate rows
+#         # filter duplicate queries based on candidate_id and candidate_we_vote_id
+#         if positive_value_exists(star_item.candidate_id) or \
+#                 positive_value_exists(star_item.candidate_we_vote_id):
+#             bookmark_candidate_duplicates_query = bookmark_duplicates_query.filter(
 #                 voter_id=star_item.voter_id,
-#                 candidate_campaign_id=star_item.candidate_campaign_id,
-#                 candidate_campaign_we_vote_id=star_item.candidate_campaign_we_vote_id)
-#             if bookmark_candidate_campaign_duplicates_query.count() > 0:
+#                 candidate_id=star_item.candidate_id,
+#                 candidate_we_vote_id=star_item.candidate_we_vote_id)
+#             if bookmark_candidate_duplicates_query.count() > 0:
 #                 number_of_duplicates = 0
 #             else:
 #                 defaults={
@@ -107,8 +107,8 @@ logger = wevote_functions.admin.get_logger(__name__)
 #                     contest_measure_we_vote_id= star_item.contest_measure_we_vote_id,
 #                     contest_office_id= star_item.contest_office_id,
 #                     contest_office_we_vote_id= star_item.contest_office_we_vote_id,
-#                     candidate_campaign_id= star_item.candidate_campaign_id,
-#                     candidate_campaign_we_vote_id= star_item.candidate_campaign_we_vote_id,
+#                     candidate_id= star_item.candidate_id,
+#                     candidate_we_vote_id= star_item.candidate_we_vote_id,
 #                     defaults= defaults
 #                 )
 #

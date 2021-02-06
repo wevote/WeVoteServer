@@ -1709,11 +1709,11 @@ def move_positions_to_another_organization(
             organization_we_vote_id=to_organization_we_vote_id,
             voter_id=empty_voter_id,
             contest_office_id=from_position_entry.contest_office_id,
-            candidate_campaign_id=from_position_entry.candidate_campaign_id,
+            candidate_id=from_position_entry.candidate_campaign_id,
             contest_measure_id=from_position_entry.contest_measure_id,
             voter_we_vote_id=empty_voter_we_vote_id,
             contest_office_we_vote_id=from_position_entry.contest_office_we_vote_id,
-            candidate_campaign_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
+            candidate_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
             contest_measure_we_vote_id=from_position_entry.contest_measure_we_vote_id)
 
         if results['position_found']:
@@ -1803,11 +1803,11 @@ def move_positions_to_another_organization(
             organization_we_vote_id=to_organization_we_vote_id,
             voter_id=empty_voter_id,
             contest_office_id=from_position_entry.contest_office_id,
-            candidate_campaign_id=from_position_entry.candidate_campaign_id,
+            candidate_id=from_position_entry.candidate_campaign_id,
             contest_measure_id=from_position_entry.contest_measure_id,
             voter_we_vote_id=empty_voter_we_vote_id,
             contest_office_we_vote_id=from_position_entry.contest_office_we_vote_id,
-            candidate_campaign_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
+            candidate_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
             contest_measure_we_vote_id=from_position_entry.contest_measure_we_vote_id)
 
         if results['position_found']:
@@ -2281,12 +2281,12 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
     organization_id = 0
     organization_we_vote_id = ''
     contest_office_id = 0
-    candidate_campaign_id = 0
+    candidate_id = 0
     contest_measure_id = 0
     position_voter_id = 0
     results = position_manager.retrieve_position_table_unknown(
         position_we_vote_id, organization_id, organization_we_vote_id, position_voter_id,
-        contest_office_id, candidate_campaign_id, contest_measure_id)
+        contest_office_id, candidate_id, contest_measure_id)
 
     if results['position_found']:
         position = results['position']
@@ -4473,7 +4473,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             voter_id, office_we_vote_id)
 
     elif positive_value_exists(candidate_we_vote_id):
-        results = position_manager.retrieve_voter_candidate_campaign_position_with_we_vote_id(
+        results = position_manager.retrieve_voter_candidate_position_with_we_vote_id(
             voter_id, candidate_we_vote_id)
 
     elif positive_value_exists(measure_we_vote_id):
@@ -4861,7 +4861,7 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
     success = False
     position_manager = PositionManager()
     if positive_value_exists(candidate_we_vote_id):
-        results = position_manager.retrieve_voter_candidate_campaign_position_with_we_vote_id(
+        results = position_manager.retrieve_voter_candidate_position_with_we_vote_id(
             voter_id, candidate_we_vote_id)
     elif positive_value_exists(measure_we_vote_id):
         results = position_manager.retrieve_voter_contest_measure_position_with_we_vote_id(

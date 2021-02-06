@@ -90,17 +90,17 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 
     {# ADD NEW: Show the drop-down of campaigns this org can have enter a position for #}
 <div class="form-group{% if candidate_and_measure_not_found %} has-error{% endif %}">
-    <label for="candidate_campaign_id" class="col-sm-2 control-label">Candidate</label>
+    <label for="candidate_id" class="col-sm-2 control-label">Candidate</label>
     <div class="col-sm-9">
         {% if candidate_and_measure_not_found %}
             <div class="text-danger bg-danger">A candidate must be chosen</div>
         {% endif %}
-        <select type="text" name="candidate_campaign_id" id="candidate_campaign_id" class="form-control" >
-        {% if candidate_campaigns_for_this_election_list %}
+        <select type="text" name="candidate_id" id="candidate_id" class="form-control" >
+        {% if candidates_for_this_election_list %}
             <option value="0">-- select candidate --</option>
-            {% for candidate_campaign_from_loop in candidate_campaigns_for_this_election_list %}
+            {% for candidate_campaign_from_loop in candidates_for_this_election_list %}
             <option value="{{ candidate_campaign_from_loop.id }}"
-                    {% if candidate_campaign_from_loop.id|slugify == candidate_campaign_id|slugify %} selected="selected"
+                    {% if candidate_campaign_from_loop.id|slugify == candidate_id|slugify %} selected="selected"
                     {% endif %}>{{ candidate_campaign_from_loop.candidate_name }}</option>
             {% endfor %}
         {% else %}

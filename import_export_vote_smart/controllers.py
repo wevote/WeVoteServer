@@ -707,7 +707,7 @@ def transfer_vote_smart_ratings_to_positions(candidate_id, politician_id):  # TO
             # (in addition to just org and candidate identifiers) since I believe
             # Google Civic gives a person a new candidate ID each election,
             # while Vote Smart uses the same candidateId from year to year
-            organization_position_results = position_manager.retrieve_organization_candidate_campaign_position(
+            organization_position_results = position_manager.retrieve_organization_candidate_position(
                 we_vote_organization.id, candidate_id)
 
             if positive_value_exists(organization_position_results['position_found']):

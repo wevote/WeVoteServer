@@ -1696,14 +1696,14 @@ def organization_position_new_view(request, organization_id):
 
     # Prepare a drop down of candidates competing in this election
     candidate_list = CandidateListManager()
-    candidate_campaigns_for_this_election_list = []
+    candidates_for_this_election_list = []
     results = candidate_list.retrieve_all_candidates_for_upcoming_election(
         google_civic_election_id_list,
         state_code,
         search_string=candidate_search,
         return_list_of_objects=True)
     if results['candidate_list_found']:
-        candidate_campaigns_for_this_election_list = results['candidate_list_objects']
+        candidates_for_this_election_list = results['candidate_list_objects']
 
     # Prepare a drop down of measures in this election
     contest_measure_list = ContestMeasureListManager()
@@ -1753,7 +1753,7 @@ def organization_position_new_view(request, organization_id):
                         election_list.append(one_election)
 
         template_values = {
-            'candidate_campaigns_for_this_election_list':   candidate_campaigns_for_this_election_list,
+            'candidates_for_this_election_list':            candidates_for_this_election_list,
             'candidate_id':                                 candidate_id,
             'candidate_search':                             candidate_search
             if positive_value_exists(candidate_search) else '',
@@ -1763,7 +1763,7 @@ def organization_position_new_view(request, organization_id):
             if positive_value_exists(measure_search) else '',
             'messages_on_stage':                            messages_on_stage,
             'organization':                                 organization_on_stage,
-            'organization_position_candidate_campaign_id':  0,
+            'organization_position_candidate_id':           0,
             'possible_stances_list':                        ORGANIZATION_STANCE_CHOICES,
             'show_all_elections':                           show_all_elections,
             'stance_selected':                              stance,
@@ -2131,7 +2131,7 @@ def organization_position_edit_process_view(request):
         # If a position_we_vote_id hasn't been passed in, then we are trying to create a new position.
         # Check to make sure a position for this org, candidate and election doesn't already exist
         if candidate_id:
-            results = position_manager.retrieve_organization_candidate_campaign_position(
+            results = position_manager.retrieve_organization_candidate_position(
                 organization_id, candidate_id, google_civic_election_id)
         elif contest_measure_id:
             results = position_manager.retrieve_organization_contest_measure_position(

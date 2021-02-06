@@ -4823,8 +4823,8 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def retrieve_organization_candidate_campaign_position(self, organization_id, candidate_id,
-                                                          google_civic_election_id=False, state_code=False):
+    def retrieve_organization_candidate_position(self, organization_id, candidate_id,
+                                                 google_civic_election_id=False, state_code=False):
         """
         Find a position based on the organization_id & candidate_id
         :param organization_id:
@@ -4849,10 +4849,10 @@ class PositionManager(models.Manager):
             voter_we_vote_id, contest_office_we_vote_id, candidate_we_vote_id, contest_measure_we_vote_id,
             google_civic_election_id)
 
-    def retrieve_organization_candidate_campaign_position_with_we_vote_id(self, organization_id,
-                                                                          candidate_we_vote_id,
-                                                                          google_civic_election_id=False,
-                                                                          state_code=False):
+    def retrieve_organization_candidate_position_with_we_vote_id(self, organization_id,
+                                                                 candidate_we_vote_id,
+                                                                 google_civic_election_id=False,
+                                                                 state_code=False):
         """
         Find a position based on the organization_id & candidate_we_vote_id
         :param organization_id:
@@ -4959,7 +4959,7 @@ class PositionManager(models.Manager):
             voter_we_vote_id, contest_office_we_vote_id, candidate_we_vote_id, contest_measure_we_vote_id
         )
 
-    def retrieve_voter_candidate_campaign_position(self, voter_id, candidate_id):
+    def retrieve_voter_candidate_position(self, voter_id, candidate_id):
         organization_id = 0
         organization_we_vote_id = ''
         position_we_vote_id = ''
@@ -4970,7 +4970,7 @@ class PositionManager(models.Manager):
             position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
             office_id, candidate_id, contest_measure_id)
 
-    def retrieve_voter_candidate_campaign_position_with_we_vote_id(self, voter_id, candidate_we_vote_id):
+    def retrieve_voter_candidate_position_with_we_vote_id(self, voter_id, candidate_we_vote_id):
         organization_id = 0
         organization_we_vote_id = ''
         position_we_vote_id = ''
@@ -5052,7 +5052,7 @@ class PositionManager(models.Manager):
                                       contest_measure_we_vote_id,
                                       google_civic_election_id, vote_smart_time_span)
 
-    def merge_position_duplicates_voter_candidate_campaign_position(self, voter_id, candidate_id,
+    def merge_position_duplicates_voter_candidate_position(self, voter_id, candidate_id,
                                                                     retrieve_position_for_friends):
         organization_id = 0
         organization_we_vote_id = ''
@@ -5064,7 +5064,7 @@ class PositionManager(models.Manager):
             position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
             office_id, candidate_id, contest_measure_id, retrieve_position_for_friends)
 
-    def merge_position_duplicates_voter_candidate_campaign_position_with_we_vote_id(
+    def merge_position_duplicates_voter_candidate_position_with_we_vote_id(
             self, voter_id, candidate_we_vote_id, retrieve_position_for_friends):
         organization_id = 0
         organization_we_vote_id = ''
@@ -6139,7 +6139,7 @@ class PositionManager(models.Manager):
         contest_measure_id = 0
         status = ""
 
-        results = position_manager.retrieve_voter_candidate_campaign_position(voter_id, candidate_id)
+        results = position_manager.retrieve_voter_candidate_position(voter_id, candidate_id)
         is_public_position = results['is_public_position']
         status += results['status']
 
@@ -6148,7 +6148,7 @@ class PositionManager(models.Manager):
             status += 'MultipleObjectsReturned '
 
             retrieve_position_for_friends = not is_public_position
-            merge_results = position_manager.merge_position_duplicates_voter_candidate_campaign_position(
+            merge_results = position_manager.merge_position_duplicates_voter_candidate_position(
                 voter_id, candidate_id, retrieve_position_for_friends)
             status += merge_results['status']
 
@@ -6166,7 +6166,7 @@ class PositionManager(models.Manager):
                 return results
 
             status += 'CANDIDATE_DUPLICATES_REPAIRED '
-            results_after_repair = position_manager.retrieve_voter_candidate_campaign_position(
+            results_after_repair = position_manager.retrieve_voter_candidate_position(
                 voter_id, candidate_id)
             status += results_after_repair['status']
             is_public_position = results_after_repair['is_public_position']
@@ -6645,7 +6645,7 @@ class PositionManager(models.Manager):
                 voter_id = fetch_voter_id_from_voter_we_vote_id(voter_we_vote_id)
 
             if positive_value_exists(candidate_we_vote_id):
-                results = self.retrieve_voter_candidate_campaign_position_with_we_vote_id(
+                results = self.retrieve_voter_candidate_position_with_we_vote_id(
                     voter_id, candidate_we_vote_id)
                 is_public_position = results['is_public_position']
                 if results['position_found']:
@@ -6656,13 +6656,13 @@ class PositionManager(models.Manager):
                     status += "UPDATE_OR_CREATE_POSITION_COMMENT-MultipleObjectsReturned-CANDIDATE "
 
                     retrieve_position_for_friends = not is_public_position
-                    merge_results = self.merge_position_duplicates_voter_candidate_campaign_position_with_we_vote_id(
+                    merge_results = self.merge_position_duplicates_voter_candidate_position_with_we_vote_id(
                         voter_id, candidate_we_vote_id, retrieve_position_for_friends)
                     status += merge_results['status']
 
                     if merge_results['duplicates_repaired']:
                         problem_with_duplicate_in_same_table = False
-                        results = self.retrieve_voter_candidate_campaign_position_with_we_vote_id(
+                        results = self.retrieve_voter_candidate_position_with_we_vote_id(
                             voter_id, candidate_we_vote_id)
                         status += results['status']
                         is_public_position = results['is_public_position']
