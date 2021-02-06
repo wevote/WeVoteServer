@@ -14,7 +14,7 @@ urlpatterns = [
     url(r'^import_status/$',
         views_admin.polling_locations_import_from_master_server_status_view,
         name='polling_locations_import_from_master_server_status'),
-    # Processing incoming file with polling locations
+    # Processing incoming file with map points
     url(r'^import_polling_locations_process/$', views_admin.import_polling_locations_process_view,
         name='import_polling_locations_process'),
     url(r'^(?P<polling_location_local_id>[0-9]+)/edit/$', views_admin.polling_location_edit_view,

@@ -86,7 +86,7 @@
       <input type="checkbox" name="use_for_bulk_retrieve" id="use_for_bulk_retrieve_id"
            value="True"
            {% if polling_location and polling_location.use_for_bulk_retrieve %}checked{% endif %} />
-        Use this polling location when doing bulk retrieve of ballots (so we have coverage across the state)
+        Use this map point when doing bulk retrieve of ballots (so we have coverage across the state)
     </div>
 </div>
 
@@ -96,7 +96,7 @@
       <input type="checkbox" name="polling_location_deleted" id="polling_location_deleted_id"
            value="True"
            {% if polling_location and polling_location.polling_location_deleted %}checked{% endif %} />
-        Remove this polling location from usage
+        Remove this map point from usage
     </div>
 </div>
 

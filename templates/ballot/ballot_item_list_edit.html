@@ -214,7 +214,7 @@
         <br />
         <input type="hidden" name="polling_location_id" value="{{ polling_location.id }}">
     {% else %}
-        {# Choose polling location for this ballot_returned #}
+        {# Choose map point for this ballot_returned #}
         Search for City: <input type="text" name="polling_location_city" value="{{ polling_location_city }}" />
         or ZIP: <input type="text" name="polling_location_zip" value="{{ polling_location_zip }}" />
         <input type="submit" value="Search" />
@@ -232,7 +232,7 @@
             </select>
             <br />
         {% else %}
-            (There are no polling locations to choose from)<br />
+            (There are no map points to choose from)<br />
         {% endif %}
     {% endif %}
 

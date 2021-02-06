@@ -164,11 +164,11 @@ class ElectoralDistrictLinkToPollingLocation(models.Model):
     """
     # We are relying on built-in Python id field
 
-    # The polling location's we_vote_id linked to the electoral district
+    # The map point's we_vote_id linked to the electoral district
     polling_location_we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
 
-    # The polling location's we_vote_id linked to the electoral district
+    # The map point's we_vote_id linked to the electoral district
     electoral_district_we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
 

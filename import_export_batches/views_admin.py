@@ -262,7 +262,7 @@ def batch_list_process_view(request):
     # Make sure we have a polling_location_we_vote_id
     # if kind_of_batch in IMPORT_BALLOT_ITEM and not positive_value_exists(polling_location_we_vote_id):
     #     messages.add_message(request, messages.ERROR, 'This kind_of_batch (\"{kind_of_batch}\") requires you '
-    #                                                   'to choose a polling location.'
+    #                                                   'to choose a map point.'
     #                                                   ''.format(kind_of_batch=kind_of_batch))
     #     return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
     #                                 "?kind_of_batch=" + str(kind_of_batch) +

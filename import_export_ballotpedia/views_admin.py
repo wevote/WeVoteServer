@@ -174,8 +174,8 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
                              'Could not retrieve election data. Election could not be found.')
         return HttpResponseRedirect(reverse('election:election_list', args=()))
 
-    # Check to see if we have polling location data related to the region(s) covered by this election
-    # We request the ballot data for each polling location as a way to build up our local data
+    # Check to see if we have map point data related to the region(s) covered by this election
+    # We request the ballot data for each map point as a way to build up our local data
     if not positive_value_exists(state_code) and positive_value_exists(google_civic_election_id):
         state_code = election_state_code
 
@@ -214,8 +214,8 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
             polling_location_list = polling_location_query.order_by('line1')[:polling_location_limited_count]
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
-                             'Could not retrieve polling location data for the {election_name}. '
-                             'No polling locations exist for the state \'{state}\'. '
+                             'Could not retrieve map point data for the {election_name}. '
+                             'No map points exist for the state \'{state}\'. '
                              'Data needed from VIP.'.format(
                                  election_name=election_name,
                                  state=state_code))
@@ -225,7 +225,7 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
     if polling_location_count == 0:
         messages.add_message(request, messages.ERROR,
                              'Could not retrieve ballot data for the {election_name}. '
-                             'No polling locations returned for the state \'{state}\'. '
+                             'No map points returned for the state \'{state}\'. '
                              '(error 2 - attach_ballotpedia_election_view)'.format(
                                  election_name=election_name,
                                  state=state_code))
@@ -285,10 +285,10 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
 def refresh_ballotpedia_districts_for_polling_locations_view(request):
     """
     This function refreshes the Ballotpedia districts used with subsequent calls to Ballotpedia:
-    1) Retrieve (internally) polling locations (so we can use those addresses to retrieve a
+    1) Retrieve (internally) map points (so we can use those addresses to retrieve a
     representative set of ballots)
-    2) Cycle through a portion of those polling locations, enough that we are caching all of the possible ballot items
-    3) Ask for Ballotpedia districts for each of the polling locations being analyzed
+    2) Cycle through a portion of those map points, enough that we are caching all of the possible ballot items
+    3) Ask for Ballotpedia districts for each of the map points being analyzed
     :param request:
     :return:
     """
@@ -330,7 +330,7 @@ def refresh_ballotpedia_districts_for_polling_locations_view(request):
         status += "ELECTORAL_DISTRICT-COULD_NOT_FIND_POLLING_LOCATION_LIST " + str(e) + " "
 
     if polling_location_count == 0:
-        # We didn't find any polling locations marked for bulk retrieve, so just retrieve up to the import_limit
+        # We didn't find any map points marked for bulk retrieve, so just retrieve up to the import_limit
         try:
             polling_location_count_query = PollingLocation.objects.all()
             polling_location_count_query = \
@@ -356,7 +356,7 @@ def refresh_ballotpedia_districts_for_polling_locations_view(request):
         except PollingLocation.DoesNotExist:
             messages.add_message(request, messages.INFO,
                                  'Could not retrieve ballot data. '
-                                 'No polling locations exist for the state \'{state}\'. '
+                                 'No map points exist for the state \'{state}\'. '
                                  'Data needed from VIP.'.format(
                                      state=state_code))
             return HttpResponseRedirect(reverse('electoral_district:electoral_district_list', args=()))
@@ -364,14 +364,14 @@ def refresh_ballotpedia_districts_for_polling_locations_view(request):
     if polling_location_count == 0:
         messages.add_message(request, messages.ERROR,
                              'Could not retrieve ballot data. '
-                             'No polling locations returned for the state \'{state}\'. '
+                             'No map points returned for the state \'{state}\'. '
                              '(error 2 - refresh_ballotpedia_districts_for_polling_locations_view)'.format(
                                  state=state_code))
         return HttpResponseRedirect(reverse('electoral_district:electoral_district_list', args=()))
 
     # If here, we know that we have some polling_locations to use in order to retrieve ballotpedia districts
 
-    # Step though our set of polling locations, until we find one that contains a ballot.  Some won't contain ballots
+    # Step though our set of map points, until we find one that contains a ballot.  Some won't contain ballots
     # due to data quality issues.
     polling_locations_with_data = 0
     polling_locations_without_data = 0
@@ -505,7 +505,7 @@ def retrieve_ballotpedia_ballots_for_entire_election_api_v4_view(request):
         return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()))
 
     for state_code in state_code_list:
-        # Refresh based on polling locations
+        # Refresh based on map points
         if batch_process_manager.is_batch_process_currently_scheduled(
                 google_civic_election_id=google_civic_election_id,
                 state_code=state_code,
@@ -532,7 +532,7 @@ def retrieve_ballotpedia_ballots_for_entire_election_api_v4_view(request):
             if not positive_value_exists(results['success']):
                 status += results['status']
 
-        # Retrieve first time for each polling location
+        # Retrieve first time for each map point
         if batch_process_manager.is_batch_process_currently_scheduled(
                 google_civic_election_id=google_civic_election_id,
                 state_code=state_code,
@@ -556,7 +556,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view(request):
     from lat/long, and then the ballot items. Ballotpedia API v4
     Reach out to Ballotpedia and retrieve (for one election):
     1) Polling locations (so we can use those addresses to retrieve a representative set of ballots)
-    2) Cycle through a portion of those polling locations, enough that we are caching all of the possible ballot items
+    2) Cycle through a portion of those map points, enough that we are caching all of the possible ballot items
     :param request:
     :return:
     """
@@ -677,8 +677,8 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
             }
             return results
 
-    # Check to see if we have polling location data related to the region(s) covered by this election
-    # We request the ballot data for each polling location as a way to build up our local data
+    # Check to see if we have map point data related to the region(s) covered by this election
+    # We request the ballot data for each map point as a way to build up our local data
     if not positive_value_exists(state_code) and positive_value_exists(google_civic_election_id):
         state_code = election_state_code
 
@@ -707,7 +707,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
         else:
             limit_polling_locations_retrieved = 0
 
-        # Retrieve polling locations already in ballot_returned table
+        # Retrieve map points already in ballot_returned table
         if positive_value_exists(is_national_election) and positive_value_exists(state_code):
             status += "NATIONAL_WITH_STATE (" + str(state_code) + ") "
             status += "date_last_updated_should_not_exceed: " + str(date_last_updated_should_not_exceed) + ' '
@@ -735,7 +735,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
         if positive_value_exists(refresh_ballot_returned):
             polling_location_query = PollingLocation.objects.using('readonly').all()
             polling_location_query = polling_location_query.filter(we_vote_id__in=polling_location_we_vote_id_list)
-            # We don't exclude the deleted polling locations because we need to know to delete the ballot returned entry
+            # We don't exclude the deleted map points because we need to know to delete the ballot returned entry
             # polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
             polling_location_list = list(polling_location_query)
             polling_location_count = len(polling_location_list)
@@ -747,12 +747,12 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
                 polling_location_query.exclude(Q(zip_long__isnull=True) | Q(zip_long__exact='0') |
                                                Q(zip_long__exact=''))
             polling_location_query = polling_location_query.filter(state__iexact=state_code)
-            # Exclude polling locations already retrieved
+            # Exclude map points already retrieved
             polling_location_query = polling_location_query.exclude(we_vote_id__in=polling_location_we_vote_id_list)
-            # We don't exclude the deleted polling locations because we need to know to delete the ballot returned entry
+            # We don't exclude the deleted map points because we need to know to delete the ballot returned entry
             # polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
 
-            # Randomly change the sort order so we over time load different polling locations (before timeout)
+            # Randomly change the sort order so we over time load different map points (before timeout)
             random_sorting = random.randint(1, 5)
             first_retrieve_limit = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK  # 125. Formerly 250 and 111
             if random_sorting == 1:
@@ -787,7 +787,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
         polling_location_count = len(polling_location_list)
     except PollingLocation.DoesNotExist:
         message = 'Could not retrieve (as opposed to refresh) ballot data for the {election_name}. ' \
-                  'Ballotpedia Ballots-No polling locations exist for the state \'{state}\'. ' \
+                  'Ballotpedia Ballots-No map points exist for the state \'{state}\'. ' \
                   ''.format(
                      election_name=election_name,
                      state=state_code)
@@ -806,7 +806,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
             return results
     except Exception as e:
         message = 'Could not retrieve (as opposed to refresh) ballot data for the {election_name}. ' \
-                  'Ballotpedia Ballots-No polling locations exist for the state \'{state}\'. ERROR: {error}' \
+                  'Ballotpedia Ballots-No map points exist for the state \'{state}\'. ERROR: {error}' \
                   ''.format(
                      election_name=election_name,
                      error=str(e),
@@ -827,7 +827,7 @@ def retrieve_ballotpedia_ballots_for_polling_locations_api_v4_internal_view(
 
     if polling_location_count == 0:
         message = 'Did not retrieve (as opposed to refresh) ballot data for the {election_name}. ' \
-                  'Data for all polling locations for the state \'{state}\' has been retrieved once ' \
+                  'Data for all map points for the state \'{state}\' has been retrieved once ' \
                   'date_last_updated_should_not_exceed: \'{date_last_updated_should_not_exceed}\'. ' \
                   '(result 2 - retrieve_ballotpedia_ballots_for_polling_locations_api_v4_view)'.format(
                      election_name=election_name,
@@ -1109,8 +1109,8 @@ def refresh_ballotpedia_ballots_for_voters_api_v4_internal_view(
             }
             return results
 
-    # Check to see if we have polling location data related to the region(s) covered by this election
-    # We request the ballot data for each polling location as a way to build up our local data
+    # Check to see if we have map point data related to the region(s) covered by this election
+    # We request the ballot data for each map point as a way to build up our local data
     if not positive_value_exists(state_code) and positive_value_exists(google_civic_election_id):
         state_code = election_state_code
 
@@ -1308,7 +1308,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
     """
     Reach out to Ballotpedia and retrieve (for one election):
     1) Polling locations (so we can use those addresses to retrieve a representative set of ballots)
-    2) Cycle through a portion of those polling locations, enough that we are caching all of the possible ballot items
+    2) Cycle through a portion of those map points, enough that we are caching all of the possible ballot items
     :param request:
     :param election_local_id:
     :return:
@@ -1349,8 +1349,8 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
                                                       'Election could not be found.')
         return HttpResponseRedirect(reverse('election:election_list', args=()))
 
-    # Check to see if we have polling location data related to the region(s) covered by this election
-    # We request the ballot data for each polling location as a way to build up our local data
+    # Check to see if we have map point data related to the region(s) covered by this election
+    # We request the ballot data for each map point as a way to build up our local data
     if not positive_value_exists(state_code) and positive_value_exists(google_civic_election_id):
         state_code = election_state_code
 
@@ -1379,7 +1379,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         status += "COULD_NOT_FIND_POLLING_LOCATION_LIST " + str(e) + " "
 
     if polling_location_count == 0:
-        # We didn't find any polling locations marked for bulk retrieve, so just retrieve up to the import_limit
+        # We didn't find any map points marked for bulk retrieve, so just retrieve up to the import_limit
         try:
             polling_location_count_query = PollingLocation.objects.all()
             polling_location_count_query = \
@@ -1405,7 +1405,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         except PollingLocation.DoesNotExist:
             messages.add_message(request, messages.INFO,
                                  'Could not retrieve ballot data for the {election_name}. '
-                                 'No polling locations exist for the state \'{state}\'. '
+                                 'No map points exist for the state \'{state}\'. '
                                  'Data needed from VIP.'.format(
                                      election_name=election_name,
                                      state=state_code))
@@ -1414,7 +1414,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
     if polling_location_count == 0:
         messages.add_message(request, messages.ERROR,
                              'Could not retrieve ballot data for the {election_name}. '
-                             'No polling locations returned for the state \'{state}\'. '
+                             'No map points returned for the state \'{state}\'. '
                              '(error 2 - retrieve_ballotpedia_data_for_polling_locations_view)'.format(
                                  election_name=election_name,
                                  state=state_code))
@@ -1424,7 +1424,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
     ballots_retrieved = 0
     ballots_not_retrieved = 0
 
-    # Step though our set of polling locations, until we find one that contains a ballot.  Some won't contain ballots
+    # Step though our set of map points, until we find one that contains a ballot.  Some won't contain ballots
     # due to data quality issues.
     if retrieve_races or retrieve_measures or force_district_retrieve_from_ballotpedia:
         polling_locations_with_data = 0

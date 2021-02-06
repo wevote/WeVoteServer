@@ -32,7 +32,7 @@ def retrieve_representatives_for_many_addresses_view(request):  # THIS FUNCTION 
     """
     Reach out to Google and retrieve (for one election):
     1) Polling locations (so we can use those addresses to retrieve a representative set of ballots)
-    2) Cycle through a portion of those polling locations, enough that we are caching all of the possible ballot items
+    2) Cycle through a portion of those map points, enough that we are caching all of the possible ballot items
     :param request:
     :return:
     """
@@ -61,8 +61,8 @@ def retrieve_representatives_for_many_addresses_view(request):  # THIS FUNCTION 
     #     messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. Election could not be found.')
     #     return HttpResponseRedirect(reverse('election:election_list', args=()))
     #
-    # # Check to see if we have polling location data related to the region(s) covered by this election
-    # # We request the ballot data for each polling location as a way to build up our local data
+    # # Check to see if we have map point data related to the region(s) covered by this election
+    # # We request the ballot data for each map point as a way to build up our local data
     # if not positive_value_exists(state_code):
     #     state_code = election_on_stage.get_election_state()
     #     # if not positive_value_exists(state_code):
@@ -72,7 +72,7 @@ def retrieve_representatives_for_many_addresses_view(request):  # THIS FUNCTION 
     #     polling_location_count_query = PollingLocation.objects.all()
     #     polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
     #     polling_location_count_query = polling_location_count_query.exclude(polling_location_deleted=True)
-    #     # If Google wasn't able to return ballot data in the past ignore that polling location
+    #     # If Google wasn't able to return ballot data in the past ignore that map point
     #     polling_location_count_query = polling_location_count_query.filter(
     #         google_response_address_not_found__isnull=True)
     #     polling_location_count = polling_location_count_query.count()
@@ -88,7 +88,7 @@ def retrieve_representatives_for_many_addresses_view(request):  # THIS FUNCTION 
     # except PollingLocation.DoesNotExist:
     #     messages.add_message(request, messages.INFO,
     #                          'Could not retrieve ballot data for the {election_name}. '
-    #                          'No polling locations exist for the state \'{state}\'. '
+    #                          'No map points exist for the state \'{state}\'. '
     #                          'Data needed from VIP.'.format(
     #                              election_name=election_on_stage.election_name,
     #                              state=state_code))
@@ -97,7 +97,7 @@ def retrieve_representatives_for_many_addresses_view(request):  # THIS FUNCTION 
     # if polling_location_count == 0:
     #     messages.add_message(request, messages.ERROR,
     #                          'Could not retrieve ballot data for the {election_name}. '
-    #                          'No polling locations returned for the state \'{state}\'. '
+    #                          'No map points returned for the state \'{state}\'. '
     #                          '(error 2 - retrieve_representatives_for_many_addresses_view)'.format(
     #                              election_name=election_on_stage.election_name,
     #                              state=state_code))
@@ -110,11 +110,11 @@ def retrieve_representatives_for_many_addresses_view(request):  # THIS FUNCTION 
     # ballots_with_election_administration_data = 0
     # ballots_refreshed = 0
     # # We used to only retrieve up to 500 locations from each state, but we don't limit now
-    # # # We retrieve 10% of the total polling locations, which should give us coverage of the entire election
+    # # # We retrieve 10% of the total map points, which should give us coverage of the entire election
     # # number_of_polling_locations_to_retrieve = int(.1 * polling_location_count)
     # ballot_returned_manager = BallotReturnedManager()
     # rate_limit_count = 0
-    # # Step though our set of polling locations, until we find one that contains a ballot.  Some won't contain ballots
+    # # Step though our set of map points, until we find one that contains a ballot.  Some won't contain ballots
     # # due to data quality issues.
     # for polling_location in polling_location_list:
     #     success = False
@@ -132,7 +132,7 @@ def retrieve_representatives_for_many_addresses_view(request):  # THIS FUNCTION 
     #             if store_representatives_results['ballot_returned_found']:
     #                 ballot_returned = store_representatives_results['ballot_returned']
     #                 ballot_returned_id = ballot_returned.id
-    #             # NOTE: We don't support retrieving ballots for polling locations AND geocoding simultaneously
+    #             # NOTE: We don't support retrieving ballots for map points AND geocoding simultaneously
     #             # if store_representatives_results['ballot_returned_found']:
     #             #     ballot_returned = store_representatives_results['ballot_returned']
     #             #     ballot_returned_results = \
@@ -214,7 +214,7 @@ def retrieve_representatives_for_many_addresses_view(request):  # THIS FUNCTION 
 def retrieve_representatives_for_one_address_view(request):
     """
     Reach out to Google and retrieve civicinfo.representatives.representativeInfoByAddress
-    (for one address, typically from a polling location)
+    (for one address, typically from a map point)
     :param request:
     :return:
     """

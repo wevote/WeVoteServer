@@ -30,7 +30,7 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-# These are states for which we have polling location data
+# These are states for which we have map point data
 STATE_LIST_IMPORT = {
     'AK': 'Alaska',
     'AL': 'Alabama',
@@ -232,13 +232,13 @@ def polling_locations_import_from_master_server_view(request):
         status += import_results['status']
         json_retrieved = True
         polling_locations_import_status_string = "Checking " + str(len(structured_json)) + \
-                                                 " polling locations for duplicates. "
+                                                 " map points for duplicates. "
         results = filter_polling_locations_structured_json_for_local_duplicates(structured_json)
         filtered_structured_json = results['structured_json']
         duplicates_removed = results['duplicates_removed']
 
         polling_locations_import_status_string = "Importing " + str(len(filtered_structured_json)) + \
-                                                 " polling locations."
+                                                 " map points."
         import_results = polling_locations_import_from_structured_json(filtered_structured_json)
         saved = import_results['saved']
         updated = import_results['updated']
@@ -283,7 +283,7 @@ def polling_locations_import_from_master_server_status_view(request):
 @login_required
 def import_polling_locations_process_view(request):
     """
-    This view imports the polling location data from xml files from VIP (http://data.votinginfoproject.org)
+    This view imports the map point data from xml files from VIP (http://data.votinginfoproject.org)
     :param request:
     :return:
     """
@@ -592,10 +592,10 @@ def polling_location_list_view(request):
 
     polling_location_count = polling_location_count_query.count()
 
-    info_message = '{polling_location_count} polling locations found.'.format(
+    info_message = '{polling_location_count} map points found.'.format(
         polling_location_count=polling_location_count)
     if positive_value_exists(polling_location_without_latitude_count):
-        info_message += ' {polling_location_without_latitude_count} polling locations without lat/long.'.format(
+        info_message += ' {polling_location_without_latitude_count} map points without lat/long.'.format(
             polling_location_without_latitude_count=polling_location_without_latitude_count)
 
     messages.add_message(request, messages.INFO, info_message)
@@ -624,7 +624,7 @@ def polling_location_list_view(request):
 @login_required
 def polling_locations_add_address_from_latitude_and_longitude_view(request):
     """
-    Find polling location entries that don't have state, but do have latitude/longitude, and update them
+    Find map point entries that don't have state, but do have latitude/longitude, and update them
     :param request:
     :return:
     """
@@ -645,7 +645,7 @@ def polling_locations_add_address_from_latitude_and_longitude_view(request):
     polling_locations_not_saved = 0
 
     try:
-        # Find all polling locations with an empty latitude (with limit)
+        # Find all map points with an empty latitude (with limit)
         polling_location_query = PollingLocation.objects.all()
         polling_location_query = polling_location_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
         polling_location_query = polling_location_query.filter(Q(state__isnull=True) | Q(state=''))
@@ -654,7 +654,7 @@ def polling_locations_add_address_from_latitude_and_longitude_view(request):
         polling_location_list = list(polling_location_query)
     except Exception as e:
         messages.add_message(request, messages.ERROR,
-                             'No polling locations found that have lat/long and need state: ' + str(e))
+                             'No map points found that have lat/long and need state: ' + str(e))
 
     for polling_location_on_stage in polling_location_list:
         try:
@@ -685,7 +685,7 @@ def polling_locations_add_address_from_latitude_and_longitude_view(request):
 @login_required
 def polling_locations_add_latitude_and_longitude_view(request):
     """
-    Find polling location entries that don't have latitude/longitude (up to a limit), and update them
+    Find map point entries that don't have latitude/longitude (up to a limit), and update them
     :param request:
     :return:
     """
@@ -713,7 +713,7 @@ def polling_locations_add_latitude_and_longitude_view(request):
     polling_locations_not_saved = 0
 
     try:
-        # Find all polling locations with an empty latitude (with limit)
+        # Find all map points with an empty latitude (with limit)
         polling_location_query = PollingLocation.objects.all()
         if positive_value_exists(refresh_all):
             # Do not restrict to entries without lat/long
@@ -725,7 +725,7 @@ def polling_locations_add_latitude_and_longitude_view(request):
         polling_location_query = polling_location_query.order_by('location_name')[:limit]
         polling_location_list = list(polling_location_query)
     except Exception as e:
-        messages.add_message(request, messages.ERROR, 'No polling locations found that need lat/long: ' + str(e))
+        messages.add_message(request, messages.ERROR, 'No map points found that need lat/long: ' + str(e))
 
     for polling_location_on_stage in polling_location_list:
         try:
@@ -895,7 +895,7 @@ def polling_location_summary_by_we_vote_id_view(request, polling_location_we_vot
 @login_required
 def soft_delete_duplicates_view(request):
     """
-    Find polling location entries that have the same address and mark them as deleted
+    Find map point entries that have the same address and mark them as deleted
     :param request:
     :return:
     """
@@ -922,7 +922,7 @@ def soft_delete_duplicates_view(request):
     polling_location_list = []
 
     try:
-        # Find all polling locations not already deleted
+        # Find all map points not already deleted
         polling_location_query = PollingLocation.objects.all()
         polling_location_query = polling_location_query.filter(state__iexact=state_code)
         polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
@@ -930,7 +930,7 @@ def soft_delete_duplicates_view(request):
         polling_location_query = polling_location_query.exclude(Q(city__isnull=True) | Q(city__iexact=""))
         polling_location_list = polling_location_query[analyze_start:analyze_end]
     except Exception as e:
-        messages.add_message(request, messages.ERROR, 'No polling locations found. ' + str(e))
+        messages.add_message(request, messages.ERROR, 'No map points found. ' + str(e))
 
     polling_locations_deleted = 0
     polling_locations_reviewed = 0

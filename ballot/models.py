@@ -45,9 +45,9 @@ class BallotItem(models.Model):
     # The unique id of the voter for which this ballot was retrieved
     voter_id = models.IntegerField(verbose_name="the voter unique id",
                                    default=0, null=False, blank=False, db_index=True)
-    # The polling location for which this ballot was retrieved
+    # The map point for which this ballot was retrieved
     polling_location_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id of the polling location", max_length=255, default=None, null=True,
+        verbose_name="we vote permanent id of the map point", max_length=255, default=None, null=True,
         blank=True, unique=False, db_index=True)
 
     # The unique ID of this election. (Provided by Google Civic)
@@ -473,7 +473,7 @@ class BallotItemManager(models.Manager):
         elif not polling_location_we_vote_id:
             success = False
             status += 'MISSING_POLLING_LOCATION_WE_VOTE_ID '
-        #  We Vote Server doesn't have a matching polling location yet.
+        #  We Vote Server doesn't have a matching map point yet.
         # elif not polling_location_found:
         #     success = False
         #     status = 'MISSING_POLLING_LOCATION_LOCALLY'
@@ -1339,7 +1339,7 @@ class BallotItemListManager(models.Manager):
     #
     #     ballot_item_manager = BallotItemManager()
     #
-    #     # This is a list of ballot items, usually from a polling location, that we are copying over to a voter
+    #     # This is a list of ballot items, usually from a map point, that we are copying over to a voter
     #     for one_ballot_item in ballot_item_list:
     #         defaults = {}
     #         defaults['measure_url'] = one_ballot_item.measure_url
@@ -1600,9 +1600,9 @@ class BallotReturned(models.Model):
     # Either voter_id or polling_location_we_vote_id will be set, but not both.
     # The unique id of the voter for which this ballot was retrieved.
     voter_id = models.IntegerField(verbose_name="the voter unique id", null=True, blank=True)
-    # The polling location for which this ballot was retrieved
+    # The map point for which this ballot was retrieved
     polling_location_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id of the polling location", max_length=255, default=None, null=True,
+        verbose_name="we vote permanent id of the map point", max_length=255, default=None, null=True,
         blank=True, unique=False)
 
     # The unique ID of this election. (Provided by Google Civic)
@@ -2101,7 +2101,7 @@ class BallotReturnedManager(models.Manager):
 
     def fetch_last_election_in_this_state(self, state_code):
         """
-        Find the last election (in the past) that has at least one ballot at a polling location
+        Find the last election (in the past) that has at least one ballot at a map point
         :param state_code:
         :return:
         """
@@ -2161,7 +2161,7 @@ class BallotReturnedManager(models.Manager):
 
     def fetch_next_upcoming_election_in_this_state(self, state_code, skip_these_elections=[]):
         """
-        Find the soonest upcoming election in the future with at least one ballot at a polling location
+        Find the soonest upcoming election in the future with at least one ballot at a map point
         :param state_code:
         :return:
         """
@@ -2293,7 +2293,7 @@ class BallotReturnedManager(models.Manager):
                 ballot_returned_query = BallotReturned.objects.using('readonly').all()
             else:
                 ballot_returned_query = BallotReturned.objects.all()
-            # Limit this query to entries stored for polling locations
+            # Limit this query to entries stored for map points
             ballot_returned_query = ballot_returned_query.exclude(
                 Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
 
@@ -2347,7 +2347,7 @@ class BallotReturnedManager(models.Manager):
                 ballot_returned_query = BallotReturned.objects.using('readonly').all()
             else:
                 ballot_returned_query = BallotReturned.objects.all()
-            # Limit this query to entries stored for polling locations
+            # Limit this query to entries stored for map points
             ballot_returned_query = ballot_returned_query.exclude(
                 Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
             if positive_value_exists(address) and "," in address:
@@ -2455,7 +2455,7 @@ class BallotReturnedManager(models.Manager):
                     ballot_returned_query = BallotReturned.objects.using('readonly').all()
                 else:
                     ballot_returned_query = BallotReturned.objects.all()
-                # Limit this query to entries stored for polling locations
+                # Limit this query to entries stored for map points
                 ballot_returned_query = ballot_returned_query.exclude(
                     Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
 
@@ -3264,9 +3264,9 @@ class VoterBallotSaved(models.Model):
     is_from_substituted_address = models.BooleanField(default=False)
     is_from_test_ballot = models.BooleanField(default=False)
 
-    # The polling location for which this ballot was retrieved
+    # The map point for which this ballot was retrieved
     polling_location_we_vote_id_source = models.CharField(
-        verbose_name="we vote permanent id of the polling location this was copied from",
+        verbose_name="we vote permanent id of the map point this was copied from",
         max_length=255, default=None, null=True, blank=True, unique=False)
 
     # When we copy a ballot from a master ballot_returned entry, we want to store a link back to that source

@@ -118,7 +118,7 @@ def electoral_district_list_view(request):
     electoral_district_search = request.GET.get('electoral_district_search', '')
 
     if positive_value_exists(polling_location_we_vote_id):
-        # Find the electoral_districts this polling location is in
+        # Find the electoral_districts this map point is in
         electoral_district_link_query = ElectoralDistrictLinkToPollingLocation.objects.all()
         electoral_district_link_query = electoral_district_link_query.filter(
             polling_location_we_vote_id__iexact=polling_location_we_vote_id)
