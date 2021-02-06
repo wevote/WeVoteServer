@@ -28,7 +28,7 @@ from wevote_functions.functions import add_period_to_middle_name_initial, add_pe
     convert_to_political_party_constant, positive_value_exists, process_request_from_master, \
     extract_twitter_handle_from_text_string, extract_website_from_url, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
-from .models import CandidateCampaignListManager, CandidateCampaign, CandidateCampaignManager, \
+from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
     CANDIDATE_UNIQUE_IDENTIFIERS
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -133,7 +133,7 @@ def candidates_import_from_sample_file():
     # Load saved json from local file
     logger.info("Loading CandidateCampaigns from local file")
 
-    with open("candidate/import_data/candidate_campaigns_sample.json") as json_data:
+    with open("candidate/import_data/candidates_sample.json") as json_data:
         structured_json = json.load(json_data)
 
     return candidates_import_from_structured_json(structured_json)
@@ -190,13 +190,13 @@ def fetch_duplicate_candidate_count(we_vote_candidate, ignore_candidate_id_list)
     if not positive_value_exists(we_vote_candidate.google_civic_election_id):
         return 0
 
-    candidate_campaign_list_manager = CandidateCampaignListManager()
-    results = candidate_campaign_list_manager.retrieve_google_civic_election_id_list_from_candidate_we_vote_id_list(
+    candidate_list_manager = CandidateListManager()
+    results = candidate_list_manager.retrieve_google_civic_election_id_list_from_candidate_we_vote_id_list(
         candidate_we_vote_id_list=[we_vote_candidate.we_vote_id])
     google_civic_election_id_list = results['google_civic_election_id_list']
 
     # Search for other candidates in any of the elections this candidate is in that match name and election
-    return candidate_campaign_list_manager.fetch_candidates_from_non_unique_identifiers_count(
+    return candidate_list_manager.fetch_candidates_from_non_unique_identifiers_count(
         google_civic_election_id_list, we_vote_candidate.state_code,
         we_vote_candidate.candidate_twitter_handle, we_vote_candidate.candidate_name, ignore_candidate_id_list)
 
@@ -211,14 +211,14 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
         }
         return error_results
 
-    candidate_campaign_list_manager = CandidateCampaignListManager()
-    results = candidate_campaign_list_manager.retrieve_google_civic_election_id_list_from_candidate_we_vote_id_list(
+    candidate_list_manager = CandidateListManager()
+    results = candidate_list_manager.retrieve_google_civic_election_id_list_from_candidate_we_vote_id_list(
         candidate_we_vote_id_list=[we_vote_candidate.we_vote_id])
     google_civic_election_id_list = results['google_civic_election_id_list']
 
     # Search for other candidates that share the same elections that match name and election
     try:
-        results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
+        results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id_list, we_vote_candidate.state_code,
             we_vote_candidate.candidate_twitter_handle, we_vote_candidate.candidate_name, ignore_candidate_id_list)
 
@@ -365,13 +365,13 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
     :return:
     """
     status = ""
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
 
     # Candidate 1 is the one we keep, and Candidate 2 is the one we will merge into Candidate 1
     candidate1_results = \
-        candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate1_we_vote_id)
-    if candidate1_results['candidate_campaign_found']:
-        candidate1_on_stage = candidate1_results['candidate_campaign']
+        candidate_manager.retrieve_candidate_from_we_vote_id(candidate1_we_vote_id)
+    if candidate1_results['candidate_found']:
+        candidate1_on_stage = candidate1_results['candidate']
         candidate1_id = candidate1_on_stage.id
     else:
         results = {
@@ -383,9 +383,9 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
         return results
 
     candidate2_results = \
-        candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate2_we_vote_id)
-    if candidate2_results['candidate_campaign_found']:
-        candidate2_on_stage = candidate2_results['candidate_campaign']
+        candidate_manager.retrieve_candidate_from_we_vote_id(candidate2_we_vote_id)
+    if candidate2_results['candidate_found']:
+        candidate2_on_stage = candidate2_results['candidate']
         candidate2_id = candidate2_on_stage.id
     else:
         results = {
@@ -496,7 +496,7 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
     # Deal with candidate_to_office_link
     # We are going to keep candidate1 linkages
     candidate1_office_we_vote_id_list = []
-    candidate1_link_results = candidate_campaign_manager.retrieve_candidate_to_office_link(
+    candidate1_link_results = candidate_manager.retrieve_candidate_to_office_link(
             candidate_we_vote_id=candidate1_we_vote_id, read_only=False)
     if positive_value_exists(candidate1_link_results['success']):
         candidate1_to_office_link_list = candidate1_link_results['candidate_to_office_link_list']
@@ -508,7 +508,7 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
 
     # We need to migrate candidate2 linkages
     candidate2_to_office_link_list = []
-    candidate2_link_results = candidate_campaign_manager.retrieve_candidate_to_office_link(
+    candidate2_link_results = candidate_manager.retrieve_candidate_to_office_link(
             candidate_we_vote_id=candidate2_we_vote_id, read_only=False)
     if positive_value_exists(candidate2_link_results['success']):
         candidate2_to_office_link_list = candidate2_link_results['candidate_to_office_link_list']
@@ -545,7 +545,7 @@ def move_candidates_to_another_office(from_contest_office_id, from_contest_offic
     success = True
     candidate_entries_moved = 0
     candidate_entries_not_moved = 0
-    candidate_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     contest_manager = ContestOfficeManager()
 
     # #####################################
@@ -634,7 +634,7 @@ def filter_candidates_structured_json_for_local_duplicates(structured_json):
     processed = 0
     duplicates_removed = 0
     filtered_structured_json = []
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     for one_candidate in structured_json:
         candidate_name = one_candidate['candidate_name'] if 'candidate_name' in one_candidate else ''
         google_civic_candidate_name = one_candidate['google_civic_candidate_name'] \
@@ -691,7 +691,7 @@ def filter_candidates_structured_json_for_local_duplicates(structured_json):
 
 
 def candidates_import_from_structured_json(structured_json):
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     candidates_saved = 0
     candidates_updated = 0
     candidates_not_processed = 0
@@ -839,7 +839,7 @@ def candidates_import_from_structured_json(structured_json):
             if 'wikipedia_photo_url' in one_candidate:
                 updated_candidate_values['wikipedia_photo_url'] = one_candidate['wikipedia_photo_url']
 
-            results = candidate_campaign_manager.update_or_create_candidate_campaign(
+            results = candidate_manager.update_or_create_candidate(
                 we_vote_id, google_civic_election_id, ocd_division_id,
                 contest_office_id, contest_office_we_vote_id,
                 candidate_name, updated_candidate_values)
@@ -871,7 +871,7 @@ def candidates_import_from_structured_json(structured_json):
 
 
 def candidate_to_office_link_import_from_structured_json(structured_json):
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     entries_saved = 0
     entries_updated = 0
     entries_not_processed = 0
@@ -885,7 +885,7 @@ def candidate_to_office_link_import_from_structured_json(structured_json):
         if positive_value_exists(candidate_we_vote_id) \
                 and positive_value_exists(contest_office_we_vote_id) \
                 and positive_value_exists(google_civic_election_id):
-            results = candidate_campaign_manager.get_or_create_candidate_to_office_link(
+            results = candidate_manager.get_or_create_candidate_to_office_link(
                 candidate_we_vote_id,
                 contest_office_we_vote_id,
                 google_civic_election_id,
@@ -940,13 +940,13 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    candidate_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     if positive_value_exists(candidate_id):
-        results = candidate_manager.retrieve_candidate_campaign_from_id(candidate_id)
+        results = candidate_manager.retrieve_candidate_from_id(candidate_id)
         success = results['success']
         status = results['status']
     elif positive_value_exists(candidate_we_vote_id):
-        results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
         success = results['success']
         status = results['status']
     else:
@@ -962,16 +962,16 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     if success:
-        candidate_campaign = results['candidate_campaign']
+        candidate = results['candidate']
         wdate = ''
-        if isinstance(candidate_campaign.withdrawal_date, the_other_datetime.date):
-            wdate = candidate_campaign.withdrawal_date.strftime("%Y-%m-%d")
-        if not positive_value_exists(candidate_campaign.contest_office_name):
-            candidate_campaign = candidate_manager.refresh_cached_candidate_office_info(candidate_campaign)
+        if isinstance(candidate.withdrawal_date, the_other_datetime.date):
+            wdate = candidate.withdrawal_date.strftime("%Y-%m-%d")
+        if not positive_value_exists(candidate.contest_office_name):
+            candidate = candidate_manager.refresh_cached_candidate_office_info(candidate)
 
         office_list_for_candidate = []
         office_link_results = candidate_manager.retrieve_candidate_to_office_link(
-            candidate_we_vote_id=candidate_campaign.we_vote_id,
+            candidate_we_vote_id=candidate.we_vote_id,
             read_only=True)
         if office_link_results['list_found']:
             office_manager = ContestOfficeManager()
@@ -1002,50 +1002,50 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
                 }
                 office_list_for_candidate.append(one_office_dict)
         date_last_updated = ''
-        if positive_value_exists(candidate_campaign.date_last_updated):
-            date_last_updated = candidate_campaign.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+        if positive_value_exists(candidate.date_last_updated):
+            date_last_updated = candidate.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
         json_data = {
             'status':                       status,
             'success':                      True,
-            'ballot_item_display_name':     candidate_campaign.display_candidate_name(),
-            'ballotpedia_candidate_id':     candidate_campaign.ballotpedia_candidate_id,
-            'ballotpedia_candidate_summary': candidate_campaign.ballotpedia_candidate_summary,
-            'ballotpedia_candidate_url':    candidate_campaign.ballotpedia_candidate_url,
-            'ballotpedia_person_id':        candidate_campaign.ballotpedia_person_id,
-            'candidate_photo_url_large':    candidate_campaign.we_vote_hosted_profile_image_url_large
-            if positive_value_exists(candidate_campaign.we_vote_hosted_profile_image_url_large)
-            else candidate_campaign.candidate_photo_url(),
-            'candidate_photo_url_medium':   candidate_campaign.we_vote_hosted_profile_image_url_medium,
-            'candidate_photo_url_tiny':     candidate_campaign.we_vote_hosted_profile_image_url_tiny,
-            'candidate_email':              candidate_campaign.candidate_email,
-            'candidate_phone':              candidate_campaign.candidate_phone,
-            'candidate_url':                candidate_campaign.candidate_url,
-            'candidate_contact_form_url':   candidate_campaign.candidate_contact_form_url,
-            'contest_office_id':            candidate_campaign.contest_office_id,
-            'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
-            'contest_office_name':          candidate_campaign.contest_office_name,
+            'ballot_item_display_name':     candidate.display_candidate_name(),
+            'ballotpedia_candidate_id':     candidate.ballotpedia_candidate_id,
+            'ballotpedia_candidate_summary': candidate.ballotpedia_candidate_summary,
+            'ballotpedia_candidate_url':    candidate.ballotpedia_candidate_url,
+            'ballotpedia_person_id':        candidate.ballotpedia_person_id,
+            'candidate_photo_url_large':    candidate.we_vote_hosted_profile_image_url_large
+            if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large)
+            else candidate.candidate_photo_url(),
+            'candidate_photo_url_medium':   candidate.we_vote_hosted_profile_image_url_medium,
+            'candidate_photo_url_tiny':     candidate.we_vote_hosted_profile_image_url_tiny,
+            'candidate_email':              candidate.candidate_email,
+            'candidate_phone':              candidate.candidate_phone,
+            'candidate_url':                candidate.candidate_url,
+            'candidate_contact_form_url':   candidate.candidate_contact_form_url,
+            'contest_office_id':            candidate.contest_office_id,
+            'contest_office_we_vote_id':    candidate.contest_office_we_vote_id,
+            'contest_office_name':          candidate.contest_office_name,
             'contest_office_list':          office_list_for_candidate,
-            'facebook_url':                 candidate_campaign.facebook_url,
-            # 'google_civic_candidate_name': candidate_campaign.google_civic_candidate_name,
-            'google_civic_election_id':     candidate_campaign.google_civic_election_id,
-            'id':                           candidate_campaign.id,
+            'facebook_url':                 candidate.facebook_url,
+            # 'google_civic_candidate_name': candidate.google_civic_candidate_name,
+            'google_civic_election_id':     candidate.google_civic_election_id,
+            'id':                           candidate.id,
             'kind_of_ballot_item':          CANDIDATE,
             'last_updated':                 date_last_updated,
-            'maplight_id':                  candidate_campaign.maplight_id,
-            'ocd_division_id':              candidate_campaign.ocd_division_id,
-            'order_on_ballot':              candidate_campaign.order_on_ballot,
-            'party':                        candidate_campaign.political_party_display(),
-            'politician_id':                candidate_campaign.politician_id,
-            'politician_we_vote_id':        candidate_campaign.politician_we_vote_id,
-            'state_code':                   candidate_campaign.state_code,
-            'twitter_url':                  candidate_campaign.twitter_url,
-            'twitter_handle':               candidate_campaign.fetch_twitter_handle(),
-            'twitter_description':          candidate_campaign.twitter_description,
-            'twitter_followers_count':      candidate_campaign.twitter_followers_count,
-            'we_vote_id':                   candidate_campaign.we_vote_id,
-            'withdrawn_from_election':      candidate_campaign.withdrawn_from_election,
+            'maplight_id':                  candidate.maplight_id,
+            'ocd_division_id':              candidate.ocd_division_id,
+            'order_on_ballot':              candidate.order_on_ballot,
+            'party':                        candidate.political_party_display(),
+            'politician_id':                candidate.politician_id,
+            'politician_we_vote_id':        candidate.politician_we_vote_id,
+            'state_code':                   candidate.state_code,
+            'twitter_url':                  candidate.twitter_url,
+            'twitter_handle':               candidate.fetch_twitter_handle(),
+            'twitter_description':          candidate.twitter_description,
+            'twitter_followers_count':      candidate.twitter_followers_count,
+            'we_vote_id':                   candidate.we_vote_id,
+            'withdrawn_from_election':      candidate.withdrawn_from_election,
             'withdrawal_date':              wdate,
-            'youtube_url': candidate_campaign.youtube_url,
+            'youtube_url': candidate.youtube_url,
         }
     else:
         json_data = {
@@ -1086,7 +1086,7 @@ def candidates_retrieve_for_api(office_id=0, office_we_vote_id=''):  # candidate
     candidates_to_display = []
     google_civic_election_id = 0
     try:
-        candidate_list_object = CandidateCampaignListManager()
+        candidate_list_object = CandidateListManager()
         results = candidate_list_object.retrieve_all_candidates_for_office(
             office_id=office_id,
             office_we_vote_id=office_we_vote_id)
@@ -1100,17 +1100,17 @@ def candidates_retrieve_for_api(office_id=0, office_we_vote_id=''):  # candidate
         success = False
 
     if success:
-        candidate_manager = CandidateCampaignManager()
-        for candidate_campaign in candidate_list:
-            if not positive_value_exists(candidate_campaign.contest_office_name):
-                candidate_campaign = candidate_manager.refresh_cached_candidate_office_info(candidate_campaign)
+        candidate_manager = CandidateManager()
+        for candidate in candidate_list:
+            if not positive_value_exists(candidate.contest_office_name):
+                candidate = candidate_manager.refresh_cached_candidate_office_info(candidate)
             wdate = ''
-            if isinstance(candidate_campaign.withdrawal_date, the_other_datetime.date):
-                wdate = candidate_campaign.withdrawal_date.strftime("%Y-%m-%d")
+            if isinstance(candidate.withdrawal_date, the_other_datetime.date):
+                wdate = candidate.withdrawal_date.strftime("%Y-%m-%d")
 
             office_list_for_candidate = []
             office_link_results = candidate_manager.retrieve_candidate_to_office_link(
-                    candidate_we_vote_id=candidate_campaign.we_vote_id,
+                    candidate_we_vote_id=candidate.we_vote_id,
                     read_only=True)
             if office_link_results['list_found']:
                 office_manager = ContestOfficeManager()
@@ -1143,57 +1143,57 @@ def candidates_retrieve_for_api(office_id=0, office_we_vote_id=''):  # candidate
 
             # This should match voter_ballot_items_retrieve_for_one_election_for_api (voterBallotItemsRetrieve)
             date_last_updated = ''
-            if positive_value_exists(candidate_campaign.date_last_updated):
-                date_last_updated = candidate_campaign.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+            if positive_value_exists(candidate.date_last_updated):
+                date_last_updated = candidate.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
             one_candidate = {
                 'status':                       status,
                 'success':                      True,
-                'id':                           candidate_campaign.id,
-                'we_vote_id':                   candidate_campaign.we_vote_id,
-                'ballot_item_display_name':     candidate_campaign.display_candidate_name(),
-                'ballotpedia_candidate_id':     candidate_campaign.ballotpedia_candidate_id,
-                'ballotpedia_candidate_summary': candidate_campaign.ballotpedia_candidate_summary,
-                'ballotpedia_candidate_url':    candidate_campaign.ballotpedia_candidate_url,
-                'ballotpedia_person_id':        candidate_campaign.ballotpedia_person_id,
-                'candidate_email':              candidate_campaign.candidate_email,
-                'candidate_phone':              candidate_campaign.candidate_phone,
-                'candidate_photo_url_large':    candidate_campaign.we_vote_hosted_profile_image_url_large
-                if positive_value_exists(candidate_campaign.we_vote_hosted_profile_image_url_large)
-                else candidate_campaign.candidate_photo_url(),
-                'candidate_photo_url_medium':   candidate_campaign.we_vote_hosted_profile_image_url_medium,
-                'candidate_photo_url_tiny':     candidate_campaign.we_vote_hosted_profile_image_url_tiny,
-                'candidate_url':                candidate_campaign.candidate_url,
-                'candidate_contact_form_url':   candidate_campaign.candidate_contact_form_url,
+                'id':                           candidate.id,
+                'we_vote_id':                   candidate.we_vote_id,
+                'ballot_item_display_name':     candidate.display_candidate_name(),
+                'ballotpedia_candidate_id':     candidate.ballotpedia_candidate_id,
+                'ballotpedia_candidate_summary': candidate.ballotpedia_candidate_summary,
+                'ballotpedia_candidate_url':    candidate.ballotpedia_candidate_url,
+                'ballotpedia_person_id':        candidate.ballotpedia_person_id,
+                'candidate_email':              candidate.candidate_email,
+                'candidate_phone':              candidate.candidate_phone,
+                'candidate_photo_url_large':    candidate.we_vote_hosted_profile_image_url_large
+                if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large)
+                else candidate.candidate_photo_url(),
+                'candidate_photo_url_medium':   candidate.we_vote_hosted_profile_image_url_medium,
+                'candidate_photo_url_tiny':     candidate.we_vote_hosted_profile_image_url_tiny,
+                'candidate_url':                candidate.candidate_url,
+                'candidate_contact_form_url':   candidate.candidate_contact_form_url,
                 'contest_office_list':          office_list_for_candidate,
-                'contest_office_id':            candidate_campaign.contest_office_id,  # Deprecate
-                'contest_office_name':          candidate_campaign.contest_office_name,  # Deprecate
+                'contest_office_id':            candidate.contest_office_id,  # Deprecate
+                'contest_office_name':          candidate.contest_office_name,  # Deprecate
                 'contest_office_we_vote_id':    office_we_vote_id,
-                'facebook_url':                 candidate_campaign.facebook_url,
-                'google_civic_election_id':     candidate_campaign.google_civic_election_id,  # Deprecate
+                'facebook_url':                 candidate.facebook_url,
+                'google_civic_election_id':     candidate.google_civic_election_id,  # Deprecate
                 'kind_of_ballot_item':          CANDIDATE,
                 'last_updated':                 date_last_updated,
-                'maplight_id':                  candidate_campaign.maplight_id,
-                'ocd_division_id':              candidate_campaign.ocd_division_id,
-                'order_on_ballot':              candidate_campaign.order_on_ballot,
-                'party':                        candidate_campaign.political_party_display(),
-                'politician_id':                candidate_campaign.politician_id,
-                'politician_we_vote_id':        candidate_campaign.politician_we_vote_id,
-                'state_code':                   candidate_campaign.state_code,
-                'twitter_url':                  candidate_campaign.twitter_url,
-                'twitter_handle':               candidate_campaign.fetch_twitter_handle(),
-                'twitter_description':          candidate_campaign.twitter_description,
-                'twitter_followers_count':      candidate_campaign.twitter_followers_count,
-                'youtube_url':                  candidate_campaign.youtube_url,
-                'withdrawn_from_election':      candidate_campaign.withdrawn_from_election,
+                'maplight_id':                  candidate.maplight_id,
+                'ocd_division_id':              candidate.ocd_division_id,
+                'order_on_ballot':              candidate.order_on_ballot,
+                'party':                        candidate.political_party_display(),
+                'politician_id':                candidate.politician_id,
+                'politician_we_vote_id':        candidate.politician_we_vote_id,
+                'state_code':                   candidate.state_code,
+                'twitter_url':                  candidate.twitter_url,
+                'twitter_handle':               candidate.fetch_twitter_handle(),
+                'twitter_description':          candidate.twitter_description,
+                'twitter_followers_count':      candidate.twitter_followers_count,
+                'youtube_url':                  candidate.youtube_url,
+                'withdrawn_from_election':      candidate.withdrawn_from_election,
                 'withdrawal_date':              wdate,
             }
             candidates_to_display.append(one_candidate.copy())
             # Deprecate all of these
             # Capture the office_we_vote_id and google_civic_election_id so we can return
-            if not positive_value_exists(office_id) and candidate_campaign.contest_office_id:
-                office_id = candidate_campaign.contest_office_id
-            if not positive_value_exists(google_civic_election_id) and candidate_campaign.google_civic_election_id:
-                google_civic_election_id = candidate_campaign.google_civic_election_id
+            if not positive_value_exists(office_id) and candidate.contest_office_id:
+                office_id = candidate.contest_office_id
+            if not positive_value_exists(google_civic_election_id) and candidate.google_civic_election_id:
+                google_civic_election_id = candidate.google_civic_election_id
 
         if len(candidates_to_display):
             status += 'CANDIDATES_RETRIEVED '
@@ -1223,32 +1223,32 @@ def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
     twitter_json = {}
     status = ""
 
-    candidate_campaign_manager = CandidateCampaignManager()
-    candidate_campaign = CandidateCampaign()
+    candidate_manager = CandidateManager()
+    candidate = CandidateCampaign()
     twitter_user_manager = TwitterUserManager()
 
-    results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
-    if not results['candidate_campaign_found']:
+    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+    if not results['candidate_found']:
         status = "REFRESH_CANDIDATE_FROM_MASTER_TABLES-CANDIDATE_NOT_FOUND "
         results = {
-            'success':              False,
-            'status':               status,
-            'candidate_campaign':   candidate_campaign,
+            'success':      False,
+            'status':       status,
+            'candidate':    candidate,
         }
         return results
 
-    candidate_campaign = results['candidate_campaign']
+    candidate = results['candidate']
 
     # Retrieve twitter user data from TwitterUser Table
-    twitter_user_id = candidate_campaign.twitter_user_id
+    twitter_user_id = candidate.twitter_user_id
     twitter_user_results = twitter_user_manager.retrieve_twitter_user(twitter_user_id)
     if twitter_user_results['twitter_user_found']:
         twitter_user = twitter_user_results['twitter_user']
-        if twitter_user.twitter_handle != candidate_campaign.candidate_twitter_handle or \
-                twitter_user.twitter_name != candidate_campaign.twitter_name or \
-                twitter_user.twitter_location != candidate_campaign.twitter_location or \
-                twitter_user.twitter_followers_count != candidate_campaign.twitter_followers_count or \
-                twitter_user.twitter_description != candidate_campaign.twitter_description:
+        if twitter_user.twitter_handle != candidate.candidate_twitter_handle or \
+                twitter_user.twitter_name != candidate.twitter_name or \
+                twitter_user.twitter_location != candidate.twitter_location or \
+                twitter_user.twitter_followers_count != candidate.twitter_followers_count or \
+                twitter_user.twitter_description != candidate.twitter_description:
             twitter_json = {
                 'id': twitter_user.twitter_id,
                 'screen_name': twitter_user.twitter_handle,
@@ -1278,43 +1278,43 @@ def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
             elif we_vote_image.kind_of_image_twitter_banner and we_vote_image.kind_of_image_original:
                 twitter_profile_banner_url_https = we_vote_image.we_vote_image_url
 
-    # Refresh twitter details in candidate campaign
-    update_candidate_results = candidate_campaign_manager.update_candidate_twitter_details(
-        candidate_campaign, twitter_json, twitter_profile_image_url_https,
+    # Refresh twitter details in CandidateCampaign
+    update_candidate_results = candidate_manager.update_candidate_twitter_details(
+        candidate, twitter_json, twitter_profile_image_url_https,
         twitter_profile_background_image_url_https, twitter_profile_banner_url_https,
         we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
         we_vote_hosted_profile_image_url_tiny)
     status += update_candidate_results['status']
     success = update_candidate_results['success']
 
-    # Refresh contest office details in candidate campaign
-    candidate_campaign = candidate_campaign_manager.refresh_cached_candidate_office_info(candidate_campaign)
+    # Refresh contest office details in CandidateCampaign
+    candidate = candidate_manager.refresh_cached_candidate_office_info(candidate)
     status += "REFRESHED_CANDIDATE_CAMPAIGN_FROM_CONTEST_OFFICE"
 
-    if not positive_value_exists(candidate_campaign.politician_id) and \
-            positive_value_exists(candidate_campaign.politician_we_vote_id):
+    if not positive_value_exists(candidate.politician_id) and \
+            positive_value_exists(candidate.politician_we_vote_id):
         politician_manager = PoliticianManager()
-        politician_id = politician_manager.fetch_politician_id_from_we_vote_id(candidate_campaign.politician_we_vote_id)
+        politician_id = politician_manager.fetch_politician_id_from_we_vote_id(candidate.politician_we_vote_id)
         update_values = {
             'politician_id': politician_id,
         }
-        results = candidate_campaign_manager.update_candidate_row_entry(candidate_campaign.we_vote_id, update_values)
-        candidate_campaign = results['updated_candidate']
+        results = candidate_manager.update_candidate_row_entry(candidate.we_vote_id, update_values)
+        candidate = results['updated_candidate']
 
     results = {
-        'success':              success,
-        'status':               status,
-        'candidate_campaign':   candidate_campaign,
+        'success':      success,
+        'status':       status,
+        'candidate':    candidate,
     }
     return results
 
 
 def push_candidate_data_to_other_table_caches(candidate_we_vote_id):
-    candidate_campaign_manager = CandidateCampaignManager()
-    results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
-    candidate_campaign = results['candidate_campaign']
+    candidate_manager = CandidateManager()
+    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+    candidate = results['candidate']
 
-    save_position_from_candidate_results = update_all_position_details_from_candidate(candidate_campaign)
+    save_position_from_candidate_results = update_all_position_details_from_candidate(candidate)
 
 
 def retrieve_candidate_photos(we_vote_candidate, force_retrieve=False):
@@ -1537,7 +1537,7 @@ def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_ele
         status += election_list_results['status']
 
     if len(upcoming_google_civic_election_id_list):
-        candidate_list_manager = CandidateCampaignListManager()
+        candidate_list_manager = CandidateListManager()
         results = candidate_list_manager.retrieve_candidates_for_specific_elections(
             upcoming_google_civic_election_id_list,
             limit_to_this_state_code=limit_to_this_state_code,
@@ -1585,7 +1585,7 @@ def retrieve_candidate_list_for_all_prior_elections_this_year(
         status += election_list_results['status']
 
     if len(prior_google_civic_election_id_list):
-        candidate_list_manager = CandidateCampaignListManager()
+        candidate_list_manager = CandidateListManager()
         results = candidate_list_manager.retrieve_candidates_for_specific_elections(
             prior_google_civic_election_id_list,
             limit_to_this_state_code=limit_to_this_state_code,
@@ -1618,7 +1618,7 @@ def retrieve_next_or_most_recent_office_for_candidate(candidate_we_vote_id=''):
     contest_office_found = False
     google_civic_election_id = 0
 
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     candidate_we_vote_id_list = [candidate_we_vote_id]
     link_results = candidate_list_manager.retrieve_candidate_to_office_link_list(
         candidate_we_vote_id_list=candidate_we_vote_id_list)

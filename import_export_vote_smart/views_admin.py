@@ -16,7 +16,7 @@ from .models import VoteSmartCandidate, VoteSmartCategory, VoteSmartRating, Vote
     VoteSmartSpecialInterestGroup, VoteSmartState
 from .votesmart_local import VotesmartApiError
 from admin_tools.views import redirect_to_sign_in_page
-from candidate.models import CandidateCampaignManager, CandidateCampaign
+from candidate.models import CandidateManager, CandidateCampaign
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.messages import get_messages
@@ -48,12 +48,12 @@ def import_one_candidate_ratings_view(request, vote_smart_candidate_id):
                                                       "(error: {error_message})"
                                                       "".format(error_message=one_group_results['status']))
 
-    candidate_manager = CandidateCampaignManager()
-    results = candidate_manager.retrieve_candidate_campaign_from_vote_smart_id(vote_smart_candidate_id)
-    if results['candidate_campaign_found']:
-        candidate = results['candidate_campaign']
-        candidate_campaign_id = candidate.id
-        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_campaign_id,)))
+    candidate_manager = CandidateManager()
+    results = candidate_manager.retrieve_candidate_from_vote_smart_id(vote_smart_candidate_id)
+    if results['candidate_found']:
+        candidate = results['candidate']
+        candidate_id = candidate.id
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
     else:
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
 
@@ -75,12 +75,12 @@ def import_one_politician_ratings_view(request, vote_smart_candidate_id):  # TOD
                                                       "(error: {error_message})"
                                                       "".format(error_message=one_group_results['status']))
 
-    candidate_manager = CandidateCampaignManager()
-    results = candidate_manager.retrieve_candidate_campaign_from_vote_smart_id(vote_smart_candidate_id)
-    if results['candidate_campaign_found']:
-        candidate = results['candidate_campaign']
-        candidate_campaign_id = candidate.id
-        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_campaign_id,)))
+    candidate_manager = CandidateManager()
+    results = candidate_manager.retrieve_candidate_from_vote_smart_id(vote_smart_candidate_id)
+    if results['candidate_found']:
+        candidate = results['candidate']
+        candidate_id = candidate.id
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
     else:
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
 
@@ -509,20 +509,20 @@ def retrieve_positions_from_vote_smart_for_election_view(request):
 
 
 @login_required
-def transfer_vote_smart_ratings_to_positions_for_candidate_view(request, candidate_campaign_id):
+def transfer_vote_smart_ratings_to_positions_for_candidate_view(request, candidate_id):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    results = transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id)
+    results = transfer_vote_smart_ratings_to_positions_for_candidate(candidate_id)
 
     if results['success']:
         messages.add_message(request, messages.INFO, results['status'])
     else:
         messages.add_message(request, messages.ERROR, results['status'])
 
-    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_campaign_id,)))
+    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
 
 @login_required

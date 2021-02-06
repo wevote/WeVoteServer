@@ -31,11 +31,11 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
     <input type="hidden" name="position_we_vote_id" value="{% if organization_position %}{{ organization_position.we_vote_id }}{% endif %}">
 
 
-{# Candidate Campaign #}
+{# CandidateCampaign #}
 {% if is_in_edit_mode %}
     {# EDIT EXISTING: There is no need to display anything here #}
     {% if organization_position.candidate_campaign and organization_position.candidate_campaign.id %}
-      <input type="hidden" name="candidate_campaign_id" value="{{ organization_position.candidate_campaign.id }}">
+      <input type="hidden" name="candidate_id" value="{{ organization_position.candidate_campaign.id }}">
     {% elif organization_position.contest_measure and organization_position.contest_measure.id %}
       <input type="hidden" name="contest_measure_id" value="{{ organization_position.contest_measure.id }}">
     {% endif %}
@@ -90,17 +90,17 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 
     {# ADD NEW: Show the drop-down of campaigns this org can have enter a position for #}
 <div class="form-group{% if candidate_and_measure_not_found %} has-error{% endif %}">
-    <label for="candidate_campaign_id" class="col-sm-2 control-label">Candidate</label>
+    <label for="candidate_id" class="col-sm-2 control-label">Candidate</label>
     <div class="col-sm-9">
         {% if candidate_and_measure_not_found %}
             <div class="text-danger bg-danger">A candidate must be chosen</div>
         {% endif %}
-        <select type="text" name="candidate_campaign_id" id="candidate_campaign_id" class="form-control" >
-        {% if candidate_campaigns_for_this_election_list %}
+        <select type="text" name="candidate_id" id="candidate_id" class="form-control" >
+        {% if candidates_for_this_election_list %}
             <option value="0">-- select candidate --</option>
-            {% for candidate_campaign_from_loop in candidate_campaigns_for_this_election_list %}
+            {% for candidate_campaign_from_loop in candidates_for_this_election_list %}
             <option value="{{ candidate_campaign_from_loop.id }}"
-                    {% if candidate_campaign_from_loop.id|slugify == candidate_campaign_id|slugify %} selected="selected"
+                    {% if candidate_campaign_from_loop.id|slugify == candidate_id|slugify %} selected="selected"
                     {% endif %}>{{ candidate_campaign_from_loop.candidate_name }}</option>
             {% endfor %}
         {% else %}
@@ -203,7 +203,7 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
     </label>
     <div class="col-sm-9">
         <strong>{{ organization_position.we_vote_id }}</strong>,
-        <span class="u-no-break">candidate_campaign_we_vote_id: <strong>{{ organization_position.candidate_campaign_we_vote_id }}</strong>,</span>
+        <span class="u-no-break">candidate_we_vote_id: <strong>{{ organization_position.candidate_campaign_we_vote_id }}</strong>,</span>
         <span class="u-no-break">politician_we_vote_id: <strong>{{ organization_position.politician_we_vote_id }}</strong>,</span>
         <span class="u-no-break">contest_office_we_vote_id: <strong>{{ organization_position.contest_office_we_vote_id }}</strong>,</span>
         <span class="u-no-break">contest_measure_we_vote_id: <strong>{{ organization_position.contest_measure_we_vote_id }}</strong>,</span>

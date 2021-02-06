@@ -151,7 +151,7 @@ def pledge_to_vote_with_voter_guide_for_api(voter_device_id, voter_guide_we_vote
             organization_we_vote_id=voter.linked_organization_we_vote_id,
             voter_id=voter.id,
             contest_office_id=organization_position.contest_office_id,
-            candidate_campaign_id=organization_position.candidate_campaign_id,
+            candidate_id=organization_position.candidate_campaign_id,
             contest_measure_id=organization_position.contest_measure_id,
             google_civic_election_id=voter_guide.google_civic_election_id)
         if results['position_found']:

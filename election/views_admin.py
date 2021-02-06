@@ -9,7 +9,7 @@ from analytics.models import AnalyticsManager
 from ballot.models import BallotItem, BallotItemListManager, \
     BallotReturned, BallotReturnedListManager, BallotReturnedManager, \
     VoterBallotSaved, VoterBallotSavedManager
-from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager, \
+from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager, \
     CandidateToOfficeLink
 from config.base import get_environment_variable
 import copy
@@ -846,7 +846,7 @@ def election_list_view(request):
     election_list = election_list_query[:200]
     election_list_modified = []
     ballot_returned_list_manager = BallotReturnedListManager()
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     for election in election_list:
         if positive_value_exists(election.election_day_text):
             try:
@@ -993,7 +993,6 @@ def nationwide_election_list_view(request):
     timezone = pytz.timezone("America/Los_Angeles")
     datetime_now = timezone.localize(datetime.now())
     election_manager = ElectionManager()
-    office_manager = ContestOfficeManager()
 
     is_national_election = False
     national_election = None
@@ -1197,7 +1196,7 @@ def nationwide_election_list_view(request):
 
     election_list_modified = []
     ballot_returned_list_manager = BallotReturnedListManager()
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     for election in election_list:
         if positive_value_exists(election.election_day_text):
             try:
@@ -1402,7 +1401,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
     ballot_returned_voter_oldest_date = ''
     entries_missing_latitude_longitude = 0
     ballot_returned_list_manager = BallotReturnedListManager()
-    candidate_campaign_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     office_manager = ContestOfficeManager()
 
     if election_found:
@@ -1455,7 +1454,6 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             status_print_list += "ballot_returned_count: " + str(ballot_returned_count_entire_election) + ""
             messages.add_message(request, messages.INFO, status_print_list)
 
-        candidate_list_manager = CandidateCampaignListManager()
         google_civic_election_id_list = [google_civic_election_id]
         results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
             google_civic_election_id_list=google_civic_election_id_list,
@@ -1484,7 +1482,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
                             if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
                                 offices_count += 1
                                 office_list.append(one_ballot_item.contest_office_we_vote_id)
-                                candidate_results = candidate_campaign_list_manager.retrieve_candidate_count_for_office(
+                                candidate_results = candidate_list_manager.retrieve_candidate_count_for_office(
                                     0, one_ballot_item.contest_office_we_vote_id)
                                 candidates_count += candidate_results['candidate_count']
                     one_ballot_returned.office_and_candidate_text = \

@@ -11,7 +11,7 @@ from .models import WeVoteImageManager, WeVoteImage, \
     TWITTER_PROFILE_IMAGE_NAME, TWITTER_BACKGROUND_IMAGE_NAME, TWITTER_BANNER_IMAGE_NAME, MAPLIGHT_IMAGE_NAME, \
     VOTE_SMART_IMAGE_NAME, MASTER_IMAGE, ISSUE_IMAGE_NAME, BALLOTPEDIA_IMAGE_NAME, LINKEDIN_IMAGE_NAME, \
     WIKIPEDIA_IMAGE_NAME
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateManager
 from config.base import get_environment_variable
 from django.db.models import Q
 from import_export_facebook.models import FacebookManager
@@ -819,13 +819,13 @@ def retrieve_facebook_image_url(facebook_user_id):
     return results
 
 
-def retrieve_and_save_ballotpedia_candidate_images(candidate_campaign):
+def retrieve_and_save_ballotpedia_candidate_images(candidate):
     from import_export_ballotpedia.controllers import retrieve_ballotpedia_candidate_image_from_api
     status = ""
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     politician_manager = PoliticianManager()
 
-    if not candidate_campaign:
+    if not candidate:
         status += "BALLOTPEDIA_CANDIDATE_IMAGE_NOT_RETRIEVED-CANDIDATE_MISSING "
         results = {
             'success':      False,
@@ -834,10 +834,10 @@ def retrieve_and_save_ballotpedia_candidate_images(candidate_campaign):
         }
         return results
 
-    if positive_value_exists(candidate_campaign.ballotpedia_image_id):
+    if positive_value_exists(candidate.ballotpedia_image_id):
         status += "BALLOTPEDIA_CANDIDATE_IMAGE-REACHING_OUT_TO_BALLOTPEDIA "
         results = retrieve_ballotpedia_candidate_image_from_api(
-            candidate_campaign.ballotpedia_image_id, candidate_campaign.google_civic_election_id)
+            candidate.ballotpedia_image_id, candidate.google_civic_election_id)
 
         if results['success']:
             status += "BALLOTPEDIA_CANDIDATE_IMAGE_RETRIEVED "
@@ -846,10 +846,10 @@ def retrieve_and_save_ballotpedia_candidate_images(candidate_campaign):
             ballotpedia_profile_image_url_https = results['profile_image_url_https']
 
             cache_results = cache_master_and_resized_image(
-                candidate_id=candidate_campaign.id,
-                candidate_we_vote_id=candidate_campaign.we_vote_id,
-                ballotpedia_candidate_id=candidate_campaign.ballotpedia_candidate_id,
-                ballotpedia_image_id=candidate_campaign.ballotpedia_image_id,
+                candidate_id=candidate.id,
+                candidate_we_vote_id=candidate.we_vote_id,
+                ballotpedia_candidate_id=candidate.ballotpedia_candidate_id,
+                ballotpedia_image_id=candidate.ballotpedia_image_id,
                 ballotpedia_profile_image_url=ballotpedia_profile_image_url_https,
                 image_source=BALLOTPEDIA_IMAGE_SOURCE)
             cached_ballotpedia_image_url_https = cache_results['cached_ballotpedia_image_url_https']
@@ -857,26 +857,26 @@ def retrieve_and_save_ballotpedia_candidate_images(candidate_campaign):
             we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
             we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
 
-            save_candidate_campaign_results = candidate_campaign_manager.update_candidate_ballotpedia_image_details(
-                candidate_campaign,
+            save_candidate_results = candidate_manager.update_candidate_ballotpedia_image_details(
+                candidate,
                 cached_ballotpedia_image_url_https,
                 we_vote_hosted_profile_image_url_large,
                 we_vote_hosted_profile_image_url_medium,
                 we_vote_hosted_profile_image_url_tiny)
-            candidate_campaign = save_candidate_campaign_results['candidate']
+            candidate = save_candidate_results['candidate']
             # Need to update voter ballotpedia details for the candidate in future
             save_politician_details_results = politician_manager.update_politician_details_from_candidate(
-                candidate_campaign)
-            save_position_from_candidate_results = update_all_position_details_from_candidate(candidate_campaign)
+                candidate)
+            save_position_from_candidate_results = update_all_position_details_from_candidate(candidate)
     else:
         status += "BALLOTPEDIA_CANDIDATE_IMAGE-CLEARING_DETAILS "
-        # save_candidate_campaign_results = candidate_campaign_manager.clear_candidate_twitter_details(
-        # candidate_campaign)
+        # save_candidate_results = candidate_manager.clear_candidate_twitter_details(
+        # candidate)
 
     results = {
         'success':      True,
         'status':       status,
-        'candidate':    candidate_campaign,
+        'candidate':    candidate,
     }
     return results
 
@@ -1064,8 +1064,8 @@ def delete_cached_images_for_candidate(candidate):
                 original_twitter_profile_banner_url_https = we_vote_image.twitter_profile_banner_url_https
 
         # Reset CandidateCampaign with original image details
-        candidate_campaign_manager = CandidateCampaignManager()
-        reset_candidate_image_results = candidate_campaign_manager.reset_candidate_image_details(
+        candidate_manager = CandidateManager()
+        reset_candidate_image_results = candidate_manager.reset_candidate_image_details(
             candidate, original_twitter_profile_image_url_https, original_twitter_profile_background_image_url_https,
             original_twitter_profile_banner_url_https)
 
@@ -1410,13 +1410,13 @@ def retrieve_all_images_for_one_candidate(candidate_we_vote_id):
     :return:
     """
     we_vote_image_list = []
-    candidate_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     we_vote_image_manager = WeVoteImageManager()
 
     if positive_value_exists(candidate_we_vote_id):
         # if candidate_we_vote_id is defined then retrieve cached images for that candidate only
-        candidate_results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
-        if candidate_results['candidate_campaign_found']:
+        candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+        if candidate_results['candidate_found']:
             we_vote_image_list_results = we_vote_image_manager.\
                 retrieve_we_vote_image_list_from_we_vote_id(None, candidate_we_vote_id)
             we_vote_image_list_query = we_vote_image_list_results['we_vote_image_list']

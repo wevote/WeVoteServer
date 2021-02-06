@@ -11,7 +11,7 @@
 from .models import GoogleCivicApiCounterManager
 from ballot.models import BallotItemManager, BallotItemListManager, BallotReturned, BallotReturnedManager, \
     VoterBallotSavedManager
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateManager
 from config.base import get_environment_variable
 from election.models import ElectionManager
 import json
@@ -101,7 +101,7 @@ def process_candidates_from_structured_json(
 
         # DALE 2016-02-20 It would be helpful to call a service here that disambiguated the candidate
         # ...and linked to a politician
-        # ...and looked to see if there were any other candidate_campaign entries for this election (in case the
+        # ...and looked to see if there were any other candidate entries for this election (in case the
         #   Google Civic contest_office name changed so we generated another contest)
 
         we_vote_id = ''
@@ -115,56 +115,56 @@ def process_candidates_from_structured_json(
             # candidates are tied to a particular google_civic_election_id, so there is a different candidate entry
             # for each Presidential candidate for each state.
 
-            updated_candidate_campaign_values = {
+            updated_candidate_values = {
                 # Values we search against
                 'google_civic_election_id': google_civic_election_id,
             }
             if positive_value_exists(ocd_division_id):
-                updated_candidate_campaign_values["ocd_division_id"] = ocd_division_id
+                updated_candidate_values["ocd_division_id"] = ocd_division_id
             if positive_value_exists(candidate_name):
                 # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
                 #  updating candidate_name via subsequent Google Civic imports
-                updated_candidate_campaign_values["candidate_name"] = candidate_name
+                updated_candidate_values["candidate_name"] = candidate_name
                 # We store the literal spelling here so we can match in the future, even if we customize candidate_name
-                updated_candidate_campaign_values["google_civic_candidate_name"] = candidate_name
+                updated_candidate_values["google_civic_candidate_name"] = candidate_name
             if positive_value_exists(state_code):
-                updated_candidate_campaign_values["state_code"] = state_code.lower()
+                updated_candidate_values["state_code"] = state_code.lower()
             if positive_value_exists(party):
-                updated_candidate_campaign_values["party"] = party
+                updated_candidate_values["party"] = party
             if positive_value_exists(email):
-                updated_candidate_campaign_values["candidate_email"] = email
+                updated_candidate_values["candidate_email"] = email
             if positive_value_exists(phone):
-                updated_candidate_campaign_values["candidate_phone"] = phone
+                updated_candidate_values["candidate_phone"] = phone
             if positive_value_exists(order_on_ballot):
-                updated_candidate_campaign_values["order_on_ballot"] = order_on_ballot
+                updated_candidate_values["order_on_ballot"] = order_on_ballot
             if positive_value_exists(candidate_url):
-                updated_candidate_campaign_values["candidate_url"] = candidate_url
+                updated_candidate_values["candidate_url"] = candidate_url
             if positive_value_exists(candidate_contact_form_url):
-                updated_candidate_campaign_values["candidate_contact_form_url"] = candidate_contact_form_url
+                updated_candidate_values["candidate_contact_form_url"] = candidate_contact_form_url
             if positive_value_exists(photo_url):
-                updated_candidate_campaign_values["photo_url"] = photo_url
+                updated_candidate_values["photo_url"] = photo_url
             if positive_value_exists(facebook_url):
-                updated_candidate_campaign_values["facebook_url"] = facebook_url
+                updated_candidate_values["facebook_url"] = facebook_url
             if positive_value_exists(twitter_url):
-                updated_candidate_campaign_values["twitter_url"] = twitter_url
+                updated_candidate_values["twitter_url"] = twitter_url
             if positive_value_exists(google_plus_url):
-                updated_candidate_campaign_values["google_plus_url"] = google_plus_url
+                updated_candidate_values["google_plus_url"] = google_plus_url
             if positive_value_exists(youtube_url):
-                updated_candidate_campaign_values["youtube_url"] = youtube_url
+                updated_candidate_values["youtube_url"] = youtube_url
             # 2016-02-20 Google Civic sometimes changes the name of contests, which can create a new contest
             #  so we may need to update the candidate to a new contest_office_id
             if positive_value_exists(contest_office_id):
-                updated_candidate_campaign_values["contest_office_id"] = contest_office_id
+                updated_candidate_values["contest_office_id"] = contest_office_id
             if positive_value_exists(contest_office_we_vote_id):
-                updated_candidate_campaign_values["contest_office_we_vote_id"] = contest_office_we_vote_id
+                updated_candidate_values["contest_office_we_vote_id"] = contest_office_we_vote_id
             if positive_value_exists(contest_office_name):
-                updated_candidate_campaign_values["contest_office_name"] = contest_office_name
+                updated_candidate_values["contest_office_name"] = contest_office_name
 
-            candidate_campaign_manager = CandidateCampaignManager()
-            results = candidate_campaign_manager.update_or_create_candidate_campaign(
+            candidate_manager = CandidateManager()
+            results = candidate_manager.update_or_create_candidate(
                 we_vote_id, google_civic_election_id,
                 ocd_division_id, contest_office_id, contest_office_we_vote_id,
-                google_civic_candidate_name, updated_candidate_campaign_values)
+                google_civic_candidate_name, updated_candidate_values)
 
     return results
 

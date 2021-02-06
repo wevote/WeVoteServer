@@ -4,7 +4,7 @@
 
 from .models import AnalyticsAction, AnalyticsCountManager, AnalyticsManager, \
     ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateManager
 from config.base import get_environment_variable
 from datetime import date, datetime, timedelta
 from django.db.models import Q
@@ -366,7 +366,7 @@ def augment_analytics_action_with_election_id_one_voter(
 
     # First loop through and assign election for candidates and measures associated with specific election
     analytics_manager = AnalyticsManager()
-    candidate_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     contest_measure_manager = ContestMeasureManager()
     for analytics_action in voter_history_list:
         analysis_success = True
@@ -375,17 +375,17 @@ def augment_analytics_action_with_election_id_one_voter(
             if "cand" in analytics_action.ballot_item_we_vote_id:
                 # If we are looking at a candidate without a google_civic_election_id...
                 if analytics_action.ballot_item_we_vote_id in candidate_election_cache:
-                    candidate_campaign_google_civic_election_id = \
+                    candidate_google_civic_election_id = \
                         candidate_election_cache[analytics_action.ballot_item_we_vote_id]
                 else:
-                    candidate_campaign_google_civic_election_id = \
+                    candidate_google_civic_election_id = \
                         candidate_manager.fetch_next_upcoming_election_id_for_candidate(
                             analytics_action.ballot_item_we_vote_id)
                     candidate_election_cache[analytics_action.ballot_item_we_vote_id] = \
-                        candidate_campaign_google_civic_election_id
-                if positive_value_exists(candidate_campaign_google_civic_election_id):
+                        candidate_google_civic_election_id
+                if positive_value_exists(candidate_google_civic_election_id):
                     try:
-                        analytics_action.google_civic_election_id = candidate_campaign_google_civic_election_id
+                        analytics_action.google_civic_election_id = candidate_google_civic_election_id
                         analytics_action.save()
                         analytics_updated_count += 1
                     except Exception as e:
@@ -510,7 +510,7 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
         status += "COULD_NOT_RETRIEVE_ANALYTICS_FOR_VOTER-gte=starting_analytics_action: " + str(e) + " "
 
     # First loop through and assign election for candidates and measures associated with specific election
-    candidate_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     contest_measure_manager = ContestMeasureManager()
     candidate_election_cache = {}
     measure_found_list = []
@@ -521,17 +521,17 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
             if "cand" in analytics_action.ballot_item_we_vote_id:
                 # If we are looking at a candidate without a google_civic_election_id...
                 if analytics_action.ballot_item_we_vote_id in candidate_election_cache:
-                    candidate_campaign_google_civic_election_id = \
+                    candidate_google_civic_election_id = \
                         candidate_election_cache[analytics_action.ballot_item_we_vote_id]
                 else:
-                    candidate_campaign_google_civic_election_id = \
+                    candidate_google_civic_election_id = \
                         candidate_manager.fetch_next_upcoming_election_id_for_candidate(
                             analytics_action.ballot_item_we_vote_id)
                     candidate_election_cache[analytics_action.ballot_item_we_vote_id] = \
-                        candidate_campaign_google_civic_election_id
-                if positive_value_exists(candidate_campaign_google_civic_election_id):
+                        candidate_google_civic_election_id
+                if positive_value_exists(candidate_google_civic_election_id):
                     try:
-                        analytics_action.google_civic_election_id = candidate_campaign_google_civic_election_id
+                        analytics_action.google_civic_election_id = candidate_google_civic_election_id
                         analytics_action.save()
                         analytics_updated_count += 1
                     except Exception as e:

@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateManager
 from config.base import get_environment_variable
 from elasticsearch import Elasticsearch
 from organization.models import OrganizationManager
@@ -88,7 +88,7 @@ def search_all_for_api(text_from_search_field, voter_device_id):
     # Example of querying ALL indexes
     search_results = []
     search_count = 0
-    candidate_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     organization_manager = OrganizationManager()
     try:
         res = elastic_search_object.search(body=query)
@@ -126,10 +126,10 @@ def search_all_for_api(text_from_search_field, voter_device_id):
                 else:
                     link_internal = "/candidate/" + one_search_result_dict['we_vote_id']
 
-                results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(
+                results = candidate_manager.retrieve_candidate_from_we_vote_id(
                     one_search_result_dict['we_vote_id'])
-                if results['candidate_campaign_found']:
-                    candidate = results['candidate_campaign']
+                if results['candidate_found']:
+                    candidate = results['candidate']
                     result_image = candidate.candidate_photo_url()
                 else:
                     result_image = ""

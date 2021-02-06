@@ -9,9 +9,10 @@ from . import views, views_admin
 
 urlpatterns = [
     # url(r'^$', views_admin.vote_smart_index_view, name='vote_smart_index',),
-    url(r'^(?P<organization_id>[0-9]+)/import_organization_logo/$', views_admin.import_organization_logo_from_wikipedia_view,
+    url(r'^(?P<organization_id>[0-9]+)/import_organization_logo/$',
+        views_admin.import_organization_logo_from_wikipedia_view,
         name='import_organization_logo',),
-    # url(r'^(?P<candidate_campaign_id>[0-9]+)/transfer_vote_smart_ratings_to_positions_for_candidate/$',
+    # url(r'^(?P<candidate_id>[0-9]+)/transfer_vote_smart_ratings_to_positions_for_candidate/$',
     #     views_admin.transfer_vote_smart_ratings_to_positions_for_candidate_view,
     #     name='transfer_vote_smart_ratings_to_positions_for_candidate',),
     url(r'^import_all_organizations_logos/$',

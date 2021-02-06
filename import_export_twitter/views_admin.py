@@ -18,7 +18,7 @@ from .controllers import refresh_twitter_candidate_details, refresh_twitter_data
     transfer_candidate_twitter_handles_from_google_civic
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateManager
 from image.controllers import delete_cached_images_for_voter, delete_cached_images_for_candidate, \
     delete_cached_images_for_organization, delete_stored_images_for_voter
 from organization.controllers import update_social_media_statistics_in_other_tables
@@ -31,49 +31,49 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 @login_required
-def delete_possible_twitter_handles_view(request, candidate_campaign_we_vote_id):
+def delete_possible_twitter_handles_view(request, candidate_we_vote_id):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    candidate_manager = CandidateCampaignManager()
-    results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_campaign_we_vote_id)
+    candidate_manager = CandidateManager()
+    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
 
-    if not results['candidate_campaign_found']:
+    if not results['candidate_found']:
         messages.add_message(request, messages.INFO, results['status'])
         return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id',
-                                            args=(candidate_campaign_we_vote_id,)))
+                                            args=(candidate_we_vote_id,)))
 
-    candidate_campaign = results['candidate_campaign']
+    candidate = results['candidate']
 
-    results = delete_possible_twitter_handles(candidate_campaign)
+    results = delete_possible_twitter_handles(candidate)
     messages.add_message(request, messages.INFO, 'Possibilities deleted.')
 
-    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_campaign_we_vote_id,)))
+    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_we_vote_id,)))
 
 
 @login_required
-def retrieve_possible_twitter_handles_view(request, candidate_campaign_we_vote_id):
+def retrieve_possible_twitter_handles_view(request, candidate_we_vote_id):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    candidate_manager = CandidateCampaignManager()
-    results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_campaign_we_vote_id)
+    candidate_manager = CandidateManager()
+    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
 
-    if not results['candidate_campaign_found']:
+    if not results['candidate_found']:
         messages.add_message(request, messages.INFO, results['status'])
         return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id',
-                                            args=(candidate_campaign_we_vote_id,)))
+                                            args=(candidate_we_vote_id,)))
 
-    candidate_campaign = results['candidate_campaign']
+    candidate = results['candidate']
 
-    results = retrieve_possible_twitter_handles(candidate_campaign)
+    results = retrieve_possible_twitter_handles(candidate)
     messages.add_message(request, messages.INFO, 'Number of possibilities found: ' + results['num_of_possibilities'])
 
-    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_campaign_we_vote_id,)) +
+    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_we_vote_id,)) +
                                 '?show_all_twitter_search_results=1')
 
 
@@ -130,14 +130,14 @@ def delete_images_view(request):
     voter_id = request.GET.get('voter_id', 0)
 
     if positive_value_exists(candidate_id):
-        candidate_manager = CandidateCampaignManager()
-        results = candidate_manager.retrieve_candidate_campaign(candidate_id)
-        if not results['candidate_campaign_found']:
+        candidate_manager = CandidateManager()
+        results = candidate_manager.retrieve_candidate(candidate_id)
+        if not results['candidate_found']:
             messages.add_message(request, messages.INFO, results['status'])
             return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
                                         '?google_civic_election_id=' + str(google_civic_election_id))
-        candidate_campaign = results['candidate_campaign']
-        delete_image_results = delete_cached_images_for_candidate(candidate_campaign)
+        candidate = results['candidate']
+        delete_image_results = delete_cached_images_for_candidate(candidate)
     elif positive_value_exists(organization_id):
         organization_manager = OrganizationManager()
         results = organization_manager.retrieve_organization(organization_id)
@@ -180,16 +180,16 @@ def refresh_twitter_candidate_details_view(request, candidate_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    candidate_manager = CandidateCampaignManager()
-    results = candidate_manager.retrieve_candidate_campaign(candidate_id)
+    candidate_manager = CandidateManager()
+    results = candidate_manager.retrieve_candidate(candidate_id)
 
-    if not results['candidate_campaign_found']:
+    if not results['candidate_found']:
         messages.add_message(request, messages.INFO, results['status'])
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
-    candidate_campaign = results['candidate_campaign']
+    candidate = results['candidate']
 
-    results = refresh_twitter_candidate_details(candidate_campaign)
+    results = refresh_twitter_candidate_details(candidate)
 
     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
@@ -226,16 +226,16 @@ def refresh_twitter_politician_details_view(request, politician_id):  # TODO DAL
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    # candidate_manager = CandidateCampaignManager()
-    # results = candidate_manager.retrieve_candidate_campaign(candidate_id)
+    # candidate_manager = CandidateManager()
+    # results = candidate_manager.retrieve_candidate(candidate_id)
     #
-    # if not results['candidate_campaign_found']:
+    # if not results['candidate_found']:
     #     messages.add_message(request, messages.INFO, results['status'])
     #     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
     #
-    # candidate_campaign = results['candidate_campaign']
+    # candidate = results['candidate']
     #
-    # results = refresh_twitter_candidate_details(candidate_campaign)
+    # results = refresh_twitter_candidate_details(candidate)
 
     return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
 
@@ -248,16 +248,16 @@ def refresh_twitter_elected_official_details_view(request, elected_official_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    # candidate_manager = CandidateCampaignManager()
-    # results = candidate_manager.retrieve_candidate_campaign(candidate_id)
+    # candidate_manager = CandidateManager()
+    # results = candidate_manager.retrieve_candidate(candidate_id)
     #
-    # if not results['candidate_campaign_found']:
+    # if not results['candidate_found']:
     #     messages.add_message(request, messages.INFO, results['status'])
     #     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
     #
-    # candidate_campaign = results['candidate_campaign']
+    # candidate = results['candidate']
     #
-    # results = refresh_twitter_candidate_details(candidate_campaign)
+    # results = refresh_twitter_candidate_details(candidate)
 
     return HttpResponseRedirect(reverse('elected_official:elected_official_edit', args=(elected_official_id,)))
 

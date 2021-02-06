@@ -78,14 +78,14 @@ class QuickInfo(models.Model):
         verbose_name="last editor we vote id", max_length=255, null=True, blank=True, unique=False)
 
     # This is the office that the quick_info refers to.
-    #  Either contest_measure is filled, contest_office OR candidate_campaign, but not all three
+    #  Either contest_measure is filled, contest_office OR candidate, but not all three
     contest_office_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the contest_office", max_length=255, null=True, blank=True, unique=False)
 
     # This is the candidate/politician that the quick_info refers to.
-    #  Either candidate_campaign is filled, contest_office OR contest_measure, but not all three
+    #  Either candidate is filled, contest_office OR contest_measure, but not all three
     candidate_campaign_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id for the candidate_campaign", max_length=255, null=True,
+        verbose_name="we vote permanent id for the candidate", max_length=255, null=True,
         blank=True, unique=False)
 
     # Useful for queries based on Politicians
@@ -94,7 +94,7 @@ class QuickInfo(models.Model):
         blank=True, unique=False)
 
     # This is the measure/initiative/proquick_info that the quick_info refers to.
-    #  Either contest_measure is filled, contest_office OR candidate_campaign, but not all three
+    #  Either contest_measure is filled, contest_office OR candidate, but not all three
     contest_measure_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the contest_measure", max_length=255, null=True,
         blank=True, unique=False)
@@ -208,19 +208,19 @@ class QuickInfoManager(models.Manager):
     def retrieve_contest_office_quick_info(self, contest_office_we_vote_id):
         quick_info_id = 0
         quick_info_we_vote_id = None
-        candidate_campaign_we_vote_id = None
+        candidate_we_vote_id = None
         politician_we_vote_id = None
         contest_measure_we_vote_id = None
         quick_info_manager = QuickInfoManager()
         return quick_info_manager.retrieve_quick_info(
             quick_info_id, quick_info_we_vote_id,
             contest_office_we_vote_id,
-            candidate_campaign_we_vote_id,
+            candidate_we_vote_id,
             politician_we_vote_id,
             contest_measure_we_vote_id
         )
 
-    def retrieve_candidate_campaign_quick_info(self, candidate_campaign_we_vote_id):
+    def retrieve_candidate_quick_info(self, candidate_we_vote_id):
         quick_info_id = 0
         quick_info_we_vote_id = None
         politician_we_vote_id = None
@@ -230,7 +230,7 @@ class QuickInfoManager(models.Manager):
         return quick_info_manager.retrieve_quick_info(
             quick_info_id, quick_info_we_vote_id,
             contest_office_we_vote_id,
-            candidate_campaign_we_vote_id,
+            candidate_we_vote_id,
             politician_we_vote_id,
             contest_measure_we_vote_id
         )
@@ -238,21 +238,21 @@ class QuickInfoManager(models.Manager):
     def retrieve_contest_measure_quick_info(self, contest_measure_we_vote_id):
         quick_info_id = 0
         quick_info_we_vote_id = None
-        candidate_campaign_we_vote_id = None
+        candidate_we_vote_id = None
         politician_we_vote_id = None
         contest_office_we_vote_id = None
         quick_info_manager = QuickInfoManager()
         return quick_info_manager.retrieve_quick_info(
             quick_info_id, quick_info_we_vote_id,
             contest_office_we_vote_id,
-            candidate_campaign_we_vote_id,
+            candidate_we_vote_id,
             politician_we_vote_id,
             contest_measure_we_vote_id
         )
 
     def retrieve_quick_info_from_id(self, quick_info_id):
         quick_info_we_vote_id = None
-        candidate_campaign_we_vote_id = None
+        candidate_we_vote_id = None
         politician_we_vote_id = None
         contest_office_we_vote_id = None
         contest_measure_we_vote_id = None
@@ -260,14 +260,14 @@ class QuickInfoManager(models.Manager):
         return quick_info_manager.retrieve_quick_info(
             quick_info_id, quick_info_we_vote_id,
             contest_office_we_vote_id,
-            candidate_campaign_we_vote_id,
+            candidate_we_vote_id,
             politician_we_vote_id,
             contest_measure_we_vote_id
         )
 
     def retrieve_quick_info_from_we_vote_id(self, quick_info_we_vote_id):
         quick_info_id = 0
-        candidate_campaign_we_vote_id = None
+        candidate_we_vote_id = None
         politician_we_vote_id = None
         contest_office_we_vote_id = None
         contest_measure_we_vote_id = None
@@ -275,14 +275,14 @@ class QuickInfoManager(models.Manager):
         return quick_info_manager.retrieve_quick_info(
             quick_info_id, quick_info_we_vote_id,
             contest_office_we_vote_id,
-            candidate_campaign_we_vote_id,
+            candidate_we_vote_id,
             politician_we_vote_id,
             contest_measure_we_vote_id
         )
 
     def retrieve_quick_info(self, quick_info_id, quick_info_we_vote_id=None,
                             contest_office_we_vote_id=None,
-                            candidate_campaign_we_vote_id=None,
+                            candidate_we_vote_id=None,
                             politician_we_vote_id=None,
                             contest_measure_we_vote_id=None):
         error_result = False
@@ -308,10 +308,10 @@ class QuickInfoManager(models.Manager):
                     contest_office_we_vote_id=contest_office_we_vote_id)
                 quick_info_id = quick_info_on_stage.id
                 success = True
-            elif positive_value_exists(candidate_campaign_we_vote_id):
+            elif positive_value_exists(candidate_we_vote_id):
                 status = "RETRIEVE_QUICK_INFO_FOUND_WITH_CANDIDATE_WE_VOTE_ID"
                 quick_info_on_stage = QuickInfo.objects.get(
-                    candidate_campaign_we_vote_id=candidate_campaign_we_vote_id)
+                    candidate_campaign_we_vote_id=candidate_we_vote_id)
                 quick_info_id = quick_info_on_stage.id
                 success = True
             elif positive_value_exists(politician_we_vote_id):
@@ -413,7 +413,7 @@ class QuickInfoManager(models.Manager):
     def update_or_create_quick_info(self, quick_info_id, quick_info_we_vote_id,
                                     ballot_item_display_name,
                                     contest_office_we_vote_id,
-                                    candidate_campaign_we_vote_id,
+                                    candidate_we_vote_id,
                                     politician_we_vote_id,
                                     contest_measure_we_vote_id,
                                     info_html,
@@ -429,7 +429,7 @@ class QuickInfoManager(models.Manager):
         quick_info_manager = QuickInfoManager()
         results = quick_info_manager.retrieve_quick_info(quick_info_id, quick_info_we_vote_id,
                                                          contest_office_we_vote_id,
-                                                         candidate_campaign_we_vote_id,
+                                                         candidate_we_vote_id,
                                                          politician_we_vote_id,
                                                          contest_measure_we_vote_id)
 
@@ -464,8 +464,8 @@ class QuickInfoManager(models.Manager):
                     quick_info_on_stage.last_editor_we_vote_id = last_editor_we_vote_id
                 if contest_office_we_vote_id is not False:
                     quick_info_on_stage.contest_office_we_vote_id = contest_office_we_vote_id
-                if candidate_campaign_we_vote_id is not False:
-                    quick_info_on_stage.candidate_campaign_we_vote_id = candidate_campaign_we_vote_id
+                if candidate_we_vote_id is not False:
+                    quick_info_on_stage.candidate_campaign_we_vote_id = candidate_we_vote_id
                 if politician_we_vote_id is not False:
                     quick_info_on_stage.politician_we_vote_id = politician_we_vote_id
                 if contest_measure_we_vote_id is not False:
@@ -514,8 +514,8 @@ class QuickInfoManager(models.Manager):
                     last_editor_we_vote_id = ""
                 if contest_office_we_vote_id is False:
                     contest_office_we_vote_id = ""
-                if candidate_campaign_we_vote_id is False:
-                    candidate_campaign_we_vote_id = ""
+                if candidate_we_vote_id is False:
+                    candidate_we_vote_id = ""
                 if politician_we_vote_id is False:
                     politician_we_vote_id = ""
                 if contest_measure_we_vote_id is False:
@@ -537,7 +537,7 @@ class QuickInfoManager(models.Manager):
                 quick_info_on_stage = QuickInfo(
                     ballot_item_display_name=ballot_item_display_name,
                     contest_office_we_vote_id=contest_office_we_vote_id,
-                    candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                    candidate_campaign_we_vote_id=candidate_we_vote_id,
                     politician_we_vote_id=politician_we_vote_id,
                     contest_measure_we_vote_id=contest_measure_we_vote_id,
                     info_html=info_html,

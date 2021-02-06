@@ -491,14 +491,14 @@ def retrieve_all_organizations_logos_from_wikipedia(state_code=''):
     return results
 
 
-def retrieve_candidate_images_from_wikipedia_page(candidate_campaign, wikipedia_page, force_retrieve=False):
+def retrieve_candidate_images_from_wikipedia_page(candidate, wikipedia_page, force_retrieve=False):
     status = ''
     wikipedia_photo_url = ''
     image_options = []
     image_found = False
     values_changed = False
 
-    if not candidate_campaign:
+    if not candidate:
         status += 'WIKIPEDIA_CANDIDATE_REQUIRED_FOR_IMAGE '
         results = {
             'success':                  False,
@@ -506,7 +506,7 @@ def retrieve_candidate_images_from_wikipedia_page(candidate_campaign, wikipedia_
         }
         return results
 
-    if not positive_value_exists(candidate_campaign.id):
+    if not positive_value_exists(candidate.id):
         status += 'WIKIPEDIA_CANDIDATE_ID_REQUIRED_FOR_IMAGE '
         results = {
             'success':                  False,
@@ -515,7 +515,7 @@ def retrieve_candidate_images_from_wikipedia_page(candidate_campaign, wikipedia_
         return results
 
     # Have we already retrieved a Wikipedia photo?
-    if positive_value_exists(candidate_campaign.wikipedia_photo_url) and not force_retrieve:
+    if positive_value_exists(candidate.wikipedia_photo_url) and not force_retrieve:
         status += 'WIKIPEDIA_CANDIDATE_IMAGE_ALREADY_RETRIEVED-NO_FORCE '
         results = {
             'success':                      True,
@@ -566,8 +566,8 @@ def retrieve_candidate_images_from_wikipedia_page(candidate_campaign, wikipedia_
             name_with_underscores = wikipedia_page.title.replace(" ", "_")
             name_without_spaces = wikipedia_page.title.replace(" ", "")
             # Try it without the leading "The "
-            if candidate_campaign.candidate_name.find("The ", 0, 4) == 0:
-                name_without_the = candidate_campaign.candidate_name[4:]
+            if candidate.candidate_name.find("The ", 0, 4) == 0:
+                name_without_the = candidate.candidate_name[4:]
             else:
                 name_without_the = ''
             for one_image in wikipedia_page.images:

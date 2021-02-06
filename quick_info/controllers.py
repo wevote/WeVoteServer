@@ -4,7 +4,7 @@
 
 from .models import QuickInfo, QuickInfoManager, QuickInfoMasterManager
 from ballot.models import OFFICE, CANDIDATE, POLITICIAN, MEASURE
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateManager
 from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
@@ -224,15 +224,15 @@ def quick_info_import_from_sample_file(request=None):  # , load_from_uri=False  
         organization_id = organization_manager.fetch_organization_id(one_quick_info["organization_we_vote_id"])
 
         # We need to look up the local candidate_campaign_id
-        candidate_campaign_manager = CandidateCampaignManager()
-        candidate_campaign_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(
+        candidate_manager = CandidateManager()
+        candidate_campaign_id = candidate_manager.fetch_candidate_id_from_we_vote_id(
             one_quick_info["candidate_campaign_we_vote_id"])
 
         # Find the google_civic_candidate_name so we have a backup way to link quick_info if the we_vote_id is lost
         google_civic_candidate_name = one_quick_info["google_civic_candidate_name"] if \
             "google_civic_candidate_name" in one_quick_info else ''
         if not positive_value_exists(google_civic_candidate_name):
-            google_civic_candidate_name = candidate_campaign_manager.fetch_google_civic_candidate_name_from_we_vote_id(
+            google_civic_candidate_name = candidate_manager.fetch_google_civic_candidate_name_from_we_vote_id(
                 one_quick_info["candidate_campaign_we_vote_id"])
 
         # TODO We need to look up contest_measure_id
@@ -396,7 +396,7 @@ def quick_info_retrieve_for_api(kind_of_ballot_item, ballot_item_we_vote_id):
         results = quick_info_manager.retrieve_contest_office_quick_info(office_we_vote_id)
 
     elif positive_value_exists(candidate_we_vote_id):
-        results = quick_info_manager.retrieve_candidate_campaign_quick_info(candidate_we_vote_id)
+        results = quick_info_manager.retrieve_candidate_quick_info(candidate_we_vote_id)
 
     elif positive_value_exists(measure_we_vote_id):
         results = quick_info_manager.retrieve_contest_measure_quick_info(measure_we_vote_id)

@@ -4,7 +4,7 @@
 
 from .controllers import import_maplight_from_json
 from .models import MapLightCandidate
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateManager
 from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.urls import reverse
@@ -63,28 +63,28 @@ def transfer_maplight_data_to_we_vote_tables(request):
     }
     politician_name_mapping_list.append(one_mapping)
 
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
 
     maplight_candidates_current_query = MapLightCandidate.objects.all()
 
     for one_candidate_from_maplight_table in maplight_candidates_current_query:
         found_by_id = False
         # Try to find a matching candidate
-        results = candidate_campaign_manager.retrieve_candidate_campaign_from_id_maplight(
+        results = candidate_manager.retrieve_candidate_from_id_maplight(
             one_candidate_from_maplight_table.candidate_id)
 
         if not results['success']:
             logger.warning(u"Candidate NOT found by MapLight id: {name}".format(
                 name=one_candidate_from_maplight_table.candidate_id
             ))
-            results = candidate_campaign_manager.retrieve_candidate_campaign_from_candidate_name(
+            results = candidate_manager.retrieve_candidate_from_candidate_name(
                 one_candidate_from_maplight_table.display_name)
 
             if not results['success']:
                 logger.warning(u"Candidate NOT found by display_name: {name}".format(
                     name=one_candidate_from_maplight_table.display_name
                 ))
-                results = candidate_campaign_manager.retrieve_candidate_campaign_from_candidate_name(
+                results = candidate_manager.retrieve_candidate_from_candidate_name(
                     one_candidate_from_maplight_table.original_name)
 
                 if not results['success']:
@@ -100,7 +100,7 @@ def transfer_maplight_data_to_we_vote_tables(request):
                             one_mapping_google_civic_name = one_mapping_found['google_civic_name']
                             break
                     if positive_value_exists(one_mapping_google_civic_name):
-                        results = candidate_campaign_manager.retrieve_candidate_campaign_from_candidate_name(
+                        results = candidate_manager.retrieve_candidate_from_candidate_name(
                             one_mapping_google_civic_name)
                     if not results['success'] or not positive_value_exists(one_mapping_google_civic_name):
                         logger.warning(u"Candidate NOT found by mapping to google_civic name: {name}".format(
@@ -109,26 +109,26 @@ def transfer_maplight_data_to_we_vote_tables(request):
 
                         continue  # Go to the next candidate
 
-        candidate_campaign_on_stage = results['candidate_campaign']
+        candidate_on_stage = results['candidate']
 
         # Just in case the logic above let us through to here accidentally without a candidate_name value, don't proceed
-        if not positive_value_exists(candidate_campaign_on_stage.candidate_name):
+        if not positive_value_exists(candidate_on_stage.candidate_name):
             continue
 
         logger.debug(u"Candidate {name} found".format(
-            name=candidate_campaign_on_stage.candidate_name
+            name=candidate_on_stage.candidate_name
         ))
 
         try:
             # Tie the maplight id to our record
             if not found_by_id:
-                candidate_campaign_on_stage.id_maplight = one_candidate_from_maplight_table.candidate_id
+                candidate_on_stage.id_maplight = one_candidate_from_maplight_table.candidate_id
 
             # Bring over the photo
-            candidate_campaign_on_stage.photo_url_from_maplight = one_candidate_from_maplight_table.photo
+            candidate_on_stage.photo_url_from_maplight = one_candidate_from_maplight_table.photo
 
             # We can bring over other data as needed, like gender for example
-            candidate_campaign_on_stage.save()
+            candidate_on_stage.save()
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
 

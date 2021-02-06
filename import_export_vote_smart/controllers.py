@@ -12,7 +12,7 @@ from .models import VoteSmartApiCounterManager, VoteSmartCandidate, VoteSmartCan
     vote_smart_special_interest_group_list_filter, \
     VoteSmartState, vote_smart_state_filter
 from .votesmart_local import votesmart, VotesmartApiError
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateManager
 from config.base import get_environment_variable
 import copy
 from exception.models import handle_record_found_more_than_one_exception
@@ -622,30 +622,30 @@ def make_request(cls, method, **kwargs):
         return resp.text
 
 
-def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id):
+def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_id):
     politician_id = 0
-    return transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_id)
+    return transfer_vote_smart_ratings_to_positions(candidate_id, politician_id)
 
 
 def transfer_vote_smart_ratings_to_positions_for_politician(politician_id):
-    candidate_campaign_id = 0
-    return transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_id)
+    candidate_id = 0
+    return transfer_vote_smart_ratings_to_positions(candidate_id, politician_id)
 
 
-def transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_id):  # TODO DALE Update for politician
+def transfer_vote_smart_ratings_to_positions(candidate_id, politician_id):  # TODO DALE Update for politician
     we_vote_organizations_created = 0
     organization_positions_that_exist = 0
     organization_positions_created = 0
     ratings_status = ""
-    candidate_manager = CandidateCampaignManager()
-    candidate_results = candidate_manager.retrieve_candidate_campaign_from_id(candidate_campaign_id)
+    candidate_manager = CandidateManager()
+    candidate_results = candidate_manager.retrieve_candidate_from_id(candidate_id)
 
-    if candidate_results['candidate_campaign_found']:
+    if candidate_results['candidate_found']:
         # Working with Vote Smart data
-        candidate_campaign = candidate_results['candidate_campaign']
-        if not positive_value_exists(candidate_campaign.vote_smart_id):
+        candidate = candidate_results['candidate']
+        if not positive_value_exists(candidate.vote_smart_id):
             status = "VOTE_SMART_ID_HAS_NOT_BEEN_RETRIEVED_YET_FOR_THIS_CANDIDATE: " \
-                     "{candidate_campaign_id}".format(candidate_campaign_id=candidate_campaign_id)
+                     "{candidate_id}".format(candidate_id=candidate_id)
             success = False
             results = {
                 'status':   status,
@@ -658,7 +658,7 @@ def transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_i
         else:
             try:
                 rating_list_query = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')  # Desc order
-                rating_list = rating_list_query.filter(candidateId=candidate_campaign.vote_smart_id)
+                rating_list = rating_list_query.filter(candidateId=candidate.vote_smart_id)
             except Exception as error_instance:
                 # Catch the error message coming back from Vote Smart and pass it in the status
                 error_message = error_instance.args
@@ -705,10 +705,10 @@ def transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_i
             # Check to see if a position already exists
             # TODO DALE Note: we need to consider searching with a time span variable
             # (in addition to just org and candidate identifiers) since I believe
-            # Google Civic gives a person a new candidate campaign ID each election,
+            # Google Civic gives a person a new candidate ID each election,
             # while Vote Smart uses the same candidateId from year to year
-            organization_position_results = position_manager.retrieve_organization_candidate_campaign_position(
-                we_vote_organization.id, candidate_campaign_id)
+            organization_position_results = position_manager.retrieve_organization_candidate_position(
+                we_vote_organization.id, candidate_id)
 
             if positive_value_exists(organization_position_results['position_found']):
                 # For now, we only want to create positions that don't exist
@@ -721,9 +721,9 @@ def transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_i
                     public_figure_we_vote_id=False,
                     voter_we_vote_id=False,
                     google_civic_election_id=False,
-                    ballot_item_display_name=candidate_campaign.display_candidate_name(),
+                    ballot_item_display_name=candidate.display_candidate_name(),
                     office_we_vote_id=False,
-                    candidate_we_vote_id=candidate_campaign.we_vote_id,
+                    candidate_we_vote_id=candidate.we_vote_id,
                     measure_we_vote_id=False,
                     stance=PERCENT_RATING,
                     set_as_public_position=True,

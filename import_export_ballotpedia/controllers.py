@@ -5,7 +5,7 @@
 from .models import BallotpediaApiCounterManager
 from ballot.models import BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager, \
     VoterBallotSavedManager
-from candidate.models import CandidateCampaignManager, CandidateCampaignListManager, fetch_candidate_count_for_office
+from candidate.models import CandidateManager, CandidateListManager, fetch_candidate_count_for_office
 from config.base import get_environment_variable
 from electoral_district.models import ElectoralDistrict, ElectoralDistrictManager
 from election.models import BallotpediaElection, ElectionManager, Election
@@ -2008,7 +2008,7 @@ def groom_and_store_sample_ballot_results_api_v4(
     ballot_item_dict_list = []
 
     contest_office_manager = ContestOfficeManager()
-    candidate_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     measure_manager = ContestMeasureManager()
     # politician_manager = PoliticianManager()
     office_names_with_no_state = ["President of the United States"]
@@ -2217,8 +2217,8 @@ def groom_and_store_sample_ballot_results_api_v4(
                             ballotpedia_candidate_id = 0
                             ballotpedia_candidate_name = ""
                             ballotpedia_profile_image_url_https = ''
-                            candidate_campaign = None
-                            candidate_campaign_we_vote_id = ''
+                            candidate = None
+                            candidate_we_vote_id = ''
                             new_candidate_created = False
                             save_ballotpedia_image = False
 
@@ -2228,21 +2228,20 @@ def groom_and_store_sample_ballot_results_api_v4(
 
                             if positive_value_exists(ballotpedia_candidate_id):
                                 if ballotpedia_candidate_id in existing_candidate_objects_dict:
-                                    candidate_campaign = existing_candidate_objects_dict[ballotpedia_candidate_id]
-                                    candidate_campaign_we_vote_id = candidate_campaign.we_vote_id
+                                    candidate = existing_candidate_objects_dict[ballotpedia_candidate_id]
+                                    candidate_we_vote_id = candidate.we_vote_id
                                 else:
                                     # Does candidate already exist?
                                     candidate_results = \
-                                        candidate_manager.retrieve_candidate_campaign_from_ballotpedia_candidate_id(
+                                        candidate_manager.retrieve_candidate_from_ballotpedia_candidate_id(
                                             ballotpedia_candidate_id=ballotpedia_candidate_id,
                                             read_only=False
                                         )
-                                    if candidate_results['candidate_campaign_found']:
-                                        candidate_campaign = candidate_results['candidate_campaign']
-                                        candidate_campaign_we_vote_id = candidate_campaign.we_vote_id
+                                    if candidate_results['candidate_found']:
+                                        candidate = candidate_results['candidate']
+                                        candidate_we_vote_id = candidate.we_vote_id
                                         if ballotpedia_candidate_id not in existing_candidate_objects_dict:
-                                            existing_candidate_objects_dict[ballotpedia_candidate_id] = \
-                                                candidate_campaign
+                                            existing_candidate_objects_dict[ballotpedia_candidate_id] = candidate
                                         # In the future, we will want to look for updated data to save
                                     elif candidate_results['MultipleObjectsReturned']:
                                         status += "MORE_THAN_ONE_CANDIDATE_WITH_SAME_BALLOTPEDIA_CANDIDATE_ID1 ("
@@ -2253,7 +2252,7 @@ def groom_and_store_sample_ballot_results_api_v4(
                                         status += "RETRIEVE_BY_BALLOTPEDIA_CANDIDATE_ID_FAILED "
                                         status += candidate_results['status']
                                         continue
-                                if positive_value_exists(candidate_campaign_we_vote_id):
+                                if positive_value_exists(candidate_we_vote_id):
                                     pass
                                 else:
                                     # Create new candidate
@@ -2324,18 +2323,18 @@ def groom_and_store_sample_ballot_results_api_v4(
                                             and positive_value_exists(google_civic_election_id):
                                         results = candidate_manager.create_candidate_row_entry(update_values)
                                         new_candidate_created = results['new_candidate_created']
-                                        candidate_campaign = results['new_candidate']
-                                        candidate_campaign_we_vote_id = candidate_campaign.we_vote_id
-                                        if candidate_campaign_we_vote_id not in new_candidate_we_vote_ids_list:
-                                            new_candidate_we_vote_ids_list.append(candidate_campaign_we_vote_id)
-                                        existing_candidate_objects_dict[ballotpedia_candidate_id] = candidate_campaign
+                                        candidate = results['new_candidate']
+                                        candidate_we_vote_id = candidate.we_vote_id
+                                        if candidate_we_vote_id not in new_candidate_we_vote_ids_list:
+                                            new_candidate_we_vote_ids_list.append(candidate_we_vote_id)
+                                        existing_candidate_objects_dict[ballotpedia_candidate_id] = candidate
 
                                     if new_candidate_created and save_ballotpedia_image:
                                         cache_results = cache_master_and_resized_image(
-                                            candidate_id=candidate_campaign.id,
-                                            candidate_we_vote_id=candidate_campaign.we_vote_id,
-                                            ballotpedia_candidate_id=candidate_campaign.ballotpedia_candidate_id,
-                                            ballotpedia_image_id=candidate_campaign.ballotpedia_image_id,
+                                            candidate_id=candidate.id,
+                                            candidate_we_vote_id=candidate.we_vote_id,
+                                            ballotpedia_candidate_id=candidate.ballotpedia_candidate_id,
+                                            ballotpedia_image_id=candidate.ballotpedia_image_id,
                                             ballotpedia_profile_image_url=ballotpedia_profile_image_url_https,
                                             image_source=BALLOTPEDIA_IMAGE_SOURCE)
                                         cached_ballotpedia_image_url_https = cache_results[
@@ -2347,34 +2346,33 @@ def groom_and_store_sample_ballot_results_api_v4(
                                         we_vote_hosted_profile_image_url_tiny = cache_results[
                                             'we_vote_hosted_profile_image_url_tiny']
 
-                                        save_candidate_campaign_results = \
+                                        save_candidate_results = \
                                             candidate_manager.update_candidate_ballotpedia_image_details(
-                                                candidate_campaign,
+                                                candidate,
                                                 cached_ballotpedia_image_url_https,
                                                 we_vote_hosted_profile_image_url_large,
                                                 we_vote_hosted_profile_image_url_medium,
                                                 we_vote_hosted_profile_image_url_tiny)
-                                        candidate_campaign = save_candidate_campaign_results['candidate']
+                                        candidate = save_candidate_results['candidate']
                                     # if new_candidate_created:
                                     #     # Need to update voter ballotpedia details for the candidate in future
                                     #     save_politician_details_results = \
-                                    #         politician_manager.update_politician_details_from_candidate(
-                                    #             candidate_campaign)
+                                    #         politician_manager.update_politician_details_from_candidate(candidate)
 
                                 # Now make sure we have a CandidateToOfficeLink
-                                if positive_value_exists(candidate_campaign_we_vote_id):
+                                if positive_value_exists(candidate_we_vote_id):
                                     # TODO NOTE, 2020-09-12: We could pass a dict through with whether there is a
                                     #  candidate_to_office_link, in order to save looking in the database
                                     results = candidate_manager.get_or_create_candidate_to_office_link(
-                                        candidate_we_vote_id=candidate_campaign_we_vote_id,
+                                        candidate_we_vote_id=candidate_we_vote_id,
                                         contest_office_we_vote_id=contest_office_we_vote_id,
                                         google_civic_election_id=google_civic_election_id,
                                         state_code=state_code)
                                     if positive_value_exists(results['success']):
                                         try:
-                                            if not positive_value_exists(candidate_campaign.migrated_to_link):
-                                                candidate_campaign.migrated_to_link = True
-                                                candidate_campaign.save()
+                                            if not positive_value_exists(candidate.migrated_to_link):
+                                                candidate.migrated_to_link = True
+                                                candidate.save()
                                         except Exception as e:
                                             pass
             if 'ballot_measures' in one_district_json and positive_value_exists(one_district_json['ballot_measures']):
@@ -2785,7 +2783,7 @@ def process_ballotpedia_voter_districts(google_civic_election_id, state_code, mo
     ballot_item_dict_list = []
     generated_ballot_order = 0
 
-    candidate_campaign_list = CandidateCampaignListManager()
+    candidate_list = CandidateListManager()
     contest_office_list_manager = ContestOfficeListManager()
     measure_list_manager = ContestMeasureListManager()
     return_list_of_objects = True
@@ -2804,7 +2802,7 @@ def process_ballotpedia_voter_districts(google_civic_election_id, state_code, mo
                 # Remove any offices from this list that don't have candidates
                 modified_office_list_objects = []
                 for one_office in office_list_objects:
-                    results = candidate_campaign_list.retrieve_candidate_count_for_office(one_office.id, "")
+                    results = candidate_list.retrieve_candidate_count_for_office(one_office.id, "")
                     if positive_value_exists(results['candidate_count']):
                         modified_office_list_objects.append(one_office)
 

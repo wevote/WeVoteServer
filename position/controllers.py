@@ -8,7 +8,7 @@ from .models import PositionEntered, PositionForFriends, PositionManager, Positi
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching, \
     figure_out_google_civic_election_id_voter_is_watching_by_voter_id
 from ballot.models import BallotItemListManager, OFFICE, CANDIDATE, MEASURE
-from candidate.models import CandidateCampaign, CandidateCampaignManager, CandidateCampaignListManager, \
+from candidate.models import CandidateCampaign, CandidateManager, CandidateListManager, \
     CandidateToOfficeLink
 from config.base import get_environment_variable
 from django.db.models import Q
@@ -278,7 +278,7 @@ def calculate_positions_count_for_all_ballot_items_for_api(
 
     position_manager = PositionManager()
     position_list_manager = PositionListManager()
-    candidate_list_object = CandidateCampaignListManager()
+    candidate_list_object = CandidateListManager()
 
     follow_organization_list_manager = FollowOrganizationList()
     return_we_vote_id = True
@@ -346,7 +346,7 @@ def calculate_positions_count_for_all_ballot_items_for_api(
                     retrieve_public_positions_now = True  # The alternate is positions for friends-only
                     most_recent_only = True
                     public_positions_list_for_one_ballot_item = \
-                        position_list_manager.retrieve_all_positions_for_candidate_campaign(
+                        position_list_manager.retrieve_all_positions_for_candidate(
                             retrieve_public_positions_now, 0, candidate.we_vote_id,
                             ANY_STANCE, most_recent_only,
                             organizations_followed_we_vote_id_list=organizations_followed_by_voter_by_we_vote_id,
@@ -376,7 +376,7 @@ def calculate_positions_count_for_all_ballot_items_for_api(
                     retrieve_public_positions_now = False  # Return friends-only positions counts
                     most_recent_only = True
                     friends_only_positions_list_for_one_ballot_item = \
-                        position_list_manager.retrieve_all_positions_for_candidate_campaign(
+                        position_list_manager.retrieve_all_positions_for_candidate(
                             retrieve_public_positions_now, 0, candidate.we_vote_id,
                             ANY_STANCE, most_recent_only, friends_we_vote_id_list, read_only=True)
 
@@ -552,7 +552,7 @@ def count_for_all_ballot_items_from_position_network_score_for_api(  # positions
 
     # Get a list of all candidates and measures from this election (in the active election)
     ballot_item_list_manager = BallotItemListManager()
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     ballot_item_list = []
     if google_civic_election_id:
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
@@ -1267,12 +1267,12 @@ def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vot
     retrieve_all_admin_override = True
 
     # Get all positions for the "from_candidate" that we are moving away from
-    from_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+    from_position_list = position_list_manager.retrieve_all_positions_for_candidate(
         public_or_private, from_candidate_id, from_candidate_we_vote_id, stance_we_are_looking_for,
         most_recent_only, friends_we_vote_id_list, retrieve_all_admin_override=retrieve_all_admin_override)
 
     # Get all positions for the "to_candidate" that we need to check
-    to_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+    to_position_list = position_list_manager.retrieve_all_positions_for_candidate(
         public_or_private, to_candidate_id, to_candidate_we_vote_id, stance_we_are_looking_for,
         most_recent_only, friends_we_vote_id_list, retrieve_all_admin_override=retrieve_all_admin_override)
 
@@ -1709,11 +1709,11 @@ def move_positions_to_another_organization(
             organization_we_vote_id=to_organization_we_vote_id,
             voter_id=empty_voter_id,
             contest_office_id=from_position_entry.contest_office_id,
-            candidate_campaign_id=from_position_entry.candidate_campaign_id,
+            candidate_id=from_position_entry.candidate_campaign_id,
             contest_measure_id=from_position_entry.contest_measure_id,
             voter_we_vote_id=empty_voter_we_vote_id,
             contest_office_we_vote_id=from_position_entry.contest_office_we_vote_id,
-            candidate_campaign_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
+            candidate_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
             contest_measure_we_vote_id=from_position_entry.contest_measure_we_vote_id)
 
         if results['position_found']:
@@ -1803,11 +1803,11 @@ def move_positions_to_another_organization(
             organization_we_vote_id=to_organization_we_vote_id,
             voter_id=empty_voter_id,
             contest_office_id=from_position_entry.contest_office_id,
-            candidate_campaign_id=from_position_entry.candidate_campaign_id,
+            candidate_id=from_position_entry.candidate_campaign_id,
             contest_measure_id=from_position_entry.contest_measure_id,
             voter_we_vote_id=empty_voter_we_vote_id,
             contest_office_we_vote_id=from_position_entry.contest_office_we_vote_id,
-            candidate_campaign_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
+            candidate_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
             contest_measure_we_vote_id=from_position_entry.contest_measure_we_vote_id)
 
         if results['position_found']:
@@ -2281,12 +2281,12 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
     organization_id = 0
     organization_we_vote_id = ''
     contest_office_id = 0
-    candidate_campaign_id = 0
+    candidate_id = 0
     contest_measure_id = 0
     position_voter_id = 0
     results = position_manager.retrieve_position_table_unknown(
         position_we_vote_id, organization_id, organization_we_vote_id, position_voter_id,
-        contest_office_id, candidate_campaign_id, contest_measure_id)
+        contest_office_id, candidate_id, contest_measure_id)
 
     if results['position_found']:
         position = results['position']
@@ -2599,7 +2599,7 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
         # Retrieve public positions
         retrieve_public_positions_now = True  # The alternate is positions for friends-only
         return_only_latest_position_per_speaker = True
-        position_objects = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+        position_objects = position_list_manager.retrieve_all_positions_for_candidate(
             retrieve_public_positions_now, candidate_id, candidate_we_vote_id, stance_we_are_looking_for,
             return_only_latest_position_per_speaker, read_only=False)
         # is_public_position_setting = True
@@ -2610,16 +2610,16 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
         # there are any positions for this ballot_item (which would include both the id and we_vote_id),
         # we retrieve the following so we can get the ballot item's id and we_vote_id (per the request of
         # the WebApp team)
-        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
         if positive_value_exists(candidate_id):
-            results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(candidate_id)
+            results = candidate_manager.retrieve_candidate_from_id(candidate_id)
         else:
-            results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
 
-        if results['candidate_campaign_found']:
-            candidate_campaign = results['candidate_campaign']
-            ballot_item_id = candidate_campaign.id
-            ballot_item_we_vote_id = candidate_campaign.we_vote_id
+        if results['candidate_found']:
+            candidate = results['candidate']
+            ballot_item_id = candidate.id
+            ballot_item_we_vote_id = candidate.we_vote_id
             ballot_item_found = True
         else:
             ballot_item_id = candidate_id
@@ -3049,10 +3049,10 @@ def retrieve_position_list_for_ballot_item_from_friends(
         if retrieve_public_positions:
             retrieve_public_positions_now = True  # The alternate is positions for friends-only
             return_only_latest_position_per_speaker = True
-            public_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+            public_positions_list = position_list_manager.retrieve_all_positions_for_candidate(
                 retrieve_public_positions=retrieve_public_positions_now,
-                candidate_campaign_id=candidate_id,
-                candidate_campaign_we_vote_id=candidate_we_vote_id,
+                candidate_id=candidate_id,
+                candidate_we_vote_id=candidate_we_vote_id,
                 stance_we_are_looking_for=stance_we_are_looking_for,
                 most_recent_only=return_only_latest_position_per_speaker,
                 friends_we_vote_id_list=friends_we_vote_id_list,
@@ -3068,7 +3068,7 @@ def retrieve_position_list_for_ballot_item_from_friends(
         if retrieve_friends_positions:
             retrieve_public_positions_now = False  # This being False means: "Positions from friends-only"
             return_only_latest_position_per_speaker = True
-            friends_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+            friends_positions_list = position_list_manager.retrieve_all_positions_for_candidate(
                 retrieve_public_positions_now,
                 candidate_id,
                 candidate_we_vote_id,
@@ -3087,16 +3087,16 @@ def retrieve_position_list_for_ballot_item_from_friends(
         # there are any positions for this ballot_item (which would include both the id and we_vote_id),
         # we retrieve the following so we can get the ballot item's id and we_vote_id (per the request of
         # the WebApp team)
-        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
         if positive_value_exists(candidate_id):
-            results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(candidate_id)
+            results = candidate_manager.retrieve_candidate_from_id(candidate_id)
         else:
-            results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
 
-        if results['candidate_campaign_found']:
-            candidate_campaign = results['candidate_campaign']
-            ballot_item_id = candidate_campaign.id
-            ballot_item_we_vote_id = candidate_campaign.we_vote_id
+        if results['candidate_found']:
+            candidate = results['candidate']
+            ballot_item_id = candidate.id
+            ballot_item_we_vote_id = candidate.we_vote_id
             ballot_item_found = True
         else:
             ballot_item_id = candidate_id
@@ -3347,10 +3347,10 @@ def retrieve_position_list_for_ballot_item_from_shared_items(
         # Retrieve positions from shared_items that are publicly visible
         if retrieve_public_positions:
             retrieve_public_positions_now = True  # The alternate is positions for friends-only
-            public_positions_list = position_list_manager.retrieve_shared_item_positions_for_candidate_campaign(
+            public_positions_list = position_list_manager.retrieve_shared_item_positions_for_candidate(
                 retrieve_public_positions=retrieve_public_positions_now,
-                candidate_campaign_id=candidate_id,
-                candidate_campaign_we_vote_id=candidate_we_vote_id,
+                candidate_id=candidate_id,
+                candidate_we_vote_id=candidate_we_vote_id,
                 stance_we_are_looking_for=stance_we_are_looking_for,
                 shared_by_organization_we_vote_id_list=shared_by_organization_we_vote_id_list,
                 read_only=True)
@@ -3361,10 +3361,10 @@ def retrieve_position_list_for_ballot_item_from_shared_items(
         # Now retrieve positions from your friends that are friend's-only visible
         if retrieve_friends_positions:
             retrieve_public_positions_now = False  # This being False means: "Positions from friends-only"
-            friends_positions_list = position_list_manager.retrieve_shared_item_positions_for_candidate_campaign(
+            friends_positions_list = position_list_manager.retrieve_shared_item_positions_for_candidate(
                 retrieve_public_positions=retrieve_public_positions_now,
-                candidate_campaign_id=candidate_id,
-                candidate_campaign_we_vote_id=candidate_we_vote_id,
+                candidate_id=candidate_id,
+                candidate_we_vote_id=candidate_we_vote_id,
                 stance_we_are_looking_for=stance_we_are_looking_for,
                 shared_by_organization_we_vote_id_list=friends_only_shared_by_organization_we_vote_id_list,
                 read_only=True)
@@ -3375,16 +3375,16 @@ def retrieve_position_list_for_ballot_item_from_shared_items(
         # there are any positions for this ballot_item (which would include both the id and we_vote_id),
         # we retrieve the following so we can get the ballot item's id and we_vote_id (per the request of
         # the WebApp team)
-        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
         if positive_value_exists(candidate_id):
-            results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(candidate_id)
+            results = candidate_manager.retrieve_candidate_from_id(candidate_id)
         else:
-            results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
 
-        if results['candidate_campaign_found']:
-            candidate_campaign = results['candidate_campaign']
-            ballot_item_id = candidate_campaign.id
-            ballot_item_we_vote_id = candidate_campaign.we_vote_id
+        if results['candidate_found']:
+            candidate = results['candidate']
+            ballot_item_id = candidate.id
+            ballot_item_we_vote_id = candidate.we_vote_id
             ballot_item_found = True
         else:
             ballot_item_id = candidate_id
@@ -4152,7 +4152,7 @@ def filter_positions_structured_json_for_local_duplicates(structured_json):
             one_position['google_civic_election_id'] if 'google_civic_election_id' in one_position else ''
         organization_we_vote_id = \
             one_position['organization_we_vote_id'] if 'organization_we_vote_id' in one_position else ''
-        candidate_campaign_we_vote_id = one_position['candidate_campaign_we_vote_id'] \
+        candidate_we_vote_id = one_position['candidate_campaign_we_vote_id'] \
             if 'candidate_campaign_we_vote_id' in one_position else ''
         contest_measure_we_vote_id = one_position['contest_measure_we_vote_id'] \
             if 'contest_measure_we_vote_id' in one_position else ''
@@ -4162,7 +4162,7 @@ def filter_positions_structured_json_for_local_duplicates(structured_json):
 
         results = position_list_manager.retrieve_possible_duplicate_positions(
             google_civic_election_id, organization_we_vote_id,
-            candidate_campaign_we_vote_id, contest_measure_we_vote_id,
+            candidate_we_vote_id, contest_measure_we_vote_id,
             we_vote_id_from_master)
 
         if results['position_list_found']:
@@ -4230,16 +4230,16 @@ def positions_import_from_structured_json(structured_json):
             # TODO Build this for public_figure - skip for now
             continue
 
-        candidate_campaign_manager = CandidateCampaignManager()
-        candidate_campaign_id = 0
+        candidate_manager = CandidateManager()
+        candidate_id = 0
         contest_measure_id = 0
         if positive_value_exists(one_position["candidate_campaign_we_vote_id"]):
-            # We need to look up the local candidate_campaign_id and store for internal use
-            candidate_campaign_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(
+            # We need to look up the local candidate_id and store for internal use
+            candidate_id = candidate_manager.fetch_candidate_id_from_we_vote_id(
                 one_position["candidate_campaign_we_vote_id"])
-            if not positive_value_exists(candidate_campaign_id):
+            if not positive_value_exists(candidate_id):
                 # If an id does not exist, then we don't have this candidate locally
-                # print("positions_import did not find a candidate_campaign_id for candidate_campaign_we_vote_id: " +
+                # print("positions_import did not find a candidate_id for candidate_we_vote_id: " +
                 #       one_position["candidate_campaign_we_vote_id"])
                 positions_not_processed += 1
                 continue
@@ -4273,14 +4273,14 @@ def positions_import_from_structured_json(structured_json):
         google_civic_candidate_name = one_position["google_civic_candidate_name"] if \
             "google_civic_candidate_name" in one_position else ''
         if not positive_value_exists(google_civic_candidate_name):
-            google_civic_candidate_name = candidate_campaign_manager.fetch_google_civic_candidate_name_from_we_vote_id(
+            google_civic_candidate_name = candidate_manager.fetch_google_civic_candidate_name_from_we_vote_id(
                 one_position["candidate_campaign_we_vote_id"])
 
         try:
             if position_on_stage_found:
                 # Update
                 position_on_stage.we_vote_id = one_position["we_vote_id"]
-                position_on_stage.candidate_campaign_id = candidate_campaign_id
+                position_on_stage.candidate_campaign_id = candidate_id
                 position_on_stage.candidate_campaign_we_vote_id = one_position["candidate_campaign_we_vote_id"]
                 position_on_stage.contest_measure_id = contest_measure_id
                 position_on_stage.contest_measure_we_vote_id = one_position["contest_measure_we_vote_id"]
@@ -4305,7 +4305,7 @@ def positions_import_from_structured_json(structured_json):
                 position_on_stage = PositionEntered(
                     we_vote_id=one_position["we_vote_id"],
                     date_entered=one_position["date_entered"],
-                    candidate_campaign_id=candidate_campaign_id,
+                    candidate_campaign_id=candidate_id,
                     candidate_campaign_we_vote_id=one_position["candidate_campaign_we_vote_id"],
                     contest_measure_id=contest_measure_id,
                     contest_measure_we_vote_id=one_position["contest_measure_we_vote_id"],
@@ -4473,7 +4473,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             voter_id, office_we_vote_id)
 
     elif positive_value_exists(candidate_we_vote_id):
-        results = position_manager.retrieve_voter_candidate_campaign_position_with_we_vote_id(
+        results = position_manager.retrieve_voter_candidate_position_with_we_vote_id(
             voter_id, candidate_we_vote_id)
 
     elif positive_value_exists(measure_we_vote_id):
@@ -4861,7 +4861,7 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
     success = False
     position_manager = PositionManager()
     if positive_value_exists(candidate_we_vote_id):
-        results = position_manager.retrieve_voter_candidate_campaign_position_with_we_vote_id(
+        results = position_manager.retrieve_voter_candidate_position_with_we_vote_id(
             voter_id, candidate_we_vote_id)
     elif positive_value_exists(measure_we_vote_id):
         results = position_manager.retrieve_voter_contest_measure_position_with_we_vote_id(
@@ -5008,7 +5008,7 @@ def refresh_positions_with_candidate_details_for_election(google_civic_election_
     positions_updated_count = 0
     google_civic_election_id = convert_to_int(google_civic_election_id)
 
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     return_list_of_objects = True
     google_civic_election_id_list = [google_civic_election_id]
     candidates_results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
@@ -5365,10 +5365,10 @@ def retrieve_ballot_item_we_vote_ids_for_organization_static(
     return results
 
 
-def reset_all_position_image_details_from_candidate(candidate_campaign, twitter_profile_image_url_https):
+def reset_all_position_image_details_from_candidate(candidate, twitter_profile_image_url_https):
     """
     Reset all position image urls PositionEntered and PositionForFriends from candidate details
-    :param candidate_campaign:
+    :param candidate:
     :param twitter_profile_image_url_https
     :return:
     """
@@ -5377,16 +5377,16 @@ def reset_all_position_image_details_from_candidate(candidate_campaign, twitter_
     reset_all_position_image_urls_results = []
 
     retrieve_public_positions = True
-    public_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-        retrieve_public_positions, candidate_campaign.id, candidate_campaign.we_vote_id)
+    public_position_list = position_list_manager.retrieve_all_positions_for_candidate(
+        retrieve_public_positions, candidate.id, candidate.we_vote_id)
     for position_object in public_position_list:
         reset_position_image_urls_results = position_manager.reset_position_image_details(
             position_object, twitter_profile_image_url_https)
         reset_all_position_image_urls_results.append(reset_position_image_urls_results)
 
     retrieve_public_positions = False
-    friends_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-        retrieve_public_positions, candidate_campaign.id, candidate_campaign.we_vote_id,
+    friends_position_list = position_list_manager.retrieve_all_positions_for_candidate(
+        retrieve_public_positions, candidate.id, candidate.we_vote_id,
         retrieve_all_admin_override=True)
     for position_object in friends_position_list:
         reset_position_image_urls_results = position_manager.reset_position_image_details(
@@ -5400,10 +5400,10 @@ def reset_all_position_image_details_from_candidate(candidate_campaign, twitter_
     return results
 
 
-def update_all_position_details_from_candidate(candidate_campaign):
+def update_all_position_details_from_candidate(candidate):
     """
     Update all position image urls PositionEntered and PositionForFriends from candidate details
-    :param candidate_campaign:
+    :param candidate:
     :return:
     """
     position_list_manager = PositionListManager()
@@ -5414,14 +5414,14 @@ def update_all_position_details_from_candidate(candidate_campaign):
     update_all_position_candidate_data_results = []
 
     retrieve_public_positions = True
-    public_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-        retrieve_public_positions, candidate_campaign.id, candidate_campaign.we_vote_id)
+    public_position_list = position_list_manager.retrieve_all_positions_for_candidate(
+        retrieve_public_positions, candidate.id, candidate.we_vote_id)
     for position_object in public_position_list:
         update_position_image_urls_results = position_manager.update_position_image_urls_from_candidate(
-            position_object, candidate_campaign)
+            position_object, candidate)
         update_all_position_image_urls_results.append(update_position_image_urls_results)
         update_position_candidate_data_results = position_manager.update_position_ballot_data_from_candidate(
-            position_object, candidate_campaign)
+            position_object, candidate)
         update_all_position_candidate_data_results.append(update_position_candidate_data_results)
         if update_position_image_urls_results['success'] and update_position_candidate_data_results['success']:
             positions_updated_count += 1
@@ -5429,15 +5429,15 @@ def update_all_position_details_from_candidate(candidate_campaign):
             positions_not_updated_count += 1
 
     retrieve_public_positions = False
-    friends_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-        retrieve_public_positions, candidate_campaign.id, candidate_campaign.we_vote_id,
+    friends_position_list = position_list_manager.retrieve_all_positions_for_candidate(
+        retrieve_public_positions, candidate.id, candidate.we_vote_id,
         retrieve_all_admin_override=True)
     for position_object in friends_position_list:
         update_position_image_urls_results = position_manager.update_position_image_urls_from_candidate(
-            position_object, candidate_campaign)
+            position_object, candidate)
         update_all_position_image_urls_results.append(update_position_image_urls_results)
         update_position_candidate_data_results = position_manager.update_position_ballot_data_from_candidate(
-            position_object, candidate_campaign)
+            position_object, candidate)
         update_all_position_candidate_data_results.append(update_position_candidate_data_results)
         if update_position_image_urls_results['success'] and update_position_candidate_data_results['success']:
             positions_updated_count += 1

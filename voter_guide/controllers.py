@@ -5,7 +5,7 @@
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 from candidate.controllers import retrieve_candidate_list_for_all_prior_elections_this_year, \
     retrieve_candidate_list_for_all_upcoming_elections
-from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
+from candidate.models import CandidateManager, CandidateListManager
 from config.base import get_environment_variable
 import copy
 from datetime import datetime, timedelta
@@ -342,10 +342,10 @@ def extract_import_position_list_from_voter_guide_possibility(voter_guide_possib
             if positive_value_exists(voter_guide_possibility.candidate_we_vote_id) else ""
 
         contest_office_name = ""
-        candidate_manager = CandidateCampaignManager()
-        results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
-        if results['candidate_campaign_found']:
-            candidate = results['candidate_campaign']
+        candidate_manager = CandidateManager()
+        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+        if results['candidate_found']:
+            candidate = results['candidate']
             contest_office_name = candidate.contest_office_name
     else:
         candidate_name = ""
@@ -484,10 +484,10 @@ def extract_voter_guide_possibility_position_list_from_database(
             if positive_value_exists(voter_guide_possibility.candidate_twitter_handle) else ""
         candidate_we_vote_id = voter_guide_possibility.candidate_we_vote_id \
             if positive_value_exists(voter_guide_possibility.candidate_we_vote_id) else ""
-        # candidate_manager = CandidateCampaignManager()
-        # results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
-        # if results['candidate_campaign_found']:
-        #     candidate = results['candidate_campaign']
+        # candidate_manager = CandidateManager()
+        # results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+        # if results['candidate_found']:
+        #     candidate = results['candidate']
         #     contest_office_name = candidate.contest_office_name
     else:
         # candidate_name = ""
@@ -501,7 +501,7 @@ def extract_voter_guide_possibility_position_list_from_database(
         possibility_position_query = possibility_position_query.filter(id=voter_guide_possibility_position_id)
     possibility_position_query = possibility_position_query[:200]  # Limit to 200 to avoid very slow page loading
     possibility_position_list = list(possibility_position_query)
-    candidate_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     for possibility_position in possibility_position_list:
         candidate_alternate_names = []
         if positive_value_exists(possibility_position.more_info_url):
@@ -521,9 +521,9 @@ def extract_voter_guide_possibility_position_list_from_database(
                 if positive_value_exists(possibility_position.candidate_twitter_handle) else ""
             # If this is a list of candidates being endorsed by one organization, add on the alternate_names
             if positive_value_exists(candidate_we_vote_id):
-                candidate_results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
-                if candidate_results['candidate_campaign_found']:
-                    candidate_alternate_names = candidate_results['candidate_campaign'].display_alternate_names_list()
+                candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+                if candidate_results['candidate_found']:
+                    candidate_alternate_names = candidate_results['candidate'].display_alternate_names_list()
         elif voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
             # ######################
             # If we are starting from a single candidate endorsed by many "organizations" (which may be people),
@@ -582,8 +582,8 @@ def augment_candidate_possible_position_data(
         all_possible_candidates=[], attach_objects=True):
     status = ""
     success = True
-    candidate_campaign_manager = CandidateCampaignManager()
-    candidate_campaign_list_manager = CandidateCampaignListManager()
+    candidate_manager = CandidateManager()
+    candidate_list_manager = CandidateListManager()
     contest_office_manager = ContestOfficeManager()
 
     possible_endorsement_matched = False
@@ -595,10 +595,10 @@ def augment_candidate_possible_position_data(
     if 'candidate_we_vote_id' in possible_endorsement \
             and positive_value_exists(possible_endorsement['candidate_we_vote_id']):
         possible_endorsement_matched = True
-        results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+        results = candidate_manager.retrieve_candidate_from_we_vote_id(
             possible_endorsement['candidate_we_vote_id'])
-        if results['candidate_campaign_found']:
-            candidate = results['candidate_campaign']
+        if results['candidate_found']:
+            candidate = results['candidate']
             if positive_value_exists(attach_objects):
                 possible_endorsement['candidate'] = candidate
             possible_endorsement['ballot_item_name'] = candidate.display_candidate_name()
@@ -624,7 +624,7 @@ def augment_candidate_possible_position_data(
             positive_value_exists(possible_endorsement['ballot_item_name']):
         possible_endorsement_matched = True
         # If here search for possible candidate matches
-        matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
+        matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id_list, limit_to_this_state_code, '', possible_endorsement['ballot_item_name'])
 
         if matching_results['candidate_found']:
@@ -706,11 +706,11 @@ def augment_candidate_possible_position_data(
                             one_endorsement_light['google_civic_election_id']
                     else:
                         possible_endorsement['google_civic_election_id'] = 0
-                    matching_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+                    matching_results = candidate_manager.retrieve_candidate_from_we_vote_id(
                         possible_endorsement['candidate_we_vote_id'])
 
-                    if matching_results['candidate_campaign_found']:
-                        candidate = matching_results['candidate_campaign']
+                    if matching_results['candidate_found']:
+                        candidate = matching_results['candidate']
 
                         # If one candidate found, add we_vote_id here
                         possible_endorsement['candidate_we_vote_id'] = candidate.we_vote_id
@@ -765,11 +765,11 @@ def augment_candidate_possible_position_data(
                                 one_endorsement_light['google_civic_election_id']
                         else:
                             possible_endorsement_copy['google_civic_election_id'] = 0
-                        matching_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+                        matching_results = candidate_manager.retrieve_candidate_from_we_vote_id(
                             possible_endorsement_copy['candidate_we_vote_id'])
 
-                        if matching_results['candidate_campaign_found']:
-                            candidate = matching_results['candidate_campaign']
+                        if matching_results['candidate_found']:
+                            candidate = matching_results['candidate']
 
                             # If one candidate found, augment the data if we can
                             if positive_value_exists(attach_objects):
@@ -1854,11 +1854,11 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     candidate_dict = {}
     possible_owner_of_website_candidates_list = []
     if positive_value_exists(candidate_we_vote_id):
-        candidate_manager = CandidateCampaignManager()
-        candidate_results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+        candidate_manager = CandidateManager()
+        candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
         status += candidate_results['status']
-        if candidate_results['candidate_campaign_found']:
-            candidate = candidate_results['candidate_campaign']
+        if candidate_results['candidate_found']:
+            candidate = candidate_results['candidate']
             candidate_dict = {
                 'candidate_we_vote_id':         candidate.we_vote_id,
                 'candidate_name':               candidate.candidate_name,
@@ -1873,7 +1873,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
         if positive_value_exists(possible_candidate_name) or positive_value_exists(possible_candidate_twitter_handle):
             google_civic_election_id_list = retrieve_upcoming_election_id_list(
                 limit_to_this_state_code=limit_to_this_state_code)
-            candidate_list_manager = CandidateCampaignListManager()
+            candidate_list_manager = CandidateListManager()
             results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
                 google_civic_election_id_list, limit_to_this_state_code,
                 possible_candidate_twitter_handle, possible_candidate_name)
@@ -1941,7 +1941,7 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
     highlight_list = []
     voter_we_vote_id = ''
     names_already_included_list = []
-    candidate_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
 
     # Once we know we have a voter_device_id to work with, get this working
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
@@ -1975,10 +1975,10 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                     }
                     highlight_list.append(one_highlight)
                 if positive_value_exists(one_possible_position['candidate_we_vote_id']):
-                    candidate_results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(
+                    candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(
                         one_possible_position['candidate_we_vote_id'])
-                    if candidate_results['candidate_campaign_found']:
-                        one_candidate = candidate_results['candidate_campaign']
+                    if candidate_results['candidate_found']:
+                        one_candidate = candidate_results['candidate']
                         if positive_value_exists(one_candidate.display_candidate_name()) \
                                 and one_candidate.display_candidate_name() not in names_already_included_list:
                             names_already_included_list.append(one_candidate.display_candidate_name())
@@ -2948,7 +2948,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                     organization_manager = OrganizationManager()
                     organization_id = organization_manager.fetch_organization_id(
                         voter_guide.organization_we_vote_id)
-                    results = position_manager.retrieve_organization_candidate_campaign_position_with_we_vote_id(
+                    results = position_manager.retrieve_organization_candidate_position_with_we_vote_id(
                         organization_id, ballot_item_we_vote_id)
                     if results['position_found']:
                         position = results['position']
@@ -3068,7 +3068,7 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
     position_list_manager = PositionListManager()
     if (kind_of_ballot_item == CANDIDATE) and positive_value_exists(ballot_item_we_vote_id):
         candidate_id = 0
-        all_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+        all_positions_list = position_list_manager.retrieve_all_positions_for_candidate(
             retrieve_public_positions, candidate_id, ballot_item_we_vote_id, ANY_STANCE, read_only=True)
     elif (kind_of_ballot_item == MEASURE) and positive_value_exists(ballot_item_we_vote_id):
         measure_id = 0

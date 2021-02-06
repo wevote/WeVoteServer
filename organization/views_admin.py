@@ -8,7 +8,7 @@ from .controllers import full_domain_string_available, merge_these_two_organizat
     push_organization_data_to_other_table_caches, subdomain_string_available
 from .models import GROUP, INDIVIDUAL, Organization, OrganizationReservedDomain, ORGANIZATION_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
-from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
+from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
 from config.base import get_environment_variable
 from django.db.models import Q
 from django.http import HttpResponseRedirect
@@ -1350,7 +1350,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     organization_id = convert_to_int(organization_id)
     organization_search_for_merge = request.GET.get('organization_search_for_merge', "")
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    candidate_campaign_id = request.GET.get('candidate_campaign_id', 0)
+    candidate_id = request.GET.get('candidate_id', 0)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
 
@@ -1422,14 +1422,14 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         google_civic_election_id_list.append(str(one_election.google_civic_election_id))
 
     # We pass candidate_we_vote_id to this page to pre-populate the form
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     if positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_id = 0
-        results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
-        if results['candidate_campaign_found']:
-            candidate_campaign = results['candidate_campaign']
-            candidate_campaign_id = candidate_campaign.id
-    elif positive_value_exists(candidate_campaign_id):
+        candidate_id = 0
+        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+        if results['candidate_found']:
+            candidate = results['candidate']
+            candidate_id = candidate.id
+    elif positive_value_exists(candidate_id):
         pass
 
     organization_on_stage = Organization()
@@ -1467,7 +1467,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
                 if twitter_link_to_organization_handle.lower() != organization_twitter_handle.lower():
                     twitter_handle_mismatch = True
 
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     if not organization_on_stage_found:
         messages.add_message(request, messages.ERROR,
                              'Could not find organization when trying to retrieve positions.')
@@ -1602,7 +1602,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     organization_type_display_text = ORGANIZATION_TYPE_MAP.get(organization_on_stage.organization_type,
                                                                ORGANIZATION_TYPE_MAP[UNKNOWN])
     template_values = {
-        'candidate_campaign_id':            candidate_campaign_id,
+        'candidate_id':                     candidate_id,
         'candidate_we_vote_id':             candidate_we_vote_id,
         'election_list':                    election_list,
         'friends_only_position_count':      friends_only_position_count,
@@ -1634,7 +1634,7 @@ def organization_position_new_view(request, organization_id):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
-    candidate_campaign_id = request.GET.get('candidate_campaign_id', 0)
+    candidate_id = request.GET.get('candidate_id', 0)
     candidate_search = request.GET.get('candidate_search', False)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', False)
     measure_search = request.GET.get('measure_search', False)
@@ -1649,14 +1649,14 @@ def organization_position_new_view(request, organization_id):
     more_info_url = request.GET.get('more_info_url', '')
 
     # We pass candidate_we_vote_id to this page to pre-populate the form
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     if positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_id = 0
-        results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
-        if results['candidate_campaign_found']:
-            candidate_campaign = results['candidate_campaign']
-            candidate_campaign_id = candidate_campaign.id
-    elif positive_value_exists(candidate_campaign_id):
+        candidate_id = 0
+        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+        if results['candidate_found']:
+            candidate = results['candidate']
+            candidate_id = candidate.id
+    elif positive_value_exists(candidate_id):
         pass
 
     # We pass candidate_we_vote_id to this page to pre-populate the form
@@ -1695,15 +1695,15 @@ def organization_position_new_view(request, organization_id):
         google_civic_election_id_list = []
 
     # Prepare a drop down of candidates competing in this election
-    candidate_campaign_list = CandidateCampaignListManager()
-    candidate_campaigns_for_this_election_list = []
-    results = candidate_campaign_list.retrieve_all_candidates_for_upcoming_election(
+    candidate_list = CandidateListManager()
+    candidates_for_this_election_list = []
+    results = candidate_list.retrieve_all_candidates_for_upcoming_election(
         google_civic_election_id_list,
         state_code,
         search_string=candidate_search,
         return_list_of_objects=True)
     if results['candidate_list_found']:
-        candidate_campaigns_for_this_election_list = results['candidate_list_objects']
+        candidates_for_this_election_list = results['candidate_list_objects']
 
     # Prepare a drop down of measures in this election
     contest_measure_list = ContestMeasureListManager()
@@ -1753,8 +1753,8 @@ def organization_position_new_view(request, organization_id):
                         election_list.append(one_election)
 
         template_values = {
-            'candidate_campaigns_for_this_election_list':   candidate_campaigns_for_this_election_list,
-            'candidate_campaign_id':                        candidate_campaign_id,
+            'candidates_for_this_election_list':            candidates_for_this_election_list,
+            'candidate_id':                                 candidate_id,
             'candidate_search':                             candidate_search
             if positive_value_exists(candidate_search) else '',
             'contest_measures_for_this_election_list':      contest_measures_for_this_election_list,
@@ -1763,7 +1763,7 @@ def organization_position_new_view(request, organization_id):
             if positive_value_exists(measure_search) else '',
             'messages_on_stage':                            messages_on_stage,
             'organization':                                 organization_on_stage,
-            'organization_position_candidate_campaign_id':  0,
+            'organization_position_candidate_id':           0,
             'possible_stances_list':                        ORGANIZATION_STANCE_CHOICES,
             'show_all_elections':                           show_all_elections,
             'stance_selected':                              stance,
@@ -1878,7 +1878,7 @@ def organization_position_edit_view(request, organization_id=0, organization_we_
                              'Could not find organization position when trying to edit.')
         return HttpResponseRedirect(reverse('organization:organization_position_list', args=([organization_id])))
 
-    # Note: We have access to the candidate campaign through organization_position_on_stage.candidate_campaign
+    # Note: We have access to the candidate through organization_position_on_stage.candidate
 
     election_manager = ElectionManager()
     if positive_value_exists(show_all_elections):
@@ -1928,7 +1928,7 @@ def organization_position_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    candidate_campaign_id = convert_to_int(request.POST.get('candidate_campaign_id', 0))
+    candidate_id = convert_to_int(request.POST.get('candidate_id', 0))
     candidate_search = request.POST.get('candidate_search', False)
     contest_measure_id = convert_to_int(request.POST.get('contest_measure_id', 0))
     google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
@@ -1942,15 +1942,15 @@ def organization_position_edit_process_view(request):
     statement_text = request.POST.get('statement_text', '')  # Set a default if stance comes in empty
 
     go_back_to_add_new = False
-    candidate_campaign_we_vote_id = ""
+    candidate_we_vote_id = ""
     google_civic_candidate_name = ""
     contest_measure_we_vote_id = ""
     google_civic_measure_title = ""
-    candidate_campaign_on_stage_found = False
+    candidate_on_stage_found = False
     contest_measure_on_stage_found = False
     organization_position_on_stage = PositionEntered()
     organization_on_stage = Organization()
-    candidate_campaign_on_stage = CandidateCampaign()
+    candidate_on_stage = CandidateCampaign()
     contest_measure_on_stage = ContestMeasure()
     state_code = ""
     position_manager = PositionManager()
@@ -1975,20 +1975,20 @@ def organization_position_edit_process_view(request):
         return HttpResponseRedirect(reverse('organization:organization_list', args=()))
 
     # Now retrieve the CandidateCampaign or the ContestMeasure so we can save it with the Position
-    # We need either candidate_campaign_id or contest_measure_id
-    if candidate_campaign_id:
+    # We need either candidate_id or contest_measure_id
+    if candidate_id:
         try:
-            candidate_campaign_on_stage = CandidateCampaign.objects.get(id=candidate_campaign_id)
-            candidate_campaign_on_stage_found = True
-            candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
-            google_civic_candidate_name = candidate_campaign_on_stage.google_civic_candidate_name
-            state_code = candidate_campaign_on_stage.state_code
+            candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
+            candidate_on_stage_found = True
+            candidate_we_vote_id = candidate_on_stage.we_vote_id
+            google_civic_candidate_name = candidate_on_stage.google_civic_candidate_name
+            state_code = candidate_on_stage.state_code
         except CandidateCampaign.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
         except CandidateCampaign.DoesNotExist as e:
             handle_record_not_found_exception(e, logger=logger)
 
-        if candidate_campaign_on_stage_found:
+        if candidate_on_stage_found:
             pass
         else:
             messages.add_message(
@@ -2081,7 +2081,7 @@ def organization_position_edit_process_view(request):
                 return HttpResponseRedirect(
                     reverse('organization:organization_position_new', args=([organization_id])) + url_variables
                 )
-        candidate_campaign_id = 0
+        candidate_id = 0
     else:
         if positive_value_exists(candidate_search):
             messages.add_message(
@@ -2130,16 +2130,16 @@ def organization_position_edit_process_view(request):
     if not organization_position_on_stage_found:  # Position not found from position_we_vote_id
         # If a position_we_vote_id hasn't been passed in, then we are trying to create a new position.
         # Check to make sure a position for this org, candidate and election doesn't already exist
-        if candidate_campaign_id:
-            results = position_manager.retrieve_organization_candidate_campaign_position(
-                organization_id, candidate_campaign_id, google_civic_election_id)
+        if candidate_id:
+            results = position_manager.retrieve_organization_candidate_position(
+                organization_id, candidate_id, google_civic_election_id)
         elif contest_measure_id:
             results = position_manager.retrieve_organization_contest_measure_position(
                 organization_id, contest_measure_id, google_civic_election_id)
         else:
             messages.add_message(
                 request, messages.ERROR,
-                "Missing both candidate_campaign_id and contest_measure_id.")
+                "Missing both candidate_id and contest_measure_id.")
             return HttpResponseRedirect(
                 reverse('organization:organization_position_list', args=([organization_id]))
             )
@@ -2172,8 +2172,8 @@ def organization_position_edit_process_view(request):
                     organization_position_on_stage.statement_text = statement_text
                 if not positive_value_exists(organization_position_on_stage.organization_we_vote_id):
                     organization_position_on_stage.organization_we_vote_id = organization_on_stage.we_vote_id
-                organization_position_on_stage.candidate_campaign_id = candidate_campaign_id
-                organization_position_on_stage.candidate_campaign_we_vote_id = candidate_campaign_we_vote_id
+                organization_position_on_stage.candidate_campaign_id = candidate_id
+                organization_position_on_stage.candidate_campaign_we_vote_id = candidate_we_vote_id
                 organization_position_on_stage.google_civic_candidate_name = google_civic_candidate_name
                 organization_position_on_stage.contest_measure_id = contest_measure_id
                 organization_position_on_stage.contest_measure_we_vote_id = contest_measure_we_vote_id
@@ -2185,11 +2185,11 @@ def organization_position_edit_process_view(request):
 
                 success = True
 
-                if positive_value_exists(candidate_campaign_we_vote_id):
+                if positive_value_exists(candidate_we_vote_id):
                     messages.add_message(
                         request, messages.INFO,
                         "Position on {candidate_name} updated.".format(
-                            candidate_name=candidate_campaign_on_stage.display_candidate_name()))
+                            candidate_name=candidate_on_stage.display_candidate_name()))
                 elif positive_value_exists(contest_measure_we_vote_id):
                     messages.add_message(
                         request, messages.INFO,
@@ -2202,8 +2202,8 @@ def organization_position_edit_process_view(request):
                 organization_position_on_stage = PositionEntered(
                     organization_id=organization_id,
                     organization_we_vote_id=organization_we_vote_id,
-                    candidate_campaign_id=candidate_campaign_id,
-                    candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                    candidate_campaign_id=candidate_id,
+                    candidate_campaign_we_vote_id=candidate_we_vote_id,
                     google_civic_candidate_name=google_civic_candidate_name,
                     contest_measure_id=contest_measure_id,
                     contest_measure_we_vote_id=contest_measure_we_vote_id,
@@ -2219,11 +2219,11 @@ def organization_position_edit_process_view(request):
                 results = position_manager.refresh_cached_position_info(organization_position_on_stage)
                 success = True
 
-                if positive_value_exists(candidate_campaign_we_vote_id):
+                if positive_value_exists(candidate_we_vote_id):
                     messages.add_message(
                         request, messages.INFO,
                         "New position on {candidate_name} saved.".format(
-                            candidate_name=candidate_campaign_on_stage.display_candidate_name()))
+                            candidate_name=candidate_on_stage.display_candidate_name()))
                 elif positive_value_exists(contest_measure_we_vote_id):
                     messages.add_message(
                         request, messages.INFO,
@@ -2245,8 +2245,8 @@ def organization_position_edit_process_view(request):
     if go_back_to_add_new:
         url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
         url_variables += "&state_code=" + str(state_code)
-        if positive_value_exists(candidate_campaign_id):
-            url_variables += "&candidate_campaign_id=" + str(candidate_campaign_id)
+        if positive_value_exists(candidate_id):
+            url_variables += "&candidate_id=" + str(candidate_id)
         if positive_value_exists(show_all_elections):
             url_variables += "&show_all_elections=1"
         url_variables += "&contest_measure_id=" + str(contest_measure_id)

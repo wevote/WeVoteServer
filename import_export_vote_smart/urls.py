@@ -14,7 +14,7 @@ urlpatterns = [
         views_admin.import_one_candidate_ratings_view, name='import_one_candidate_ratings',),
     url(r'^(?P<vote_smart_candidate_id>[0-9]+)/import_one_politician_ratings/$',
         views_admin.import_one_politician_ratings_view, name='import_one_politician_ratings',),
-    url(r'^(?P<candidate_campaign_id>[0-9]+)/transfer_vote_smart_ratings_to_positions_for_candidate/$',
+    url(r'^(?P<candidate_id>[0-9]+)/transfer_vote_smart_ratings_to_positions_for_candidate/$',
         views_admin.transfer_vote_smart_ratings_to_positions_for_candidate_view,
         name='transfer_vote_smart_ratings_to_positions_for_candidate',),
     url(r'^(?P<politician_id>[0-9]+)/transfer_vote_smart_ratings_to_positions_for_politician/$',
