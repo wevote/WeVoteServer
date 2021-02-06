@@ -20,18 +20,18 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 class PollingLocation(models.Model):
     """
-    This is for storing polling location information from the Voting Information Project Feeds
+    This is for storing map point information from the Voting Information Project Feeds
     """
     # We rely on the default internal id field too
-    # The ID of this polling location from VIP. (It seems to only be unique within each state.)
+    # The ID of this map point from VIP. (It seems to only be unique within each state.)
     polling_location_id = models.CharField(max_length=255, verbose_name="vip polling_location id", null=False)
     we_vote_id = models.CharField(
-        verbose_name="we vote permanent id of this polling location", max_length=255, default=None, null=True,
+        verbose_name="we vote permanent id of this map point", max_length=255, default=None, null=True,
         blank=True, unique=True, db_index=True)
     location_name = models.CharField(max_length=255, verbose_name="location name", null=True, blank=True)
     polling_hours_text = models.CharField(max_length=255, verbose_name="polling hours", null=True, blank=True)
     directions_text = models.TextField(
-        verbose_name="directions to get to polling location", null=True, blank=True)
+        verbose_name="directions to get to map point", null=True, blank=True)
     line1 = models.CharField(max_length=255, blank=True, null=True, verbose_name='address line 1 returned from VIP',
                              db_index=True)
     line2 = models.CharField(max_length=255, blank=True, null=True, verbose_name='address line 2 returned from VIP')
@@ -301,7 +301,7 @@ class PollingLocationManager(models.Manager):
             street_number = ''
             route = ''
             for location in location_list:
-                # Repair the polling location to include the ZIP code
+                # Repair the map point to include the ZIP code
                 if hasattr(location, 'raw'):
                     if 'address_components' in location.raw:
                         for one_address_component in location.raw['address_components']:
@@ -433,7 +433,7 @@ class PollingLocationManager(models.Manager):
             latitude = location.latitude
             longitude = location.longitude
             if not positive_value_exists(polling_location.zip_long):
-                # Repair the polling location to include the ZIP code
+                # Repair the map point to include the ZIP code
                 if hasattr(location, 'raw'):
                     if 'address_components' in location.raw:
                         for one_address_component in location.raw['address_components']:
@@ -538,7 +538,7 @@ class PollingLocationManager(models.Manager):
         try:
             state_code_found = False
             for location in location_list:
-                # Repair the polling location to include the ZIP code
+                # Repair the map point to include the ZIP code
                 if hasattr(location, 'raw'):
                     if 'address_components' in location.raw:
                         for one_address_component in location.raw['address_components']:
@@ -833,7 +833,7 @@ class PollingLocationListManager(models.Manager):
                 new_filter = Q(location_name__iexact=location_name) & Q(state__iexact=state)
                 filters.append(new_filter)
 
-            # 2016-05-17 This portion of the query restricts us from retrieving all polling locations from master.
+            # 2016-05-17 This portion of the query restricts us from retrieving all map points from master.
             #  That is why we only using this filter when neither of the above filters are used
             if not positive_value_exists(location_id_and_state_used) and \
                     not positive_value_exists(location_name_and_state_used):

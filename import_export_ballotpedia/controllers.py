@@ -674,7 +674,7 @@ def retrieve_ballot_items_from_polling_location(
     if not positive_value_exists(polling_location_we_vote_id) and not polling_location:
         results = {
             'success': False,
-            'status': "Error: Missing polling location we vote id and polling_location_object",
+            'status': "Error: Missing map point we vote id and polling_location_object",
         }
         return results
 
@@ -767,7 +767,7 @@ def retrieve_ballot_items_from_polling_location(
 #     if not positive_value_exists(polling_location_we_vote_id) and not polling_location:
 #         results = {
 #             'success': False,
-#             'status': "Error: Missing polling location we vote id and polling_location_object",
+#             'status': "Error: Missing map point we vote id and polling_location_object",
 #         }
 #         return results
 #
@@ -881,7 +881,7 @@ def retrieve_ballot_items_from_polling_location_api_v4(
     if not positive_value_exists(polling_location_we_vote_id) and not polling_location:
         results = {
             'success': False,
-            'status': "Error: Missing polling location we vote id and polling_location_object",
+            'status': "Error: Missing map point we vote id and polling_location_object",
             'batch_header_id':  batch_header_id,
             'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_office_objects_dict': existing_office_objects_dict,
@@ -1329,7 +1329,7 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
     if not positive_value_exists(polling_location_we_vote_id) and not polling_location:
         results = {
             'success': False,
-            'status': "Error: Missing polling location we vote id and polling_location_object",
+            'status': "Error: Missing map point we vote id and polling_location_object",
             'ballotpedia_district_id_list': ballotpedia_district_id_list,
         }
         return results
@@ -1370,7 +1370,7 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
         electoral_district_manager = ElectoralDistrictManager()
         ballotpedia_district_id_list_found = False
         if positive_value_exists(force_district_retrieve_from_ballotpedia):
-            # Delete any existing links between this district and this polling location
+            # Delete any existing links between this district and this map point
             results = electoral_district_manager.delete_electoral_district_link(
                     polling_location_we_vote_id=polling_location_we_vote_id)
             if not results['success']:
@@ -1455,7 +1455,7 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
                             electoral_district.save()
                         electoral_district_we_vote_id = electoral_district.we_vote_id
 
-                        # Now create a link between this district and this polling location
+                        # Now create a link between this district and this map point
                         results = \
                             electoral_district_manager.update_or_create_electoral_district_link_to_polling_location(
                                 polling_location_we_vote_id, electoral_district_we_vote_id, ballotpedia_district_id,
@@ -1967,7 +1967,7 @@ def groom_and_store_sample_ballot_elections_api_v4(structured_json, google_civic
                 #         electoral_district.save()
                 #     electoral_district_we_vote_id = electoral_district.we_vote_id
                 #
-                #     # Now create a link between this district and this polling location
+                #     # Now create a link between this district and this map point
                 #     results = \
                 #         electoral_district_manager.update_or_create_electoral_district_link_to_polling_location(
                 #             polling_location_we_vote_id, electoral_district_we_vote_id, ballotpedia_district_id,

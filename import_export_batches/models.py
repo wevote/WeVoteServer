@@ -4418,7 +4418,7 @@ class BatchDescription(models.Model):
     organization_we_vote_id = models.CharField(
         verbose_name="if for positions, the organization's we vote id", max_length=255, null=True, blank=True)
     polling_location_we_vote_id = models.CharField(
-        verbose_name="if for ballot items, the polling location we vote id", max_length=255, null=True, blank=True)
+        verbose_name="if for ballot items, the map point we vote id", max_length=255, null=True, blank=True)
     voter_id = models.IntegerField(null=True, blank=True)
     batch_description_text = models.CharField(max_length=255)
     # Have the batch rows under this description been analyzed?
@@ -5251,9 +5251,9 @@ class BatchProcess(models.Model):
     # Either voter_id or polling_location_we_vote_id will be set, but not both.
     # The unique id of the voter for which this ballot was retrieved.
     voter_id = models.IntegerField(verbose_name="the voter unique id", null=True, blank=True)
-    # The polling location for which this ballot was retrieved
+    # The map point for which this ballot was retrieved
     polling_location_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id of the polling location", max_length=255, default=None, null=True,
+        verbose_name="we vote permanent id of the map point", max_length=255, default=None, null=True,
         blank=True, unique=False)
 
     # API Refresh Request
@@ -5321,9 +5321,9 @@ class BatchProcessLogEntry(models.Model):
     # Either voter_id or polling_location_we_vote_id will be set, but not both.
     # The unique id of the voter for which this ballot was retrieved.
     voter_id = models.IntegerField(verbose_name="the voter unique id", null=True, blank=True)
-    # The polling location for which this ballot was retrieved
+    # The map point for which this ballot was retrieved
     polling_location_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id of the polling location", max_length=255, default=None, null=True,
+        verbose_name="we vote permanent id of the map point", max_length=255, default=None, null=True,
         blank=True, unique=False)
 
     critical_failure = models.NullBooleanField(default=None, null=True)
@@ -6158,9 +6158,9 @@ class BatchRowActionBallotItem(models.Model):
     # Fields from BallotItem
     # The unique id of the voter for which this ballot was retrieved
     voter_id = models.IntegerField(verbose_name="the voter unique id", default=0, null=False, blank=False)
-    # The polling location for which this ballot was retrieved
+    # The map point for which this ballot was retrieved
     polling_location_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id of the polling location", max_length=255, default=None, null=True,
+        verbose_name="we vote permanent id of the map point", max_length=255, default=None, null=True,
         blank=True, unique=False)
 
     # The unique ID of this election. (Provided by Google Civic)

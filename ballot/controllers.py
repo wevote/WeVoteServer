@@ -340,7 +340,7 @@ def ballot_returned_import_from_structured_json(structured_json):
                                                                 positive_value_exists(voter_id)):
             proceed_to_update_or_create = True
 
-            # Here we check for a local polling_location. We used to require the polling location be found,
+            # Here we check for a local polling_location. We used to require the map point be found,
             #  but no longer.
             results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
             if results['polling_location_found']:
@@ -703,7 +703,7 @@ def refresh_voter_ballots_from_polling_location(ballot_returned_from_polling_loc
     ballots_refreshed = 0
 
     # ballot_saved_manager = VoterBallotSavedManager()
-    # # When voters provide partial addresses, we copy their ballots from nearby polling locations
+    # # When voters provide partial addresses, we copy their ballots from nearby map points
     # # We want to find all voter_ballot_saved entries that came from polling_location_we_vote_id_source
     # polling_location_we_vote_id_source = ballot_returned_from_polling_location.polling_location_we_vote_id
     #
@@ -750,7 +750,7 @@ def refresh_voter_ballots_not_copied_from_polling_location(google_civic_election
     ballot_returned_manager = BallotReturnedManager()
     ballot_saved_manager = VoterBallotSavedManager()
 
-    # When we set up voter_ballot_saved entries by copying data from a polling location, if something
+    # When we set up voter_ballot_saved entries by copying data from a map point, if something
     # happens to the ballot_returned entry, we need to repair it
     retrieve_results = ballot_saved_manager.retrieve_voter_ballot_saved_list_for_election(
         google_civic_election_id, find_all_entries_for_election=True)
@@ -872,7 +872,7 @@ def repair_ballot_items_for_election(google_civic_election_id, refresh_from_goog
     # voter_ballots_copied_count = results['voter_ballots_copied']
     # voter_ballots_copied_count = 0
 
-    # Now check for VoterBallotSaved entries for voter ballots that were not copied from polling locations
+    # Now check for VoterBallotSaved entries for voter ballots that were not copied from map points
     #  so we can refresh the data
     # This tries to reach out to Google Civic
     retrieve_from_google_civic = False
@@ -1416,7 +1416,7 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
             return results
 
         # Most incoming addresses are just City, State Zip. 2018-08-27 We don't want to look those up from
-        # Ballotpedia -- we want to work with cached polling locations.
+        # Ballotpedia -- we want to work with cached map points.
         turn_off_direct_voter_ballot_retrieve = False  # Search for this variable elsewhere
         default_election_data_source_is_ballotpedia = True
         if turn_off_direct_voter_ballot_retrieve:

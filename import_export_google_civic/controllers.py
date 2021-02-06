@@ -376,7 +376,7 @@ def process_contest_office_from_structured_json(
             contest_office_id, contest_office_we_vote_id,
             contest_measure_id, contest_measure_we_vote_id, state_code)
 
-    # If this is a polling location, we want to save the ballot information for it so we can use it as reference
+    # If this is a map point, we want to save the ballot information for it so we can use it as reference
     #  for nearby voters (when we don't have their full address)
     if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id) \
             and positive_value_exists(contest_office_id):
@@ -658,7 +658,7 @@ def store_representatives_from_google_civic_api(one_ballot_json, voter_id=0, pol
     #             voter_id, voter_address_dict)
     #         # Note that neither 'success' nor 'status' are set here because updating the voter_address with normalized
     #         # values isn't critical to the success of storing the ballot for a voter
-    # # We don't store the normalized address information when we capture a ballot for a polling location
+    # # We don't store the normalized address information when we capture a ballot for a map point
     #
     # google_civic_election_id = one_ballot_json['election']['id']
     # ocd_division_id = one_ballot_json['election']['ocdDivisionId']
@@ -929,7 +929,7 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
                 voter_id, voter_address_dict)
             # Note that neither 'success' nor 'status' are set here because updating the voter_address with normalized
             # values isn't critical to the success of storing the ballot for a voter
-    # We don't store the normalized address information when we capture a ballot for a polling location
+    # We don't store the normalized address information when we capture a ballot for a map point
 
     google_civic_election_id = one_ballot_json['election']['id']
     ocd_division_id = one_ballot_json['election']['ocdDivisionId']

@@ -307,7 +307,7 @@ def create_batch_row_actions(
                         voter_id = batch_row_action_ballot_item.voter_id
 
             if batch_description_found and batch_header_map_found:
-                # Start by retrieving existing ballot items for this polling location
+                # Start by retrieving existing ballot items for this map point
                 if positive_value_exists(polling_location_we_vote_id) and \
                         positive_value_exists(batch_description.google_civic_election_id):
                     ballot_item_list_manager = BallotItemListManager()
@@ -2663,7 +2663,7 @@ def create_batch_row_action_ballot_item(batch_description,
 
     # NOTE: If you add incoming header names here, make sure to update BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
     # These are variables that might come from an import file, and are used to identify which
-    #  ballot item to add to a polling location
+    #  ballot item to add to a map point
     polling_location_we_vote_id = batch_manager.retrieve_value_from_batch_row(
         "polling_location_we_vote_id", batch_header_map, one_batch_row)
     contest_office_we_vote_id = batch_manager.retrieve_value_from_batch_row(

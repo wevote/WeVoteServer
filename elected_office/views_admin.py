@@ -486,7 +486,7 @@ def elected_office_update_view(request, elected_office_id=0, elected_office_we_v
     if not state_code:
         messages.add_message(request, messages.INFO, "Please select a state!")
     else:
-        # Get all the polling locations that are in the current state, and extract the poll addresses from google civic
+        # Get all the map points that are in the current state, and extract the poll addresses from google civic
         try:
             officials_names = {}
             results = PollingLocationManager().retrieve_polling_locations_in_city_or_state(state_code, None, None)
@@ -516,7 +516,7 @@ def elected_office_update_view(request, elected_office_id=0, elected_office_we_v
                             continue
                         elif code == 403:
                             elected_office_completion_status = "Processed " + str(i) + " of " + number_of_polls + \
-                                                               " polling locations for the state of " + state_code + \
+                                                               " map points for the state of " + state_code + \
                                                         ".  Ended in mid stream, since the API User Rate was exceeded"
                             break
                         else:
@@ -529,7 +529,7 @@ def elected_office_update_view(request, elected_office_id=0, elected_office_we_v
                             text_for_map_search
 
                         elected_office_completion_status = "Processed " + str(i) + " of " + number_of_polls + \
-                                                           " polling locations for the state of " + state_code
+                                                           " map points for the state of " + state_code
                         # print(elected_office_status_string)
 
                     divisions = one_polling_location_json['divisions']

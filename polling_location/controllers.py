@@ -232,10 +232,10 @@ def retrieve_polling_locations_data_from_xml(xml_file_location):
             city = address.find('city')
             city_text = city.text if city is not None else ''
             if city_text == 'A BALLOT FOR EACH ELECTION':
-                # We don't want to save this polling location
+                # We don't want to save this map point
                 continue
             if city_text == '0':
-                # We don't want to save this polling location
+                # We don't want to save this map point
                 continue
             state = address.find('state')
             state_text = state.text if state is not None else ''
@@ -274,10 +274,10 @@ def retrieve_polling_locations_data_from_xml(xml_file_location):
             city = address.find('city')
             city_text = city.text if city is not None else ''
             if city_text == 'A BALLOT FOR EACH ELECTION':
-                # We don't want to save this polling location
+                # We don't want to save this map point
                 continue
             if city_text == '0':
-                # We don't want to save this polling location
+                # We don't want to save this map point
                 continue
             state = address.find('state')
             state_text = state.text if state is not None else ''

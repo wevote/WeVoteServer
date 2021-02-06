@@ -1498,7 +1498,7 @@ def data_voter_statistics_view(request):
         # NOT VOTER SPECIFIC
 
         # ################################
-        # For this election, how many BallotReturned entries were saved for polling locations?
+        # For this election, how many BallotReturned entries were saved for map points?
         ballot_returned_query = BallotReturned.objects.all()
         ballot_returned_query = ballot_returned_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
@@ -1593,7 +1593,7 @@ def delete_test_data_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    # We leave in place the polling locations data and the election data from Google civic
+    # We leave in place the map points data and the election data from Google civic
 
     # Delete candidate data from exported file
 

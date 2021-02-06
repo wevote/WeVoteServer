@@ -340,8 +340,8 @@
     <br />
     Clicking this link schedules a Batch Process that does the following:
   <ul>
-    <li>Start with all of the polling locations in this state.</li>
-    <li>For each polling location, reach out to Ballotpedia "sample_ballot_elections" API with lat/long and retrieve the districts covered by one polling location.</li>
+    <li>Start with all of the map points in this state.</li>
+    <li>For each map point, reach out to Ballotpedia "sample_ballot_elections" API with lat/long and retrieve the districts covered by one map point.</li>
     <li>Reach out to Ballotpedia "sample_ballot_results" API with the districts and election date.</li>
     <li>Store the offices, candidates and measures returned.</li>
   </ul>
@@ -360,9 +360,9 @@
   <li>
     <a href="{% url 'election:election_all_ballots_retrieve' election.id %}?state_code={{ state_code }}" target="_blank">
         Google: Retrieve Ballot Data for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}</a><br />
-        Reach out to Google Civic API and ask for ballots from many polling locations so we can stitch
+        Reach out to Google Civic API and ask for ballots from many map points so we can stitch
         together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
-        polling locations to retrieve ballots from.
+        map points to retrieve ballots from.
   </li>
 {% else %}
   <li>

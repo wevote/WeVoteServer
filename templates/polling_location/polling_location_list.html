@@ -15,7 +15,7 @@
 
     <p>
       <a href="{% url 'polling_location:polling_location_edit' 0 %}?state_code={{ state_code }}">
-         Create polling location,
+         Create map point,
       </a>
 
       <a href="{% url 'electoral_district:electoral_district_list' %}?state_code={{ state_code }}">
@@ -24,10 +24,10 @@
 
     {% if state_code %}
         <a href="{% url 'polling_location:polling_locations_add_latitude_and_longitude' %}?state_code={{ state_code }}">
-            Add latitude/longitude to polling locations (up to 1000),
+            Add latitude/longitude to map points (up to 1000),
         </a>
         <a href="{% url 'polling_location:soft_delete_duplicates' %}?state_code={{ state_code }}">
-            Delete duplicate polling locations
+            Delete duplicate map points
         </a>
       [
         <a href="{% url 'polling_location:soft_delete_duplicates' %}?state_code={{ state_code }}&analyze_start=2000">
@@ -40,10 +40,10 @@
             8,000</a>
       ]
     {% else %}
-        (Choose state to add latitude/longitude to polling locations),
+        (Choose state to add latitude/longitude to map points),
     {% endif %}
         <a href="{% url 'polling_location:polling_locations_add_address_from_latitude_and_longitude' %}?state_code={{ state_code }}">
-            Add address to polling locations with only latitude/longitude (up to 1000),
+            Add address to map points with only latitude/longitude (up to 1000),
         </a>
 
         <a href="{% url 'polling_location:polling_location_statistics' %}?state_code={{ state_code }}" target="_blank">

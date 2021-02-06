@@ -49,7 +49,7 @@ def ballot_items_sync_out_view(request):  # ballotItemsSyncOut
 
     try:
         ballot_item_list = BallotItem.objects.all()
-        # We only want BallotItem values associated with polling locations
+        # We only want BallotItem values associated with map points
         ballot_item_list = ballot_item_list.exclude(
             Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
         if positive_value_exists(google_civic_election_id):
@@ -166,7 +166,7 @@ def ballot_returned_sync_out_view(request):  # ballotReturnedSyncOut
 
     try:
         ballot_returned_list = BallotReturned.objects.using('readonly').all()
-        # We only want BallotReturned values associated with polling locations
+        # We only want BallotReturned values associated with map points
         ballot_returned_list = ballot_returned_list.exclude(
             Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
         if positive_value_exists(google_civic_election_id):
@@ -593,7 +593,7 @@ def ballot_item_list_edit_process_view(request):
                     state_code = election.state_code
 
             # If this is a BallotReturned entry for a PollingLocation, retrieve it now.
-            # We cannot change a polling location once saved, so it ballot_returned has a polling_location_we_vote_id,
+            # We cannot change a map point once saved, so it ballot_returned has a polling_location_we_vote_id,
             # we will ignore the incoming polling_location_id
             if ballot_returned.polling_location_we_vote_id:
                 results = polling_location_manager.retrieve_polling_location_by_id(
@@ -612,7 +612,7 @@ def ballot_item_list_edit_process_view(request):
             ballot_returned.ballot_location_shortcut = ballot_location_shortcut
             ballot_returned.normalized_state = state_code
             # We don't want this to ever be empty. It be a custom address for one voter,
-            # or address form polling location.
+            # or address form map point.
             if positive_value_exists(text_for_map_search):
                 ballot_returned.text_for_map_search = text_for_map_search
 
@@ -655,7 +655,7 @@ def ballot_item_list_edit_process_view(request):
                 polling_location_found = False
 
             if positive_value_exists(polling_location_found):
-                # If this is from a polling location, override what was entered on the form
+                # If this is from a map point, override what was entered on the form
                 results = polling_location.get_text_for_map_search_results()
                 text_for_map_search = results['text_for_map_search']
 
@@ -906,7 +906,7 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):
             if ballot_returned_results['geocoder_quota_exceeded']:
                 break
 
-        # Write the lat/long data that we have back to the polling location table
+        # Write the lat/long data that we have back to the map point table
         ballot_returned_query = BallotReturned.objects.order_by('id')
         ballot_returned_query = ballot_returned_query.exclude(Q(latitude=None) | Q(latitude=0))  # Exclude empty entries
         ballot_returned_query = ballot_returned_query.exclude(Q(polling_location_we_vote_id=None) |

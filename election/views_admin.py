@@ -140,7 +140,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     """
     Reach out to Google and retrieve (for one election):
     1) Polling locations (so we can use those addresses to retrieve a representative set of ballots)
-    2) Cycle through a portion of those polling locations, enough that we are caching all of the possible ballot items
+    2) Cycle through a portion of those map points, enough that we are caching all of the possible ballot items
     :param request:
     :param election_local_id:
     :return:
@@ -169,8 +169,8 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
         messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. Election could not be found.')
         return HttpResponseRedirect(reverse('election:election_list', args=()))
 
-    # Check to see if we have polling location data related to the region(s) covered by this election
-    # We request the ballot data for each polling location as a way to build up our local data
+    # Check to see if we have map point data related to the region(s) covered by this election
+    # We request the ballot data for each map point as a way to build up our local data
     if not positive_value_exists(state_code):
         state_code = election_on_stage.get_election_state()
         # if not positive_value_exists(state_code):
@@ -180,7 +180,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
         polling_location_count_query = PollingLocation.objects.all()
         polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
         polling_location_count_query = polling_location_count_query.exclude(polling_location_deleted=True)
-        # If Google wasn't able to return ballot data in the past ignore that polling location
+        # If Google wasn't able to return ballot data in the past ignore that map point
         polling_location_count_query = polling_location_count_query.filter(
             google_response_address_not_found__isnull=True)
         polling_location_count = polling_location_count_query.count()
@@ -196,7 +196,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve ballot data for the {election_name}. '
-                             'No polling locations exist for the state \'{state}\'. '
+                             'No map points exist for the state \'{state}\'. '
                              'Data needed from VIP.'.format(
                                  election_name=election_on_stage.election_name,
                                  state=state_code))
@@ -205,7 +205,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     if polling_location_count == 0:
         messages.add_message(request, messages.ERROR,
                              'Could not retrieve ballot data for the {election_name}. '
-                             'No polling locations returned for the state \'{state}\'. '
+                             'No map points returned for the state \'{state}\'. '
                              '(error 2 - election_all_ballots_retrieve_view)'.format(
                                  election_name=election_on_stage.election_name,
                                  state=state_code))
@@ -218,11 +218,11 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     ballots_with_election_administration_data = 0
     ballots_refreshed = 0
     # We used to only retrieve up to 500 locations from each state, but we don't limit now
-    # # We retrieve 10% of the total polling locations, which should give us coverage of the entire election
+    # # We retrieve 10% of the total map points, which should give us coverage of the entire election
     # number_of_polling_locations_to_retrieve = int(.1 * polling_location_count)
     ballot_returned_manager = BallotReturnedManager()
     rate_limit_count = 0
-    # Step though our set of polling locations, until we find one that contains a ballot.  Some won't contain ballots
+    # Step though our set of map points, until we find one that contains a ballot.  Some won't contain ballots
     # due to data quality issues.
     for polling_location in polling_location_list:
         success = False
@@ -248,7 +248,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
                     #     refresh_ballot_results = refresh_voter_ballots_from_polling_location(
                     #         ballot_returned, google_civic_election_id)
                     #     ballots_refreshed += refresh_ballot_results['ballots_refreshed']
-                # NOTE: We don't support retrieving ballots for polling locations AND geocoding simultaneously
+                # NOTE: We don't support retrieving ballots for map points AND geocoding simultaneously
                 # if store_one_ballot_results['ballot_returned_found']:
                 #     ballot_returned = store_one_ballot_results['ballot_returned']
                 #     ballot_returned_results = \
@@ -335,7 +335,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
 @login_required
 def election_one_ballot_retrieve_view(request, election_local_id=0):
     """
-    Reach out to Google and retrieve ballot data (for one ballot, typically a polling location)
+    Reach out to Google and retrieve ballot data (for one ballot, typically a map point)
     :param request:
     :param election_local_id:
     :return:
@@ -381,8 +381,8 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
     except Exception as e:
         pass
 
-    # Check to see if we have polling location data related to the region(s) covered by this election
-    # We request the ballot data for each polling location as a way to build up our local data
+    # Check to see if we have map point data related to the region(s) covered by this election
+    # We request the ballot data for each map point as a way to build up our local data
     if not positive_value_exists(state_code) and positive_value_exists(election_local_id):
         state_code = election_on_stage.get_election_state()
         # if not positive_value_exists(state_code):
@@ -395,7 +395,7 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
                 we_vote_id__iexact=polling_location_we_vote_id)
         except PollingLocation.DoesNotExist:
             messages.add_message(request, messages.INFO,
-                                 'Could not retrieve ballot data for this polling location for {election_name}, '
+                                 'Could not retrieve ballot data for this map point for {election_name}, '
                                  'state: {state}. '.format(
                                      election_name=election_on_stage.election_name,
                                      state=state_code))
@@ -405,7 +405,7 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
                                         )
         except Exception as e:
             messages.add_message(request, messages.ERROR,
-                                 'Problem retrieving polling location '
+                                 'Problem retrieving map point '
                                  '"{polling_location_we_vote_id}" for {election_name}. '
                                  'state: {state}. '.format(
                                      election_name=election_on_stage.election_name,
@@ -462,7 +462,7 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
                 # elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
                 #     # Nothing else to be done
                 #     pass
-            # NOTE: We don't support retrieving ballots for polling locations AND geocoding simultaneously
+            # NOTE: We don't support retrieving ballots for map points AND geocoding simultaneously
             # if store_one_ballot_results['ballot_returned_found']:
             #     ballot_returned = store_one_ballot_results['ballot_returned']
             #     ballot_returned_results = \
