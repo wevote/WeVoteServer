@@ -4,7 +4,7 @@
 
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
 from ballot.models import CANDIDATE, MEASURE, OFFICE, BallotItemListManager
-from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
+from candidate.models import CandidateManager, CandidateListManager
 from friend.models import FriendManager
 from measure.models import ContestMeasureManager
 from django.http import HttpResponse
@@ -52,10 +52,10 @@ def positions_count_for_api(voter_device_id,
 
     show_positions_this_voter_follows = True
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
-        results = positions_count_for_candidate_campaign(voter_id,
-                                                         candidate_id, candidate_we_vote_id,
-                                                         stance_we_are_looking_for,
-                                                         show_positions_this_voter_follows)
+        results = positions_count_for_candidate(voter_id,
+                                                candidate_id, candidate_we_vote_id,
+                                                stance_we_are_looking_for,
+                                                show_positions_this_voter_follows)
         json_data = results['json_data']
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     elif positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):
@@ -76,8 +76,8 @@ def positions_count_for_api(voter_device_id,
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def positions_count_for_candidate_campaign(voter_id, candidate_id, candidate_we_vote_id, stance_we_are_looking_for,
-                                           show_positions_this_voter_follows=True):
+def positions_count_for_candidate(voter_id, candidate_id, candidate_we_vote_id, stance_we_are_looking_for,
+                                  show_positions_this_voter_follows=True):
     """
     We want to return a JSON file with the number of orgs, friends and public figures the voter follows who support
     this particular candidate's campaign
@@ -85,38 +85,38 @@ def positions_count_for_candidate_campaign(voter_id, candidate_id, candidate_we_
     # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the candidate object
     # so we make sure we have both of these values to return
     if positive_value_exists(candidate_id):
-        candidate_campaign_manager = CandidateCampaignManager()
-        results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(candidate_id)
-        if results['candidate_campaign_found']:
-            candidate_campaign = results['candidate_campaign']
-            candidate_we_vote_id = candidate_campaign.we_vote_id
+        candidate_manager = CandidateManager()
+        results = candidate_manager.retrieve_candidate_from_id(candidate_id)
+        if results['candidate_found']:
+            candidate = results['candidate']
+            candidate_we_vote_id = candidate.we_vote_id
     elif positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_manager = CandidateCampaignManager()
-        results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
-        if results['candidate_campaign_found']:
-            candidate_campaign = results['candidate_campaign']
-            candidate_id = candidate_campaign.id
+        candidate_manager = CandidateManager()
+        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+        if results['candidate_found']:
+            candidate = results['candidate']
+            candidate_id = candidate.id
 
     position_list_manager = PositionListManager()
     ############################
     # Retrieve public positions
     retrieve_public_positions_now = True  # The alternate is positions for friends-only
     most_recent_only = True
-    public_positions_list_for_candidate_campaign = \
-        position_list_manager.retrieve_all_positions_for_candidate_campaign(
+    public_positions_list_for_candidate = \
+        position_list_manager.retrieve_all_positions_for_candidate(
             retrieve_public_positions_now, candidate_id, candidate_we_vote_id,
             stance_we_are_looking_for, most_recent_only
         )
 
     organizations_followed_by_voter_by_id = []
-    if len(public_positions_list_for_candidate_campaign):
+    if len(public_positions_list_for_candidate):
         follow_organization_list_manager = FollowOrganizationList()
         organizations_followed_by_voter_by_id = \
             follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
 
     if show_positions_this_voter_follows:
         position_objects = position_list_manager.calculate_positions_followed_by_voter(
-            voter_id, public_positions_list_for_candidate_campaign, organizations_followed_by_voter_by_id)
+            voter_id, public_positions_list_for_candidate, organizations_followed_by_voter_by_id)
 
         ##################################
         # Now retrieve friend's positions
@@ -139,14 +139,14 @@ def positions_count_for_candidate_campaign(voter_id, candidate_id, candidate_we_
 
         # Add yourself as a friend so your opinions show up
         friends_we_vote_id_list.append(voter_we_vote_id)
-        friends_positions_list_for_candidate_campaign = \
-            position_list_manager.retrieve_all_positions_for_candidate_campaign(
+        friends_positions_list_for_candidate = \
+            position_list_manager.retrieve_all_positions_for_candidate(
                 retrieve_public_positions_now, candidate_id, candidate_we_vote_id,
                 stance_we_are_looking_for, most_recent_only,
                 friends_we_vote_id_list)
 
-        if len(friends_positions_list_for_candidate_campaign):
-            position_objects = friends_positions_list_for_candidate_campaign + position_objects
+        if len(friends_positions_list_for_candidate):
+            position_objects = friends_positions_list_for_candidate + position_objects
 
         positions_followed_count = len(position_objects)
 
@@ -164,7 +164,7 @@ def positions_count_for_candidate_campaign(voter_id, candidate_id, candidate_we_
         return results
     else:
         positions_not_followed = position_list_manager.calculate_positions_not_followed_by_voter(
-            public_positions_list_for_candidate_campaign, organizations_followed_by_voter_by_id)
+            public_positions_list_for_candidate, organizations_followed_by_voter_by_id)
         positions_not_followed_count = len(positions_not_followed)
         json_data = {
             'status': 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED_COUNT_FOR_CANDIDATE',
@@ -343,7 +343,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
         return json_data
 
     position_list_manager = PositionListManager()
-    candidate_list_object = CandidateCampaignListManager()
+    candidate_list_object = CandidateListManager()
 
     follow_organization_list_manager = FollowOrganizationList()
     return_we_vote_id = True
@@ -408,7 +408,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
 
                     # Public Positions
                     public_support_count_for_one_ballot_item = \
-                        position_list_manager.fetch_positions_count_for_candidate_campaign(
+                        position_list_manager.fetch_positions_count_for_candidate(
                             0,
                             candidate.we_vote_id,
                             SUPPORT,
@@ -416,7 +416,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
                             organizations_followed_we_vote_id_list=organizations_followed_by_voter_by_we_vote_id
                         )
                     public_oppose_count_for_one_ballot_item = \
-                        position_list_manager.fetch_positions_count_for_candidate_campaign(
+                        position_list_manager.fetch_positions_count_for_candidate(
                             0,
                             candidate.we_vote_id,
                             OPPOSE,
@@ -426,7 +426,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
 
                     # Friend's-only Positions
                     friends_only_support_count_for_one_ballot_item = \
-                        position_list_manager.fetch_positions_count_for_candidate_campaign(
+                        position_list_manager.fetch_positions_count_for_candidate(
                             0,
                             candidate.we_vote_id,
                             SUPPORT,
@@ -434,7 +434,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
                             friends_we_vote_id_list=friends_we_vote_id_list
                         )
                     friends_only_oppose_count_for_one_ballot_item = \
-                        position_list_manager.fetch_positions_count_for_candidate_campaign(
+                        position_list_manager.fetch_positions_count_for_candidate(
                             0,
                             candidate.we_vote_id,
                             OPPOSE,
@@ -582,11 +582,11 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
         retrieve_public_positions_now = True  # The alternate is positions for friends-only
         most_recent_only = True
         public_support_positions_list_for_one_ballot_item = \
-            position_list_manager.retrieve_all_positions_for_candidate_campaign(
+            position_list_manager.retrieve_all_positions_for_candidate(
                 retrieve_public_positions_now, 0, ballot_item_we_vote_id,
                 SUPPORT, most_recent_only)
         public_oppose_positions_list_for_one_ballot_item = \
-            position_list_manager.retrieve_all_positions_for_candidate_campaign(
+            position_list_manager.retrieve_all_positions_for_candidate(
                 retrieve_public_positions_now, 0, ballot_item_we_vote_id,
                 OPPOSE, most_recent_only)
 
@@ -620,11 +620,11 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
         retrieve_public_positions_now = False  # Return friends-only positions counts
         most_recent_only = True
         friends_only_support_positions_list_for_one_ballot_item = \
-            position_list_manager.retrieve_all_positions_for_candidate_campaign(
+            position_list_manager.retrieve_all_positions_for_candidate(
                 retrieve_public_positions_now, 0, ballot_item_we_vote_id,
                 SUPPORT, most_recent_only, friends_we_vote_id_list=friends_we_vote_id_list)
         friends_only_oppose_positions_list_for_one_ballot_item = \
-            position_list_manager.retrieve_all_positions_for_candidate_campaign(
+            position_list_manager.retrieve_all_positions_for_candidate(
                 retrieve_public_positions_now, 0, ballot_item_we_vote_id,
                 OPPOSE, most_recent_only, friends_we_vote_id_list=friends_we_vote_id_list)
 
@@ -836,8 +836,8 @@ def finalize_support_and_oppose_positions_count(voter_id, show_positions_this_vo
 def positions_public_count_for_api(candidate_id, candidate_we_vote_id, measure_id, measure_we_vote_id,
                                    stance_we_are_looking_for):
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
-        results = positions_public_count_for_candidate_campaign(candidate_id, candidate_we_vote_id,
-                                                                stance_we_are_looking_for)
+        results = positions_public_count_for_candidate(candidate_id, candidate_we_vote_id,
+                                                       stance_we_are_looking_for)
         json_data = results['json_data']
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     elif positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):
@@ -855,7 +855,7 @@ def positions_public_count_for_api(candidate_id, candidate_we_vote_id, measure_i
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def positions_public_count_for_candidate_campaign(candidate_id, candidate_we_vote_id, stance_we_are_looking_for):
+def positions_public_count_for_candidate(candidate_id, candidate_we_vote_id, stance_we_are_looking_for):
     """
     We want to return a JSON file with the number of orgs and public figures who support
     this particular candidate's campaign
@@ -864,24 +864,24 @@ def positions_public_count_for_candidate_campaign(candidate_id, candidate_we_vot
     #  application layer
 
     position_list_manager = PositionListManager()
-    all_positions_count_for_candidate_campaign = \
-        position_list_manager.fetch_public_positions_count_for_candidate_campaign(
+    all_positions_count_for_candidate = \
+        position_list_manager.fetch_public_positions_count_for_candidate(
             candidate_id,
             candidate_we_vote_id,
             stance_we_are_looking_for)
 
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
         # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the value we don't have
         if positive_value_exists(candidate_id):
-            candidate_we_vote_id = candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(candidate_id)
+            candidate_we_vote_id = candidate_manager.fetch_candidate_we_vote_id_from_id(candidate_id)
         elif positive_value_exists(candidate_we_vote_id):
-            candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+            candidate_id = candidate_manager.fetch_candidate_id_from_we_vote_id(candidate_we_vote_id)
 
     json_data = {
         'status':                   'SUCCESSFUL_RETRIEVE_OF_PUBLIC_POSITION_COUNT_RE_CANDIDATE',
         'success':                  True,
-        'count':                    all_positions_count_for_candidate_campaign,
+        'count':                    all_positions_count_for_candidate,
         'ballot_item_id':           convert_to_int(candidate_id),
         'ballot_item_we_vote_id':   candidate_we_vote_id,
         'kind_of_ballot_item':      CANDIDATE,
@@ -957,16 +957,16 @@ def voter_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # 
 
     position_manager = PositionManager()
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
         # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the value we don't have
         if positive_value_exists(candidate_id):
-            candidate_we_vote_id = candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(candidate_id)
+            candidate_we_vote_id = candidate_manager.fetch_candidate_we_vote_id_from_id(candidate_id)
         elif positive_value_exists(candidate_we_vote_id):
-            candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+            candidate_id = candidate_manager.fetch_candidate_id_from_we_vote_id(candidate_we_vote_id)
 
-        results = position_manager.toggle_on_voter_oppose_for_candidate_campaign(voter_id, candidate_id,
-                                                                                 user_agent_string, user_agent_object)
-        # toggle_off_voter_support_for_candidate_campaign
+        results = position_manager.toggle_on_voter_oppose_for_candidate(voter_id, candidate_id,
+                                                                        user_agent_string, user_agent_object)
+        # toggle_off_voter_support_for_candidate
         status = "OPPOSING_CANDIDATE " + results['status']
         success = results['success']
 
@@ -1045,14 +1045,14 @@ def voter_stop_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id
 
     position_manager = PositionManager()
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
         # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the value we don't have
         if positive_value_exists(candidate_id):
-            candidate_we_vote_id = candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(candidate_id)
+            candidate_we_vote_id = candidate_manager.fetch_candidate_we_vote_id_from_id(candidate_id)
         elif positive_value_exists(candidate_we_vote_id):
-            candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+            candidate_id = candidate_manager.fetch_candidate_id_from_we_vote_id(candidate_we_vote_id)
 
-        results = position_manager.toggle_off_voter_oppose_for_candidate_campaign(voter_id, candidate_id,
+        results = position_manager.toggle_off_voter_oppose_for_candidate(voter_id, candidate_id,
                                                                                   user_agent_string, user_agent_object)
         status = "STOP_OPPOSING_CANDIDATE " + results['status']
         success = results['success']
@@ -1132,15 +1132,15 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_
 
     position_manager = PositionManager()
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
         # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the value we don't have
         if positive_value_exists(candidate_id):
-            candidate_we_vote_id = candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(candidate_id)
+            candidate_we_vote_id = candidate_manager.fetch_candidate_we_vote_id_from_id(candidate_id)
         elif positive_value_exists(candidate_we_vote_id):
-            candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+            candidate_id = candidate_manager.fetch_candidate_id_from_we_vote_id(candidate_we_vote_id)
 
-        results = position_manager.toggle_off_voter_support_for_candidate_campaign(voter_id, candidate_id,
-                                                                                   user_agent_string, user_agent_object)
+        results = position_manager.toggle_off_voter_support_for_candidate(voter_id, candidate_id,
+                                                                          user_agent_string, user_agent_object)
         status = "STOP_SUPPORTING_CANDIDATE " + results['status']
         success = results['success']
 
@@ -1232,15 +1232,15 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
 
     position_manager = PositionManager()
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
         # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the value we don't have
         if positive_value_exists(candidate_id):
-            candidate_we_vote_id = candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(candidate_id)
+            candidate_we_vote_id = candidate_manager.fetch_candidate_we_vote_id_from_id(candidate_id)
         elif positive_value_exists(candidate_we_vote_id):
-            candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+            candidate_id = candidate_manager.fetch_candidate_id_from_we_vote_id(candidate_we_vote_id)
 
-        results = position_manager.toggle_on_voter_support_for_candidate_campaign(voter_id, candidate_id,
-                                                                                  user_agent_string, user_agent_object)
+        results = position_manager.toggle_on_voter_support_for_candidate(voter_id, candidate_id,
+                                                                         user_agent_string, user_agent_object)
         status += "SUPPORTING_CANDIDATE " + results['status'] + " "
         success = results['success']
 

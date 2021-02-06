@@ -119,7 +119,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
                 success=json_data10['success'], organization_count=json_data10['organization_count']))
 
         #######################################
-        # Create candidate_campaign
+        # Create candidate
 
         #######################################
         # Create position where organization is supporting candidate

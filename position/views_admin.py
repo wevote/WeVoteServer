@@ -9,7 +9,7 @@ from .controllers import generate_position_sorting_dates_for_election, positions
     refresh_positions_with_contest_measure_details_for_election
 from .models import ANY_STANCE, PositionEntered, PositionForFriends, PositionListManager, PERCENT_RATING
 from admin_tools.views import redirect_to_sign_in_page
-from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
+from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
 from config.base import get_environment_variable
 from django.urls import reverse
 from django.contrib import messages
@@ -169,7 +169,7 @@ def update_position_list_with_speaker_type(position_list):
 
 
 def update_position_list_with_contest_office_info(position_list):
-    candidate_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     candidate_dict = {}
     politician_manager = PoliticianManager()
     politician_dict = {}
@@ -188,10 +188,10 @@ def update_position_list_with_contest_office_info(position_list):
             politician_we_vote_id = candidate.politician_we_vote_id
             politician_id = candidate.politician_id
         else:
-            results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(
                 one_position.candidate_campaign_we_vote_id)
-            if results['candidate_campaign_found']:
-                candidate = results['candidate_campaign']
+            if results['candidate_found']:
+                candidate = results['candidate']
                 candidate_dict[one_position.candidate_campaign_we_vote_id] = candidate
                 candidate_campaign_id = candidate.id
                 contest_office_we_vote_id = candidate.contest_office_we_vote_id
@@ -255,7 +255,7 @@ def position_list_view(request):
 
     position_search = request.GET.get('position_search', '')
 
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     election_manager = ElectionManager()
     google_civic_election_id_list_for_dropdown = []
     if positive_value_exists(show_this_year_of_elections):

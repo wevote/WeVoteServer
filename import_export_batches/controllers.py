@@ -15,7 +15,7 @@ from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, Ba
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
 from ballot.models import BallotItem, BallotItemListManager, BallotItemManager, BallotReturnedManager
 from candidate.controllers import retrieve_next_or_most_recent_office_for_candidate
-from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
+from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
 # from django.db import transaction
 from django.db.models import Q
 from django.utils.timezone import now
@@ -1270,9 +1270,9 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         # we haven't found contest_office yet. Look up for existing contest_office using candidate_name & state_code
         if keep_looking_for_duplicates:
             if positive_value_exists(candidate_name) and not positive_value_exists(ballotpedia_race_id):
-                candidate_campaign_list_manager = CandidateCampaignListManager()
+                candidate_list_manager = CandidateListManager()
                 google_civic_election_id_list = [google_civic_election_id]
-                matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
+                matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
                     google_civic_election_id_list, state_code, '', candidate_name)
 
                 if matching_results['candidate_found']:
@@ -2022,7 +2022,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     # These three parameters are needed to look up in ElectedOffice table for a match
     keep_looking_for_duplicates = True
     kind_of_action = IMPORT_TO_BE_DETERMINED
-    candidate_campaign_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     if positive_value_exists(candidate_we_vote_id):
         # If here, then we are updating an existing known record
         keep_looking_for_duplicates = False
@@ -2034,11 +2034,11 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         candidate_name = ballotpedia_candidate_name
 
     if keep_looking_for_duplicates and positive_value_exists(ballotpedia_candidate_id):
-        candidate_campaign_manager = CandidateCampaignManager()
-        matching_results = candidate_campaign_manager.retrieve_candidate_campaign_from_ballotpedia_candidate_id(
+        candidate_manager = CandidateManager()
+        matching_results = candidate_manager.retrieve_candidate_from_ballotpedia_candidate_id(
             ballotpedia_candidate_id, read_only=False)
-        if matching_results['candidate_campaign_found']:
-            candidate = matching_results['candidate_campaign']
+        if matching_results['candidate_found']:
+            candidate = matching_results['candidate']
             candidate_found = True
             keep_looking_for_duplicates = False
             candidate_we_vote_id = candidate.we_vote_id
@@ -2054,7 +2054,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     # We don't want to use this routine if we have a ballotpedia_candidate_id
     if keep_looking_for_duplicates and not positive_value_exists(ballotpedia_candidate_id):
         google_civic_election_id_list = [google_civic_election_id]
-        matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
+        matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name)
 
         if matching_results['candidate_found']:
@@ -2393,12 +2393,12 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     # NEXT: figure out what candidate/office the endorsement is for
     contest_office_manager = ContestOfficeManager()
     if positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_manager = CandidateCampaignManager()
-        candidate_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+        candidate_manager = CandidateManager()
+        candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(
             candidate_we_vote_id)
 
-        if candidate_results['candidate_campaign_found']:
-            candidate = candidate_results['candidate_campaign']
+        if candidate_results['candidate_found']:
+            candidate = candidate_results['candidate']
             candidate_found = True
             candidate_we_vote_id = candidate.we_vote_id
             candidate_id = candidate.id
@@ -2428,9 +2428,9 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         else:
             status += measure_results['status']
     elif positive_value_exists(candidate_twitter_handle) or positive_value_exists(candidate_name):
-        candidate_campaign_list_manager = CandidateCampaignListManager()
+        candidate_list_manager = CandidateListManager()
         google_civic_election_id_list = [google_civic_election_id]
-        matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
+        matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name)
 
         if matching_results['candidate_found']:
@@ -2762,10 +2762,10 @@ def create_batch_row_action_ballot_item(batch_description,
 
     if keep_looking_for_duplicates and \
             positive_value_exists(candidate_twitter_handle) or positive_value_exists(candidate_name):
-        candidate_campaign_list_manager = CandidateCampaignListManager()
+        candidate_list_manager = CandidateListManager()
         google_civic_election_id_list = [google_civic_election_id]
         # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
-        matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
+        matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name, read_only=False)
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
@@ -4067,7 +4067,7 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
         if positive_value_exists(one_batch_row_action.state_code):
             update_values['state_code'] = one_batch_row_action.state_code
 
-        candidate_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
         if create_entry_flag:
             # These parameters are required to create a CandidateCampaign entry
             if positive_value_exists(one_batch_row_action.candidate_name) \

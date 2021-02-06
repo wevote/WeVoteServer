@@ -31,11 +31,11 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
     <input type="hidden" name="position_we_vote_id" value="{% if organization_position %}{{ organization_position.we_vote_id }}{% endif %}">
 
 
-{# Candidate Campaign #}
+{# CandidateCampaign #}
 {% if is_in_edit_mode %}
     {# EDIT EXISTING: There is no need to display anything here #}
     {% if organization_position.candidate_campaign and organization_position.candidate_campaign.id %}
-      <input type="hidden" name="candidate_campaign_id" value="{{ organization_position.candidate_campaign.id }}">
+      <input type="hidden" name="candidate_id" value="{{ organization_position.candidate_campaign.id }}">
     {% elif organization_position.contest_measure and organization_position.contest_measure.id %}
       <input type="hidden" name="contest_measure_id" value="{{ organization_position.contest_measure.id }}">
     {% endif %}
@@ -203,7 +203,7 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
     </label>
     <div class="col-sm-9">
         <strong>{{ organization_position.we_vote_id }}</strong>,
-        <span class="u-no-break">candidate_campaign_we_vote_id: <strong>{{ organization_position.candidate_campaign_we_vote_id }}</strong>,</span>
+        <span class="u-no-break">candidate_we_vote_id: <strong>{{ organization_position.candidate_campaign_we_vote_id }}</strong>,</span>
         <span class="u-no-break">politician_we_vote_id: <strong>{{ organization_position.politician_we_vote_id }}</strong>,</span>
         <span class="u-no-break">contest_office_we_vote_id: <strong>{{ organization_position.contest_office_we_vote_id }}</strong>,</span>
         <span class="u-no-break">contest_measure_we_vote_id: <strong>{{ organization_position.contest_measure_we_vote_id }}</strong>,</span>

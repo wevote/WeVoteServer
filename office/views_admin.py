@@ -11,7 +11,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from ballot.controllers import move_ballot_items_to_another_office
 from bookmark.models import BookmarkItemList
 from candidate.controllers import move_candidates_to_another_office
-from candidate.models import CandidateCampaign, CandidateCampaignListManager, fetch_candidate_count_for_office
+from candidate.models import CandidateCampaign, CandidateListManager, fetch_candidate_count_for_office
 from config.base import get_environment_variable
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -688,7 +688,7 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
     # Cache the full names of candidates for the root contest_office so we can check to see if possible duplicate
     # offices share the same candidates
     root_office_candidate_last_names = ""
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_office_list(
         contest_office_we_vote_id_list=[contest_office_we_vote_id])
     candidate_we_vote_id_list = results['candidate_we_vote_id_list']
@@ -700,9 +700,9 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
         support_total = 0
         for one_candidate in candidate_list:
             # Find the count of Voters that support this candidate (Endorsers are not included in this)
-            one_candidate.support_count = position_list_manager.fetch_voter_positions_count_for_candidate_campaign(
+            one_candidate.support_count = position_list_manager.fetch_voter_positions_count_for_candidate(
                 one_candidate.id, "", SUPPORT)
-            one_candidate.oppose_count = position_list_manager.fetch_voter_positions_count_for_candidate_campaign(
+            one_candidate.oppose_count = position_list_manager.fetch_voter_positions_count_for_candidate(
                 one_candidate.id, "", OPPOSE)
             support_total += one_candidate.support_count
             root_office_candidate_last_names += " " + one_candidate.extract_last_name()
@@ -765,7 +765,7 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
             office_search_results_list = results['contest_office_list']
 
     # Show the candidates under each office
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     office_search_results_list_modified = []
     for one_office in office_search_results_list:
         if positive_value_exists(one_office.we_vote_id):
@@ -1081,7 +1081,7 @@ def render_contest_office_merge_form(
     contest_office_option2_for_template.bookmarks_count = contest_office_option2_bookmark_count
 
     # Show the candidates under each office
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     if positive_value_exists(contest_office_option1_for_template.we_vote_id):
         contest_office_option1_results = candidate_list_manager.retrieve_all_candidates_for_office(
             office_we_vote_id=contest_office_option1_for_template.we_vote_id, read_only=True)

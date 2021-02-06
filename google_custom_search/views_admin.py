@@ -5,7 +5,7 @@
 from .controllers import delete_possible_google_search_users, retrieve_possible_google_search_users, \
     bulk_possible_google_search_users_do_not_match, possible_google_search_user_do_not_match
 from admin_tools.views import redirect_to_sign_in_page
-from candidate.models import CandidateCampaignManager, CandidateCampaign
+from candidate.models import CandidateManager, CandidateCampaign
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
@@ -20,26 +20,26 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 @login_required
-def delete_possible_google_search_users_view(request, candidate_campaign_we_vote_id):
+def delete_possible_google_search_users_view(request, candidate_we_vote_id):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    candidate_manager = CandidateCampaignManager()
-    results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_campaign_we_vote_id)
+    candidate_manager = CandidateManager()
+    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
 
-    if not results['candidate_campaign_found']:
+    if not results['candidate_found']:
         messages.add_message(request, messages.INFO, results['status'])
         return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id',
-                                            args=(candidate_campaign_we_vote_id,)))
+                                            args=(candidate_we_vote_id,)))
 
-    candidate_campaign = results['candidate_campaign']
+    candidate = results['candidate']
 
-    results = delete_possible_google_search_users(candidate_campaign)
+    results = delete_possible_google_search_users(candidate)
     messages.add_message(request, messages.INFO, 'Possibilities deleted.')
 
-    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_campaign_we_vote_id,)))
+    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_we_vote_id,)))
 
 
 @login_required
@@ -49,60 +49,60 @@ def possible_google_search_user_do_not_match_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    candidate_campaign_we_vote_id = request.GET.get('candidate_we_vote_id', '')
+    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
     item_link = request.GET.get('item_link', '')
 
-    results = possible_google_search_user_do_not_match(candidate_campaign_we_vote_id, item_link)
+    results = possible_google_search_user_do_not_match(candidate_we_vote_id, item_link)
     messages.add_message(request, messages.INFO, 'Candidate possibility updated with no match.')
 
-    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_campaign_we_vote_id,)))
+    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_we_vote_id,)))
 
 
 @login_required
-def bulk_possible_google_search_users_do_not_match_view(request, candidate_campaign_we_vote_id):
+def bulk_possible_google_search_users_do_not_match_view(request, candidate_we_vote_id):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    candidate_manager = CandidateCampaignManager()
-    results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_campaign_we_vote_id)
+    candidate_manager = CandidateManager()
+    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
 
-    if not results['candidate_campaign_found']:
+    if not results['candidate_found']:
         messages.add_message(request, messages.INFO, results['status'])
         return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id',
-                                            args=(candidate_campaign_we_vote_id,)))
+                                            args=(candidate_we_vote_id,)))
 
-    candidate_campaign = results['candidate_campaign']
+    candidate = results['candidate']
 
-    results = bulk_possible_google_search_users_do_not_match(candidate_campaign)
+    results = bulk_possible_google_search_users_do_not_match(candidate)
     messages.add_message(request, messages.INFO, 'Candidate possibilities updated with no match.')
 
-    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_campaign_we_vote_id,)))
+    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_we_vote_id,)))
 
 
 @login_required
-def retrieve_possible_google_search_users_view(request, candidate_campaign_we_vote_id):
+def retrieve_possible_google_search_users_view(request, candidate_we_vote_id):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
     voter_device_id = get_voter_api_device_id(request)
-    candidate_manager = CandidateCampaignManager()
-    results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_campaign_we_vote_id)
+    candidate_manager = CandidateManager()
+    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
 
-    if not results['candidate_campaign_found']:
+    if not results['candidate_found']:
         messages.add_message(request, messages.INFO, results['status'])
         return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id',
-                                            args=(candidate_campaign_we_vote_id,)))
+                                            args=(candidate_we_vote_id,)))
 
-    candidate_campaign = results['candidate_campaign']
+    candidate = results['candidate']
 
-    results = retrieve_possible_google_search_users(candidate_campaign, voter_device_id)
+    results = retrieve_possible_google_search_users(candidate, voter_device_id)
     messages.add_message(request, messages.INFO, 'Number of possibilities found: ' + results['num_of_possibilities'])
 
-    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_campaign_we_vote_id,)))
+    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_we_vote_id,)))
 
 
 @login_required

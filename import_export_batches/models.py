@@ -5749,7 +5749,7 @@ class BatchRowActionCandidate(models.Model):
 
     # Fields from Candidate
     candidate_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id of this candidate campaign", max_length=255, default=None, null=True,
+        verbose_name="we vote permanent id of this candidate", max_length=255, default=None, null=True,
         blank=True)
     maplight_id = models.CharField(
         verbose_name="maplight candidate id", max_length=255, default=None, null=True, blank=True)
@@ -5798,13 +5798,13 @@ class BatchRowActionCandidate(models.Model):
     state_code = models.CharField(verbose_name="state this candidate serves", max_length=2, null=True, blank=True)
     # The URL for the candidate's campaign web site.
     candidate_url = models.URLField(
-        verbose_name='website url of candidate campaign', max_length=255, blank=True, null=True)
+        verbose_name='website url of candidate', max_length=255, blank=True, null=True)
     candidate_contact_form_url = models.URLField(
         verbose_name='website url of candidate contact form', max_length=255, blank=True, null=True)
     facebook_url = models.URLField(
-        verbose_name='facebook url of candidate campaign', max_length=255, blank=True, null=True)
+        verbose_name='facebook url of candidate', max_length=255, blank=True, null=True)
 
-    twitter_url = models.URLField(verbose_name='twitter url of candidate campaign', blank=True, null=True)
+    twitter_url = models.URLField(verbose_name='twitter url of candidate', blank=True, null=True)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
     candidate_twitter_handle = models.CharField(
         verbose_name='candidate twitter screen_name', max_length=255, null=True, unique=False)
@@ -5822,12 +5822,12 @@ class BatchRowActionCandidate(models.Model):
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
 
-    google_plus_url = models.URLField(verbose_name='google plus url of candidate campaign', blank=True, null=True)
-    youtube_url = models.URLField(verbose_name='youtube url of candidate campaign', blank=True, null=True)
+    google_plus_url = models.URLField(verbose_name='google plus url of candidate', blank=True, null=True)
+    youtube_url = models.URLField(verbose_name='youtube url of candidate', blank=True, null=True)
     # The email address for the candidate's campaign.
-    candidate_email = models.CharField(verbose_name="candidate campaign email", max_length=255, null=True, blank=True)
+    candidate_email = models.CharField(verbose_name="candidate email", max_length=255, null=True, blank=True)
     # The voice phone number for the candidate's campaign office.
-    candidate_phone = models.CharField(verbose_name="candidate campaign phone", max_length=255, null=True, blank=True)
+    candidate_phone = models.CharField(verbose_name="candidate phone", max_length=255, null=True, blank=True)
 
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
@@ -6083,7 +6083,7 @@ class BatchRowActionPosition(models.Model):
     tweet_source_id = models.BigIntegerField(null=True, blank=True)
 
     # This is the office that the position refers to.
-    #  Either contest_measure is filled, contest_office OR candidate_campaign, but not all three
+    #  Either contest_measure is filled, contest_office OR candidate, but not all three
     contest_office_id = models.BigIntegerField(verbose_name='id of contest_office', null=True, blank=True)
     contest_office_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the contest_office", max_length=255, null=True, blank=True, unique=False)
@@ -6091,10 +6091,10 @@ class BatchRowActionPosition(models.Model):
     race_office_level = models.CharField(verbose_name="race office level", max_length=255, null=True, blank=True)
 
     # This is the candidate/politician that the position refers to.
-    #  Either candidate_campaign is filled, contest_office OR contest_measure, but not all three
-    candidate_campaign_id = models.BigIntegerField(verbose_name='id of candidate_campaign', null=True, blank=True)
+    #  Either candidate is filled, contest_office OR contest_measure, but not all three
+    candidate_campaign_id = models.BigIntegerField(verbose_name='id of candidate', null=True, blank=True)
     candidate_campaign_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id for the candidate_campaign", max_length=255, null=True,
+        verbose_name="we vote permanent id for the candidate", max_length=255, null=True,
         blank=True, unique=False)
     # The candidate's name as passed over by Google Civic. We save this so we can match to this candidate if an import
     # doesn't include a we_vote_id we recognize.
@@ -6112,7 +6112,7 @@ class BatchRowActionPosition(models.Model):
     political_party = models.CharField(verbose_name="political party", max_length=255, null=True)
 
     # This is the measure/initiative/proposition that the position refers to.
-    #  Either contest_measure is filled, contest_office OR candidate_campaign, but not all three
+    #  Either contest_measure is filled, contest_office OR candidate, but not all three
     contest_measure_id = models.BigIntegerField(verbose_name='id of contest_measure', null=True, blank=True)
     contest_measure_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the contest_measure", max_length=255, null=True,

@@ -11,7 +11,7 @@ import urllib.request
 import wevote_functions.admin
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
 from candidate.controllers import refresh_candidate_data_from_master_tables
-from candidate.models import CandidateCampaign, CandidateCampaignManager, CandidateCampaignListManager
+from candidate.models import CandidateCampaign, CandidateManager, CandidateListManager
 from config.base import get_environment_variable
 from datetime import timedelta
 from django.db.models import Q
@@ -89,10 +89,10 @@ class GetOutOfLoopLocal(Exception):
 def analyze_twitter_search_results(
         search_results=[],
         candidate_name={},
-        candidate_campaign=None,
+        candidate=None,
         possible_twitter_handles_list=[]):
-    search_term = candidate_campaign.candidate_name
-    state_code = candidate_campaign.state_code
+    search_term = candidate.candidate_name
+    state_code = candidate.state_code
     state_full_name = convert_state_code_to_state_text(state_code)
     search_results_length = 0
     if search_results and len(search_results) > 0:
@@ -152,13 +152,13 @@ def analyze_twitter_search_results(
             likelihood_score -= 30
 
         # Check if candidate's party is in description
-        political_party = candidate_campaign.political_party_display()
+        political_party = candidate.political_party_display()
         if one_result.description and positive_value_exists(political_party) and \
                 political_party in one_result.description:
             likelihood_score += 20
 
         # Check (each word individually) if office name is in description
-        office_name = candidate_campaign.contest_office_name
+        office_name = candidate.contest_office_name
         if positive_value_exists(office_name) and one_result.description:
             office_name = office_name.split()
             office_found_in_description = False
@@ -223,7 +223,7 @@ def analyze_twitter_search_results(
 
 
 def fetch_number_of_candidates_needing_twitter_search():
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     election_manager = ElectionManager()
     status = ''
     # Run Twitter account search and analysis on candidates without a linked or possible Twitter account
@@ -304,7 +304,7 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
         state_code = ""
         candidate_name = ""
 
-        candidate_list_manager = CandidateCampaignListManager()
+        candidate_list_manager = CandidateListManager()
         google_civic_election_id_list = [google_civic_election_id_voter_is_watching]
         candidate_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id_list, state_code, twitter_handle, candidate_name)
@@ -397,11 +397,11 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
     return results
 
 
-def delete_possible_twitter_handles(candidate_campaign):
+def delete_possible_twitter_handles(candidate):
     status = ""
     twitter_user_manager = TwitterUserManager()
 
-    if not candidate_campaign:
+    if not candidate:
         status += "DELETE_POSSIBLE_TWITTER_HANDLES-CANDIDATE_MISSING "
         results = {
             'success':                  False,
@@ -409,7 +409,7 @@ def delete_possible_twitter_handles(candidate_campaign):
         }
         return results
 
-    results = twitter_user_manager.delete_twitter_link_possibilities(candidate_campaign.we_vote_id)
+    results = twitter_user_manager.delete_twitter_link_possibilities(candidate.we_vote_id)
     status += results['status']
 
     results = {
@@ -420,14 +420,14 @@ def delete_possible_twitter_handles(candidate_campaign):
     return results
 
 
-def refresh_twitter_candidate_details(candidate_campaign):
+def refresh_twitter_candidate_details(candidate):
     status = ""
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     politician_manager = PoliticianManager()
     twitter_user_manager = TwitterUserManager()
     we_vote_image_manager = WeVoteImageManager()
 
-    if not candidate_campaign:
+    if not candidate:
         status += "TWITTER_CANDIDATE_DETAILS_NOT_RETRIEVED-CANDIDATE_MISSING "
         results = {
             'success':                  False,
@@ -435,10 +435,10 @@ def refresh_twitter_candidate_details(candidate_campaign):
         }
         return results
 
-    if candidate_campaign.candidate_twitter_handle:
+    if candidate.candidate_twitter_handle:
         status += "TWITTER_CANDIDATE_DETAILS-REACHING_OUT_TO_TWITTER "
         twitter_user_id = 0
-        results = retrieve_twitter_user_info(twitter_user_id, candidate_campaign.candidate_twitter_handle)
+        results = retrieve_twitter_user_info(twitter_user_id, candidate.candidate_twitter_handle)
 
         if results['success']:
             status += "TWITTER_CANDIDATE_DETAILS_RETRIEVED_FROM_TWITTER "
@@ -451,9 +451,9 @@ def refresh_twitter_candidate_details(candidate_campaign):
             twitter_profile_banner_url_https = results['twitter_json']['profile_banner_url'] \
                 if 'profile_banner_url' in results['twitter_json'] else None
             cache_results = cache_master_and_resized_image(
-                candidate_id=candidate_campaign.id, candidate_we_vote_id=candidate_campaign.we_vote_id,
-                twitter_id=candidate_campaign.twitter_user_id,
-                twitter_screen_name=candidate_campaign.candidate_twitter_handle,
+                candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+                twitter_id=candidate.twitter_user_id,
+                twitter_screen_name=candidate.candidate_twitter_handle,
                 twitter_profile_image_url_https=twitter_profile_image_url_https,
                 twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
                 twitter_profile_banner_url_https=twitter_profile_banner_url_https, image_source=TWITTER)
@@ -465,24 +465,24 @@ def refresh_twitter_candidate_details(candidate_campaign):
             we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
             we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
 
-            save_candidate_campaign_results = candidate_campaign_manager.update_candidate_twitter_details(
-                candidate_campaign, results['twitter_json'], cached_twitter_profile_image_url_https,
+            save_candidate_results = candidate_manager.update_candidate_twitter_details(
+                candidate, results['twitter_json'], cached_twitter_profile_image_url_https,
                 cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https,
                 we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
                 we_vote_hosted_profile_image_url_tiny)
-            candidate_campaign = save_candidate_campaign_results['candidate']
+            candidate = save_candidate_results['candidate']
             save_twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
-                results['twitter_json'], candidate_campaign.twitter_user_id, cached_twitter_profile_image_url_https,
+                results['twitter_json'], candidate.twitter_user_id, cached_twitter_profile_image_url_https,
                 cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https,
                 we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
                 we_vote_hosted_profile_image_url_tiny)
             # Need to update voter twitter details for the candidate in future
             save_politician_details_results = politician_manager.update_politician_details_from_candidate(
-                candidate_campaign)
-            save_position_from_candidate_results = update_all_position_details_from_candidate(candidate_campaign)
+                candidate)
+            save_position_from_candidate_results = update_all_position_details_from_candidate(candidate)
     else:
         status += "TWITTER_CANDIDATE_DETAILS-CLEARING_DETAILS "
-        save_candidate_campaign_results = candidate_campaign_manager.clear_candidate_twitter_details(candidate_campaign)
+        save_candidate_results = candidate_manager.clear_candidate_twitter_details(candidate)
 
     results = {
         'success':                  True,
@@ -646,13 +646,13 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
     return results
 
 
-def retrieve_possible_twitter_handles(candidate_campaign):
+def retrieve_possible_twitter_handles(candidate):
     status = ""
     success = True
     twitter_user_manager = TwitterUserManager()
     remote_request_history_manager = RemoteRequestHistoryManager()
 
-    if not candidate_campaign:
+    if not candidate:
         status = "RETRIEVE_POSSIBLE_TWITTER_HANDLES-CANDIDATE_MISSING "
         results = {
             'success':                  False,
@@ -660,27 +660,27 @@ def retrieve_possible_twitter_handles(candidate_campaign):
         }
         return results
 
-    if positive_value_exists(candidate_campaign.contest_office_we_vote_id) and not \
-            positive_value_exists(candidate_campaign.contest_office_name):
+    if positive_value_exists(candidate.contest_office_we_vote_id) and not \
+            positive_value_exists(candidate.contest_office_name):
         contest_office_manager = ContestOfficeManager()
         results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
-            candidate_campaign.contest_office_we_vote_id)
+            candidate.contest_office_we_vote_id)
         if results['contest_office_found']:
             contest_office = results['contest_office']
             try:
-                candidate_campaign.contest_office_name = contest_office.office_name
-                candidate_campaign.save()
+                candidate.contest_office_name = contest_office.office_name
+                candidate.save()
             except Exception as e:
                 status += "FAILED_TO_SAVE_CANDIDATE_CAMPAIGN: " + str(e) + " "
 
     name_handling_regex = r"[^ \w'-]"
     candidate_name = {
-        'title': sub(name_handling_regex, "", candidate_campaign.extract_title()),
-        'first_name': sub(name_handling_regex, "", candidate_campaign.extract_first_name()),
-        'middle_name': sub(name_handling_regex, "", candidate_campaign.extract_middle_name()),
-        'last_name': sub(name_handling_regex, "", candidate_campaign.extract_last_name()),
-        'suffix': sub(name_handling_regex, "", candidate_campaign.extract_suffix()),
-        'nickname': sub(name_handling_regex, "", candidate_campaign.extract_nickname()),
+        'title': sub(name_handling_regex, "", candidate.extract_title()),
+        'first_name': sub(name_handling_regex, "", candidate.extract_first_name()),
+        'middle_name': sub(name_handling_regex, "", candidate.extract_middle_name()),
+        'last_name': sub(name_handling_regex, "", candidate.extract_last_name()),
+        'suffix': sub(name_handling_regex, "", candidate.extract_suffix()),
+        'nickname': sub(name_handling_regex, "", candidate.extract_nickname()),
     }
 
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
@@ -691,7 +691,7 @@ def retrieve_possible_twitter_handles(candidate_campaign):
 
     # ##############
     # Search 1
-    search_term = candidate_campaign.candidate_name
+    search_term = candidate.candidate_name
     try:
         search_results = api.search_users(q=search_term, page=1)
 
@@ -703,7 +703,7 @@ def retrieve_possible_twitter_handles(candidate_campaign):
             analyze_twitter_search_results(
                 search_results=search_results,
                 candidate_name=candidate_name,
-                candidate_campaign=candidate_campaign,
+                candidate=candidate,
                 possible_twitter_handles_list=possible_twitter_handles_list)
     except Exception as e:
         status += "ERROR_RETURNED_FROM_TWITTER_SEARCH1: " + str(e) + " "
@@ -732,7 +732,7 @@ def retrieve_possible_twitter_handles(candidate_campaign):
                 analyze_twitter_search_results(
                     search_results=modified_search_results,
                     candidate_name=candidate_name,
-                    candidate_campaign=candidate_campaign,
+                    candidate=candidate,
                     possible_twitter_handles_list=possible_twitter_handles_list)
         except Exception as e:
             status += "ERROR_RETURNED_FROM_TWITTER_SEARCH2: " + str(e) + " "
@@ -751,7 +751,7 @@ def retrieve_possible_twitter_handles(candidate_campaign):
                 analyze_twitter_search_results(
                     search_results=modified_search_results_2,
                     candidate_name=candidate_name,
-                    candidate_campaign=candidate_campaign,
+                    candidate=candidate,
                     possible_twitter_handles_list=possible_twitter_handles_list)
         except Exception as e:
             status += "ERROR_RETURNED_FROM_TWITTER_SEARCH3: " + str(e) + " "
@@ -763,15 +763,15 @@ def retrieve_possible_twitter_handles(candidate_campaign):
         for possibility_result in possible_twitter_handles_list:
             save_twitter_user_results = \
                 twitter_user_manager.update_or_create_twitter_link_possibility_from_twitter_json(
-                    candidate_campaign.we_vote_id, possibility_result['twitter_json'],
+                    candidate.we_vote_id, possibility_result['twitter_json'],
                     possibility_result['search_term'], possibility_result['likelihood_score'])
             if save_twitter_user_results['multiple_objects_returned']:
                 twitter_json = possibility_result['twitter_json']
-                twitter_user_manager.delete_twitter_link_possibility(candidate_campaign.we_vote_id, twitter_json['id'])
+                twitter_user_manager.delete_twitter_link_possibility(candidate.we_vote_id, twitter_json['id'])
                 # Now try again
                 save_twitter_user_results = \
                     twitter_user_manager.update_or_create_twitter_link_possibility_from_twitter_json(
-                        candidate_campaign.we_vote_id, possibility_result['twitter_json'],
+                        candidate.we_vote_id, possibility_result['twitter_json'],
                         possibility_result['search_term'], possibility_result['likelihood_score'])
             if not save_twitter_user_results['success']:
                 status += save_twitter_user_results['status']
@@ -779,8 +779,8 @@ def retrieve_possible_twitter_handles(candidate_campaign):
 
     # Create a record denoting that we have retrieved from Twitter for this candidate
     save_results_history = remote_request_history_manager.create_remote_request_history_entry(
-        RETRIEVE_POSSIBLE_TWITTER_HANDLES, candidate_campaign.google_civic_election_id,
-        candidate_campaign.we_vote_id, None, len(possible_twitter_handles_list), status)
+        RETRIEVE_POSSIBLE_TWITTER_HANDLES, candidate.google_civic_election_id,
+        candidate.we_vote_id, None, len(possible_twitter_handles_list), status)
     if not save_results_history['success']:
         status += save_results_history['status']
         success = False
@@ -802,7 +802,7 @@ def retrieve_possible_twitter_handles_in_bulk(
     success = True
 
     election_manager = ElectionManager()
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     # Run Twitter account search and analysis on candidates without a linked or possible Twitter account
     candidate_queryset = CandidateCampaign.objects.all()  # Cannot be readonly
     google_civic_election_id_list = []
@@ -1174,8 +1174,8 @@ def scrape_and_save_social_media_for_candidates_in_one_election(google_civic_ele
     status = ""
     google_civic_election_id = convert_to_int(google_civic_election_id)
 
-    candidate_manager = CandidateCampaignManager()
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_manager = CandidateManager()
+    candidate_list_manager = CandidateListManager()
     return_list_of_objects = True
     google_civic_election_id_list = [google_civic_election_id]
     results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
@@ -1224,7 +1224,7 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
 
     google_civic_election_id = convert_to_int(google_civic_election_id)
 
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     return_list_of_objects = True
     google_civic_election_id_list = [google_civic_election_id]
     candidates_results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
@@ -1272,7 +1272,7 @@ def transfer_candidate_twitter_handles_from_google_civic(google_civic_election_i
     status = ""
     google_civic_election_id = convert_to_int(google_civic_election_id)
 
-    candidate_list_object = CandidateCampaignListManager()
+    candidate_list_object = CandidateListManager()
     return_list_of_objects = True
     google_civic_election_id_list = [google_civic_election_id]
     results = candidate_list_object.retrieve_all_candidates_for_upcoming_election(

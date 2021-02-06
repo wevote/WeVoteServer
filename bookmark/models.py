@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateManager
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
@@ -60,8 +60,8 @@ class BookmarkItem(models.Model):
         elif self.contest_measure_we_vote_id:
             return self.contest_measure_we_vote_id
         elif self.candidate_campaign_id:
-            candidate_campaign_manager = CandidateCampaignManager()
-            return candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(self.candidate_campaign_id)
+            candidate_manager = CandidateManager()
+            return candidate_manager.fetch_candidate_we_vote_id_from_id(self.candidate_campaign_id)
         elif self.contest_measure_id:
             contest_measure_manager = ContestMeasureManager()
             return contest_measure_manager.fetch_contest_measure_we_vote_id_from_id(self.contest_measure_id)
@@ -171,9 +171,9 @@ class BookmarkItemManager(models.Manager):
             try:
                 # Create new bookmark_item entry
                 if candidate_campaign_id and not candidate_campaign_we_vote_id:
-                    candidate_campaign_manager = CandidateCampaignManager()
+                    candidate_manager = CandidateManager()
                     candidate_campaign_we_vote_id = \
-                        candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(candidate_campaign_id)
+                        candidate_manager.fetch_candidate_we_vote_id_from_id(candidate_campaign_id)
                 if contest_measure_id and not contest_measure_we_vote_id:
                     contest_measure_manager = ContestMeasureManager()
                     contest_measure_we_vote_id = contest_measure_manager.fetch_contest_measure_we_vote_id_from_id(

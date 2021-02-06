@@ -4,7 +4,7 @@
 
 from config.base import get_environment_variable, get_git_merge_date, get_node_version, get_python_version, LOGIN_URL
 from ballot.models import BallotReturned, VoterBallotSaved
-from candidate.models import CandidateCampaign, CandidateCampaignManager
+from candidate.models import CandidateCampaign, CandidateManager
 from candidate.controllers import candidates_import_from_sample_file
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -591,7 +591,7 @@ def data_cleanup_position_list_analysis_view(request):
     voter_we_vote_id_added = 0
     voter_we_vote_id_added_failed = 0
 
-    candidate_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     measure_manager = ContestMeasureManager()
     organization_manager = OrganizationManager()
     voter_manager = VoterManager()
@@ -707,10 +707,10 @@ def data_cleanup_position_list_analysis_view(request):
         for one_position in public_positions_without_election_id:
             if positive_value_exists(one_position.candidate_campaign_id):
                 # Retrieve the candidate and get the election it is for
-                candidate_results = candidate_manager.retrieve_candidate_campaign_from_id(
+                candidate_results = candidate_manager.retrieve_candidate_from_id(
                     one_position.candidate_campaign_id)
-                if candidate_results['candidate_campaign_found']:
-                    candidate = candidate_results['candidate_campaign']
+                if candidate_results['candidate_found']:
+                    candidate = candidate_results['candidate']
                     if positive_value_exists(candidate.google_civic_election_id):
                         try:
                             one_position.google_civic_election_id = candidate.google_civic_election_id
@@ -757,10 +757,10 @@ def data_cleanup_position_list_analysis_view(request):
         for one_position in positions_for_friends_without_election_id:
             if positive_value_exists(one_position.candidate_campaign_id):
                 # Retrieve the candidate and get the election it is for
-                candidate_results = candidate_manager.retrieve_candidate_campaign_from_id(
+                candidate_results = candidate_manager.retrieve_candidate_from_id(
                     one_position.candidate_campaign_id)
-                if candidate_results['candidate_campaign_found']:
-                    candidate = candidate_results['candidate_campaign']
+                if candidate_results['candidate_found']:
+                    candidate = candidate_results['candidate']
                     if positive_value_exists(candidate.google_civic_election_id):
                         try:
                             one_position.google_civic_election_id = candidate.google_civic_election_id
@@ -1543,10 +1543,10 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many CandidateCampaign
-        candidate_campaign_query = CandidateCampaign.objects.all()
-        candidate_campaign_query = candidate_campaign_query.filter(
+        candidate_query = CandidateCampaign.objects.all()
+        candidate_query = candidate_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
-        one_election.number_of_candidates = candidate_campaign_query.count()
+        one_election.number_of_candidates = candidate_query.count()
         # if positive_value_exists(one_election.number_of_candidates):
         #     election_values_exist = True
 

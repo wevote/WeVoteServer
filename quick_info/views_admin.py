@@ -8,7 +8,7 @@ from .models import LANGUAGE_CHOICES, QuickInfo, QuickInfoManager, \
     NOT_SPECIFIED
 from ballot.models import OFFICE, CANDIDATE, POLITICIAN, MEASURE, KIND_OF_BALLOT_ITEM_CHOICES
 from admin_tools.views import redirect_to_sign_in_page
-from candidate.models import CandidateCampaign, CandidateCampaignManager
+from candidate.models import CandidateCampaign, CandidateManager
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib import messages
@@ -86,7 +86,7 @@ def quick_info_new_view(request):
     more_info_url = request.POST.get('more_info_url', "")
 
     contest_office_we_vote_id = request.POST.get('contest_office_we_vote_id', "")
-    candidate_campaign_we_vote_id = request.POST.get('candidate_campaign_we_vote_id', "")
+    candidate_we_vote_id = request.POST.get('candidate_we_vote_id', "")
     politician_we_vote_id = request.POST.get('politician_we_vote_id', "")
     contest_measure_we_vote_id = request.POST.get('contest_measure_we_vote_id', "")
 
@@ -111,7 +111,7 @@ def quick_info_new_view(request):
     # See below: quick_info.info_html = info_html
     quick_info.ballot_item_display_name = ballot_item_display_name
     quick_info.contest_office_we_vote_id = contest_office_we_vote_id
-    quick_info.candidate_campaign_we_vote_id = candidate_campaign_we_vote_id
+    quick_info.candidate_campaign_we_vote_id = candidate_we_vote_id
     quick_info.politician_we_vote_id = politician_we_vote_id
     quick_info.contest_measure_we_vote_id = contest_measure_we_vote_id
     # See below: quick_info.quick_info_master_we_vote_id = quick_info_master_we_vote_id
@@ -141,9 +141,9 @@ def quick_info_new_view(request):
     if positive_value_exists(google_civic_election_id):
         contest_office_options = contest_office_options.filter(google_civic_election_id=google_civic_election_id)
 
-    candidate_campaign_options = CandidateCampaign.objects.order_by('candidate_name')
+    candidate_options = CandidateCampaign.objects.order_by('candidate_name')
     if positive_value_exists(google_civic_election_id):
-        candidate_campaign_options = candidate_campaign_options.filter(google_civic_election_id=google_civic_election_id)
+        candidate_options = candidate_options.filter(google_civic_election_id=google_civic_election_id)
 
     contest_measure_options = ContestMeasure.objects.order_by('measure_title')
     if positive_value_exists(google_civic_election_id):
@@ -161,7 +161,7 @@ def quick_info_new_view(request):
     template_values = {
         'messages_on_stage':            messages_on_stage,
         'contest_office_options':       contest_office_options,
-        'candidate_campaign_options':   candidate_campaign_options,
+        'candidate_options':            candidate_options,
         'contest_measure_options':      contest_measure_options,
         'election_list':                election_list,
         'election_found':               election_found,
@@ -213,7 +213,7 @@ def quick_info_edit_view(request, quick_info_id):
         more_info_url = request.POST.get('more_info_url', False)
 
         contest_office_we_vote_id = request.POST.get('contest_office_we_vote_id', False)
-        candidate_campaign_we_vote_id = request.POST.get('candidate_campaign_we_vote_id', False)
+        candidate_we_vote_id = request.POST.get('candidate_we_vote_id', False)
         politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
         contest_measure_we_vote_id = request.POST.get('contest_measure_we_vote_id', False)
 
@@ -237,8 +237,8 @@ def quick_info_edit_view(request, quick_info_id):
             quick_info.more_info_url = more_info_url
         if contest_office_we_vote_id is not False:
             quick_info.contest_office_we_vote_id = contest_office_we_vote_id
-        if candidate_campaign_we_vote_id is not False:
-            quick_info.candidate_campaign_we_vote_id = candidate_campaign_we_vote_id
+        if candidate_we_vote_id is not False:
+            quick_info.candidate_campaign_we_vote_id = candidate_we_vote_id
         if politician_we_vote_id is not False:
             quick_info.politician_we_vote_id = politician_we_vote_id
         if contest_measure_we_vote_id is not False:
@@ -297,9 +297,9 @@ def quick_info_edit_view(request, quick_info_id):
         contest_office_options = contest_office_options.filter(
             google_civic_election_id=quick_info.google_civic_election_id)
 
-    candidate_campaign_options = CandidateCampaign.objects.order_by('candidate_name')
+    candidate_options = CandidateCampaign.objects.order_by('candidate_name')
     if positive_value_exists(quick_info.google_civic_election_id):
-        candidate_campaign_options = candidate_campaign_options.filter(
+        candidate_options = candidate_options.filter(
             google_civic_election_id=quick_info.google_civic_election_id)
 
     contest_measure_options = ContestMeasure.objects.order_by('measure_title')
@@ -319,7 +319,7 @@ def quick_info_edit_view(request, quick_info_id):
     template_values = {
         'messages_on_stage':            messages_on_stage,
         'contest_office_options':       contest_office_options,
-        'candidate_campaign_options':   candidate_campaign_options,
+        'candidate_options':            candidate_options,
         'contest_measure_options':      contest_measure_options,
         'election_list':                election_list,
         'election_found':               election_found,
@@ -357,7 +357,7 @@ def quick_info_edit_process_view(request):
     more_info_url = request.POST.get('more_info_url', False)
 
     contest_office_we_vote_id = request.POST.get('contest_office_we_vote_id', False)
-    candidate_campaign_we_vote_id = request.POST.get('candidate_campaign_we_vote_id', False)
+    candidate_we_vote_id = request.POST.get('candidate_we_vote_id', False)
     politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
     contest_measure_we_vote_id = request.POST.get('contest_measure_we_vote_id', False)
 
@@ -374,7 +374,7 @@ def quick_info_edit_process_view(request):
     number_of_ballot_items = 0
     if positive_value_exists(contest_office_we_vote_id):
         number_of_ballot_items += 1
-    if positive_value_exists(candidate_campaign_we_vote_id):
+    if positive_value_exists(candidate_we_vote_id):
         number_of_ballot_items += 1
     if positive_value_exists(politician_we_vote_id):
         number_of_ballot_items += 1
@@ -448,13 +448,12 @@ def quick_info_edit_process_view(request):
                 ballot_item_display_name = contest_office.office_name
             else:
                 ballot_item_display_name = ''
-        elif positive_value_exists(candidate_campaign_we_vote_id):
-            candidate_campaign_manager = CandidateCampaignManager()
-            results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
-                candidate_campaign_we_vote_id)
+        elif positive_value_exists(candidate_we_vote_id):
+            candidate_manager = CandidateManager()
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
             if results['success']:
-                candidate_campaign = results['candidate_campaign']
-                ballot_item_display_name = candidate_campaign.display_candidate_name()
+                candidate = results['candidate']
+                ballot_item_display_name = candidate.display_candidate_name()
             else:
                 ballot_item_display_name = ''
         # if positive_value_exists(politician_we_vote_id):
@@ -476,7 +475,7 @@ def quick_info_edit_process_view(request):
         quick_info_we_vote_id=quick_info_we_vote_id,
         ballot_item_display_name=ballot_item_display_name,
         contest_office_we_vote_id=contest_office_we_vote_id,
-        candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+        candidate_campaign_we_vote_id=candidate_we_vote_id,
         politician_we_vote_id=politician_we_vote_id,
         contest_measure_we_vote_id=contest_measure_we_vote_id,
         info_html=info_html,

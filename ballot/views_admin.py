@@ -6,7 +6,7 @@ from .controllers import ballot_items_import_from_master_server, ballot_returned
     repair_ballot_items_for_election
 from .models import BallotItem, BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager
 from admin_tools.views import redirect_to_sign_in_page
-from candidate.models import CandidateCampaignListManager
+from candidate.models import CandidateListManager
 from config.base import get_environment_variable
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -391,7 +391,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
     messages_on_stage = get_messages(request)
     ballot_item_list = []
     ballot_item_list_modified = []
-    candidate_campaign_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     contest_office_we_vote_ids_already_on_ballot = []
     contest_offices_to_choose_list = []
     if ballot_returned_found:
@@ -407,7 +407,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
                     one_ballot_item.candidates_string = ""
                     if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
                         contest_office_we_vote_ids_already_on_ballot.append(one_ballot_item.contest_office_we_vote_id)
-                        candidate_results = candidate_campaign_list_manager.retrieve_all_candidates_for_office(
+                        candidate_results = candidate_list_manager.retrieve_all_candidates_for_office(
                             office_we_vote_id=one_ballot_item.contest_office_we_vote_id)
                         if candidate_results['candidate_list_found']:
                             candidate_list = candidate_results['candidate_list']
@@ -424,7 +424,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
                     one_ballot_item.candidates_string = ""
                     if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
                         contest_office_we_vote_ids_already_on_ballot.append(one_ballot_item.contest_office_we_vote_id)
-                        candidate_results = candidate_campaign_list_manager.retrieve_all_candidates_for_office(
+                        candidate_results = candidate_list_manager.retrieve_all_candidates_for_office(
                             office_we_vote_id=one_ballot_item.contest_office_we_vote_id)
                         if candidate_results['candidate_list_found']:
                             candidate_list = candidate_results['candidate_list']

@@ -85,7 +85,7 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
 ]
 
 
-class CandidateCampaignListManager(models.Manager):
+class CandidateListManager(models.Manager):
     """
     This is a class to make it easy to retrieve lists of Candidates
     """
@@ -110,7 +110,7 @@ class CandidateCampaignListManager(models.Manager):
             }
             return results
 
-        candidate_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
         contest_manager = ContestOfficeManager()
         if positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
             office_we_vote_id = contest_manager.fetch_contest_office_we_vote_id_from_id(office_id)
@@ -378,7 +378,7 @@ class CandidateCampaignListManager(models.Manager):
             }
             return results
 
-        candidate_list_manager = CandidateCampaignListManager()
+        candidate_list_manager = CandidateListManager()
         results = candidate_list_manager.retrieve_all_candidates_for_office(
             office_id=office_id, office_we_vote_id=office_we_vote_id)
         if not positive_value_exists(results['success']):
@@ -509,7 +509,7 @@ class CandidateCampaignListManager(models.Manager):
         }
         return results
 
-    def retrieve_candidate_campaigns_from_all_elections_list(self):
+    def retrieve_candidates_from_all_elections_list(self):
         """
         This is used by the admin tools to show CandidateCampaigns in a drop-down for example
         """
@@ -1422,7 +1422,7 @@ class CandidateCampaign(models.Model):
     # then the string "cand", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_candidate_campaign_integer
     we_vote_id = models.CharField(
-        verbose_name="we vote permanent id of this candidate campaign", max_length=255, default=None, null=True,
+        verbose_name="we vote permanent id of this candidate", max_length=255, default=None, null=True,
         blank=True, unique=True, db_index=True)
     maplight_id = models.CharField(
         verbose_name="maplight candidate id", max_length=255, default=None, null=True, blank=True, unique=True)
@@ -1481,15 +1481,15 @@ class CandidateCampaign(models.Model):
     date_last_updated = models.DateTimeField(null=True, auto_now=True)
     # The URL for the candidate's campaign web site.
     candidate_url = models.URLField(
-        verbose_name='website url of candidate campaign', max_length=255, blank=True, null=True)
+        verbose_name='website url of candidate', max_length=255, blank=True, null=True)
     candidate_contact_form_url = models.URLField(
         verbose_name='website url of candidate contact form', max_length=255, blank=True, null=True)
-    facebook_url = models.TextField(verbose_name='facebook url of candidate campaign', blank=True, null=True)
+    facebook_url = models.TextField(verbose_name='facebook url of candidate', blank=True, null=True)
     facebook_url_is_broken = models.BooleanField(verbose_name="facebook url is broken", default=False)
     facebook_profile_image_url_https = models.TextField(verbose_name='url of profile image from facebook',
                                                         blank=True, null=True)
 
-    twitter_url = models.URLField(verbose_name='twitter url of candidate campaign', blank=True, null=True)
+    twitter_url = models.URLField(verbose_name='twitter url of candidate', blank=True, null=True)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
     candidate_twitter_handle = models.CharField(
         verbose_name='candidate twitter screen_name', max_length=255, null=True, unique=False)
@@ -1514,12 +1514,12 @@ class CandidateCampaign(models.Model):
     we_vote_hosted_profile_image_url_tiny = models.TextField(verbose_name='we vote hosted tiny image url',
                                                              blank=True, null=True)
 
-    google_plus_url = models.URLField(verbose_name='google plus url of candidate campaign', blank=True, null=True)
-    youtube_url = models.URLField(verbose_name='youtube url of candidate campaign', blank=True, null=True)
+    google_plus_url = models.URLField(verbose_name='google plus url of candidate', blank=True, null=True)
+    youtube_url = models.URLField(verbose_name='youtube url of candidate', blank=True, null=True)
     # The email address for the candidate's campaign.
-    candidate_email = models.CharField(verbose_name="candidate campaign email", max_length=255, null=True, blank=True)
+    candidate_email = models.CharField(verbose_name="candidate email", max_length=255, null=True, blank=True)
     # The voice phone number for the candidate's campaign office.
-    candidate_phone = models.CharField(verbose_name="candidate campaign phone", max_length=255, null=True, blank=True)
+    candidate_phone = models.CharField(verbose_name="candidate phone", max_length=255, null=True, blank=True)
 
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
@@ -1744,14 +1744,14 @@ class CandidateCampaign(models.Model):
 
 
 def fetch_candidate_count_for_office(office_id=0, office_we_vote_id=''):
-    candidate_campaign_list = CandidateCampaignListManager()
-    results = candidate_campaign_list.retrieve_candidate_count_for_office(office_id, office_we_vote_id)
+    candidate_list = CandidateListManager()
+    results = candidate_list.retrieve_candidate_count_for_office(office_id, office_we_vote_id)
     return results['candidate_count']
 
 
 def fetch_candidate_count_for_election_and_state(google_civic_election_id, state_code):
-    candidate_campaign_list = CandidateCampaignListManager()
-    results = candidate_campaign_list.retrieve_candidate_count_for_office(google_civic_election_id, state_code)
+    candidate_list = CandidateListManager()
+    results = candidate_list.retrieve_candidate_count_for_office(google_civic_election_id, state_code)
     return results['candidate_count']
 
 
@@ -1819,96 +1819,96 @@ def mimic_google_civic_initials(name):
     return modified_name
 
 
-class CandidateCampaignManager(models.Manager):
+class CandidateManager(models.Manager):
 
     def __unicode__(self):
-        return "CandidateCampaignManager"
+        return "CandidateManager"
 
-    def retrieve_candidate_campaign_from_id(self, candidate_campaign_id, read_only=False):
-        candidate_campaign_manager = CandidateCampaignManager()
-        return candidate_campaign_manager.retrieve_candidate_campaign(candidate_campaign_id, read_only=read_only)
+    def retrieve_candidate_from_id(self, candidate_id, read_only=False):
+        candidate_manager = CandidateManager()
+        return candidate_manager.retrieve_candidate(candidate_id, read_only=read_only)
 
-    def retrieve_candidate_campaign_from_we_vote_id(self, we_vote_id):
-        candidate_campaign_id = 0
-        candidate_campaign_manager = CandidateCampaignManager()
-        return candidate_campaign_manager.retrieve_candidate_campaign(candidate_campaign_id, we_vote_id)
+    def retrieve_candidate_from_we_vote_id(self, we_vote_id):
+        candidate_id = 0
+        candidate_manager = CandidateManager()
+        return candidate_manager.retrieve_candidate(candidate_id, we_vote_id)
 
-    def fetch_candidate_campaign_id_from_we_vote_id(self, we_vote_id):
-        candidate_campaign_id = 0
-        candidate_campaign_manager = CandidateCampaignManager()
-        results = candidate_campaign_manager.retrieve_candidate_campaign(candidate_campaign_id, we_vote_id)
+    def fetch_candidate_id_from_we_vote_id(self, we_vote_id):
+        candidate_id = 0
+        candidate_manager = CandidateManager()
+        results = candidate_manager.retrieve_candidate(candidate_id, we_vote_id)
         if results['success']:
-            return results['candidate_campaign_id']
+            return results['candidate_id']
         return 0
 
-    def fetch_candidate_campaign_we_vote_id_from_id(self, candidate_campaign_id):
+    def fetch_candidate_we_vote_id_from_id(self, candidate_id):
         we_vote_id = ''
-        candidate_campaign_manager = CandidateCampaignManager()
-        results = candidate_campaign_manager.retrieve_candidate_campaign(candidate_campaign_id, we_vote_id)
+        candidate_manager = CandidateManager()
+        results = candidate_manager.retrieve_candidate(candidate_id, we_vote_id)
         if results['success']:
-            return results['candidate_campaign_we_vote_id']
+            return results['candidate_we_vote_id']
         return ''
 
     def fetch_google_civic_candidate_name_from_we_vote_id(self, we_vote_id):
-        candidate_campaign_id = 0
-        candidate_campaign_manager = CandidateCampaignManager()
-        results = candidate_campaign_manager.retrieve_candidate_campaign(candidate_campaign_id, we_vote_id)
+        candidate_id = 0
+        candidate_manager = CandidateManager()
+        results = candidate_manager.retrieve_candidate(candidate_id, we_vote_id)
         if results['success']:
-            candidate_campaign = results['candidate_campaign']
-            return candidate_campaign.google_civic_candidate_name
+            candidate = results['candidate']
+            return candidate.google_civic_candidate_name
         return 0
 
-    def retrieve_candidate_campaign_from_maplight_id(self, candidate_maplight_id):
-        candidate_campaign_id = 0
+    def retrieve_candidate_from_maplight_id(self, candidate_maplight_id):
+        candidate_id = 0
         we_vote_id = ''
-        candidate_campaign_manager = CandidateCampaignManager()
-        return candidate_campaign_manager.retrieve_candidate_campaign(
-            candidate_campaign_id, we_vote_id, candidate_maplight_id)
+        candidate_manager = CandidateManager()
+        return candidate_manager.retrieve_candidate(
+            candidate_id, we_vote_id, candidate_maplight_id)
 
-    def retrieve_candidate_campaign_from_vote_smart_id(self, candidate_vote_smart_id):
-        candidate_campaign_id = 0
+    def retrieve_candidate_from_vote_smart_id(self, candidate_vote_smart_id):
+        candidate_id = 0
         we_vote_id = ''
         candidate_maplight_id = ''
         candidate_name = ''
-        candidate_campaign_manager = CandidateCampaignManager()
-        return candidate_campaign_manager.retrieve_candidate_campaign(
-            candidate_campaign_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id)
+        candidate_manager = CandidateManager()
+        return candidate_manager.retrieve_candidate(
+            candidate_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id)
 
-    def retrieve_candidate_campaign_from_ballotpedia_candidate_id(
+    def retrieve_candidate_from_ballotpedia_candidate_id(
             self, ballotpedia_candidate_id, read_only=False):
-        candidate_campaign_id = 0
+        candidate_id = 0
         we_vote_id = ''
         candidate_maplight_id = ''
         candidate_name = ''
         candidate_vote_smart_id = 0
-        return self.retrieve_candidate_campaign(
-            candidate_campaign_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id,
+        return self.retrieve_candidate(
+            candidate_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id,
             ballotpedia_candidate_id, read_only=read_only)
 
-    def retrieve_candidate_campaign_from_candidate_name(self, candidate_name):
-        candidate_campaign_id = 0
+    def retrieve_candidate_from_candidate_name(self, candidate_name):
+        candidate_id = 0
         we_vote_id = ''
         candidate_maplight_id = ''
-        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
 
-        results = candidate_campaign_manager.retrieve_candidate_campaign(
-            candidate_campaign_id, we_vote_id, candidate_maplight_id, candidate_name)
+        results = candidate_manager.retrieve_candidate(
+            candidate_id, we_vote_id, candidate_maplight_id, candidate_name)
         if results['success']:
             return results
 
         # Try to modify the candidate name, and search again
         # MapLight for example will pass in "Ronald  Gold" for example
         candidate_name_try2 = candidate_name.replace('  ', ' ')
-        results = candidate_campaign_manager.retrieve_candidate_campaign(
-            candidate_campaign_id, we_vote_id, candidate_maplight_id, candidate_name_try2)
+        results = candidate_manager.retrieve_candidate(
+            candidate_id, we_vote_id, candidate_maplight_id, candidate_name_try2)
         if results['success']:
             return results
 
         # MapLight also passes in "Kamela D Harris" for example, and Google Civic uses "Kamela D. Harris"
         candidate_name_try3 = mimic_google_civic_initials(candidate_name)
         if candidate_name_try3 != candidate_name:
-            results = candidate_campaign_manager.retrieve_candidate_campaign(
-                candidate_campaign_id, we_vote_id, candidate_maplight_id, candidate_name_try3)
+            results = candidate_manager.retrieve_candidate(
+                candidate_id, we_vote_id, candidate_maplight_id, candidate_name_try3)
             if results['success']:
                 return results
 
@@ -1916,97 +1916,97 @@ class CandidateCampaignManager(models.Manager):
         return results
 
     # NOTE: searching by all other variables seems to return a list of objects
-    def retrieve_candidate_campaign(
-            self, candidate_campaign_id, candidate_campaign_we_vote_id=None, candidate_maplight_id=None,
+    def retrieve_candidate(
+            self, candidate_id, candidate_we_vote_id=None, candidate_maplight_id=None,
             candidate_name=None, candidate_vote_smart_id=None,
             ballotpedia_candidate_id=None, google_civic_election_id=None, read_only=False):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
-        candidate_campaign_on_stage = CandidateCampaign()
+        candidate_on_stage = CandidateCampaign()
         status = ""
         success = True
 
         try:
-            if positive_value_exists(candidate_campaign_id):
+            if positive_value_exists(candidate_id):
                 if positive_value_exists(read_only):
-                    candidate_campaign_on_stage = CandidateCampaign.objects.using('readonly').get(
-                        id=candidate_campaign_id)
+                    candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
+                        id=candidate_id)
                 else:
-                    candidate_campaign_on_stage = CandidateCampaign.objects.get(id=candidate_campaign_id)
-                candidate_campaign_id = candidate_campaign_on_stage.id
-                candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
-                candidate_campaign_found = True
+                    candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
+                candidate_id = candidate_on_stage.id
+                candidate_we_vote_id = candidate_on_stage.we_vote_id
+                candidate_found = True
                 status += "RETRIEVE_CANDIDATE_FOUND_BY_ID "
-            elif positive_value_exists(candidate_campaign_we_vote_id):
+            elif positive_value_exists(candidate_we_vote_id):
                 if positive_value_exists(read_only):
-                    candidate_campaign_on_stage = CandidateCampaign.objects.using('readonly').get(
-                        we_vote_id=candidate_campaign_we_vote_id)
+                    candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
+                        we_vote_id=candidate_we_vote_id)
                 else:
-                    candidate_campaign_on_stage = CandidateCampaign.objects.get(
-                        we_vote_id=candidate_campaign_we_vote_id)
-                candidate_campaign_id = candidate_campaign_on_stage.id
-                candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
-                candidate_campaign_found = True
+                    candidate_on_stage = CandidateCampaign.objects.get(
+                        we_vote_id=candidate_we_vote_id)
+                candidate_id = candidate_on_stage.id
+                candidate_we_vote_id = candidate_on_stage.we_vote_id
+                candidate_found = True
                 status += "RETRIEVE_CANDIDATE_FOUND_BY_WE_VOTE_ID "
             elif positive_value_exists(candidate_maplight_id):
                 if positive_value_exists(read_only):
-                    candidate_campaign_on_stage = CandidateCampaign.objects.using('readonly').get(
+                    candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
                         maplight_id=candidate_maplight_id)
                 else:
-                    candidate_campaign_on_stage = CandidateCampaign.objects.get(maplight_id=candidate_maplight_id)
-                candidate_campaign_id = candidate_campaign_on_stage.id
-                candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
-                candidate_campaign_found = True
+                    candidate_on_stage = CandidateCampaign.objects.get(maplight_id=candidate_maplight_id)
+                candidate_id = candidate_on_stage.id
+                candidate_we_vote_id = candidate_on_stage.we_vote_id
+                candidate_found = True
                 status += "RETRIEVE_CANDIDATE_FOUND_BY_MAPLIGHT_ID "
             elif positive_value_exists(candidate_vote_smart_id):
                 if positive_value_exists(read_only):
-                    candidate_campaign_on_stage = CandidateCampaign.objects.using('readonly').get(
+                    candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
                         vote_smart_id=candidate_vote_smart_id)
                 else:
-                    candidate_campaign_on_stage = CandidateCampaign.objects.get(vote_smart_id=candidate_vote_smart_id)
-                candidate_campaign_id = candidate_campaign_on_stage.id
-                candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
-                candidate_campaign_found = True
+                    candidate_on_stage = CandidateCampaign.objects.get(vote_smart_id=candidate_vote_smart_id)
+                candidate_id = candidate_on_stage.id
+                candidate_we_vote_id = candidate_on_stage.we_vote_id
+                candidate_found = True
                 status += "RETRIEVE_CANDIDATE_FOUND_BY_VOTE_SMART_ID "
             elif positive_value_exists(candidate_name):
                 if positive_value_exists(read_only):
-                    candidate_campaign_on_stage = CandidateCampaign.objects.using('readonly').get(
+                    candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
                         candidate_name=candidate_name)
                 else:
-                    candidate_campaign_on_stage = CandidateCampaign.objects.get(candidate_name=candidate_name)
-                candidate_campaign_id = candidate_campaign_on_stage.id
-                candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
-                candidate_campaign_found = True
+                    candidate_on_stage = CandidateCampaign.objects.get(candidate_name=candidate_name)
+                candidate_id = candidate_on_stage.id
+                candidate_we_vote_id = candidate_on_stage.we_vote_id
+                candidate_found = True
                 status += "RETRIEVE_CANDIDATE_FOUND_BY_NAME "
             elif positive_value_exists(ballotpedia_candidate_id):
                 ballotpedia_candidate_id_integer = convert_to_int(ballotpedia_candidate_id)
                 if positive_value_exists(read_only):
-                    candidate_campaign_on_stage = CandidateCampaign.objects.using('readonly').get(
+                    candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
                         ballotpedia_candidate_id=ballotpedia_candidate_id_integer)
                 else:
-                    candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                    candidate_on_stage = CandidateCampaign.objects.get(
                         ballotpedia_candidate_id=ballotpedia_candidate_id_integer)
-                candidate_campaign_id = candidate_campaign_on_stage.id
-                candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
-                candidate_campaign_found = True
+                candidate_id = candidate_on_stage.id
+                candidate_we_vote_id = candidate_on_stage.we_vote_id
+                candidate_found = True
                 status += "RETRIEVE_CANDIDATE_FOUND_BY_BALLOTPEDIA_CANDIDATE_ID "
             else:
-                candidate_campaign_found = False
+                candidate_found = False
                 status += "RETRIEVE_CANDIDATE_SEARCH_INDEX_MISSING "
                 success = False
         except CandidateCampaign.MultipleObjectsReturned as e:
-            candidate_campaign_found = False
+            candidate_found = False
             handle_record_found_more_than_one_exception(e, logger=logger)
             exception_multiple_object_returned = True
             status += "RETRIEVE_CANDIDATE_MULTIPLE_OBJECTS_RETURNED "
             success = False
         except CandidateCampaign.DoesNotExist:
-            candidate_campaign_found = False
+            candidate_found = False
             exception_does_not_exist = True
             status += "RETRIEVE_CANDIDATE_NOT_FOUND "
         except Exception as e:
-            candidate_campaign_found = False
+            candidate_found = False
             status += "RETRIEVE_CANDIDATE_NOT_FOUND_EXCEPTION " + str(e) + " "
             success = False
 
@@ -2016,10 +2016,10 @@ class CandidateCampaignManager(models.Manager):
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
-            'candidate_campaign_found': candidate_campaign_found,
-            'candidate_campaign_id':    convert_to_int(candidate_campaign_id),
-            'candidate_campaign_we_vote_id':    candidate_campaign_we_vote_id,
-            'candidate_campaign':       candidate_campaign_on_stage,
+            'candidate_found':          candidate_found,
+            'candidate_id':             convert_to_int(candidate_id),
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'candidate':                candidate_on_stage,
         }
         return results
 
@@ -2240,21 +2240,21 @@ class CandidateCampaignManager(models.Manager):
         results = self.retrieve_candidates_are_not_duplicates_list(candidate_we_vote_id)
         return results['candidates_are_not_duplicates_list_we_vote_ids']
 
-    def update_or_create_candidate_campaign(self, candidate_we_vote_id, google_civic_election_id, ocd_division_id,
-                                            contest_office_id, contest_office_we_vote_id, google_civic_candidate_name,
-                                            updated_candidate_campaign_values):
+    def update_or_create_candidate(self, candidate_we_vote_id, google_civic_election_id, ocd_division_id,
+                                   contest_office_id, contest_office_we_vote_id, google_civic_candidate_name,
+                                   updated_candidate_values):
         """
-        Either update or create a candidate_campaign entry.
+        Either update or create a candidate entry.
         """
         exception_multiple_object_returned = False
         success = False
         new_candidate_created = False
-        candidate_campaign_on_stage = CandidateCampaign()
+        candidate_on_stage = CandidateCampaign()
         status = ""
-        google_civic_candidate_name2 = updated_candidate_campaign_values['google_civic_candidate_name2'] \
-            if 'google_civic_candidate_name2' in updated_candidate_campaign_values else ""
-        google_civic_candidate_name3 = updated_candidate_campaign_values['google_civic_candidate_name3'] \
-            if 'google_civic_candidate_name3' in updated_candidate_campaign_values else ""
+        google_civic_candidate_name2 = updated_candidate_values['google_civic_candidate_name2'] \
+            if 'google_civic_candidate_name2' in updated_candidate_values else ""
+        google_civic_candidate_name3 = updated_candidate_values['google_civic_candidate_name3'] \
+            if 'google_civic_candidate_name3' in updated_candidate_values else ""
 
         if not positive_value_exists(google_civic_election_id):
             success = False
@@ -2272,12 +2272,12 @@ class CandidateCampaignManager(models.Manager):
             status += 'MISSING_GOOGLE_CIVIC_CANDIDATE_NAME '
         elif positive_value_exists(candidate_we_vote_id) and positive_value_exists(contest_office_we_vote_id):
             try:
-                candidate_campaign_on_stage, new_candidate_created = \
+                candidate_on_stage, new_candidate_created = \
                     CandidateCampaign.objects.update_or_create(
                         # google_civic_election_id__exact=google_civic_election_id,
                         we_vote_id__iexact=candidate_we_vote_id,
                         # contest_office_we_vote_id__iexact=contest_office_we_vote_id,
-                        defaults=updated_candidate_campaign_values)
+                        defaults=updated_candidate_values)
                 success = True
                 status += "CANDIDATE_CAMPAIGN_UPDATED_OR_CREATED_BY_CANDIDATE_WE_VOTE_ID "
             except CandidateCampaign.MultipleObjectsReturned as e:
@@ -2299,7 +2299,7 @@ class CandidateCampaignManager(models.Manager):
                     google_civic_candidate_name2 = "NO_NAME_IGNORE"
                 if not positive_value_exists(google_civic_candidate_name3):
                     google_civic_candidate_name3 = "NO_NAME_IGNORE"
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                candidate_on_stage = CandidateCampaign.objects.get(
                     Q(google_civic_candidate_name__iexact=google_civic_candidate_name) |
                     Q(google_civic_candidate_name2__iexact=google_civic_candidate_name) |
                     Q(google_civic_candidate_name3__iexact=google_civic_candidate_name) |
@@ -2407,7 +2407,7 @@ class CandidateCampaignManager(models.Manager):
 
                 if name_changed:
                     try:
-                        candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                        candidate_on_stage = CandidateCampaign.objects.get(
                             Q(google_civic_candidate_name__iexact=google_civic_candidate_name_modified) |
                             Q(google_civic_candidate_name2__iexact=google_civic_candidate_name_modified) |
                             Q(google_civic_candidate_name3__iexact=google_civic_candidate_name_modified) |
@@ -2439,7 +2439,7 @@ class CandidateCampaignManager(models.Manager):
             if not candidate_found and not exception_multiple_object_returned:
                 # Try to find record based on candidate_name (instead of google_civic_office_name)
                 try:
-                    candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                    candidate_on_stage = CandidateCampaign.objects.get(
                         Q(candidate_name__iexact=google_civic_candidate_name) |
                         Q(candidate_name__iexact=google_civic_candidate_name2) |
                         Q(candidate_name__iexact=google_civic_candidate_name3),
@@ -2497,7 +2497,7 @@ class CandidateCampaignManager(models.Manager):
 
                     if name_changed and positive_value_exists(google_civic_candidate_name_modified):
                         try:
-                            candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                            candidate_on_stage = CandidateCampaign.objects.get(
                                 Q(candidate_name__iexact=google_civic_candidate_name_modified) |
                                 Q(candidate_name__iexact=google_civic_candidate_name2_modified) |
                                 Q(candidate_name__iexact=google_civic_candidate_name3_modified),
@@ -2532,12 +2532,12 @@ class CandidateCampaignManager(models.Manager):
                     new_candidate_created = False
                     candidate_updated = False
                     candidate_changes_found = False
-                    for key, value in updated_candidate_campaign_values.items():
-                        if hasattr(candidate_campaign_on_stage, key):
+                    for key, value in updated_candidate_values.items():
+                        if hasattr(candidate_on_stage, key):
                             candidate_changes_found = True
-                            setattr(candidate_campaign_on_stage, key, value)
-                    if candidate_changes_found and positive_value_exists(candidate_campaign_on_stage.we_vote_id):
-                        candidate_campaign_on_stage.save()
+                            setattr(candidate_on_stage, key, value)
+                    if candidate_changes_found and positive_value_exists(candidate_on_stage.we_vote_id):
+                        candidate_on_stage.save()
                         candidate_updated = True
                     if candidate_updated:
                         success = True
@@ -2553,17 +2553,17 @@ class CandidateCampaignManager(models.Manager):
                 # Create record
                 try:
                     new_candidate_created = False
-                    candidate_campaign_on_stage = CandidateCampaign.objects.create(
+                    candidate_on_stage = CandidateCampaign.objects.create(
                         google_civic_election_id=google_civic_election_id,
                         ocd_division_id=ocd_division_id,
                         contest_office_id=contest_office_id,
                         contest_office_we_vote_id=contest_office_we_vote_id,
                         google_civic_candidate_name=google_civic_candidate_name)
-                    if positive_value_exists(candidate_campaign_on_stage.id):
-                        for key, value in updated_candidate_campaign_values.items():
-                            if hasattr(candidate_campaign_on_stage, key):
-                                setattr(candidate_campaign_on_stage, key, value)
-                        candidate_campaign_on_stage.save()
+                    if positive_value_exists(candidate_on_stage.id):
+                        for key, value in updated_candidate_values.items():
+                            if hasattr(candidate_on_stage, key):
+                                setattr(candidate_on_stage, key, value)
+                        candidate_on_stage.save()
                         new_candidate_created = True
                     if new_candidate_created:
                         success = True
@@ -2578,17 +2578,17 @@ class CandidateCampaignManager(models.Manager):
                     success = False
 
         results = {
-            'success':                          success,
-            'status':                           status,
-            'MultipleObjectsReturned':          exception_multiple_object_returned,
-            'new_candidate_created':            new_candidate_created,
-            'candidate_campaign':               candidate_campaign_on_stage,
+            'success':                  success,
+            'status':                   status,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'new_candidate_created':    new_candidate_created,
+            'candidate':                candidate_on_stage,
         }
         return results
 
     def update_or_create_candidates_are_not_duplicates(self, candidate1_we_vote_id, candidate2_we_vote_id):
         """
-        Either update or create a candidate_campaign entry.
+        Either update or create a candidate entry.
         """
         exception_multiple_object_returned = False
         success = False
@@ -2627,7 +2627,7 @@ class CandidateCampaignManager(models.Manager):
         }
         return results
 
-    def add_candidate_position_sorting_dates_if_needed(self, position_object=None, candidate_campaign=None):
+    def add_candidate_position_sorting_dates_if_needed(self, position_object=None, candidate=None):
         generate_sorting_dates = False
         position_object_updated = False
         candidate_year_changed = False
@@ -2635,13 +2635,13 @@ class CandidateCampaignManager(models.Manager):
         status = ""
         success = True
 
-        if positive_value_exists(candidate_campaign.candidate_year):
-            position_object.position_year = candidate_campaign.candidate_year
+        if positive_value_exists(candidate.candidate_year):
+            position_object.position_year = candidate.candidate_year
             position_object_updated = True
         else:
             generate_sorting_dates = True
-        if positive_value_exists(candidate_campaign.candidate_ultimate_election_date):
-            position_object.position_ultimate_election_date = candidate_campaign.candidate_ultimate_election_date
+        if positive_value_exists(candidate.candidate_ultimate_election_date):
+            position_object.position_ultimate_election_date = candidate.candidate_ultimate_election_date
             position_object_updated = True
         else:
             generate_sorting_dates = True
@@ -2649,11 +2649,11 @@ class CandidateCampaignManager(models.Manager):
         if generate_sorting_dates:
             largest_year_integer = None
             largest_election_date_integer = None
-            candidate_campaign_manager = CandidateCampaignManager()
-            date_results = candidate_campaign_manager.generate_candidate_position_sorting_dates(
-                candidate_we_vote_id=candidate_campaign.we_vote_id)
+            candidate_manager = CandidateManager()
+            date_results = candidate_manager.generate_candidate_position_sorting_dates(
+                candidate_we_vote_id=candidate.we_vote_id)
             if positive_value_exists(date_results['largest_year_integer']):
-                if candidate_campaign.candidate_year != date_results['largest_year_integer']:
+                if candidate.candidate_year != date_results['largest_year_integer']:
                     candidate_year_changed = True
                 if not position_object.position_year:
                     position_object.position_year = date_results['largest_year_integer']
@@ -2662,7 +2662,7 @@ class CandidateCampaignManager(models.Manager):
                     position_object.position_year = date_results['largest_year_integer']
                     position_object_updated = True
             if positive_value_exists(date_results['largest_election_date_integer']):
-                if candidate_campaign.candidate_ultimate_election_date != date_results['largest_election_date_integer']:
+                if candidate.candidate_ultimate_election_date != date_results['largest_election_date_integer']:
                     candidate_ultimate_election_date_changed = True
                 if not position_object.position_ultimate_election_date:
                     position_object.position_ultimate_election_date = date_results['largest_election_date_integer']
@@ -2673,9 +2673,9 @@ class CandidateCampaignManager(models.Manager):
             if candidate_year_changed or candidate_ultimate_election_date_changed:
                 # Retrieve an editable copy of the candidate so we can update the date caches
                 results = \
-                    candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_campaign.we_vote_id)
-                if results['candidate_campaign_found']:
-                    editable_candidate = results['candidate_campaign']
+                    candidate_manager.retrieve_candidate_from_we_vote_id(candidate.we_vote_id)
+                if results['candidate_found']:
+                    editable_candidate = results['candidate']
                     try:
                         if candidate_year_changed:
                             editable_candidate.candidate_year = largest_year_integer

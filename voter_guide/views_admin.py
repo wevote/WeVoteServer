@@ -20,7 +20,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from candidate.controllers import find_candidate_endorsements_on_one_candidate_web_page, \
     retrieve_candidate_list_for_all_upcoming_elections, \
     find_organization_endorsements_of_candidates_on_one_web_page
-from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
+from candidate.models import CandidateManager, CandidateListManager
 from config.base import get_environment_variable
 from datetime import date, datetime, timedelta, time
 from django.contrib.auth.decorators import login_required
@@ -437,8 +437,8 @@ def voter_guide_create_view(request):
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
-    candidate_manager = CandidateCampaignManager()
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_manager = CandidateManager()
+    candidate_list_manager = CandidateListManager()
     organization_list_manager = OrganizationListManager()
     organization_manager = OrganizationManager()
     organizations_list = []
@@ -503,9 +503,9 @@ def voter_guide_create_view(request):
         # #########################
         # voter_guide_create_view: Find the candidate who is the subject of this page
         if positive_value_exists(candidate_we_vote_id):
-            results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
-            if results['candidate_campaign_found']:
-                candidate = results['candidate_campaign']
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+            if results['candidate_found']:
+                candidate = results['candidate']
                 candidate_found = True
                 candidate_name = candidate.display_candidate_name()
                 candidate_twitter_handle = candidate.candidate_twitter_handle
@@ -768,8 +768,8 @@ def voter_guide_create_process_view(request):
     # ########################################
     # Figure out if we are looking at an organization's page of endorsements
     # or a candidate's page of people/organizations endorsing the candidate
-    candidate_manager = CandidateCampaignManager()
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_manager = CandidateManager()
+    candidate_list_manager = CandidateListManager()
     organization_manager = OrganizationManager()
     twitter_user_manager = TwitterUserManager()
     if type_of_website == "CandidateWebsite" or positive_value_exists(candidate_name) or \
@@ -1040,9 +1040,9 @@ def voter_guide_create_process_view(request):
         # If here is_list_of_endorsements_for_candidate is true
         # First, identify the candidate that is the subject of the page we are analyzing
         if positive_value_exists(candidate_we_vote_id):
-            results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
-            if results['candidate_campaign_found']:
-                candidate = results['candidate_campaign']
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+            if results['candidate_found']:
+                candidate = results['candidate']
                 candidate_found = True
                 candidate_name = candidate.display_candidate_name()
                 candidate_twitter_handle = candidate.candidate_twitter_handle
@@ -1538,7 +1538,7 @@ def generate_voter_guides_view(request):
     if election_results['election_list_found']:
         election_list = election_results['election_list']
 
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     office_manager = ContestOfficeManager()
     voter_guide_manager = VoterGuideManager()
 
@@ -1654,7 +1654,7 @@ def generate_voter_guides_for_one_election_view(request):
     voter_guide_updated_count = 0
 
     # Query PositionEntered table in this election for unique organization_we_vote_ids
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
         google_civic_election_id_list=[google_civic_election_id])
     if not positive_value_exists(results['success']):
@@ -1836,7 +1836,7 @@ def voter_guide_edit_process_view(request):  # NOTE: THIS FORM DOESN'T SAVE YET 
 
             # Now refresh the cache entries for this voter_guide
 
-            messages.add_message(request, messages.INFO, 'Candidate Campaign updated.')
+            messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
         else:
             # Create new
             # election must be found

@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from config.base import get_environment_variable
-from candidate.models import CandidateCampaignListManager, CandidateCampaignManager
+from candidate.models import CandidateListManager, CandidateManager
 from import_export_twitter.controllers import refresh_twitter_organization_details, scrape_social_media_from_one_site
 from organization.models import Organization, OrganizationListManager, OrganizationManager, \
     CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
@@ -24,7 +24,7 @@ VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # vot
 def candidates_found_on_url(url_to_scan, google_civic_election_id_list=[], state_code=''):
     status = ""
     success = True
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
 
     facebook_page_list = []
     twitter_or_facebook_found = False

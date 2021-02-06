@@ -5,7 +5,7 @@
 from .controllers import get_facebook_photo_url_from_graphapi
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.controllers import FACEBOOK, save_image_to_candidate_table
-from candidate.models import CandidateCampaign, CandidateCampaignListManager
+from candidate.models import CandidateCampaign, CandidateListManager
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
@@ -132,7 +132,7 @@ def bulk_retrieve_facebook_photos_view(request):
                                     '&hide_candidate_tools=' + str(hide_candidate_tools) +
                                     '&page=' + str(page)
                                     )
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     already_retrieved = 0
     already_stored = 0
     try:

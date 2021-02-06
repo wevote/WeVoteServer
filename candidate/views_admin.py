@@ -6,11 +6,11 @@ from .controllers import candidates_import_from_master_server, candidates_import
     candidate_politician_match, fetch_duplicate_candidate_count, figure_out_candidate_conflict_values, \
     find_duplicate_candidate, \
     merge_if_duplicate_candidates, merge_these_two_candidates, \
-    refresh_candidate_data_from_master_tables, retrieve_candidate_photos, \
+    retrieve_candidate_photos, \
     retrieve_candidate_politician_match_options, retrieve_next_or_most_recent_office_for_candidate, \
     save_image_to_candidate_table, \
     save_google_search_link_to_candidate_table
-from .models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager, CandidateToOfficeLink, \
+from .models import CandidateCampaign, CandidateListManager, CandidateManager, CandidateToOfficeLink, \
     CANDIDATE_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager
@@ -70,7 +70,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     google_civic_election_id_list = [google_civic_election_id]
     results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
         google_civic_election_id_list=google_civic_election_id_list,
@@ -219,7 +219,7 @@ def candidates_import_from_master_server_view(request):
 @login_required
 def candidates_import_from_sample_file_view(request):
     """
-    This gives us sample organizations, candidate campaigns, and positions for testing
+    This gives us sample organizations, candidates, and positions for testing
     :return:
     """
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
@@ -228,7 +228,7 @@ def candidates_import_from_sample_file_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     # We are importing candidate_campaigns data (and not politician data) because all we are doing is making sure we
-    #  sync to the same We Vote ID. This is critical so we can link Positions to Organization & Candidate Campaign.
+    #  sync to the same We Vote ID. This is critical so we can link Positions to Organization & CandidateCampaign.
     # At this point (June 2015) we assume the politicians have been imported from Google Civic. We aren't assigning
     # the politicians a We Vote id, but instead use their full name as the identifier
     candidates_import_from_sample_file(request, False)
@@ -291,8 +291,8 @@ def candidate_list_view(request):
     state_code = request.GET.get('state_code', '')
     state_list = STATE_CODE_MAP
     state_list_modified = {}
-    candidate_manager = CandidateCampaignManager()
-    candidate_campaign_list_manager = CandidateCampaignListManager()
+    candidate_manager = CandidateManager()
+    candidate_list_manager = CandidateListManager()
 
     if positive_value_exists(google_civic_election_id) or positive_value_exists(migrate_to_candidate_link):
         candidate_query = CandidateCampaign.objects.all()
@@ -333,7 +333,6 @@ def candidate_list_view(request):
         google_civic_election_id_list_generated = True
         google_civic_election_id_list = retrieve_upcoming_election_id_list()
 
-    candidate_list_manager = CandidateCampaignListManager()
     candidate_we_vote_id_list = []
     if google_civic_election_id_list_generated:
         results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
@@ -342,7 +341,7 @@ def candidate_list_view(request):
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
     for one_state_code, one_state_name in state_list.items():
-        count_result = candidate_campaign_list_manager.retrieve_candidate_count_for_election_and_state(
+        count_result = candidate_list_manager.retrieve_candidate_count_for_election_and_state(
             google_civic_election_id_list, one_state_code)
         state_name_modified = one_state_name
         if positive_value_exists(count_result['candidate_count']):
@@ -714,7 +713,7 @@ def candidate_list_view(request):
         # Attach the positions_count, if any, to each candidate in list
         position_list_manager = PositionListManager()
         for candidate in candidate_list:
-            candidate.positions_count = position_list_manager.fetch_public_positions_count_for_candidate_campaign(
+            candidate.positions_count = position_list_manager.fetch_public_positions_count_for_candidate(
                 candidate.id, candidate.we_vote_id)
             if positive_value_exists(candidate.candidate_twitter_handle):
                 total_twitter_handles += 1
@@ -823,7 +822,7 @@ def candidate_new_view(request):
     politician_we_vote_id = request.GET.get('politician_we_vote_id', "")
 
     office_manager = ContestOfficeManager()
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
 
     # These are the Offices already entered for this election
     try:
@@ -938,7 +937,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
     candidate_we_vote_id = ''
     candidate_on_stage_found = False
     candidate_on_stage = CandidateCampaign()
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     google_civic_election_id = 0
 
     try:
@@ -1087,8 +1086,8 @@ def candidate_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    candidate_campaign_manager = CandidateCampaignManager()
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_manager = CandidateManager()
+    candidate_list_manager = CandidateListManager()
 
     status = ""
     look_for_politician = request.POST.get('look_for_politician', False)  # If this comes in with value, don't save
@@ -1205,7 +1204,7 @@ def candidate_edit_process_view(request):
         candidate_to_office_link_add_office_we_vote_id = candidate_to_office_link_add_office_we_vote_id.strip()
         candidate_to_office_link_add_state_code = candidate_to_office_link_add_state_code.strip()
         if positive_value_exists(candidate_we_vote_id):
-            results = candidate_campaign_manager.get_or_create_candidate_to_office_link(
+            results = candidate_manager.get_or_create_candidate_to_office_link(
                 candidate_we_vote_id=candidate_we_vote_id,
                 contest_office_we_vote_id=candidate_to_office_link_add_office_we_vote_id,
                 google_civic_election_id=candidate_to_office_link_add_election,
@@ -1463,7 +1462,7 @@ def candidate_edit_process_view(request):
             ballotpedia_profile_image_url_https = candidate_on_stage.ballotpedia_profile_image_url_https
             # Now refresh the cache entries for this candidate
 
-            messages.add_message(request, messages.INFO, 'Candidate Campaign updated.')
+            messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
         else:
             # Create new
             # election must be found
@@ -1540,7 +1539,7 @@ def candidate_edit_process_view(request):
                 messages.add_message(request, messages.INFO, 'New candidate saved.')
 
                 # Now add Candidate to Office Link
-                candidate_campaign_manager.get_or_create_candidate_to_office_link(
+                candidate_manager.get_or_create_candidate_to_office_link(
                     candidate_we_vote_id=candidate_we_vote_id,
                     contest_office_we_vote_id=contest_office_we_vote_id,
                     google_civic_election_id=google_civic_election_id,
@@ -1697,15 +1696,15 @@ def candidate_politician_match_view(request):
         messages.add_message(request, messages.ERROR, "The candidate_id variable was not passed in.")
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
 
-    results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(candidate_id)
-    if not positive_value_exists(results['candidate_campaign_found']):
+    results = candidate_manager.retrieve_candidate_from_id(candidate_id)
+    if not positive_value_exists(results['candidate_found']):
         messages.add_message(request, messages.ERROR,
                              "Candidate '{candidate_id}' not found.".format(candidate_id=candidate_id))
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
-    we_vote_candidate = results['candidate_campaign']
+    we_vote_candidate = results['candidate']
 
     # Make sure we have a politician for this candidate. If we don't, create a politician entry, and save the
     # politician_we_vote_id in the candidate
@@ -1736,7 +1735,7 @@ def candidate_politician_match_for_this_election_view(request):
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
 
     try:
-        candidate_list_manager = CandidateCampaignListManager()
+        candidate_list_manager = CandidateListManager()
         results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
             google_civic_election_id_list=google_civic_election_id_list)
         # if not positive_value_exists(results['success']):
@@ -1811,15 +1810,15 @@ def candidate_retrieve_photos_view(request, candidate_id):
     candidate_id = convert_to_int(candidate_id)
     force_retrieve = request.GET.get('force_retrieve', 0)
 
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
 
-    results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(candidate_id)
-    if not positive_value_exists(results['candidate_campaign_found']):
+    results = candidate_manager.retrieve_candidate_from_id(candidate_id)
+    if not positive_value_exists(results['candidate_found']):
         messages.add_message(request, messages.ERROR,
                              "Candidate '{candidate_id}' not found.".format(candidate_id=candidate_id))
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
-    we_vote_candidate = results['candidate_campaign']
+    we_vote_candidate = results['candidate']
 
     display_messages = True
     retrieve_candidate_results = retrieve_candidate_photos(we_vote_candidate, force_retrieve)
@@ -1841,7 +1840,7 @@ def candidate_merge_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
 
     merge = request.POST.get('merge', False)
     skip = request.POST.get('skip', False)
@@ -1855,7 +1854,7 @@ def candidate_merge_process_view(request):
     state_code = request.POST.get('state_code', '')
 
     if positive_value_exists(skip):
-        results = candidate_campaign_manager.update_or_create_candidates_are_not_duplicates(
+        results = candidate_manager.update_or_create_candidates_are_not_duplicates(
             candidate1_we_vote_id, candidate2_we_vote_id)
         if not results['new_candidates_are_not_duplicates_created']:
             messages.add_message(request, messages.ERROR, 'Could not save candidates_are_not_duplicates entry: ' +
@@ -1865,18 +1864,18 @@ def candidate_merge_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
-    candidate1_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate1_we_vote_id)
-    if candidate1_results['candidate_campaign_found']:
-        candidate1_on_stage = candidate1_results['candidate_campaign']
+    candidate1_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate1_we_vote_id)
+    if candidate1_results['candidate_found']:
+        candidate1_on_stage = candidate1_results['candidate']
     else:
         messages.add_message(request, messages.ERROR, 'Could not retrieve candidate 1.')
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
                                     '&state_code=' + str(state_code))
 
-    candidate2_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate2_we_vote_id)
-    if candidate2_results['candidate_campaign_found']:
-        candidate2_on_stage = candidate2_results['candidate_campaign']
+    candidate2_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate2_we_vote_id)
+    if candidate2_results['candidate_found']:
+        candidate2_on_stage = candidate2_results['candidate']
     else:
         messages.add_message(request, messages.ERROR, 'Could not retrieve candidate 2.')
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
@@ -1935,8 +1934,8 @@ def find_and_merge_duplicate_candidates_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
     state_code = request.GET.get('state_code', "")
-    candidate_manager = CandidateCampaignManager()
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_manager = CandidateManager()
+    candidate_list_manager = CandidateListManager()
     election_manager = ElectionManager()
 
     if positive_value_exists(google_civic_election_id):
@@ -2017,15 +2016,15 @@ def render_candidate_merge_form(
         request, candidate_option1_for_template, candidate_option2_for_template,
         candidate_merge_conflict_values, remove_duplicate_process=True):
     bookmark_item_list_manager = BookmarkItemList()
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     position_list_manager = PositionListManager()
 
     # Get positions counts for both candidates
     candidate_option1_for_template.public_positions_count = \
-        position_list_manager.fetch_public_positions_count_for_candidate_campaign(
+        position_list_manager.fetch_public_positions_count_for_candidate(
             candidate_option1_for_template.id, candidate_option1_for_template.we_vote_id)
     candidate_option1_for_template.friends_positions_count = \
-        position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
+        position_list_manager.fetch_friends_only_positions_count_for_candidate(
             candidate_option1_for_template.id, candidate_option1_for_template.we_vote_id)
     # Bookmarks
     bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_candidate(
@@ -2038,10 +2037,10 @@ def render_candidate_merge_form(
     candidate_option1_for_template.bookmarks_count = candidate_option1_bookmark_count
 
     candidate_option2_for_template.public_positions_count = \
-        position_list_manager.fetch_public_positions_count_for_candidate_campaign(
+        position_list_manager.fetch_public_positions_count_for_candidate(
             candidate_option2_for_template.id, candidate_option2_for_template.we_vote_id)
     candidate_option2_for_template.friends_positions_count = \
-        position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
+        position_list_manager.fetch_friends_only_positions_count_for_candidate(
             candidate_option2_for_template.id, candidate_option2_for_template.we_vote_id)
     # Bookmarks
     bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_candidate(
@@ -2096,14 +2095,14 @@ def find_duplicate_candidate_view(request, candidate_id):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
 
-    candidate_manager = CandidateCampaignManager()
-    candidate_results = candidate_manager.retrieve_candidate_campaign_from_id(candidate_id)
-    if not candidate_results['candidate_campaign_found']:
+    candidate_manager = CandidateManager()
+    candidate_results = candidate_manager.retrieve_candidate_from_id(candidate_id)
+    if not candidate_results['candidate_found']:
         messages.add_message(request, messages.ERROR, "Candidate not found.")
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id))
 
-    candidate = candidate_results['candidate_campaign']
+    candidate = candidate_results['candidate']
 
     ignore_candidate_id_list = []
     ignore_candidate_id_list.append(candidate.we_vote_id)
@@ -2168,8 +2167,8 @@ def remove_duplicate_candidate_view(request):
                                                                                    "".format(
             var=google_civic_election_id))
 
-    candidate_campaign_list_manager = CandidateCampaignListManager()
-    results = candidate_campaign_list_manager.remove_duplicate_candidate(candidate_id, google_civic_election_id)
+    candidate_list_manager = CandidateListManager()
+    results = candidate_list_manager.remove_duplicate_candidate(candidate_id, google_civic_election_id)
     if results['success']:
         if remove_duplicate_process:
             # Continue this process
@@ -2202,7 +2201,7 @@ def retrieve_candidate_photos_for_election_view(request, election_id):
         messages.add_message(request, messages.ERROR, "Google Civic Election ID required.")
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
 
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     google_civic_election_id_list = [str(google_civic_election_id)]
     results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
         google_civic_election_id_list=google_civic_election_id_list)
@@ -2281,7 +2280,7 @@ def candidate_summary_view(request, candidate_id):
     candidate_search = request.GET.get('candidate_search', "")
 
     candidate_on_stage = CandidateCampaign()
-    candidate_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
     try:
         candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
         candidate_we_vote_id = candidate_on_stage.we_vote_id
@@ -2295,7 +2294,7 @@ def candidate_summary_view(request, candidate_id):
         # This is fine, create new
         pass
 
-    candidate_list_manager = CandidateCampaignListManager()
+    candidate_list_manager = CandidateListManager()
     results = candidate_list_manager.retrieve_candidate_to_office_link_list(
         candidate_we_vote_id_list=[candidate_we_vote_id])
     candidate_to_office_link_list = results['candidate_to_office_link_list']
@@ -2307,10 +2306,10 @@ def candidate_summary_view(request, candidate_id):
 
         # Get positions counts
         candidate_on_stage.public_positions_count = \
-            position_list_manager.fetch_public_positions_count_for_candidate_campaign(
+            position_list_manager.fetch_public_positions_count_for_candidate(
                 candidate_on_stage.id, candidate_on_stage.we_vote_id)
         candidate_on_stage.friends_positions_count = \
-            position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
+            position_list_manager.fetch_friends_only_positions_count_for_candidate(
                 candidate_on_stage.id, candidate_on_stage.we_vote_id)
         # Bookmarks
         bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_candidate(
@@ -2323,7 +2322,7 @@ def candidate_summary_view(request, candidate_id):
         candidate_on_stage.bookmarks_count = candidate_bookmark_count
 
     candidate_search_results_list = []
-    # candidate_list_manager = CandidateCampaignListManager()
+    # candidate_list_manager = CandidateListManager()
     # results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
     #     google_civic_election_id_list=google_civic_election_id_list,
     #     limit_to_this_state_code=state_code)
@@ -2453,7 +2452,7 @@ def candidate_delete_process_view(request):
     # instance of this candidate?
     position_list_manager = PositionListManager()
     retrieve_public_positions = True  # The alternate is positions for friends-only
-    position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+    position_list = position_list_manager.retrieve_all_positions_for_candidate(
         retrieve_public_positions, candidate_id)
     if positive_value_exists(len(position_list)):
         positions_found_for_this_candidate = True
@@ -2464,7 +2463,7 @@ def candidate_delete_process_view(request):
         if not positions_found_for_this_candidate:
             # Delete the candidate
             candidate_on_stage.delete()
-            messages.add_message(request, messages.INFO, 'Candidate Campaign deleted.')
+            messages.add_message(request, messages.INFO, 'CandidateCampaign deleted.')
         else:
             messages.add_message(request, messages.ERROR, 'Could not delete -- '
                                                           'positions still attached to this candidate.')
@@ -2489,22 +2488,22 @@ def compare_two_candidates_for_merge_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
 
-    candidate_manager = CandidateCampaignManager()
-    candidate_results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate1_we_vote_id)
-    if not candidate_results['candidate_campaign_found']:
+    candidate_manager = CandidateManager()
+    candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate1_we_vote_id)
+    if not candidate_results['candidate_found']:
         messages.add_message(request, messages.ERROR, "Candidate1 not found.")
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id))
 
-    candidate_option1_for_template = candidate_results['candidate_campaign']
+    candidate_option1_for_template = candidate_results['candidate']
 
-    candidate_results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate2_we_vote_id)
-    if not candidate_results['candidate_campaign_found']:
+    candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate2_we_vote_id)
+    if not candidate_results['candidate_found']:
         messages.add_message(request, messages.ERROR, "Candidate2 not found.")
         return HttpResponseRedirect(reverse('candidate:candidate_summary', args=(candidate_option1_for_template.id,)) +
                                     "?google_civic_election_id=" + str(google_civic_election_id))
 
-    candidate_option2_for_template = candidate_results['candidate_campaign']
+    candidate_option2_for_template = candidate_results['candidate']
 
     candidate_merge_conflict_values = figure_out_candidate_conflict_values(
         candidate_option1_for_template, candidate_option2_for_template)

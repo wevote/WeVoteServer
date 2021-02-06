@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from candidate.controllers import retrieve_candidate_photos
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateManager
 from elected_office.models import ElectedOffice
 from exception.models import handle_record_not_found_exception, handle_record_found_more_than_one_exception, \
     print_to_log, handle_record_not_saved_exception
@@ -463,15 +463,15 @@ def elected_official_retrieve_photos_view(request, candidate_id):  # TODO DALE T
     candidate_id = convert_to_int(candidate_id)
     force_retrieve = request.GET.get('force_retrieve', 0)
 
-    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_manager = CandidateManager()
 
-    results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(candidate_id)
-    if not positive_value_exists(results['candidate_campaign_found']):
+    results = candidate_manager.retrieve_candidate_from_id(candidate_id)
+    if not positive_value_exists(results['candidate_found']):
         messages.add_message(request, messages.ERROR,
                              "Candidate '{candidate_id}' not found.".format(candidate_id=candidate_id))
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
-    we_vote_candidate = results['candidate_campaign']
+    we_vote_candidate = results['candidate']
 
     display_messages = True
     retrieve_candidate_results = retrieve_candidate_photos(we_vote_candidate, force_retrieve)

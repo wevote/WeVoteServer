@@ -4,7 +4,7 @@
 
 from .models import BookmarkItemList, BookmarkItemManager
 from ballot.models import CANDIDATE, MEASURE, OFFICE
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateManager
 from django.http import HttpResponse
 import json
 from measure.models import ContestMeasureManager
@@ -65,12 +65,12 @@ def voter_bookmark_off_save_for_api(voter_device_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     elif positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
         # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the value we don't have
         if positive_value_exists(candidate_id):
-            candidate_we_vote_id = candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(candidate_id)
+            candidate_we_vote_id = candidate_manager.fetch_candidate_we_vote_id_from_id(candidate_id)
         elif positive_value_exists(candidate_we_vote_id):
-            candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+            candidate_id = candidate_manager.fetch_candidate_id_from_we_vote_id(candidate_we_vote_id)
 
         results = bookmark_item_manager.toggle_off_voter_bookmarked_candidate(voter_id, candidate_id)
         status = "BOOKMARK_OFF_CANDIDATE " + results['status']
@@ -167,12 +167,12 @@ def voter_bookmark_on_save_for_api(voter_device_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     elif positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
         # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the value we don't have
         if positive_value_exists(candidate_id):
-            candidate_we_vote_id = candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(candidate_id)
+            candidate_we_vote_id = candidate_manager.fetch_candidate_we_vote_id_from_id(candidate_id)
         elif positive_value_exists(candidate_we_vote_id):
-            candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+            candidate_id = candidate_manager.fetch_candidate_id_from_we_vote_id(candidate_we_vote_id)
 
         results = bookmark_item_manager.toggle_on_voter_bookmarked_candidate(voter_id, candidate_id)
         status = "BOOKMARK_ON_CANDIDATE " + results['status']
@@ -290,12 +290,12 @@ def voter_bookmark_status_retrieve_for_api(voter_device_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     elif positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_manager = CandidateManager()
         # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the value we don't have
         if positive_value_exists(candidate_id):
-            candidate_we_vote_id = candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(candidate_id)
+            candidate_we_vote_id = candidate_manager.fetch_candidate_we_vote_id_from_id(candidate_id)
         elif positive_value_exists(candidate_we_vote_id):
-            candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+            candidate_id = candidate_manager.fetch_candidate_id_from_we_vote_id(candidate_we_vote_id)
 
         # Zero out the unused values
         bookmark_item_id = 0

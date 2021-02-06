@@ -421,7 +421,7 @@ class PoliticianManager(models.Manager):
 
     def update_or_create_politician_from_candidate(self, candidate):
         """
-        Take a We Vote candidate_campaign object, and map it to update_or_create_politician
+        Take a We Vote candidate object, and map it to update_or_create_politician
         :param candidate:
         :return:
         """
