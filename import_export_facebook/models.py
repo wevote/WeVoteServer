@@ -364,7 +364,7 @@ class FacebookManager(models.Manager):
         }
         return results
 
-    def create_or_update_facebook_friends_using_we_vote(self, facebook_id_of_me, facebook_id_of_my_friend):
+    def update_or_create_facebook_friends_using_we_vote(self, facebook_id_of_me, facebook_id_of_my_friend):
         """
         We use this subroutine to create or update FacebookFriendsUsingWeVote table with my friends facebook id.
         :param facebook_id_of_me:
@@ -869,7 +869,7 @@ class FacebookManager(models.Manager):
                     else None)
                 if facebook_friend_dict not in facebook_friends_list:
                     facebook_friends_list.append(facebook_friend_dict)
-                facebook_friends_saved_results = self.create_or_update_facebook_friends_using_we_vote(
+                facebook_friends_saved_results = self.update_or_create_facebook_friends_using_we_vote(
                     facebook_auth_response.facebook_user_id, facebook_friend_dict.get('facebook_user_id'))
                 status += ' ' + facebook_friends_saved_results['status']
 

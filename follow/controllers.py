@@ -458,6 +458,81 @@ def duplicate_organization_followers_to_another_organization(from_organization_i
     return results
 
 
+def voter_campaignx_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, ignore_value,
+                                   user_agent_string, user_agent_object):  # campaignFollow
+    voter_we_vote_id = False
+    voter_id = 0
+    is_signed_in = False
+    issue_id = ''
+    if positive_value_exists(voter_device_id):
+        voter_manager = VoterManager()
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        if voter_results['voter_found']:
+            voter = voter_results['voter']
+            voter_we_vote_id = voter.we_vote_id
+            voter_id = voter.id
+            if voter.is_signed_in():
+                is_signed_in = True
+    follow_issue_manager = FollowIssueManager()
+    follow_metrics_manager = FollowMetricsManager()
+    result = False
+    is_bot = user_agent_object.is_bot or robot_detection.is_robot(user_agent_string)
+    analytics_manager = AnalyticsManager()
+    if positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
+        if follow_value:
+            result = follow_issue_manager.toggle_on_voter_following_issue(voter_we_vote_id, issue_id,
+                                                                          issue_we_vote_id)
+            analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW,
+                                                              voter_we_vote_id, voter_id, is_signed_in,
+                                                              user_agent_string=user_agent_string, is_bot=is_bot,
+                                                              is_mobile=user_agent_object.is_mobile,
+                                                              is_desktop=user_agent_object.is_pc,
+                                                              is_tablet=user_agent_object.is_tablet)
+        elif not follow_value:
+            result = follow_issue_manager.toggle_off_voter_following_issue(voter_we_vote_id, issue_id,
+                                                                           issue_we_vote_id)
+            analytics_results = analytics_manager.save_action(ACTION_ISSUE_STOP_FOLLOWING,
+                                                              voter_we_vote_id, voter_id, is_signed_in,
+                                                              user_agent_string=user_agent_string, is_bot=is_bot,
+                                                              is_mobile=user_agent_object.is_mobile,
+                                                              is_desktop=user_agent_object.is_pc,
+                                                              is_tablet=user_agent_object.is_tablet)
+        elif ignore_value:
+            result = follow_issue_manager.toggle_ignore_voter_following_issue(voter_we_vote_id, issue_id,
+                                                                              issue_we_vote_id)
+            analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW_IGNORE,
+                                                              voter_we_vote_id, voter_id, is_signed_in,
+                                                              user_agent_string=user_agent_string, is_bot=is_bot,
+                                                              is_mobile=user_agent_object.is_mobile,
+                                                              is_desktop=user_agent_object.is_pc,
+                                                              is_tablet=user_agent_object.is_tablet)
+
+    if not result:
+        new_result = {
+            'success': False,
+            'follow_issue_found': False,
+        }
+    else:
+        if positive_value_exists(voter_we_vote_id):
+            number_of_issues_followed = follow_metrics_manager.fetch_issues_followed(voter_we_vote_id)
+
+            voter_manager = VoterManager()
+            voter_manager.update_issues_interface_status(voter_we_vote_id, number_of_issues_followed)
+
+        new_result = {
+            'success': result['success'],
+            'status': result['status'],
+            'voter_device_id': voter_device_id,
+            'issue_we_vote_id': issue_we_vote_id,
+            'follow_value': follow_value,
+            'ignore_value': ignore_value,
+            'follow_issue_found': result['follow_issue_found'],
+            'follow_issue_id': result['follow_issue_id'],
+        }
+
+    return new_result
+
+
 def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, ignore_value,
                                user_agent_string, user_agent_object):  # issueFollow
     voter_we_vote_id = False

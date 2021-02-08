@@ -333,9 +333,10 @@ def office_list_view(request):
             pass
     sorted_state_list = sorted(state_list_modified.items())
 
+    office_list_count_str = f'{office_list_count:,}'
+
     status_print_list = ""
-    status_print_list += "office_list_count: " + \
-                         str(office_list_count) + " "
+    status_print_list += "office_list_count: " + office_list_count_str + " "
 
     messages.add_message(request, messages.INFO, status_print_list)
 

@@ -2040,7 +2040,7 @@ def voter_guide_list_view(request):
     else:
         modified_voter_guide_list = voter_guide_list
 
-    messages.add_message(request, messages.INFO, 'We found {voter_guides_count} existing voter guides. '
+    messages.add_message(request, messages.INFO, 'We found {voter_guides_count:,} existing voter guides. '
                                                  ''.format(voter_guides_count=voter_guides_count))
 
     messages_on_stage = get_messages(request)

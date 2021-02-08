@@ -265,7 +265,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
 
         # Store the new permissions granted if the public or friends-only positions were shared
         if positive_value_exists(include_public_positions) or positive_value_exists(include_friends_only_positions):
-            permission_results = share_manager.create_or_update_shared_permissions_granted(
+            permission_results = share_manager.update_or_create_shared_permissions_granted(
                 shared_by_voter_we_vote_id=shared_item.shared_by_voter_we_vote_id,
                 shared_by_organization_type=shared_item.shared_by_organization_type,
                 shared_by_organization_we_vote_id=shared_item.shared_by_organization_we_vote_id,
@@ -509,7 +509,7 @@ def shared_item_save_for_api(  # sharedItemSave
         'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
         'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
     }
-    create_results = share_manager.create_or_update_shared_item(
+    create_results = share_manager.update_or_create_shared_item(
         destination_full_url=destination_full_url,
         shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
         google_civic_election_id=google_civic_election_id,

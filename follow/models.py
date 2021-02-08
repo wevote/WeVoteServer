@@ -43,14 +43,232 @@ FOLLOW_SUGGESTIONS_FROM_FRIENDS_ON_TWITTER = 'FOLLOW_SUGGESTIONS_FROM_FRIENDS_ON
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+class FollowCampaignX(models.Model):
+    voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
+    organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    campaignx_id = models.PositiveIntegerField(null=True, blank=True)
+    campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
+
+
+class FollowCampaignXManager(models.Manager):
+
+    def __unicode__(self):
+        return "FollowCampaignXManager"
+
+    def toggle_on_follow_campaignx(self, voter_we_vote_id, issue_id, issue_we_vote_id, following_status):
+        follow_campaignx_on_stage_found = False
+        follow_campaignx_changed = False
+        follow_campaignx_on_stage_id = 0
+        follow_campaignx_on_stage = FollowIssue()
+        status = ''
+
+        issue_identifier_exists = positive_value_exists(issue_we_vote_id) or positive_value_exists(issue_id)
+        if not positive_value_exists(voter_we_vote_id) and not issue_identifier_exists:
+            results = {
+                'success': True if follow_campaignx_on_stage_found else False,
+                'status': 'Insufficient inputs to toggle issue link, try passing ids for voter and issue ',
+                'follow_campaignx_found': follow_campaignx_on_stage_found,
+                'follow_campaignx_id': follow_campaignx_on_stage_id,
+                'follow_campaignx': follow_campaignx_on_stage,
+            }
+            return results
+
+        # Does a follow_campaignx entry exist from this voter already exist?
+        follow_campaignx_manager = FollowIssueManager()
+        follow_campaignx_id = 0
+        results = follow_campaignx_manager.retrieve_follow_campaignx(follow_campaignx_id, voter_we_vote_id, issue_id,
+                                                             issue_we_vote_id)
+        if results['MultipleObjectsReturned']:
+            status += 'TOGGLE_FOLLOWING_ISSUE MultipleObjectsReturned ' + following_status
+            delete_results = follow_campaignx_manager.delete_follow_campaignx(
+                follow_campaignx_id, voter_we_vote_id, issue_id, issue_we_vote_id)
+            status += delete_results['status']
+
+            results = follow_campaignx_manager.retrieve_follow_campaignx(follow_campaignx_id, voter_we_vote_id, issue_id,
+                                                                 issue_we_vote_id)
+
+        if results['follow_campaignx_found']:
+            follow_campaignx_on_stage = results['follow_campaignx']
+
+            # Update this follow_campaignx entry with new values - we do not delete because we might be able to use
+            try:
+                follow_campaignx_on_stage.following_status = following_status
+                # We don't need to update here because set set auto_now=True in the field
+                # follow_campaignx_on_stage.date_last_changed =
+                follow_campaignx_on_stage.save()
+                follow_campaignx_changed = True
+                follow_campaignx_on_stage_id = follow_campaignx_on_stage.id
+                follow_campaignx_on_stage_found = True
+                status += 'FOLLOW_STATUS_UPDATED_AS ' + following_status
+            except Exception as e:
+                status += 'FAILED_TO_UPDATE ' + following_status
+                handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+        elif results['DoesNotExist']:
+            try:
+                # Create new follow_campaignx entry
+                # First make sure that issue_id is for a valid issue
+                issue_manager = IssueManager()
+                if positive_value_exists(issue_id):
+                    results = issue_manager.retrieve_issue(issue_id)
+                else:
+                    results = issue_manager.retrieve_issue(0, issue_we_vote_id)
+                if results['issue_found']:
+                    issue = results['issue']
+                    follow_campaignx_on_stage = FollowIssue(
+                        voter_we_vote_id=voter_we_vote_id,
+                        issue_id=issue.id,
+                        issue_we_vote_id=issue.we_vote_id,
+                        following_status=following_status,
+                    )
+                    # if auto_followed_from_twitter_suggestion:
+                    #     follow_campaignx_on_stage.auto_followed_from_twitter_suggestion = True
+                    follow_campaignx_on_stage.save()
+                    follow_campaignx_changed = True
+                    follow_campaignx_on_stage_id = follow_campaignx_on_stage.id
+                    follow_campaignx_on_stage_found = True
+                    status += 'CREATE ' + following_status
+                else:
+                    status = 'ISSUE_NOT_FOUND_ON_CREATE ' + following_status
+            except Exception as e:
+                status += 'FAILED_TO_UPDATE ' + following_status
+                handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+        else:
+            status += results['status']
+
+        results = {
+            'success':               True if follow_campaignx_on_stage_found else False,
+            'status':                status,
+            'follow_campaignx_found':    follow_campaignx_on_stage_found,
+            'follow_campaignx_id':       follow_campaignx_on_stage_id,
+            'follow_campaignx':          follow_campaignx_on_stage,
+        }
+        return results
+
+    def retrieve_follow_campaignx(self, follow_campaignx_id, voter_we_vote_id, issue_id, issue_we_vote_id):
+        """
+        follow_campaignx_id is the identifier for records stored in this table (it is NOT the issue_id)
+        """
+        error_result = False
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        follow_campaignx_on_stage = FollowIssue()
+        follow_campaignx_on_stage_id = 0
+
+        try:
+            if positive_value_exists(follow_campaignx_id):
+                follow_campaignx_on_stage = FollowIssue.objects.get(id=follow_campaignx_id)
+                follow_campaignx_on_stage_id = issue_id.id
+                success = True
+                status = 'FOLLOW_ISSUE_FOUND_WITH_ID'
+            elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_id):
+                follow_campaignx_on_stage = FollowIssue.objects.get(
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    issue_id=issue_id)
+                follow_campaignx_on_stage_id = follow_campaignx_on_stage.id
+                success = True
+                status = 'FOLLOW_ISSUE_FOUND_WITH_VOTER_WE_VOTE_ID_AND_ISSUE_ID'
+            elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
+                follow_campaignx_on_stage = FollowIssue.objects.get(
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    issue_we_vote_id__iexact=issue_we_vote_id)
+                follow_campaignx_on_stage_id = follow_campaignx_on_stage.id
+                success = True
+                status = 'FOLLOW_ISSUE_FOUND_WITH_VOTER_WE_VOTE_ID_AND_ISSUE_WE_VOTE_ID'
+            else:
+                success = False
+                status = 'FOLLOW_ISSUE_MISSING_REQUIRED_VARIABLES'
+        except FollowIssue.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            error_result = True
+            exception_multiple_object_returned = True
+            success = False
+            status = 'FOLLOW_ISSUE_NOT_FOUND_MultipleObjectsReturned'
+        except FollowIssue.DoesNotExist:
+            error_result = False
+            exception_does_not_exist = True
+            success = True
+            status = 'FOLLOW_ISSUE_NOT_FOUND_DoesNotExist'
+
+        if positive_value_exists(follow_campaignx_on_stage_id):
+            follow_campaignx_on_stage_found = True
+            is_following = follow_campaignx_on_stage.is_following()
+            is_not_following = follow_campaignx_on_stage.is_not_following()
+            is_ignoring = follow_campaignx_on_stage.is_ignoring()
+        else:
+            follow_campaignx_on_stage_found = False
+            is_following = False
+            is_not_following = True
+            is_ignoring = False
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'follow_campaignx_found':           follow_campaignx_on_stage_found,
+            'follow_campaignx_id':              follow_campaignx_on_stage_id,
+            'follow_campaignx':                 follow_campaignx_on_stage,
+            'is_following':                 is_following,
+            'is_not_following':             is_not_following,
+            'is_ignoring':                  is_ignoring,
+            'error_result':                 error_result,
+            'DoesNotExist':                 exception_does_not_exist,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+        }
+        return results
+
+    def delete_follow_campaignx(self, follow_campaignx_id, voter_we_vote_id, issue_id, issue_we_vote_id):
+        """
+        Remove any follow issue entries (we may have duplicate entries)
+        """
+        follow_campaignx_deleted = False
+        status = ''
+
+        try:
+            if positive_value_exists(follow_campaignx_id):
+                follow_campaignx_on_stage = FollowIssue.objects.get(id=follow_campaignx_id)
+                follow_campaignx_on_stage.delete()
+                follow_campaignx_deleted = True
+                success = True
+                status += 'FOLLOW_ISSUE_DELETED_BY_ID '
+            elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_id):
+                follow_campaignx_query = FollowIssue.objects.filter(
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    issue_id=issue_id)
+                follow_campaignx_list = list(follow_campaignx_query)
+                for one_follow_campaignx in follow_campaignx_list:
+                    one_follow_campaignx.delete()
+                    follow_campaignx_deleted = True
+                success = True
+                status += 'FOLLOW_ISSUE_DELETED_BY_VOTER_WE_VOTE_ID_AND_ISSUE_ID '
+            elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
+                follow_campaignx_query = FollowIssue.objects.filter(
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    issue_we_vote_id__iexact=issue_we_vote_id)
+                follow_campaignx_list = list(follow_campaignx_query)
+                for one_follow_campaignx in follow_campaignx_list:
+                    one_follow_campaignx.delete()
+                    follow_campaignx_deleted = True
+                success = True
+                status += 'FOLLOW_ISSUE_DELETE_BY_VOTER_WE_VOTE_ID_AND_ISSUE_WE_VOTE_ID '
+            else:
+                success = False
+                status += 'FOLLOW_ISSUE_DELETE_MISSING_REQUIRED_VARIABLES '
+        except FollowIssue.DoesNotExist:
+            success = True
+            status = 'FOLLOW_ISSUE_DELETE_NOT_FOUND_DoesNotExist '
+
+        results = {
+            'status':               status,
+            'success':              success,
+            'follow_campaignx_deleted': follow_campaignx_deleted,
+        }
+        return results
+
+
 class FollowIssue(models.Model):
     # We are relying on built-in Python id field
     # The voter following the issue
     voter_we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
-
-    # NOTE: we will use the organization_we_vote_id in FollowIssue if we decide to let a voter publish to
-    # the public the issues they follow. 2017-09 NOT CURRENTLY SUPPORTED
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
 
@@ -319,7 +537,7 @@ class FollowIssueManager(models.Manager):
         }
         return results
 
-    def create_or_update_suggested_issue_to_follow(self, viewer_voter_we_vote_id, issue_we_vote_id,
+    def update_or_create_suggested_issue_to_follow(self, viewer_voter_we_vote_id, issue_we_vote_id,
                                                    from_twitter=False):
         """
         Create or update the SuggestedIssueToFollow table with suggested issues from twitter ids i follow

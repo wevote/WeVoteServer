@@ -535,9 +535,10 @@ def measure_list_view(request):
             pass
     sorted_state_list = sorted(state_list_modified.items())
 
+    measure_list_count_str = f'{measure_list_count:,}'
+
     status_print_list = ""
-    status_print_list += "measure_list_count: " + \
-                         str(measure_list_count) + " "
+    status_print_list += "measure_list_count: " + measure_list_count_str + " "
 
     messages.add_message(request, messages.INFO, status_print_list)
 
