@@ -592,10 +592,10 @@ def polling_location_list_view(request):
 
     polling_location_count = polling_location_count_query.count()
 
-    info_message = '{polling_location_count} map points found.'.format(
+    info_message = '{polling_location_count:,} map points found.'.format(
         polling_location_count=polling_location_count)
     if positive_value_exists(polling_location_without_latitude_count):
-        info_message += ' {polling_location_without_latitude_count} map points without lat/long.'.format(
+        info_message += ' {polling_location_without_latitude_count:,} map points without lat/long.'.format(
             polling_location_without_latitude_count=polling_location_without_latitude_count)
 
     messages.add_message(request, messages.INFO, info_message)

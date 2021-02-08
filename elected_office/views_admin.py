@@ -134,9 +134,10 @@ def elected_office_list_view(request):
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
+    elected_office_list_count_str = f'{elected_office_list_count:,}'
+
     status_print_list = ""
-    status_print_list += "elected_office_list_count: " + \
-                         str(elected_office_list_count) + " "
+    status_print_list += "elected_office_list_count: " + elected_office_list_count_str + " "
 
     messages.add_message(request, messages.INFO, status_print_list)
 

@@ -1,4 +1,4 @@
-# apis_v1/views/views_candidate.py
+# apis_v1/views/views_measure.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 from config.base import get_environment_variable

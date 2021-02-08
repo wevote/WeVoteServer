@@ -703,7 +703,7 @@ def organization_analyze_tweets(organization_we_vote_id):
 
     organization_manager = OrganizationManager()
     for key, value in unique_hashtags_count_dict.items():
-        organization_link_to_hashtag_results = organization_manager.create_or_update_organization_link_to_hashtag(
+        organization_link_to_hashtag_results = organization_manager.update_or_create_organization_link_to_hashtag(
             organization_we_vote_id, key)
 
     results = {

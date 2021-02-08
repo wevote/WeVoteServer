@@ -128,6 +128,7 @@ INSTALLED_APPS = (
     'apple',
     'ballot',
     'bookmark',
+    'campaign',
     'candidate',
     'config',
     'donate',

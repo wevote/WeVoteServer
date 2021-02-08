@@ -173,7 +173,7 @@ class ShareManager(models.Manager):
         }
         return results
 
-    def create_or_update_shared_item(
+    def update_or_create_shared_item(
             self,
             destination_full_url='',
             shared_by_voter_we_vote_id='',
@@ -295,7 +295,7 @@ class ShareManager(models.Manager):
         }
         return results
 
-    def create_or_update_shared_permissions_granted(
+    def update_or_create_shared_permissions_granted(
             self,
             shared_by_voter_we_vote_id='',
             shared_by_organization_type='',

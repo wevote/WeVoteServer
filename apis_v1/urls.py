@@ -11,7 +11,7 @@ from django.conf.urls import url
 from django.conf.urls.static import static
 
 from apis_v1.views import views_activity, views_apple, views_docs, views_analytics, views_ballot, \
-    views_candidate, views_donation, \
+    views_campaign, views_candidate, views_donation, \
     views_election, views_extension, views_facebook, views_friend, \
     views_issues, views_measure, views_misc, views_organization, \
     views_pledge_to_vote, views_position, views_reaction, views_retrieve_tables, \
@@ -60,13 +60,20 @@ urlpatterns = [
         name='ballotItemsSearchRetrieveView'),
     url(r'^ballotItemsSyncOut/', ballot_items_sync_out_view, name='ballotItemsSyncOutView'),
     url(r'^ballotReturnedSyncOut/', ballot_returned_sync_out_view, name='ballotReturnedSyncOutView'),
+    url(r'^campaignFollow/', views_campaign.voter_campaignx_follow_view, name='campaignFollowView'),
+    url(r'^campaignRetrieve/', views_campaign.campaignx_retrieve_view, name='campaignRetrieveView'),
+    url(r'^campaignRetrieveAsOwner/',
+        views_campaign.campaignx_retrieve_as_owner_view, name='campaignRetrieveAsOwnerView'),
+    url(r'^campaignSave/', views_campaign.campaignx_save_view, name='campaignSaveView'),
+    url(r'^campaignStartSave/', views_campaign.campaignx_save_view, name='campaignStartSaveView'),
     url(r'^candidateRetrieve/', views_candidate.candidate_retrieve_view, name='candidateRetrieveView'),
     url(r'^candidateListForUpcomingElectionsRetrieve/',
         views_candidate.candidate_list_for_upcoming_elections_retrieve_api_view,
         name='candidateListForUpcomingElectionsRetrieveView'),
     url(r'^candidatesRetrieve/', views_candidate.candidates_retrieve_view, name='candidatesRetrieveView'),
     url(r'^candidatesSyncOut/', candidates_sync_out_view, name='candidatesSyncOutView'),
-    url(r'^candidateToOfficeLinkSyncOut/', candidate_to_office_link_sync_out_view, name='candidateToOfficeLinkSyncOutView'),
+    url(r'^candidateToOfficeLinkSyncOut/',
+        candidate_to_office_link_sync_out_view, name='candidateToOfficeLinkSyncOutView'),
     url(r'^couponSummaryRetrieve',
         views_donation.coupon_summary_retrieve_for_api_view, name='couponSummaryRetrieve'),  # No doc yet
     url(r'^defaultPricing', views_donation.default_pricing_for_api_view, name='defaultPricing'),  # No doc yet
@@ -351,6 +358,9 @@ urlpatterns = [
     url(r'^docs/ballotItemsSyncOut/$', views_docs.ballot_items_sync_out_doc_view, name='ballotItemsSyncOutDocs'),
     url(r'^docs/ballotReturnedSyncOut/$',
         views_docs.ballot_returned_sync_out_doc_view, name='ballotReturnedSyncOutDocs'),
+    url(r'^docs/campaignFollow/$', views_docs.campaign_follow_doc_view, name='campaignFollowDocs'),
+    url(r'^docs/campaignRetrieve/$', views_docs.campaign_retrieve_doc_view, name='campaignRetrieveDocs'),
+    url(r'^docs/campaignSave/$', views_docs.campaign_save_doc_view, name='campaignSaveDocs'),
     url(r'^docs/candidateRetrieve/$', views_docs.candidate_retrieve_doc_view, name='candidateRetrieveDocs'),
     url(r'^docs/candidateListForUpcomingElectionsRetrieve/$',
         views_docs.candidate_list_for_upcoming_elections_retrieve_doc_view,

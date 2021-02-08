@@ -190,7 +190,7 @@ class OrganizationManager(models.Manager):
     A class for working with the Organization model
     """
     # DO WE WANT CREATE OR UPDATE AND CREATE # Do we want the organization twitter handle
-    def create_or_update_organization_link_to_hashtag(self, organization_we_vote_id, hashtag_text):
+    def update_or_create_organization_link_to_hashtag(self, organization_we_vote_id, hashtag_text):
         success = False
         status = ""
         organization_link_to_hashtag_created = False
