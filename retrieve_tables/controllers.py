@@ -264,6 +264,7 @@ def retrieve_sql_files_from_master_server(request):
 
             cur.execute("SELECT setval('" + table_name + "_id_seq', (SELECT MAX(id) FROM \"" + table_name + "\"))")
             conn.commit()
+            conn.close()
             print("... SQL executed: SELECT setval('" +
                   table_name + "_id_seq', (SELECT MAX(id) FROM \"" + table_name + "\"))")
 
