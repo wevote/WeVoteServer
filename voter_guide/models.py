@@ -11,7 +11,7 @@ from exception.models import handle_exception, handle_record_not_found_exception
 import operator
 from organization.models import Organization, OrganizationManager, \
     CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
-    POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, UNKNOWN, ORGANIZATION_TYPE_CHOICES
+    POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, TRADE_ASSOCIATION, UNKNOWN, ORGANIZATION_TYPE_CHOICES
 from pledge_to_vote.models import PledgeToVoteManager
 import pytz
 from voter.models import VoterManager
@@ -1126,6 +1126,7 @@ class VoterGuide(models.Model):
     POLITICAL_ACTION_COMMITTEE = POLITICAL_ACTION_COMMITTEE
     ORGANIZATION = ORGANIZATION  # Deprecate in favor of GROUP
     PUBLIC_FIGURE = PUBLIC_FIGURE
+    TRADE_ASSOCIATION = TRADE_ASSOCIATION
     VOTER = VOTER  # Deprecate in favor of Individual
     UNKNOWN = UNKNOWN
 

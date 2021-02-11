@@ -15,8 +15,6 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 # This api will only return the data from the following tables
 allowable_tables = [
-    'ballot_ballotitem',
-    'ballot_ballotreturned',
     'candidate_candidatecampaign',
     'candidate_candidatetoofficelink',
     'election_election',
@@ -35,7 +33,9 @@ allowable_tables = [
     'voter_guide_voterguidepossibility',
     'voter_guide_voterguidepossibilityposition',
     'voter_guide_voterguide',
-    'wevote_settings_wevotesetting'
+    'wevote_settings_wevotesetting',
+    'ballot_ballotitem',
+    'ballot_ballotreturned',
 ]
 
 dummy_unique_id = 10000000
@@ -248,6 +248,29 @@ def retrieve_sql_files_from_master_server(request):
                 finally:
                     start += 1000000
                     end += 1000000
+
+        # Update the last_value for this table so creating new entries doesn't
+        #  throw "django Key (id)= already exists" error
+        try:
+            conn = psycopg2.connect(
+                database=get_environment_variable('DATABASE_NAME'),
+                user=get_environment_variable('DATABASE_USER'),
+                password=get_environment_variable('DATABASE_PASSWORD'),
+                host=get_environment_variable('DATABASE_HOST'),
+                port=get_environment_variable('DATABASE_PORT')
+            )
+
+            cur = conn.cursor()
+
+            cur.execute("SELECT setval('" + table_name + "_id_seq', (SELECT MAX(id) FROM \"" + table_name + "\"))")
+            conn.commit()
+            print("... SQL executed: SELECT setval('" +
+                  table_name + "_id_seq', (SELECT MAX(id) FROM \"" + table_name + "\"))")
+
+        except Exception as e:
+            status += "... SQL FAILED: SELECT setval('" + \
+                      table_name + "_id_seq', (SELECT MAX(id) FROM \"" + table_name + "\")): " + str(e)
+            logger.error(status)
 
         status += ", " + " loaded " + table_name
         stat = 'Processing and loading table: ' + table_name + '  took ' + str(int(dt)) + ' seconds'

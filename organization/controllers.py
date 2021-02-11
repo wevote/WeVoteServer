@@ -5,9 +5,7 @@
 from .controllers_fastly import add_wevote_subdomain_to_fastly, add_subdomain_route53_record, \
     get_wevote_subdomain_status
 from .models import Organization, OrganizationListManager, OrganizationManager, \
-    OrganizationReservedDomain, ORGANIZATION_UNIQUE_IDENTIFIERS, OrganizationMembershipLinkToVoter, \
-    CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
-    POLITICAL_ACTION_COMMITTEE, ORGANIZATION, PUBLIC_FIGURE, UNKNOWN, VOTER, ORGANIZATION_TYPE_CHOICES
+    OrganizationReservedDomain, ORGANIZATION_UNIQUE_IDENTIFIERS, OrganizationMembershipLinkToVoter
 from analytics.models import ACTION_BALLOT_VISIT, ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, \
     ACTION_ORGANIZATION_STOP_FOLLOWING, ACTION_ORGANIZATION_STOP_IGNORING, AnalyticsManager
 import base64

@@ -28,6 +28,7 @@ NEWS_ORGANIZATION = 'NW'
 ORGANIZATION = 'O'  # Deprecated
 POLITICAL_ACTION_COMMITTEE = 'P'
 PUBLIC_FIGURE = 'PF'
+TRADE_ASSOCIATION = 'TA'
 UNKNOWN = 'U'
 VOTER = 'V'
 ORGANIZATION_TYPE_CHOICES = (
@@ -35,17 +36,18 @@ ORGANIZATION_TYPE_CHOICES = (
     (GROUP, 'Group'),
     (INDIVIDUAL, 'Individual'),
     (NEWS_ORGANIZATION, 'News Corporation'),
-    (NONPROFIT, 'Nonprofit'),
+    (NONPROFIT, 'Nonpartisan'),
     (NONPROFIT_501C3, 'Nonprofit 501c3'),
     (NONPROFIT_501C4, 'Nonprofit 501c4'),
     (POLITICAL_ACTION_COMMITTEE, 'Political Action Committee'),
     (PUBLIC_FIGURE, 'Public Figure'),
+    (TRADE_ASSOCIATION, 'Trade Association or Union'),
     (UNKNOWN, 'Unknown Type'),
     (ORGANIZATION, 'Group - Organization'),  # Deprecated
 )
 ORGANIZATION_TYPE_CHOICES_IN_PUBLIC_SPHERE = [CORPORATION, GROUP, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4,
                                               NEWS_ORGANIZATION, ORGANIZATION, POLITICAL_ACTION_COMMITTEE,
-                                              PUBLIC_FIGURE]
+                                              PUBLIC_FIGURE, TRADE_ASSOCIATION]
 
 ORGANIZATION_NAMES_TO_EXCLUDE_FROM_SCRAPER = ["DID", "Google", "Twitter", "Ro", "Uber"]
 
@@ -54,11 +56,12 @@ ORGANIZATION_TYPE_MAP = {
     GROUP:                      'Group',
     INDIVIDUAL:                 'Individual',
     NEWS_ORGANIZATION:          'News Organization',
-    NONPROFIT:                  'Nonprofit (c?)',
-    NONPROFIT_501C3:            'Nonprofit 501c3',
-    NONPROFIT_501C4:            'Nonprofit 501c4',
+    NONPROFIT:                  'Nonpartisan',
+    NONPROFIT_501C3:            'Nonprofit 501c3 - Remove',
+    NONPROFIT_501C4:            'Nonprofit 501c4 - Remove',
     POLITICAL_ACTION_COMMITTEE: 'Political Action Committee',
     PUBLIC_FIGURE:              'Public Figure',
+    TRADE_ASSOCIATION:          'Trade Association or Union',
     UNKNOWN:                    'Unknown Type',
 }
 
