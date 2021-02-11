@@ -26,11 +26,16 @@ allowable_tables = [
     'office_contestoffice',
     'office_contestofficevisitingotherelection',
     'organization_organization',
+    'organization_organizationreserveddomain',
+    'party_party',
     'politician_politician',
     'polling_location_pollinglocation',
     'position_positionentered',
+    'twitter_twitterlinktoorganization',
     'voter_guide_voterguidepossibility',
-    'voter_guide_voterguide'
+    'voter_guide_voterguidepossibilityposition',
+    'voter_guide_voterguide',
+    'wevote_settings_wevotesetting'
 ]
 
 dummy_unique_id = 10000000

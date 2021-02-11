@@ -4,7 +4,7 @@ boto3==1.13.16
 cryptography==3.2
 dj-database-url==0.5.0
 dj-static==0.0.6
-django==2.2.16
+django==2.2.18
 django-background-tasks==1.2.5
 django-bootstrap3==10.0.1
 django-cors-headers==3.2.1
@@ -24,31 +24,31 @@ google-auth==1.21.1
 google-cloud-firestore==1.9.0
 google-cloud-storage==1.31.0
 gunicorn==19.10.0
-httplib2==0.18.0
+httplib2==0.19.0
 oauth2client==4.1.3
 oauthlib==3.1.0
-nameparser==1.0.5
-phonenumbers==8.11.2
-Pillow==6.2.2
-psycopg2-binary==2.8.5
+nameparser==1.0.6
+phonenumbers==8.12.18
+Pillow==8.1.0
+psycopg2-binary==2.8.6
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 py3dns==3.2.1
 pygeoip==0.3.2
 pyjwkest==1.4.2
 PyJWT==1.7.1
-python-magic==0.4.15  # Requires "brew install libmagic" or "brew upgrade libmagic" or "pip install libmagic"
+python-magic==0.4.18  # Requires "brew install libmagic" or "brew upgrade libmagic" or "pip install libmagic"
 python-openid==2.2.5
 # python-social-auth==0.2.21
 pytz==2020.1
 requests==2.22.0
 requests-oauthlib==1.3.0
 robot-detection==0.4
-rsa==4.1
+rsa==4.7
 selenium==3.141.0
 sendgrid-django==4.2.0
 setuptools==40.6.3
-simplejson==3.17.0
+simplejson==3.17.2
 six==1.14.0
 social-auth-app-django==3.1.0
 social-auth-core==3.2.0
