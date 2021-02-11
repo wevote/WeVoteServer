@@ -516,14 +516,6 @@ def create_batch_row_action_organization(batch_description, batch_header_map, on
             kind_of_action == IMPORT_CREATE
 
     # Transform data to our constants: BatchRowTranslationMap
-    # ORGANIZATION_TYPE_CHOICES = (
-    #     (NONPROFIT_501C3, 'Nonprofit 501c3'),
-    #     (NONPROFIT_501C4, 'Nonprofit 501c4'),
-    #     (POLITICAL_ACTION_COMMITTEE, 'Political Action Committee'),
-    #     (CORPORATION, 'Corporation'),
-    #     (NEWS_ORGANIZATION, 'News Corporation'),
-    #     (UNKNOWN, 'Unknown'),
-    # )
     organization_type_transformed = UNKNOWN  # Default to this
     if organization_type.lower() == "c3":
         organization_type_transformed = NONPROFIT_501C3

@@ -5,9 +5,7 @@
 from config.base import get_environment_variable
 from candidate.models import CandidateListManager, CandidateManager
 from import_export_twitter.controllers import refresh_twitter_organization_details, scrape_social_media_from_one_site
-from organization.models import Organization, OrganizationListManager, OrganizationManager, \
-    CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
-    POLITICAL_ACTION_COMMITTEE, ORGANIZATION, PUBLIC_FIGURE, UNKNOWN, VOTER, ORGANIZATION_TYPE_CHOICES
+from organization.models import OrganizationListManager, OrganizationManager, GROUP
 from twitter.models import TwitterUserManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_date_to_we_vote_date_string, \

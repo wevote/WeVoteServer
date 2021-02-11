@@ -20,8 +20,7 @@ from friend.models import FriendManager
 from measure.models import ContestMeasure, ContestMeasureManager
 from office.models import ContestOffice, ContestOfficeManager
 from organization.models import Organization, OrganizationManager, \
-    CORPORATION, GROUP, INDIVIDUAL, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, NEWS_ORGANIZATION, \
-    ORGANIZATION, POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, UNKNOWN, VOTER, ORGANIZATION_TYPE_CHOICES
+    INDIVIDUAL, PUBLIC_FIGURE, UNKNOWN, ORGANIZATION_TYPE_CHOICES
 import robot_detection
 from share.models import ShareManager
 from twitter.models import TwitterUser
