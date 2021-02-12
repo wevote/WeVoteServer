@@ -304,6 +304,7 @@ class CampaignXManager(models.Manager):
             organization_we_vote_id='',
             update_values={}):
         status = ""
+        campaignx = None
         campaignx_changed = False
         campaignx_created = False
         campaignx_manager = CampaignXManager()
@@ -333,8 +334,9 @@ class CampaignXManager(models.Manager):
                 campaignx_we_vote_id=campaignx_we_vote_id,
                 read_only=False)
             campaignx_found = results['campaignx_found']
-            campaignx = results['campaignx']
-            campaignx_we_vote_id = campaignx.we_vote_id
+            if campaignx_found:
+                campaignx = results['campaignx']
+                campaignx_we_vote_id = campaignx.we_vote_id
             success = results['success']
             status += results['status']
         else:
@@ -342,8 +344,9 @@ class CampaignXManager(models.Manager):
                 voter_we_vote_id=voter_we_vote_id,
                 read_only=False)
             campaignx_found = results['campaignx_found']
-            campaignx = results['campaignx']
-            campaignx_we_vote_id = campaignx.we_vote_id
+            if campaignx_found:
+                campaignx = results['campaignx']
+                campaignx_we_vote_id = campaignx.we_vote_id
             success = results['success']
             status += results['status']
 

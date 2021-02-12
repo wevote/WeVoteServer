@@ -232,7 +232,7 @@ def retrieve_sql_files_from_master_server(request):
                             cur.copy_from(file, table_name, sep='|', size=16384, columns=header)
                             file.close()
                     except Exception as e0:
-                        print("FAILED " + table_name + " -- " + str(e0))
+                        print("FAILED_TABLE_INSERT: " + table_name + " -- " + str(e0))
                     conn.commit()
                     conn.close()
                     dt = time.time() - t1
@@ -445,6 +445,21 @@ def csv_file_to_clean_csv_file2(table_name):
                     clean_row(row, 11)                      # internal_notes
                     clean_row(row, 20)                      # contributor_comments
                     clean_row(row, 22)                      # candidate_name
+                    # dump_row_col_labels_and_errors(table_name, header, row, '4')
+                elif table_name == 'voter_guide_voterguidepossibilityposition':
+                    substitute_null(row, 1, '0')            # voter_guide_possibility_parent_id
+                    substitute_null(row, 2, '0')            # possibility_position_number
+                    clean_row(row, 3)                       # ballot_item_name
+                    clean_row(row, 4)                       # candidate_we_vote_id
+                    clean_row(row, 5)                       # position_we_vote_id
+                    clean_row(row, 6)                       # measure_we_vote_id
+                    clean_row(row, 7)                       # statement_text
+                    substitute_null(row, 8, '0')            # google_civic_election_id
+                    clean_url(row, 10)                      # more_info_url
+                    clean_row(row, 13)                      # candidate_twitter_handle
+                    clean_row(row, 14)                      # organization_name
+                    clean_row(row, 15)                      # organization_twitter_handle
+                    clean_row(row, 16)                      # organization_we_vote_id
                     # dump_row_col_labels_and_errors(table_name, header, row, '4')
                 elif table_name == 'voter_guide_voterguide':
                     clean_row(row, 14)                      # twitter_description
