@@ -39,10 +39,14 @@ def campaignx_retrieve_as_owner_view(request):  # campaignRetrieveAsOwner (No CD
 
 def campaignx_save_view(request):  # campaignSave & campaignStartSave
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    politician_list_serialized = request.GET.get('politician_list', '')
+    politician_list_changed = positive_value_exists(request.GET.get('politician_list_changed', False))
     campaign_title = request.GET.get('campaign_title', '')
     campaign_title_changed = positive_value_exists(request.GET.get('campaign_title_changed', False))
     campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
     json_data = campaignx_save_for_api(
+        politician_list_serialized=politician_list_serialized,
+        politician_list_changed=politician_list_changed,
         campaign_title=campaign_title,
         campaign_title_changed=campaign_title_changed,
         campaignx_we_vote_id=campaignx_we_vote_id,

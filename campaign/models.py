@@ -25,6 +25,7 @@ class CampaignX(models.Model):
     campaign_title = models.CharField(verbose_name="title of campaign", max_length=255, null=False, blank=False)
     # Has not been released for view
     in_draft_mode = models.BooleanField(default=True, db_index=True)
+    politician_list_serialized = models.TextField(null=True, blank=True)
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # We override the save function so we can auto-generate we_vote_id
@@ -147,15 +148,36 @@ class CampaignXManager(models.Manager):
                 }
                 campaignx_owner_list.append(campaign_owner_dict)
 
+            # campaignx_politician_object_list = campaignx_manager.retrieve_campaignx_politician_list(
+            #     campaignx_we_vote_id=campaignx_we_vote_id)
+            #
+            # for campaignx_politician in campaignx_politician_object_list:
+            #     campaignx_politician_organization_name = '' if campaignx_politician.organization_name is None \
+            #         else campaignx_politician.organization_name
+            #     campaignx_politician_organization_we_vote_id = '' \
+            #         if campaignx_politician.organization_we_vote_id is None \
+            #         else campaignx_politician.organization_we_vote_id
+            #     campaignx_politician_we_vote_hosted_profile_image_url_tiny = '' \
+            #         if campaignx_politician.we_vote_hosted_profile_image_url_tiny is None \
+            #         else campaignx_politician.we_vote_hosted_profile_image_url_tiny
+            #     campaignx_politician_dict = {
+            #         'organization_name':                        campaignx_politician_organization_name,
+            #         'organization_we_vote_id':                  campaignx_politician_organization_we_vote_id,
+            #         'we_vote_hosted_profile_image_url_tiny':
+            #         campaignx_politician_we_vote_hosted_profile_image_url_tiny,
+            #         'visible_to_public':                        campaignx_politician.visible_to_public,
+            #     }
+            #     campaignx_politician_list.append(campaignx_politician_dict)
+
         results = {
-            'status':                   status,
-            'success':                  success,
-            'campaignx':                campaignx,
-            'campaignx_found':          campaignx_found,
-            'campaignx_we_vote_id':     campaignx_we_vote_id,
-            'campaignx_owner_list':     campaignx_owner_list,
-            'DoesNotExist':             exception_does_not_exist,
-            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'status':                       status,
+            'success':                      success,
+            'campaignx':                    campaignx,
+            'campaignx_found':              campaignx_found,
+            'campaignx_we_vote_id':         campaignx_we_vote_id,
+            'campaignx_owner_list':         campaignx_owner_list,
+            'DoesNotExist':                 exception_does_not_exist,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
         }
         return results
 
@@ -167,7 +189,6 @@ class CampaignXManager(models.Manager):
         campaignx_manager = CampaignXManager()
         campaignx_owner_list = []
         status = ''
-        viewer_is_owner = False
 
         try:
             if positive_value_exists(campaignx_we_vote_id):
@@ -297,6 +318,72 @@ class CampaignXManager(models.Manager):
             campaignx_owner_list = []
             return campaignx_owner_list
 
+    def retrieve_campaignx_politician(
+            self,
+            campaignx_we_vote_id='',
+            politician_we_vote_id='',
+            politician_name='',
+            read_only=False):
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        campaignx_politician = None
+        campaignx_politician_found = False
+        status = ''
+
+        try:
+            if positive_value_exists(campaignx_we_vote_id) and positive_value_exists(politician_we_vote_id):
+                if positive_value_exists(read_only):
+                    campaignx_politician = CampaignXPolitician.objects.using('readonly').get(
+                        campaignx_we_vote_id=campaignx_we_vote_id,
+                        politician_we_vote_id=politician_we_vote_id)
+                else:
+                    campaignx_politician = CampaignXPolitician.objects.get(
+                        campaignx_we_vote_id=campaignx_we_vote_id,
+                        politician_we_vote_id=politician_we_vote_id)
+                campaignx_politician_found = True
+                status += 'CAMPAIGNX_POLITICIAN_FOUND_WITH_WE_VOTE_ID '
+                success = True
+            else:
+                status += 'CAMPAIGNX_POLITICIAN_NOT_FOUND-MISSING_VARIABLES '
+                success = False
+        except CampaignXPolitician.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            exception_multiple_object_returned = True
+            status += 'CAMPAIGNX_POLITICIAN_NOT_FOUND_MultipleObjectsReturned '
+            success = False
+        except CampaignXPolitician.DoesNotExist:
+            exception_does_not_exist = True
+            status += 'CAMPAIGNX_POLITICIAN_NOT_FOUND_DoesNotExist '
+            success = True
+
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'campaignx_politician':         campaignx_politician,
+            'campaignx_politician_found':   campaignx_politician_found,
+            'DoesNotExist':                 exception_does_not_exist,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+        }
+        return results
+
+    def retrieve_campaignx_politician_list(self, campaignx_we_vote_id=''):
+        campaignx_politician_list_found = False
+        campaignx_politician_list = []
+        try:
+            campaignx_politician_query = CampaignXPolitician.objects.all()
+            campaignx_politician_query = campaignx_politician_query.filter(campaignx_we_vote_id=campaignx_we_vote_id)
+            campaignx_politician_list = list(campaignx_politician_query)
+            if len(campaignx_politician_list):
+                campaignx_politician_list_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        if campaignx_politician_list_found:
+            return campaignx_politician_list
+        else:
+            campaignx_politician_list = []
+            return campaignx_politician_list
+
     def update_or_create_campaignx(
             self,
             campaignx_we_vote_id='',
@@ -370,9 +457,12 @@ class CampaignXManager(models.Manager):
                         and positive_value_exists(update_values['campaign_title_changed']):
                     campaignx.campaign_title = update_values['campaign_title']
                     campaignx_changed = True
+                if 'politician_list_changed' in update_values \
+                        and positive_value_exists(update_values['politician_list_changed']):
+                    campaignx.politician_list_serialized = update_values['politician_list_serialized']
+                    campaignx_changed = True
                 if campaignx_changed:
                     campaignx.save()
-                    campaignx_created = True
                     status += "CAMPAIGNX_UPDATED "
                 else:
                     status += "CAMPAIGNX_NOT_UPDATED-NO_CHANGES_FOUND "
@@ -386,6 +476,7 @@ class CampaignXManager(models.Manager):
                 campaignx = CampaignX.objects.create(
                     campaign_title=update_values['campaign_title'],
                     in_draft_mode=True,
+                    politician_list_serialized=update_values['politician_list_serialized'],
                     started_by_voter_we_vote_id=voter_we_vote_id,
                 )
                 campaignx_created = True
@@ -395,7 +486,7 @@ class CampaignXManager(models.Manager):
                 campaignx_created = False
                 campaignx = CampaignX()
                 success = False
-                status += "CAMPAIGNX_NOT_CREATED " + str(e) + " "
+                status += "CAMPAIGNX_NOT_CREATED: " + str(e) + " "
 
         results = {
             'success':              success,
@@ -496,6 +587,109 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    def update_or_create_campaignx_politician(
+            self,
+            campaignx_we_vote_id='',
+            politician_name=None,
+            politician_we_vote_id='',
+            state_code='',
+            we_vote_hosted_profile_image_url_large=None,
+            we_vote_hosted_profile_image_url_medium=None,
+            we_vote_hosted_profile_image_url_tiny=None):
+        status = ""
+        if not positive_value_exists(campaignx_we_vote_id) or not positive_value_exists(politician_name):
+            status += "MISSING_REQUIRED_VALUE_FOR_CAMPAIGNX_POLITICIAN "
+            results = {
+                'success':                      False,
+                'status':                       status,
+                'campaignx_politician_created': False,
+                'campaignx_politician_found':   False,
+                'campaignx_politician_updated': False,
+                'campaignx_politician':         None,
+            }
+            return results
+
+        campaignx_manager = CampaignXManager()
+        campaignx_politician_created = False
+        campaignx_politician_updated = False
+
+        results = campaignx_manager.retrieve_campaignx_politician(
+            campaignx_we_vote_id=campaignx_we_vote_id,
+            politician_we_vote_id=politician_we_vote_id,
+            politician_name=politician_name,
+            read_only=False)
+        campaignx_politician_found = results['campaignx_politician_found']
+        campaignx_politician = results['campaignx_politician']
+        success = results['success']
+        status += results['status']
+
+        if campaignx_politician_found:
+            if politician_name is not None \
+                    or politician_we_vote_id is not None \
+                    or state_code is not None \
+                    or we_vote_hosted_profile_image_url_large is not None \
+                    or we_vote_hosted_profile_image_url_medium is not None \
+                    or we_vote_hosted_profile_image_url_tiny is not None:
+                try:
+                    if politician_name is not None:
+                        campaignx_politician.politician_name = politician_name
+                    if politician_we_vote_id is not None:
+                        campaignx_politician.politician_we_vote_id = politician_we_vote_id
+                    if state_code is not None:
+                        campaignx_politician.state_code = state_code
+                    if we_vote_hosted_profile_image_url_large is not None:
+                        campaignx_politician.we_vote_hosted_profile_image_url_large = \
+                            we_vote_hosted_profile_image_url_large
+                    if we_vote_hosted_profile_image_url_medium is not None:
+                        campaignx_politician.we_vote_hosted_profile_image_url_medium = \
+                            we_vote_hosted_profile_image_url_medium
+                    if we_vote_hosted_profile_image_url_tiny is not None:
+                        campaignx_politician.we_vote_hosted_profile_image_url_tiny = \
+                            we_vote_hosted_profile_image_url_tiny
+                    campaignx_politician.save()
+                    campaignx_politician_updated = True
+                    success = True
+                    status += "CAMPAIGNX_POLITICIAN_UPDATED "
+                except Exception as e:
+                    campaignx_politician = CampaignXPolitician()
+                    success = False
+                    status += "CAMPAIGNX_POLITICIAN_NOT_UPDATED: " + str(e) + " "
+        else:
+            try:
+                campaignx_politician = CampaignXPolitician.objects.create(
+                    campaignx_we_vote_id=campaignx_we_vote_id,
+                    politician_name=politician_name,
+                )
+                if politician_we_vote_id is not None:
+                    campaignx_politician.politician_we_vote_id = politician_we_vote_id
+                if state_code is not None:
+                    campaignx_politician.state_code = state_code
+                if we_vote_hosted_profile_image_url_large is not None:
+                    campaignx_politician.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                if we_vote_hosted_profile_image_url_medium is not None:
+                    campaignx_politician.we_vote_hosted_profile_image_url_medium = \
+                        we_vote_hosted_profile_image_url_medium
+                if we_vote_hosted_profile_image_url_tiny is not None:
+                    campaignx_politician.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                campaignx_politician.save()
+                campaignx_politician_created = True
+                success = True
+                status += "CAMPAIGNX_POLITICIAN_CREATED "
+            except Exception as e:
+                campaignx_politician = None
+                success = False
+                status += "CAMPAIGNX_POLITICIAN_NOT_CREATED: " + str(e) + " "
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'campaignx_politician_created': campaignx_politician_created,
+            'campaignx_politician_found':   campaignx_politician_found,
+            'campaignx_politician_updated': campaignx_politician_updated,
+            'campaignx_politician':         campaignx_politician,
+        }
+        return results
+
 
 class CampaignXOwner(models.Model):
     campaignx_id = models.PositiveIntegerField(null=True, blank=True)
@@ -505,4 +699,16 @@ class CampaignXOwner(models.Model):
     organization_name = models.CharField(max_length=255, null=False, blank=False)
     we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     visible_to_public = models.BooleanField(default=False)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
+
+
+class CampaignXPolitician(models.Model):
+    campaignx_id = models.PositiveIntegerField(null=True, blank=True)
+    campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    politician_name = models.CharField(max_length=255, null=False, blank=False)
+    state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
+    we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)

@@ -18,8 +18,8 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
         campaignx_we_vote_id='',
         as_owner=False):
     status = ''
-    success = True
     campaignx_owner_list = []
+    campaignx_politician_list = []
 
     campaignx_manager = CampaignXManager()
     if positive_value_exists(as_owner):
@@ -27,19 +27,17 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
         if voter_results['voter_found']:
             voter = voter_results['voter']
-            voter_id = voter.id
             voter_we_vote_id = voter.we_vote_id
-            linked_organization_we_vote_id = voter.linked_organization_we_vote_id
-            is_signed_in = voter.is_signed_in()
         else:
             status += "VALID_VOTER_ID_MISSING "
             results = {
-                'status':                       status,
-                'success':                      False,
-                'campaign_title':               '',
-                'in_draft_mode':                True,
-                'campaignx_owner_list':         campaignx_owner_list,
-                'campaignx_we_vote_id':         '',
+                'status':                           status,
+                'success':                          False,
+                'campaign_title':                   '',
+                'in_draft_mode':                    True,
+                'campaignx_owner_list':             campaignx_owner_list,
+                'campaignx_politician_list':        campaignx_politician_list,
+                'campaignx_we_vote_id':             '',
             }
             return results
         results = campaignx_manager.retrieve_campaignx_as_owner(
@@ -56,37 +54,44 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
     if not results['success']:
         status += "CAMPAIGNX_RETRIEVE_ERROR "
         results = {
-            'status':                       status,
-            'success':                      False,
-            'campaign_title':               '',
-            'in_draft_mode':                True,
-            'campaignx_owner_list':         campaignx_owner_list,
-            'campaignx_we_vote_id':         '',
+            'status':                           status,
+            'success':                          False,
+            'campaign_title':                   '',
+            'in_draft_mode':                    True,
+            'campaignx_owner_list':             campaignx_owner_list,
+            'campaignx_politician_list':        campaignx_politician_list,
+            'campaignx_we_vote_id':             '',
         }
         return results
     elif not results['campaignx_found']:
         status += "CAMPAIGNX_NOT_FOUND: "
         status += results['status'] + " "
         results = {
-            'status':                       status,
-            'success':                      True,
-            'campaign_title':               '',
-            'in_draft_mode':                True,
-            'campaignx_owner_list':         campaignx_owner_list,
-            'campaignx_we_vote_id':         '',
+            'status':                           status,
+            'success':                          True,
+            'campaign_title':                   '',
+            'in_draft_mode':                    True,
+            'campaignx_owner_list':             campaignx_owner_list,
+            'campaignx_politician_list':        campaignx_politician_list,
+            'campaignx_we_vote_id':             '',
         }
         return results
 
     campaignx = results['campaignx']
     campaignx_owner_list = results['campaignx_owner_list']
+    if campaignx.politician_list_serialized:
+        campaignx_politician_list = json.loads(campaignx.politician_list_serialized)
+    else:
+        campaignx_politician_list = []
 
     results = {
-        'status':                       status,
-        'success':                      True,
-        'campaign_title':               campaignx.campaign_title,
-        'in_draft_mode':                campaignx.in_draft_mode,
-        'campaignx_owner_list':         campaignx_owner_list,
-        'campaignx_we_vote_id':         campaignx.we_vote_id,
+        'status':                           status,
+        'success':                          True,
+        'campaign_title':                   campaignx.campaign_title,
+        'in_draft_mode':                    campaignx.in_draft_mode,
+        'campaignx_owner_list':             campaignx_owner_list,
+        'campaignx_politician_list':        campaignx_politician_list,
+        'campaignx_we_vote_id':             campaignx.we_vote_id,
     }
     return results
 
@@ -94,11 +99,14 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
 def campaignx_save_for_api(  # campaignSave & campaignStartSave
         voter_device_id='',
         campaignx_we_vote_id='',
+        politician_list_serialized='',
+        politician_list_changed=False,
         campaign_title='',
         campaign_title_changed=False):
     status = ''
     success = True
     campaignx_owner_list = []
+    campaignx_politician_list = []
 
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
@@ -114,6 +122,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'campaign_title':               '',
             'in_draft_mode':                True,
             'campaignx_owner_list':         campaignx_owner_list,
+            'campaignx_politician_list':    campaignx_politician_list,
             'campaignx_we_vote_id':         '',
         }
         return results
@@ -125,17 +134,20 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
         if not positive_value_exists(viewer_is_owner):
             status += "VOTER_IS_NOT_OWNER_OF_CAMPAIGNX "
             results = {
-                'status':               status,
-                'success':              False,
-                'campaign_title':       '',
-                'in_draft_mode':        False,
-                'campaignx_owner_list': campaignx_owner_list,
-                'campaignx_we_vote_id': '',
+                'status':                       status,
+                'success':                      False,
+                'campaign_title':               '',
+                'in_draft_mode':                False,
+                'campaignx_owner_list':         campaignx_owner_list,
+                'campaignx_politician_list':    campaignx_politician_list,
+                'campaignx_we_vote_id':         '',
             }
             return results
         update_values = {
-            'campaign_title':           campaign_title,
-            'campaign_title_changed':   campaign_title_changed,
+            'campaign_title':               campaign_title,
+            'campaign_title_changed':       campaign_title_changed,
+            'politician_list_changed':      politician_list_changed,
+            'politician_list_serialized':   politician_list_serialized,
         }
         create_results = campaignx_manager.update_or_create_campaignx(
             campaignx_we_vote_id=campaignx_we_vote_id,
@@ -146,8 +158,10 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
     else:
         # If here, we are working with a draft
         update_values = {
-            'campaign_title':           campaign_title,
-            'campaign_title_changed':   campaign_title_changed,
+            'campaign_title':               campaign_title,
+            'campaign_title_changed':       campaign_title_changed,
+            'politician_list_changed':      politician_list_changed,
+            'politician_list_serialized':   politician_list_serialized,
         }
         create_results = campaignx_manager.update_or_create_campaignx(
             voter_we_vote_id=voter_we_vote_id,
@@ -164,6 +178,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
 
     status += create_results['status']
     if create_results['campaignx_found']:
+        # Get owner_list
         results = campaignx_manager.retrieve_campaignx_as_owner(
             campaignx_we_vote_id=campaignx_we_vote_id,
             voter_we_vote_id=voter_we_vote_id,
@@ -172,26 +187,33 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
 
         campaignx = create_results['campaignx']
         campaignx_owner_list = results['campaignx_owner_list']
+        # Get politician_list
+        if campaignx.politician_list_serialized:
+            campaignx_politician_list = json.loads(campaignx.politician_list_serialized)
+        else:
+            campaignx_politician_list = []
 
         results = {
-            'status':               status,
-            'success':              True,
-            'campaign_title':       campaignx.campaign_title,
-            'in_draft_mode':        campaignx.in_draft_mode,
-            'campaignx_owner_list': campaignx_owner_list,
-            'campaignx_we_vote_id': campaignx.we_vote_id,
-            'voter_we_vote_id':     voter_we_vote_id,
+            'status':                       status,
+            'success':                      success,
+            'campaign_title':               campaignx.campaign_title,
+            'in_draft_mode':                campaignx.in_draft_mode,
+            'campaignx_politician_list':    campaignx_politician_list,
+            'campaignx_owner_list':         campaignx_owner_list,
+            'campaignx_we_vote_id':         campaignx.we_vote_id,
+            'voter_we_vote_id':             voter_we_vote_id,
         }
         return results
     else:
         status += "CAMPAIGNX_SAVE_ERROR "
         results = {
-            'status':               status,
-            'success':              False,
-            'campaign_title':       '',
-            'in_draft_mode':        True,
-            'campaignx_owner_list': [],
-            'campaignx_we_vote_id': '',
-            'voter_we_vote_id':     voter_we_vote_id,
+            'status':                       status,
+            'success':                      False,
+            'campaign_title':               '',
+            'in_draft_mode':                True,
+            'campaignx_owner_list':         [],
+            'campaignx_politician_list':    [],
+            'campaignx_we_vote_id':         '',
+            'voter_we_vote_id':             voter_we_vote_id,
         }
         return results
