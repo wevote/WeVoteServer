@@ -8,7 +8,7 @@ import sys
 es = Elasticsearch(["172.31.24.246:9200"], timeout = 120, max_retries = 5, retry_on_timeout = True)
 
 if len(sys.argv) < 2:
-    print "Usage: %s <search term>" % (sys.argv[0])
+    print("Usage: %s <search term>" % (sys.argv[0]))
     sys.exit(-1)
 
 search_term = sys.argv[1]
@@ -74,47 +74,47 @@ res_with_missing_last_election_date = es.search(body=query_with_missing_last_ele
 # res_with_missing_election_date_without_order = es.search(body=query_with_missing_election_date_without_order)
 # res_with_election_missing_date_value = es.search(body=query_with_election_missing_date_value)
 
-print "Got %d hits from all index search: " % res['hits']['total']
-print "Got %d hits from all index search: " % res_with_election_date['hits']['total']
-print "Got %d hits from all index search: " % res_with_missing_last_election_date['hits']['total']
-# print "Got %d hits from all index search: " % res_with_missing_election_date_without_order['hits']['total']
-# print "Got %d hits from all index search: " % res_with_election_missing_date_value['hits']['total']
+print("Got %d hits from all index search: " % res['hits']['total'])
+print("Got %d hits from all index search: " % res_with_election_date['hits']['total'])
+print("Got %d hits from all index search: " % res_with_missing_last_election_date['hits']['total'])
+# print("Got %d hits from all index search: " % res_with_missing_election_date_without_order['hits']['total'])
+# print("Got %d hits from all index search: " % res_with_election_missing_date_value['hits']['total'])
 for hit in res['hits']['hits']:
-        print "------------- RESULT --------------"
-        for field in hit:
-                print "%s: %s" % (field, hit[field])
-print "============================================"
-print "============================================"
+    print("------------- RESULT --------------")
+    for field in hit:
+        print("%s: %s" % (field, hit[field]))
+print("============================================")
+print("============================================")
 for hit in res_with_election_date['hits']['hits']:
-        print "------------- RESULT --------------"
-        for field in hit:
-                print "%s: %s" % (field, hit[field])
-print "============================================"
-print "============================================"
+    print("------------- RESULT --------------")
+    for field in hit:
+        print("%s: %s" % (field, hit[field]))
+print("============================================")
+print("============================================")
 for hit in res_with_missing_last_election_date['hits']['hits']:
-        print "------------- RESULT --------------"
-        for field in hit:
-                print "%s: %s" % (field, hit[field])
-print "============================================"
-# print "============================================"
+    print("------------- RESULT --------------")
+    for field in hit:
+        print("%s: %s" % (field, hit[field]))
+print("============================================")
+# print("============================================")
 # for hit in res_with_missing_election_date_without_order['hits']['hits']:
-#         print "------------- RESULT --------------"
+#         print("------------- RESULT --------------")
 #         for field in hit:
-#                 print "%s: %s" % (field, hit[field])
-# print "============================================"
-# print "============================================"
+#                 print("%s: %s" % (field, hit[field]))
+# print("============================================")
+# print("============================================")
 # for hit in res_with_election_missing_date_value['hits']['hits']:
-#         print "------------- RESULT --------------"
+#         print("------------- RESULT --------------")
 #         for field in hit:
-#                 print "%s: %s" % (field, hit[field])
+#                 print("%s: %s" % (field, hit[field]))
 
 
 # example of querying single index
-if (True):
-        res = es.search(index="elections", body={ "query": {"match": { "google_civic_election_id": "5000"}}})
-        print "Got %d hits from single index search: " % res['hits']['total']
+if True:
+    res = es.search(index="elections", body={ "query": {"match": { "google_civic_election_id": "5000"}}})
+    print("Got %d hits from single index search: " % res['hits']['total'])
 
-        for hit in res['hits']['hits']:
-                for field in hit:
-                        print "%s: %s" % (field, hit[field])
+    for hit in res['hits']['hits']:
+        for field in hit:
+            print("%s: %s" % (field, hit[field]))
 

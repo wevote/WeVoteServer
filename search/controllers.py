@@ -6,6 +6,7 @@ from candidate.models import CandidateManager
 from config.base import get_environment_variable
 from elasticsearch import Elasticsearch
 from organization.models import OrganizationManager
+from politician.models import PoliticianManager
 from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
@@ -14,7 +15,101 @@ logger = wevote_functions.admin.get_logger(__name__)
 ELASTIC_SEARCH_CONNECTION_STRING = get_environment_variable("ELASTIC_SEARCH_CONNECTION_STRING")
 
 
-def search_all_for_api(text_from_search_field, voter_device_id):
+def search_all_for_api(text_from_search_field='', voter_device_id='', search_scope_list=[]):
+    """
+
+    :param text_from_search_field:
+    :param voter_device_id:
+    :param search_scope_list:
+    :return:
+    """
+    if not positive_value_exists(text_from_search_field):
+        results = {
+            'status':                   'TEXT_FROM_SEARCH_FIELD_MISSING ',
+            'success':                  True,
+            'text_from_search_field':   text_from_search_field,
+            'voter_device_id':          voter_device_id,
+            'search_results_found':     False,
+            'search_results':           [],
+        }
+        return results
+
+    # Get voter_id from the voter_device_id so we can know who is doing the bookmarking
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        results = {
+            'status':                   'VALID_VOTER_DEVICE_ID_MISSING ',
+            'success':                  False,
+            'text_from_search_field':   text_from_search_field,
+            'voter_device_id':          voter_device_id,
+            'search_results_found':     False,
+            'search_results':           [],
+        }
+        return results
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        results = {
+            'status':                   "VALID_VOTER_ID_MISSING ",
+            'success':                  False,
+            'text_from_search_field':   text_from_search_field,
+            'voter_device_id':          voter_device_id,
+            'search_results_found':     False,
+            'search_results':           [],
+        }
+        return results
+
+    # Example of querying ALL indexes
+    search_results = []
+    search_count = 0
+    status = ""
+    politician_manager = PoliticianManager()
+    try:
+        results = politician_manager.search_politicians(name_search_terms=text_from_search_field)
+        politician_search_results_list = results['politician_search_results_list']
+        success = results['success']
+        if not positive_value_exists(success):
+            status += results['status']
+        for one_politician in politician_search_results_list:
+            # link_internal = "/office/" + one_search_result_dict['we_vote_id']
+            link_internal = ''
+
+            one_search_result = {
+                'result_title':             one_politician.display_full_name(),
+                'result_image':             one_politician.we_vote_hosted_profile_image_url_medium,
+                'result_subtitle':          "",
+                'result_summary':           "",
+                'result_score':             0,
+                'link_internal':            link_internal,
+                'kind_of_owner':            "POLITICIAN",
+                'google_civic_election_id': 0,
+                'state_code':               one_politician.state_code,
+                'twitter_handle':           one_politician.politician_twitter_handle,
+                'we_vote_id':               one_politician.we_vote_id,
+                'local_id':                 one_politician.id,
+            }
+            search_results.append(one_search_result)
+            search_count += 1
+
+        status += "SEARCH_ALL_COMPLETE"
+        success = True
+
+    except Exception as e:
+        status = 'POLITICIAN_SEARCH: ' + str(e) + " "
+        success = False
+
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'text_from_search_field':   text_from_search_field,
+        'voter_device_id':          voter_device_id,
+        'search_results_found':     True if search_count > 0 else False,
+        'search_results':           search_results,
+    }
+    return results
+
+
+def search_all_elastic_for_api(text_from_search_field, voter_device_id):
     """
 
     :param text_from_search_field:

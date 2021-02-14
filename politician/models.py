@@ -4,6 +4,7 @@
 
 # Politician-related Models
 from django.db import models
+from django.db.models import Q
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from tag.models import Tag
 import wevote_functions.admin
@@ -336,6 +337,47 @@ class PoliticianManager(models.Manager):
             'success':      success,
             'status':       status,
             'politician':   politician
+        }
+        return results
+
+    def search_politicians(self, name_search_terms=None):
+        status = ""
+        success = True
+        politician_search_results_list = []
+
+        try:
+            queryset = Politician.objects.all()
+            if name_search_terms is not None:
+                name_search_words = name_search_terms.split()
+            else:
+                name_search_words = []
+            for one_word in name_search_words:
+                filters = []  # Reset for each search word
+                new_filter = Q(politician_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(politician_twitter_handle__icontains=one_word)
+                filters.append(new_filter)
+
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    queryset = queryset.filter(final_filters)
+
+            politician_search_results_list = list(queryset)
+        except Exception as e:
+            success = False
+            status += "ERROR_SEARCHING_POLITICIANS: " + str(e) + " "
+
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'politician_search_results_list':   politician_search_results_list,
         }
         return results
 

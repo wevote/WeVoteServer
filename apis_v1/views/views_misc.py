@@ -117,6 +117,10 @@ def search_all_view(request):  # searchAll
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     text_from_search_field = request.GET.get('text_from_search_field', '')
+    search_scope_list = request.GET.getlist('search_scope_list[]')
+    search_scope_list = list(filter(None, search_scope_list))
+    # search_scope_list options
+    # PN = POLITICIAN_NAME
 
     if not positive_value_exists(text_from_search_field):
         status = 'MISSING_TEXT_FROM_SEARCH_FIELD'
@@ -129,7 +133,11 @@ def search_all_view(request):  # searchAll
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    results = search_all_for_api(text_from_search_field, voter_device_id)
+    results = search_all_for_api(
+        text_from_search_field=text_from_search_field,
+        voter_device_id=voter_device_id,
+        search_scope_list=search_scope_list)
+    # results = search_all_elastic_for_api(text_from_search_field, voter_device_id)  #
     status = "UNABLE_TO_FIND_ANY_SEARCH_RESULTS "
     search_results = []
     if results['search_results_found']:
