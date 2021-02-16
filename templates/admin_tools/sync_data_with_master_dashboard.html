@@ -283,7 +283,7 @@
     console.log("ON CLICK fastLoadButton");
         // http://localhost:8000/retrieve_tables/import/?
         if (!$("#fastLoadButton").html().includes('.....')) {
-            $("#fastLoadButton").html("... Loading all data from the master server, this takes about 12 minutes ...")
+            $("#fastLoadButton").html("... Loading all data from the master server, this takes about 10 to 30 minutes ...")
                 .css('background-color', 'gold');
             let origin = new URL('{{request.build_absolute_uri}}').origin;
             let apiURL = origin + '/retrieve_tables/import/?';

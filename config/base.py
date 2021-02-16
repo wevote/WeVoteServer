@@ -65,7 +65,11 @@ def get_python_version():
 
 
 def get_node_version():
-    version = "Node " + os.popen('node -v').read().replace('\n', '').strip()
+    # Node is not installed on production API/Python servers
+    raw = os.popen('node -v').read().replace('\n', '').strip()
+    version = 'Node not installed on this server'
+    if len(raw) > 0:
+        version = "Node " + os.popen('node -v').read().replace('\n', '').strip()
     print(version)    # Something like 'v14.15.1'
     return version
 

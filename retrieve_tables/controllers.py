@@ -261,12 +261,17 @@ def retrieve_sql_files_from_master_server(request):
             )
 
             cur = conn.cursor()
-
-            cur.execute("SELECT setval('" + table_name + "_id_seq', (SELECT MAX(id) FROM \"" + table_name + "\"))")
+            command = "SELECT setval('" + table_name + "_id_seq', (SELECT MAX(id) FROM \"" + table_name + "\"))"
+            cur.execute(command)
+            data_tuple = cur.fetchone()
+            print("... SQL executed: " + command + " and returned " + str(data_tuple[0]))
+            conn.commit()
+            command = "ALTER SEQUENCE " + table_name + "_id_seq START WITH " + str(data_tuple[0])
+            cur.execute(command)
             conn.commit()
             conn.close()
-            print("... SQL executed: SELECT setval('" +
-                  table_name + "_id_seq', (SELECT MAX(id) FROM \"" + table_name + "\"))")
+            print("... SQL executed: " + command)
+            # To confirm:  SELECT * FROM information_schema.sequences where sequence_name like 'org%'
 
         except Exception as e:
             status += "... SQL FAILED: SELECT setval('" + \
