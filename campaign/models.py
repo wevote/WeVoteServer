@@ -22,11 +22,14 @@ class CampaignX(models.Model):
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, default=None, null=True,
         blank=True, unique=True, db_index=True)
+    campaign_description = models.TextField(null=True, blank=True)
     campaign_title = models.CharField(verbose_name="title of campaign", max_length=255, null=False, blank=False)
     # Has not been released for view
     in_draft_mode = models.BooleanField(default=True, db_index=True)
     politician_list_serialized = models.TextField(null=True, blank=True)
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
+    we_vote_hosted_campaign_photo_original_url = models.TextField(blank=True, null=True)
+    we_vote_hosted_campaign_photo_large_url = models.TextField(blank=True, null=True)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -453,6 +456,15 @@ class CampaignXManager(models.Manager):
             # Update existing campaignx
             try:
                 campaignx_changed = False
+                if 'campaign_description_changed' in update_values \
+                        and positive_value_exists(update_values['campaign_description_changed']):
+                    campaignx.campaign_description = update_values['campaign_description']
+                    campaignx_changed = True
+                if 'campaign_photo_changed' in update_values \
+                        and positive_value_exists(update_values['campaign_photo_changed']):
+                    campaignx.we_vote_hosted_campaign_photo_large_url = \
+                        update_values['we_vote_hosted_campaign_photo_large_url']
+                    campaignx_changed = True
                 if 'campaign_title_changed' in update_values \
                         and positive_value_exists(update_values['campaign_title_changed']):
                     campaignx.campaign_title = update_values['campaign_title']
@@ -474,6 +486,8 @@ class CampaignXManager(models.Manager):
         else:
             try:
                 campaignx = CampaignX.objects.create(
+                    campaign_description=update_values['campaign_description'],
+                    we_vote_hosted_campaign_photo_large_url=update_values['we_vote_hosted_campaign_photo_large_url'],
                     campaign_title=update_values['campaign_title'],
                     in_draft_mode=True,
                     politician_list_serialized=update_values['politician_list_serialized'],

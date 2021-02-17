@@ -4,6 +4,7 @@
 from campaign.controllers import campaignx_retrieve_for_api, campaignx_save_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from django_user_agents.utils import get_user_agent
 from follow.controllers import voter_campaignx_follow_for_api
 import json
@@ -37,19 +38,29 @@ def campaignx_retrieve_as_owner_view(request):  # campaignRetrieveAsOwner (No CD
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+@csrf_exempt
 def campaignx_save_view(request):  # campaignSave & campaignStartSave
+    # This is set in /config/base.py: DATA_UPLOAD_MAX_MEMORY_SIZE = 6000000
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    politician_list_serialized = request.GET.get('politician_list', '')
-    politician_list_changed = positive_value_exists(request.GET.get('politician_list_changed', False))
-    campaign_title = request.GET.get('campaign_title', '')
-    campaign_title_changed = positive_value_exists(request.GET.get('campaign_title_changed', False))
-    campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
+    campaign_description = request.POST.get('campaign_description', '')
+    campaign_description_changed = positive_value_exists(request.POST.get('campaign_description_changed', False))
+    campaign_photo_from_file_reader = request.POST.get('campaign_photo_from_file_reader', '')
+    campaign_photo_changed = positive_value_exists(request.POST.get('campaign_photo_changed', False))
+    campaign_title = request.POST.get('campaign_title', '')
+    campaign_title_changed = positive_value_exists(request.POST.get('campaign_title_changed', False))
+    campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', '')
+    politician_list_serialized = request.POST.get('politician_list', '')
+    politician_list_changed = positive_value_exists(request.POST.get('politician_list_changed', False))
     json_data = campaignx_save_for_api(
-        politician_list_serialized=politician_list_serialized,
-        politician_list_changed=politician_list_changed,
+        campaign_description=campaign_description,
+        campaign_description_changed=campaign_description_changed,
+        campaign_photo_from_file_reader=campaign_photo_from_file_reader,
+        campaign_photo_changed=campaign_photo_changed,
         campaign_title=campaign_title,
         campaign_title_changed=campaign_title_changed,
         campaignx_we_vote_id=campaignx_we_vote_id,
+        politician_list_serialized=politician_list_serialized,
+        politician_list_changed=politician_list_changed,
         voter_device_id=voter_device_id,
     )
     return HttpResponse(json.dumps(json_data), content_type='application/json')

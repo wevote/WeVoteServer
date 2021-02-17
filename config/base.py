@@ -332,6 +332,7 @@ CORS_ALLOW_CREDENTIALS = True
 # will work with https
 CORS_REPLACE_HTTPS_REFERER = True
 CSRF_TRUSTED_ORIGINS = ['api.wevoteusa.org']
+DATA_UPLOAD_MAX_MEMORY_SIZE = 6000000
 
 # CORS_ORIGIN_WHITELIST = (
 #     'google.com',
