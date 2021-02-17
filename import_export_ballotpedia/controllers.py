@@ -2333,8 +2333,6 @@ def groom_and_store_sample_ballot_results_api_v4(
                                         cache_results = cache_master_and_resized_image(
                                             candidate_id=candidate.id,
                                             candidate_we_vote_id=candidate.we_vote_id,
-                                            ballotpedia_candidate_id=candidate.ballotpedia_candidate_id,
-                                            ballotpedia_image_id=candidate.ballotpedia_image_id,
                                             ballotpedia_profile_image_url=ballotpedia_profile_image_url_https,
                                             image_source=BALLOTPEDIA_IMAGE_SOURCE)
                                         cached_ballotpedia_image_url_https = cache_results[

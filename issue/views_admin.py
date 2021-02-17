@@ -482,9 +482,13 @@ def issue_edit_process_view(request):
                 image_format = cached_master_we_vote_image.we_vote_image_file_location.split(".")[-1]
                 master_we_vote_hosted_image_url = cached_master_we_vote_image.we_vote_image_url
                 cache_large_resized_image_results = cache_resized_image_locally(
-                    google_civic_election_id, master_we_vote_hosted_image_url, we_vote_parent_image_id,
-                    issue_we_vote_id=issue_we_vote_id, image_format=image_format,
-                    kind_of_image_issue=True, kind_of_image_large=True)
+                    google_civic_election_id,
+                    master_we_vote_hosted_image_url,
+                    we_vote_parent_image_id,
+                    issue_we_vote_id=issue_we_vote_id,
+                    image_format=image_format,
+                    kind_of_image_issue=True,
+                    kind_of_image_large=True)
                 if cache_large_resized_image_results['success']:
                     cached_resized_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
                         issue_we_vote_id=issue_we_vote_id, issue_image_url_https=master_we_vote_hosted_image_url,
@@ -494,9 +498,13 @@ def issue_edit_process_view(request):
                             cached_resized_image_results['we_vote_image'].we_vote_image_url
 
                 cache_medium_resized_image_results = cache_resized_image_locally(
-                    google_civic_election_id, master_we_vote_hosted_image_url, we_vote_parent_image_id,
-                    issue_we_vote_id=issue_we_vote_id, image_format=image_format,
-                    kind_of_image_issue=True, kind_of_image_medium=True)
+                    google_civic_election_id,
+                    master_we_vote_hosted_image_url,
+                    we_vote_parent_image_id,
+                    issue_we_vote_id=issue_we_vote_id,
+                    image_format=image_format,
+                    kind_of_image_issue=True,
+                    kind_of_image_medium=True)
                 if cache_medium_resized_image_results['success']:
                     cached_resized_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
                         issue_we_vote_id=issue_we_vote_id, issue_image_url_https=master_we_vote_hosted_image_url,
@@ -506,9 +514,13 @@ def issue_edit_process_view(request):
                             cached_resized_image_results['we_vote_image'].we_vote_image_url
 
                 cache_tiny_resized_image_results = cache_resized_image_locally(
-                    google_civic_election_id, master_we_vote_hosted_image_url, we_vote_parent_image_id,
-                    issue_we_vote_id=issue_we_vote_id, image_format=image_format,
-                    kind_of_image_issue=True, kind_of_image_tiny=True)
+                    google_civic_election_id,
+                    master_we_vote_hosted_image_url,
+                    we_vote_parent_image_id,
+                    issue_we_vote_id=issue_we_vote_id,
+                    image_format=image_format,
+                    kind_of_image_issue=True,
+                    kind_of_image_tiny=True)
                 if cache_tiny_resized_image_results['success']:
                     cached_resized_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
                         issue_we_vote_id=issue_we_vote_id, issue_image_url_https=master_we_vote_hosted_image_url,
