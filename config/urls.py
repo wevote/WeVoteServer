@@ -35,6 +35,7 @@ urlpatterns = [
     url(r'^ballotpedia/', include(('import_export_ballotpedia.urls','ballotpedia'), namespace="ballotpedia")),
     url(r'^bookmark/', include(('bookmark.urls','bookmark'), namespace="bookmark")),
     url(r'^c/', include(('candidate.urls', 'candidate'), namespace="candidate")),
+    url(r'^campaign/', include(('campaign.urls', 'campaign'), namespace="campaign")),
     url(r'^e/', include(('election.urls', 'election'), namespace="election")),
     url(r'^elected_office/', include(('elected_office.urls', 'elected_office'), namespace="elected_office")),
     url(r'^elected_official_list/', include(('elected_official.urls', 'elected_official_list'), namespace="elected_official_list")),

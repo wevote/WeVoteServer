@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import CampaignX, CampaignXManager
+from .models import CampaignX, CampaignXManager, CampaignXOwner
 import base64
 from django.db.models import Q
 from django.http import HttpResponse
@@ -356,5 +356,86 @@ def campaignx_save_photo_from_file_reader(
         'status':                   status,
         'success':                  success,
         'we_vote_hosted_campaign_photo_original_url': we_vote_hosted_campaign_photo_original_url,
+    }
+    return results
+
+
+def move_campaignx_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id, from_organization_we_vote_id, to_organization_we_vote_id,
+        to_organization_name=None):
+    status = ''
+    success = True
+    campaignx_entries_moved = 0
+    campaignx_owner_entries_moved = 0
+
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        status += "MOVE_CAMPAIGNX-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        success = False
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'from_voter_we_vote_id':            from_voter_we_vote_id,
+            'to_voter_we_vote_id':              to_voter_we_vote_id,
+            'campaignx_entries_moved':          campaignx_entries_moved,
+            'campaignx_owner_entries_moved':    campaignx_owner_entries_moved,
+        }
+        return results
+
+    if from_voter_we_vote_id == to_voter_we_vote_id:
+        status += "MOVE_CAMPAIGNX-FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
+        success = False
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'from_voter_we_vote_id':            from_voter_we_vote_id,
+            'to_voter_we_vote_id':              to_voter_we_vote_id,
+            'campaignx_entries_moved':          campaignx_entries_moved,
+            'campaignx_owner_entries_moved':    campaignx_owner_entries_moved,
+        }
+        return results
+
+    # ######################
+    # Move based on started_by_voter_we_vote_id
+    try:
+        campaignx_entries_moved += CampaignX.objects\
+            .filter(started_by_voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .update(started_by_voter_we_vote_id=to_voter_we_vote_id)
+    except Exception as e:
+        status += "FAILED-CAMPAIGNX_UPDATE: " + str(e) + " "
+
+    # ######################
+    # Move based on voter_we_vote_id
+    try:
+        campaignx_owner_entries_moved += CampaignXOwner.objects\
+            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .update(voter_we_vote_id=to_voter_we_vote_id)
+    except Exception as e:
+        status += "FAILED-CAMPAIGNX_OWNER_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
+
+    # #############################################
+    # Move based on organization_we_vote_id
+    if positive_value_exists(to_organization_name):
+        try:
+            campaignx_owner_entries_moved += CampaignXOwner.objects \
+                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(organization_name=to_organization_name,
+                        organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
+    else:
+        try:
+            campaignx_owner_entries_moved += CampaignXOwner.objects \
+                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'from_voter_we_vote_id':            from_voter_we_vote_id,
+        'to_voter_we_vote_id':              to_voter_we_vote_id,
+        'campaignx_entries_moved':          campaignx_owner_entries_moved,
+        'campaignx_owner_entries_moved':    campaignx_owner_entries_moved,
     }
     return results
