@@ -11,7 +11,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
 from config.base import get_environment_variable
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -26,6 +26,7 @@ from import_export_twitter.controllers import refresh_twitter_organization_detai
 from import_export_vote_smart.models import VoteSmartSpecialInterestGroupManager
 from issue.models import ALPHABETICAL_ASCENDING, IssueListManager, IssueManager, \
     OrganizationLinkToIssueList, OrganizationLinkToIssueManager, MOST_LINKED_ORGANIZATIONS
+import json
 from measure.models import ContestMeasure, ContestMeasureListManager, ContestMeasureManager
 from office.models import ContestOfficeManager
 import operator
@@ -40,8 +41,6 @@ from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
     STATE_CODE_MAP
-from django.http import HttpResponse
-import json
 
 
 ORGANIZATION_STANCE_CHOICES = (

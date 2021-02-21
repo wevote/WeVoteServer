@@ -8,5 +8,7 @@ from . import views_admin
 
 
 urlpatterns = [
-    url(r'^export/', views_admin.export_reaction_like_data_view(), name='reaction_like_export'),
+    url(r'^$', views_admin.campaign_list_view, name='campaignx_list',),
+    url(r'^(?P<campaignx_we_vote_id>wv[\w]{2}camp[\w]+)/edit$', views_admin.campaign_edit_view, name='campaignx_edit'),
+    # url(r'^edit_process/$', views_admin.campaign_edit_process_view, name='campaignx_edit_process'),
 ]

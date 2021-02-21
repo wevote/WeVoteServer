@@ -1,0 +1,196 @@
+{# templates/campaign/campaignx_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Campaigns{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+{% load humanize %}
+
+<h1>Campaigns</h1>
+
+{#<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"#}
+{#      target="_blank">#}
+{#        Import New Campaigns ></a> (open in new window)#}
+{#</p>#}
+
+<form name="state_code_form" method="get" action="{% url 'campaign:campaignx_list' %}">
+    {% csrf_token %}
+    <input type="hidden" name="sort_by" value="{{ sort_by }}">
+    <input type="hidden" name="show_all" value="{{ show_all }}">
+    <input type="hidden" name="show_more" value="{{ show_more }}">
+
+{% if state_list %}
+    <select id="state_code_id" name="state_code">
+        <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
+        {% if '' == state_code %}
+            -- Filter by State Served --
+        {% else %}
+            -- Show All States Served --
+        {% endif %}
+        </option>
+    {% for key, state in state_list %}
+        <option value="{{ key }}"
+                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+            {{ state }}</option>
+    {% endfor %}
+    </select>
+{% endif %}{# End of if state_list #}
+
+    &nbsp;&nbsp;&nbsp;
+
+    {#  #}
+{#    <label for="show_organizations_without_email_id">#}
+{#      <input type="checkbox" name="show_organizations_without_email" id="show_organizations_without_email_id" value="1"#}
+{#             {% if show_organizations_without_email %}checked{% endif %} /> Show Emails Missing&nbsp;&nbsp;&nbsp;#}
+{#    </label>#}
+
+    {#  #}
+    <label for="show_campaigns_in_draft_id">
+      <input type="checkbox" name="show_campaigns_in_draft" id="show_campaigns_in_draft_id" value="1"
+             {% if show_campaigns_in_draft %}checked{% endif %} /> In Draft Mode
+    </label>
+
+    &nbsp;&nbsp;&nbsp;&nbsp;
+{#    {% if election_years_available %}#}
+{#    <select id="limit_to_opinions_in_this_year_id" name="limit_to_opinions_in_this_year">#}
+{#        <option value="0" {% if 0 == limit_to_opinions_in_this_year|convert_to_int %} selected="selected"{% endif %}>#}
+{#        {% if 0 == limit_to_opinions_in_this_year %}#}
+{#            -- Opinions in This Year --#}
+{#        {% else %}#}
+{#            -- Do Not Limit by Year --#}
+{#        {% endif %}#}
+{#        </option>#}
+{#        {% for year in election_years_available %}#}
+{#        <option value="{{ year }}"#}
+{#                {% if limit_to_opinions_in_this_year|slugify == year|slugify %} selected="selected"{% endif %}>#}
+{#            {% if limit_to_opinions_in_this_year|slugify == year|slugify %}Limited To {% endif %}#}
+{#            {{ year }}</option>#}
+{#        {% endfor %}#}
+{#    </select>#}
+{#    {% endif %}{# End of if election_list #}
+
+{#    {% if state_list %}#}
+{#    <select id="limit_to_opinions_in_state_code_id" name="limit_to_opinions_in_state_code">#}
+{#        <option value="" {% if '' == limit_to_opinions_in_state_code %} selected="selected"{% endif %}>#}
+{#        {% if '' == limit_to_opinions_in_state_code %}#}
+{#            -- Opinions in This State --#}
+{#        {% else %}#}
+{#            -- Do Not Limit by State --#}
+{#        {% endif %}#}
+{#        </option>#}
+{#    {% for key, state in state_list %}#}
+{#        <option value="{{ key }}"#}
+{#                {% if key|lower == limit_to_opinions_in_state_code|lower %} selected="selected"{% endif %}>#}
+{#            {% if key|lower == limit_to_opinions_in_state_code|lower %}Limited to Opinions About Candidates in {% endif %}#}
+{#            {{ state }}</option>#}
+{#    {% endfor %}#}
+{#    </select>#}
+{#    {% endif %}{# End of if state_list #}
+
+    <br />
+
+{% if campaignx_search %}
+    <a href="{% url 'campaign:campaignx_list' %}?state_code={{ state_code }}">
+         clear search</a>&nbsp;
+{% endif %}
+    <input type="text" name="campaignx_search" id="campaignx_search_id" value="{{ campaignx_search }}" />
+    <input type="submit" value="Search for Campaign" />
+
+</form>
+
+{% if campaignx_list %}
+    <table class="table">
+    {% for campaignx in campaignx_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
+    {# Show the header every ~15 lines #}
+     <thead>
+        <tr>
+            <th></th>
+            <th></th>
+            <th>
+              <a href="{% url 'campaign:campaignx_list' %}?sort_by=campaignx&state_code={{ state_code }}&campaignx_type_filter={{ campaignx_type_filter }}&campaignx_search={{ campaignx_search }}">
+              {% if sort_by == "campaignx" %}<strong>Campaign</strong>{% else %}Campaign{% endif %}
+              </a>
+            </th>
+            <th>
+              {% if sort_by == "supporters_count" %}
+                  <a href="{% url 'campaign:campaignx_list' %}?state_code={{ state_code }}&campaignx_type_filter={{ campaignx_type_filter }}&campaignx_search={{ campaignx_search }}&show_campaignxs_without_email={{ show_campaignxs_without_email }}&show_campaignxs_to_be_analyzed={{ show_campaignxs_to_be_analyzed }}">
+                  Supporters <span class="glyphicon glyphicon-triangle-bottom"></span>
+                  </a>
+              {% else %}
+              <a href="{% url 'campaign:campaignx_list' %}?sort_by=supporters_count&state_code={{ state_code }}&campaignx_type_filter={{ campaignx_type_filter }}&campaignx_search={{ campaignx_search }}&show_campaignxs_without_email={{ show_campaignxs_without_email }}&show_campaignxs_to_be_analyzed={{ show_campaignxs_to_be_analyzed }}">
+                  Supporters (click to sort)
+                  </a>
+              {% endif %}
+            </th>
+            <th>Description</th>
+        </tr>
+      </thead>
+    {% endif %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{% if campaignx.we_vote_hosted_campaign_photo_large_url %}
+                <a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
+                    <img src="{{ campaignx.we_vote_hosted_campaign_photo_large_url }}" width="128px" /></a>{% endif %}</td>
+            <td>
+                {{ campaignx.campaign_title }} <span class="glyphicon glyphicon-new-window"></span><br />
+                &nbsp;&nbsp;&nbsp;(<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}"
+                                      target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>)
+            </td>
+            <td>{% if campaignx.supporters_count %}{{ campaignx.supporters_count|intcomma }} supporters{% endif %}</td>
+            <td>{{ campaignx.campaign_description|default_if_none:"" }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+    {% if not show_all and not show_more %}
+    <a href="{% url 'campaign:campaignx_list' %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}&show_more=1">
+        show more</a>
+    {% endif %}
+    {% if show_more %}
+    <a href="{% url 'campaign:campaignx_list' %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}&show_all=1">
+        show all</a>
+    {% endif %}
+    {% if show_all or show_more %}
+    &nbsp;&nbsp;&nbsp;
+      (<a href="{% url 'campaign:campaignx_list' %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}">
+        show fewer</a>)
+    {% endif %}
+
+    <p></p>
+{#    <p>#}
+{#        <a href="{% url 'apis_v1:campaignxsSyncOutView' %}?format=json" target="_blank" >Export Campaigns</a>#}
+{#    </p>#}
+{% else %}
+    <p>(no campaigns found)</p>
+{% endif %}
+
+    <p></p>
+{#    <p>#}
+{#        <a href="{% url 'campaign:campaignxs_import' %}" >Import Campaigns From Master Server</a>#}
+{#    </p>#}
+
+    <script>
+        $(function() {
+            $('#limit_to_opinions_in_this_year_id').change(function() {
+                this.form.submit();
+            });
+            $('#limit_to_opinions_in_state_code_id').change(function() {
+                this.form.submit();
+            });
+            $('#campaignx_type_filter_id').change(function() {
+                this.form.submit();
+            });
+            {#$('#show_campaignxs_without_email_id').change(function() {#}
+            {#    this.form.submit();#}
+            {# });#}
+            $('#show_campaigns_in_draft_id').change(function() {
+                this.form.submit();
+            });
+            $('#state_code_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

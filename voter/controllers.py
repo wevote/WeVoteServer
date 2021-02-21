@@ -17,6 +17,7 @@ from analytics.controllers import delete_analytics_info_for_voter, move_analytic
 from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, \
     ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
     ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
+from campaign.controllers import move_campaignx_to_another_voter
 from datetime import timedelta
 from django.http import HttpResponse
 from django.db.models import F
@@ -2342,6 +2343,13 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id,
         to_voter=new_owner_voter)
     status += " " + move_activity_comment_results['status']
+
+    # Transfer CampaignX related info from voter to new_owner_voter
+    move_campaignx_results = move_campaignx_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id,
+        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id,
+        to_organization_name=organization_full_name)
+    status += " " + move_campaignx_results['status']
 
     # Bring over Analytics information
     move_analytics_results = move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)

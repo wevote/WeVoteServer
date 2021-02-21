@@ -28,6 +28,7 @@ class CampaignX(models.Model):
     in_draft_mode = models.BooleanField(default=True, db_index=True)
     politician_list_serialized = models.TextField(null=True, blank=True)
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
+    supporters_count = models.PositiveIntegerField(default=0)
     we_vote_hosted_campaign_photo_original_url = models.TextField(blank=True, null=True)
     we_vote_hosted_campaign_photo_large_url = models.TextField(blank=True, null=True)
 
@@ -487,13 +488,20 @@ class CampaignXManager(models.Manager):
             try:
                 campaignx = CampaignX.objects.create(
                     campaign_description=update_values['campaign_description'],
-                    we_vote_hosted_campaign_photo_large_url=update_values['we_vote_hosted_campaign_photo_large_url'],
                     campaign_title=update_values['campaign_title'],
                     in_draft_mode=True,
                     politician_list_serialized=update_values['politician_list_serialized'],
                     started_by_voter_we_vote_id=voter_we_vote_id,
                 )
+                if 'campaign_photo_changed' in update_values \
+                        and positive_value_exists(update_values['campaign_photo_changed']):
+                    campaignx.we_vote_hosted_campaign_photo_large_url = \
+                        update_values['we_vote_hosted_campaign_photo_large_url']
+                if campaignx_changed:
+                    campaignx.save()
+                    status += "CAMPAIGNX_PHOTO_SAVED "
                 campaignx_created = True
+                campaignx_found = True
                 success = True
                 status += "CAMPAIGNX_CREATED "
             except Exception as e:
