@@ -1,7 +1,7 @@
 # apis_v1/views/views_campaign.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from campaign.controllers import campaignx_retrieve_for_api, campaignx_save_for_api
+from campaign.controllers import campaignx_list_retrieve_for_api, campaignx_retrieve_for_api, campaignx_save_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -15,6 +15,14 @@ from wevote_functions.functions import convert_to_bool, get_voter_device_id,  \
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+
+
+def campaignx_list_retrieve_view(request):  # campaignListRetrieve (No CDN)
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    json_data = campaignx_list_retrieve_for_api(
+        voter_device_id=voter_device_id,
+    )
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def campaignx_retrieve_view(request):  # campaignRetrieve (CDN)

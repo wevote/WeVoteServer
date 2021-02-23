@@ -6,12 +6,13 @@ from .models import CampaignX, CampaignXManager, CampaignXOwner
 import base64
 from django.db.models import Q
 from django.http import HttpResponse
+from exception.models import handle_exception
 from image.controllers import cache_campaignx_image, create_resized_images
 import json
 from io import BytesIO, StringIO
 from PIL import Image, ImageOps
 import re
-from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
+from voter.models import fetch_voter_we_vote_id_from_voter_device_link, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
 
@@ -20,6 +21,74 @@ logger = wevote_functions.admin.get_logger(__name__)
 # Search for in image/controllers.py as well
 CAMPAIGN_PHOTO_LARGE_MAX_WIDTH = 640  # 1600
 CAMPAIGN_PHOTO_LARGE_MAX_HEIGHT = 360  # 900
+
+
+def campaignx_list_retrieve_for_api(voter_device_id):  # campaignListRetrieve
+    """
+
+    :param voter_device_id:
+    :return:
+    """
+    campaignx_display_list = []
+    status = ""
+    voter_started_campaignx_we_vote_ids = []
+    voter_supported_campaignx_we_vote_ids = []
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id=voter_device_id, read_only=True)
+    if not positive_value_exists(voter_results['voter_found']):
+        status += 'VOTER_WE_VOTE_ID_COULD_NOT_BE_FETCHED '
+        json_data = {
+            'status': status,
+            'success': False,
+            'campaignx_list': [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    voter = voter_results['voter']
+    voter_we_vote_id = voter.we_vote_id
+
+    # owned_by_voter_we_vote_id_list = [],
+    # owned_by_organization_we_vote_id_list = []):
+
+    # including_campaignx_we_vote_id_list = [],
+    # excluding_campaignx_we_vote_id_list = [],
+    # including_politicians_in_any_of_these_states = None,
+    # including_politicians_with_support_in_any_of_these_issues = None):
+
+    campaignx_manager = CampaignXManager()
+    results = campaignx_manager.retrieve_campaignx_list(
+        including_started_by_voter_we_vote_id=voter_we_vote_id)
+    success = results['success']
+    status += results['status']
+    campaignx_list = results['campaignx_list']
+    campaignx_list_found = results['campaignx_list_found']
+
+    if success:
+        for campaignx in campaignx_list:
+            # Now calculate which campaigns belong to this voter
+            if positive_value_exists(voter_we_vote_id):
+                if campaignx.started_by_voter_we_vote_id == voter_we_vote_id:
+                    voter_started_campaignx_we_vote_ids.append(campaignx.we_vote_id)
+            one_campaignx = {
+                'campaign_description':                     campaignx.campaign_description,
+                'campaign_title':                           campaignx.campaign_title,
+                'campaignx_we_vote_id':                     campaignx.we_vote_id,
+                'in_draft_mode':                            campaignx.in_draft_mode,
+                'supporters_count':                         campaignx.supporters_count,
+                'we_vote_hosted_campaign_photo_large_url':  campaignx.we_vote_hosted_campaign_photo_large_url,
+                'we_vote_hosted_campaign_photo_medium_url': campaignx.we_vote_hosted_campaign_photo_large_url,
+            }
+            campaignx_display_list.append(one_campaignx)
+
+    json_data = {
+        'status':                                   status,
+        'success':                                  success,
+        'campaignx_list':                           campaignx_display_list,
+        'campaignx_list_found':                     campaignx_list_found,
+        'voter_started_campaignx_we_vote_ids':      voter_started_campaignx_we_vote_ids,
+        'voter_supported_campaignx_we_vote_ids':    voter_supported_campaignx_we_vote_ids,
+    }
+    return json_data
 
 
 def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOwner (No CDN)
