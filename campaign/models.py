@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception
 import wevote_functions.admin
@@ -238,6 +239,66 @@ class CampaignXManager(models.Manager):
             'campaignx_owner_list':     campaignx_owner_list,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
+        }
+        return results
+
+    def retrieve_campaignx_list(
+            self,
+            including_started_by_voter_we_vote_id=None,
+            including_campaignx_we_vote_id_list=[],
+            excluding_campaignx_we_vote_id_list=[],
+            including_politicians_in_any_of_these_states=None,
+            including_politicians_with_support_in_any_of_these_issues=None,
+            limit=25,
+            read_only=True):
+        campaignx_list = []
+        campaignx_list_found = False
+        success = True
+        status = ""
+        voter_started_campaignx_we_vote_ids = []
+        voter_supported_campaignx_we_vote_ids = []
+
+        try:
+            if read_only:
+                campaignx_queryset = CampaignX.objects.using('readonly').all()
+            else:
+                campaignx_queryset = CampaignX.objects.all()
+
+            # #########
+            # All "OR" queries
+            filters = []
+            if positive_value_exists(including_started_by_voter_we_vote_id):
+                new_filter = Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)
+                filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                campaignx_queryset = campaignx_queryset.filter(final_filters)
+
+            # issue_queryset = issue_queryset.filter(we_vote_id__in=issue_we_vote_id_list_to_filter)
+            # office_queryset = office_queryset.filter(Q(ballotpedia_is_marquee=True) | Q(is_battleground_race=True))
+
+            campaignx_list = campaignx_queryset[:limit]
+            campaignx_list_found = positive_value_exists(len(campaignx_list))
+            status += "RETRIEVE_CAMPAIGNX_LIST_SUCCEEDED "
+        except Exception as e:
+            success = False
+            status += "RETRIEVE_CAMPAIGNX_LIST_FAILED: " + str(e) + " "
+            campaignx_list_found = False
+
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'campaignx_list_found':                     campaignx_list_found,
+            'campaignx_list':                           campaignx_list,
+            'voter_started_campaignx_we_vote_ids':      voter_started_campaignx_we_vote_ids,
+            'voter_supported_campaignx_we_vote_ids':    voter_supported_campaignx_we_vote_ids,
         }
         return results
 

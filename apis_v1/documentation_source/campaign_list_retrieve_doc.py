@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/campaign_save_doc.py
+# apis_v1/documentation_source/campaign_list_retrieve_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def campaign_save_doc_template_values(url_root):
+def campaign_list_retrieve_doc_template_values(url_root):
     """
-    Show documentation about campaignSave & campaignStartSave
+    Show documentation about campaignListRetrieve (No CDN)
     """
     required_query_parameter_list = [
         {
@@ -20,21 +20,6 @@ def campaign_save_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
-        {
-            'name':         'campaignx_we_vote_id',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'The we_vote_id for the campaign.',
-        },
-        {
-            'name':         'campaign_title',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'The title of the campaign.',
-        },
-        {
-            'name':         'campaign_title_changed',
-            'value':        'boolean',  # boolean, integer, long, string
-            'description':  'Are we trying to change the campaign\'s title?',
-        },
     ]
 
     potential_status_codes_list = [
@@ -49,28 +34,36 @@ def campaign_save_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        # 'campaignx_we_vote_id': 'wv85camp1',
+        # 'campaignx_we_vote_id': 'wv85org1',
     }
 
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "campaign_title": string,\n' \
-                   '  "in_draft_mode": boolean,\n' \
-                   '  "campaignx_we_vote_id": string,\n' \
-                   '  "organization_we_vote_id": string,\n' \
-                   '  "voter_we_vote_id": string,\n' \
+                   '  "campaignx_list": list\n' \
+                   '   [\n' \
+                   '     "campaign_description": string,\n' \
+                   '     "campaign_title": string,\n' \
+                   '     "campaignx_we_vote_id": string,\n' \
+                   '     "in_draft_mode": boolean,\n' \
+                   '     "supporters_count": integer,\n' \
+                   '     "we_vote_hosted_campaign_photo_large_url": string,\n' \
+                   '     "we_vote_hosted_campaign_photo_medium_url": string,\n' \
+                   '   ],\n' \
+                   '  "campaign_list_found": boolean,\n' \
+                   '  "voter_started_campaignx_we_vote_ids": list [],\n' \
+                   '  "voter_supported_campaignx_we_vote_ids": list [],\n' \
                    '}'
 
     template_values = {
-        'api_name': 'campaignSave',
-        'api_slug': 'campaignSave',
+        'api_name': 'campaignListRetrieve',
+        'api_slug': 'campaignListRetrieve',
         'api_introduction':
             "",
-        'try_now_link': 'apis_v1:campaignSaveView',
+        'try_now_link': 'apis_v1:campaignListRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
-        'get_or_post': 'POST',
+        'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,
         'optional_query_parameter_list': optional_query_parameter_list,
         'api_response': api_response,
