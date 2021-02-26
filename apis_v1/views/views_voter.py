@@ -2221,6 +2221,8 @@ def voter_update_view(request):  # voterUpdate
         success = results['success']
         voter = results['voter']
         voter_updated = results['voter_updated']
+        first_name = voter.first_name
+        last_name = voter.last_name
         linked_organization_we_vote_id = voter.linked_organization_we_vote_id
 
     organization_manager = OrganizationManager()

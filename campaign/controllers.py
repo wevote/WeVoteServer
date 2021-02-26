@@ -31,6 +31,7 @@ def campaignx_list_retrieve_for_api(voter_device_id):  # campaignListRetrieve
     """
     campaignx_display_list = []
     status = ""
+    promoted_campaignx_we_vote_ids = []
     voter_started_campaignx_we_vote_ids = []
     voter_supported_campaignx_we_vote_ids = []
 
@@ -69,6 +70,13 @@ def campaignx_list_retrieve_for_api(voter_device_id):  # campaignListRetrieve
             if positive_value_exists(voter_we_vote_id):
                 if campaignx.started_by_voter_we_vote_id == voter_we_vote_id:
                     voter_started_campaignx_we_vote_ids.append(campaignx.we_vote_id)
+            if campaignx.is_still_active and campaignx.is_ok_to_promote_on_we_vote:
+                promoted_campaignx_we_vote_ids.append(campaignx.we_vote_id)
+            # Temp
+            if campaignx.we_vote_hosted_campaign_photo_medium_url:
+                we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_medium_url
+            else:
+                we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_large_url
             one_campaignx = {
                 'campaign_description':                     campaignx.campaign_description,
                 'campaign_title':                           campaignx.campaign_title,
@@ -76,7 +84,7 @@ def campaignx_list_retrieve_for_api(voter_device_id):  # campaignListRetrieve
                 'in_draft_mode':                            campaignx.in_draft_mode,
                 'supporters_count':                         campaignx.supporters_count,
                 'we_vote_hosted_campaign_photo_large_url':  campaignx.we_vote_hosted_campaign_photo_large_url,
-                'we_vote_hosted_campaign_photo_medium_url': campaignx.we_vote_hosted_campaign_photo_large_url,
+                'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,
             }
             campaignx_display_list.append(one_campaignx)
 
@@ -85,6 +93,7 @@ def campaignx_list_retrieve_for_api(voter_device_id):  # campaignListRetrieve
         'success':                                  success,
         'campaignx_list':                           campaignx_display_list,
         'campaignx_list_found':                     campaignx_list_found,
+        'promoted_campaignx_we_vote_ids':           promoted_campaignx_we_vote_ids,
         'voter_started_campaignx_we_vote_ids':      voter_started_campaignx_we_vote_ids,
         'voter_supported_campaignx_we_vote_ids':    voter_supported_campaignx_we_vote_ids,
     }
@@ -98,6 +107,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
     status = ''
     campaignx_owner_list = []
     campaignx_politician_list = []
+    voter_signed_in_with_email = False
 
     campaignx_manager = CampaignXManager()
     if positive_value_exists(as_owner):
@@ -105,6 +115,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
         if voter_results['voter_found']:
             voter = voter_results['voter']
+            voter_signed_in_with_email = voter.signed_in_with_email()
             voter_we_vote_id = voter.we_vote_id
         else:
             status += "VALID_VOTER_ID_MISSING "
@@ -113,11 +124,13 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
                 'success':                          False,
                 'campaign_description':             '',
                 'campaign_title':                   '',
-                'in_draft_mode':                    True,
                 'campaignx_owner_list':             campaignx_owner_list,
                 'campaignx_politician_list':        campaignx_politician_list,
                 'campaignx_we_vote_id':             '',
+                'in_draft_mode':                    True,
+                'voter_signed_in_with_email':       voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url':  '',
+                'we_vote_hosted_campaign_photo_medium_url': '',
             }
             return results
         results = campaignx_manager.retrieve_campaignx_as_owner(
@@ -138,11 +151,13 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
             'success':                          False,
             'campaign_description':             '',
             'campaign_title':                   '',
-            'in_draft_mode':                    True,
             'campaignx_owner_list':             campaignx_owner_list,
             'campaignx_politician_list':        campaignx_politician_list,
             'campaignx_we_vote_id':             '',
+            'in_draft_mode':                    True,
+            'voter_signed_in_with_email':       voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
+            'we_vote_hosted_campaign_photo_medium_url': '',
         }
         return results
     elif not results['campaignx_found']:
@@ -153,11 +168,13 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
             'success':                          True,
             'campaign_description':             '',
             'campaign_title':                   '',
-            'in_draft_mode':                    True,
             'campaignx_owner_list':             campaignx_owner_list,
             'campaignx_politician_list':        campaignx_politician_list,
             'campaignx_we_vote_id':             '',
+            'in_draft_mode':                    True,
+            'voter_signed_in_with_email':       voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url':  '',
+            'we_vote_hosted_campaign_photo_medium_url': '',
         }
         return results
 
@@ -167,7 +184,11 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
         campaignx_politician_list = json.loads(campaignx.politician_list_serialized)
     else:
         campaignx_politician_list = []
-
+    # Temp
+    if campaignx.we_vote_hosted_campaign_photo_medium_url:
+        we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_medium_url
+    else:
+        we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_large_url
     results = {
         'status':                           status,
         'success':                          True,
@@ -177,7 +198,9 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
         'campaignx_owner_list':             campaignx_owner_list,
         'campaignx_politician_list':        campaignx_politician_list,
         'campaignx_we_vote_id':             campaignx.we_vote_id,
+        'voter_signed_in_with_email':       voter_signed_in_with_email,
         'we_vote_hosted_campaign_photo_large_url':  campaignx.we_vote_hosted_campaign_photo_large_url,
+        'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,
     }
     return results
 
@@ -185,8 +208,11 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
 def campaignx_save_for_api(  # campaignSave & campaignStartSave
         campaign_description='',
         campaign_description_changed=False,
+        in_draft_mode=False,
+        in_draft_mode_changed=False,
         campaign_photo_from_file_reader='',
         campaign_photo_changed=False,
+        campaign_publish_now=False,
         campaign_title='',
         campaign_title_changed=False,
         campaignx_we_vote_id='',
@@ -197,11 +223,13 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
     success = True
     campaignx_owner_list = []
     campaignx_politician_list = []
+    voter_signed_in_with_email = False
 
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     if voter_results['voter_found']:
         voter = voter_results['voter']
+        voter_signed_in_with_email = voter.signed_in_with_email()
         voter_we_vote_id = voter.we_vote_id
         linked_organization_we_vote_id = voter.linked_organization_we_vote_id
     else:
@@ -215,9 +243,30 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'campaignx_owner_list':         campaignx_owner_list,
             'campaignx_politician_list':    campaignx_politician_list,
             'campaignx_we_vote_id':         '',
+            'voter_signed_in_with_email':   voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
+            'we_vote_hosted_campaign_photo_medium_url': '',
         }
         return results
+
+    if positive_value_exists(campaign_publish_now):
+        # To publish a campaign, voter must be signed in with an email address
+        if not voter.signed_in_with_email():
+            status += "MUST_BE_SIGNED_IN_WITH_EMAIL "
+            results = {
+                'status':                       status,
+                'success':                      False,
+                'campaign_description':         '',
+                'campaign_title':               '',
+                'in_draft_mode':                True,
+                'campaignx_owner_list':         campaignx_owner_list,
+                'campaignx_politician_list':    campaignx_politician_list,
+                'campaignx_we_vote_id':         '',
+                'voter_signed_in_with_email':   voter_signed_in_with_email,
+                'we_vote_hosted_campaign_photo_large_url': '',
+                'we_vote_hosted_campaign_photo_medium_url': '',
+            }
+            return results
 
     campaignx_manager = CampaignXManager()
     if positive_value_exists(campaignx_we_vote_id):
@@ -234,11 +283,14 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                 'campaignx_owner_list':         campaignx_owner_list,
                 'campaignx_politician_list':    campaignx_politician_list,
                 'campaignx_we_vote_id':         '',
+                'voter_signed_in_with_email':   voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url': '',
+                'we_vote_hosted_campaign_photo_medium_url': '',
             }
             return results
         # Save campaign_photo_from_file_reader and get back we_vote_hosted_campaign_photo_original_url
         we_vote_hosted_campaign_photo_large_url = None
+        we_vote_hosted_campaign_photo_medium_url = None
         we_vote_hosted_campaign_photo_original_url = None
         if campaign_photo_changed and campaign_photo_from_file_reader:
             photo_results = campaignx_save_photo_from_file_reader(
@@ -252,16 +304,21 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                     we_vote_hosted_campaign_photo_original_url=we_vote_hosted_campaign_photo_original_url)
                 we_vote_hosted_campaign_photo_large_url = \
                     create_resized_image_results['cached_resized_image_url_large']
+                # To be updated
+                we_vote_hosted_campaign_photo_medium_url = we_vote_hosted_campaign_photo_large_url
 
         update_values = {
             'campaign_description':         campaign_description,
             'campaign_description_changed': campaign_description_changed,
+            'in_draft_mode':            in_draft_mode,
+            'in_draft_mode_changed':    in_draft_mode_changed,
             'campaign_photo_changed':       campaign_photo_changed,
             'campaign_title':               campaign_title,
             'campaign_title_changed':       campaign_title_changed,
             'politician_list_changed':      politician_list_changed,
             'politician_list_serialized':   politician_list_serialized,
             'we_vote_hosted_campaign_photo_large_url': we_vote_hosted_campaign_photo_large_url,
+            'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,
             'we_vote_hosted_campaign_photo_original_url': we_vote_hosted_campaign_photo_original_url,
         }
         create_results = campaignx_manager.update_or_create_campaignx(
@@ -277,6 +334,8 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
         update_values = {
             'campaign_description':         campaign_description,
             'campaign_description_changed': campaign_description_changed,
+            'in_draft_mode':                in_draft_mode,
+            'in_draft_mode_changed':        in_draft_mode_changed,
             'campaign_title':               campaign_title,
             'campaign_title_changed':       campaign_title_changed,
             'politician_list_changed':      politician_list_changed,
@@ -311,10 +370,14 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                         we_vote_hosted_campaign_photo_original_url=campaignx.we_vote_hosted_campaign_photo_original_url)
                     campaignx.we_vote_hosted_campaign_photo_large_url = \
                         create_resized_image_results['cached_resized_image_url_large']
+                    # To be updated
+                    campaignx.we_vote_hosted_campaign_photo_medium_url = \
+                        campaignx.we_vote_hosted_campaign_photo_large_url
                     campaignx.save()
             else:
                 # Deleting image
                 campaignx.we_vote_hosted_campaign_photo_large_url = None
+                campaignx.we_vote_hosted_campaign_photo_medium_url = None
                 campaignx.save()
 
     status += create_results['status']
@@ -334,17 +397,24 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
         else:
             campaignx_politician_list = []
 
+        # Temp
+        if campaignx.we_vote_hosted_campaign_photo_medium_url:
+            we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_medium_url
+        else:
+            we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_large_url
         results = {
             'status':                       status,
             'success':                      success,
             'campaign_description':         campaignx.campaign_description,
-            'we_vote_hosted_campaign_photo_large_url': campaignx.we_vote_hosted_campaign_photo_large_url,
             'campaign_title':               campaignx.campaign_title,
-            'in_draft_mode':                campaignx.in_draft_mode,
             'campaignx_politician_list':    campaignx_politician_list,
             'campaignx_owner_list':         campaignx_owner_list,
             'campaignx_we_vote_id':         campaignx.we_vote_id,
-            'voter_we_vote_id':             voter_we_vote_id,
+            'in_draft_mode':                campaignx.in_draft_mode,
+            # 'voter_we_vote_id':             voter_we_vote_id,
+            'voter_signed_in_with_email':   voter_signed_in_with_email,
+            'we_vote_hosted_campaign_photo_large_url': campaignx.we_vote_hosted_campaign_photo_large_url,
+            'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,
         }
         return results
     else:
@@ -353,13 +423,15 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'status':                       status,
             'success':                      False,
             'campaign_description':         '',
-            'we_vote_hosted_campaign_photo_large_url': '',
             'campaign_title':               '',
-            'in_draft_mode':                True,
             'campaignx_owner_list':         [],
             'campaignx_politician_list':    [],
             'campaignx_we_vote_id':         '',
-            'voter_we_vote_id':             voter_we_vote_id,
+            'in_draft_mode':                True,
+            # 'voter_we_vote_id':             voter_we_vote_id,
+            'voter_signed_in_with_email':   voter_signed_in_with_email,
+            'we_vote_hosted_campaign_photo_large_url': '',
+            'we_vote_hosted_campaign_photo_medium_url': '',
         }
         return results
 

@@ -51,6 +51,7 @@ def campaign_list_retrieve_doc_template_values(url_root):
                    '     "we_vote_hosted_campaign_photo_medium_url": string,\n' \
                    '   ],\n' \
                    '  "campaign_list_found": boolean,\n' \
+                   '  "promoted_campaignx_we_vote_ids": list [],\n' \
                    '  "voter_started_campaignx_we_vote_ids": list [],\n' \
                    '  "voter_supported_campaignx_we_vote_ids": list [],\n' \
                    '}'

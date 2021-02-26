@@ -27,11 +27,16 @@ class CampaignX(models.Model):
     campaign_title = models.CharField(verbose_name="title of campaign", max_length=255, null=False, blank=False)
     # Has not been released for view
     in_draft_mode = models.BooleanField(default=True, db_index=True)
+    # Can be promoted by We Vote on free home page and elsewhere
+    is_ok_to_promote_on_we_vote = models.BooleanField(default=True, db_index=True)
+    is_still_active = models.BooleanField(default=True, db_index=True)
+    is_victorious = models.BooleanField(default=False, db_index=True)
     politician_list_serialized = models.TextField(null=True, blank=True)
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     supporters_count = models.PositiveIntegerField(default=0)
     we_vote_hosted_campaign_photo_original_url = models.TextField(blank=True, null=True)
     we_vote_hosted_campaign_photo_large_url = models.TextField(blank=True, null=True)
+    we_vote_hosted_campaign_photo_medium_url = models.TextField(blank=True, null=True)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -530,6 +535,10 @@ class CampaignXManager(models.Manager):
                 if 'campaign_title_changed' in update_values \
                         and positive_value_exists(update_values['campaign_title_changed']):
                     campaignx.campaign_title = update_values['campaign_title']
+                    campaignx_changed = True
+                if 'in_draft_mode_changed' in update_values \
+                        and positive_value_exists(update_values['in_draft_mode_changed']):
+                    campaignx.in_draft_mode = positive_value_exists(update_values['in_draft_mode'])
                     campaignx_changed = True
                 if 'politician_list_changed' in update_values \
                         and positive_value_exists(update_values['politician_list_changed']):
