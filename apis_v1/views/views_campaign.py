@@ -52,8 +52,11 @@ def campaignx_save_view(request):  # campaignSave & campaignStartSave
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     campaign_description = request.POST.get('campaign_description', '')
     campaign_description_changed = positive_value_exists(request.POST.get('campaign_description_changed', False))
+    in_draft_mode = request.POST.get('in_draft_mode', '')
+    in_draft_mode_changed = positive_value_exists(request.POST.get('in_draft_mode_changed', False))
     campaign_photo_from_file_reader = request.POST.get('campaign_photo_from_file_reader', '')
     campaign_photo_changed = positive_value_exists(request.POST.get('campaign_photo_changed', False))
+    campaign_publish_now = positive_value_exists(request.POST.get('campaign_publish_now', False))
     campaign_title = request.POST.get('campaign_title', '')
     campaign_title_changed = positive_value_exists(request.POST.get('campaign_title_changed', False))
     campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', '')
@@ -62,8 +65,11 @@ def campaignx_save_view(request):  # campaignSave & campaignStartSave
     json_data = campaignx_save_for_api(
         campaign_description=campaign_description,
         campaign_description_changed=campaign_description_changed,
+        in_draft_mode=in_draft_mode,
+        in_draft_mode_changed=in_draft_mode_changed,
         campaign_photo_from_file_reader=campaign_photo_from_file_reader,
         campaign_photo_changed=campaign_photo_changed,
+        campaign_publish_now=campaign_publish_now,
         campaign_title=campaign_title,
         campaign_title_changed=campaign_title_changed,
         campaignx_we_vote_id=campaignx_we_vote_id,
