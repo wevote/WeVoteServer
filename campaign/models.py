@@ -4,10 +4,12 @@
 
 from django.db import models
 from django.db.models import Q
+from django.utils.text import slugify
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception
+import string
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import generate_random_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_campaignx_integer, fetch_site_unique_id_prefix
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -32,6 +34,7 @@ class CampaignX(models.Model):
     is_still_active = models.BooleanField(default=True, db_index=True)
     is_victorious = models.BooleanField(default=False, db_index=True)
     politician_list_serialized = models.TextField(null=True, blank=True)
+    seo_friendly_path = models.CharField(max_length=255, null=True, unique=True, db_index=True)
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     supporters_count = models.PositiveIntegerField(default=0)
     we_vote_hosted_campaign_photo_original_url = models.TextField(blank=True, null=True)
@@ -63,6 +66,263 @@ class CampaignXManager(models.Manager):
     def __unicode__(self):
         return "CampaignXManager"
 
+    def generate_seo_friendly_path(self, campaignx_we_vote_id='', campaignx_title=None):
+        """
+        Generate the closest possible SEO friendly path for this campaign. Note that these paths
+        are only generated for campaigns which are already published.
+        :param campaignx_we_vote_id:
+        :param campaignx_title:
+        :return:
+        """
+        final_pathname_string = ''
+        pathname_modifier = None
+        status = ""
+
+        if not positive_value_exists(campaignx_we_vote_id):
+            status += "MISSING_CAMPAIGNX_WE_VOTE_ID "
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        if not campaignx_title:
+            status += "MISSING_CAMPAIGN_TITLE "
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        # Generate the ideal path given this title
+        try:
+            base_pathname_string = slugify(campaignx_title)
+        except Exception as e:
+            status += 'PROBLEM_WITH_SLUGIFY: ' + str(e) + ' '
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        if not base_pathname_string or not positive_value_exists(len(base_pathname_string)):
+            status += "MISSING_BASE_PATHNAME_STRING "
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        # Is that path already stored for this campaign?
+        try:
+            path_query = CampaignXSEOFriendlyPath.objects.using('readonly').all()
+            path_query = path_query.filter(campaignx_we_vote_id=campaignx_we_vote_id)
+            path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
+            match_count = path_query.count()
+            if positive_value_exists(match_count):
+                status += "PATHNAME_FOUND-OWNED_BY_CAMPAIGNX "
+                results = {
+                    'seo_friendly_path':            base_pathname_string,
+                    'seo_friendly_path_created':    False,
+                    'seo_friendly_path_found':      True,
+                    'status':                       status,
+                    'success':                      True,
+                }
+                return results
+        except Exception as e:
+            status += 'PROBLEM_QUERYING_CAMPAIGNX_SEO_FRIENDLY_PATH_TABLE1 {error} [type: {error_type}] ' \
+                      ''.format(error=str(e), error_type=type(e))
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        # Is it being used by any campaign?
+        owned_by_another_campaignx = False
+        try:
+            path_query = CampaignXSEOFriendlyPath.objects.using('readonly').all()
+            path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
+            match_count = path_query.count()
+            if positive_value_exists(match_count):
+                owned_by_another_campaignx = True
+                status += "PATHNAME_FOUND-OWNED_BY_ANOTHER_CAMPAIGNX "
+        except Exception as e:
+            status += 'PROBLEM_QUERYING_CAMPAIGNX_SEO_FRIENDLY_PATH_TABLE2 {error} [type: {error_type}] ' \
+                      ''.format(error=str(e), error_type=type(e))
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        if not owned_by_another_campaignx:
+            # Double-check that we don't have a reserved entry already in the OrganizationReservedDomain table
+            try:
+                path_query = CampaignX.objects.using('readonly').all()
+                path_query = path_query.filter(seo_friendly_path__iexact=base_pathname_string)
+                match_count = path_query.count()
+                if positive_value_exists(match_count):
+                    owned_by_another_campaignx = True
+                    status += "PATHNAME_FOUND_IN_ANOTHER_CAMPAIGNX "
+            except Exception as e:
+                status += 'PROBLEM_QUERYING_CAMPAIGNX_SEO_FRIENDLY_PATH_TABLE3 {error} [type: {error_type}] ' \
+                          ''.format(error=str(e), error_type=type(e))
+                results = {
+                    'seo_friendly_path':            final_pathname_string,
+                    'seo_friendly_path_created':    False,
+                    'seo_friendly_path_found':      False,
+                    'status':                       status,
+                    'success':                      False,
+                }
+                return results
+
+        if not owned_by_another_campaignx:
+            final_pathname_string = base_pathname_string
+        else:
+            # If already being used, add a random string on the end, verify not in use, and save
+            continue_retrieving = True
+            pathname_modifiers_already_reviewed_list = []  # Reset
+            safety_valve_count = 0
+            while continue_retrieving and safety_valve_count < 1000:
+                safety_valve_count += 1
+                modifier_safety_valve_count = 0
+                while pathname_modifier not in pathname_modifiers_already_reviewed_list:
+                    if modifier_safety_valve_count > 50:
+                        status += 'CAMPAIGNX_MODIFIER_SAFETY_VALVE_EXCEEDED '
+                        results = {
+                            'seo_friendly_path':            final_pathname_string,
+                            'seo_friendly_path_created':    False,
+                            'seo_friendly_path_found':      False,
+                            'status':                       status,
+                            'success':                      False,
+                        }
+                        return results
+                    modifier_safety_valve_count += 1
+                    pathname_modifier = generate_random_string(
+                        string_length=4,
+                        chars=string.ascii_lowercase + string.digits,
+                        remove_confusing_digits=True,
+                    )
+                final_pathname_string_to_test = "{base_pathname_string}-{pathname_modifier}".format(
+                    base_pathname_string=base_pathname_string,
+                    pathname_modifier=pathname_modifier)
+                try:
+                    pathname_modifiers_already_reviewed_list.append(pathname_modifier)
+                    path_query = CampaignXSEOFriendlyPath.objects.using('readonly').all()
+                    path_query = path_query.filter(final_pathname_string__iexact=final_pathname_string_to_test)
+                    match_count = path_query.count()
+                    if not positive_value_exists(match_count):
+                        try:
+                            path_query = CampaignX.objects.using('readonly').all()
+                            path_query = path_query.filter(seo_friendly_path__iexact=final_pathname_string_to_test)
+                            match_count = path_query.count()
+                            if positive_value_exists(match_count):
+                                status += "FOUND_IN_ANOTHER_CAMPAIGNX2 "
+                            else:
+                                continue_retrieving = False
+                                final_pathname_string = final_pathname_string_to_test
+                                owned_by_another_campaignx = False
+                                status += "NO_PATHNAME_COLLISION "
+                        except Exception as e:
+                            status += 'PROBLEM_QUERYING_CAMPAIGNX_TABLE {error} [type: {error_type}] ' \
+                                      ''.format(error=str(e), error_type=type(e))
+                            results = {
+                                'seo_friendly_path':            final_pathname_string,
+                                'seo_friendly_path_created':    False,
+                                'seo_friendly_path_found':      False,
+                                'status':                       status,
+                                'success':                      False,
+                            }
+                            return results
+                except Exception as e:
+                    status += 'PROBLEM_QUERYING_CAMPAIGNX_SEO_FRIENDLY_PATH_TABLE4 {error} [type: {error_type}] ' \
+                              ''.format(error=str(e), error_type=type(e))
+                    results = {
+                        'seo_friendly_path':            final_pathname_string,
+                        'seo_friendly_path_created':    False,
+                        'seo_friendly_path_found':      False,
+                        'status':                       status,
+                        'success':                      False,
+                    }
+                    return results
+
+        if owned_by_another_campaignx:
+            # We have failed to find a unique URL
+            status += 'FAILED_TO_FIND_UNIQUE_URL '
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        if not positive_value_exists(final_pathname_string) or not positive_value_exists(campaignx_we_vote_id):
+            # We have failed to generate a unique URL
+            status += 'MISSING_REQUIRED_VARIABLE '
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        # Create a new entry
+        try:
+            campaignx_seo_friendly_path = CampaignXSEOFriendlyPath.objects.create(
+                base_pathname_string=base_pathname_string,
+                campaign_title=campaignx_title,
+                campaignx_we_vote_id=campaignx_we_vote_id,
+                final_pathname_string=final_pathname_string,
+                pathname_modifier=pathname_modifier,
+            )
+            seo_friendly_path_created = True
+            seo_friendly_path_found = True
+            success = True
+            status += "CAMPAIGNX_SEO_FRIENDLY_PATH_CREATED "
+        except Exception as e:
+            status += "CAMPAIGNX_SEO_FRIENDLY_PATH_NOT_CREATED: " + str(e) + " "
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        status += "FINAL_PATHNAME_STRING_GENERATED "
+        results = {
+            'seo_friendly_path':            final_pathname_string,
+            'seo_friendly_path_created':    seo_friendly_path_created,
+            'seo_friendly_path_found':      seo_friendly_path_found,
+            'status':                       status,
+            'success':                      success,
+        }
+        return results
+
     def is_voter_campaignx_owner(self, campaignx_we_vote_id='', voter_we_vote_id=''):
         status = ''
         voter_is_campaignx_owner = False
@@ -82,12 +342,17 @@ class CampaignXManager(models.Manager):
         return
 
     def retrieve_campaignx_as_owner(
-            self, campaignx_we_vote_id='', voter_we_vote_id='', read_only=False):
+            self,
+            campaignx_we_vote_id='',
+            seo_friendly_path='',
+            voter_we_vote_id='',
+            read_only=False):
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         campaignx = None
         campaignx_manager = CampaignXManager()
         campaignx_owner_list = []
+        seo_friendly_path_list = []
         status = ''
         viewer_is_owner = False
 
@@ -104,6 +369,15 @@ class CampaignXManager(models.Manager):
                 campaignx_found = True
                 campaignx_we_vote_id = campaignx.we_vote_id
                 status += 'CAMPAIGNX_AS_OWNER_FOUND_WITH_WE_VOTE_ID '
+                success = True
+            elif positive_value_exists(seo_friendly_path):
+                if positive_value_exists(read_only):
+                    campaignx = CampaignX.objects.using('readonly').get(seo_friendly_path__iexact=seo_friendly_path)
+                else:
+                    campaignx = CampaignX.objects.get(seo_friendly_path__iexact=seo_friendly_path)
+                campaignx_found = True
+                campaignx_we_vote_id = campaignx.we_vote_id
+                status += 'CAMPAIGNX_FOUND_WITH_SEO_FRIENDLY_PATH '
                 success = True
             elif positive_value_exists(voter_we_vote_id):
                 # If ONLY the voter_we_vote_id is passed in, get the campaign for that voter in draft mode
@@ -158,6 +432,10 @@ class CampaignXManager(models.Manager):
                 }
                 campaignx_owner_list.append(campaign_owner_dict)
 
+            seo_friendly_path_list = \
+                campaignx_manager.retrieve_seo_friendly_path_simple_list(
+                    campaignx_we_vote_id=campaignx_we_vote_id)
+
             # campaignx_politician_object_list = campaignx_manager.retrieve_campaignx_politician_list(
             #     campaignx_we_vote_id=campaignx_we_vote_id)
             #
@@ -186,18 +464,20 @@ class CampaignXManager(models.Manager):
             'campaignx_found':              campaignx_found,
             'campaignx_we_vote_id':         campaignx_we_vote_id,
             'campaignx_owner_list':         campaignx_owner_list,
+            'seo_friendly_path_list':       seo_friendly_path_list,
             'DoesNotExist':                 exception_does_not_exist,
             'MultipleObjectsReturned':      exception_multiple_object_returned,
         }
         return results
 
-    def retrieve_campaignx(self, campaignx_we_vote_id='', read_only=False):
+    def retrieve_campaignx(self, campaignx_we_vote_id='', seo_friendly_path='', read_only=False):
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         campaignx = None
         campaignx_found = False
         campaignx_manager = CampaignXManager()
         campaignx_owner_list = []
+        seo_friendly_path_list = []
         status = ''
 
         try:
@@ -208,6 +488,14 @@ class CampaignXManager(models.Manager):
                     campaignx = CampaignX.objects.get(we_vote_id=campaignx_we_vote_id)
                 campaignx_found = True
                 status += 'CAMPAIGNX_FOUND_WITH_WE_VOTE_ID '
+                success = True
+            elif positive_value_exists(seo_friendly_path):
+                if positive_value_exists(read_only):
+                    campaignx = CampaignX.objects.using('readonly').get(seo_friendly_path__iexact=seo_friendly_path)
+                else:
+                    campaignx = CampaignX.objects.get(seo_friendly_path__iexact=seo_friendly_path)
+                campaignx_found = True
+                status += 'CAMPAIGNX_FOUND_WITH_SEO_FRIENDLY_PATH '
                 success = True
             else:
                 status += 'CAMPAIGNX_NOT_FOUND-MISSING_VARIABLES '
@@ -225,7 +513,6 @@ class CampaignXManager(models.Manager):
         if positive_value_exists(campaignx_found):
             campaignx_owner_object_list = campaignx_manager.retrieve_campaignx_owner_list(
                 campaignx_we_vote_id=campaignx_we_vote_id, viewer_is_owner=False)
-
             for campaignx_owner in campaignx_owner_object_list:
                 campaign_owner_dict = {
                     'organization_name':                        campaignx_owner.organization_name,
@@ -235,6 +522,10 @@ class CampaignXManager(models.Manager):
                 }
                 campaignx_owner_list.append(campaign_owner_dict)
 
+            seo_friendly_path_list = \
+                campaignx_manager.retrieve_seo_friendly_path_simple_list(
+                    campaignx_we_vote_id=campaignx_we_vote_id)
+
         results = {
             'status':                   status,
             'success':                  success,
@@ -242,6 +533,7 @@ class CampaignXManager(models.Manager):
             'campaignx_found':          campaignx_found,
             'campaignx_we_vote_id':     campaignx_we_vote_id,
             'campaignx_owner_list':     campaignx_owner_list,
+            'seo_friendly_path_list':   seo_friendly_path_list,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
         }
@@ -454,6 +746,32 @@ class CampaignXManager(models.Manager):
             campaignx_politician_list = []
             return campaignx_politician_list
 
+    def retrieve_seo_friendly_path_list(self, campaignx_we_vote_id=''):
+        seo_friendly_path_list_found = False
+        seo_friendly_path_list = []
+        try:
+            query = CampaignXSEOFriendlyPath.objects.all()
+            query = query.filter(campaignx_we_vote_id=campaignx_we_vote_id)
+            seo_friendly_path_list = list(query)
+            if len(seo_friendly_path_list):
+                seo_friendly_path_list_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        if seo_friendly_path_list_found:
+            return seo_friendly_path_list
+        else:
+            seo_friendly_path_list = []
+            return seo_friendly_path_list
+
+    def retrieve_seo_friendly_path_simple_list(self, campaignx_we_vote_id=''):
+        seo_friendly_path_list = \
+            self.retrieve_seo_friendly_path_list(campaignx_we_vote_id=campaignx_we_vote_id)
+        simple_list = []
+        for one_path in seo_friendly_path_list:
+            simple_list.append(one_path.final_pathname_string)
+        return simple_list
+
     def update_or_create_campaignx(
             self,
             campaignx_we_vote_id='',
@@ -538,8 +856,22 @@ class CampaignXManager(models.Manager):
                     campaignx_changed = True
                 if 'in_draft_mode_changed' in update_values \
                         and positive_value_exists(update_values['in_draft_mode_changed']):
-                    campaignx.in_draft_mode = positive_value_exists(update_values['in_draft_mode'])
-                    campaignx_changed = True
+                    in_draft_mode_may_be_updated = True
+                    if positive_value_exists(campaignx.campaign_title):
+                        # An SEO friendly path is not created when we first create the campaign in draft mode
+                        if not positive_value_exists(update_values['in_draft_mode']):
+                            # If changing from in_draft_mode to published...
+                            path_results = campaignx_manager.generate_seo_friendly_path(
+                                campaignx_we_vote_id=campaignx.we_vote_id,
+                                campaignx_title=campaignx.campaign_title)
+                            if path_results['seo_friendly_path_found']:
+                                campaignx.seo_friendly_path = path_results['seo_friendly_path']
+                            else:
+                                status += path_results['status']
+                                in_draft_mode_may_be_updated = False
+                    if in_draft_mode_may_be_updated:
+                        campaignx.in_draft_mode = positive_value_exists(update_values['in_draft_mode'])
+                        campaignx_changed = True
                 if 'politician_list_changed' in update_values \
                         and positive_value_exists(update_values['politician_list_changed']):
                     campaignx.politician_list_serialized = update_values['politician_list_serialized']
@@ -551,7 +883,7 @@ class CampaignXManager(models.Manager):
                     status += "CAMPAIGNX_NOT_UPDATED-NO_CHANGES_FOUND "
                 success = True
             except Exception as e:
-                campaignx = CampaignX()
+                campaignx = None
                 success = False
                 status += "CAMPAIGNX_NOT_UPDATED: " + str(e) + " "
         else:
@@ -804,3 +1136,14 @@ class CampaignXPolitician(models.Model):
     we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
+
+
+class CampaignXSEOFriendlyPath(models.Model):
+    def __unicode__(self):
+        return "CampaignXSEOFriendlyPath"
+
+    campaignx_we_vote_id = models.CharField(max_length=255, null=True)
+    campaign_title = models.CharField(max_length=255, null=False)
+    base_pathname_string = models.CharField(max_length=255, null=True)
+    pathname_modifier = models.CharField(max_length=10, null=True)
+    final_pathname_string = models.CharField(max_length=255, null=True, unique=True, db_index=True)
