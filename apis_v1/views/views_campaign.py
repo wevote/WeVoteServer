@@ -28,9 +28,11 @@ def campaignx_list_retrieve_view(request):  # campaignListRetrieve (No CDN)
 def campaignx_retrieve_view(request):  # campaignRetrieve (CDN)
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
+    seo_friendly_path = request.GET.get('seo_friendly_path', '')
     json_data = campaignx_retrieve_for_api(
         voter_device_id=voter_device_id,
         campaignx_we_vote_id=campaignx_we_vote_id,
+        seo_friendly_path=seo_friendly_path,
     )
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -52,7 +54,7 @@ def campaignx_save_view(request):  # campaignSave & campaignStartSave
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     campaign_description = request.POST.get('campaign_description', '')
     campaign_description_changed = positive_value_exists(request.POST.get('campaign_description_changed', False))
-    in_draft_mode = request.POST.get('in_draft_mode', '')
+    in_draft_mode = positive_value_exists(request.POST.get('in_draft_mode', True))
     in_draft_mode_changed = positive_value_exists(request.POST.get('in_draft_mode_changed', False))
     campaign_photo_from_file_reader = request.POST.get('campaign_photo_from_file_reader', '')
     campaign_photo_changed = positive_value_exists(request.POST.get('campaign_photo_changed', False))
