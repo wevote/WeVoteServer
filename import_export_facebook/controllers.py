@@ -12,9 +12,10 @@ from organization.models import OrganizationManager, INDIVIDUAL
 from socket import timeout
 import urllib.request
 from urllib.error import HTTPError
-from voter.models import VoterDeviceLinkManager, VoterManager
+from voter.models import VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import extract_and_replace_facebook_page_id, is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions import extract_and_replace_facebook_page_id, is_voter_device_id_valid, \
+    positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -116,6 +117,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
 
     # ##### Make the facebook_email an email for the current voter (and possibly the primary email)
     email_manager = EmailManager()
+    email_address_object = {}
     if positive_value_exists(facebook_auth_response.facebook_email):
         # Check to make sure there isn't an account already using the facebook_email
         facebook_email_address_verified = False

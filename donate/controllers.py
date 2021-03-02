@@ -18,7 +18,7 @@ import textwrap
 
 logger = get_logger(__name__)
 stripe.api_key = get_environment_variable("STRIPE_SECRET_KEY")
-if (not stripe.api_key.startswith("sk_")):
+if not stripe.api_key.startswith("sk_"):
     logger.error("Configuration error, the stripe secret key, must begin with 'sk_' -- don't use the publishable key "
                  "on the server!")
 
@@ -180,8 +180,8 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     :param request:
     :param token: The Stripe token.id for the card and transaction
     :param email:
-    :param donation_amount:
-    :param monthly_donation:
+    :param donation_amount:  the amount of the donation, but not used for organization subscriptions
+    :param monthly_donation: (boolean) is this a monthly donation subscription
     :param voter_we_vote_id:
     :param is_organization_plan:  True for a organization plan, False for a donation (one time or donation subscription)
     :param coupon_code: Our coupon codes for pricing and features that are looked up
@@ -192,9 +192,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     """
 
     donation_manager = DonationManager()
-    success = False
-    saved_stripe_donation = False
-    donation_entry_saved = False
+    success, saved_stripe_donation, donation_entry_saved = False, False, False
     donation_date_time = datetime.today()
     donation_status = ''
     if positive_value_exists(is_organization_plan):
@@ -202,45 +200,20 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     else:
         donation_journal_action_taken = 'VOTER_SUBMITTED_DONATION'
     charge_id = ''
-    amount = 0
-    currency = ''
-    stripe_customer_id = ''
-    stripe_subscription_created = False
-    donation_plan_definition_already_exists = False
+    if is_organization_plan:
+        amount = 0
+    else:
+        amount = donation_amount
+    currency, stripe_customer_id, status, error_message, funding = '', '', '', '', ''
+    stripe_subscription_created, donation_plan_definition_already_exists, livemode = False, False, False
     subscription_saved = 'NOT_APPLICABLE'
-    status = ''
-    error_message = ''
-    funding = ''
-    livemode = False
-    created = None
-    failure_code = ''
-    failure_message = ''
-    network_status = ''
-    reason = ''
-    seller_message = ''
-    stripe_type = ''
-    paid = ''
-    amount_refunded = 0
-    refund_count = 0
-    address_zip = ''
-    brand = ''
-    country = ''
-    exp_month = 0
-    exp_year = 0
-    last4 = 0
-    id_card = ''
-    stripe_object = ''
-    stripe_status = ''
-    stripe_subscription_id = None
-    subscription_plan_id = None
-    subscription_created_at = None
-    subscription_canceled_at = None
-    subscription_ended_at = None
-    create_donation_entry = False
-    create_subscription_entry = False
-    charge = None
-    not_loggedin_voter_we_vote_id = None
-    org_subs_already_exists = False
+    failure_code, failure_message, network_status, reason, seller_message, stripe_type = '', '', '', '', '', ''
+    amount_refunded, refund_count, exp_month, exp_year, last4 = 0, 0, 0, 0, 0
+    paid, address_zip, brand, country = '', '', '', ''
+    id_card, stripe_object, stripe_status = '', '', ''
+    stripe_subscription_id, subscription_plan_id, subscription_created_at, created  = None, None, None, None
+    subscription_canceled_at, subscription_ended_at, charge, not_loggedin_voter_we_vote_id = None, None, None, None
+    create_donation_entry, create_subscription_entry, org_subs_already_exists = False, False, False
     organization_saved = False
 
     ip_address = get_ip_from_headers(request)
@@ -272,6 +245,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
         status += "DONATION_WITH_STRIPE_EMAIL_MISSING "
         error_results = {
             'status':                   status,
+            'error_message_for_voter':  'An email address is required by our payment processor.',
             'success':                  success,
             'amount_paid':              amount,
             'charge_id':                charge_id,    # Always 0 here
@@ -289,8 +263,11 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
         return error_results
 
     # Use a default coupon_code if none is specified
-    if len(coupon_code) < 2:
-        coupon_code = 'DEFAULT-' + plan_type_enum
+    if is_organization_plan:
+        if len(coupon_code) < 2:
+            coupon_code = 'DEFAULT-' + plan_type_enum
+    else:
+        coupon_code = ''
 
     # If is_organization_plan, set the price from the coupon, not whatever was passed in.
     if is_organization_plan:
@@ -456,6 +433,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
         logger.error("donation_with_stripe_for_api, StripeError : " + donation_status)
     except Exception as err:
         # Something else happened, completely unrelated to Stripe
+        logger.error("donation_with_stripe_for_api caught: ", err)
         donation_status += "A_NON_STRIPE_ERROR_OCCURRED "
         logger.error("donation_with_stripe_for_api threw " + str(err))
         status += textwrap.shorten(donation_status + " " + status, width=255, placeholder="...")
@@ -851,7 +829,8 @@ def move_donation_info_to_another_voter(from_voter, to_voter):
     """
     Within a session, if the voter donates before logging in, the donations will be created under a new unique
     voter_we_vote_id.  Subsequently when they login, their proper voter_we_vote_id will come into effect.  If we did not
-    call this method before the end of the session, those "un-logged-in" donations would not be associated with the voter.
+    call this method before the end of the session, those "un-logged-in" donations would not be associated with the
+    voter.
     Unfortunately at this time "un-logged-in" donations created in a session that was ended before logging in will not
     be associated with the correct voter -- we could do this in the future by doing something with email addresses.
     :param from_voter:
@@ -864,7 +843,7 @@ def move_donation_info_to_another_voter(from_voter, to_voter):
     if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
             or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
         status += textwrap.shorten("MOVE_DONATION_INFO_MISSING_FROM_OR_TO_VOTER_ID " + status, width=255,
-                                  placeholder="...")
+                                   placeholder="...")
 
         results = {
             'status': status,
