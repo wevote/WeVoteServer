@@ -123,7 +123,7 @@ Python server's port 8000.
 
     And your localhost WebApp should be communicating with your localhost Python server.
 
-1.  Send a test webook from the console, using charge.updated - the dummy data it sends will not effect anything, but you should see
+1.  Send a test webhook from the console, using charge.updated - the dummy data it sends will not effect anything, but you should see
 a note in the Python Console log ...
 
     ```
@@ -131,7 +131,7 @@ a note in the Python Console log ...
     [2019-01-04 09:49:22,531] [INFO] Steves-MacBook-Pro-32GB-Oct-3171.local:donate.controllers: WEBHOOK ignored: donation_process_stripe_webhook_event: charge.updated
     ```
 
-    this confims that the webhook is successfully communicating with your test setup.
+    this confirms that the webhook is successfully communicating with your test setup.
 
 **If the Webhook starts failing**
 

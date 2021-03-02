@@ -390,17 +390,25 @@ class DonationManager(models.Manager):
                 success = True
                 status += 'DONATION_PLAN_ALREADY_EXISTS_IN_DATABASE '
 
-            plan_id_query = stripe.Plan.retrieve(we_vote_donation_plan_identifier)
-            if positive_value_exists(plan_id_query.id):
-                stripe_plan_id = plan_id_query.id
-                logger.debug("Stripe, plan_id_query.id " + plan_id_query.id)
+            plan_id_query = {}
+            try:
+                plan_id_query = stripe.Plan.retrieve(we_vote_donation_plan_identifier)
+            except stripe.error.StripeError as stripeError:
+                logger.error('Stripe error (1):', stripeError)
+                pass
+
+            if positive_value_exists(plan_id_query):
+                if positive_value_exists(plan_id_query.id):
+                    stripe_plan_id = plan_id_query.id
+                    logger.debug("Stripe, plan_id_query.id " + plan_id_query.id)
         except DonationManager.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             success = False
             status += 'MULTIPLE_MATCHING_SUBSCRIPTION_PLANS_FOUND '
             exception_multiple_object_returned = True
 
-        except stripe.error.StripeError:
+        except stripe.error.StripeError as stripeError:
+            logger.error('Stripe error (2):', stripeError)
             pass
 
         except Exception as e:
@@ -427,7 +435,7 @@ class DonationManager(models.Manager):
                 success = False
                 status += 'SUBSCRIPTION_PLAN_NOT_CREATED_IN_STRIPE '
         else:
-            status += 'STRIPE_PLAN_NOT_CREATED-REQUIREMENTS_NOT_SATISFIED '
+            status += 'STRIPE_PLAN_NOT_CREATED-REQUIREMENTS_NOT_SATISFIED_OR_STRIPE_PLAN_ALREADY_EXISTS '
         results = {
             'success': success,
             'status': status,
