@@ -68,16 +68,64 @@ def campaignx_list_retrieve_for_api(voter_device_id):  # campaignListRetrieve
     if success:
         for campaignx in campaignx_list:
             # Now calculate which campaigns belong to this voter
+            viewer_is_owner = False
             if positive_value_exists(voter_we_vote_id):
                 if campaignx.started_by_voter_we_vote_id == voter_we_vote_id:
                     voter_started_campaignx_we_vote_ids.append(campaignx.we_vote_id)
+                    viewer_is_owner = True
             if campaignx.is_still_active and campaignx.is_ok_to_promote_on_we_vote:
                 promoted_campaignx_we_vote_ids.append(campaignx.we_vote_id)
+
+            campaignx_owner_object_list = campaignx_manager.retrieve_campaignx_owner_list(
+                campaignx_we_vote_id=campaignx.we_vote_id, viewer_is_owner=viewer_is_owner)
+            campaignx_owner_list = []
+            for campaignx_owner in campaignx_owner_object_list:
+                campaign_owner_dict = {
+                    'organization_name':                        campaignx_owner.organization_name,
+                    'organization_we_vote_id':                  campaignx_owner.organization_we_vote_id,
+                    'we_vote_hosted_profile_image_url_tiny':    campaignx_owner.we_vote_hosted_profile_image_url_tiny,
+                    'visible_to_public':                        campaignx_owner.visible_to_public,
+                }
+                campaignx_owner_list.append(campaign_owner_dict)
+
+            if campaignx.politician_list_serialized:
+                campaignx_politician_list = json.loads(campaignx.politician_list_serialized)
+            else:
+                campaignx_politician_list = []
 
             # Get list of SEO Friendly Paths related to this campaignX. For most campaigns, there will only be one.
             seo_friendly_path_list = campaignx_manager.retrieve_seo_friendly_path_simple_list(
                 campaignx_we_vote_id=campaignx.we_vote_id,
             )
+
+            supporter_results = campaignx_manager.retrieve_campaignx_supporter(
+                campaignx_we_vote_id=campaignx.we_vote_id,
+                voter_we_vote_id=voter_we_vote_id,
+                read_only=True)
+            if supporter_results['success'] and supporter_results['campaignx_supporter_found']:
+                campaignx_supporter = supporter_results['campaignx_supporter']
+                date_last_changed_string = ''
+                date_supported_string = ''
+                try:
+                    date_last_changed_string = campaignx_supporter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
+                    date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+                except Exception as e:
+                    status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+                voter_campaignx_supporter_dict = {
+                    'campaignx_we_vote_id':         campaignx_supporter.campaignx_we_vote_id,
+                    'date_last_changed':            date_last_changed_string,
+                    'date_supported':               date_supported_string,
+                    'organization_we_vote_id':      campaignx_supporter.organization_we_vote_id,
+                    'supporter_endorsement':        campaignx_supporter.supporter_endorsement,
+                    'supporter_name':               campaignx_supporter.supporter_name,
+                    'visible_to_public':            campaignx_supporter.visible_to_public,
+                    'voter_we_vote_id':             campaignx_supporter.voter_we_vote_id,
+                    'voter_signed_in_with_email':   voter_signed_in_with_email,
+                    'we_vote_hosted_profile_photo_image_url_tiny':
+                    campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
+                }
+            else:
+                voter_campaignx_supporter_dict = {}
 
             # Temp
             if campaignx.we_vote_hosted_campaign_photo_medium_url:
@@ -86,12 +134,15 @@ def campaignx_list_retrieve_for_api(voter_device_id):  # campaignListRetrieve
                 we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_large_url
             one_campaignx = {
                 'campaign_description':                     campaignx.campaign_description,
+                'campaignx_owner_list':                     campaignx_owner_list,
+                'campaignx_politician_list':                campaignx_politician_list,
                 'campaign_title':                           campaignx.campaign_title,
                 'campaignx_we_vote_id':                     campaignx.we_vote_id,
                 'in_draft_mode':                            campaignx.in_draft_mode,
                 'seo_friendly_path':                        campaignx.seo_friendly_path,
                 'seo_friendly_path_list':                   seo_friendly_path_list,
                 'supporters_count':                         campaignx.supporters_count,
+                'voter_campaignx_supporter':                voter_campaignx_supporter_dict,
                 'voter_signed_in_with_email':               voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url':  campaignx.we_vote_hosted_campaign_photo_large_url,
                 'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,
@@ -120,16 +171,17 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
     campaignx_politician_list = []
     seo_friendly_path_list = []
     voter_signed_in_with_email = False
+    voter_we_vote_id = ''
 
     campaignx_manager = CampaignXManager()
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_signed_in_with_email = voter.signed_in_with_email()
+        voter_we_vote_id = voter.we_vote_id
     if positive_value_exists(as_owner):
-        voter_manager = VoterManager()
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-        if voter_results['voter_found']:
-            voter = voter_results['voter']
-            voter_signed_in_with_email = voter.signed_in_with_email()
-            voter_we_vote_id = voter.we_vote_id
-        else:
+        if not positive_value_exists(voter_we_vote_id):
             status += "VALID_VOTER_ID_MISSING "
             results = {
                 'status':                           status,
@@ -143,6 +195,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
                 'seo_friendly_path':                '',
                 'seo_friendly_path_list':           seo_friendly_path_list,
                 'supporters_count':                 0,
+                'voter_campaignx_supporter':        {},
                 'voter_signed_in_with_email':       voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url':  '',
                 'we_vote_hosted_campaign_photo_medium_url': '',
@@ -175,6 +228,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
             'seo_friendly_path':                '',
             'seo_friendly_path_list':           seo_friendly_path_list,
             'supporters_count':                 0,
+            'voter_campaignx_supporter':        {},
             'voter_signed_in_with_email':       voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
             'we_vote_hosted_campaign_photo_medium_url': '',
@@ -195,6 +249,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
             'seo_friendly_path':                '',
             'seo_friendly_path_list':           seo_friendly_path_list,
             'supporters_count':                 0,
+            'voter_campaignx_supporter':        {},
             'voter_signed_in_with_email':       voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url':  '',
             'we_vote_hosted_campaign_photo_medium_url': '',
@@ -208,6 +263,36 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
         campaignx_politician_list = json.loads(campaignx.politician_list_serialized)
     else:
         campaignx_politician_list = []
+
+    supporter_results = campaignx_manager.retrieve_campaignx_supporter(
+        campaignx_we_vote_id=campaignx.we_vote_id,
+        voter_we_vote_id=voter_we_vote_id,
+        read_only=True)
+    if supporter_results['success'] and supporter_results['campaignx_supporter_found']:
+        campaignx_supporter = supporter_results['campaignx_supporter']
+        date_last_changed_string = ''
+        date_supported_string = ''
+        try:
+            date_last_changed_string = campaignx_supporter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
+            date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+        except Exception as e:
+            status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+        voter_campaignx_supporter_dict = {
+            'campaignx_we_vote_id':         campaignx_supporter.campaignx_we_vote_id,
+            'date_last_changed':            date_last_changed_string,
+            'date_supported':               date_supported_string,
+            'organization_we_vote_id':      campaignx_supporter.organization_we_vote_id,
+            'supporter_endorsement':        campaignx_supporter.supporter_endorsement,
+            'supporter_name':               campaignx_supporter.supporter_name,
+            'visible_to_public':            campaignx_supporter.visible_to_public,
+            'voter_we_vote_id':             campaignx_supporter.voter_we_vote_id,
+            'voter_signed_in_with_email':   voter_signed_in_with_email,
+            'we_vote_hosted_profile_photo_image_url_tiny':
+            campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
+        }
+    else:
+        voter_campaignx_supporter_dict = {}
+
     # Temp
     if campaignx.we_vote_hosted_campaign_photo_medium_url:
         we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_medium_url
@@ -225,6 +310,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
         'seo_friendly_path':                campaignx.seo_friendly_path,
         'seo_friendly_path_list':           seo_friendly_path_list,
         'supporters_count':                 campaignx.supporters_count,
+        'voter_campaignx_supporter':        voter_campaignx_supporter_dict,
         'voter_signed_in_with_email':       voter_signed_in_with_email,
         'we_vote_hosted_campaign_photo_large_url':  campaignx.we_vote_hosted_campaign_photo_large_url,
         'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,
@@ -546,6 +632,240 @@ def campaignx_save_photo_from_file_reader(
         'we_vote_hosted_campaign_photo_original_url': we_vote_hosted_campaign_photo_original_url,
     }
     return results
+
+
+def campaignx_supporter_retrieve_for_api(  # campaignSupporterRetrieve
+        voter_device_id='',
+        campaignx_we_vote_id=''):
+    status = ''
+    voter_signed_in_with_email = False
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_signed_in_with_email = voter.signed_in_with_email()
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        status += "VALID_VOTER_ID_MISSING "
+        results = {
+            'status':                       status,
+            'success':                      False,
+            'campaignx_we_vote_id':         '',
+            'date_last_changed':            '',
+            'date_supported':               '',
+            'organization_we_vote_id':      '',
+            'supporter_endorsement':        '',
+            'supporter_name':               '',
+            'visible_to_public':            True,
+            'voter_we_vote_id':             '',
+            'voter_signed_in_with_email':   voter_signed_in_with_email,
+            'we_vote_hosted_profile_photo_image_url_tiny': '',
+        }
+        return results
+
+    campaignx_manager = CampaignXManager()
+    results = campaignx_manager.retrieve_campaignx_supporter(
+        campaignx_we_vote_id=campaignx_we_vote_id,
+        voter_we_vote_id=voter_we_vote_id,
+        read_only=True,
+    )
+    status += results['status']
+    if not results['success']:
+        status += "CAMPAIGNX_SUPPORTER_RETRIEVE_ERROR "
+        results = {
+            'status':                       status,
+            'success':                      False,
+            'campaignx_we_vote_id':         '',
+            'date_last_changed':            '',
+            'date_supported':               '',
+            'organization_we_vote_id':      '',
+            'supporter_endorsement':        '',
+            'supporter_name':               '',
+            'visible_to_public':            True,
+            'voter_we_vote_id':             '',
+            'voter_signed_in_with_email':   voter_signed_in_with_email,
+            'we_vote_hosted_profile_photo_image_url_tiny': '',
+        }
+        return results
+    elif not results['campaignx_supporter_found']:
+        status += "CAMPAIGNX_SUPPORTER_NOT_FOUND: "
+        status += results['status'] + " "
+        results = {
+            'status':                       status,
+            'success':                      False,
+            'campaignx_we_vote_id':         '',
+            'date_last_changed':            '',
+            'date_supported':               '',
+            'organization_we_vote_id':      '',
+            'supporter_endorsement':        '',
+            'supporter_name':               '',
+            'visible_to_public':            True,
+            'voter_we_vote_id':             '',
+            'voter_signed_in_with_email':   voter_signed_in_with_email,
+            'we_vote_hosted_profile_photo_image_url_tiny': '',
+        }
+        return results
+
+    campaignx_supporter = results['campaignx_supporter']
+    date_last_changed_string = ''
+    date_supported_string = ''
+    try:
+        date_last_changed_string = campaignx_supporter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
+        date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+    except Exception as e:
+        status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+    results = {
+        'status':                       status,
+        'success':                      True,
+        'campaignx_we_vote_id':         campaignx_supporter.campaignx_we_vote_id,
+        'date_last_changed':            date_last_changed_string,
+        'date_supported':               date_supported_string,
+        'organization_we_vote_id':      campaignx_supporter.organization_we_vote_id,
+        'supporter_endorsement':        campaignx_supporter.supporter_endorsement,
+        'supporter_name':               campaignx_supporter.supporter_name,
+        'visible_to_public':            campaignx_supporter.visible_to_public,
+        'voter_we_vote_id':             campaignx_supporter.voter_we_vote_id,
+        'voter_signed_in_with_email':   voter_signed_in_with_email,
+        'we_vote_hosted_profile_photo_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
+    }
+    return results
+
+
+def campaignx_supporter_save_for_api(  # campaignSupporterSave
+        campaignx_we_vote_id='',
+        campaign_supported=False,
+        campaign_supported_changed=False,
+        supporter_endorsement='',
+        supporter_endorsement_changed=False,
+        visible_to_public=False,
+        visible_to_public_changed=False,
+        voter_device_id=''):
+    status = ''
+    success = True
+    voter_signed_in_with_email = False
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_signed_in_with_email = voter.signed_in_with_email()
+        voter_we_vote_id = voter.we_vote_id
+        linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+    else:
+        status += "VALID_VOTER_ID_MISSING "
+        results = {
+            'status':                       status,
+            'success':                      False,
+            'campaignx_we_vote_id':         '',
+            'date_last_changed':            '',
+            'date_supported':               '',
+            'organization_we_vote_id':      '',
+            'supporter_endorsement':        '',
+            'supporter_name':               '',
+            'visible_to_public':            True,
+            'voter_we_vote_id':             '',
+            'voter_signed_in_with_email':   voter_signed_in_with_email,
+            'we_vote_hosted_profile_photo_image_url_tiny': '',
+        }
+        return results
+
+    if positive_value_exists(campaign_supported):
+        # To support a campaign, voter must be signed in with an email address
+        if not voter.signed_in_with_email():
+            status += "MUST_BE_SIGNED_IN_WITH_EMAIL "
+            results = {
+                'status':                       status,
+                'success':                      False,
+                'campaignx_we_vote_id':         '',
+                'date_last_changed':            '',
+                'date_supported':               '',
+                'organization_we_vote_id':      '',
+                'supporter_endorsement':        '',
+                'supporter_name':               '',
+                'visible_to_public':            True,
+                'voter_we_vote_id':             '',
+                'voter_signed_in_with_email':   voter_signed_in_with_email,
+                'we_vote_hosted_profile_photo_image_url_tiny': '',
+            }
+            return results
+
+    if not positive_value_exists(campaignx_we_vote_id):
+        status += "CAMPAIGNX_WE_VOTE_ID_REQUIRED "
+        results = {
+            'status':                       status,
+            'success':                      False,
+            'campaignx_we_vote_id':         '',
+            'date_last_changed':            '',
+            'date_supported':               '',
+            'organization_we_vote_id':      '',
+            'supporter_endorsement':        '',
+            'supporter_name':               '',
+            'visible_to_public':            True,
+            'voter_we_vote_id':             '',
+            'voter_signed_in_with_email':   voter_signed_in_with_email,
+            'we_vote_hosted_profile_photo_image_url_tiny': '',
+        }
+        return results
+
+    campaignx_manager = CampaignXManager()
+    update_values = {
+        'campaign_supported':               campaign_supported,
+        'campaign_supported_changed':       campaign_supported_changed,
+        'supporter_endorsement':            supporter_endorsement,
+        'supporter_endorsement_changed':    supporter_endorsement_changed,
+        'visible_to_public':                visible_to_public,
+        'visible_to_public_changed':        visible_to_public_changed,
+    }
+    create_results = campaignx_manager.update_or_create_campaignx_supporter(
+        campaignx_we_vote_id=campaignx_we_vote_id,
+        voter_we_vote_id=voter_we_vote_id,
+        organization_we_vote_id=linked_organization_we_vote_id,
+        update_values=update_values,
+    )
+
+    status += create_results['status']
+    if create_results['campaignx_supporter_found']:
+        campaignx_supporter = create_results['campaignx_supporter']
+        date_last_changed_string = ''
+        date_supported_string = ''
+        try:
+            date_last_changed_string = campaignx_supporter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
+            date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+        except Exception as e:
+            status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'campaignx_we_vote_id':         campaignx_supporter.campaignx_we_vote_id,
+            'date_last_changed':            date_last_changed_string,
+            'date_supported':               date_supported_string,
+            'organization_we_vote_id':      campaignx_supporter.organization_we_vote_id,
+            'supporter_endorsement':        campaignx_supporter.supporter_endorsement,
+            'supporter_name':               campaignx_supporter.supporter_name,
+            'visible_to_public':            campaignx_supporter.visible_to_public,
+            'voter_we_vote_id':             campaignx_supporter.voter_we_vote_id,
+            'voter_signed_in_with_email':   voter_signed_in_with_email,
+            'we_vote_hosted_profile_photo_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
+        }
+        return results
+    else:
+        status += "CAMPAIGNX_SUPPORTER_SAVE_ERROR "
+        results = {
+            'status':                       status,
+            'success':                      False,
+            'campaignx_we_vote_id':         '',
+            'date_last_changed':            '',
+            'date_supported':               '',
+            'organization_we_vote_id':      '',
+            'supporter_endorsement':        '',
+            'supporter_name':               '',
+            'visible_to_public':            True,
+            'voter_we_vote_id':             '',
+            'voter_signed_in_with_email':   voter_signed_in_with_email,
+            'we_vote_hosted_profile_photo_image_url_tiny': '',
+        }
+        return results
 
 
 def move_campaignx_to_another_voter(

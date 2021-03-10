@@ -46,9 +46,26 @@ def campaign_list_retrieve_doc_template_values(url_root):
                    '     "campaign_title": string,\n' \
                    '     "campaignx_we_vote_id": string,\n' \
                    '     "in_draft_mode": boolean,\n' \
+                   '     "seo_friendly_path": string,\n' \
                    '     "supporters_count": integer,\n' \
+                   '     "voter_signed_in_with_email": boolean,\n' \
+                   '     "voter_we_vote_id": string,\n' \
                    '     "we_vote_hosted_campaign_photo_large_url": string,\n' \
                    '     "we_vote_hosted_campaign_photo_medium_url": string,\n' \
+                   '     "campaignx_owner_list": list\n' \
+                   '     [\n' \
+                   '       "organization_name": string,\n' \
+                   '       "organization_we_vote_id": string,\n' \
+                   '       "we_vote_hosted_profile_image_url_tiny": string,\n' \
+                   '       "visible_to_public": boolean,\n' \
+                   '     ],\n' \
+                   '     "campaignx_politician_list": list\n' \
+                   '     [\n' \
+                   '       "value": string,\n' \
+                   '       "label": string,\n' \
+                   '     ],\n' \
+                   '     "seo_friendly_path_list": list\n' \
+                   '     [],\n' \
                    '   ],\n' \
                    '  "campaign_list_found": boolean,\n' \
                    '  "promoted_campaignx_we_vote_ids": list [],\n' \
