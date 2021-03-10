@@ -16,6 +16,9 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 class CampaignX(models.Model):
+    def __unicode__(self):
+        return "CampaignX"
+
     # We call this "CampaignX" since we have some other data objects in We Vote already with "Campaign" in the name
     # These are campaigns anyone can start to gather support or opposition for one or more items on the ballot.
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data
@@ -568,6 +571,9 @@ class CampaignXManager(models.Manager):
                 new_filter = Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)
                 filters.append(new_filter)
 
+            new_filter = Q(in_draft_mode=False, is_still_active=True, is_ok_to_promote_on_we_vote=True)
+            filters.append(new_filter)
+
             # Add the first query
             if len(filters):
                 final_filters = filters.pop()
@@ -578,6 +584,8 @@ class CampaignXManager(models.Manager):
 
                 campaignx_queryset = campaignx_queryset.filter(final_filters)
 
+            campaignx_queryset = campaignx_queryset.order_by('-supporters_count')
+            campaignx_queryset = campaignx_queryset.order_by('-in_draft_mode')
             # issue_queryset = issue_queryset.filter(we_vote_id__in=issue_we_vote_id_list_to_filter)
             # office_queryset = office_queryset.filter(Q(ballotpedia_is_marquee=True) | Q(is_battleground_race=True))
 
@@ -745,6 +753,49 @@ class CampaignXManager(models.Manager):
         else:
             campaignx_politician_list = []
             return campaignx_politician_list
+
+    def retrieve_campaignx_supporter(self, campaignx_we_vote_id='', voter_we_vote_id='', read_only=False):
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        campaignx_supporter = None
+        campaignx_supporter_found = False
+        status = ''
+
+        try:
+            if positive_value_exists(campaignx_we_vote_id) and positive_value_exists(voter_we_vote_id):
+                if positive_value_exists(read_only):
+                    campaignx_supporter = CampaignXSupporter.objects.using('readonly').get(
+                        campaignx_we_vote_id=campaignx_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id)
+                else:
+                    campaignx_supporter = CampaignXSupporter.objects.get(
+                        campaignx_we_vote_id=campaignx_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id)
+                campaignx_supporter_found = True
+                status += 'CAMPAIGNX_SUPPORTER_FOUND_WITH_WE_VOTE_ID '
+                success = True
+            else:
+                status += 'CAMPAIGNX_SUPPORTER_NOT_FOUND-MISSING_VARIABLES '
+                success = False
+        except CampaignXSupporter.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            exception_multiple_object_returned = True
+            status += 'CAMPAIGNX_SUPPORTER_NOT_FOUND_MultipleObjectsReturned '
+            success = False
+        except CampaignXSupporter.DoesNotExist:
+            exception_does_not_exist = True
+            status += 'CAMPAIGNX_SUPPORTER_NOT_FOUND_DoesNotExist '
+            success = True
+
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'campaignx_supporter':          campaignx_supporter,
+            'campaignx_supporter_found':    campaignx_supporter_found,
+            'DoesNotExist':                 exception_does_not_exist,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+        }
+        return results
 
     def retrieve_seo_friendly_path_list(self, campaignx_we_vote_id=''):
         seo_friendly_path_list_found = False
@@ -1075,7 +1126,7 @@ class CampaignXManager(models.Manager):
                     success = True
                     status += "CAMPAIGNX_POLITICIAN_UPDATED "
                 except Exception as e:
-                    campaignx_politician = CampaignXPolitician()
+                    campaignx_politician = None
                     success = False
                     status += "CAMPAIGNX_POLITICIAN_NOT_UPDATED: " + str(e) + " "
         else:
@@ -1114,8 +1165,151 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    def update_or_create_campaignx_supporter(
+            self,
+            campaignx_we_vote_id='',
+            voter_we_vote_id='',
+            organization_we_vote_id='',
+            update_values={}):
+        status = ""
+        campaignx_supporter = None
+        campaignx_supporter_changed = False
+        campaignx_supporter_created = False
+        campaignx_manager = CampaignXManager()
+
+        create_variables_exist = positive_value_exists(campaignx_we_vote_id) \
+            and positive_value_exists(voter_we_vote_id) \
+            and positive_value_exists(organization_we_vote_id)
+        update_variables_exist = positive_value_exists(campaignx_we_vote_id) \
+            and positive_value_exists(voter_we_vote_id)
+        if not create_variables_exist and not update_variables_exist:
+            status += "COULD_NOT_UPDATE_OR_CREATE: "
+            if not create_variables_exist:
+                status += "CREATE_CAMPAIGNX_SUPPORTER_VARIABLES_MISSING "
+            if not update_variables_exist:
+                status += "UPDATE_CAMPAIGNX_SUPPORTER_VARIABLES_MISSING "
+            results = {
+                'success':                      False,
+                'status':                       status,
+                'campaignx_supporter':          None,
+                'campaignx_supporter_changed':  False,
+                'campaignx_supporter_created':  False,
+                'campaignx_supporter_found':    False,
+                'campaignx_we_vote_id':         '',
+                'voter_we_vote_id':             '',
+            }
+            return results
+
+        results = campaignx_manager.retrieve_campaignx_supporter(
+            campaignx_we_vote_id=campaignx_we_vote_id,
+            voter_we_vote_id=voter_we_vote_id,
+            read_only=False)
+        campaignx_supporter_found = results['campaignx_supporter_found']
+        if campaignx_supporter_found:
+            campaignx_supporter = results['campaignx_supporter']
+        success = results['success']
+        status += results['status']
+
+        if not positive_value_exists(success):
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'campaignx_supporter':          campaignx_supporter,
+                'campaignx_supporter_changed':  campaignx_supporter_changed,
+                'campaignx_supporter_created':  campaignx_supporter_created,
+                'campaignx_supporter_found':    campaignx_supporter_found,
+                'campaignx_we_vote_id':         campaignx_we_vote_id,
+                'voter_we_vote_id':             voter_we_vote_id,
+            }
+            return results
+
+        if campaignx_supporter_found:
+            # Update existing campaignx_supporter with changes
+            try:
+                campaignx_supporter_changed = False
+                if 'campaign_supported_changed' in update_values \
+                        and positive_value_exists(update_values['campaign_supported_changed']):
+                    campaignx_supporter.campaign_supported = update_values['campaign_supported']
+                    campaignx_supporter_changed = True
+                if 'supporter_endorsement_changed' in update_values \
+                        and positive_value_exists(update_values['supporter_endorsement_changed']):
+                    campaignx_supporter.supporter_endorsement = \
+                        update_values['supporter_endorsement']
+                    campaignx_supporter_changed = True
+                if 'visible_to_public_changed' in update_values \
+                        and positive_value_exists(update_values['visible_to_public_changed']):
+                    campaignx_supporter.visible_to_public = update_values['visible_to_public']
+                    campaignx_supporter_changed = True
+                if campaignx_supporter_changed:
+                    campaignx_supporter.save()
+                    status += "CAMPAIGNX_SUPPORTER_UPDATED "
+                else:
+                    status += "CAMPAIGNX_SUPPORTER_NOT_UPDATED-NO_CHANGES_FOUND "
+                success = True
+            except Exception as e:
+                campaignx_supporter = None
+                success = False
+                status += "CAMPAIGNX_SUPPORTER_NOT_UPDATED: " + str(e) + " "
+        else:
+            try:
+                campaignx_supporter = CampaignXSupporter.objects.create(
+                    campaign_supported=True,
+                    campaignx_we_vote_id=campaignx_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
+                )
+                status += "CAMPAIGNX_CREATED "
+                # Retrieve the supporter_name and we_vote_hosted_profile_image_url_tiny from the organization entry
+                from organization.models import OrganizationManager
+                organization_manager = OrganizationManager()
+                organization_results = \
+                    organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+                if organization_results['organization_found']:
+                    organization = organization_results['organization']
+                    if positive_value_exists(organization.organization_name):
+                        campaignx_supporter.supporter_name = organization.organization_name
+                        campaignx_supporter_changed = True
+                    if positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny):
+                        campaignx_supporter.we_vote_hosted_profile_image_url_tiny = \
+                            organization.we_vote_hosted_profile_image_url_tiny
+                        campaignx_supporter_changed = True
+
+                if 'supporter_endorsement_changed' in update_values \
+                        and positive_value_exists(update_values['supporter_endorsement_changed']):
+                    campaignx_supporter.supporter_endorsement = update_values['supporter_endorsement']
+                    campaignx_supporter_changed = True
+                if 'visible_to_public_changed' in update_values \
+                        and positive_value_exists(update_values['visible_to_public_changed']):
+                    campaignx_supporter.visible_to_public = update_values['visible_to_public']
+                    campaignx_supporter_changed = True
+                if campaignx_supporter_changed:
+                    campaignx_supporter.save()
+                    status += "CAMPAIGNX_SUPPORTER_SAVED "
+                campaignx_supporter_created = True
+                campaignx_supporter_found = True
+                success = True
+            except Exception as e:
+                campaignx_supporter_created = False
+                campaignx_supporter = None
+                success = False
+                status += "CAMPAIGNX_SUPPORTER_NOT_CREATED: " + str(e) + " "
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'campaignx_supporter':          campaignx_supporter,
+            'campaignx_supporter_changed':  campaignx_supporter_changed,
+            'campaignx_supporter_created':  campaignx_supporter_created,
+            'campaignx_supporter_found':    campaignx_supporter_found,
+            'campaignx_we_vote_id':         campaignx_we_vote_id,
+        }
+        return results
+
 
 class CampaignXOwner(models.Model):
+    def __unicode__(self):
+        return "CampaignXOwner"
+
     campaignx_id = models.PositiveIntegerField(null=True, blank=True)
     campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
@@ -1127,6 +1321,9 @@ class CampaignXOwner(models.Model):
 
 
 class CampaignXPolitician(models.Model):
+    def __unicode__(self):
+        return "CampaignXPolitician"
+
     campaignx_id = models.PositiveIntegerField(null=True, blank=True)
     campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
@@ -1147,3 +1344,19 @@ class CampaignXSEOFriendlyPath(models.Model):
     base_pathname_string = models.CharField(max_length=255, null=True)
     pathname_modifier = models.CharField(max_length=10, null=True)
     final_pathname_string = models.CharField(max_length=255, null=True, unique=True, db_index=True)
+
+
+class CampaignXSupporter(models.Model):
+    def __unicode__(self):
+        return "CampaignXSupporter"
+
+    campaign_supported = models.BooleanField(default=True, db_index=True)
+    campaignx_we_vote_id = models.CharField(max_length=255, db_index=True)
+    voter_we_vote_id = models.CharField(max_length=255, db_index=True)
+    organization_we_vote_id = models.CharField(max_length=255, null=True)
+    supporter_name = models.CharField(max_length=255, null=True)
+    supporter_endorsement = models.TextField(null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)
+    visible_to_public = models.BooleanField(default=False)
+    date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
+    date_supported = models.DateTimeField(null=True, auto_now_add=True, db_index=True)

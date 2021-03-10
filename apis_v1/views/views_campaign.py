@@ -1,7 +1,8 @@
 # apis_v1/views/views_campaign.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from campaign.controllers import campaignx_list_retrieve_for_api, campaignx_retrieve_for_api, campaignx_save_for_api
+from campaign.controllers import campaignx_list_retrieve_for_api, campaignx_retrieve_for_api, campaignx_save_for_api, \
+    campaignx_supporter_retrieve_for_api, campaignx_supporter_save_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -9,8 +10,7 @@ from django_user_agents.utils import get_user_agent
 from follow.controllers import voter_campaignx_follow_for_api
 import json
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_bool, get_voter_device_id,  \
-    is_speaker_type_organization, is_speaker_type_public_figure, positive_value_exists
+from wevote_functions.functions import get_voter_device_id, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -21,6 +21,16 @@ def campaignx_list_retrieve_view(request):  # campaignListRetrieve (No CDN)
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     json_data = campaignx_list_retrieve_for_api(
         voter_device_id=voter_device_id,
+    )
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def campaignx_supporter_retrieve_view(request):  # campaignSupporterRetrieve
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
+    json_data = campaignx_supporter_retrieve_for_api(
+        voter_device_id=voter_device_id,
+        campaignx_we_vote_id=campaignx_we_vote_id,
     )
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -77,6 +87,28 @@ def campaignx_save_view(request):  # campaignSave & campaignStartSave
         campaignx_we_vote_id=campaignx_we_vote_id,
         politician_list_serialized=politician_list_serialized,
         politician_list_changed=politician_list_changed,
+        voter_device_id=voter_device_id,
+    )
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def campaignx_supporter_save_view(request):  # campaignSupporterSave
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    supporter_endorsement = request.GET.get('supporter_endorsement', '')
+    supporter_endorsement_changed = positive_value_exists(request.GET.get('supporter_endorsement_changed', False))
+    visible_to_public = positive_value_exists(request.GET.get('visible_to_public', True))
+    visible_to_public_changed = positive_value_exists(request.GET.get('visible_to_public_changed', False))
+    campaign_supported = positive_value_exists(request.GET.get('campaign_supported', False))
+    campaign_supported_changed = positive_value_exists(request.GET.get('campaign_supported_changed', False))
+    campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
+    json_data = campaignx_supporter_save_for_api(
+        campaignx_we_vote_id=campaignx_we_vote_id,
+        campaign_supported=campaign_supported,
+        campaign_supported_changed=campaign_supported_changed,
+        supporter_endorsement=supporter_endorsement,
+        supporter_endorsement_changed=supporter_endorsement_changed,
+        visible_to_public=visible_to_public,
+        visible_to_public_changed=visible_to_public_changed,
         voter_device_id=voter_device_id,
     )
     return HttpResponse(json.dumps(json_data), content_type='application/json')
