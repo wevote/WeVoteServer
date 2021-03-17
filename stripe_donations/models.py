@@ -64,7 +64,8 @@ class StripeSubscription(models.Model):
     This table tracks subscriptions (recurring donations) and donations
     """
     we_plan_id = models.CharField(verbose_name="donation plan name", max_length=64, null=False, blank=True)
-    stripe_subscription_id = models.CharField(verbose_name="Stripe subscription id", max_length=32, null=True, blank=True)
+    stripe_subscription_id = models.CharField(verbose_name="Stripe subscription id", max_length=32, null=True,
+                                              blank=True)
     voter_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the person who created this subscription",
         max_length=64, default=None, null=True, blank=True, unique=False, db_index=True)
@@ -100,7 +101,7 @@ class StripeSubscription(models.Model):
     livemode = models.BooleanField(verbose_name="True: Live transaction, False: Test transaction", default=False,
                                    blank=False)
     client_ip = models.CharField(verbose_name="Client IP address as seen by Stripe", max_length=32,
-                                               null=True, blank=True)
+                                 null=True, blank=True)
 
 
 class StripePayments(models.Model):
@@ -113,13 +114,14 @@ class StripePayments(models.Model):
                                                      null=True, blank=True)
     stripe_customer_id = models.CharField(verbose_name="stripe unique customer id", max_length=32,
                                           null=True, blank=True)
-    stripe_charge_id = models.CharField(verbose_name="unique charge id per specific donation", max_length=32, default="",
-                                 null=True, blank=True)
+    stripe_charge_id = models.CharField(verbose_name="unique charge id per specific donation", max_length=32,
+                                        default="", null=True, blank=True)
     stripe_card_id = models.CharField(verbose_name="unique id for a credit/debit card", max_length=32, default="",
-                                 null=True, blank=True)
+                                      null=True, blank=True)
     stripe_request_id = models.CharField(verbose_name="stripe initial request id", max_length=32, null=True, blank=True)
-    stripe_subscription_id = models.CharField(verbose_name="unique subscription id for one voter, amount, and creation time",
-                                       max_length=32, default="", null=True, blank=True)
+    stripe_subscription_id = models.CharField(
+        verbose_name="unique subscription id for one voter, amount, and creation time",
+        max_length=32, default="", null=True, blank=True)
     amount = models.PositiveIntegerField(verbose_name="donation amount", default=0, null=True)
     currency = models.CharField(verbose_name="donation currency country code", max_length=8, default="", null=True,
                                 blank=True)
@@ -138,7 +140,7 @@ class StripePayments(models.Model):
     network_status = models.CharField(verbose_name="network status reported by stripe", max_length=64, default="",
                                       null=True, blank=True)
     billing_reason = models.CharField(verbose_name="reason for billing from by stripe", max_length=64, default="",
-                              null=True, blank=True)
+                                      null=True, blank=True)
     reason = models.CharField(verbose_name="reason for failure reported by stripe", max_length=255, default="",
                               null=True, blank=True)
     seller_message = models.CharField(verbose_name="plain text message to us from stripe", max_length=255, default="",
@@ -171,9 +173,9 @@ class StripePayments(models.Model):
     status = models.CharField(verbose_name="our generated status message", max_length=255, default="", null=True,
                               blank=True)
     we_plan_id = models.CharField(verbose_name="WeVote subscription plan id", max_length=64, default="",
-                                            unique=False, null=True, blank=True)
+                                  unique=False, null=True, blank=True)
     paid_at = models.DateTimeField(verbose_name="stripe subscription most recent charge timestamp", auto_now=False,
-                                        auto_now_add=False, null=True)
+                                   auto_now_add=False, null=True)
     ip_address = models.GenericIPAddressField(verbose_name="user ip address", protocol='both', unpack_ipv4=False,
                                               null=True, blank=True, unique=False)
     is_organization_plan = models.BooleanField(
@@ -184,6 +186,7 @@ class StripePayments(models.Model):
     api_version = models.CharField(
         verbose_name="Stripe API Version at creation time",
         max_length=32, null=True, blank=True)
+
 
 class StripeManager(models.Manager):
 
@@ -206,7 +209,7 @@ class StripeManager(models.Manager):
                     stripe_customer_id=stripe_customer_id, voter_we_vote_id=voter_we_vote_id)
                 success = True
                 status = 'STRIPE_CUSTOMER_ID_SAVED '
-            except:
+            except Exception as e:
                 success = False
                 status = 'STRIPE_CUSTOMER_ID_NOT_SAVED '
 
@@ -259,7 +262,7 @@ class StripeManager(models.Manager):
         voter_we_vote_id = ''
         status = ''
         success = bool
-        if positive_value_exists(stripe_customer_id ):
+        if positive_value_exists(stripe_customer_id):
             try:
                 voter_id_queryset = StripeLinkToVoter.objects.filter(
                     stripe_customer_id__iexact=stripe_customer_id).values()
@@ -285,7 +288,7 @@ class StripeManager(models.Manager):
     def retrieve_or_create_recurring_donation_plan(voter_we_vote_id, we_plan_id, donation_amount,
                                                    is_organization_plan, coupon_code, plan_type_enum,
                                                    organization_we_vote_id, recurring_interval, client_ip,
-                                                   stripe_customer_id ):
+                                                   stripe_customer_id):
         """
         June 2017, we create these records, but never read them for donations
         August 2019, we read them for subscriptions and (someday) organization paid subscriptions
@@ -531,7 +534,6 @@ class StripeManager(models.Manager):
         status = ''
         new_history_entry = 0
         try:
-            #TODO: this is the lame one that only has the subscription creation date that is unique
             # ** is the "unpacking syntax"
             new_history_entry = StripeSubscription.objects.create(**subscription)
 
@@ -571,7 +573,7 @@ class StripeManager(models.Manager):
         stripe_subscription_created = False
         org_subs_already_exists = False
         org_segment = "organization-" if is_organization_plan else ""
-        periodicity ="-monthly-"
+        periodicity = "-monthly-"
         if "_YEARLY" in plan_type_enum:
             periodicity = "-yearly-"
         we_plan_id = voter_we_vote_id + periodicity + org_segment + str(donation_amount)
@@ -601,7 +603,7 @@ class StripeManager(models.Manager):
                 subscription = stripe.Subscription.create(
                     customer=stripe_customer_id,
                     items=[
-                        {'price': pricec.stripe_id,}
+                        {'price': pricec.stripe_id, }
                     ]
                 )
                 success = True
@@ -949,8 +951,6 @@ class StripeManager(models.Manager):
 
         return results
 
-
-
     @staticmethod
     def retrieve_donation_plan_definition(voter_we_vote_id='', organization_we_vote_id='', is_organization_plan=True,
                                           plan_type_enum='', donation_plan_is_active=True):
@@ -1044,7 +1044,8 @@ class StripeManager(models.Manager):
                     'organization_we_vote_id': donation_plan_definition.organization_we_vote_id,
                     # 'paid_without_stripe': donation_plan_definition.paid_without_stripe,
                     # 'paid_without_stripe_comment': donation_plan_definition.paid_without_stripe_comment,
-                    # 'paid_without_stripe_expiration_date': donation_plan_definition.paid_without_stripe_expiration_date,
+                    # 'paid_without_stripe_expiration_date':
+                    #         donation_plan_definition.paid_without_stripe_expiration_date,
                     # 'plan_id': donation_plan_definition.plan_name,
                     # 'plan_type_enum': donation_plan_definition.plan_type_enum,
                     'voter_we_vote_id': donation_plan_definition.voter_we_vote_id,
@@ -1250,8 +1251,8 @@ class StripeManager(models.Manager):
             org_we_vote_id = voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
 
             rows = StripeSubscription.objects.get(organization_we_vote_id__iexact=org_we_vote_id,
-                                                      is_organization_plan=True,
-                                                      donation_plan_is_active=True)
+                                                  is_organization_plan=True,
+                                                  donation_plan_is_active=True)
             if len(rows):
                 row = rows[0]
                 row.donation_plan_is_active = False
@@ -1589,7 +1590,8 @@ class StripeManager(models.Manager):
     #         row.last4 = last4
     #         row.funding = funding
     #         row.save()
-    #         logger.debug("update_subscription_in_db row=" + str(row_id) + ", plan_id=" + str(row.subscription_plan_id) +
+    #         logger.debug("update_subscription_in_db row=" + str(row_id) + ", plan_id=" +
+    #                      str(row.subscription_plan_id) +
     #                      ", amount=" + str(amount))
     #     except Exception as err:
     #         logger.error('%s', "update_subscription_in_db: " + str(err))
@@ -1603,12 +1605,12 @@ class StripeManager(models.Manager):
             queryset = StripePayments.objects.all().order_by('-id')
             rows = queryset.filter(stripe_customer_id=stripe_customer_id)
             for row in rows:
-                if row.not_loggedin_voter_we_vote_id == None and \
+                if row.not_loggedin_voter_we_vote_id is None and \
                    row.record_enum == "SUBSCRIPTION_SETUP_AND_INITIAL" and \
                    row.voter_we_vote_id != "":
                     return row.voter_we_vote_id
             for row in rows:
-                if row.not_loggedin_voter_we_vote_id != None:
+                if row.not_loggedin_voter_we_vote_id is not None:
                     return row.not_loggedin_voter_we_vote_id
 
             return ""
@@ -1671,4 +1673,3 @@ class StripeManager(models.Manager):
         except StripePayments.DoesNotExist:
             logger.error('%s', "update_journal_entry_for_refund_completed row does not exist for charge " + charge)
         return "False"
-

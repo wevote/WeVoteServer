@@ -2,7 +2,6 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 import pytz
@@ -32,7 +31,7 @@ def organization_subscription_list_view(request):
         try:
             created_at_dt = plan.plan_created_at.astimezone(pytz.timezone("US/Pacific"))  # Display PST/PDST
             nice_created_at = created_at_dt.strftime("%m/%d/%Y %H:%M")
-            if plan.coupon_expires_date == None or plan.coupon_expires_date == '':
+            if plan.coupon_expires_date is None or plan.coupon_expires_date == '':
                 nice_expires_dt = 'None'
             else:
                 expires_dt = plan.coupon_expires_date.astimezone(pytz.timezone("US/Pacific"))  # Display PST/PDST
@@ -66,4 +65,3 @@ def organization_subscription_list_view(request):
     }
 
     return render(request, 'organization_plans/plan_list.html', template_values)
-

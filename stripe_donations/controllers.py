@@ -178,6 +178,7 @@ def donation_with_stripe_for_api(request, token, client_ip, email, donation_amou
     Initiate a donation or organization subscription plan using the Stripe Payment API, and record details in our DB
     :param request:
     :param token: The Stripe token.id for the card and transaction
+    :param client_ip:
     :param email:
     :param donation_amount:  the amount of the donation, but not used for organization subscriptions
     :param monthly_donation: (boolean) is this a monthly donation subscription
@@ -1156,7 +1157,7 @@ def donation_subscription_cancellation_for_api(voter_we_vote_id, plan_type_enum=
         return json_returned
 
     voter = voter_results['voter']
-    linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+    # linked_organization_we_vote_id = voter.linked_organization_we_vote_id
 
     donation_manager = StripeManager()
     # if positive_value_exists(plan_type_enum):

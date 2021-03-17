@@ -1,7 +1,7 @@
 # apis_v1/views/views_donation.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from admin_tools.views import redirect_to_sign_in_page
+# from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -15,7 +15,7 @@ from stripe_donations.controllers import donation_active_paid_plan_retrieve, don
 # from donate.models import DonationManager, OrganizationSubscriptionPlans
 from stripe_donations.models import StripeManager
 import json
-from voter.models import fetch_voter_we_vote_id_from_voter_device_link, VoterManager, voter_has_authority
+from voter.models import fetch_voter_we_vote_id_from_voter_device_link, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import get_voter_device_id, positive_value_exists
 import stripe
@@ -44,14 +44,13 @@ def donation_with_stripe_view(request):  # donationWithStripe
     coupon_code = request.GET.get('coupon_code', '')
     plan_type_enum = request.GET.get('plan_type_enum', '')
 
-    status = ''
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_we_vote_id = ''
 
     if positive_value_exists(voter_device_id):
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
     else:
-         logger.error('%s', 'donation_with_stripe_view voter_we_vote_id is missing')
+        logger.error('%s', 'donation_with_stripe_view voter_we_vote_id is missing')
 
     voter_manager = VoterManager()
     linked_organization_we_vote_id = \
@@ -191,18 +190,12 @@ def donation_stripe_webhook_view(request):
         event = stripe.Event.construct_from(json.loads(payload), stripe.api_key)
 
     except ValueError as e:
-        logger.error("donation_stripe_webhook_view, Stripe returned 'Invalid payload'")
+        logger.error("donation_stripe_webhook_view, Stripe returned ValueError: " + str(e))
         return HttpResponse(status=400)
 
     except stripe.error.SignatureVerificationError as err:
         logger.error("donation_stripe_webhook_view, Stripe returned SignatureVerificationError: " + str(err))
         return HttpResponse(status=400)
-
-    except ValueError as err:
-        logger.error("donation_stripe_webhook_view, Stripe returned ValueError: " + str(err))
-        # Invalid payload
-        return HttpResponse(status=400)
-
 
     except Exception as err:
         logger.error("donation_stripe_webhook_view: " + str(err))
@@ -253,7 +246,6 @@ def donation_history_list_view(request):   # donationHistory
             donation_subscription_list, donation_payments_list = donation_lists_for_a_voter(voter_we_vote_id)
             # donation_list = donation_journal_history_for_a_voter(voter_we_vote_id)
 
-
             active_results = donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_vote_id)
             active_paid_plan = active_results['active_paid_plan']
             # donation_plan_definition_list_json = active_results['donation_plan_definition_list_json']
@@ -280,92 +272,92 @@ def donation_history_list_view(request):   # donationHistory
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def coupon_summary_retrieve_for_api_view(request):  # couponSummaryRetrieve
-    coupon_code = request.GET.get('coupon_code', '')
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-
-    if positive_value_exists(voter_device_id):
-        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
-        json_data = DonationManager.retrieve_coupon_summary(coupon_code)
-    else:
-        json_data = {
-            'success': False,
-            'status': "coupon_summary_retrieve_for_api_view received bad voter_device_id",
-        }
-
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
-def default_pricing_for_api_view(request):  # defaultPricing
-    json_data = DonationManager.retrieve_default_pricing()
-
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
-def validate_coupon_for_api_view(request):  # validateCoupon
-    plan_type_enum = request.GET.get('plan_type_enum', '')
-    coupon_code = request.GET.get('coupon_code', '')
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    print("validate_coupon_for_api_view, plan_type_enum: " + plan_type_enum + ", coupon_code: " + coupon_code)
-
-    if positive_value_exists(voter_device_id):
-        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
-        json_data = DonationManager.validate_coupon(plan_type_enum, coupon_code)
-    else:
-        json_data = {
-            'success': False,
-            'status': "validate_coupon_for_api_view received bad voter_device_id",
-        }
-
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
-def create_new_plan_for_api_view(request):
-    authority_required = {'admin'}
-    if not voter_has_authority(request, authority_required):
-        return redirect_to_sign_in_page(request, authority_required)
-
-    coupon_code = request.GET.get('couponCode')
-    plan_type_enum = request.GET.get('planTypeEnum')
-    hidden_plan_comment = request.GET.get('hiddenPlanComment')
-    coupon_applied_message = request.GET.get('couponAppliedMessage')
-    monthly_price_stripe = request.GET.get('monthlyPriceStripe')
-    monthly_price_stripe = monthly_price_stripe if monthly_price_stripe != '' else 0
-    annual_price_stripe = request.GET.get('annualPriceStripe')
-    annual_price_stripe = annual_price_stripe if annual_price_stripe != '' else 0
-    master_feature_package = request.GET.get('masterFeatureType')
-    features_provided_bitmap = request.GET.get('featuresProvidedBitmap')
-    coupon_expires_date = request.GET.get('couponExpiresDate', None)
-    if len(coupon_expires_date) == 0:
-        coupon_expires_date = None
-    print("create_new_plan_for_api_view, plan_type_enum: " + plan_type_enum + ", coupon_code: " + coupon_code)
-    plan_on_stage = 0
-
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    if positive_value_exists(voter_device_id):
-        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
-        plan_on_stage = OrganizationSubscriptionPlans.objects.create(
-            coupon_code=coupon_code,
-            plan_type_enum=plan_type_enum,
-            hidden_plan_comment=hidden_plan_comment,
-            coupon_applied_message=coupon_applied_message,
-            monthly_price_stripe=monthly_price_stripe,
-            annual_price_stripe=annual_price_stripe,
-            master_feature_package=master_feature_package,
-            features_provided_bitmap=features_provided_bitmap,
-            coupon_expires_date=coupon_expires_date)
-        status = "create_new_plan_for_api_view succeeded"
-    else:
-        status = "create_new_plan_for_api_view received bad voter_device_id",
-
-    json_data = {
-        'success': positive_value_exists(plan_on_stage.id),
-        'status': status,
-        'id': plan_on_stage.id if positive_value_exists(plan_on_stage.id) else 0.
-        }
-
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
-
+# def coupon_summary_retrieve_for_api_view(request):  # couponSummaryRetrieve
+#     coupon_code = request.GET.get('coupon_code', '')
+#     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+#
+#     if positive_value_exists(voter_device_id):
+#         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+#         json_data = DonationManager.retrieve_coupon_summary(coupon_code)
+#     else:
+#         json_data = {
+#             'success': False,
+#             'status': "coupon_summary_retrieve_for_api_view received bad voter_device_id",
+#         }
+#
+#     return HttpResponse(json.dumps(json_data), content_type='application/json')
+#
+#
+# def default_pricing_for_api_view(request):  # defaultPricing
+#     json_data = DonationManager.retrieve_default_pricing()
+#
+#     return HttpResponse(json.dumps(json_data), content_type='application/json')
+#
+#
+# def validate_coupon_for_api_view(request):  # validateCoupon
+#     plan_type_enum = request.GET.get('plan_type_enum', '')
+#     coupon_code = request.GET.get('coupon_code', '')
+#     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+#     print("validate_coupon_for_api_view, plan_type_enum: " + plan_type_enum + ", coupon_code: " + coupon_code)
+#
+#     if positive_value_exists(voter_device_id):
+#         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+#         json_data = DonationManager.validate_coupon(plan_type_enum, coupon_code)
+#     else:
+#         json_data = {
+#             'success': False,
+#             'status': "validate_coupon_for_api_view received bad voter_device_id",
+#         }
+#
+#     return HttpResponse(json.dumps(json_data), content_type='application/json')
+#
+#
+# def create_new_plan_for_api_view(request):
+#     authority_required = {'admin'}
+#     if not voter_has_authority(request, authority_required):
+#         return redirect_to_sign_in_page(request, authority_required)
+#
+#     coupon_code = request.GET.get('couponCode')
+#     plan_type_enum = request.GET.get('planTypeEnum')
+#     hidden_plan_comment = request.GET.get('hiddenPlanComment')
+#     coupon_applied_message = request.GET.get('couponAppliedMessage')
+#     monthly_price_stripe = request.GET.get('monthlyPriceStripe')
+#     monthly_price_stripe = monthly_price_stripe if monthly_price_stripe != '' else 0
+#     annual_price_stripe = request.GET.get('annualPriceStripe')
+#     annual_price_stripe = annual_price_stripe if annual_price_stripe != '' else 0
+#     master_feature_package = request.GET.get('masterFeatureType')
+#     features_provided_bitmap = request.GET.get('featuresProvidedBitmap')
+#     coupon_expires_date = request.GET.get('couponExpiresDate', None)
+#     if len(coupon_expires_date) == 0:
+#         coupon_expires_date = None
+#     print("create_new_plan_for_api_view, plan_type_enum: " + plan_type_enum + ", coupon_code: " + coupon_code)
+#     plan_on_stage = 0
+#
+#     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+#     if positive_value_exists(voter_device_id):
+#         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+#         plan_on_stage = OrganizationSubscriptionPlans.objects.create(
+#             coupon_code=coupon_code,
+#             plan_type_enum=plan_type_enum,
+#             hidden_plan_comment=hidden_plan_comment,
+#             coupon_applied_message=coupon_applied_message,
+#             monthly_price_stripe=monthly_price_stripe,
+#             annual_price_stripe=annual_price_stripe,
+#             master_feature_package=master_feature_package,
+#             features_provided_bitmap=features_provided_bitmap,
+#             coupon_expires_date=coupon_expires_date)
+#         status = "create_new_plan_for_api_view succeeded"
+#     else:
+#         status = "create_new_plan_for_api_view received bad voter_device_id",
+#
+#     json_data = {
+#         'success': positive_value_exists(plan_on_stage.id),
+#         'status': status,
+#         'id': plan_on_stage.id if positive_value_exists(plan_on_stage.id) else 0.
+#         }
+#
+#     return HttpResponse(json.dumps(json_data), content_type='application/json')
+#
 
 # def delete_plan_for_api_view(request):
 #     authority_required = {'admin'}
@@ -403,7 +395,7 @@ def does_paid_subscription_exist_for_api(request):  # doesOrgHavePaidPlan
     if positive_value_exists(voter_device_id):
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
     else:
-         logger.error('%s', 'donation_with_stripe_view voter_we_vote_id is missing')
+        logger.error('%s', 'donation_with_stripe_view voter_we_vote_id is missing')
     voter_manager = VoterManager()
     organization_we_vote_id = voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
     found_live_paid_subscription_for_the_org = StripeManager.does_paid_subscription_exist(organization_we_vote_id)
@@ -414,4 +406,3 @@ def does_paid_subscription_exist_for_api(request):  # doesOrgHavePaidPlan
     }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
-
