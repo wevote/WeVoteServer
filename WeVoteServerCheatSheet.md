@@ -20,6 +20,8 @@ server started
 (WeVoteServerPy3.7) Steves-MacBook-Pro-32GB-Oct-2018:PycharmProjects stevepodell$ ~/PythonProjects/ngrok http 8000 -host-header="localhost:8000"
 
 ```
+A very useful http inspector is made available by ngrok at [http://127.0.0.1:4040/inspect/http](http://127.0.0.1:4040/inspect/http)
+
 
 ####launching psql and disconnecting all the postgres sessions
 ```
@@ -83,7 +85,9 @@ There has to be a better way to do this, but this is what I went through...
   217  psql -l
   218  postgres --version
   219  initdb /usr/local/var/postgres
-```    (WeVoteServerPy3.7) stevepodell@Steves-MacBook-Pro-32GB-Oct-2018 var % !215                          
+```    
+```    
+    (WeVoteServerPy3.7) stevepodell@Steves-MacBook-Pro-32GB-Oct-2018 var % !215                          
     pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/server.log start
     pg_ctl: another server might be running; trying to start server anyway
     waiting for server to start.... stopped waiting

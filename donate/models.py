@@ -394,7 +394,7 @@ class DonationManager(models.Manager):
             try:
                 plan_id_query = stripe.Plan.retrieve(we_vote_donation_plan_identifier)
             except stripe.error.StripeError as stripeError:
-                logger.error('Stripe error (1):', stripeError)
+                logger.error('Stripe (informational for splunk) error (1): %s', stripeError)
                 pass
 
             if positive_value_exists(plan_id_query):
@@ -408,7 +408,7 @@ class DonationManager(models.Manager):
             exception_multiple_object_returned = True
 
         except stripe.error.StripeError as stripeError:
-            logger.error('Stripe error (2):', stripeError)
+            logger.error('%s', 'Stripe error (2):', stripeError)
             pass
 
         except Exception as e:
@@ -694,7 +694,7 @@ class DonationManager(models.Manager):
                 body = e.json_body
                 err = body['error']
                 status += "STRIPE_ERROR_IS_" + err['message'] + "_END"
-                logger.error("create_recurring_donation StripeError: " + status)
+                logger.error("%s", "create_recurring_donation StripeError: " + status)
 
                 results = {
                     'success': False,
@@ -786,7 +786,7 @@ class DonationManager(models.Manager):
                 body = e.json_body
                 err = body['error']
                 status = "STRIPE_ERROR_IS_" + err['message'] + "_END"
-                logger.error("create_recurring_donation StripeError: " + status)
+                logger.error('%s', "create_recurring_donation StripeError: " + status)
 
             if positive_value_exists(stripe_subscription_id):
                 try:
@@ -1146,7 +1146,7 @@ class DonationManager(models.Manager):
             status += "mark_donation_journal_canceled_or_ended: " + \
                       "Subscription " + stripe_subscription_id + " with customer_id " + \
                       customer_id + " does not exist"
-            logger.error(status)
+            logger.error('%s', status)
             success = True
         except Exception as e:
             handle_exception(e, logger=logger, exception_message="Exception in mark_donation_journal_canceled_or_ended")
@@ -1205,12 +1205,12 @@ class DonationManager(models.Manager):
                 row.save()
             else:
                 print('DonationPlanDefinition for ' + org_we_vote_id + ' not found')
-                logger.error('DonationPlanDefinition for ' + org_we_vote_id +
+                logger.error('%s', 'DonationPlanDefinition for ' + org_we_vote_id +
                              ' not found in mark_latest_donation_plan_definition_canceled')
 
             # TODO: STEVE STEVE STEVE seperately make sure that we only find the active ones
         except Exception as e:
-            logger.error('DonationPlanDefinition for ' + org_we_vote_id +
+            logger.error('%s', 'DonationPlanDefinition for ' + org_we_vote_id +
                          ' threw exception: ' + str(e))
         return
 
@@ -1237,7 +1237,7 @@ class DonationManager(models.Manager):
             success = True
         except Exception as e:
             status += "RETRIEVE_EXCEPTION_IN-move_donate_link_to_voter_from_voter_to_voter "
-            logger.error("move_donate_link_to_voter_from_voter_to_voter 2:" + status)
+            logger.error('%s', "move_donate_link_to_voter_from_voter_to_voter 2:" + status)
             success = False
 
         donate_link_migration_count = 0
@@ -1287,7 +1287,7 @@ class DonationManager(models.Manager):
             success = True
         except Exception as e:
             status += "RETRIEVE_EXCEPTION_IN-move_donation_journal_entries_from_voter_to_voter "
-            logger.error("move_donation_journal_entries_from_voter_to_voter 2:" + status)
+            logger.error('%s', "move_donation_journal_entries_from_voter_to_voter 2:" + status)
             success = False
 
         donation_journal_migration_count = 0
@@ -1338,7 +1338,7 @@ class DonationManager(models.Manager):
             success = True
         except Exception as e:
             status += "RETRIEVE_EXCEPTION_IN-move_donation_plan_definition_entries_from_voter_to_voter "
-            logger.error("move_donation_plan_definition_entries_from_voter_to_voter 2:" + status)
+            logger.error('%s', "move_donation_plan_definition_entries_from_voter_to_voter 2:" + status)
             success = False
 
         donation_plan_definition_migration_count = 0
@@ -1388,7 +1388,7 @@ class DonationManager(models.Manager):
             success = True
         except Exception as e:
             status += "RETRIEVE_EXCEPTION_IN-move_donation_journal_entries_from_organization_to_organization "
-            logger.error("move_donation_journal_entries_from_organization_to_organization 2:" + status)
+            logger.error('%s', "move_donation_journal_entries_from_organization_to_organization 2:" + status)
             success = False
 
         donation_journal_migration_count = 0
@@ -1438,7 +1438,7 @@ class DonationManager(models.Manager):
             success = True
         except Exception as e:
             status += "RETRIEVE_EXCEPTION_IN-move_donation_plan_definition_entries_from_organization_to_organization "
-            logger.error("move_donation_plan_definition_entries_from_organization_to_organization 2:" + status)
+            logger.error('%s', "move_donation_plan_definition_entries_from_organization_to_organization 2:" + status)
             success = False
 
         donation_plan_definition_migration_count = 0
@@ -1477,10 +1477,10 @@ class DonationManager(models.Manager):
                 if row.last4 == 0:
                     row_id = row.id
         except DonationJournal.DoesNotExist:
-            logger.error("check_for_subscription_in_db_without_card_info row does not exist for stripe customer" +
+            logger.error('%s', "check_for_subscription_in_db_without_card_info row does not exist for stripe customer" +
                          customer)
         except Exception as e:
-            logger.error("check_for_subscription_in_db_without_card_info Exception " + str(e))
+            logger.error('%s', "check_for_subscription_in_db_without_card_info Exception " + str(e))
 
         return row_id
 
@@ -1503,7 +1503,7 @@ class DonationManager(models.Manager):
             logger.debug("update_subscription_in_db row=" + str(row_id) + ", plan_id=" + str(row.subscription_plan_id) +
                          ", amount=" + str(amount))
         except Exception as err:
-            logger.error("update_subscription_in_db: " + str(err))
+            logger.error('%s', "update_subscription_in_db: " + str(err))
 
         return
 
@@ -1525,9 +1525,9 @@ class DonationManager(models.Manager):
             return ""
 
         except DonationJournal.DoesNotExist:
-            logger.error("find_we_vote_voter_id_for_stripe_customer row does not exist")
+            logger.error('%s', "find_we_vote_voter_id_for_stripe_customer row does not exist")
         except Exception as e:
-            logger.error("find_we_vote_voter_id_for_stripe_customer: " + str(e))
+            logger.error('%s', "find_we_vote_voter_id_for_stripe_customer: " + str(e))
 
         return ""
 
@@ -1545,7 +1545,7 @@ class DonationManager(models.Manager):
 
             return "True"
 
-        logger.error("update_journal_entry_for_refund bad charge or refund for charge_id " + charge +
+        logger.error('%s', "update_journal_entry_for_refund bad charge or refund for charge_id " + charge +
                      " and voter_we_vote_id " + voter_we_vote_id)
         return "False"
 
@@ -1580,7 +1580,7 @@ class DonationManager(models.Manager):
                 return "True"
 
         except DonationJournal.DoesNotExist:
-            logger.error("update_journal_entry_for_refund_completed row does not exist for charge " + charge)
+            logger.error('%s', "update_journal_entry_for_refund_completed row does not exist for charge " + charge)
         return "False"
 
     @staticmethod
@@ -1680,7 +1680,7 @@ class DonationManager(models.Manager):
                 }
 
         except DonationJournal.DoesNotExist:
-            logger.error("Donation Journal table does not exist")
+            logger.error('%s', "Donation Journal table does not exist")
             journal = {
                 'subscription_plan_id': '',
                 'subscription_id': '',
@@ -1692,7 +1692,7 @@ class DonationManager(models.Manager):
             }
 
         except Exception as e:
-            logger.error("subscription info row does not exist for voter ", e)
+            logger.error('%s', "subscription info row does not exist for voter ", e)
             journal = {
                 'subscription_plan_id': '',
                 'subscription_id': '',
