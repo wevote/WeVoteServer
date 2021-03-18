@@ -68,7 +68,6 @@ def campaignx_save_view(request):  # campaignSave & campaignStartSave
     in_draft_mode_changed = positive_value_exists(request.POST.get('in_draft_mode_changed', False))
     campaign_photo_from_file_reader = request.POST.get('campaign_photo_from_file_reader', '')
     campaign_photo_changed = positive_value_exists(request.POST.get('campaign_photo_changed', False))
-    campaign_publish_now = positive_value_exists(request.POST.get('campaign_publish_now', False))
     campaign_title = request.POST.get('campaign_title', '')
     campaign_title_changed = positive_value_exists(request.POST.get('campaign_title_changed', False))
     campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', '')
@@ -81,7 +80,6 @@ def campaignx_save_view(request):  # campaignSave & campaignStartSave
         in_draft_mode_changed=in_draft_mode_changed,
         campaign_photo_from_file_reader=campaign_photo_from_file_reader,
         campaign_photo_changed=campaign_photo_changed,
-        campaign_publish_now=campaign_publish_now,
         campaign_title=campaign_title,
         campaign_title_changed=campaign_title_changed,
         campaignx_we_vote_id=campaignx_we_vote_id,

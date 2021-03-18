@@ -823,6 +823,40 @@ class CampaignXManager(models.Manager):
             simple_list.append(one_path.final_pathname_string)
         return simple_list
 
+    def update_campaignx_supporters_count(self, campaignx_we_vote_id):
+        status = ''
+        supporters_count = 0
+        try:
+            count_query = CampaignXSupporter.objects.using('readonly').all()
+            count_query = count_query.filter(campaignx_we_vote_id__iexact=campaignx_we_vote_id)
+            count_query = count_query.filter(campaign_supported=True)
+            supporters_count = count_query.count()
+        except Exception as e:
+            status += "FAILED_RETRIEVING_SUPPORTER_COUNT: " + str(e) + ' '
+            results = {
+                'success': False,
+                'status': status,
+                'supporters_count': supporters_count,
+            }
+            return results
+
+        update_values = {
+            'supporters_count': supporters_count,
+        }
+        update_results = self.update_or_create_campaignx(
+            campaignx_we_vote_id=campaignx_we_vote_id,
+            update_values=update_values,
+        )
+        status = update_results['status']
+        success = update_results['success']
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'supporters_count': supporters_count,
+        }
+        return results
+
     def update_or_create_campaignx(
             self,
             campaignx_we_vote_id='',
@@ -927,6 +961,10 @@ class CampaignXManager(models.Manager):
                         and positive_value_exists(update_values['politician_list_changed']):
                     campaignx.politician_list_serialized = update_values['politician_list_serialized']
                     campaignx_changed = True
+                if 'supporters_count' in update_values \
+                        and positive_value_exists(update_values['supporters_count']):
+                    campaignx.supporters_count = update_values['supporters_count']
+                    campaignx_changed = True
                 if campaignx_changed:
                     campaignx.save()
                     status += "CAMPAIGNX_UPDATED "
@@ -945,6 +983,7 @@ class CampaignXManager(models.Manager):
                     in_draft_mode=True,
                     politician_list_serialized=update_values['politician_list_serialized'],
                     started_by_voter_we_vote_id=voter_we_vote_id,
+                    supporters_count=1,
                 )
                 if 'campaign_photo_changed' in update_values \
                         and positive_value_exists(update_values['campaign_photo_changed']):
