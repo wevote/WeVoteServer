@@ -112,6 +112,7 @@ def campaignx_list_retrieve_for_api(voter_device_id):  # campaignListRetrieve
                 except Exception as e:
                     status += "DATE_CONVERSION_ERROR: " + str(e) + " "
                 voter_campaignx_supporter_dict = {
+                    'campaign_supported':           campaignx_supporter.campaign_supported,
                     'campaignx_we_vote_id':         campaignx_supporter.campaignx_we_vote_id,
                     'date_last_changed':            date_last_changed_string,
                     'date_supported':               date_supported_string,
@@ -161,7 +162,7 @@ def campaignx_list_retrieve_for_api(voter_device_id):  # campaignListRetrieve
     return json_data
 
 
-def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOwner (No CDN)
+def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (No CDN)
         voter_device_id='',
         campaignx_we_vote_id='',
         seo_friendly_path='',
@@ -278,6 +279,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve (CDN) & campaignRetrieveAsOw
         except Exception as e:
             status += "DATE_CONVERSION_ERROR: " + str(e) + " "
         voter_campaignx_supporter_dict = {
+            'campaign_supported':           campaignx_supporter.campaign_supported,
             'campaignx_we_vote_id':         campaignx_supporter.campaignx_we_vote_id,
             'date_last_changed':            date_last_changed_string,
             'date_supported':               date_supported_string,
@@ -325,7 +327,6 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
         in_draft_mode_changed=False,
         campaign_photo_from_file_reader='',
         campaign_photo_changed=False,
-        campaign_publish_now=False,
         campaign_title='',
         campaign_title_changed=False,
         campaignx_we_vote_id='',
@@ -366,7 +367,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
         }
         return results
 
-    if positive_value_exists(campaign_publish_now):
+    if positive_value_exists(in_draft_mode_changed) and not positive_value_exists(in_draft_mode):
         # To publish a campaign, voter must be signed in with an email address
         if not voter.signed_in_with_email():
             status += "MUST_BE_SIGNED_IN_WITH_EMAIL "
@@ -433,8 +434,8 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
         update_values = {
             'campaign_description':         campaign_description,
             'campaign_description_changed': campaign_description_changed,
-            'in_draft_mode':            in_draft_mode,
-            'in_draft_mode_changed':    in_draft_mode_changed,
+            'in_draft_mode':                in_draft_mode,
+            'in_draft_mode_changed':        in_draft_mode_changed,
             'campaign_photo_changed':       campaign_photo_changed,
             'campaign_title':               campaign_title,
             'campaign_title_changed':       campaign_title_changed,
@@ -525,6 +526,10 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
         seo_friendly_path_list = campaignx_manager.retrieve_seo_friendly_path_simple_list(
             campaignx_we_vote_id=campaignx_we_vote_id,
         )
+
+        # Make sure the person creating the campaign has a campaignx_supporter entry
+        if in_draft_mode_changed and not positive_value_exists(in_draft_mode):
+            pass
 
         # Temp
         if campaignx.we_vote_hosted_campaign_photo_medium_url:
@@ -826,6 +831,11 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
 
     status += create_results['status']
     if create_results['campaignx_supporter_found']:
+        if positive_value_exists(campaign_supported_changed):
+            count_results = campaignx_manager.update_campaignx_supporters_count(campaignx_we_vote_id)
+            if not count_results['success']:
+                status += count_results['status']
+
         campaignx_supporter = create_results['campaignx_supporter']
         date_last_changed_string = ''
         date_supported_string = ''
