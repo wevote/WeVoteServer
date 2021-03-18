@@ -174,6 +174,7 @@ INSTALLED_APPS = (
     'search',
     'share',
     'sms',
+    'stripe_donations',
     'support_oppose_deciding',
     'tag',
     'twitter',  # See also import_export_twitter

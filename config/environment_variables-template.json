@@ -139,7 +139,7 @@
 
   "_comment":                       "stripe test 'Secret Key' (The 'Publishable key' is only used on the WebApp!)",
   "STRIPE_SECRET_KEY":              "API Secret key begins with - pk_...",
-  "STRIPE_SIGNING_SECRET":          "Webhook signing secret key, begins with - whsec_...",
+  "STRIPE_SIGNING_SECRET":          "ABANDONED Webhook 'signing secret key' in Stripe API 2020-08-27",
   "STRIPE_REFUND_DAYS":             30,
 
   "_comment":                       "Image server (Amazon Web Service AWS s3) settings",

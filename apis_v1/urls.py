@@ -78,9 +78,9 @@ urlpatterns = [
     url(r'^candidatesSyncOut/', candidates_sync_out_view, name='candidatesSyncOutView'),
     url(r'^candidateToOfficeLinkSyncOut/',
         candidate_to_office_link_sync_out_view, name='candidateToOfficeLinkSyncOutView'),
-    url(r'^couponSummaryRetrieve',
-        views_donation.coupon_summary_retrieve_for_api_view, name='couponSummaryRetrieve'),  # No doc yet
-    url(r'^defaultPricing', views_donation.default_pricing_for_api_view, name='defaultPricing'),  # No doc yet
+    # url(r'^couponSummaryRetrieve',
+    #     views_donation.coupon_summary_retrieve_for_api_view, name='couponSummaryRetrieve'),  # No doc yet
+    # url(r'^defaultPricing', views_donation.default_pricing_for_api_view, name='defaultPricing'),  # No doc yet
     url(r'^deviceIdGenerate/$', views_misc.device_id_generate_view, name='deviceIdGenerateView'),
     url(r'^deviceStoreFirebaseCloudMessagingToken/$', views_misc.device_store_firebase_fcm_token_view,
         name='deviceStoreFirebaseCloudMessagingToken'),
@@ -222,12 +222,12 @@ urlpatterns = [
     url(r'^twitterSignInRetrieve/', views_twitter.twitter_sign_in_retrieve_view, name='twitterSignInRetrieveView'),
     url(r'^twitterRetrieveIdsIFollow/',
         views_twitter.twitter_retrieve_ids_i_follow_view, name='twitterRetrieveIdsIFollowView'),
-    url(r'^validateCoupon', views_donation.validate_coupon_for_api_view,
-        name='validateCoupon'),
-    url(r'^createNewPlan', views_donation.create_new_plan_for_api_view,
-        name='createNewCoupon'),
-    url(r'^deletePlan', views_donation.delete_plan_for_api_view,
-        name='deletePlan'),
+    # url(r'^validateCoupon', views_donation.validate_coupon_for_api_view,
+    #     name='validateCoupon'),
+    # url(r'^createNewPlan', views_donation.create_new_plan_for_api_view,
+    #     name='createNewCoupon'),
+    # url(r'^deletePlan', views_donation.delete_plan_for_api_view,
+    #     name='deletePlan'),
     url(r'^doesOrgHavePaidPlan', views_donation.does_paid_subscription_exist_for_api,
         name='doesOrgHavePaidPlan'),
     url(r'^voterAddressRetrieve/', views_voter.voter_address_retrieve_view, name='voterAddressRetrieveView'),
