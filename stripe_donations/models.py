@@ -2,20 +2,16 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.db import models, IntegrityError
-from datetime import datetime, timezone, timedelta
+from django.db import models
+from datetime import datetime, timezone
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
-from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOWED, CHOSEN_GOOGLE_ANALYTICS_ALLOWED, \
-    CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED, CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED, CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED
-
+# from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOWED, CHOSEN_GOOGLE_ANALYTICS_ALLOWED, \
+#     CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED, CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED, CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED
 import wevote_functions.admin
 from voter.models import VoterManager
-from wevote_functions.functions import positive_value_exists, convert_date_to_date_as_integer
+from wevote_functions.functions import positive_value_exists
 import stripe
 import textwrap
-import time
-import django.utils.timezone as tm
-
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -166,8 +162,6 @@ class StripePayments(models.Model):
                                             null=True)
     exp_year = models.PositiveIntegerField(verbose_name="the expiration year of the credit card", default=0, null=True)
     last4 = models.PositiveIntegerField(verbose_name="the last 4 digits of the credit card", default=0, null=True)
-    # stripe_object = models.CharField(verbose_name="stripe returns 'card' for card, maybe different for bitcoin, etc.",
-    #                                  max_length=32, default="", null=True, blank=True)
     stripe_status = models.CharField(verbose_name="status string reported by stripe", max_length=64, default="",
                                      null=True, blank=True)
     status = models.CharField(verbose_name="our generated status message", max_length=255, default="", null=True,
@@ -313,8 +307,7 @@ class StripeManager(models.Manager):
         status = ''
         stripe_plan_id = ''
         success = False
-        org_subs_id = 0
-        org_subs_already_exists = False
+        subscription_already_exists = False
 
         try:
             # the donation plan needs to exist in two places: our stripe account and our database
@@ -390,7 +383,7 @@ class StripeManager(models.Manager):
         results = {
             'success': success,
             'status': status,
-            'org_subs_already_exists': org_subs_already_exists,
+            'subscription_already_exists': subscription_already_exists,
             'MultipleObjectsReturned': exception_multiple_object_returned,
             'recurring_we_plan_id': we_plan_id,
         }
@@ -552,7 +545,7 @@ class StripeManager(models.Manager):
 
     def create_recurring_donation(self, stripe_customer_id, voter_we_vote_id, donation_amount, start_date_time, email,
                                   is_organization_plan, coupon_code, plan_type_enum, organization_we_vote_id,
-                                  client_ip):
+                                  client_ip, payment_method_id):
         """
 
         :param stripe_customer_id:
@@ -565,13 +558,13 @@ class StripeManager(models.Manager):
         :param plan_type_enum:
         :param organization_we_vote_id:
         :param client_ip
+        :param payment_method_id
         :return:
         """
         plan_error = False
         status = ""
-        success = False
+        results = {}
         stripe_subscription_created = False
-        org_subs_already_exists = False
         org_segment = "organization-" if is_organization_plan else ""
         periodicity = "-monthly-"
         if "_YEARLY" in plan_type_enum:
@@ -581,10 +574,10 @@ class StripeManager(models.Manager):
         donation_plan_results = self.retrieve_or_create_recurring_donation_plan(
             voter_we_vote_id, we_plan_id, donation_amount, is_organization_plan, coupon_code,
             plan_type_enum, organization_we_vote_id, 'month', client_ip, stripe_customer_id)
-        org_subs_already_exists = donation_plan_results['org_subs_already_exists']
+        subscription_already_exists = donation_plan_results['subscription_already_exists']
         success = donation_plan_results['success']
         status += donation_plan_results['status']
-        if not org_subs_already_exists and success:
+        if not subscription_already_exists and success:
             try:
                 # If not logged in, this voter_we_vote_id will not be the same as the logged in id.
                 # Passing the voter_we_vote_id to the subscription gives us a chance to associate logged in with not
@@ -600,11 +593,17 @@ class StripeManager(models.Manager):
                     nickname=nickname
                 )
 
+                stripe.PaymentMethod.attach(
+                    payment_method_id,
+                    customer=stripe_customer_id,
+                )
+
                 subscription = stripe.Subscription.create(
                     customer=stripe_customer_id,
                     items=[
                         {'price': pricec.stripe_id, }
-                    ]
+                    ],
+                    default_payment_method=payment_method_id
                 )
                 success = True
                 stripe_subscription_id = subscription['id']
@@ -616,10 +615,13 @@ class StripeManager(models.Manager):
                     'status': status,
                     'voter_subscription_saved': status,
                     'stripe_subscription_created': stripe_subscription_created,
+                    'code': '',
+                    'decline_code': '',
+                    'error_message': '',
                     'subscription_plan_id': we_plan_id,
                     'subscription_created_at': subscription['created'],
                     'stripe_subscription_id': stripe_subscription_id,
-                    'org_subs_already_exists': False,
+                    'subscription_already_exists': False,
                 }
 
             except AttributeError as err:
@@ -634,12 +636,18 @@ class StripeManager(models.Manager):
                 status += "STRIPE_ERROR_IS_" + err['message'] + "_END"
                 logger.error("%s", "create_recurring_donation StripeError: " + status)
 
+                remove_results = self.remove_subscription(we_plan_id)
+                status += " " + remove_results['status']
+
                 results = {
                     'success': False,
                     'status': status,
                     'voter_subscription_saved': False,
-                    'org_subs_already_exists': False,
+                    'subscription_already_exists': False,
                     'stripe_subscription_created': stripe_subscription_created,
+                    'code': err['code'],
+                    'decline_code': err['decline_code'],
+                    'error_message': err['message'],
                     'subscription_plan_id': "",
                     'subscription_created_at': "",
                     'stripe_subscription_id': ""
@@ -649,8 +657,11 @@ class StripeManager(models.Manager):
                 'success': success,
                 'status': status,
                 'voter_subscription_saved': False,
-                'org_subs_already_exists': org_subs_already_exists,
+                'subscription_already_exists': subscription_already_exists,
                 'stripe_subscription_created': stripe_subscription_created,
+                'code': '',
+                'decline_code': '',
+                'error_message': '',
                 'subscription_plan_id': "",
                 'subscription_created_at': "",
                 'stripe_subscription_id': ""
@@ -918,8 +929,8 @@ class StripeManager(models.Manager):
         :param voter_we_vote_id:
         :return:
         """
-        donation_journal_list = []
         status = ''
+        payment_list = []
 
         try:
             payment_queryset = StripePayments.objects.all().order_by('-created')
@@ -977,7 +988,6 @@ class StripeManager(models.Manager):
                 status += 'DONATION_PLAN_DEFINITION_RETRIEVED '
                 success = True
             else:
-                donation_plan_definition_list = []
                 status += 'DONATION_PLAN_DEFINITION_LIST_EMPTY '
                 success = True
 
@@ -1244,8 +1254,25 @@ class StripeManager(models.Manager):
         }
 
     @staticmethod
+    def remove_subscription(we_plan_id):
+        success = False
+        status = ''
+        try:
+            StripeSubscription.objects.get(we_plan_id=we_plan_id, stripe_charge_id__isnull=True).delete()
+            success = True
+            status = 'SUBSCRIPTION_DELETED_ON_INITIAL_CHARGE_FAILURE'
+        except Exception as e:
+            handle_exception(e, logger=logger, exception_message="Exception in mark_donation_plan_definition_canceled")
+            status = "DELETE_SUBSCRIPTION-FAILED: " + str(e) + " "
+        return {
+            'status':   status,
+            'success':  success,
+        }
+
+    @staticmethod
     def mark_latest_donation_plan_definition_canceled(voter_we_vote_id):
         # There can only be one active organization paid plan at one time, so mark the first active one as inactive
+        org_we_vote_id = ''
         try:
             voter_manager = VoterManager()
             org_we_vote_id = voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)

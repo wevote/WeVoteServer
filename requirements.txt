@@ -14,7 +14,7 @@ django-user_agents==0.3.2
 djangorestframework==3.11.0
 elasticsearch>=1.0.0,<2.0.0
 facebook-sdk==3.1.0
-firebase_admin==4.3.0
+firebase_admin==4.5.3
 future==0.18.2
 geoip2==2.9.0
 geopy==1.23.0
@@ -28,8 +28,8 @@ httplib2==0.19.0
 oauth2client==4.1.3
 oauthlib==3.1.0
 nameparser==1.0.6
-phonenumbers==8.12.18
-Pillow==8.1.0
+phonenumbers==8.12.20
+Pillow==8.1.2
 psycopg2-binary==2.8.6
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
@@ -40,11 +40,11 @@ PyJWT==1.7.1
 python-magic==0.4.18  # Requires "brew install libmagic" or "brew upgrade libmagic" or "pip install libmagic"
 python-openid==2.2.5
 # python-social-auth==0.2.21
-pytz==2020.1
-requests==2.22.0
+pytz==2021.1
+requests==2.25.1
 requests-oauthlib==1.3.0
 robot-detection==0.4
-rsa==4.7
+rsa==4.7.2
 selenium==3.141.0
 sendgrid-django==4.2.0
 setuptools==40.6.3
@@ -54,8 +54,8 @@ social-auth-app-django==3.1.0
 social-auth-core==3.2.0
 static3==0.7.0
 stripe==2.56.0
-tweepy==3.8.0
-twilio==6.35.2
+tweepy==3.10.0
+twilio==6.54.0
 # Unipath==1.1s
 uritemplate==3.0.1
 usaddress==0.5.10

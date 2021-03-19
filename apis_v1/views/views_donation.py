@@ -1,18 +1,13 @@
 # apis_v1/views/views_donation.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-# from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from stripe_donations.controllers import donation_lists_for_a_voter
-# donation_active_paid_plan_retrieve, donation_with_stripe_for_api, \
-#     donation_process_stripe_webhook_event, \
-#     donation_refund_for_api, donation_subscription_cancellation_for_api, donation_journal_history_for_a_voter
 from stripe_donations.controllers import donation_active_paid_plan_retrieve, donation_with_stripe_for_api, \
     donation_process_stripe_webhook_event, \
     donation_refund_for_api, donation_subscription_cancellation_for_api, donation_journal_history_for_a_voter
-# from donate.models import DonationManager, OrganizationSubscriptionPlans
 from stripe_donations.models import StripeManager
 import json
 from voter.models import fetch_voter_we_vote_id_from_voter_device_link, VoterManager
@@ -37,6 +32,7 @@ def donation_with_stripe_view(request):  # donationWithStripe
 
     token = request.GET.get('token', '')
     client_ip = request.GET.get('client_ip', '')
+    payment_method_id = request.GET.get('payment_method_id', '')
     email = request.GET.get('email', '')
     donation_amount = request.GET.get('donation_amount', 0)
     monthly_donation = positive_value_exists(request.GET.get('monthly_donation', False))
@@ -57,9 +53,9 @@ def donation_with_stripe_view(request):  # donationWithStripe
         voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
 
     if positive_value_exists(token):
-        results = donation_with_stripe_for_api(request, token, client_ip, email, donation_amount, monthly_donation,
-                                               voter_we_vote_id, is_organization_plan, coupon_code, plan_type_enum,
-                                               linked_organization_we_vote_id)
+        results = donation_with_stripe_for_api(request, token, payment_method_id, client_ip, email, donation_amount,
+                                               monthly_donation, voter_we_vote_id, is_organization_plan, coupon_code,
+                                               plan_type_enum, linked_organization_we_vote_id)
 
         org_subs_already_exists = results['org_subs_already_exists'] if \
             'org_subs_already_exists' in results else False
@@ -68,28 +64,23 @@ def donation_with_stripe_view(request):  # donationWithStripe
         active_paid_plan = active_results['active_paid_plan']
         # donation_plan_definition_list_json = active_results['donation_plan_definition_list_json']
         donation_subscription_list, donation_payments_list = donation_lists_for_a_voter(voter_we_vote_id)
-        error_message_for_voter = ''
-        if 'error_message_for_voter' in results:
-            error_message_for_voter = results['error_message_for_voter']
         json_data = {
             'status': results['status'],
             'success': results['success'],
             'active_paid_plan': active_paid_plan,
             'amount_paid': results['amount_paid'],
             'charge_id': results['charge_id'],
-            'customer_id': results['customer_id'],
-            # 'donation_list': donation_journal_history_for_a_voter(voter_we_vote_id),
-            # 'donation_plan_definition_list':    donation_plan_definition_list_json,
+            'stripe_customer_id': results['stripe_customer_id'],
             'donation_subscription_list': donation_subscription_list,
             'donation_payments_list': donation_payments_list,
-            'error_message_for_voter': error_message_for_voter,
+            'error_message_for_voter': results['error_message_for_voter'],
+            'stripe_failure_code': results['stripe_failure_code'],
             'monthly_donation': monthly_donation,
             'organization_saved': results['organization_saved'],
             'org_subs_already_exists': org_subs_already_exists,
             'plan_type_enum': results['plan_type_enum'],
             'saved_donation_in_log': results['donation_entry_saved'],
             'saved_stripe_donation': results['saved_stripe_donation'],
-            'subscription': results['subscription'],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -225,8 +216,6 @@ def donation_history_list_view(request):   # donationHistory
         'subscription_ended_at':    '',
         'stripe_subscription_id':          stripe_subscription_id,
     }
-    # donation_list = []
-    # donation_plan_definition_list_json = []
     donation_subscription_list = []
     donation_payments_list = []
 
@@ -244,18 +233,13 @@ def donation_history_list_view(request):   # donationHistory
             linked_organization_we_vote_id = voter.linked_organization_we_vote_id
 
             donation_subscription_list, donation_payments_list = donation_lists_for_a_voter(voter_we_vote_id)
-            # donation_list = donation_journal_history_for_a_voter(voter_we_vote_id)
-
             active_results = donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_vote_id)
             active_paid_plan = active_results['active_paid_plan']
-            # donation_plan_definition_list_json = active_results['donation_plan_definition_list_json']
 
         json_data = {
             'active_paid_plan':                 active_paid_plan,
             'donation_subscription_list':       donation_subscription_list,
             'donation_payments_list':           donation_payments_list,
-            # 'donation_list':                    donation_list,
-            # 'donation_plan_definition_list':    donation_plan_definition_list_json,
             'status':                           status,
             'success':                          success,
         }
@@ -358,7 +342,7 @@ def donation_history_list_view(request):   # donationHistory
 #
 #     return HttpResponse(json.dumps(json_data), content_type='application/json')
 #
-
+#
 # def delete_plan_for_api_view(request):
 #     authority_required = {'admin'}
 #     if not voter_has_authority(request, authority_required):
