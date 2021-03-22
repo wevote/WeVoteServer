@@ -179,7 +179,7 @@ def donation_with_stripe_for_api(request, token, payment_method_id, client_ip, e
     Initiate a donation or organization subscription plan using the Stripe Payment API, and record details in our DB
     :param request:
     :param token: The Stripe token.id for the card and transaction
-    :param payment_method_id: payment method selected/created on the client CheckOutform
+    :param payment_method_id: payment method selected/created on the client CheckoutForm.jsx
     :param client_ip:
     :param email:
     :param donation_amount:  the amount of the donation, but not used for organization subscriptions
@@ -213,17 +213,13 @@ def donation_with_stripe_for_api(request, token, payment_method_id, client_ip, e
         'subscription_saved': 'NOT_APPLICABLE',
     }
 
+    charge, not_loggedin_voter_we_vote_id = None, None
     donation_date_time = datetime.today()
     raw_donation_status = ''
-    # TODO: 3/14/21: The following test is a bug, introduced with organizational subs - maybe doesnt matter for new api?
-    # 'is_organization_plan' is ABSOLUTELY NOT the correct criteria
-    if positive_value_exists(is_organization_plan):
-        donation_journal_action_taken = 'VOTER_SUBMITTED_SUBSCRIPTION'
-    else:
-        donation_journal_action_taken = 'VOTER_SUBMITTED_DONATION'
+    is_signed_in = is_voter_logged_in(request)
+
     if is_organization_plan:
         results['amount_paid'] = 0
-    charge, not_loggedin_voter_we_vote_id = None, None
 
     if not positive_value_exists(voter_we_vote_id):
         results['status'] += "DONATION_WITH_STRIPE_VOTER_WE_VOTE_ID_MISSING "
@@ -268,98 +264,102 @@ def donation_with_stripe_for_api(request, token, payment_method_id, client_ip, e
         if not positive_value_exists(results['stripe_customer_id']):
             results['status'] += "STRIPE_CUSTOMER_ID_MISSING "
         else:
-            if positive_value_exists(is_organization_plan):
-                # If here, we are processing organization subscription
+            # if positive_value_exists(is_organization_plan):
+            #     # If here, we are processing organization subscription
+            #     results['status'] += 'DONATION_SUBSCRIPTION_SETUP '
+            #     if "MONTHLY" in results['plan_type_enum']:
+            #         recurring_interval = 'month'
+            #     elif "YEARLY" in results['plan_type_enum']:
+            #         recurring_interval = 'year'
+            #     else:
+            #         recurring_interval = 'year'
+            #     subscription_results = donation_manager.create_organization_subscription(
+            #         results['stripe_customer_id'], voter_we_vote_id, donation_amount, donation_date_time,
+            #         email, coupon_code, results['plan_type_enum'], organization_we_vote_id,
+            #         recurring_interval)
+            #
+            #     donation_plan_definition_already_exists = \
+            #         subscription_results['donation_plan_definition_already_exists']
+            #     results['stripe_subscription_created'] = subscription_results['stripe_subscription_created']
+            #     if donation_plan_definition_already_exists:
+            #         results['charge_id'] = ''
+            #     else:
+            #         results['status'] += textwrap.shorten(subscription_results['status'] + " " + results['status'],
+            #                                               width=255, placeholder="...")
+            #         results['success'] = subscription_results['success']
+            #         create_subscription_entry = True
+            #         stripe_subscription_id = subscription_results['stripe_subscription_id']
+            #         subscription_plan_id = subscription_results['subscription_plan_id']
+            #         subscription_created_at = None
+            #         if type(subscription_results['subscription_created_at']) is int:
+            #             subscription_created_at = datetime.fromtimestamp(
+            #                 subscription_results['subscription_created_at'],
+            #                 timezone.utc)
+            #         created = subscription_created_at
+            #         subscription_canceled_at = None
+            #         subscription_ended_at = None
+            # else:
+            # If here, we are processing a donation subscription or Membership
+            if positive_value_exists(monthly_donation):
                 results['status'] += 'DONATION_SUBSCRIPTION_SETUP '
-                if "MONTHLY" in results['plan_type_enum']:
-                    recurring_interval = 'month'
-                elif "YEARLY" in results['plan_type_enum']:
-                    recurring_interval = 'year'
-                else:
-                    recurring_interval = 'year'
-                subscription_results = donation_manager.create_organization_subscription(
-                    results['stripe_customer_id'], voter_we_vote_id, donation_amount, donation_date_time,
-                    email, coupon_code, results['plan_type_enum'], organization_we_vote_id,
-                    recurring_interval)
+                # The Stripe API calls are made within the following function call
+                recurring_donation_results = donation_manager.create_recurring_donation(
+                    results['stripe_customer_id'], voter_we_vote_id,
+                    donation_amount, donation_date_time,
+                    email, is_organization_plan,
+                    coupon_code, results['plan_type_enum'],
+                    organization_we_vote_id, client_ip, payment_method_id, is_signed_in)
 
-                donation_plan_definition_already_exists = \
-                    subscription_results['donation_plan_definition_already_exists']
-                results['stripe_subscription_created'] = subscription_results['stripe_subscription_created']
-                if donation_plan_definition_already_exists:
+                results['subscription_already_exists'] = recurring_donation_results['subscription_already_exists']
+                results['stripe_subscription_created'] = recurring_donation_results['stripe_subscription_created']
+                results['stripe_subscription_id'] = recurring_donation_results['stripe_subscription_id']
+                stripe_subscription_success = recurring_donation_results['success']
+
+                if not stripe_subscription_success:
+                    results['subscription_saved'] = 'NOT_SAVED'
+                    results['status'] += textwrap.shorten(recurring_donation_results['status'] +
+                                                          " " + results['status'], width=255, placeholder="...")
+                    results['success'] = stripe_subscription_success
+                    results['error_message_for_voter'] = recurring_donation_results['error_message']
+                    results['stripe_failure_code'] = recurring_donation_results['code']
+                    results['amount_paid'] = 0
+                    return results
+                elif results['subscription_already_exists']:
                     results['charge_id'] = ''
                 else:
-                    results['status'] += textwrap.shorten(subscription_results['status'] + " " + results['status'],
-                                                          width=255, placeholder="...")
-                    results['success'] = subscription_results['success']
+                    results['subscription_saved'] = recurring_donation_results['voter_subscription_saved']
+                    results['status'] += textwrap.shorten(recurring_donation_results['status'] +
+                                                          " " + results['status'], width=255, placeholder="...")
+                    results['success'] = recurring_donation_results['success']
                     create_subscription_entry = True
-                    stripe_subscription_id = subscription_results['stripe_subscription_id']
-                    subscription_plan_id = subscription_results['subscription_plan_id']
+                    stripe_subscription_id = recurring_donation_results['stripe_subscription_id']
+                    subscription_plan_id = recurring_donation_results['subscription_plan_id']
                     subscription_created_at = None
-                    if type(subscription_results['subscription_created_at']) is int:
-                        subscription_created_at = datetime.fromtimestamp(
-                            subscription_results['subscription_created_at'],
-                            timezone.utc)
-                    created = subscription_created_at
-                    subscription_canceled_at = None
-                    subscription_ended_at = None
-            else:
-                # If here, we are processing a donation
-                if positive_value_exists(monthly_donation):
-                    results['status'] += 'DONATION_SUBSCRIPTION_SETUP '
-                    # The Stripe API calls are made within the following function call
-                    recurring_donation_results = donation_manager.create_recurring_donation(
-                        results['stripe_customer_id'], voter_we_vote_id,
-                        donation_amount, donation_date_time,
-                        email, is_organization_plan,
-                        coupon_code, results['plan_type_enum'],
-                        organization_we_vote_id, client_ip, payment_method_id)
+                    if type(recurring_donation_results['subscription_created_at']) is int:
+                        subscription_created_at = \
+                            datetime.fromtimestamp(recurring_donation_results['subscription_created_at'],
+                                                   timezone.utc)
+            else:  # One time charge
+                charge = stripe.Charge.create(
+                    amount=donation_amount,
+                    currency="usd",
+                    source=token,
+                    metadata={
+                        'email': email,
+                        'one_time_donation': True,
+                        'organization_we_vote_id': organization_we_vote_id,
+                        'plan_type_enum': results['plan_type_enum'],
+                        'voter_we_vote_id': voter_we_vote_id,
+                        'coupon_code': coupon_code,
+                        'stripe_customer_id': dm_results['stripe_customer_id']
+                    }
+                )
+                results['status'] += textwrap.shorten("STRIPE_CHARGE_SUCCESSFUL " + results['status'], width=255,
+                                                      placeholder="...")
+                results['charge_id'] = charge.id
+                results['success'] = positive_value_exists(charge.id)
 
-                    results['subscription_already_exists'] = recurring_donation_results['subscription_already_exists']
-                    results['stripe_subscription_created'] = recurring_donation_results['stripe_subscription_created']
-                    stripe_subscription_success = recurring_donation_results['success']
-
-                    if not stripe_subscription_success:
-                        results['subscription_saved'] = 'NOT_SAVED'
-                        results['status'] += textwrap.shorten(recurring_donation_results['status'] +
-                                                              " " + results['status'], width=255, placeholder="...")
-                        results['success'] = stripe_subscription_success
-                        results['error_message_for_voter'] = recurring_donation_results['error_message']
-                        results['stripe_failure_code'] = recurring_donation_results['code']
-                        results['amount_paid'] = 0
-                        return results
-                    elif results['subscription_already_exists']:
-                        results['charge_id'] = ''
-                    else:
-                        results['subscription_saved'] = recurring_donation_results['voter_subscription_saved']
-                        results['status'] += textwrap.shorten(recurring_donation_results['status'] +
-                                                              " " + results['status'], width=255, placeholder="...")
-                        results['success'] = recurring_donation_results['success']
-                        create_subscription_entry = True
-                        stripe_subscription_id = recurring_donation_results['stripe_subscription_id']
-                        subscription_plan_id = recurring_donation_results['subscription_plan_id']
-                        subscription_created_at = None
-                        if type(recurring_donation_results['subscription_created_at']) is int:
-                            subscription_created_at = \
-                                datetime.fromtimestamp(recurring_donation_results['subscription_created_at'],
-                                                       timezone.utc)
-                else:  # One time charge
-                    charge = stripe.Charge.create(
-                        amount=donation_amount,
-                        currency="usd",
-                        source=token,
-                        metadata={
-                            'voter_we_vote_id': voter_we_vote_id,
-                            'coupon_code': coupon_code,
-                            'plan_type_enum': results['plan_type_enum'],
-                            'organization_we_vote_id': organization_we_vote_id
-                        }
-                    )
-                    results['status'] += textwrap.shorten("STRIPE_CHARGE_SUCCESSFUL " + results['status'], width=255,
-                                                          placeholder="...")
-                    results['charge_id'] = charge.id
-                    results['success'] = positive_value_exists(charge.id)
-
-        if positive_value_exists(charge.id):
+        if positive_value_exists(charge) and positive_value_exists(charge.id):
             results['saved_stripe_donation'] = True
             results['status'] += ' DONATION_PROCESSED_SUCCESSFULLY '
             amount = charge['amount']
@@ -405,10 +405,9 @@ def donation_with_stripe_for_api(request, token, payment_method_id, client_ip, e
     #    STRIPE_DONATION_NOT_COMPLETED, DONATION_SUBSCRIPTION_SETUP
     # action_result = raw_donation_status
 
-    logged_in = is_voter_logged_in(request)
-    # print("is_voter_logged_in() = " + str(logged_in))
-    if not logged_in:
-        not_loggedin_voter_we_vote_id = voter_we_vote_id
+    # print("is_voter_logged_in() = " + str(is_signed_in))
+    if not is_signed_in:
+        results['not_loggedin_voter_we_vote_id'] = voter_we_vote_id
 
     return results
 
@@ -582,9 +581,10 @@ def donation_process_stripe_webhook_event(event):
         return donation_process_subscription_payment(event)
     elif etype == 'charge.refunded':
         return donation_process_refund_payment(event)
-    elif etype == 'invoice.created':
-        return donation_process_invoice_created(event)
+    # elif etype == 'invoice.created':  Abandoned March 2021, not needed with new api
+    #     return donation_process_invoice_created(event)
 
+    print("WEBHOOK ignored: donation_process_stripe_webhook_event: " + event.type)
     logger.info("WEBHOOK ignored: donation_process_stripe_webhook_event: " + event.type)
     return
 
@@ -598,94 +598,102 @@ def write_event_to_local_file(event):
 
 def donation_process_charge(event):           # 'charge.succeeded' webhook
     """
-    3/12/21: This might be almost ready to go for individual donations, but needs to be blocked for subscriptions
-
     :param event:
     :return:
     """
+
     try:
         # print('first line in stripe_donation donation_process_charge')
         charge = event['data']['object']
+        description = charge['description']
+        metadata = charge['metadata']
+        is_one_time_donation = True if 'one_time_donation' in metadata else False
+        print('donation_process_charge # charge.succeeded ... is_one_time_donation:', is_one_time_donation)
+
+        if description == "Subscription creation":
+            print('charge.succeeded webhook is NOT Needed for subscriptions as of 3/16/21: ' + description)
+            return
+        elif not is_one_time_donation:
+            print('charge.succeeded webhook received -- not for a subs AND without one_time_donation in metadata')
+            return
+
         source = charge['source']
         outcome = charge['outcome']
         customer = charge['customer']
-        description = charge['description']
-        api_version = event['api_version']
-        created = event['created']
+        data = event['data']
+        stripe_object = data['object']
 
-        if description != "Subscription creation":
-            print('NOT YET SUPPORTED: ' + description)
-            return
-        else:
-            print('charge.succeeded webhook is NOT Needed for subscriptions as of 3/16/21: ' + description)
-            return
+        is_signed_in = False
+        voter_we_vote_id = ''
+        not_loggedin_voter_we_vote_id = ''
+        if 'voter_we_vote_id' in metadata:
+            voter_manager = VoterManager()
+            results = voter_manager.retrieve_voter_by_we_vote_id(metadata['voter_we_vote_id'])
+            if results['voter_found']:
+                voter = results['voter']
+                is_signed_in = voter.is_signed_in()
+            if is_signed_in:
+                voter_we_vote_id = metadata['voter_we_vote_id']
+            else:
+                not_loggedin_voter_we_vote_id = metadata['voter_we_vote_id']
 
-    # next two lines are a hack to avoid removing the try above
-    finally:
-        return
+        payment = {
+            # record_enum
+            'voter_we_vote_id': voter_we_vote_id,
+            'not_loggedin_voter_we_vote_id': not_loggedin_voter_we_vote_id,
+            'stripe_customer_id': metadata['stripe_customer_id'],
+            'stripe_charge_id': charge['id'],
+            'stripe_card_id': charge['payment_method'],
+            'stripe_request_id': event['request']['id'],
+            # stripe_subscription_id
+            'currency': charge['currency'],
+            'livemode': charge['livemode'],
+            # action_taken
+            # action_result
+            'amount': charge['amount'],
+            'created': datetime.fromtimestamp(event['created'], timezone.utc),
+            'failure_code': charge['failure_code'],
+            'failure_message': charge['failure_message'],
+            'network_status': outcome['network_status'],
+            # billing_reason
+            'reason': outcome['reason'],
+            'seller_message': outcome['seller_message'],
+            'stripe_type': stripe_object['object'],
+            # payment_msg
+            'is_paid': charge['paid'],
+            'is_refunded': charge['refunded'],
+            'source_obj': source['object'],
+            'funding': source['funding'],
+            'amount_refunded': charge['amount_refunded'],
+            'email': metadata['email'] if 'email' in metadata else '',    # Need a change on the other side!
+            'address_zip': source['address_zip'],
+            'brand': source['brand'],
+            'country': source['country'],
+            'exp_month': source['exp_month'],
+            'exp_year': source['exp_year'],
+            'last4': source['last4'],
+            'stripe_status': charge['status'],
+            'status': stripe_object['calculated_statement_descriptor'],
+            # we_plan_id
+            'paid_at': datetime.fromtimestamp(charge['created'], timezone.utc),
+            'ip_address': '0.0.0.0',                # Need a change on the other side!
+            'is_organization_plan': False,
+            'api_version': event['api_version'],
+        }
 
-    #  Do not delete, works well 3/12/21 and could be used for 'Chip In' donations.
-    #     # Handle stripe test urls with no customer
-    #     if outcome is None:
-    #         outcome = []
-    #
-    #     if 'network_status' in outcome:
-    #         network_status = outcome['network_status']
-    #     else:
-    #         network_status = ""
-    #     if customer is None:
-    #         customer = "none"
-    #     else:
-    #         customer = str(charge['customer'])
-    #     if 'reason' in outcome:
-    #         reason = outcome['reason']
-    #     else:
-    #         reason = 'none'
-    #     if 'seller_message' in outcome:
-    #         seller_message = outcome['seller_message']
-    #     else:
-    #         seller_message = 'none'
-    #
-    #     voter_we_vote_id = None;
-    #     # Charges from subscription payments, won't have our metadata
-    #     if 'metadata' in charge and 'voter_we_vote_id' in charge['metadata']:
-    #         voter_we_vote_id = charge['metadata']['voter_we_vote_id']
-    #     if voter_we_vote_id:
-    #         # Has our metadata?  Then we have already made a journal entry at the time of the donation
-    #         logger.info("Stripe 'charge.succeeded' received for a PAYMENT_FROM_UI -- ignored, charge = " + charge)
-    #         return
-    #     else:
-    #         voter_we_vote_id = StripeManager.find_we_vote_voter_id_for_stripe_customer(customer)
-    #
-    #     initial_subscription = {
-    #         'amount': charge['amount'],
-    #         'billing_interval': 'month',
-    #         'currency': charge['currency'],
-    #         'donation_plan_is_active': True,
-    #         'stripe_customer_id': charge['customer'],
-    #         'voter_we_vote_id': voter_we_vote_id,
-    #         'stripe_request_id': event['request']['id'],
-    #         'stripe_charge_id': charge['id'],
-    #         'subscription_created_at': datetime.fromtimestamp(charge['created'], timezone.utc),
-    #         'api_version': api_version,
-    #         'livemode': charge['livemode'],
-    #     }
-    #
-    #     StripeManager.create_subscription_entry(initial_subscription)
-    #
-    #     logger.debug("Stripe subscription payment from webhook: " + str(charge['customer']) + ", amount: " +
-    #                  str(charge['amount']) + ", last4:" + str(source['last4']))
-    #     StripeManager.update_subscription_with_latest_charge_date(charge['invoice'], charge['created'])
-    #
-    # except stripe.error.StripeError as e:
-    #     body = e.json_body
-    #     error_from_json = body['error']
-    #     logger.error("donation_process_charge, Stripe: " + error_from_json)
-    #
-    # except Exception as err:
-    #     logger.error("donation_process_charge, general: " + str(err))
-    #
-    # return
+        StripeManager.create_payment_entry(payment)
+        logger.debug("Stripe subscription payment from webhook: " + str(charge['customer']) + ", amount: " +
+                     str(charge['amount']) + ", last4:" + str(source['last4']))
+
+    except stripe.error.StripeError as e:
+        body = e.json_body
+        error_from_json = body['error']
+        logger.error("donation_process_charge, Stripe: " + error_from_json)
+
+    except Exception as err:
+        logger.error("donation_process_charge, general: " + str(err))
+
+    return
 
 
 def donation_process_subscription_deleted(event):
@@ -799,14 +807,14 @@ def move_donation_info_to_another_voter(from_voter, to_voter):
 
     # All we really need to do is find the donations that are associated with the "from" voter, and change their
     # voter_we_vote_id to the "to" voter.
-    results = StripeManager.move_donation_journal_entries_from_voter_to_voter(from_voter, to_voter)
+    results = StripeManager.move_donation_payment_entries_from_voter_to_voter(from_voter, to_voter)
     status += results['status']
 
     donate_link_results = StripeManager.move_donate_link_to_voter_from_voter_to_voter(from_voter, to_voter)
     status += donate_link_results['status']
 
     donation_plan_results = \
-        StripeManager.move_donation_plan_definition_entries_from_voter_to_voter(from_voter, to_voter)
+        StripeManager.move_stripe_subscription_entries_from_voter_to_voter(from_voter, to_voter)
     status += donation_plan_results['status']
 
     results = {
@@ -846,8 +854,14 @@ def donation_process_subscription_payment(event):    # invoice.payment_succeeded
         # paid_at = last_charged
         stripe_charge_id = dataobject['charge']
         customer = stripe.Customer.retrieve(customer_id)
-        result = StripeManager.retrieve_voter_we_vote_id_from_donate_link_to_voter(customer_id)
-        voter_we_vote_id = result['voter_we_vote_id']
+        if billing_reason == 'subscription_create':
+            result_request = StripeManager.retrieve_voter_we_vote_id_via_amount_and_customer_id(amount, customer_id)
+            voter_we_vote_id = result_request['voter_we_vote_id']
+            not_loggedin_voter_we_vote_id = result_request['not_loggedin_voter_we_vote_id']
+        else:
+            result_link = StripeManager.retrieve_voter_we_vote_id_from_donate_link_to_voter(customer_id)
+            voter_we_vote_id = result_link['voter_we_vote_id']
+
         email = customer['email']
         # source_obj = dataobject['source']['object']
         stripe_customer_id = customer['id']
@@ -875,13 +889,17 @@ def donation_process_subscription_payment(event):    # invoice.payment_succeeded
         stripe_type = dataobject['lines']['data'][0]['type']
         is_organization_plan = 'False'
 
-        StripeManager.update_subscription_on_charge_success(we_plan_id, voter_we_vote_id, stripe_request_id,
+        StripeManager.update_subscription_on_charge_success(we_plan_id, stripe_request_id,
                                                             stripe_subscription_id, stripe_charge_id,
                                                             subscription_created_at, last_charged,
                                                             brand, exp_month, exp_year, last4, api_version)
+
+        # Not that we have saved the subscription, save what we know about the payment (more will arrive in the webhook)
+
         stripe_payment = {
             # 'we_plan_id': we_plan_id,
             'voter_we_vote_id': voter_we_vote_id,
+            'not_loggedin_voter_we_vote_id': not_loggedin_voter_we_vote_id,
             'stripe_customer_id': stripe_customer_id,
             'stripe_request_id': stripe_request_id,
             'stripe_subscription_id': stripe_subscription_id,
@@ -909,7 +927,7 @@ def donation_process_subscription_payment(event):    # invoice.payment_succeeded
             'is_organization_plan': is_organization_plan,
             'created': created,
         }
-        print(stripe_payment)
+        print('Adding new StripePayment record on_charge_success: ', stripe_payment)
         StripeManager.add_payment_on_charge_success(stripe_payment)
     except Exception as err:
         logger.error("donation_process_subscription_payment: " + str(err))
@@ -928,33 +946,6 @@ def donation_process_refund_payment(event):
         success = StripeManager.update_journal_entry_for_refund_completed(charge)
 
     return success
-
-
-def donation_process_invoice_created(event):
-    """
-    The only way to associate an incoming automatic payment for a subscription payment
-    'invoice.payment_succeeded' is to cache the invoice id number and subscription id when the
-    invoice created event arrives.  Then when the 'invoice.payment_succeeded' arrives a few seconds
-    later, we can update the subscription 'last_charged' field since we will have cached the
-    subscription id
-    :param event: The Stripe event
-    :return:
-    """
-
-    try:
-        dataobject = event['data']['object']
-        customer_id = dataobject['customer']
-        plan = dataobject['lines']['data'][0]['plan']
-        we_plan_id = plan['id']
-        stripe_subscription_id = dataobject['subscription']
-        invoice_id = dataobject['id']
-        invoice_date = datetime.fromtimestamp(dataobject['created'], timezone.utc)
-        return StripeManager.update_donation_invoice(stripe_subscription_id, we_plan_id, invoice_id,
-                                                     invoice_date, customer_id)
-    except Exception as e:
-        logger.error("donation_process_invoice_created threw " + str(e))
-
-    return
 
 
 def donation_refund_for_api(request, charge, voter_we_vote_id):

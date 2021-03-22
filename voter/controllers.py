@@ -22,7 +22,7 @@ from datetime import timedelta
 from django.http import HttpResponse
 from django.db.models import F
 from django.utils.timezone import now
-from donate.controllers import donation_journal_history_for_a_voter, move_donation_info_to_another_voter
+from stripe_donations.controllers import donation_journal_history_for_a_voter, move_donation_info_to_another_voter
 from email_outbound.controllers import delete_email_address_entries_for_voter, \
     move_email_address_entries_to_another_voter, schedule_verification_email, \
     WE_VOTE_SERVER_ROOT_URL, schedule_email_with_email_outbound_description
