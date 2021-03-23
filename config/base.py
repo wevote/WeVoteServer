@@ -10,6 +10,7 @@ import os
 import pathlib
 import re
 from django.core.exceptions import ImproperlyConfigured
+from django.db import connection
 
 # Consider switching to the way that Two Scoops of Django 1.8 suggests file path handling, section 5.6
 # from unipath import Path
@@ -59,7 +60,7 @@ def get_environment_variable_default(var_name, default_value):
 
 
 def get_python_version():
-    version = os.popen('python --version').read().strip()
+    version = os.popen('python --version').read().strip().replace('Python', '')
     print(version)    # Something like 'Python 3.7.2'
     return version
 
@@ -69,7 +70,7 @@ def get_node_version():
     raw = os.popen('node -v').read().replace('\n', '').strip()
     version = 'Node not installed on this server'
     if len(raw) > 0:
-        version = "Node " + os.popen('node -v').read().replace('\n', '').strip()
+        version = os.popen('node -v').read().replace('\n', '').strip()
     print(version)    # Something like 'v14.15.1'
     return version
 
@@ -88,6 +89,16 @@ def get_git_merge_date():
     # print(out_string)
     return out_string
 
+
+def get_postgres_version():
+    formatted = 'fail'
+    try:
+        version = str(connection.cursor().connection.server_version)
+        formatted = version[0:2] + '.' + version[2:4] + '.' + version[4:6]
+    except Exception:
+        pass
+    print('Postgres ', formatted)
+    return formatted
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

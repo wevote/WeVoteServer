@@ -424,7 +424,7 @@ class StripeManager(models.Manager):
             try:
                 plan_id_query = stripe.Plan.retrieve(we_plan_id)
             except stripe.error.StripeError as stripeError:
-                logger.error('Stripe (informational for splunk) error (1): %s', stripeError)
+                # logger.error('Stripe (informational for splunk) error (1): %s', stripeError)
                 pass
 
             if positive_value_exists(plan_id_query):

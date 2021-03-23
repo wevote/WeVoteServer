@@ -160,9 +160,24 @@
 {# This information does not have to be on the front page, as long as it can be found somewhere #}
 <h4>Technical Information</h4>
 <p>
-    Running: {{ python_version }}<br>
-    Running: {{ node_version }}<br>
-    Git date:&nbsp; {{git_merge_date}}<br>
+    <table>
+        <tr>
+            <td>Python:</td>
+            <td>{{ python_version }}</td>
+        </tr>
+        <tr>
+            <td>Node:</td>
+            <td>{{ node_version }}</td>
+        </tr>
+        <tr>
+            <td>Postgres:&nbsp;&nbsp;</td>
+            <td>{{ postgres_version }}</td>
+        </tr>
+        <tr>
+            <td>Git date:</td>
+            <td>{{git_merge_date}}</td>
+        </tr>
+     </table>
 </p>
 
 {%  endblock %}
