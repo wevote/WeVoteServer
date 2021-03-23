@@ -394,7 +394,7 @@ class DonationManager(models.Manager):
             try:
                 plan_id_query = stripe.Plan.retrieve(we_vote_donation_plan_identifier)
             except stripe.error.StripeError as stripeError:
-                logger.error('Stripe (informational for splunk) error (1): %s', stripeError)
+                # logger.info('Stripe error (1): %s', stripeError)
                 pass
 
             if positive_value_exists(plan_id_query):
@@ -1208,7 +1208,6 @@ class DonationManager(models.Manager):
                 logger.error('%s', 'DonationPlanDefinition for ' + org_we_vote_id +
                              ' not found in mark_latest_donation_plan_definition_canceled')
 
-            # TODO: STEVE STEVE STEVE seperately make sure that we only find the active ones
         except Exception as e:
             logger.error('%s', 'DonationPlanDefinition for ' + org_we_vote_id +
                          ' threw exception: ' + str(e))

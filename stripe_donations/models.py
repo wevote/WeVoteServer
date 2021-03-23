@@ -2,20 +2,17 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.db import models, IntegrityError
-from datetime import datetime, timezone, timedelta
+from django.db import models
+from django.db.models import Q
+from datetime import datetime, timezone
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
-from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOWED, CHOSEN_GOOGLE_ANALYTICS_ALLOWED, \
-    CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED, CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED, CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED
-
+# from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOWED, CHOSEN_GOOGLE_ANALYTICS_ALLOWED, \
+#     CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED, CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED, CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED
 import wevote_functions.admin
 from voter.models import VoterManager
-from wevote_functions.functions import positive_value_exists, convert_date_to_date_as_integer
+from wevote_functions.functions import positive_value_exists
 import stripe
 import textwrap
-import time
-import django.utils.timezone as tm
-
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -69,6 +66,8 @@ class StripeSubscription(models.Model):
     voter_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the person who created this subscription",
         max_length=64, default=None, null=True, blank=True, unique=False, db_index=True)
+    not_loggedin_voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=32, unique=False,
+                                                     null=True, blank=True)
     stripe_customer_id = models.CharField(verbose_name="stripe customer id", max_length=32, null=True, blank=True)
     # Stripe uses integer pennies for amount (ex: 2000 = $20.00)
     amount = models.PositiveIntegerField(verbose_name="recurring donation amount", default=0, null=False)
@@ -166,8 +165,6 @@ class StripePayments(models.Model):
                                             null=True)
     exp_year = models.PositiveIntegerField(verbose_name="the expiration year of the credit card", default=0, null=True)
     last4 = models.PositiveIntegerField(verbose_name="the last 4 digits of the credit card", default=0, null=True)
-    # stripe_object = models.CharField(verbose_name="stripe returns 'card' for card, maybe different for bitcoin, etc.",
-    #                                  max_length=32, default="", null=True, blank=True)
     stripe_status = models.CharField(verbose_name="status string reported by stripe", max_length=64, default="",
                                      null=True, blank=True)
     status = models.CharField(verbose_name="our generated status message", max_length=255, default="", null=True,
@@ -285,10 +282,84 @@ class StripeManager(models.Manager):
         return results
 
     @staticmethod
+    def retrieve_voter_we_vote_id_via_stripe_request_id(stripe_request_id):
+        """
+
+        :param stripe_request_id:
+        :return:
+        """
+        voter_we_vote_id = ''
+        not_loggedin_voter_we_vote_id = ''
+        status = ''
+        success = bool
+        if positive_value_exists(stripe_request_id):
+            try:
+                voter_id_queryset = StripeSubscription.objects.filter(
+                    stripe_request_id__iexact=stripe_request_id).values()
+                voter_we_vote_id = voter_id_queryset[0]['voter_we_vote_id']
+                not_loggedin_voter_we_vote_id = voter_id_queryset[0]['not_loggedin_voter_we_vote_id']
+                if positive_value_exists(voter_we_vote_id) or positive_value_exists(not_loggedin_voter_we_vote_id):
+                    success = True
+                    status = "VOTER_WE_VOTE_ID_RETRIEVED"
+                else:
+                    success = False
+                    status = "EXISTING_VOTER_WE_VOTE_ID_NOT_FOUND"
+            except Exception as e:
+                success = False
+                status = "VOTER_WE_VOTE_ID_RETRIEVAL_ATTEMPT_FAILED"
+
+        results = {
+            'success': success,
+            'status': status,
+            'voter_we_vote_id': voter_we_vote_id,
+            'not_loggedin_voter_we_vote_id': not_loggedin_voter_we_vote_id,
+        }
+        return results
+
+    @staticmethod
+    def retrieve_voter_we_vote_id_via_amount_and_customer_id(amount, stripe_customer_id):
+        """
+
+        :param amount:
+        :param stripe_customer_id:
+        :return:
+        """
+        voter_we_vote_id = ''
+        status = ''
+        success = bool
+        if positive_value_exists(stripe_customer_id):
+            try:
+                subscription_queryset = StripeSubscription.objects.all().order_by('-id')
+                subscription_queryset = subscription_queryset.filter(
+                    Q(amount=amount) | Q(stripe_customer_id=stripe_customer_id)
+                )
+                subscription_list = list(subscription_queryset)
+                highest_id_row = subscription_list[0]
+                voter_we_vote_id = highest_id_row.voter_we_vote_id
+                not_loggedin_voter_we_vote_id = highest_id_row.not_loggedin_voter_we_vote_id
+                if positive_value_exists(voter_we_vote_id) or positive_value_exists(not_loggedin_voter_we_vote_id):
+                    success = True
+                    status = "VOTER_WE_VOTE_ID_RETRIEVED"
+                else:
+                    success = False
+                    status = "EXISTING_VOTER_WE_VOTE_ID_NOT_FOUND"
+            except Exception as e:
+                success = False
+                status = "VOTER_WE_VOTE_ID_RETRIEVAL_ATTEMPT_FAILED"
+
+        results = {
+            'success': success,
+            'status': status,
+            'voter_we_vote_id': voter_we_vote_id,
+            'not_loggedin_voter_we_vote_id': not_loggedin_voter_we_vote_id,
+        }
+        return results
+
+    @staticmethod
     def retrieve_or_create_recurring_donation_plan(voter_we_vote_id, we_plan_id, donation_amount,
                                                    is_organization_plan, coupon_code, plan_type_enum,
                                                    organization_we_vote_id, recurring_interval, client_ip,
-                                                   stripe_customer_id):
+                                                   stripe_customer_id, is_signed_in):
         """
         June 2017, we create these records, but never read them for donations
         August 2019, we read them for subscriptions and (someday) organization paid subscriptions
@@ -302,6 +373,7 @@ class StripeManager(models.Manager):
         :param recurring_interval:
         :param client_ip
         :param stripe_customer_id
+        :param is_signed_in
         :return:
         """
         # recurring_we_plan_id = voter_we_vote_id + "-monthly-" + str(donation_amount)
@@ -313,20 +385,27 @@ class StripeManager(models.Manager):
         status = ''
         stripe_plan_id = ''
         success = False
-        org_subs_id = 0
-        org_subs_already_exists = False
+        subscription_already_exists = False
 
         try:
             # the donation plan needs to exist in two places: our stripe account and our database
-            # plans can be created here or in our stripe account dashboard8
-            # TODO this is the good first one, with a we_plan_id
+            # plans can be created here or in our stripe account dashboard
+
+            if is_signed_in:
+                voter_we_vote_id_2 = voter_we_vote_id
+                not_loggedin_voter_we_vote_id = ''
+            else:
+                voter_we_vote_id_2 = ''
+                not_loggedin_voter_we_vote_id = voter_we_vote_id
+
             donation_plan_query, is_new = StripeSubscription.objects.get_or_create(
                 we_plan_id=we_plan_id,
                 amount=donation_amount,
                 billing_interval=billing_interval,
                 currency=currency,
                 donation_plan_is_active=donation_plan_is_active,
-                voter_we_vote_id=voter_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id_2,
+                not_loggedin_voter_we_vote_id=not_loggedin_voter_we_vote_id,
                 organization_we_vote_id=organization_we_vote_id,
                 # organization_subscription_plan_id=org_subs_id,
                 client_ip=client_ip,
@@ -390,7 +469,7 @@ class StripeManager(models.Manager):
         results = {
             'success': success,
             'status': status,
-            'org_subs_already_exists': org_subs_already_exists,
+            'subscription_already_exists': subscription_already_exists,
             'MultipleObjectsReturned': exception_multiple_object_returned,
             'recurring_we_plan_id': we_plan_id,
         }
@@ -538,10 +617,10 @@ class StripeManager(models.Manager):
             new_history_entry = StripeSubscription.objects.create(**subscription)
 
             success = True
-            status = 'NEW_DONATION_JOURNAL_ENTRY_SAVED '
+            status = 'NEW_DONATION_PAYMENT_ENTRY_SAVED '
         except Exception as e:
             success = False
-            status += 'UNABLE_TO_SAVE_DONATION_JOURNAL_ENTRY, EXCEPTION: ' + str(e) + ' '
+            status += 'UNABLE_TO_SAVE_DONATION_PAYMENT_ENTRY, EXCEPTION: ' + str(e) + ' '
 
         saved_results = {
             'success': success,
@@ -550,9 +629,31 @@ class StripeManager(models.Manager):
         }
         return saved_results
 
+    @staticmethod
+    def create_payment_entry(payment):
+        status = ''
+        new_payment_entry = 0
+        try:
+            # ** is the "unpacking syntax"
+            new_payment_entry = StripePayments.objects.create(**payment)
+
+            success = True
+            status = 'NEW_PAYMENT_ENTRY_SAVED '
+        except Exception as e:
+            success = False
+            status += 'UNABLE_TO_SAVE_PAYMENT_ENTRY, EXCEPTION: ' + str(e) + ' '
+            logger.error('%s', 'UNABLE_TO_SAVE_PAYMENT_ENTRY, EXCEPTION: ' + str(e))
+
+        saved_results = {
+            'success': success,
+            'status': status,
+            'payment_entry_created': new_payment_entry
+        }
+        return saved_results
+
     def create_recurring_donation(self, stripe_customer_id, voter_we_vote_id, donation_amount, start_date_time, email,
                                   is_organization_plan, coupon_code, plan_type_enum, organization_we_vote_id,
-                                  client_ip):
+                                  client_ip, payment_method_id, is_signed_in):
         """
 
         :param stripe_customer_id:
@@ -565,13 +666,14 @@ class StripeManager(models.Manager):
         :param plan_type_enum:
         :param organization_we_vote_id:
         :param client_ip
+        :param payment_method_id
+        :param: is_signed_in
         :return:
         """
         plan_error = False
         status = ""
-        success = False
+        results = {}
         stripe_subscription_created = False
-        org_subs_already_exists = False
         org_segment = "organization-" if is_organization_plan else ""
         periodicity = "-monthly-"
         if "_YEARLY" in plan_type_enum:
@@ -580,11 +682,11 @@ class StripeManager(models.Manager):
 
         donation_plan_results = self.retrieve_or_create_recurring_donation_plan(
             voter_we_vote_id, we_plan_id, donation_amount, is_organization_plan, coupon_code,
-            plan_type_enum, organization_we_vote_id, 'month', client_ip, stripe_customer_id)
-        org_subs_already_exists = donation_plan_results['org_subs_already_exists']
+            plan_type_enum, organization_we_vote_id, 'month', client_ip, stripe_customer_id, is_signed_in)
+        subscription_already_exists = donation_plan_results['subscription_already_exists']
         success = donation_plan_results['success']
         status += donation_plan_results['status']
-        if not org_subs_already_exists and success:
+        if not subscription_already_exists and success:
             try:
                 # If not logged in, this voter_we_vote_id will not be the same as the logged in id.
                 # Passing the voter_we_vote_id to the subscription gives us a chance to associate logged in with not
@@ -600,11 +702,17 @@ class StripeManager(models.Manager):
                     nickname=nickname
                 )
 
+                stripe.PaymentMethod.attach(
+                    payment_method_id,
+                    customer=stripe_customer_id,
+                )
+
                 subscription = stripe.Subscription.create(
                     customer=stripe_customer_id,
                     items=[
                         {'price': pricec.stripe_id, }
-                    ]
+                    ],
+                    default_payment_method=payment_method_id
                 )
                 success = True
                 stripe_subscription_id = subscription['id']
@@ -616,10 +724,13 @@ class StripeManager(models.Manager):
                     'status': status,
                     'voter_subscription_saved': status,
                     'stripe_subscription_created': stripe_subscription_created,
+                    'code': '',
+                    'decline_code': '',
+                    'error_message': '',
                     'subscription_plan_id': we_plan_id,
                     'subscription_created_at': subscription['created'],
                     'stripe_subscription_id': stripe_subscription_id,
-                    'org_subs_already_exists': False,
+                    'subscription_already_exists': False,
                 }
 
             except AttributeError as err:
@@ -634,12 +745,18 @@ class StripeManager(models.Manager):
                 status += "STRIPE_ERROR_IS_" + err['message'] + "_END"
                 logger.error("%s", "create_recurring_donation StripeError: " + status)
 
+                remove_results = self.remove_subscription(we_plan_id)
+                status += " " + remove_results['status']
+
                 results = {
                     'success': False,
                     'status': status,
                     'voter_subscription_saved': False,
-                    'org_subs_already_exists': False,
+                    'subscription_already_exists': False,
                     'stripe_subscription_created': stripe_subscription_created,
+                    'code': err['code'],
+                    'decline_code': err['decline_code'],
+                    'error_message': err['message'],
                     'subscription_plan_id': "",
                     'subscription_created_at': "",
                     'stripe_subscription_id': ""
@@ -649,8 +766,11 @@ class StripeManager(models.Manager):
                 'success': success,
                 'status': status,
                 'voter_subscription_saved': False,
-                'org_subs_already_exists': org_subs_already_exists,
+                'subscription_already_exists': subscription_already_exists,
                 'stripe_subscription_created': stripe_subscription_created,
+                'code': '',
+                'decline_code': '',
+                'error_message': '',
                 'subscription_plan_id': "",
                 'subscription_created_at': "",
                 'stripe_subscription_id': ""
@@ -811,11 +931,11 @@ class StripeManager(models.Manager):
 
             if len(donation_journal_list):
                 success = True
-                status += ' CACHED_WE_VOTE_DONATION_JOURNAL_HISTORY_LIST_RETRIEVED '
+                status += ' CACHED_WE_VOTE_DONATION_PAYMENT_HISTORY_LIST_RETRIEVED '
             else:
                 donation_journal_list = []
                 success = True
-                status += ' NO_DONATION_JOURNAL_HISTORY_EXISTS_FOR_THIS_VOTER '
+                status += ' NO_DONATION_PAYMENT_HISTORY_EXISTS_FOR_THIS_VOTER '
 
         except StripePayments.DoesNotExist:
             status += " WE_VOTE_HISTORY_DOES_NOT_EXIST "
@@ -846,7 +966,9 @@ class StripeManager(models.Manager):
 
         try:
             subscription_queryset = StripeSubscription.objects.all().order_by('-subscription_created_at')
-            subscription_queryset = subscription_queryset.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            subscription_queryset = subscription_queryset.filter(
+                Q(voter_we_vote_id__iexact=voter_we_vote_id) | Q(not_loggedin_voter_we_vote_id__iexact=voter_we_vote_id)
+            )
             subscription_list = list(subscription_queryset)
 
             if len(subscription_list):
@@ -918,12 +1040,14 @@ class StripeManager(models.Manager):
         :param voter_we_vote_id:
         :return:
         """
-        donation_journal_list = []
         status = ''
+        payment_list = []
 
         try:
             payment_queryset = StripePayments.objects.all().order_by('-created')
-            payment_queryset = payment_queryset.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            payment_queryset = payment_queryset.filter(
+                Q(voter_we_vote_id__iexact=voter_we_vote_id) | Q(not_loggedin_voter_we_vote_id__iexact=voter_we_vote_id)
+            )
             payment_list = list(payment_queryset)
 
             if len(payment_list):
@@ -977,7 +1101,6 @@ class StripeManager(models.Manager):
                 status += 'DONATION_PLAN_DEFINITION_RETRIEVED '
                 success = True
             else:
-                donation_plan_definition_list = []
                 status += 'DONATION_PLAN_DEFINITION_LIST_EMPTY '
                 success = True
 
@@ -1195,7 +1318,7 @@ class StripeManager(models.Manager):
             subscription_row.subscription_canceled_at = datetime.fromtimestamp(subscription_canceled_at, timezone.utc)
             subscription_row.donation_plan_is_active = False
             subscription_row.save()
-            status += "DONATION_JOURNAL_SAVED-MARKED_CANCELED "
+            status += "DONATION_PAYMENT_SAVED-MARKED_CANCELED "
             success = True
         except StripePayments.DoesNotExist:
             status += "mark_donation_journal_canceled_or_ended: " + \
@@ -1244,8 +1367,25 @@ class StripeManager(models.Manager):
         }
 
     @staticmethod
+    def remove_subscription(we_plan_id):
+        success = False
+        status = ''
+        try:
+            StripeSubscription.objects.get(we_plan_id=we_plan_id, stripe_charge_id__isnull=True).delete()
+            success = True
+            status = 'SUBSCRIPTION_DELETED_ON_INITIAL_CHARGE_FAILURE'
+        except Exception as e:
+            handle_exception(e, logger=logger, exception_message="Exception in mark_donation_plan_definition_canceled")
+            status = "DELETE_SUBSCRIPTION-FAILED: " + str(e) + " "
+        return {
+            'status':   status,
+            'success':  success,
+        }
+
+    @staticmethod
     def mark_latest_donation_plan_definition_canceled(voter_we_vote_id):
         # There can only be one active organization paid plan at one time, so mark the first active one as inactive
+        org_we_vote_id = ''
         try:
             voter_manager = VoterManager()
             org_we_vote_id = voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
@@ -1319,7 +1459,7 @@ class StripeManager(models.Manager):
         return results
 
     @staticmethod
-    def move_donation_journal_entries_from_voter_to_voter(from_voter, to_voter):
+    def move_donation_payment_entries_from_voter_to_voter(from_voter, to_voter):
         """
 
         :param from_voter:
@@ -1327,38 +1467,40 @@ class StripeManager(models.Manager):
         :return:
         """
         status = ''
-        donation_journal_list = []
+        donation_payments_list = []
         voter_we_vote_id = from_voter.we_vote_id
         to_voter_we_vote_id = to_voter.we_vote_id
 
         try:
-            donation_journal_query = StripePayments.objects.all()
-            donation_journal_query = donation_journal_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
-            donation_journal_list = list(donation_journal_query)
-            status += "move_donation_journal_entries_from_voter_to_voter LIST_RETRIEVED-" + \
+            donation_payments_query = StripePayments.objects.all()
+            donation_payments_query = donation_payments_query.filter(
+                Q(voter_we_vote_id__iexact=voter_we_vote_id) | Q(not_loggedin_voter_we_vote_id__iexact=voter_we_vote_id)
+            )
+            donation_payments_list = list(donation_payments_query)
+            status += "move_donation_payment_entries_from_voter_to_voter LIST_RETRIEVED-" + \
                       voter_we_vote_id + "-TO-" + to_voter_we_vote_id + \
-                      " LENGTH: " + str(len(donation_journal_list)) + " "
+                      " LENGTH: " + str(len(donation_payments_list)) + " "
             logger.debug(status)
             success = True
         except Exception as e:
-            status += "RETRIEVE_EXCEPTION_IN-move_donation_journal_entries_from_voter_to_voter "
-            logger.error('%s', "move_donation_journal_entries_from_voter_to_voter 2:" + status)
+            status += "RETRIEVE_EXCEPTION_IN-move_donation_payment_entries_from_voter_to_voter "
+            logger.error('%s', "move_donation_payment_entries_from_voter_to_voter 2:" + status)
             success = False
 
-        donation_journal_migration_count = 0
-        donation_journal_migration_fails = 0
-        for donation_journal in donation_journal_list:
+        donation_payment_migration_count = 0
+        donation_payment_migration_fails = 0
+        for donation_payment in donation_payments_list:
             try:
-                donation_journal.voter_we_vote_id = to_voter_we_vote_id
-                donation_journal.save()
-                donation_journal_migration_count += 1
+                donation_payment.voter_we_vote_id = to_voter_we_vote_id
+                donation_payment.save()
+                donation_payment_migration_count += 1
             except Exception as e:
-                donation_journal_migration_fails += 1
+                donation_payment_migration_fails += 1
 
-        if positive_value_exists(donation_journal_migration_count):
-            status += "DONATION_JOURNAL_MOVED: " + str(donation_journal_migration_count) + " "
-        if positive_value_exists(donation_journal_migration_fails):
-            status += "DONATION_JOURNAL_FAILS: " + str(donation_journal_migration_fails) + " "
+        if positive_value_exists(donation_payment_migration_count):
+            status += "DONATION_PAYMENT_MOVED: " + str(donation_payment_migration_count) + " "
+        if positive_value_exists(donation_payment_migration_fails):
+            status += "DONATION_PAYMENT_FAILS: " + str(donation_payment_migration_fails) + " "
 
         results = {
             'status': status,
@@ -1369,7 +1511,7 @@ class StripeManager(models.Manager):
         return results
 
     @staticmethod
-    def move_donation_plan_definition_entries_from_voter_to_voter(from_voter, to_voter):
+    def move_stripe_subscription_entries_from_voter_to_voter(from_voter, to_voter):
         """
 
         :param from_voter:
@@ -1377,39 +1519,44 @@ class StripeManager(models.Manager):
         :return:
         """
         status = ''
-        donation_plan_definition_list = []
+        donation_subscription_list = []
         voter_we_vote_id = from_voter.we_vote_id
         to_voter_we_vote_id = to_voter.we_vote_id
 
         try:
-            donation_plan_definition_query = StripeSubscription.objects.all()
-            donation_plan_definition_query = donation_plan_definition_query.filter(
-                voter_we_vote_id__iexact=voter_we_vote_id)
-            donation_plan_definition_list = list(donation_plan_definition_query)
-            status += "move_donation_plan_definition_entries_from_voter_to_voter LIST_RETRIEVED-" + \
+            donation_subscription_query = StripeSubscription.objects.all()
+            # donation_plan_definition_query = donation_plan_definition_query.filter(
+            #     voter_we_vote_id__iexact=voter_we_vote_id)
+
+            donation_subscription_query = donation_subscription_query.filter(
+                Q(voter_we_vote_id=voter_we_vote_id) | Q(not_loggedin_voter_we_vote_id=voter_we_vote_id)
+            )
+
+            donation_subscription_list = list(donation_subscription_query)
+            status += "move_stripe_subscription_entries_from_voter_to_voter LIST_RETRIEVED-" + \
                       voter_we_vote_id + "-TO-" + to_voter_we_vote_id + \
-                      " LENGTH: " + str(len(donation_plan_definition_list)) + " "
+                      " LENGTH: " + str(len(donation_subscription_list)) + " "
             logger.debug(status)
             success = True
         except Exception as e:
-            status += "RETRIEVE_EXCEPTION_IN-move_donation_plan_definition_entries_from_voter_to_voter "
-            logger.error('%s', "move_donation_plan_definition_entries_from_voter_to_voter 2:" + status)
+            status += "RETRIEVE_EXCEPTION_IN-move_stripe_subscription_entries_from_voter_to_voter "
+            logger.error('%s', "move_stripe_subscription_entries_from_voter_to_voter 2:" + status)
             success = False
 
-        donation_plan_definition_migration_count = 0
-        donation_plan_definition_migration_fails = 0
-        for donation_plan_definition in donation_plan_definition_list:
+        donation_subscription_migration_count = 0
+        donation_subscription_migration_fails = 0
+        for donation_subscription in donation_subscription_list:
             try:
-                donation_plan_definition.voter_we_vote_id = to_voter_we_vote_id
-                donation_plan_definition.save()
-                donation_plan_definition_migration_count += 1
+                donation_subscription.voter_we_vote_id = to_voter_we_vote_id
+                donation_subscription.save()
+                donation_subscription_migration_count += 1
             except Exception as e:
-                donation_plan_definition_migration_fails += 1
+                donation_subscription_migration_fails += 1
 
-        if positive_value_exists(donation_plan_definition_migration_count):
-            status += "DONATION_PLAN_DEFINITION_MOVED: " + str(donation_plan_definition_migration_count) + " "
-        if positive_value_exists(donation_plan_definition_migration_fails):
-            status += "DONATION_PLAN_DEFINITION_FAILS: " + str(donation_plan_definition_migration_fails) + " "
+        if positive_value_exists(donation_subscription_migration_count):
+            status += "DONATION_PLAN_DEFINITION_MOVED: " + str(donation_subscription_migration_count) + " "
+        if positive_value_exists(donation_subscription_migration_fails):
+            status += "DONATION_PLAN_DEFINITION_FAILS: " + str(donation_subscription_migration_fails) + " "
 
         results = {
             'status': status,
@@ -1420,7 +1567,7 @@ class StripeManager(models.Manager):
         return results
 
     @staticmethod
-    def move_donation_journal_entries_from_organization_to_organization(
+    def move_donation_payment_entries_from_organization_to_organization(
             from_organization_we_vote_id, to_organization_we_vote_id):
         """
 
@@ -1429,37 +1576,37 @@ class StripeManager(models.Manager):
         :return:
         """
         status = ''
-        donation_journal_list = []
+        donation_payments_list = []
 
         try:
-            donation_journal_query = StripePayments.objects.all()
-            donation_journal_query = donation_journal_query.filter(
+            donation_payments_query = StripePayments.objects.all()
+            donation_payments_query = donation_payments_query.filter(
                 organization_we_vote_id__iexact=from_organization_we_vote_id)
-            donation_journal_list = list(donation_journal_query)
-            status += "move_donation_journal_entries_from_organization_to_organization LIST_RETRIEVED-" + \
+            donation_payments_list = list(donation_payments_query)
+            status += "move_donation_payment_entries_from_organization_to_organization LIST_RETRIEVED-" + \
                       from_organization_we_vote_id + "-TO-" + to_organization_we_vote_id +  \
-                      " LENGTH: " + str(len(donation_journal_list)) + " "
+                      " LENGTH: " + str(len(donation_payments_list)) + " "
             logger.debug(status)
             success = True
         except Exception as e:
-            status += "RETRIEVE_EXCEPTION_IN-move_donation_journal_entries_from_organization_to_organization "
-            logger.error('%s', "move_donation_journal_entries_from_organization_to_organization 2:" + status)
+            status += "RETRIEVE_EXCEPTION_IN-move_donation_payment_entries_from_organization_to_organization "
+            logger.error('%s', "move_donation_payment_entries_from_organization_to_organization 2:" + status)
             success = False
 
-        donation_journal_migration_count = 0
-        donation_journal_migration_fails = 0
-        for donation_journal in donation_journal_list:
+        donation_payment_migration_count = 0
+        donation_payment_migration_fails = 0
+        for donation_payment in donation_payments_list:
             try:
-                donation_journal.organization_we_vote_id = to_organization_we_vote_id
-                donation_journal.save()
-                donation_journal_migration_count += 1
+                donation_payment.organization_we_vote_id = to_organization_we_vote_id
+                donation_payment.save()
+                donation_payment_migration_count += 1
             except Exception as e:
-                donation_journal_migration_fails += 1
+                donation_payment_migration_fails += 1
 
-        if positive_value_exists(donation_journal_migration_count):
-            status += "DONATION_JOURNAL_MOVED: " + str(donation_journal_migration_count) + " "
-        if positive_value_exists(donation_journal_migration_fails):
-            status += "DONATION_JOURNAL_FAILS: " + str(donation_journal_migration_fails) + " "
+        if positive_value_exists(donation_payment_migration_count):
+            status += "DONATION_PAYMENT_MOVED: " + str(donation_payment_migration_count) + " "
+        if positive_value_exists(donation_payment_migration_fails):
+            status += "DONATION_PAYMENT_FAILS: " + str(donation_payment_migration_fails) + " "
 
         results = {
             'status':                       status,
@@ -1540,12 +1687,12 @@ class StripeManager(models.Manager):
         return row_id
 
     @staticmethod
-    def update_subscription_on_charge_success(we_plan_id, voter_we_vote_id, stripe_request_id, stripe_subscription_id,
+    def update_subscription_on_charge_success(we_plan_id, stripe_request_id, stripe_subscription_id,
                                               stripe_charge_id, subscription_created_at, last_charged, brand, exp_month,
                                               exp_year, last4, api_version):
+
         try:
             row = StripeSubscription.objects.get(we_plan_id=we_plan_id)
-            row.voter_we_vote_id = voter_we_vote_id
             row.stripe_request_id = stripe_request_id
             row.stripe_subscription_id = stripe_subscription_id
             row.stripe_charge_id = stripe_charge_id
@@ -1573,30 +1720,6 @@ class StripeManager(models.Manager):
             logger.error('%s', "add_payment_on_charge_success: " + str(err))
 
         return
-
-    # @staticmethod
-    # def update_subscription_in_db(row_id, amount, currency, id_card, address_zip, brand, country, exp_month, exp_year,
-    #                               last4, funding):
-    #     try:
-    #         row = StripePayments.objects.get(id=row_id)
-    #         row.amount = amount
-    #         row.currency = currency
-    #         row.id_card = id_card
-    #         row.address_zip = address_zip
-    #         row.brand = brand
-    #         row.country = country
-    #         row.exp_month = exp_month
-    #         row.exp_year = exp_year
-    #         row.last4 = last4
-    #         row.funding = funding
-    #         row.save()
-    #         logger.debug("update_subscription_in_db row=" + str(row_id) + ", plan_id=" +
-    #                      str(row.subscription_plan_id) +
-    #                      ", amount=" + str(amount))
-    #     except Exception as err:
-    #         logger.error('%s', "update_subscription_in_db: " + str(err))
-    #
-    #     return
 
     @staticmethod
     def find_we_vote_voter_id_for_stripe_customer(stripe_customer_id):
