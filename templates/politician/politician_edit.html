@@ -4,6 +4,7 @@
 {% block title %}{% if politician %}{{ politician.politician_name  }}{% else %}New Politician{% endif %}{% endblock %}
 
 {%  block content %}
+{% load humanize %}
 {% load template_filters %}
 <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">
     < Back to Politicians</a>
