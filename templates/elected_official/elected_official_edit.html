@@ -5,6 +5,7 @@
 
 {%  block content %}
 {% load template_filters %}
+{% load humanize %}
 <a href="{% url 'elected_official:elected_official_list' %}?state_code={{ state_code }}">
     < Back to Elected Officials</a>
 
