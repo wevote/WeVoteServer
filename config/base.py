@@ -94,7 +94,7 @@ def get_postgres_version():
     formatted = 'fail'
     try:
         version = str(connection.cursor().connection.server_version)
-        version = '0' + version if len(version) == 5 else version
+        version = ' ' + version if len(version) == 5 else version
         formatted = version[0:2] + '.' + version[2:4] + '.' + version[4:6]
     except Exception:
         pass

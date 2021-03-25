@@ -40,12 +40,13 @@ from politician.models import PoliticianManager
 from position.models import PositionEntered, PositionListManager
 import pytz
 import re
+import string
 from twitter.models import TwitterLinkPossibility, TwitterUserManager
 from voter.models import voter_has_authority
 from voter_guide.models import VoterGuide
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, list_intersection, \
-    positive_value_exists, STATE_CODE_MAP
+    positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
 from wevote_settings.models import RemoteRequestHistory, \
     RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
 from django.http import HttpResponse
@@ -1025,6 +1026,14 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
                 google_search_possibility_list = google_search_possibility_query[:1]
         except Exception as e:
             pass
+
+        if positive_value_exists(candidate_on_stage.candidate_name):
+            raw = candidate_on_stage.candidate_name
+            cnt = sum(1 for c in raw if c.isupper())
+            if cnt > 5:
+                humanized = display_full_name_with_correct_capitalization(raw)
+                humanized_cleaned = humanized.replace('(', '').replace(')', '')
+                candidate_on_stage.candidate_name_normalized = string.capwords(humanized_cleaned)
 
         template_values = {
             'messages_on_stage':                messages_on_stage,
