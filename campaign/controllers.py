@@ -289,11 +289,59 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             'visible_to_public':            campaignx_supporter.visible_to_public,
             'voter_we_vote_id':             campaignx_supporter.voter_we_vote_id,
             'voter_signed_in_with_email':   voter_signed_in_with_email,
-            'we_vote_hosted_profile_photo_image_url_tiny':
-            campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
+            'we_vote_hosted_profile_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
         }
     else:
         voter_campaignx_supporter_dict = {}
+
+    # Get most recent supporters
+    latest_campaignx_supporter_list = []
+    supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
+        campaignx_we_vote_id=campaignx.we_vote_id,
+        limit=3,
+        read_only=True)
+    if supporter_list_results['supporter_list_found']:
+        supporter_list = supporter_list_results['supporter_list']
+        for campaignx_supporter in supporter_list:
+            date_supported_string = ''
+            try:
+                date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+            except Exception as e:
+                status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+            one_supporter_dict = {
+                'date_supported': date_supported_string,
+                'organization_we_vote_id': campaignx_supporter.organization_we_vote_id,
+                'supporter_endorsement': campaignx_supporter.supporter_endorsement,
+                'supporter_name': campaignx_supporter.supporter_name,
+                'voter_we_vote_id': campaignx_supporter.voter_we_vote_id,
+                'we_vote_hosted_profile_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
+            }
+            latest_campaignx_supporter_list.append(one_supporter_dict)
+
+    # Get most recent supporter_endorsements
+    latest_campaignx_supporter_endorsement_list = []
+    supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
+        campaignx_we_vote_id=campaignx.we_vote_id,
+        limit=10,
+        require_supporter_endorsement=True,
+        read_only=True)
+    if supporter_list_results['supporter_list_found']:
+        supporter_list = supporter_list_results['supporter_list']
+        for campaignx_supporter in supporter_list:
+            date_supported_string = ''
+            try:
+                date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+            except Exception as e:
+                status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+            one_supporter_dict = {
+                'date_supported': date_supported_string,
+                'organization_we_vote_id': campaignx_supporter.organization_we_vote_id,
+                'supporter_endorsement': campaignx_supporter.supporter_endorsement,
+                'supporter_name': campaignx_supporter.supporter_name,
+                'voter_we_vote_id': campaignx_supporter.voter_we_vote_id,
+                'we_vote_hosted_profile_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
+            }
+            latest_campaignx_supporter_endorsement_list.append(one_supporter_dict)
 
     # Temp
     if campaignx.we_vote_hosted_campaign_photo_medium_url:
@@ -309,6 +357,8 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         'campaignx_owner_list':             campaignx_owner_list,
         'campaignx_politician_list':        campaignx_politician_list,
         'campaignx_we_vote_id':             campaignx.we_vote_id,
+        'latest_campaignx_supporter_endorsement_list':  latest_campaignx_supporter_endorsement_list,
+        'latest_campaignx_supporter_list':  latest_campaignx_supporter_list,
         'seo_friendly_path':                campaignx.seo_friendly_path,
         'seo_friendly_path_list':           seo_friendly_path_list,
         'supporters_count':                 campaignx.supporters_count,
@@ -472,15 +522,16 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
         )
         if create_results['campaignx_created']:
             # Campaign was just created, so save the voter as an owner
+            campaignx_we_vote_id = create_results['campaignx_we_vote_id']
             owner_results = campaignx_manager.update_or_create_campaignx_owner(
-                campaignx_we_vote_id=create_results['campaignx_we_vote_id'],
+                campaignx_we_vote_id=campaignx_we_vote_id,
                 organization_we_vote_id=linked_organization_we_vote_id,
                 voter_we_vote_id=voter_we_vote_id)
             status += owner_results['status']
         if create_results['campaignx_found'] and campaign_photo_changed:
             campaignx = create_results['campaignx']
+            campaignx_we_vote_id = create_results['campaignx_we_vote_id']
             if campaign_photo_from_file_reader:
-                campaignx_we_vote_id = create_results['campaignx_we_vote_id']
                 photo_results = campaignx_save_photo_from_file_reader(
                     campaignx_we_vote_id=campaignx_we_vote_id,
                     campaign_photo_from_file_reader=campaign_photo_from_file_reader)
@@ -507,6 +558,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
     status += create_results['status']
     if create_results['campaignx_found']:
         campaignx = create_results['campaignx']
+        campaignx_we_vote_id = campaignx.we_vote_id
 
         # Get owner_list
         results = campaignx_manager.retrieve_campaignx_as_owner(
@@ -527,7 +579,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             campaignx_we_vote_id=campaignx_we_vote_id,
         )
 
-        # Make sure the person creating the campaign has a campaignx_supporter entry
+        # Make sure the person creating the campaign has a campaignx_supporter entry IFF they are signed in
         if in_draft_mode_changed and not positive_value_exists(in_draft_mode):
             pass
 
