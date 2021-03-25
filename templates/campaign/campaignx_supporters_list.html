@@ -1,20 +1,21 @@
-{# templates/campaign/campaignx_list.html #}
+{# templates/campaign/campaignx_supporters_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Campaigns{% endblock %}
+{% block title %}Campaign Supporters{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
 {% load humanize %}
 
-<h1>Campaigns</h1>
+<a href="{% url 'campaign:campaignx_list' %}">< Back to Campaigns</a><br />
 
+<h1>Campaign Supporters: {{ campaignx_title }}</h1>
 {#<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"#}
 {#      target="_blank">#}
 {#        Import New Campaigns ></a> (open in new window)#}
 {#</p>#}
 
-<form name="state_code_form" method="get" action="{% url 'campaign:campaignx_list' %}">
+<form name="state_code_form" method="get" action="{% url 'campaign:supporters_list' campaignx_we_vote_id %}">
     {% csrf_token %}
     <input type="hidden" name="sort_by" value="{{ sort_by }}">
     <input type="hidden" name="show_all" value="{{ show_all }}">
@@ -37,6 +38,8 @@
 {#    </select>#}
 {#{% endif %}{# End of if state_list #}
 
+    &nbsp;&nbsp;&nbsp;
+
     {#  #}
 {#    <label for="show_organizations_without_email_id">#}
 {#      <input type="checkbox" name="show_organizations_without_email" id="show_organizations_without_email_id" value="1"#}
@@ -44,9 +47,16 @@
 {#    </label>#}
 
     {#  #}
-    <label for="show_campaigns_in_draft_id">
-      <input type="checkbox" name="show_campaigns_in_draft" id="show_campaigns_in_draft_id" value="1"
-             {% if show_campaigns_in_draft %}checked{% endif %} /> In Draft Mode
+    <label for="show_supporters_without_endorsements_id">
+      <input type="checkbox" name="show_supporters_without_endorsements" id="show_supporters_without_endorsements_id" value="1"
+             {% if show_supporters_without_endorsements %}checked{% endif %} /> Show Supporters w/o Endorsement
+    </label>
+
+    {#  #}
+    &nbsp;&nbsp;&nbsp;
+    <label for="show_supporters_not_visible_to_public_id">
+      <input type="checkbox" name="show_supporters_not_visible_to_public" id="show_supporters_not_visible_to_public_id" value="1"
+             {% if show_supporters_not_visible_to_public %}checked{% endif %} /> Not Visible to Public
     </label>
 
     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -89,86 +99,55 @@
     <br />
 
 {% if campaignx_search %}
-    <a href="{% url 'campaign:campaignx_list' %}?state_code={{ state_code }}">
+    <a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?state_code={{ state_code }}">
          clear search</a>&nbsp;
 {% endif %}
     <input type="text" name="campaignx_search" id="campaignx_search_id" value="{{ campaignx_search }}" />
-    <input type="submit" value="Search for Campaign" />
+    <input type="submit" value="Search for Supporter" />
 
 </form>
 
-{% if campaignx_list %}
+{% if supporters_list %}
     <table class="table">
-    {% for campaignx in campaignx_list %}
+    {% for campaignx_supporter in supporters_list %}
     {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
     {# Show the header every ~15 lines #}
      <thead>
         <tr>
             <th></th>
             <th></th>
-            <th>
-              <a href="{% url 'campaign:campaignx_list' %}?sort_by=campaignx&state_code={{ state_code }}&campaignx_type_filter={{ campaignx_type_filter }}&campaignx_search={{ campaignx_search }}">
-              {% if sort_by == "campaignx" %}<strong>Campaign</strong>{% else %}Campaign{% endif %}
-              </a>
-            </th>
-            <th>Owner(s)</th>
-            <th>
-              {% if sort_by == "supporters_count" %}
-                  <a href="{% url 'campaign:campaignx_list' %}?state_code={{ state_code }}&campaignx_type_filter={{ campaignx_type_filter }}&campaignx_search={{ campaignx_search }}&show_campaignxs_without_email={{ show_campaignxs_without_email }}&show_campaignxs_to_be_analyzed={{ show_campaignxs_to_be_analyzed }}" class="u-no-break">
-                  Supporters&nbsp;<span class="glyphicon glyphicon-triangle-bottom"></span>
-                  </a>
-              {% else %}
-              <a href="{% url 'campaign:campaignx_list' %}?sort_by=supporters_count&state_code={{ state_code }}&campaignx_type_filter={{ campaignx_type_filter }}&campaignx_search={{ campaignx_search }}&show_campaignxs_without_email={{ show_campaignxs_without_email }}&show_campaignxs_to_be_analyzed={{ show_campaignxs_to_be_analyzed }}">
-                  Supporters
-                  </a>
-              {% endif %}
-            </th>
-            <th>Description</th>
+            <th>Supporter</th>
+            <th>Endorsement</th>
+            <th>Public?</th>
         </tr>
       </thead>
     {% endif %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{% if campaignx.we_vote_hosted_campaign_photo_large_url %}
-                <a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
-                    <img src="{{ campaignx.we_vote_hosted_campaign_photo_large_url }}" width="128px" /></a>{% endif %}</td>
+            <td>{% if campaignx_supporter.we_vote_hosted_profile_image_url_tiny %}
+                <a href="{% url 'voter:voter_edit_we_vote_id' campaignx_supporter.voter_we_vote_id %}" target="_blank">
+                    <img src="{{ campaignx_supporter.we_vote_hosted_profile_image_url_tiny }}" width="32px" /></a>{% endif %}</td>
             <td>
-                <span class="u-no-break">
-                    {{ campaignx.campaign_title }}&nbsp;
-{#                    <span class="glyphicon glyphicon-new-window"></span>#}
-                </span><br />
-                &nbsp;&nbsp;&nbsp;(<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}"
+                {{ campaignx_supporter.supporter_name }}<br />
+                &nbsp;&nbsp;&nbsp;(<a href="{% url 'voter:voter_edit_we_vote_id' campaignx_supporter.voter_we_vote_id %}"
                                       target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>)
             </td>
-            <td>
-            {% for campaignx_owner in campaignx.campaignx_owner_list %}
-                {% if campaignx_owner.organization_name %}
-                {{ campaignx_owner.organization_name }}
-                {% else %}
-                {{ campaignx_owner.organization_we_vote_id }}
-                {% endif %}
-            {% endfor %}
-            </td>
-            <td>{% if campaignx.supporters_count %}
-                <a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}" target="_blank">
-                    {{ campaignx.supporters_count|intcomma }}
-                </a>
-            {% endif %}</td>
-            <td>{{ campaignx.campaign_description|default_if_none:"" }}</td>
+            <td>{{ campaignx_supporter.supporter_endorsement|default_if_none:"" }}</td>
+            <td>{% if campaignx_supporter.visible_to_public %}visible{% endif %}</td>
         </tr>
     {% endfor %}
     </table>
     {% if not show_all and not show_more %}
-    <a href="{% url 'campaign:campaignx_list' %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}&show_more=1">
+    <a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}&show_more=1">
         show more</a>
     {% endif %}
     {% if show_more %}
-    <a href="{% url 'campaign:campaignx_list' %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}&show_all=1">
+    <a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}&show_all=1">
         show all</a>
     {% endif %}
     {% if show_all or show_more %}
     &nbsp;&nbsp;&nbsp;
-      (<a href="{% url 'campaign:campaignx_list' %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}">
+      (<a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}">
         show fewer</a>)
     {% endif %}
 
@@ -181,9 +160,6 @@
 {% endif %}
 
     <p></p>
-{#    <p>#}
-{#        <a href="{% url 'campaign:campaignxs_import' %}" >Import Campaigns From Master Server</a>#}
-{#    </p>#}
 
     <script>
         $(function() {
@@ -196,10 +172,10 @@
             $('#campaignx_type_filter_id').change(function() {
                 this.form.submit();
             });
-            {#$('#show_campaignxs_without_email_id').change(function() {#}
-            {#    this.form.submit();#}
-            {# });#}
-            $('#show_campaigns_in_draft_id').change(function() {
+            $('#show_supporters_not_visible_to_public_id').change(function() {
+                this.form.submit();
+             });
+            $('#show_supporters_without_endorsements_id').change(function() {
                 this.form.submit();
             });
             $('#state_code_id').change(function() {

@@ -797,6 +797,48 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    def retrieve_campaignx_supporter_list(
+            self,
+            campaignx_we_vote_id=None,
+            require_supporter_endorsement=False,
+            limit=10,
+            read_only=True):
+        supporter_list = []
+        supporter_list_found = False
+        success = True
+        status = ""
+
+        try:
+            if read_only:
+                campaignx_queryset = CampaignXSupporter.objects.using('readonly').all()
+            else:
+                campaignx_queryset = CampaignXSupporter.objects.all()
+
+            campaignx_queryset = campaignx_queryset.filter(campaignx_we_vote_id=campaignx_we_vote_id)
+            campaignx_queryset = campaignx_queryset.filter(visible_to_public=True)
+            if positive_value_exists(require_supporter_endorsement):
+                campaignx_queryset = campaignx_queryset.exclude(
+                    Q(supporter_endorsement__isnull=True) |
+                    Q(supporter_endorsement__exact='')
+                )
+            campaignx_queryset = campaignx_queryset.order_by('-date_supported')
+
+            supporter_list = campaignx_queryset[:limit]
+            supporter_list_found = positive_value_exists(len(supporter_list))
+            status += "RETRIEVE_CAMPAIGNX_SUPPORTER_LIST_SUCCEEDED "
+        except Exception as e:
+            success = False
+            status += "RETRIEVE_CAMPAIGNX_SUPPORTER_LIST_FAILED: " + str(e) + " "
+            supporter_list_found = False
+
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'supporter_list_found':                     supporter_list_found,
+            'supporter_list':                           supporter_list,
+        }
+        return results
+
     def retrieve_seo_friendly_path_list(self, campaignx_we_vote_id=''):
         seo_friendly_path_list_found = False
         seo_friendly_path_list = []
@@ -985,6 +1027,7 @@ class CampaignXManager(models.Manager):
                     started_by_voter_we_vote_id=voter_we_vote_id,
                     supporters_count=1,
                 )
+                campaignx_we_vote_id = campaignx.we_vote_id
                 if 'campaign_photo_changed' in update_values \
                         and positive_value_exists(update_values['campaign_photo_changed']):
                     campaignx.we_vote_hosted_campaign_photo_large_url = \

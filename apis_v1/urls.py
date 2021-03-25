@@ -67,6 +67,7 @@ urlpatterns = [
         views_campaign.campaignx_retrieve_as_owner_view, name='campaignRetrieveAsOwnerView'),
     url(r'^campaignSave/', views_campaign.campaignx_save_view, name='campaignSaveView'),
     # campaignx_save_view also used for campaignStartSave
+    url(r'^campaignStartSave/', views_campaign.campaignx_save_view, name='campaignStartSaveView'),
     url(r'^campaignSupporterRetrieve/',
         views_campaign.campaignx_supporter_retrieve_view, name='campaignSupporterRetrieveView'),
     url(r'^campaignSupporterSave/', views_campaign.campaignx_supporter_save_view, name='campaignSupporterSaveView'),
