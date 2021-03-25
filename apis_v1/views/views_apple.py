@@ -50,8 +50,8 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
         if results:
             user_code = results['subject_registered_claim']
             email = results['email']
-            # for a splunk trail... August 24, 2020  ... ok to remove the following line in 2021
-            logger.error("splunkapple Not an error: Sign in with Apple iOS, decrypted jwt: " + user_code + "  " + email)
+            # for a splunk trail...
+            # logger.error("splunkapple Not an error: Sign in with Apple iOS, decrypted jwt: " + user_code + "  " + email)
 
     voter_manager = VoterManager()
     voter_device_link_manager = VoterDeviceLinkManager()
@@ -82,7 +82,7 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
             'previously_signed_in_voter_found':         previously_signed_in_voter_found,
             'previously_signed_in_voter_we_vote_id':    previously_signed_in_voter_we_vote_id,
         }
-        logger.error('splunkapple ' + status)
+        # logger.error('splunkapple ' + status)
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     results = sign_in_with_apple_for_api(
@@ -106,7 +106,7 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
     )
     status += merge_results['status']
 
-    logger.error('splunkapple ' + status)
+    # logger.error('splunkapple ' + status)
 
     json_data = {
         'status':                                   status,
@@ -314,8 +314,8 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
     if results:
         user_code = results['subject_registered_claim']
         email = results['email']
-        # for a splunk trail... August 24, 2020  ... ok to remove the following line in 2021
-        logger.error("splunkapple Not an error: Sign in with Apple WebApp, decrypted jwt", results)
+        # for a splunk trail...
+        # logger.error("splunkapple Not an error: Sign in with Apple WebApp, decrypted jwt", results)
 
     # voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
     voter_manager = VoterManager()
@@ -361,7 +361,7 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
         voter_starting_process=voter_starting_process,
     )
     status += merge_results['status']
-    logger.error('splunkapple ' + status)
+    # logger.error('splunkapple ' + status)
 
     return HttpResponseRedirect(return_url)
 

@@ -1484,7 +1484,7 @@ class StripeManager(models.Manager):
             success = True
         except Exception as e:
             status += "RETRIEVE_EXCEPTION_IN-move_donation_payment_entries_from_voter_to_voter "
-            logger.error('%s', "move_donation_payment_entries_from_voter_to_voter 2:" + status)
+            logger.error('%s', "move_donation_payment_entries_from_voter_to_voter 2:", e)
             success = False
 
         donation_payment_migration_count = 0

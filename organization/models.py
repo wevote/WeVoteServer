@@ -2492,7 +2492,7 @@ class OrganizationListManager(models.Manager):
             twitter_user_manager = TwitterUserManager()
             results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
                 twitter_handle_filtered)
-            if results['twitter_link_to_organization_found']:
+            if 'twitter_link_to_organization_found' in results and results['twitter_link_to_organization_found']:
                 twitter_link_to_organization = results['twitter_link_to_organization']
                 organization_manager = OrganizationManager()
                 organization_results = organization_manager.retrieve_organization_from_we_vote_id(

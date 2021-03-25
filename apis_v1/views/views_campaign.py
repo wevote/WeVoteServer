@@ -7,6 +7,7 @@ from config.base import get_environment_variable
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django_user_agents.utils import get_user_agent
+from exception.models import handle_exception
 from follow.controllers import voter_campaignx_follow_for_api
 import json
 import wevote_functions.admin
@@ -22,7 +23,15 @@ def campaignx_list_retrieve_view(request):  # campaignListRetrieve (No CDN)
     json_data = campaignx_list_retrieve_for_api(
         voter_device_id=voter_device_id,
     )
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    json_string = ''
+    try:
+        # March 24, 2021: Throwing "TypeError: Object of type 'HttpResponse' is not JSON serializable"
+        json_string = json.dumps(json_data)
+    except Exception as e:
+        status = "Caught error for voter_device_id " + voter_device_id
+        handle_exception(e, logger=logger, exception_message=status)
+
+    return HttpResponse(json_string, content_type='application/json')
 
 
 def campaignx_supporter_retrieve_view(request):  # campaignSupporterRetrieve

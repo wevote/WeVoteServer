@@ -19,6 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.http import HttpResponse
 import json
+import string
 from django.shortcuts import render
 from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
@@ -32,7 +33,7 @@ from wevote_functions.functions import convert_to_int, convert_to_political_part
     extract_first_name_from_full_name, \
     extract_middle_name_from_full_name, \
     extract_last_name_from_full_name, extract_twitter_handle_from_text_string, \
-    positive_value_exists, STATE_CODE_MAP
+    positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
 
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -383,6 +384,15 @@ def politician_edit_view(request, politician_id):
             if positive_value_exists(politician_on_stage.vote_smart_id):
                 new_filter = Q(vote_smart_id=politician_on_stage.vote_smart_id)
                 filters.append(new_filter)
+
+            politician_on_stage.politician_name_normalized = ''
+            if positive_value_exists(politician_on_stage.politician_name):
+                raw = politician_on_stage.politician_name
+                cnt = sum(1 for c in raw if c.isupper())
+                if cnt > 5:
+                    humanized = display_full_name_with_correct_capitalization(raw)
+                    humanized_cleaned = humanized.replace('(', '').replace(')', '')
+                    politician_on_stage.politician_name_normalized = string.capwords(humanized_cleaned)
 
             # Add the first query
             if len(filters):
