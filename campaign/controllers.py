@@ -116,6 +116,7 @@ def campaignx_list_retrieve_for_api(voter_device_id):  # campaignListRetrieve
                     'campaignx_we_vote_id':         campaignx_supporter.campaignx_we_vote_id,
                     'date_last_changed':            date_last_changed_string,
                     'date_supported':               date_supported_string,
+                    'id':                           campaignx_supporter.id,
                     'organization_we_vote_id':      campaignx_supporter.organization_we_vote_id,
                     'supporter_endorsement':        campaignx_supporter.supporter_endorsement,
                     'supporter_name':               campaignx_supporter.supporter_name,
@@ -283,6 +284,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             'campaignx_we_vote_id':         campaignx_supporter.campaignx_we_vote_id,
             'date_last_changed':            date_last_changed_string,
             'date_supported':               date_supported_string,
+            'id':                           campaignx_supporter.id,
             'organization_we_vote_id':      campaignx_supporter.organization_we_vote_id,
             'supporter_endorsement':        campaignx_supporter.supporter_endorsement,
             'supporter_name':               campaignx_supporter.supporter_name,
@@ -298,7 +300,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
     latest_campaignx_supporter_list = []
     supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
         campaignx_we_vote_id=campaignx.we_vote_id,
-        limit=3,
+        limit=7,
         read_only=True)
     if supporter_list_results['supporter_list_found']:
         supporter_list = supporter_list_results['supporter_list']
@@ -309,6 +311,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             except Exception as e:
                 status += "DATE_CONVERSION_ERROR: " + str(e) + " "
             one_supporter_dict = {
+                'id': campaignx_supporter.id,
                 'date_supported': date_supported_string,
                 'organization_we_vote_id': campaignx_supporter.organization_we_vote_id,
                 'supporter_endorsement': campaignx_supporter.supporter_endorsement,
@@ -334,6 +337,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             except Exception as e:
                 status += "DATE_CONVERSION_ERROR: " + str(e) + " "
             one_supporter_dict = {
+                'id': campaignx_supporter.id,
                 'date_supported': date_supported_string,
                 'organization_we_vote_id': campaignx_supporter.organization_we_vote_id,
                 'supporter_endorsement': campaignx_supporter.supporter_endorsement,
@@ -579,9 +583,30 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             campaignx_we_vote_id=campaignx_we_vote_id,
         )
 
-        # Make sure the person creating the campaign has a campaignx_supporter entry IFF they are signed in
         if in_draft_mode_changed and not positive_value_exists(in_draft_mode):
-            pass
+            if voter.signed_in_with_email():
+                # Make sure the person creating the campaign has a campaignx_supporter entry IFF they are signed in
+                update_values = {
+                    'campaign_supported': True,
+                    'campaign_supported_changed': True,
+                    'supporter_endorsement': '',
+                    'supporter_endorsement_changed': False,
+                    'visible_to_public': True,
+                    'visible_to_public_changed': True,
+                }
+                create_results = campaignx_manager.update_or_create_campaignx_supporter(
+                    campaignx_we_vote_id=campaignx_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
+                    organization_we_vote_id=linked_organization_we_vote_id,
+                    update_values=update_values,
+                )
+                status += create_results['status']
+                # Make sure an owner entry exists
+                owner_results = campaignx_manager.update_or_create_campaignx_owner(
+                    campaignx_we_vote_id=campaignx_we_vote_id,
+                    organization_we_vote_id=linked_organization_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id)
+                status += owner_results['status']
 
         # Temp
         if campaignx.we_vote_hosted_campaign_photo_medium_url:
