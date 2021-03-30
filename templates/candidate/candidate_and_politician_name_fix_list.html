@@ -33,9 +33,9 @@
         {% for person in people_list %}
           <tr class="person_row">
             <td>{{ forloop.counter|add:index_offset }}</td>
-            <td>{{ person.person_name }}</td>
+            <td class="from_db">{{ person.person_name }}</td>
             <td><input type="text"
-                       name="person_name_normalized"
+                       class="person_name_normalized"
                        value="{{ person.person_name_normalized }}"
                        style="width: 250px; {% if person.highlight %} box-shadow: 6px 6px #ffff00; {% endif %}"
                 /></td>
@@ -43,9 +43,9 @@
             <td>{{ person.contest_office_name }}</td>
             <td>{{ person.party }}</td>
             <td>{{ person.state_code }}</td>
-            <td name="we_vote_id">{{ person.we_vote_id }}</td>
+            <td class="we_vote_id">{{ person.we_vote_id }}</td>
             <td>{{ person.date_last_updated }}</td>
-            <td><input type="hidden" name="person_name_normalized_before" value="{{person.person_name_normalized }}"/></td>
+            <td><input type="hidden" class="person_name_normalized_before" value="{{ person.person_name_normalized }}"/></td>
         </tr>
       {% endfor %}
     </table>
@@ -95,9 +95,9 @@
         let changes = []
         $("tr.person_row").each(function() {
           $this = $(this);
-          let name_after = $this.find("input[name='person_name_normalized']").val();
-          let name_before = $this.find("input[name='person_name_normalized_before']").val();
-          let we_vote_id = $(this).children('td[name="we_vote_id"]').text();
+          let name_before = $this.find('.from_db').text();
+          let name_after = $this.find('.person_name_normalized').val();
+          let we_vote_id = $(this).children('.we_vote_id').text();
           if (name_after !== name_before) {
             one_change = {name_before, name_after, we_vote_id};
             changes.push(one_change);
@@ -113,7 +113,7 @@
 
         $.ajax({
           type: "PUT",
-          url: window.location.origin + "/apis/v1/candidateChangeNames",
+          url: window.location.origin + "/apis/v1/candidateOrPoliticianRepairNames",
           contentType: 'application/json',
           data: JSON.stringify(data), // access in body
           beforeSend: function(xhr, settings) {
@@ -123,7 +123,7 @@
             const success = response.success;
             const count = response.count;
             switch (count) {
-              case 0: count_string = "<br>No suggestions were edited, loading the next 15"; break;
+              case 0: count_string = "<br>All suggestions were accepted, loading the next 15"; break;
               case 1: count_string = "<br>Success: One name was saved"; break;
               default: count_string = "<br>Success: " + count + " names were saved"; break;
             }
@@ -135,7 +135,7 @@
                 modal: true,
                 open: function(event, ui) {
                   $(".ui-dialog-titlebar-close").hide();
-                  goToNextPage(4000);
+                  goToNextPage(3000);
                 },
               });
            },
