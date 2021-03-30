@@ -923,11 +923,16 @@ def display_full_name_with_correct_capitalization(full_name):
     if full_name is not None and not callable(full_name):
         full_name = str(full_name)
         full_name.strip()
-        # Special case for nicknames from Google civic e.g. "MARY ""MELL"" FLYNN"
-        pattern = r'"([A-Z]+)\s?""([A-Z]+)""\s?([A-Z]+)"'
-        nick = re.search(pattern, full_name)
+        # Special case for nicknames from Google civic ... "MARY ""MELL"" FLYNN"
+        pattern_nick = r'"([A-Z]+)\s?""([A-Z]+)""\s?([A-Z]+)"'
+        nick = re.search(pattern_nick, full_name)
         if nick and len(nick.groups()) is 3:
             return nick.group(1).title() + ' (' + nick.group(2).title() + ') ' + nick.group(3).title()
+        # Special case for nicknames from Google civic ... BEATRICE `BEA` E. GUNN PHILLIPS
+        pattern_nick2 = r'(.*?)`([A-Z]+)`(.*?)$'
+        nick2 = re.search(pattern_nick2, full_name)
+        if nick2 and len(nick2.groups()) is 3:
+            return nick2.group(1).title() + ' (' + nick2.group(2).title() + ') ' + nick2.group(3).title()
 
         pattern = r'^([A-Z]\.[A-Z]\.).*?'
         cap = re.search(pattern, full_name)
