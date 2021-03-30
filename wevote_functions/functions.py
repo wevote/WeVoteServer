@@ -3,21 +3,19 @@
 # -*- coding: UTF-8 -*-
 
 import datetime
-from nameparser import HumanName
+import json
 import random
 import re
 import string
-import sys
-import types
-import wevote_functions.admin
-import json
+from math import log10
+import django.utils.html
 import requests
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
-import django.utils.html
-from math import *
+from nameparser import HumanName
 
+import wevote_functions.admin
 
 # We don't want to include the actual constants from organization/models.py, since that can cause include conflicts
 CORPORATION = 'C'
@@ -929,8 +927,7 @@ def display_full_name_with_correct_capitalization(full_name):
         pattern = r'"([A-Z]+)\s?""([A-Z]+)""\s?([A-Z]+)"'
         nick = re.search(pattern, full_name)
         if nick and len(nick.groups()) is 3:
-            full_name_parsed = nick.group(1).title() + ' (' + nick.group(2).title() + ') ' + nick.group(3).title()
-            return full_name_parsed
+            return nick.group(1).title() + ' (' + nick.group(2).title() + ') ' + nick.group(3).title()
 
         pattern = r'^([A-Z]\.[A-Z]\.).*?'
         cap = re.search(pattern, full_name)
