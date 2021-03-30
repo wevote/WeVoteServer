@@ -923,17 +923,25 @@ def display_full_name_with_correct_capitalization(full_name):
     if full_name is not None and not callable(full_name):
         full_name = str(full_name)
         full_name.strip()
-        # Special case for nicknames from Google civic ... "MARY ""MELL"" FLYNN"
-        pattern_nick = r'"([A-Z]+)\s?""([A-Z]+)""\s?([A-Z]+)"'
-        nick = re.search(pattern_nick, full_name)
-        if nick and len(nick.groups()) is 3:
-            return nick.group(1).title() + ' (' + nick.group(2).title() + ') ' + nick.group(3).title()
-        # Special case for nicknames from Google civic ... BEATRICE `BEA` E. GUNN PHILLIPS
-        pattern_nick2 = r'(.*?)`([A-Z]+)`(.*?)$'
-        nick2 = re.search(pattern_nick2, full_name)
-        if nick2 and len(nick2.groups()) is 3:
-            return nick2.group(1).title() + ' (' + nick2.group(2).title() + ') ' + nick2.group(3).title()
-
+        try:
+            # Special case for nicknames from Google civic ... "MARY ""MELL"" FLYNN"
+            pattern_nick = r'"([A-Z]+)\s?""([A-Z]+)""\s?([A-Z]+)"'
+            nick = re.search(pattern_nick, full_name)
+            if nick and len(nick.groups()) is 3:
+                return nick.group(1).title() + ' (' + nick.group(2).title() + ') ' + nick.group(3).title()
+            # Special case for nicknames from Google civic ...
+            # BEATRICE `BEA` E. GUNN PHILLIPS  ...  CARLOS 'CHUCK' TAYLOR   ...  CAROL 'C.J.' KEAVNEY
+            pattern_nick2 = r'(.*?)(?:\`|\')([A-Z.]+)(?:\`|\')(.*?)$'
+            nick2 = re.search(pattern_nick2, full_name)
+            if nick2 and len(nick2.groups()) is 3:
+                return nick2.group(1).title() + ' (' + nick2.group(2).title() + ') ' + nick2.group(3).title()
+            # Special case for nicknames from Google civic ...  LORRAINE (LORI) GEITTMANN
+            pattern_nick3 = r'(.*?)(?:\()([A-Z]+)(?:\) )(.*?)$'
+            nick3 = re.search(pattern_nick3, full_name)
+            if nick3 and len(nick3.groups()) is 3:
+                return nick3.group(1).title() + ' (' + nick3.group(2).title() + ') ' + nick3.group(3).title()
+        except Exception as e:
+            logger.error('Parsing/regex error in display_full_name_with_correct_capitalization: ', e)
         pattern = r'^([A-Z]\.[A-Z]\.).*?'
         cap = re.search(pattern, full_name)
         full_name_parsed = HumanName(full_name)
