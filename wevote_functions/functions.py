@@ -166,7 +166,7 @@ STATE_GEOGRAPHIC_CENTER = {
     'CO': [38.9972, -105.5478, 7],
     'CT': [41.5138025, -72.4898248, 9],
     'DE': [39.177612, -75.4691267, 9],
-    'DC': [39.780, -77.022206,11],
+    'DC': [39.780, -77.022206, 11],
     'FL': [28.6305, -82.4497, 7],
     'GA': [32.6415, -83.4426, 7],
     'HI': [20.2927, -156.3737, 8],
@@ -925,10 +925,25 @@ def display_full_name_with_correct_capitalization(full_name):
     if full_name is not None and not callable(full_name):
         full_name = str(full_name)
         full_name.strip()
+        # Special case for nicknames from Google civic e.g. "MARY ""MELL"" FLYNN"
+        pattern = r'"([A-Z]+)\s?""([A-Z]+)""\s?([A-Z]+)"'
+        nick = re.search(pattern, full_name)
+        if nick and len(nick.groups()) is 3:
+            full_name_parsed = nick.group(1).title() + ' (' + nick.group(2).title() + ') ' + nick.group(3).title()
+            return full_name_parsed
+
+        pattern = r'^([A-Z]\.[A-Z]\.).*?'
+        cap = re.search(pattern, full_name)
         full_name_parsed = HumanName(full_name)
         full_name_parsed.capitalize()
-        full_name_capitalized = str(full_name_parsed)
-        return full_name_capitalized
+        full_name_str = str(full_name_parsed)
+        if cap is not None:             # Handle "A.J. BRADY" so it is not "A.j. Brady"
+            full_name_str = full_name_str.replace(full_name_str[0:4], cap.group(), 1)
+
+        if " del " in full_name_str:  # Handle "EVE FRANCES DEL CASTELLO" so it is not " => "Eve Frances del Castello"
+            full_name_str = full_name_str.replace(' del ', ' Del ')
+
+        return full_name_str
     return ""
 
 
@@ -939,9 +954,9 @@ def extract_email_addresses_from_string(incoming_string):
     :return:
     """
     string_lower_case = incoming_string.lower()
-    regex = re.compile(("([a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`"
-                        "{|}~-]+)*(@|\sat\s)(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(\.|"
-                        "\sdot\s))+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)"))
+    regex = re.compile((r"([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`"
+                        r"{|}~-]+)*(@|\sat\s)(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(\.|"
+                        r"\sdot\s))+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)"))
 
     collection_of_emails = (email[0] for email in re.findall(regex, string_lower_case) if not email[0].startswith('//'))
 
@@ -1106,7 +1121,7 @@ def extract_facebook_username_from_text_string(facebook_text_string):
 
 def extract_and_replace_facebook_page_id(facebook_full_graph_url):
     # Find the page name from the facebook_full_graph_url
-    list_of_integers = [int(x) for x in re.findall('\d+', facebook_full_graph_url)]
+    list_of_integers = [int(x) for x in re.findall(r'\d+', facebook_full_graph_url)]
     # Pop off the last integer
 
     if len(list_of_integers) > 0:
@@ -1360,7 +1375,7 @@ def set_voter_device_id(request, response, voter_device_id):
 def set_voter_api_device_id(request, response, voter_api_device_id):
     overwrite_cookie = False
     if 'voter_api_device_id' in request.COOKIES:
-        overwrite_cookie = request.COOKIES['voter_api_device_id']  != voter_api_device_id
+        overwrite_cookie = request.COOKIES['voter_api_device_id'] != voter_api_device_id
     if 'voter_api_device_id' not in request.COOKIES or overwrite_cookie:
         set_cookie(response, 'voter_api_device_id', voter_api_device_id)
 
@@ -1372,8 +1387,7 @@ def delete_voter_api_device_id_cookie(response):
 def generate_random_string(
         string_length=88,
         chars=string.ascii_lowercase + string.ascii_uppercase + string.digits,
-        remove_confusing_digits=False,
-    ):
+        remove_confusing_digits=False):
     """
     Generate a random string.
     :param string_length:
@@ -1436,29 +1450,14 @@ def positive_value_exists(value):
             return False
         if value in ['TRUE', 'True', 'true', '1']:
             return True
-        if sys.version_info > (3, 0):
-            # Python 3 code in this block
-            if isinstance(value, list):
-                return bool(len(value))
-            if isinstance(value, dict):
-                return bool(len(value))
-            if isinstance(value, datetime.date):
-                return bool(value is not None)
-            if isinstance(value, str):
-                return bool(len(value))
-        else:
-            # Python 2 code in this block
-            if isinstance(value, types.ListType):
-                return bool(len(value))
-            if isinstance(value, types.DictType):
-                return bool(len(value))
-            try:
-                basestring
-            except NameError:
-                basestring = str
-            if isinstance(value, basestring):
-                return bool(len(value))
-            # TODO We aren't checking for datetime format and need to
+        if isinstance(value, list):
+            return bool(len(value))
+        if isinstance(value, dict):
+            return bool(len(value))
+        if isinstance(value, datetime.date):
+            return bool(value is not None)
+        if isinstance(value, str):
+            return bool(len(value))
 
         value = float(value)
         if value <= 0:
@@ -1672,7 +1671,8 @@ def remove_period_from_name_prefix_and_suffix(name):
 
 def strip_html_tags(value):
     """
-    Creating a separate strip tag function instead of using  django.utils.html.strip_tags directly where required to allow for validations/value escaping later
+    Creating a separate strip tag function instead of using  django.utils.html.strip_tags directly where required to
+    allow for validations/value escaping later
     :param value: Text that needs to be stripped
     :return: stripped value.
     """

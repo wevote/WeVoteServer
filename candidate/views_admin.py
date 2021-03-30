@@ -2,6 +2,44 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import json
+import re
+import string
+from datetime import datetime
+import pytz
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.messages import get_messages
+from django.db.models import Q
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import reverse
+import wevote_functions.admin
+from admin_tools.views import redirect_to_sign_in_page
+from ballot.models import BallotReturnedListManager
+from bookmark.models import BookmarkItemList
+from config.base import get_environment_variable
+from election.controllers import retrieve_upcoming_election_id_list
+from election.models import ElectionManager
+from exception.models import handle_record_found_more_than_one_exception, \
+    handle_record_not_found_exception, print_to_log
+from google_custom_search.models import GoogleSearchUser, GoogleSearchUserManager
+from import_export_batches.models import BatchManager
+from import_export_twitter.controllers import refresh_twitter_candidate_details
+from import_export_vote_smart.models import VoteSmartRatingOneCandidate
+from import_export_vote_smart.votesmart_local import VotesmartApiError
+from measure.models import ContestMeasure
+from office.models import ContestOffice, ContestOfficeManager
+from politician.models import PoliticianManager
+from position.models import PositionEntered, PositionListManager
+from twitter.models import TwitterLinkPossibility, TwitterUserManager
+from voter.models import voter_has_authority
+from voter_guide.models import VoterGuide
+from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, list_intersection, \
+    positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
+from wevote_settings.models import RemoteRequestHistory, \
+    RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
 from .controllers import candidates_import_from_master_server, candidates_import_from_sample_file, \
     candidate_politician_match, fetch_duplicate_candidate_count, figure_out_candidate_conflict_values, \
     find_duplicate_candidate, \
@@ -12,45 +50,6 @@ from .controllers import candidates_import_from_master_server, candidates_import
     save_google_search_link_to_candidate_table
 from .models import CandidateCampaign, CandidateListManager, CandidateManager, CandidateToOfficeLink, \
     CANDIDATE_UNIQUE_IDENTIFIERS
-from admin_tools.views import redirect_to_sign_in_page
-from ballot.models import BallotReturnedListManager
-from bookmark.models import BookmarkItemList
-from config.base import get_environment_variable
-from datetime import datetime, timedelta
-from office.models import ContestOffice, ContestOfficeManager
-from django.db.models import Q
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.contrib.messages import get_messages
-from django.shortcuts import render
-from election.controllers import retrieve_upcoming_election_id_list
-from election.models import ElectionManager
-from exception.models import handle_record_found_more_than_one_exception, \
-    handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
-from google_custom_search.models import GoogleSearchUser, GoogleSearchUserManager
-# from image.controllers import retrieve_and_save_ballotpedia_candidate_images
-from import_export_batches.models import BatchManager
-from import_export_twitter.controllers import refresh_twitter_candidate_details
-from import_export_vote_smart.models import VoteSmartRatingOneCandidate
-from import_export_vote_smart.votesmart_local import VotesmartApiError
-from measure.models import ContestMeasure
-from politician.models import PoliticianManager
-from position.models import PositionEntered, PositionListManager
-import pytz
-import re
-import string
-from twitter.models import TwitterLinkPossibility, TwitterUserManager
-from voter.models import voter_has_authority
-from voter_guide.models import VoterGuide
-import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, list_intersection, \
-    positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
-from wevote_settings.models import RemoteRequestHistory, \
-    RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
-from django.http import HttpResponse
-import json
 
 CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")  # candidatesSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -523,7 +522,7 @@ def candidate_list_view(request):
                     Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
 
                 twitter_query = TwitterLinkPossibility.objects.filter(not_a_match=False)
-                twitter_possibility_list = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True)\
+                twitter_possibility_list = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True) \
                     .distinct()
                 if len(twitter_possibility_list):
                     candidate_query = candidate_query.filter(we_vote_id__in=twitter_possibility_list)
@@ -566,11 +565,11 @@ def candidate_list_view(request):
                     candidate_facebook_missing_query.filter(we_vote_id__in=candidate_we_vote_id_list)
 
             # include profile images that are null or ''
-            candidate_facebook_missing_query = candidate_facebook_missing_query.\
+            candidate_facebook_missing_query = candidate_facebook_missing_query. \
                 filter(Q(facebook_profile_image_url_https__isnull=True) | Q(facebook_profile_image_url_https__exact=''))
 
             # exclude facebook_urls that are null or ''
-            candidate_facebook_missing_query = candidate_facebook_missing_query.exclude(facebook_url__isnull=True).\
+            candidate_facebook_missing_query = candidate_facebook_missing_query.exclude(facebook_url__isnull=True). \
                 exclude(facebook_url__iexact='').exclude(facebook_url_is_broken='True')
 
             facebook_urls_without_picture_urls = candidate_facebook_missing_query.count()
@@ -745,7 +744,7 @@ def candidate_list_view(request):
         for candidate in candidate_list:
             try:
                 google_search_possibility_query = GoogleSearchUser.objects.filter(
-                    candidate_campaign_we_vote_id=candidate.we_vote_id).\
+                    candidate_campaign_we_vote_id=candidate.we_vote_id). \
                     exclude(item_image__isnull=True).exclude(item_image__exact='')
                 google_search_possibility_query = google_search_possibility_query.order_by(
                     '-chosen_and_updated', 'not_a_match', '-likelihood_score')
@@ -1084,6 +1083,91 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
 
 
 @login_required
+def repair_imported_names_view(request):
+    """
+    Process repair imported names form
+    http://localhost:8000/c/repair_imported_names/?is_candidate=true&start=0&count=25
+    :param request:
+    :return:
+    """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    is_candidate = positive_value_exists(request.GET.get('is_candidate', True))
+    start = int(request.GET.get('start', 0))
+    count = int(request.GET.get('count', 15))
+    if is_candidate:
+        candidate_list_manager = CandidateListManager()
+        list_of_people_from_db, number_of_rows = candidate_list_manager.retrieve_candidates_with_misformatted_names(
+            start, count)
+    else:
+        politician_manager = PoliticianManager()
+        list_of_people_from_db, number_of_rows = politician_manager.retrieve_politicians_with_misformatted_names(
+            start, count)
+
+    people_list = []
+    for person in list_of_people_from_db:
+        name = person.candidate_name if is_candidate else person.politician_name
+        highlight = False
+        highlight = True if name.count('.') > 2 else highlight
+        cap = re.search(r'\s([a-zA-Z]){2}\s|^([a-zA-Z]){2}\s|\s([a-zA-Z]){2}$(?<!JR|SR|MR)', name)
+        highlight = True if cap is not None else highlight
+        highlight = True if name[0] in string.punctuation else highlight
+        highlight = True if name[-1] in string.punctuation else highlight
+        short_office_name = ''
+        if is_candidate:
+            short_office_name = person.contest_office_name[0:30] if person.contest_office_name != "N" else ''
+        party = person.party.replace('Party Preference:', '') if person.party else ''
+
+        person_item = {
+            'person_name':                  name,
+            'person_name_normalized':       person.person_name_normalized,
+            'google_civic_candidate_name':  person.google_civic_candidate_name,
+            'date_last_updated':            person.date_last_updated,
+            'state_code':                   person.state_code,
+            'we_vote_id':                   person.we_vote_id,
+            'contest_office_name':          short_office_name,
+            'party': party,
+            'highlight': highlight,
+        }
+        people_list.append(person_item)
+
+    template_values = {
+        'number_of_rows':                   number_of_rows,
+        'person_is_candidate':              is_candidate,
+        'person_text':                      'Candidate' if is_candidate else 'Politician',
+        'person_text_plural':               'Candidates' if is_candidate else 'Politicians',
+        'people_list':                      people_list,
+        'index_offset':                     start,
+        'return_link':                      '/c/' if is_candidate else '/politician/',
+    }
+    return render(request, 'candidate/candidate_and_politician_name_fix_list.html', template_values)
+
+
+def candidate_change_names(changes):
+    count = 0
+    for change in changes:
+        try:
+            candidate_query = CandidateCampaign.objects.filter(we_vote_id=change['we_vote_id'])
+            candidate_query = candidate_query
+            candidate_list = list(candidate_query)
+            candidate = candidate_list[0]
+            setattr(candidate, 'candidate_name', change['name_after'])
+            timezone = pytz.timezone("America/Los_Angeles")
+            datetime_now = timezone.localize(datetime.now())
+            setattr(candidate, 'date_last_changed', datetime_now)
+            candidate.save()
+            count += 1
+        except Exception as err:
+            logger.error('candidate_change_names caught: ', err)
+            count = -1
+
+    return count
+
+
+@login_required
 def candidate_edit_process_view(request):
     """
     Process the new or edit candidate forms
@@ -1147,8 +1231,8 @@ def candidate_edit_process_view(request):
     # Note: A date is not required, but if provided it needs to be in a correct date format
     if positive_value_exists(withdrawn_from_election) and positive_value_exists(withdrawal_date):
         # If withdrawn_from_election is true AND we have an invalid withdrawal_date return with error
-        res = re.match('([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))', withdrawal_date)
-        if res == None:
+        res = re.match(r'([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))', withdrawal_date)
+        if res is None:
             print('withdrawal_date is invalid: ' + withdrawal_date)
             url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
                             "&candidate_name=" + str(candidate_name) + \
@@ -1205,7 +1289,8 @@ def candidate_edit_process_view(request):
 
     candidate_to_office_link_add_election = request.POST.get('candidate_to_office_link_add_election', False)
     candidate_to_office_link_add_state_code = request.POST.get('candidate_to_office_link_add_state_code', False)
-    candidate_to_office_link_add_office_we_vote_id = request.POST.get('candidate_to_office_link_add_office_we_vote_id', False)
+    candidate_to_office_link_add_office_we_vote_id = request.POST.get('candidate_to_office_link_add_office_we_vote_id',
+                                                                      False)
     if positive_value_exists(candidate_to_office_link_add_election) and \
             positive_value_exists(candidate_to_office_link_add_state_code) and \
             positive_value_exists(candidate_to_office_link_add_office_we_vote_id):
@@ -2082,7 +2167,7 @@ def render_candidate_merge_form(
         'candidate_option2': candidate_option2_for_template,
         'candidate_option1_candidate_to_office_link_list':  candidate_option1_candidate_to_office_link_list,
         'candidate_option2_candidate_to_office_link_list':  candidate_option2_candidate_to_office_link_list,
-        'conflict_values': candidate_merge_conflict_values,
+        'conflict_values':          candidate_merge_conflict_values,
         'contest_office_mismatch':  contest_office_mismatch,
         'google_civic_election_id': candidate_option1_for_template.google_civic_election_id,
         'remove_duplicate_process': remove_duplicate_process,
@@ -2257,7 +2342,7 @@ def retrieve_candidate_photos_for_election_view(request, election_id):
               "{num_with_vote_smart_ids} with Vote Smart Ids, " \
               "{num_candidates_just_retrieved} candidates just retrieved, " \
               "{num_with_vote_smart_photos} with Vote Smart Photos, and " \
-              "{num_candidate_photos_just_retrieved} photos just retrieved.".\
+              "{num_candidate_photos_just_retrieved} photos just retrieved.". \
         format(election_id=google_civic_election_id,
                num_candidates_reviewed=num_candidates_reviewed,
                num_with_vote_smart_ids=num_with_vote_smart_ids,

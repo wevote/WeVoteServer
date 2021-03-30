@@ -9,7 +9,9 @@
 
 <h1>Politicians</h1>
 
-<a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a><br />
+<a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a>,&nbsp;&nbsp;&nbsp;
+<a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >Repair Imported Candidate Names</a>
+<br /><br />
 
 <form name="state_code_form" method="get" action="{% url 'politician:politician_list' %}">
     {% csrf_token %}

@@ -2,38 +2,40 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import politicians_import_from_master_server
-from .models import Politician, PoliticianManager
+import json
+import string
+from datetime import datetime
+import pytz
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.messages import get_messages
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import reverse
+import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.controllers import retrieve_candidate_photos
 from candidate.models import CandidateCampaign
 from candidate.models import CandidateManager
 from config.base import get_environment_variable
-from office.models import ContestOffice
-from django.db.models import Q
-from django.http import HttpResponseRedirect
-from django.core.exceptions import ObjectDoesNotExist
-from django.urls import reverse
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.contrib.messages import get_messages
-from django.http import HttpResponse
-import json
-import string
-from django.shortcuts import render
-from election.models import Election, ElectionManager
-from exception.models import handle_record_found_more_than_one_exception,\
+from election.models import Election
+from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
+from office.models import ContestOffice
 from position.models import PositionEntered, PositionListManager
 from voter.models import voter_has_authority
-import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_to_political_party_constant, \
     extract_first_name_from_full_name, \
     extract_middle_name_from_full_name, \
     extract_last_name_from_full_name, extract_twitter_handle_from_text_string, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
+from .controllers import politicians_import_from_master_server
+from .models import Politician, PoliticianManager
 
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -436,6 +438,27 @@ def politician_edit_view(request, politician_id):
     return render(request, 'politician/politician_edit.html', template_values)
 
 
+def politician_change_names(changes):
+    count = 0
+    for change in changes:
+        try:
+            politician_query = Politician.objects.filter(we_vote_id=change['we_vote_id'])
+            politician_query = politician_query
+            politician_list = list(politician_query)
+            politician = politician_list[0]
+            setattr(politician, 'politician_name', change['name_after'])
+            timezone = pytz.timezone("America/Los_Angeles")
+            datetime_now = timezone.localize(datetime.now())
+            setattr(politician, 'date_last_changed', datetime_now)
+            politician.save()
+            count += 1
+        except Exception as err:
+            logger.error('politician_change_names caught: ', err)
+            count = -1
+
+    return count
+
+
 @login_required
 def politician_edit_process_view(request):
     """
@@ -661,7 +684,8 @@ def politician_delete_process_view(request):  # TODO DALE Transition fully to po
     # instance of this politician?
     position_list_manager = PositionListManager()
     retrieve_public_positions = True  # The alternate is positions for friends-only
-    position_list = position_list_manager.retrieve_all_positions_for_politician(retrieve_public_positions, politician_id)
+    position_list = position_list_manager.retrieve_all_positions_for_politician(retrieve_public_positions,
+                                                                                politician_id)
     if positive_value_exists(len(position_list)):
         positions_found_for_this_politician = True
     else:

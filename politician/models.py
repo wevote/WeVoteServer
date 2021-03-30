@@ -2,23 +2,17 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-# Politician-related Models
+import re
 from django.db import models
 from django.db.models import Q
+import wevote_functions.admin
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from tag.models import Tag
-import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, convert_to_political_party_constant, \
+from wevote_functions.functions import convert_to_political_party_constant, \
     display_full_name_with_correct_capitalization, \
     extract_first_name_from_full_name, extract_middle_name_from_full_name, \
-    extract_last_name_from_full_name, extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
-    positive_value_exists, \
-    AMERICAN_INDEPENDENT, DEMOCRAT, D_R, ECONOMIC_GROWTH, GREEN, INDEPENDENT,  INDEPENDENT_GREEN, LIBERTARIAN, \
-    NO_PARTY_PREFERENCE, NON_PARTISAN, PEACE_AND_FREEDOM, REFORM, REPUBLICAN
-
-
+    extract_last_name_from_full_name, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_politician_integer, fetch_site_unique_id_prefix
-
 
 FEMALE = 'F'
 GENDER_NEUTRAL = 'N'
@@ -120,6 +114,7 @@ class Politician(models.Model):
                                              unique=False)
     politician_email_address = models.CharField(verbose_name='politician email address', max_length=80, null=True,
                                                 unique=False)
+    date_last_updated = models.DateTimeField(null=True, auto_now=True)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -603,7 +598,8 @@ class PoliticianManager(models.Manager):
         new_politician = ''
 
         try:
-            new_politician = Politician.objects.create(politician_name=politician_name, first_name=politician_first_name,
+            new_politician = Politician.objects.create(politician_name=politician_name,
+                                                       first_name=politician_first_name,
                                                        middle_name=politician_middle_name,
                                                        last_name=politician_last_name, political_party=political_party,
                                                        politician_email_address=politician_email_address,
@@ -612,7 +608,7 @@ class PoliticianManager(models.Manager):
                                                        politician_facebook_id=politician_facebook_id,
                                                        politician_googleplus_id=politician_googleplus_id,
                                                        politician_youtube_id=politician_youtube_id,
-                                                       politician_url=politician_website_url,ctcl_uuid=ctcl_uuid)
+                                                       politician_url=politician_website_url, ctcl_uuid=ctcl_uuid)
             if new_politician:
                 success = True
                 status = "POLITICIAN_CREATED"
@@ -636,7 +632,7 @@ class PoliticianManager(models.Manager):
         return results
 
     def update_politician_row_entry(self, politician_name, politician_first_name, politician_middle_name,
-                                    politician_last_name, ctcl_uuid,political_party, politician_email_address,
+                                    politician_last_name, ctcl_uuid, political_party, politician_email_address,
                                     politician_twitter_handle, politician_phone_number, politician_facebook_id,
                                     politician_googleplus_id, politician_youtube_id, politician_website_url,
                                     politician_we_vote_id):
@@ -702,7 +698,6 @@ class PoliticianManager(models.Manager):
             }
         return results
 
-
 # def delete_all_politician_data():
 #     with open(LEGISLATORS_CURRENT_FILE, 'rU') as politicians_current_data:
 #         politicians_current_data.readline()             # Skip the header
@@ -712,6 +707,38 @@ class PoliticianManager(models.Manager):
 #                 break
 #             politician_entry = Politician.objects.order_by('last_name')[0]
 #             politician_entry.delete()
+
+    def retrieve_politicians_with_misformatted_names(self, start=0, count=15):
+        """
+        Get the first 15 records that have 3 capitalized letters in a row, as long as those letters
+        are not 'III' i.e. King Henry III.  Also exclude the names where the word "WITHDRAWN" has been appended when
+        the politician withdrew from the race
+        SELECT * FROM public.politician_politician WHERE politician_name ~ '.*?[A-Z][A-Z][A-Z].*?' and
+           politician_name !~ '.*?III.*?'
+
+        :param start:
+        :return:
+        """
+        politician_query = Politician.objects.all()
+        # Get all politicians that have three capital letters in a row in their name, but exclude III (King Henry III)
+        politician_query = politician_query.filter(politician_name__regex=r'.*?[A-Z][A-Z][A-Z].*?(?<!III)').\
+            order_by('politician_name')
+        number_of_rows = politician_query.count()
+        politician_query = politician_query[start:(start+count)]
+        politician_list_objects = list(politician_query)
+        results_list = []
+        # out = ''
+        # out = 'KING HENRY III => ' + display_full_name_with_correct_capitalization('KING HENRY III') + ", "
+        for x in politician_list_objects:
+            name = x.politician_name
+            if name.endswith('WITHDRAWN') and not bool(re.match('^[A-Z]+$', name)):
+                continue
+            x.person_name_normalized = display_full_name_with_correct_capitalization(name)
+            x.party = x.political_party
+            results_list.append(x)
+            # out += name + ' = > ' + x.person_name_normalized + ', '
+
+        return results_list, number_of_rows
 
 
 class PoliticianTagLink(models.Model):

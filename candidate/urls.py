@@ -19,6 +19,7 @@ urlpatterns = [
         views_admin.candidates_import_from_master_server_view, name='candidates_import_from_master_server'),
     url(r'^new/$', views_admin.candidate_new_view, name='candidate_new'),
     url(r'^(?P<candidate_id>[0-9]+)/edit/$', views_admin.candidate_edit_view, name='candidate_edit'),
+    url(r'^repair_imported_names/$', views_admin.repair_imported_names_view, name='repair_imported_names'),
     url(r'^(?P<candidate_we_vote_id>wv[\w]{2}cand[\w]+)/edit/$',
         views_admin.candidate_edit_view, name='candidate_edit_we_vote_id'),
     url(r'^(?P<candidate_id>[0-9]+)/find_duplicate_candidate/$',
