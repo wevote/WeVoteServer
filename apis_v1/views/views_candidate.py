@@ -3,6 +3,9 @@
 # -*- coding: UTF-8 -*-
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api, \
     retrieve_candidate_list_for_all_upcoming_elections
+from candidate.views_admin import candidate_change_names
+from politician.views_admin import politician_change_names
+from django.contrib.auth.decorators import login_required
 from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
@@ -57,3 +60,30 @@ def candidate_list_for_upcoming_elections_retrieve_api_view(request):  # candida
         'candidate_list':                   candidate_list_light,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+@login_required
+def candidate_or_politician_repair_names(request):  # candidateOrPoliticianRepairNames
+    """
+    Change the names of misformatted candidates or politicians
+    :param request:
+    :return:
+    """
+    status = ""
+    is_candidate = True
+    body = request.body.decode('utf-8')
+    payload = json.loads(body)
+    is_candidate = payload['is_candidate']
+    changes = payload['changes']
+
+    if is_candidate:
+        return_count = candidate_change_names(changes)
+    else:
+        return_count = politician_change_names(changes)
+
+    json_data = {
+        'count':                            return_count,
+        'success':                          return_count > 0,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+

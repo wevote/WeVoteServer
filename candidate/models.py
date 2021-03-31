@@ -1414,6 +1414,36 @@ class CandidateListManager(models.Manager):
         }
         return results
 
+    def retrieve_candidates_with_misformatted_names(self, start=0, count=15):
+        """
+        Get the first 15 records that have 3 capitalized letters in a row, as long as those letters
+        are not 'III' i.e. King Henry III.  Also exclude the names where the word "WITHDRAWN" has been appended when
+        the candidate withdrew from the race
+        SELECT * FROM public.politician_politician WHERE politician_name ~ '.*?[A-Z][A-Z][A-Z].*?' and politician_name !~ '.*?III.*?'
+
+        :param start:
+        :return:
+        """
+        candidate_query = CandidateCampaign.objects.all()
+        # Get all candidates that have three capital letters in a row in their name, but exclude III (King Henry III)
+        candidate_query = candidate_query.filter(candidate_name__regex=r'.*?[A-Z][A-Z][A-Z].*?(?<!III)').\
+            order_by('candidate_name')
+        number_of_rows = candidate_query.count()
+        candidate_query = candidate_query[start:(start+count)]
+        candidate_list_objects = list(candidate_query)
+        results_list = []
+        out = ''
+        # out = 'KING HENRY III => ' + display_full_name_with_correct_capitalization('KING HENRY III') + ", "
+        for x in candidate_list_objects:
+            name = x.candidate_name
+            if name.endswith('WITHDRAWN') and not bool(re.match('^[A-Z]+$', name)):
+                continue
+            x.person_name_normalized = display_full_name_with_correct_capitalization(name)
+            results_list.append(x)
+            # out += name + ' = > ' + x.person_name_normalized + ', '
+
+        return results_list, number_of_rows
+
 
 class CandidateCampaign(models.Model):
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other

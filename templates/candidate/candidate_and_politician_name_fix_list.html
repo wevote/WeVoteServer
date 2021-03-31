@@ -1,0 +1,148 @@
+{# templates/candidate/candidate_and_politician_name_fix_list.html #}
+{% extends "template_base.html" %}
+
+{%  block content %}
+
+<h1>Repair imported {{ person_text }} names</h1>
+<p>Please pay extra attention to highlighted names.</p>
+<p>There are <b>{{ number_of_rows }}</b> names that need repair.</p>
+<style>
+ input[type=button] { margin: 10px 8px 16px 8px; }
+</style>
+<input type="button" id="button_save_and_load" value="Save any changes, then load the next 15" />
+<input type="button" id="button_load_no_save_prev" value="< Load the previous 15 without saving" onClick="goToPrevPage(0)" />
+<input type="button" id="button_load_no_save" value="Load the next 15 without saving >" onClick="goToNextPage(0)" />
+<input type="button" value="Return to {{ person_text }} page" onclick="window.location.href='{{ return_link }}'" />
+
+{% csrf_token %}
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name in DB</th>
+          <th>Suggested Name</th>
+          <th>Google Civic Candidate Name</th>
+          <th>Office Name</th>
+          <th>Party</th>
+          <th>State</th>
+          <th>We Vote ID</th>
+          <th>Date last updated</th>
+        </tr>
+      </thead>
+        {% for person in people_list %}
+          <tr class="person_row">
+            <td>{{ forloop.counter|add:index_offset }}</td>
+            <td class="from_db">{{ person.person_name }}</td>
+            <td><input type="text"
+                       class="person_name_normalized"
+                       value="{{ person.person_name_normalized }}"
+                       style="width: 250px; {% if person.highlight %} box-shadow: 6px 6px #ffff00; {% endif %}"
+                /></td>
+            <td>{{ person.google_civic_candidate_name }}</td>
+            <td>{{ person.contest_office_name }}</td>
+            <td>{{ person.party }}</td>
+            <td>{{ person.state_code }}</td>
+            <td class="we_vote_id">{{ person.we_vote_id }}</td>
+            <td>{{ person.date_last_updated }}</td>
+            <td><input type="hidden" class="person_name_normalized_before" value="{{ person.person_name_normalized }}"/></td>
+        </tr>
+      {% endfor %}
+    </table>
+
+<script>
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = $.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function goToNextPage(delay) {
+      const is_candidate = window.location.href.includes('is_candidate=true');
+      const matched = window.location.href.match(/(?:start=)(\d+)/);
+      const newStart = matched ? parseInt(matched[1]) + 15 : 15;
+      const newHref = window.location.origin + window.location.pathname + '?is_candidate=' + is_candidate + '&start=' + newStart + '&count=15';
+      setTimeout(() => {
+        window.location = newHref;
+      }, delay);
+    }
+
+    function goToPrevPage(delay) {
+      const is_candidate = window.location.href.includes('is_candidate=true');
+      const matched = window.location.href.match(/(?:start=)(\d+)/);
+      const newStart = matched && parseInt(matched[1]) - 15 > 0 ? parseInt(matched[1]) - 15 : 0;
+
+      const newHref = window.location.origin + window.location.pathname + '?is_candidate=' + is_candidate + '&start=' + newStart + '&count=15';
+      setTimeout(() => {
+        window.location = newHref;
+      }, delay);
+    }
+
+
+    $(function(){
+      $('#button_save_and_load').click(function(evt) {
+        console.log('button_save_and_load');
+        let changes = []
+        $("tr.person_row").each(function() {
+          $this = $(this);
+          let name_before = $this.find('.from_db').text();
+          let name_after = $this.find('.person_name_normalized').val();
+          let we_vote_id = $(this).children('.we_vote_id').text();
+          if (name_after !== name_before) {
+            one_change = {name_before, name_after, we_vote_id};
+            changes.push(one_change);
+          }
+        });
+
+        data = {
+          'is_candidate': window.location.href.includes('is_candidate=true'),
+          'changes': changes,
+        };
+
+        const csrftoken = getCookie('csrftoken');
+
+        $.ajax({
+          type: "PUT",
+          url: window.location.origin + "/apis/v1/candidateOrPoliticianRepairNames",
+          contentType: 'application/json',
+          data: JSON.stringify(data), // access in body
+          beforeSend: function(xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+          },
+          success: function (response) {
+            const success = response.success;
+            const count = response.count;
+            switch (count) {
+              case 0: count_string = "<br>All suggestions were accepted, loading the next 15"; break;
+              case 1: count_string = "<br>Success: One name was saved"; break;
+              default: count_string = "<br>Success: " + count + " names were saved"; break;
+            }
+            $("<div title='Saved' id='dlg'>" + count_string + "</div>")
+              .dialog({
+                resizable: false,
+                height: 'auto',
+                width: 450,
+                modal: true,
+                open: function(event, ui) {
+                  // $(".ui-dialog-titlebar-close").hide();
+                  goToNextPage(3000);
+                },
+              });
+           },
+        });
+
+      });
+    });
+</script>
+
+{% endblock %}
