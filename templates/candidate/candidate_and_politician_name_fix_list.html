@@ -118,7 +118,7 @@
 
         $.ajax({
           type: "PUT",
-          url: window.location.origin + "/apis/v1/candidateOrPoliticianRepairNames",
+          url: window.location.origin + "/apis/v1/candidateOrPoliticianRepairNames/",
           contentType: 'application/json',
           data: JSON.stringify(data), // access in body
           beforeSend: function(xhr, settings) {
