@@ -11,7 +11,7 @@
 </style>
 <input type="button" id="button_save_and_load" value="Save any changes, then load the next 15" />
 <input type="button" id="button_load_no_save_prev" value="< Load the previous 15 without saving" onClick="goToPrevPage(0)" />
-<input type="button" id="button_load_no_save" value="Load the next 15 without saving >" onClick="goToNextPage(0)" />
+<input type="button" id="button_load_no_save" value="Load the next 15 without saving >" onClick="goToNextPage(0, true)" />
 <input type="button" value="Return to {{ person_text }} page" onclick="window.location.href='{{ return_link }}'" />
 
 {% csrf_token %}
@@ -19,8 +19,8 @@
     <table class="table">
       <thead>
         <tr>
-          <th>#</th>
-          <th>Name in DB</th>
+          <th style="width: 40px;">#</th>
+          <th style="width: 350px;">Name in DB</th>
           <th>Suggested Name</th>
           <th>Google Civic Candidate Name</th>
           <th>Office Name</th>
@@ -67,10 +67,15 @@
         return cookieValue;
     }
 
-    function goToNextPage(delay) {
+    function goToNextPage(delay, increment) {
       const is_candidate = window.location.href.includes('is_candidate=true');
       const matched = window.location.href.match(/(?:start=)(\d+)/);
-      const newStart = matched ? parseInt(matched[1]) + 15 : 15;
+      let newStart = 0;
+      if (increment) {
+        newStart = matched ? parseInt(matched[1]) + 15 : 15;
+      } else {
+        newStart = matched ? parseInt(matched[1]) : 0;
+      }
       const newHref = window.location.origin + window.location.pathname + '?is_candidate=' + is_candidate + '&start=' + newStart + '&count=15';
       setTimeout(() => {
         window.location = newHref;
@@ -120,24 +125,25 @@
             xhr.setRequestHeader("X-CSRFToken", csrftoken);
           },
           success: function (response) {
-            const success = response.success;
-            const count = response.count;
-            switch (count) {
-              case 0: count_string = "<br>All suggestions were accepted, loading the next 15"; break;
-              case 1: count_string = "<br>Success: One name was saved"; break;
-              default: count_string = "<br>Success: " + count + " names were saved"; break;
-            }
-            $("<div title='Saved' id='dlg'>" + count_string + "</div>")
-              .dialog({
-                resizable: false,
-                height: 'auto',
-                width: 450,
-                modal: true,
-                open: function(event, ui) {
-                  // $(".ui-dialog-titlebar-close").hide();
-                  goToNextPage(3000);
-                },
-              });
+            goToNextPage(0, false);
+            // const success = response.success;
+            // const count = response.count;
+            // switch (count) {
+            //   case 0: count_string = "<br>All suggestions were accepted, loading the next 15"; break;
+            //   case 1: count_string = "<br>Success: One name was saved"; break;
+            //   default: count_string = "<br>Success: " + count + " names were saved"; break;
+            // }
+            // $("<div title='Saved' id='dlg'>" + count_string + "</div>")
+            //   .dialog({
+            //     resizable: false,
+            //     height: 'auto',
+            //     width: 450,
+            //     modal: true,
+            //     open: function(event, ui) {
+            //       // $(".ui-dialog-titlebar-close").hide();
+            //       goToNextPage(3000, false);
+            //     },
+            //   });
            },
         });
 
