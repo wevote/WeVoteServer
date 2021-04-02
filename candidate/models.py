@@ -1537,6 +1537,10 @@ class CandidateCampaign(models.Model):
                                                         blank=True, null=True)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
+    vote_usa_office_id = models.CharField(
+        verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
+    vote_usa_politician_id = models.CharField(
+        verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
     we_vote_hosted_profile_image_url_large = models.TextField(verbose_name='we vote hosted large image url',
                                                               blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.TextField(verbose_name='we vote hosted medium image url',

@@ -53,6 +53,7 @@
             <th>Id</th>
             <th>We Vote Id</th>
             <th>Vote Smart Id</th>
+            <th>Vote USA Politician</th>
             <th>Candidates Linked</th>
             <th>Related Candidates?</th>
         </tr>
@@ -76,6 +77,7 @@
             <td>{{ politician.id }}</td>
             <td>{{ politician.we_vote_id }}</td>
             <td>{{ politician.vote_smart_id|default_if_none:"" }}</td>
+            <td>{{ politician.vote_usa_politician_id|default_if_none:"" }}</td>
             <td>{% if politician.linked_candidate_list_count > 0 %}{{ politician.linked_candidate_list_count }}{% endif %}</td>
             <td>{% if politician.related_candidate_list_count > 0 %}{{ politician.related_candidate_list_count }}{% endif %}</td>
         </tr>

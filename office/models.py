@@ -86,6 +86,8 @@ class ContestOffice(models.Model):
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     maplight_id = models.CharField(
         verbose_name="maplight unique identifier", max_length=255, null=True, blank=True, unique=True)
+    vote_usa_office_id = models.CharField(
+        verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
     # 2018-02-16 It is unclear if we want to keep this field
     ballotpedia_id = models.CharField(
         verbose_name="ballotpedia unique identifier", max_length=255, null=True, blank=True)

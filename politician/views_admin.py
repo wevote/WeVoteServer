@@ -483,6 +483,7 @@ def politician_edit_process_view(request):
     maplight_id = request.POST.get('maplight_id', False)
     state_code = request.POST.get('state_code', False)
     politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
+    vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
 
     # Check to see if this politician is already being used anywhere
     politician_on_stage_found = False
@@ -557,6 +558,8 @@ def politician_edit_process_view(request):
                 politician_on_stage.vote_smart_id = vote_smart_id
             if maplight_id is not False:
                 politician_on_stage.maplight_id = maplight_id
+            if vote_usa_politician_id is not False:
+                politician_on_stage.vote_usa_politician_id = vote_usa_politician_id
 
             politician_on_stage.save()
             messages.add_message(request, messages.INFO, 'Politician updated.')
@@ -589,6 +592,8 @@ def politician_edit_process_view(request):
                     politician_on_stage.maplight_id = maplight_id
                 if politician_we_vote_id is not False:
                     politician_on_stage.politician_we_vote_id = politician_we_vote_id
+                if vote_usa_politician_id is not False:
+                    politician_on_stage.vote_usa_politician_id = vote_usa_politician_id
 
                 politician_on_stage.save()
                 politician_id = politician_on_stage.id

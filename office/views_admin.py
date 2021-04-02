@@ -535,6 +535,7 @@ def office_edit_process_view(request):
     ballotpedia_race_office_level = request.POST.get('ballotpedia_race_office_level', False)
     ballotpedia_office_name = request.POST.get('ballotpedia_office_name', False)
     ballotpedia_is_marquee = request.POST.get('ballotpedia_is_marquee', False)
+    vote_usa_office_id = request.POST.get('vote_usa_office_id', False)
     is_battleground_race = request.POST.get('is_battleground_race', False)
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     redirect_to_contest_office_list = convert_to_int(request.POST.get('redirect_to_contest_office_list', 0))
@@ -591,6 +592,8 @@ def office_edit_process_view(request):
                 office_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
             if ballotpedia_race_office_level is not False:
                 office_on_stage.ballotpedia_race_office_level = ballotpedia_race_office_level
+            if vote_usa_office_id is not False:
+                office_on_stage.vote_usa_office_id = vote_usa_office_id
             office_on_stage.save()
             office_on_stage_id = office_on_stage.id
             messages.add_message(request, messages.INFO, 'Office updated.')

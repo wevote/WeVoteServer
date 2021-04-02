@@ -122,6 +122,7 @@
             <th>State</th>
             <th>District ID</th>
             <th>Ballotpedia District ID</th>
+            <th>Vote USA Office ID</th>
             <th># of Candidates</th>
             <th>Public Positions</th>
             <th>Battleground</th>
@@ -144,6 +145,7 @@
             <td>{{ office.state_code }}</td>
             <td>{{ office.district_id|default_if_none:"" }}</td>
             <td>{{ office.ballotpedia_district_id|default_if_none:"" }}</td>
+            <td>{{ office.vote_usa_office_id|default_if_none:"" }}</td>
             <td>{{ office.candidate_count }}</td>
             <td>{{ office.positions_count }}</td>
             <td>{{ office.is_battleground_race|default_if_none:"" }}</td>

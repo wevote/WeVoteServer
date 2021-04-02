@@ -92,19 +92,23 @@
       <td><strong>{{ office.ballotpedia_district_id|default_if_none:"" }}</strong></td>
     </tr>
     <tr>
-      <td>Is Marquee? :: Is Battleground?</td>
+      <td style="padding-right: 8px;">Is Marquee? :: Is Battleground?</td>
       <td><strong>{{ office.ballotpedia_is_marquee|default_if_none:"No" }} :: {{ office.is_battleground_race|default_if_none:"No" }}</strong></td>
     </tr>
     <tr>
       <td>Ballotpedia Office URL:</td>
-      <td><strong>{{ office.ballotpedia_office_url }}</strong></td>
+      <td><strong>{{ office.ballotpedia_office_url|default_if_none:"" }}</strong></td>
     </tr>
     {% if office.ballotpedia_race_office_level %}
     <tr>
       <td>Ballotpedia Race Office Level:</td>
-      <td><strong>{{ office.ballotpedia_race_office_level }}</strong></td>
+      <td><strong>{{ office.ballotpedia_race_office_level|default_if_none:"" }}</strong></td>
     </tr>
     {% endif %}
+    <tr>
+      <td>Vote Office USA ID:</td>
+      <td><strong>{{ office.vote_usa_office_id|default_if_none:"" }}</strong></td>
+    </tr>
     <tr>
       <td>Google Ballot Placement:</td>
       <td><strong>{{ office.google_ballot_placement|default_if_none:"" }}</strong></td>
@@ -129,7 +133,7 @@
 
     <p>
       <br />
-      <a href="{% url 'office:office_edit' office.id %}">edit</a><br />
+      <a href="{% url 'office:office_edit' office.id %}">Edit this Office</a><br />
       <br />
       <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}&contest_office_id={{ office.id }}&state_code={{ state_code }}">
             Add New Candidate</a>,
@@ -153,6 +157,7 @@
                 <th>We Vote Id</th>
                 <th>State</th>
                 <th>Ballotpedia Ids</th>
+                <th>Vote USA Office Id</th>
                 <th>Vote Smart Id</th>
                 <th>&nbsp;</th>
             </tr>
@@ -198,6 +203,7 @@
                 Race&nbsp;ID:&nbsp;{{ candidate.ballotpedia_race_id|default_if_none:"" }},
                 Office&nbsp;ID:&nbsp;{{ candidate.ballotpedia_office_id|default_if_none:"" }}
             </td>
+            <td>{{ office.vote_usa_office_id|default_if_none:"" }}</td>
             <td>{{ candidate.vote_smart_id|default_if_none:"" }}</td>
             <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em">(edit)</a></td>
         </tr>
