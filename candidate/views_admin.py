@@ -1214,6 +1214,8 @@ def candidate_edit_process_view(request):
     ballotpedia_office_id = request.POST.get('ballotpedia_office_id', False)
     ballotpedia_person_id = request.POST.get('ballotpedia_person_id', False)
     ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)
+    vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
+    vote_usa_office_id = request.POST.get('vote_usa_office_id', False)
     vote_smart_id = request.POST.get('vote_smart_id', False)
     maplight_id = request.POST.get('maplight_id', False)
     page = convert_to_int(request.POST.get('page', 0))
@@ -1505,6 +1507,10 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
             if ballotpedia_race_id is not False:
                 candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
+            if vote_usa_politician_id is not False:
+                candidate_on_stage.vote_usa_politician_id = vote_usa_politician_id
+            if vote_usa_office_id is not False:
+                candidate_on_stage.vote_usa_office_id = vote_usa_office_id
             if vote_smart_id is not False:
                 candidate_on_stage.vote_smart_id = vote_smart_id
             if maplight_id is not False:

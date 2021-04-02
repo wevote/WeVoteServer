@@ -96,6 +96,8 @@ class Politician(models.Model):
 
     politician_twitter_handle = models.CharField(
         verbose_name='politician twitter screen_name', max_length=255, null=True, unique=False)
+    vote_usa_politician_id = models.CharField(
+        verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
     we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
                                                              blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
