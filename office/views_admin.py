@@ -22,7 +22,7 @@ from django.shortcuts import render
 from django.db.models import Q
 from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_found_exception, handle_record_not_saved_exception, s
+    handle_record_not_found_exception, handle_record_not_saved_exception
 from position.controllers import move_positions_to_another_office
 from position.models import OPPOSE, PositionListManager, SUPPORT
 from voter.models import voter_has_authority
