@@ -575,7 +575,7 @@ def candidate_list_view(request):
             facebook_urls_without_picture_urls = candidate_facebook_missing_query.count()
 
         except Exception as e:
-            logger.error("Find facebook URLs without facebook pictures in candidate: ", e)
+            logger.error("Find facebook URLs without facebook pictures in candidate:  ", e)
 
     status_print_list = ""
     status_print_list += "candidate_list_count: " + str(candidate_list_count) + " "

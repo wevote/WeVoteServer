@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models import Q
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from wevote_settings.models import fetch_next_we_vote_id_contest_office_integer, fetch_site_unique_id_prefix
-import wevote_functions.admin
+import wevote_functions.admin, s
 from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, positive_value_exists, \
     OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES, OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS, \
     OFFICE_NAME_EQUIVALENT_DISTRICT_PHRASE_PAIRS, STATE_CODE_MAP
