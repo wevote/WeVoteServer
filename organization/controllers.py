@@ -2897,17 +2897,17 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
     if not positive_value_exists(hostname):
         status += "HOSTNAME_MISSING "
         results = {
-            'success':                  success,
-            'status':                   status,
-            'chosen_hide_we_vote_logo': chosen_hide_we_vote_logo,
-            'chosen_logo_url_https':    chosen_logo_url_https,
+            'success':                          success,
+            'status':                           status,
+            'chosen_hide_we_vote_logo':         chosen_hide_we_vote_logo,
+            'chosen_logo_url_https':            chosen_logo_url_https,
             'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
             'chosen_ready_introduction_text':   chosen_ready_introduction_text,
             'chosen_ready_introduction_title':  chosen_ready_introduction_title,
-            'features_provided_bitmap': features_provided_bitmap,
-            'hostname':                 hostname,
-            'organization_we_vote_id':  organization_we_vote_id,
-            'reserved_by_we_vote':      reserved_by_we_vote,
+            'features_provided_bitmap':         features_provided_bitmap,
+            'hostname':                         hostname,
+            'organization_we_vote_id':          organization_we_vote_id,
+            'reserved_by_we_vote':              reserved_by_we_vote,
         }
         return results
 
@@ -2921,17 +2921,17 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
         success = False
         hostname = ""
         results = {
-            'success':                  success,
-            'status':                   status,
-            'chosen_hide_we_vote_logo': chosen_hide_we_vote_logo,
-            'chosen_logo_url_https':    chosen_logo_url_https,
+            'success':                          success,
+            'status':                           status,
+            'chosen_hide_we_vote_logo':         chosen_hide_we_vote_logo,
+            'chosen_logo_url_https':            chosen_logo_url_https,
             'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
             'chosen_ready_introduction_text':   chosen_ready_introduction_text,
             'chosen_ready_introduction_title':  chosen_ready_introduction_title,
-            'features_provided_bitmap': features_provided_bitmap,
-            'hostname':                 hostname,
-            'organization_we_vote_id':  organization_we_vote_id,
-            'reserved_by_we_vote':      reserved_by_we_vote,
+            'features_provided_bitmap':         features_provided_bitmap,
+            'hostname':                         hostname,
+            'organization_we_vote_id':          organization_we_vote_id,
+            'reserved_by_we_vote':              reserved_by_we_vote,
         }
         return results
     results = organization_manager.retrieve_organization_from_incoming_hostname(hostname, read_only=True)
@@ -2960,17 +2960,17 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
         status += "HOSTNAME_NOT_OWNED_BY_ORG_OR_RESERVED_BY_WE_VOTE "
 
     results = {
-        'success':                  success,
-        'status':                   status,
-        'chosen_hide_we_vote_logo': chosen_hide_we_vote_logo,
-        'chosen_logo_url_https':    chosen_logo_url_https,
-        'chosen_prevent_sharing_opinions': chosen_prevent_sharing_opinions,
-        'chosen_ready_introduction_text': chosen_ready_introduction_text,
-        'chosen_ready_introduction_title': chosen_ready_introduction_title,
-        'features_provided_bitmap': features_provided_bitmap,
-        'hostname':                 hostname,
-        'organization_we_vote_id':  organization_we_vote_id,
-        'reserved_by_we_vote':      reserved_by_we_vote,
+        'success':                          success,
+        'status':                           status,
+        'chosen_hide_we_vote_logo':         chosen_hide_we_vote_logo,
+        'chosen_logo_url_https':            chosen_logo_url_https,
+        'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
+        'chosen_ready_introduction_text':   chosen_ready_introduction_text,
+        'chosen_ready_introduction_title':  chosen_ready_introduction_title,
+        'features_provided_bitmap':         features_provided_bitmap,
+        'hostname':                         hostname,
+        'organization_we_vote_id':          organization_we_vote_id,
+        'reserved_by_we_vote':              reserved_by_we_vote,
     }
     return results
 

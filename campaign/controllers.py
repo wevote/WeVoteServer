@@ -23,10 +23,11 @@ CAMPAIGN_PHOTO_LARGE_MAX_WIDTH = 640  # 1600
 CAMPAIGN_PHOTO_LARGE_MAX_HEIGHT = 360  # 900
 
 
-def campaignx_list_retrieve_for_api(voter_device_id):  # campaignListRetrieve
+def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignListRetrieve
     """
 
     :param voter_device_id:
+    :param hostname:
     :return:
     """
     campaignx_display_list = []
@@ -49,6 +50,10 @@ def campaignx_list_retrieve_for_api(voter_device_id):  # campaignListRetrieve
     voter_signed_in_with_email = voter.signed_in_with_email()
     voter_we_vote_id = voter.we_vote_id
 
+    from organization.controllers import site_configuration_retrieve_for_api
+    results = site_configuration_retrieve_for_api(hostname)
+    site_owner_organization_we_vote_id = results['organization_we_vote_id']
+
     # owned_by_voter_we_vote_id_list = [],
     # owned_by_organization_we_vote_id_list = []):
 
@@ -58,8 +63,13 @@ def campaignx_list_retrieve_for_api(voter_device_id):  # campaignListRetrieve
     # including_politicians_with_support_in_any_of_these_issues = None):
 
     campaignx_manager = CampaignXManager()
-    results = campaignx_manager.retrieve_campaignx_list(
-        including_started_by_voter_we_vote_id=voter_we_vote_id)
+    if positive_value_exists(site_owner_organization_we_vote_id):
+        results = campaignx_manager.retrieve_campaignx_list_for_private_label(
+            including_started_by_voter_we_vote_id=voter_we_vote_id,
+            site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
+    else:
+        results = campaignx_manager.retrieve_campaignx_list(
+            including_started_by_voter_we_vote_id=voter_we_vote_id)
     success = results['success']
     status += results['status']
     campaignx_list = results['campaignx_list']

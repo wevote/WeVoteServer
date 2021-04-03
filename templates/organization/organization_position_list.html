@@ -11,11 +11,11 @@
     Analyze Endorser Data ></a></p>
 
 {% if organization %}
-<h1>{{ organization.organization_name }}: Position List</h1>
+<h1>{{ organization.organization_name }}</h1>
 
 <table>{# Two column master table #}
     <tr>
-        <td>
+        <td style="vertical-align:top; width: 50%;">
             <table>
                 <tr>
                     <th>We Vote ID:</th>
@@ -40,6 +40,7 @@
                         {% endif %}
                     </td>
                 </tr>
+            {% if organization.organization_contact_form_url %}
                 <tr>
                     <th>Contact Form Website:</th>
                     <td>
@@ -51,12 +52,15 @@
                         {% endif %}
                     </td>
                 </tr>
+            {% endif %}
+            {% if organization.generate_facebook_link %}
                 <tr>
                     <th>Contact Email: </th>
                     <td>
                         {{ organization.organization_email|default_if_none:"" }}
                     </td>
                 </tr>
+            {% endif %}
                 {% if voter %}
                 <tr>
                     <th>Voter:</th>
@@ -65,7 +69,7 @@
                 </tr>
                 {% endif %}
                 <tr>
-                    <th>Twitter Link To Endorser:&nbsp;</th>
+                    <th>Twitter&nbsp;Link&nbsp;To&nbsp;Endorser:&nbsp;</th>
                     <td>{% if twitter_link_to_organization and twitter_link_to_organization.twitter_id %}{{ twitter_link_to_organization.fetch_twitter_handle_locally_or_remotely|default_if_none:"" }}{% else %}no link{% endif %}</td>
                 </tr>
                 <tr>
@@ -102,6 +106,7 @@
                     <th><span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Location:</span></th>
                     <td>{{ organization.twitter_location|default_if_none:"" }}</td>
                 </tr>
+            {% if organization.generate_facebook_link %}
                 <tr>
                     <th>Facebook: </th>
                     <td>{% if organization.generate_facebook_link %}
@@ -111,6 +116,7 @@
                         {% endif %}
                     </td>
                 </tr>
+            {% endif %}
 {#                <tr>#}
 {#                    <th>Wikipedia Page:</th>#}
 {#                    <td>{% if organization.wikipedia_page_title %}#}
@@ -169,7 +175,7 @@
                 </tr>
                 {% endif %}
                 <tr>
-                    <th>Issue Analysis Status:</th>
+                    <th>Issue&nbsp;Analysis&nbsp;Status:</th>
                     <td>
                         <input type="checkbox" name="issue_analysis_done" id="issue_analysis_done_id" value="1" disabled
                             {% if organization.issue_analysis_done %}checked{% endif %} />
@@ -186,71 +192,9 @@
                            class="btn btn-primary">Edit {{ organization.organization_name }}</a></td>
                 </tr>
             </table>
-        </td>
-        <td>&nbsp;&nbsp;&nbsp;</td>
-        <td>
-            <table>
-                <tr>
-                    <th>Hide We Vote Logo:</th>
-                    <td>{{organization.chosen_hide_we_vote_logo|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <th>Sub domain string:</th>
-                    <td>{{organization.chosen_subdomain_string|default_if_none:""}}{% if organization.chosen_subdomain_string %}.WeVote.US{% endif %}</td>
-                </tr>
-                <tr>
-                    <th>Domain string:</th>
-                    <td>{{organization.chosen_domain_string|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <th>API Pass Code:</th>
-                    <td>{{organization.chosen_organization_api_pass_code|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <th>Favicon URL:</th>
-                    <td>{{organization.chosen_favicon_url_https|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <th>Prevent Sharing Opinions:</th>
-                    <td>{{organization.chosen_prevent_sharing_opinions|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <th>Google Analytics account number:</th>
-                    <td>{{organization.chosen_google_analytics_account_number|default_if_none:""}}</td>
-                </tr>
 
-                <tr>
-                    <th>HTML verification string:</th>
-                    <td>{{organization.chosen_html_verification_string|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <th>Logo URL:</th>
-                    <td>{{organization.chosen_logo_url_https|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <th>Social share description:</th>
-                    <td>{{organization.chosen_social_share_description|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <th>Social share image:</th>
-                    <td>{{organization.chosen_social_share_image_256x256_url_https|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <th>Subscription plan:</th>
-                    <td>{{organization.chosen_subscription_plan|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <th>Feature Package:</th>
-                    <td>{{organization.chosen_feature_package|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <td colspan="2"><a href="{% url 'organization:organization_edit_account' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                                       class="btn btn-primary">Edit Client-Configured Values</a></td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>{# End of two column master table #}
+<br />
+<br />
 <br />
 <ul>
     <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}&organization_we_vote_id={{ organization.we_vote_id }}&state_code={{ organization.state_served_code }}" target="_blank">
@@ -269,6 +213,131 @@
         <a href="{% url 'organization:organization_analyze_tweets' organization.we_vote_id %}">Link issues from twitter feed</a>
     </li>
 </ul>
+
+        </td>
+        <td>&nbsp;&nbsp;&nbsp;</td>
+        <td style="vertical-align:top; width: 50%;">
+            <table>
+                <tr>
+                    <th>Hide We Vote Logo:</th>
+                    <td>{{organization.chosen_hide_we_vote_logo|default_if_none:""}}</td>
+                </tr>
+            {% if organization.chosen_subdomain_string %}
+                <tr>
+                    <th>Sub domain string:</th>
+                    <td>{{organization.chosen_subdomain_string|default_if_none:""}}{% if organization.chosen_subdomain_string %}.WeVote.US{% endif %}</td>
+                </tr>
+            {% endif %}
+            {% if organization.chosen_domain_string %}
+                <tr>
+                    <th>Domain string:</th>
+                    <td>{{organization.chosen_domain_string|default_if_none:""}}</td>
+                </tr>
+            {% endif %}
+            {% if organization.chosen_organization_api_pass_code %}
+                <tr>
+                    <th>API Pass Code:</th>
+                    <td>{{organization.chosen_organization_api_pass_code|default_if_none:""}}</td>
+                </tr>
+            {% endif %}
+            {% if organization.chosen_favicon_url_https %}
+                <tr>
+                    <th>Favicon URL:</th>
+                    <td>{{organization.chosen_favicon_url_https|default_if_none:""}}</td>
+                </tr>
+            {% endif %}
+                <tr>
+                    <th>Prevent&nbsp;Sharing&nbsp;Opinions:</th>
+                    <td>{{organization.chosen_prevent_sharing_opinions|default_if_none:""}}</td>
+                </tr>
+            {% if organization.chosen_google_analytics_account_number %}
+                <tr>
+                    <th>Google Analytics account number:</th>
+                    <td>{{organization.chosen_google_analytics_account_number|default_if_none:""}}</td>
+                </tr>
+            {% endif %}
+            {% if organization.chosen_html_verification_string %}
+                <tr>
+                    <th>HTML verification string:</th>
+                    <td>{{organization.chosen_html_verification_string|default_if_none:""}}</td>
+                </tr>
+            {% endif %}
+            {% if organization.chosen_logo_url_https %}
+                <tr>
+                    <th>Logo:</th>
+                    <td><img src="{{organization.chosen_logo_url_https|default_if_none:""}}" width="250px" /></td>
+                </tr>
+            {% endif %}
+            {% if organization.chosen_social_share_description %}
+                <tr>
+                    <th>Social share description:</th>
+                    <td>{{organization.chosen_social_share_description|default_if_none:""}}</td>
+                </tr>
+            {% endif %}
+            {% if organization.chosen_social_share_image_256x256_url_https %}
+                <tr>
+                    <th>Social share image:</th>
+                    <td>{{organization.chosen_social_share_image_256x256_url_https|default_if_none:""}}</td>
+                </tr>
+            {% endif %}
+                <tr>
+                    <th>Subscription plan:</th>
+                    <td>{{organization.chosen_subscription_plan|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <th>Feature Package:</th>
+                    <td>{{organization.chosen_feature_package|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td colspan="2"><a href="{% url 'organization:organization_edit_account' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                                       class="btn btn-primary">Edit Client-Configured Values</a></td>
+                </tr>
+            </table>
+
+
+
+        <br />
+        <br />
+        <br />
+    <table class="table">
+      <thead>
+        <tr>
+            <th>Campaign Title to List</th>
+            <th>Visible to Public</th>
+        </tr>
+      </thead>
+    {% for campaignx_listed_by_organization in campaignx_listed_by_organization_list %}
+    <tr>
+        <td>
+            {{ campaignx_listed_by_organization.campaignx_title }}&nbsp;&nbsp;
+            <a href="{% url 'campaign:campaignx_edit' campaignx_listed_by_organization.campaignx_we_vote_id %}"
+               target="_blank">
+                edit
+                <span class="glyphicon glyphicon-new-window"></span></a>
+        </td>
+        <td>
+            {% if campaignx_listed_by_organization.visible_to_public %}
+                visible
+            {% else %}
+                NOT visible
+            {% endif %}
+            {% if campaignx_listed_by_organization.listing_requested_by_voter_name %}
+                (Requested by: {{ campaignx_listed_by_organization.listing_requested_by_voter_name }})
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td colspan="3"><a href="{% url 'organization:organization_edit_listed_campaigns' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                           class="btn btn-primary">Add or Edit Listed Campaigns</a></td>
+    </tr>
+</table>
+
+
+
+        </td>
+    </tr>
+</table>{# End of two column master table #}
 
 <form name="organization_position_choose_election" method="get" action="{% url 'organization:organization_position_list' organization.id %}">
     {% csrf_token %}

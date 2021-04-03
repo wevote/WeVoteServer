@@ -135,10 +135,12 @@
             <td>
                 <span class="u-no-break">
                     {{ campaignx.campaign_title }}&nbsp;
-{#                    <span class="glyphicon glyphicon-new-window"></span>#}
                 </span><br />
-                &nbsp;&nbsp;&nbsp;(<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}"
-                                      target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>)
+                <span>
+                    {{ campaignx.we_vote_id }}&nbsp;
+                </span><br />
+                (<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}"
+                    target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>)
             </td>
             <td>
             {% for campaignx_owner in campaignx.campaignx_owner_list %}

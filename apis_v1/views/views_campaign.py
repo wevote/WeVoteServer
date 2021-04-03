@@ -19,8 +19,10 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
 def campaignx_list_retrieve_view(request):  # campaignListRetrieve (No CDN)
+    hostname = request.GET.get('hostname', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     json_data = campaignx_list_retrieve_for_api(
+        hostname=hostname,
         voter_device_id=voter_device_id,
     )
     json_string = ''
