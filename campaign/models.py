@@ -64,6 +64,24 @@ class CampaignX(models.Model):
         super(CampaignX, self).save(*args, **kwargs)
 
 
+class CampaignXListedByOrganization(models.Model):
+    """
+    An individual or organization can specify a campaign as one they want to list on their private-labeled site.
+    This is the link that says "show this campaign on my promotion site".
+    """
+    def __unicode__(self):
+        return "CampaignXListedByOrganization"
+
+    campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    site_owner_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    # If a candidate or campaign-starter requests to be included in a private label site:
+    listing_requested_by_voter_we_vote_id = \
+        models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
+    # Is this link approved and made visible?
+    visible_to_public = models.BooleanField(default=False)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
+
+
 class CampaignXManager(models.Manager):
 
     def __unicode__(self):
@@ -542,6 +560,48 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    def retrieve_campaignx_listed_by_organization_list(
+            self,
+            site_owner_organization_we_vote_id='',
+            visible_to_public=True,
+            ignore_visible_to_public=False,
+            read_only=True):
+        campaignx_listed_by_organization_list_found = False
+        campaignx_listed_by_organization_list = []
+        try:
+            if read_only:
+                query = CampaignXListedByOrganization.objects.using('readonly').all()
+            else:
+                query = CampaignXListedByOrganization.objects.all()
+            query = query.filter(site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
+            if not positive_value_exists(ignore_visible_to_public):
+                query = query.filter(visible_to_public=visible_to_public)
+            campaignx_listed_by_organization_list = list(query)
+            if len(campaignx_listed_by_organization_list):
+                campaignx_listed_by_organization_list_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        if campaignx_listed_by_organization_list_found:
+            return campaignx_listed_by_organization_list
+        else:
+            campaignx_listed_by_organization_list = []
+            return campaignx_listed_by_organization_list
+
+    def retrieve_campaignx_listed_by_organization_simple_list(
+            self,
+            site_owner_organization_we_vote_id='',
+            visible_to_public=True):
+        campaignx_listed_by_organization_list = \
+            self.retrieve_campaignx_listed_by_organization_list(
+                site_owner_organization_we_vote_id=site_owner_organization_we_vote_id,
+                visible_to_public=visible_to_public,
+                read_only=True)
+        simple_list = []
+        for one_link in campaignx_listed_by_organization_list:
+            simple_list.append(one_link.campaignx_we_vote_id)
+        return simple_list
+
     def retrieve_campaignx_list(
             self,
             including_started_by_voter_we_vote_id=None,
@@ -586,8 +646,6 @@ class CampaignXManager(models.Manager):
 
             campaignx_queryset = campaignx_queryset.order_by('-supporters_count')
             campaignx_queryset = campaignx_queryset.order_by('-in_draft_mode')
-            # issue_queryset = issue_queryset.filter(we_vote_id__in=issue_we_vote_id_list_to_filter)
-            # office_queryset = office_queryset.filter(Q(ballotpedia_is_marquee=True) | Q(is_battleground_race=True))
 
             campaignx_list = campaignx_queryset[:limit]
             campaignx_list_found = positive_value_exists(len(campaignx_list))
@@ -595,6 +653,81 @@ class CampaignXManager(models.Manager):
         except Exception as e:
             success = False
             status += "RETRIEVE_CAMPAIGNX_LIST_FAILED: " + str(e) + " "
+            campaignx_list_found = False
+
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'campaignx_list_found':                     campaignx_list_found,
+            'campaignx_list':                           campaignx_list,
+            'voter_started_campaignx_we_vote_ids':      voter_started_campaignx_we_vote_ids,
+            'voter_supported_campaignx_we_vote_ids':    voter_supported_campaignx_we_vote_ids,
+        }
+        return results
+
+    def retrieve_campaignx_list_for_private_label(
+            self,
+            including_started_by_voter_we_vote_id='',
+            limit=25,
+            site_owner_organization_we_vote_id='',
+            read_only=True):
+        campaignx_list = []
+        success = True
+        status = ""
+        approved_campaignx_we_vote_id_list = []
+        voter_started_campaignx_we_vote_ids = []
+        voter_supported_campaignx_we_vote_ids = []
+
+        # Limit the campaigns retrieved to the ones approved by the site owner
+        if positive_value_exists(site_owner_organization_we_vote_id):
+            try:
+                campaignx_manager = CampaignXManager()
+                approved_campaignx_we_vote_id_list = \
+                    campaignx_manager.retrieve_campaignx_listed_by_organization_simple_list(
+                        site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
+            except Exception as e:
+                success = False
+                status += "RETRIEVE_CAMPAIGNX_LIST_FOR_PRIVATE_LABEL_FAILED: " + str(e) + " "
+
+        try:
+            if read_only:
+                campaignx_queryset = CampaignX.objects.using('readonly').all()
+            else:
+                campaignx_queryset = CampaignX.objects.all()
+
+            # #########
+            # All "OR" queries
+            filters = []
+            # Campaigns started by this voter and still in draft mode
+            if positive_value_exists(including_started_by_voter_we_vote_id):
+                new_filter = \
+                    Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id, in_draft_mode=True)
+                filters.append(new_filter)
+
+            # Campaigns approved to be shown on this site
+            new_filter = \
+                Q(we_vote_id__in=approved_campaignx_we_vote_id_list, in_draft_mode=False, is_still_active=True)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                campaignx_queryset = campaignx_queryset.filter(final_filters)
+
+            campaignx_queryset = campaignx_queryset.order_by('-supporters_count')
+            campaignx_queryset = campaignx_queryset.order_by('-in_draft_mode')
+
+            campaignx_list = campaignx_queryset[:limit]
+            campaignx_list_found = positive_value_exists(len(campaignx_list))
+            status += "RETRIEVE_CAMPAIGNX_LIST_FOR_PRIVATE_LABEL_SUCCEEDED "
+        except Exception as e:
+            success = False
+            status += "RETRIEVE_CAMPAIGNX_LIST_FOR_PRIVATE_LABEL_FAILED: " + str(e) + " "
             campaignx_list_found = False
 
         results = {
