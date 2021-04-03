@@ -8,6 +8,7 @@ from .controllers import full_domain_string_available, merge_these_two_organizat
     push_organization_data_to_other_table_caches, subdomain_string_available
 from .models import GROUP, INDIVIDUAL, Organization, OrganizationReservedDomain, ORGANIZATION_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
+from campaign.models import CampaignXListedByOrganization, CampaignXManager
 from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
 from config.base import get_environment_variable
 from django.db.models import Q
@@ -828,6 +829,59 @@ def organization_edit_account_view(request, organization_id=0, organization_we_v
 
 
 @login_required
+def organization_edit_listed_campaigns_view(request, organization_id=0, organization_we_vote_id=""):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    state_code = request.GET.get('state_code', '')
+
+    messages_on_stage = get_messages(request)
+    organization_id = convert_to_int(organization_id)
+    organization_manager = OrganizationManager()
+    organization_on_stage = Organization()
+    results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+
+    if results['organization_found']:
+        organization_on_stage = results['organization']
+        organization_we_vote_id = organization_on_stage.we_vote_id
+
+    campaignx_manager = CampaignXManager()
+    campaignx_listed_by_organization_list_modified = []
+    campaignx_listed_by_organization_list = campaignx_manager.retrieve_campaignx_listed_by_organization_list(
+        site_owner_organization_we_vote_id=organization_we_vote_id,
+        ignore_visible_to_public=True
+    )
+
+    voter_manager = VoterManager()
+    for campaignx_listed_by_organization in campaignx_listed_by_organization_list:
+        if positive_value_exists(campaignx_listed_by_organization.campaignx_we_vote_id):
+            results = campaignx_manager.retrieve_campaignx(
+                campaignx_we_vote_id=campaignx_listed_by_organization.campaignx_we_vote_id)
+            if results['campaignx_found']:
+                campaignx_listed_by_organization.campaignx_title = results['campaignx'].campaign_title
+        if positive_value_exists(campaignx_listed_by_organization.listing_requested_by_voter_we_vote_id):
+            results = voter_manager.retrieve_voter_by_we_vote_id(
+                campaignx_listed_by_organization.listing_requested_by_voter_we_vote_id,
+                read_only=True)
+            if results['voter_found']:
+                campaignx_listed_by_organization.listing_requested_by_voter_name = results['voter'].get_full_name()
+
+        campaignx_listed_by_organization_list_modified.append(campaignx_listed_by_organization)
+
+    template_values = {
+        'google_civic_election_id': google_civic_election_id,
+        'messages_on_stage':        messages_on_stage,
+        'organization':             organization_on_stage,
+        'state_code':               state_code,
+        'campaignx_listed_by_organization_list':    campaignx_listed_by_organization_list_modified,
+    }
+    return render(request, 'organization/organization_edit_listed_campaigns.html', template_values)
+
+
+@login_required
 def organization_delete_process_view(request):
     """
     Delete an organization
@@ -1337,6 +1391,93 @@ def organization_edit_account_process_view(request):
 
 
 @login_required
+def organization_edit_listed_campaigns_process_view(request):
+    """
+    Process the edit listed campaigns form
+    :param request:
+    :return:
+    """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    campaignx_listed_by_organization_campaignx_we_vote_id = \
+        request.POST.get('campaignx_listed_by_organization_campaignx_we_vote_id', None)
+    campaignx_listed_by_organization_visible_to_public = \
+        positive_value_exists(request.POST.get('campaignx_listed_by_organization_visible_to_public', False))
+    google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+    organization_id = convert_to_int(request.POST.get('organization_id', None))
+    organization_we_vote_id = request.POST.get('organization_we_vote_id', None)
+    state_code = request.POST.get('state_code', '')
+
+    # Create new CampaignXListedByOrganization
+    if positive_value_exists(campaignx_listed_by_organization_campaignx_we_vote_id):
+        do_not_create = False
+        link_already_exists = False
+        status = ""
+        # Does it already exist?
+        try:
+            CampaignXListedByOrganization.objects.get(
+                campaignx_we_vote_id=campaignx_listed_by_organization_campaignx_we_vote_id,
+                site_owner_organization_we_vote_id=organization_we_vote_id)
+            link_already_exists = True
+        except CampaignXListedByOrganization.DoesNotExist:
+            link_already_exists = False
+        except Exception as e:
+            do_not_create = True
+            messages.add_message(request, messages.ERROR, 'Link already exists.')
+            status += "ADD_LISTED_CAMPAIGN_ALREADY_EXISTS " + str(e) + " "
+
+        if not do_not_create and not link_already_exists:
+            # Now create new link
+            try:
+                # Create the Campaign
+                CampaignXListedByOrganization.objects.create(
+                    campaignx_we_vote_id=campaignx_listed_by_organization_campaignx_we_vote_id,
+                    site_owner_organization_we_vote_id=organization_we_vote_id,
+                    visible_to_public=campaignx_listed_by_organization_visible_to_public)
+
+                messages.add_message(request, messages.INFO, 'New CampaignXListedByOrganization created.')
+            except Exception as e:
+                messages.add_message(request, messages.ERROR,
+                                     'Could not create CampaignXListedByOrganization.'
+                                     ' {error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+
+    # ##################################
+    # Deleting or Adding a new CampaignXListedByOrganization
+    campaignx_manager = CampaignXManager()
+    campaignx_listed_by_organization_list = campaignx_manager.retrieve_campaignx_listed_by_organization_list(
+        site_owner_organization_we_vote_id=organization_we_vote_id,
+        ignore_visible_to_public=True,
+        read_only=False
+    )
+    for campaignx_listed_by_organization in campaignx_listed_by_organization_list:
+        if positive_value_exists(campaignx_listed_by_organization.campaignx_we_vote_id):
+            variable_name = "delete_campaignx_listed_by_organization_" + str(campaignx_listed_by_organization.id)
+            delete_campaignx_listed_by_organization = positive_value_exists(request.POST.get(variable_name, False))
+            if positive_value_exists(delete_campaignx_listed_by_organization):
+                campaignx_listed_by_organization.delete()
+                messages.add_message(request, messages.INFO, 'Deleted CampaignXListedByOrganization.')
+            else:
+                exists_variable_name = "campaignx_listed_by_organization_visible_to_public_" + \
+                                str(campaignx_listed_by_organization.id) + "_exists"
+                campaignx_listed_by_organization_visible_to_public_exists = request.POST.get(exists_variable_name, None)
+                variable_name = "campaignx_listed_by_organization_visible_to_public_" + \
+                                str(campaignx_listed_by_organization.id)
+                campaignx_listed_by_organization_visible_to_public = \
+                    positive_value_exists(request.POST.get(variable_name, False))
+                if campaignx_listed_by_organization_visible_to_public_exists is not None:
+                    campaignx_listed_by_organization.visible_to_public = \
+                        campaignx_listed_by_organization_visible_to_public
+                    campaignx_listed_by_organization.save()
+
+    return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + str(state_code))
+
+
+@login_required
 def organization_position_list_view(request, organization_id=0, organization_we_vote_id="", incorrect_integer=0):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = \
@@ -1600,7 +1741,31 @@ def organization_position_list_view(request, organization_id=0, organization_we_
 
     organization_type_display_text = ORGANIZATION_TYPE_MAP.get(organization_on_stage.organization_type,
                                                                ORGANIZATION_TYPE_MAP[UNKNOWN])
+
+    campaignx_manager = CampaignXManager()
+    campaignx_listed_by_organization_list = campaignx_manager.retrieve_campaignx_listed_by_organization_list(
+        site_owner_organization_we_vote_id=organization_we_vote_id,
+        ignore_visible_to_public=True,
+        read_only=True
+    )
+    campaignx_listed_by_organization_list_modified = []
+    # campaignx_listed_by_organization_list = campaignx_listed_by_organization_list[:3]
+    for campaignx_listed_by_organization in campaignx_listed_by_organization_list:
+        if positive_value_exists(campaignx_listed_by_organization.campaignx_we_vote_id):
+            results = campaignx_manager.retrieve_campaignx(
+                campaignx_we_vote_id=campaignx_listed_by_organization.campaignx_we_vote_id)
+            if results['campaignx_found']:
+                campaignx_listed_by_organization.campaignx_title = results['campaignx'].campaign_title
+        if positive_value_exists(campaignx_listed_by_organization.listing_requested_by_voter_we_vote_id):
+            results = voter_manager.retrieve_voter_by_we_vote_id(
+                campaignx_listed_by_organization.listing_requested_by_voter_we_vote_id,
+                read_only=True)
+            if results['voter_found']:
+                campaignx_listed_by_organization.listing_requested_by_voter_name = results['voter'].get_full_name()
+        campaignx_listed_by_organization_list_modified.append(campaignx_listed_by_organization)
+
     template_values = {
+        'campaignx_listed_by_organization_list':    campaignx_listed_by_organization_list_modified,
         'candidate_id':                     candidate_id,
         'candidate_we_vote_id':             candidate_we_vote_id,
         'election_list':                    election_list,
