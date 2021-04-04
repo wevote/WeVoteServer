@@ -22,7 +22,7 @@ from django.shortcuts import render
 from django.db.models import Q
 from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
+    handle_record_not_found_exception, handle_record_not_saved_exception
 from position.controllers import move_positions_to_another_office
 from position.models import OPPOSE, PositionListManager, SUPPORT
 from voter.models import voter_has_authority
@@ -552,6 +552,7 @@ def office_edit_process_view(request):
 
     # Check to see if this office is already in the database
     office_on_stage_found = False
+    office_on_stage = None
     try:
         office_query = ContestOffice.objects.filter(id=office_id)
         if len(office_query):
@@ -730,6 +731,7 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
         election = Election.objects.get(google_civic_election_id=google_civic_election_id)
 
     office_search_results_list = []
+    contest_office = []
     if positive_value_exists(office_search):
         office_queryset = ContestOffice.objects.all()
         office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
@@ -762,8 +764,7 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
 
         office_search_results_list = list(office_queryset)
     elif contest_office_found:
-        ignore_office_we_vote_id_list = []
-        ignore_office_we_vote_id_list.append(contest_office.we_vote_id)
+        ignore_office_we_vote_id_list = [contest_office.we_vote_id]
         results = find_duplicate_contest_office(contest_office, ignore_office_we_vote_id_list)
         if results['contest_office_merge_possibility_found']:
             office_search_results_list = results['contest_office_list']
@@ -886,7 +887,7 @@ def find_duplicate_office_view(request, office_id=0):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    office_list = []
+    # office_list = []
 
     number_of_duplicate_contest_offices_processed = 0
     number_of_duplicate_contest_offices_failed = 0
@@ -909,8 +910,7 @@ def find_duplicate_office_view(request, office_id=0):
                              "Contest Office must have a google_civic_election_id in order to merge.")
         return HttpResponseRedirect(reverse('office:office_edit', args=(office_id,)))
 
-    ignore_office_we_vote_id_list = []
-    ignore_office_we_vote_id_list.append(contest_office.we_vote_id)
+    ignore_office_we_vote_id_list = [contest_office.we_vote_id]
 
     results = find_duplicate_contest_office(contest_office, ignore_office_we_vote_id_list)
 
@@ -1130,7 +1130,7 @@ def office_merge_process_view(request):
 
     contest_office_manager = ContestOfficeManager()
 
-    merge = request.POST.get('merge', False)
+    # merge = request.POST.get('merge', False)
     skip = request.POST.get('skip', False)
 
     # Contest office 1 is the one we keep, and Contest office 2 is the one we will merge into Contest office 1

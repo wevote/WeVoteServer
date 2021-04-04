@@ -575,7 +575,7 @@ def candidate_list_view(request):
             facebook_urls_without_picture_urls = candidate_facebook_missing_query.count()
 
         except Exception as e:
-            logger.error("Find facebook URLs without facebook pictures in candidate: " + e)
+            logger.error("Find facebook URLs without facebook pictures in candidate: ", e)
 
     status_print_list = ""
     status_print_list += "candidate_list_count: " + str(candidate_list_count) + " "
@@ -1118,7 +1118,8 @@ def repair_imported_names_view(request):
         highlight = True if name[-1] in string.punctuation else highlight
         short_office_name = ''
         if is_candidate:
-            short_office_name = person.contest_office_name[0:30] if person.contest_office_name != "N" else ''
+            short_office_name = person.contest_office_name[0:30] \
+                if (person.contest_office_name != "N" and person.contest_office_name is not None) else ''
         party = person.party.replace('Party Preference:', '') if person.party else ''
 
         person_item = {
