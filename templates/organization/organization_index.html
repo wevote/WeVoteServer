@@ -8,7 +8,7 @@
   <head>
     <meta
       name="description"
-      content="{{ chosen_social_share_description|default_if_none:"" }}"
+      content="{{ chosen_social_share_description|default_if_none:'' }}"
     />
     <title>{{ html_title }}</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -21,7 +21,7 @@
     <meta property="og:url"           content="https://{{ organization_incoming_domain }}" />
     <meta property="og:type"          content="website" />
     <meta property="og:title"         content="{{ html_title }}" />
-    <meta property="og:description"   content="{{ chosen_social_share_description|default_if_none:"" }}" />
+    <meta property="og:description"   content="{{ chosen_social_share_description|default_if_none:'' }}" />
   {% if hide_social_share_image %}  <!-- Social Share image hidden //-->
   {% elif chosen_social_share_master_image_url_https %}
     <meta property="og:image"         content="{{ chosen_social_share_master_image_url_https }}" />

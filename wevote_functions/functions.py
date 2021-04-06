@@ -916,7 +916,7 @@ def extract_zip_formatted_from_zip9(zip9):
 
 # precompile when this "functions" app is loaded
 pattern_quotes = re.compile(r'"([A-Z]+)\s?""([A-Z]+)""\s?([A-Z]+)"')
-pattern_nick_in_middle = re.compile(r'(.*?)(?:\`|\')([A-Z.]+)(?:\`|\')(.*?)$')
+pattern_nick_in_middle = re.compile(r'(.*?)(?:[`\'])([A-Z.]+)(?:[`\'])(.*?)$')
 pattern_nick_in_middle_paren = re.compile(r'(.*?)(?:\()([A-Z]+)(?:\) )(.*?)$')
 pattern_nick_at_end = re.compile(r'(.*?)\s+(.*?)\s+\((.*?)\)$')
 
