@@ -12,6 +12,11 @@ span.nobr { white-space: nowrap; }
 {% if not organization or not organization.we_vote_id %}
   This page requires a valid organization.
 {% else %}
+<a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+>
+    &lt; Back to {% if organization %}{{ organization.organization_name }}{% else %}Endorser{% endif %} Summary
+</a>
+
 <h1>{{ organization.organization_name }}: Listed Campaigns</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 

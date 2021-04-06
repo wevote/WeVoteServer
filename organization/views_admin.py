@@ -1472,7 +1472,7 @@ def organization_edit_listed_campaigns_process_view(request):
                         campaignx_listed_by_organization_visible_to_public
                     campaignx_listed_by_organization.save()
 
-    return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
+    return HttpResponseRedirect(reverse('organization:organization_edit_listed_campaigns', args=(organization_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
                                 "&state_code=" + str(state_code))
 
@@ -1764,8 +1764,24 @@ def organization_position_list_view(request, organization_id=0, organization_we_
                 campaignx_listed_by_organization.listing_requested_by_voter_name = results['voter'].get_full_name()
         campaignx_listed_by_organization_list_modified.append(campaignx_listed_by_organization)
 
+    campaignx_owner_list_modified = []
+    campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
+        organization_we_vote_id=organization_we_vote_id,
+        viewer_is_owner=True
+    )
+
+    # voter_manager = VoterManager()
+    for campaignx_owner in campaignx_owner_list:
+        if positive_value_exists(campaignx_owner.campaignx_we_vote_id):
+            results = campaignx_manager.retrieve_campaignx(
+                campaignx_we_vote_id=campaignx_owner.campaignx_we_vote_id)
+            if results['campaignx_found']:
+                campaignx_owner.campaign_title = results['campaignx'].campaign_title
+        campaignx_owner_list_modified.append(campaignx_owner)
+
     template_values = {
         'campaignx_listed_by_organization_list':    campaignx_listed_by_organization_list_modified,
+        'campaignx_owner_list':             campaignx_owner_list_modified,
         'candidate_id':                     candidate_id,
         'candidate_we_vote_id':             candidate_we_vote_id,
         'election_list':                    election_list,

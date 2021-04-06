@@ -1,0 +1,127 @@
+{# templates/campaign/campaigns_edit_owners.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if campaignx %}{{ campaignx.campaign_title }}{% endif %}: Campaign Owner(s){% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<style>
+span.nobr { white-space: nowrap; }
+</style>
+
+{% if not campaignx or not campaignx.we_vote_id %}
+  This page requires a valid campaignx.
+{% else %}
+<a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+>
+    &lt; Back to Campaign Summary
+</a>
+
+
+<h1>{{ campaignx.campaign_title }}: Campaign Owner(s)</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+
+<form action="{% url "campaign:campaignx_edit_owners_process" %}" method="post" class="form-horizontal">
+{% csrf_token %}
+<input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+<input type="hidden" name="campaignx_id" value="{{ campaignx.id }}">
+<input type="hidden" name="campaignx_we_vote_id" value="{{ campaignx.we_vote_id }}">
+<input type="hidden" name="state_code" value="{{ state_code }}">
+
+<p>These are individuals or endorser(s) who have the right to administer this campaign.</p>
+
+<div class="form-group">
+    <label for="google_civic_election_id_id" class="col-sm-3 control-label">
+        Add New Owner:
+    </label>
+    <div class="col-sm-8">
+        <table id="campaignx_owner_add">
+            <thead>
+                <tr>
+                    <th>Endorser Organization We Vote Id</th>
+                    <th>Visible to Public</th>
+                </tr>
+            </thead>
+            <tr>
+                <td style="width: 250px;">
+                    <input type="text"
+                           name="campaignx_owner_organization_we_vote_id"
+                           style="width: 230px; border: 1px solid lightgray;"/>
+                </td>
+                <td>
+                    <input type="checkbox"
+                           name="campaignx_owner_visible_to_public"
+                           id="campaignx_owner_visible_to_public_id"
+                           value=1
+                           checked
+                    />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="col-8">
+<table class="table">
+    <thead>
+        <tr>
+            <th>Campaign Owners</th>
+            <th>Owner Visible to Public</th>
+            <th>Delete Owner</th>
+        </tr>
+    </thead>
+    {% for campaignx_owner in campaignx_owner_list %}
+    <tr>
+        <td>
+            {% if campaignx_owner.we_vote_hosted_profile_image_url_tiny %}
+                <img src="{{ campaignx_owner.we_vote_hosted_profile_image_url_tiny }}" />
+            {% endif %}
+            {{ campaignx_owner.organization_name }}&nbsp;&nbsp;
+            <a href="{% url 'organization:organization_we_vote_id_position_list' campaignx_owner.organization_we_vote_id %}"
+               target="_blank">
+                view
+                <span class="glyphicon glyphicon-new-window"></span></a>
+        </td>
+        <td>
+            <input type="hidden" name="campaignx_owner_visible_to_public_{{ campaignx_owner.id }}_exists" value="1">
+            <input type="checkbox"
+                   name="campaignx_owner_visible_to_public_{{ campaignx_owner.id }}"
+                   id="campaignx_owner_visible_to_public_{{ campaignx_owner.id }}_id"
+                   value="True"
+                   {% if campaignx_owner.visible_to_public %}
+                     checked="checked"
+                   {% endif %}
+            />
+            visible
+        </td>
+        <td>
+            <input type="checkbox"
+                   name="delete_campaignx_owner_{{ campaignx_owner.id }}"
+                   id="delete_campaignx_owner_{{ campaignx_owner.id }}_id"
+                   value=1
+            />
+            delete
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+
+
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+      <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">cancel</a>
+    </label>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-default">Update Campaign Owner(s)</button>
+    </div>
+</div>
+
+</form>
+{% endif %}
+  <br />
+  <br />
+{% endblock %}

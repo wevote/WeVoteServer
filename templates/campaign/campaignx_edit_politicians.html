@@ -1,0 +1,122 @@
+{# templates/campaign/campaigns_edit_politicians.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if campaignx %}{{ campaignx.campaign_title }}{% endif %}: Politician(s) Supported by This Campaign{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<style>
+span.nobr { white-space: nowrap; }
+</style>
+
+{% if not campaignx or not campaignx.we_vote_id %}
+  This page requires a valid campaignx.
+{% else %}
+<a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+>
+    &lt; Back to Campaign Summary
+</a>
+
+
+<h1>{{ campaignx.campaign_title }}: Politician(s) Supported by This Campaign</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+
+<form action="{% url "campaign:campaignx_edit_politicians_process" %}" method="post" class="form-horizontal">
+{% csrf_token %}
+<input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+<input type="hidden" name="campaignx_id" value="{{ campaignx.id }}">
+<input type="hidden" name="campaignx_we_vote_id" value="{{ campaignx.we_vote_id }}">
+<input type="hidden" name="state_code" value="{{ state_code }}">
+
+<p>These are the politicians this campaign is supporting.</p>
+
+<div class="form-group">
+    <label for="google_civic_election_id_id" class="col-sm-3 control-label">
+        Add New Politician:
+    </label>
+    <div class="col-sm-8">
+        <table id="campaignx_politician_add">
+            <thead>
+                <tr>
+                    <th>Politician We Vote Id</th>
+                </tr>
+            </thead>
+            <tr>
+                <td style="width: 250px;">
+                    <input type="text"
+                           name="politician_we_vote_id"
+                           style="width: 230px; border: 1px solid lightgray;"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="col-8">
+<table class="table">
+    <thead>
+        <tr>
+            <th>Campaign Politicians</th>
+            <th>State Code</th>
+            <th>Delete Politician</th>
+        </tr>
+    </thead>
+    {% for campaignx_politician in campaignx_politician_list %}
+    <tr>
+        <td>
+            {% if campaignx_politician.we_vote_hosted_profile_image_url_tiny %}
+                <img src="{{ campaignx_politician.we_vote_hosted_profile_image_url_tiny }}" />
+            {% endif %}
+            {{ campaignx_politician.politician_name }}&nbsp;&nbsp;
+            <a href="{% url 'politician:politician_we_vote_id_edit' campaignx_politician.politician_we_vote_id %}"
+               target="_blank">
+                view
+                <span class="glyphicon glyphicon-new-window"></span></a>
+        </td>
+        <td>
+            {% if campaignx_politician.state_code %}
+                {{ campaignx_politician.state_code }}&nbsp;&nbsp;
+            {% endif %}
+        </td>
+        <td>
+            <input type="checkbox"
+                   name="delete_campaignx_politician_{{ campaignx_politician.id }}"
+                   id="delete_campaignx_politician_{{ campaignx_politician.id }}_id"
+                   value=1
+            />
+            delete
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+
+
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+      <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">cancel</a>
+    </label>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-default">Update Politician(s)</button>
+    </div>
+</div>
+
+</form>
+
+<br />
+<br />
+Politician List Serialized (For Reference Only)
+    <textarea
+        class="form-control animated"
+        disabled
+        id="politician_list_serialized_id"
+        name="politician_list_serialized"
+        rows="2">{{ campaignx.politician_list_serialized|default_if_none:"" }}</textarea>
+
+{% endif %}
+  <br />
+  <br />
+{% endblock %}

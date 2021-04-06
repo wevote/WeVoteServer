@@ -1,0 +1,113 @@
+{# templates/campaign/campaignx_summary.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if campaignx %}{{ campaignx.campaign_title  }}{% else %}New Campaign{% endif %}{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<style>
+    span.nobr { white-space: nowrap; }
+    select.form-control {
+      height: auto !important;
+    }
+</style>
+
+<a href="{% url 'campaign:campaignx_list' %}">< Back to List</a>
+
+<h1>{% if campaignx %}{{ campaignx.campaign_title }}{% else %}New Campaign{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<table>{# Two column master table #}
+<tr>
+    <td style="vertical-align:top; width: 50%;">
+        <table>
+            <tr>
+                <th>We Vote ID:</th>
+                <td> {{ campaignx.we_vote_id }}
+                    (<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}">edit</a>)
+                </td>
+            </tr>
+        {% if campaignx.campaign_description %}
+            <tr>
+                <th style="vertical-align:top">Description: </th>
+                <td style="vertical-align:top">
+                    {{ campaignx.campaign_description|default_if_none:"" }}
+                </td>
+            </tr>
+        {% endif %}
+            <tr>
+                <th></th>
+                <td><a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       class="btn btn-primary">Edit</a></td>
+            </tr>
+        </table>
+    </td>
+    <td>&nbsp;&nbsp;&nbsp;</td>
+    <td style="vertical-align:top; width: 50%;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Campaign Owner(s)</th>
+                    <th>Visible to Public</th>
+                </tr>
+            </thead>
+        {% for campaignx_owner in campaignx_owner_list %}
+            <tr>
+                <td>
+                {% if campaignx_owner.we_vote_hosted_profile_image_url_tiny %}
+                    <img src="{{ campaignx_owner.we_vote_hosted_profile_image_url_tiny }}" />
+                {% endif %}
+                    {{ campaignx_owner.organization_name }}&nbsp;&nbsp;
+                </td>
+                <td>
+                    {% if campaignx_owner.visible_to_public %}
+                        visible
+                    {% else %}
+                        NOT visible
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="3">
+                    <a href="{% url 'campaign:campaignx_edit_owners' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                       class="btn btn-primary">
+                        Add or Edit Campaign Owners
+                    </a>
+                </td>
+            </tr>
+        </table>
+        <br />
+        <br />
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Campaign Politician(s)</th>
+                    <th>State</th>
+                </tr>
+            </thead>
+        {% for campaignx_politician in campaignx_politician_list %}
+            <tr>
+                <td>
+                    {{ campaignx_politician.politician_name }}&nbsp;&nbsp;
+{#                    <a href="{% url 'campaign:campaignx_edit' campaignx_politician.campaignx_we_vote_id %}"#}
+{#                       target="_blank">#}
+{#                        edit#}
+{#                        <span class="glyphicon glyphicon-new-window"></span></a>#}
+                </td>
+                <td>
+                    {{ campaignx_politician.state_code }}&nbsp;&nbsp;
+                </td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="3"><a href="{% url 'campaign:campaignx_edit_politicians' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                                   class="btn btn-primary">Add or Edit Politicians to Campaign</a></td>
+            </tr>
+        </table>
+    </td>
+</tr>
+</table>{# End of two column master table #}
+
+
+{% endblock %}

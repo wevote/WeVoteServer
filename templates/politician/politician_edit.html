@@ -332,7 +332,8 @@
                 {% endif %}
             </td>
             <td>{{ politician_position.get_stance_display }}
-                {% if politician_position.vote_smart_rating %} {{ politician_position.vote_smart_rating }}%{% endif %}</td>
+{#                {% if politician_position.vote_smart_rating %} {{ politician_position.vote_smart_rating }}%{% endif %}#}
+            </td>
             <td>{{ politician_position.vote_smart_time_span|default_if_none:"" }}</td>
         </tr>
         {% endif %}

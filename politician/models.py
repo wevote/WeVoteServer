@@ -231,6 +231,9 @@ class PoliticianManager(models.Manager):
         }
         return results
 
+    def retrieve_politician_from_we_vote_id(self, politician_we_vote_id):
+        return self.retrieve_politician(0, politician_we_vote_id)
+
     def retrieve_all_politicians_that_might_match_candidate(self, vote_smart_id, maplight_id, candidate_twitter_handle,
                                                             candidate_name='', state_code=''):
         politician_list = []
