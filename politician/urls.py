@@ -14,6 +14,8 @@ urlpatterns = [
         views_admin.politicians_import_from_master_server_view, name='politicians_import_from_master_server'),
     url(r'^new/$', views_admin.politician_new_view, name='politician_new'),
     url(r'^(?P<politician_id>[0-9]+)/edit/$', views_admin.politician_edit_view, name='politician_edit'),
+    url(r'^(?P<politician_we_vote_id>wv[\w]{2}pol[\w]+)/edit$',
+        views_admin.politician_edit_view, name='politician_we_vote_id_edit'),
     url(r'^(?P<politician_id>[0-9]+)/retrieve_photos/$',
         views_admin.politician_retrieve_photos_view, name='politician_retrieve_photos'),
     # url(r'^(?P<politician_id>[0-9]+)/tag_new/$', views.politician_tag_new_view, name='politician_tag_new'),

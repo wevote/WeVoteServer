@@ -195,7 +195,7 @@
                 {% if candidate_position.statement_text %}
                 <span style="color: darkgray">{{ candidate_position.statement_text }}</span>
                 {% endif %}
-                {% if candidate_position.vote_smart_rating %} {{ candidate_position.vote_smart_rating }}%{% endif %}</td>
+{#                {% if candidate_position.vote_smart_rating %} {{ candidate_position.vote_smart_rating }}%{% endif %}</td>#}
             <td>{{ candidate_position.election.google_civic_election_id }}</td>
             <td>{{ candidate_position.election.election_day_text }}</td>
             <td>{{ candidate_position.vote_smart_time_span|default_if_none:"" }}</td>

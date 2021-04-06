@@ -268,7 +268,7 @@ def politician_edit_by_we_vote_id_view(request, politician_we_vote_id):
 
 
 @login_required
-def politician_edit_view(request, politician_id):
+def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -291,7 +291,10 @@ def politician_edit_view(request, politician_id):
     duplicate_politician_list = []
 
     try:
-        politician_on_stage = Politician.objects.get(id=politician_id)
+        if positive_value_exists(politician_id):
+            politician_on_stage = Politician.objects.get(id=politician_id)
+        else:
+            politician_on_stage = Politician.objects.get(we_vote_id=politician_we_vote_id)
         politician_on_stage_found = True
     except Politician.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)

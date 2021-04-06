@@ -800,7 +800,7 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def retrieve_campaignx_owner_list(self, campaignx_we_vote_id='', viewer_is_owner=False):
+    def retrieve_campaignx_owner_list(self, campaignx_we_vote_id='', organization_we_vote_id='', viewer_is_owner=False):
         campaignx_owner_list_found = False
         campaignx_owner_list = []
         try:
@@ -808,7 +808,10 @@ class CampaignXManager(models.Manager):
             if not positive_value_exists(viewer_is_owner):
                 # If not already an owner, limit to owners who are visible to public
                 campaignx_owner_query = campaignx_owner_query.filter(visible_to_public=True)
-            campaignx_owner_query = campaignx_owner_query.filter(campaignx_we_vote_id=campaignx_we_vote_id)
+            if positive_value_exists(campaignx_we_vote_id):
+                campaignx_owner_query = campaignx_owner_query.filter(campaignx_we_vote_id=campaignx_we_vote_id)
+            if positive_value_exists(organization_we_vote_id):
+                campaignx_owner_query = campaignx_owner_query.filter(organization_we_vote_id=organization_we_vote_id)
             campaignx_owner_list = list(campaignx_owner_query)
             if len(campaignx_owner_list):
                 campaignx_owner_list_found = True
@@ -1525,7 +1528,6 @@ class CampaignXOwner(models.Model):
     def __unicode__(self):
         return "CampaignXOwner"
 
-    campaignx_id = models.PositiveIntegerField(null=True, blank=True)
     campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
@@ -1539,7 +1541,6 @@ class CampaignXPolitician(models.Model):
     def __unicode__(self):
         return "CampaignXPolitician"
 
-    campaignx_id = models.PositiveIntegerField(null=True, blank=True)
     campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     politician_name = models.CharField(max_length=255, null=False, blank=False)

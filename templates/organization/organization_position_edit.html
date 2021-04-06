@@ -266,7 +266,8 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
             <span style="color: darkgray">{{ organization_position.statement_text|default_if_none:""|truncatechars:125 }}</span>
           </a></td>
           <td>{{ organization_position.get_stance_display }}
-              {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}</td>
+{#              {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}#}
+          </td>
           <td>{{ organization_position.election.google_civic_election_id }}</td>
           <td>{{ organization_position.election.election_day_text }}</td>
       </tr>

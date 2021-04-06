@@ -11,68 +11,32 @@
       height: auto !important;
     }
 </style>
+<a href="{% url 'campaign:campaignx_list' %}">< Cancel and Back to List</a>
 
-<h1>{% if campaignx %}{{ campaignx.campaign_title }}{% else %}New Campaign{% endif %}</h1>
+<h1>{% if campaignx %}{{ campaignx.campaign_title }}{% else %}Missing Campaign{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-
-{% if campaignx_list %}
-    <h3>Is the organization you are adding one of these?</h3>
-    <table cellpadding="5" cellspacing="5" border="1">
-        <tr>
-            <td></td>
-            <td></td>
-            <td>Campaign</td>
-            <td>Twitter</td>
-            <td>Facebook</td>
-            <td>Website</td>
-            <td>Wikipedia?</td>
-            <td></td>
-        </tr>
-{#    {% for possible_campaignx in campaignx_list %}#}
-{#        <tr>#}
-{#            <td>{{ forloop.counter }}</td>#}
-{#            <td>{{ possible_campaignx.campaignx_we_vote_id }}</td>#}
-{#            <td><a href="{% url 'campaign:campaignx_list' possible_campaignx.campaignx_we_vote_id %}" target="_blank">{{ possible_campaignx.campaign_title }}</a> (view in new window)</td>#}
-{#            <td>{% if possible_campaignx.campaignx_twitter_handle %}{{ possible_campaignx.campaignx_twitter_handle }}{% endif %}</td>#}
-{#            <td>{% if possible_campaignx.campaignx_facebook %}{{ possible_campaignx.campaignx_facebook }}{% endif %}</td>#}
-{#            <td>{% if possible_campaignx.campaignx_website %}{{ possible_campaignx.campaignx_website }}{% endif %}</td>#}
-{#            <td>{% if possible_campaignx.wikipedia_page_id %}#}
-{#                <a href="{{ possible_campaignx.generate_wikipedia_link }}" target="_blank">W yes</a>{% endif %}</td>#}
-{#            <td><a href="{% url 'campaign:campaignx_edit' possible_campaignx.campaignx_we_vote_id %}">CHOOSE</a></td>#}
-{#        </tr>#}
-{#    {% endfor %}#}
-    </table>
-    <p></p>
-{% endif %}
-
 
 
 {% if campaignx %}
 {% else %}
-    <p>If you include the twitter handle and website for this organization below, we will have a better chance of preventing duplicate
-    entries.</p>
+    <p>This form only allows editing an existing CampaignX.</p>
 {% endif %}
 
-{#<form action="{% url "campaign:campaignx_edit_process" %}" method="post" class="form-horizontal">#}
+<form action="{% url "campaign:campaignx_edit_process" %}" method="post" class="form-horizontal">
 {% csrf_token %}
-    <input type="hidden" name="campaignx_we_vote_id" value="{% if campaignx %}{{ campaignx.we_vote_id }}{% else %}0{% endif %}">
+    <input type="hidden" name="campaignx_we_vote_id" value="{% if campaignx %}{{ campaignx.we_vote_id }}{% endif %}">
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
-        {% if campaignx %}
-            <a href="{% url 'campaign:campaignx_list' %}">cancel</a>
-        {% else %}
-            <a href="{% url 'campaign:campaignx_list' %}">cancel</a>
-        {% endif %}
+        <a href="{% url 'campaign:campaignx_list' %}">cancel</a>
     </label>
     <div class="col-sm-8">
-        <button type="submit" class="btn btn-primary">{% if campaignx %}Update Campaign{% else %}Save New Campaign{% endif %}</button>
+        <button type="submit" class="btn btn-primary">{% if campaignx %}Update Campaign{% else %}CANNOT SAVE{% endif %}</button>
     </div>
 </div>
 
 <div class="form-group">
-    <label for="campaign_title_id" class="col-sm-3 control-label">Campaign Name</label>
+    <label for="campaign_title_id" class="col-sm-3 control-label">Campaign Title</label>
     <div class="col-sm-8">
         <input type="text" name="campaign_title" id="campaign_title_id" class="form-control"
                value="{% if campaignx %}{{ campaignx.campaign_title }}{% else %}{{ campaign_title }}{% endif %}" />
@@ -82,23 +46,6 @@
     </div>
 </div>
 
-
-{#{% if campaignx_types %}#}
-{#<div class="form-group">#}
-{#    <label for="campaignx_type_id" class="col-sm-3 control-label">Campaign Type</label>#}
-{#    <div class="col-sm-8">#}
-{#        <select id="campaignx_type_id" name="campaignx_type" class="form-control">#}
-{#            <option value="" {% if '' ==  campaignx_type %} selected="selected" {% endif %}>#}
-{#                -- Filter by Campaign Type --</option>#}
-{#        {% for key, campaignx_type in campaignx_types %}#}
-{#            <option value="{{ key }}"#}
-{#                    {% if key|lower == campaignx.campaignx_type|lower %} selected="selected"{% endif %}>#}
-{#            {{ campaignx_type }}</option>#}
-{#        {% endfor %}#}
-{#        </select>#}
-{#    </div>#}
-{#</div>#}
-{#{% endif %} {# End of if campaignx_types #}
 
 {% if campaignx %}
 <div class="form-group">
@@ -112,57 +59,44 @@
             rows="8">{{ campaignx.campaign_description|default_if_none:"" }}</textarea>
     </div>
 </div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">Politician List Serialized</label>
+    <div class="col-sm-8 ">
+        <textarea
+            name="politician_list_serialized"
+            class="form-control animated"
+            id="politician_list_serialized_id"
+            placeholder="Politician List Serialized..."
+            rows="2">{{ campaignx.politician_list_serialized|default_if_none:"" }}</textarea>
+    </div>
+</div>
+
 {% endif %}
 
-{#{% if upcoming_election_list %}#}
-{#<div class="form-group">#}
-{#    <label for="google_civic_election_id" class="col-sm-3 control-label">Create Voter Guide</label>#}
-{#    <div class="col-sm-8">#}
-{#        <select id="google_civic_election_id" name="google_civic_election_id" class="form-control">#}
-{#            <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>#}
-{#                -- Create Voter Guide for this Election --</option>#}
-{#        {% for election in upcoming_election_list %}#}
-{#            <option value="{{ election.google_civic_election_id }}"#}
-{#                    {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>#}
-{#                {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>#}
-{#        {% endfor %}#}
-{#        </select>#}
-{#    </div>#}
-{#</div>#}
-{#{% endif %}#}
-
-
-{#{% if state_list %}#}
-{#<div class="form-group">#}
-{#    <label for="state_served_code_id" class="col-sm-3 control-label">State Served Code</label>#}
-{#    <div class="col-sm-8">#}
-{#        <select id="state_served_code_id" name="state_served_code" class="form-control">#}
-{#            <option value="" {% if '' == state_served_code %} selected="selected"{% endif %}>#}
-{#                -- State Served --</option>#}
-{#        {% for key, state in state_list %}#}
-{#            <option value="{{ key }}"#}
-{#                    {% if key|lower == state_served_code|lower %} selected="selected"{% endif %}>#}
-{#                {{ state }}</option>#}
-{#        {% endfor %}#}
-{#        </select>#}
-{#    </div>#}
-{#</div>#}
-{#{% endif %}{# End of if state_list #}
 
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
-        {% if campaignx %}
-            <a href="{% url 'campaign:campaignx_list' %}">cancel</a>
-        {% else %}
-            <a href="{% url 'campaign:campaignx_list' %}">cancel</a>
-        {% endif %}
+        <a href="{% url 'campaign:campaignx_list' %}">cancel</a>
     </label>
     <div class="col-sm-8">
-        <button type="submit" class="btn btn-primary">{% if campaignx %}Update Campaign{% else %}Save New Campaign{% endif %}</button>
+        <button type="submit" class="btn btn-primary">{% if campaignx %}Update Campaign{% else %}CANNOT SAVE{% endif %}</button>
     </div>
 </div>
-{#</form>#}
+</form>
+
+<div style='clear:both'></div>
+
+
+{% if campaignx %}
+  <br />
+  <br />
+    {% if campaignx.we_vote_hosted_campaign_photo_large_url %}
+        <img src="{{ campaignx.we_vote_hosted_campaign_photo_large_url }}"><br />
+        Large<br />
+    {% endif %}
+{% endif %}
 
 
 {% if campaignx %}
@@ -177,14 +111,5 @@
   </label>
 {#</form>#}
 {% endif %}
-  <br />
-  <br />
 
-
-{% if campaignx %}
-    {% if campaignx.we_vote_hosted_campaign_photo_large_url %}
-        <img src="{{ campaignx.we_vote_hosted_campaign_photo_large_url }}"><br />
-        Large<br />
-    {% endif %}
-{% endif %}
 {% endblock %}

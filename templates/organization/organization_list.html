@@ -198,7 +198,7 @@
             <td><a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}"
                    target="_blank">
                 {{ organization.organization_name }} <span class="glyphicon glyphicon-new-window"></span></a><br />
-                &nbsp;&nbsp;&nbsp;(<a href="{% url 'organization:organization_edit' organization.id %}"
+                &nbsp;&nbsp;&nbsp;({{ organization.we_vote_id }} <a href="{% url 'organization:organization_edit' organization.id %}"
                                       target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>)
               {% if organization.linked_issues_count %}
                 {{ organization.linked_issues_count }} Values/Issues Linked

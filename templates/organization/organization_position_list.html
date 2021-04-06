@@ -53,7 +53,7 @@
                     </td>
                 </tr>
             {% endif %}
-            {% if organization.generate_facebook_link %}
+            {% if organization.organization_email %}
                 <tr>
                     <th>Contact Email: </th>
                     <td>
@@ -193,26 +193,26 @@
                 </tr>
             </table>
 
-<br />
-<br />
-<br />
-<ul>
-    <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}&organization_we_vote_id={{ organization.we_vote_id }}&state_code={{ organization.state_served_code }}" target="_blank">
-        Suggest a Voter Guide</a></strong> (in a new window). Quick public tools that feeds into import_export_batch system.</li>
-    <li><a href="{% url 'organization:organization_position_new' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}"
-           target="_blank">Add New Position Form</a> (in new window)</li>
-    <li><a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}" >
-        Refresh Voter Guides</a></li>
-    <li><a href="{% url 'voter_guide:voter_guide_list' %}?voter_guide_search={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}"
-           target="_blank">Find Voter Guides for this Endorser</a> (new window)</li>
-    <li>Assorted tools:
-    &nbsp;&nbsp;&nbsp; <a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a>,
-        <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
-        <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape endorser website for Twitter Accounts</a>,
-        <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}">Retrieve tweets for endorser</a>,
-        <a href="{% url 'organization:organization_analyze_tweets' organization.we_vote_id %}">Link issues from twitter feed</a>
-    </li>
-</ul>
+            <br />
+            <br />
+            <br />
+            <ul>
+                <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}&organization_we_vote_id={{ organization.we_vote_id }}&state_code={{ organization.state_served_code }}" target="_blank">
+                    Suggest a Voter Guide</a></strong> (in a new window). Quick public tools that feeds into import_export_batch system.</li>
+                <li><a href="{% url 'organization:organization_position_new' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}"
+                       target="_blank">Add New Position Form</a> (in new window)</li>
+                <li><a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}" >
+                    Refresh Voter Guides</a></li>
+                <li><a href="{% url 'voter_guide:voter_guide_list' %}?voter_guide_search={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank">Find Voter Guides for this Endorser</a> (new window)</li>
+                <li>Assorted tools:
+                &nbsp;&nbsp;&nbsp; <a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a>,
+                    <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
+                    <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape endorser website for Twitter Accounts</a>,
+                    <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}">Retrieve tweets for endorser</a>,
+                    <a href="{% url 'organization:organization_analyze_tweets' organization.we_vote_id %}">Link issues from twitter feed</a>
+                </li>
+            </ul>
 
         </td>
         <td>&nbsp;&nbsp;&nbsp;</td>
@@ -295,43 +295,70 @@
             </table>
 
 
+            <br />
+            <br />
+            <br />
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>...is Owner of these Campaign(s)</th>
+                        <th>Visible to Public</th>
+                    </tr>
+                </thead>
+            {% for campaignx_owner in campaignx_owner_list %}
+                <tr>
+                    <td>
+                        {{ campaignx_owner.campaign_title }}&nbsp;&nbsp;
+                        <a href="{% url 'campaign:campaignx_summary' campaignx_owner.campaignx_we_vote_id %}"
+                           target="_blank">
+                            view
+                            <span class="glyphicon glyphicon-new-window"></span></a>
+                    </td>
+                    <td>
+                        {% if campaignx_owner.visible_to_public %}
+                            visible
+                        {% else %}
+                            NOT visible
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
 
-        <br />
-        <br />
-        <br />
-    <table class="table">
-      <thead>
-        <tr>
-            <th>Campaign Title to List</th>
-            <th>Visible to Public</th>
-        </tr>
-      </thead>
-    {% for campaignx_listed_by_organization in campaignx_listed_by_organization_list %}
-    <tr>
-        <td>
-            {{ campaignx_listed_by_organization.campaignx_title }}&nbsp;&nbsp;
-            <a href="{% url 'campaign:campaignx_edit' campaignx_listed_by_organization.campaignx_we_vote_id %}"
-               target="_blank">
-                edit
-                <span class="glyphicon glyphicon-new-window"></span></a>
-        </td>
-        <td>
-            {% if campaignx_listed_by_organization.visible_to_public %}
-                visible
-            {% else %}
-                NOT visible
-            {% endif %}
-            {% if campaignx_listed_by_organization.listing_requested_by_voter_name %}
-                (Requested by: {{ campaignx_listed_by_organization.listing_requested_by_voter_name }})
-            {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-    <tr>
-        <td colspan="3"><a href="{% url 'organization:organization_edit_listed_campaigns' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                           class="btn btn-primary">Add or Edit Listed Campaigns</a></td>
-    </tr>
-</table>
+            <br />
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Campaign(s) to List on Site</th>
+                        <th>Visible to Public</th>
+                    </tr>
+                </thead>
+            {% for campaignx_listed_by_organization in campaignx_listed_by_organization_list %}
+                <tr>
+                    <td>
+                        {{ campaignx_listed_by_organization.campaignx_title }}&nbsp;&nbsp;
+                        <a href="{% url 'campaign:campaignx_summary' campaignx_listed_by_organization.campaignx_we_vote_id %}"
+                           target="_blank">
+                            view
+                            <span class="glyphicon glyphicon-new-window"></span></a>
+                    </td>
+                    <td>
+                        {% if campaignx_listed_by_organization.visible_to_public %}
+                            visible
+                        {% else %}
+                            NOT visible
+                        {% endif %}
+                        {% if campaignx_listed_by_organization.listing_requested_by_voter_name %}
+                            (Requested by: {{ campaignx_listed_by_organization.listing_requested_by_voter_name }})
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="3"><a href="{% url 'organization:organization_edit_listed_campaigns' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                                       class="btn btn-primary">Add or Edit Listed Campaigns</a></td>
+                </tr>
+            </table>
 
 
 
@@ -410,7 +437,8 @@
         <td>{% if organization_position.is_public_position %}<strong>Public</strong>{% else %}Friends&nbsp;Only{% endif %}</td>
         <td>
             {{ organization_position.get_stance_display }}
-            {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}<br />
+{#            {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}#}
+            <br />
             <a href="{% url 'organization:organization_position_delete' organization.id organization_position.we_vote_id %}">
                 delete</a>
         </td>
@@ -544,7 +572,7 @@
 
     {% if organization.twitter_profile_banner_url_https %}
         twitter_profile_banner_url_https: {{ organization.twitter_profile_banner_url_https }}<br />
-        <img src="{{ organization.twitter_profile_banner_url_https }}"><br />
+        <img src="{{ organization.twitter_profile_banner_url_https }}" style="max-width:800px;width:100%"><br />
         <br />
     {% endif %}
 
