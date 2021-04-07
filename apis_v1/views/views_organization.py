@@ -16,6 +16,8 @@ from django.views.decorators.csrf import csrf_exempt
 from donate.models import DonationManager
 from follow.controllers import organization_suggestion_tasks_for_api
 import json
+import re
+import requests
 from organization.controllers import full_domain_string_available, organization_analytics_by_voter_for_api, \
     organization_retrieve_for_api, organization_photos_save_for_api, \
     organization_save_for_api, organization_search_for_api, organizations_followed_retrieve_for_api, \
@@ -111,11 +113,12 @@ def organization_follow_ignore_api_view(request):  # organizationFollowIgnore
                                       user_agent_string=user_agent_string, user_agent_object=user_agent_object)
 
 
-def organization_index_view(request, organization_incoming_domain=''):  # organizationIndex
+def organization_index_view(request, organization_incoming_domain='', campaign_main='' ):  # organizationIndex
     status = ""
     success = True
     organization = None
     organization_found = False
+    is_campaign = positive_value_exists(campaign_main)
 
     if positive_value_exists(organization_incoming_domain):
         organization_incoming_domain = organization_incoming_domain.strip().lower()
@@ -209,6 +212,15 @@ def organization_index_view(request, organization_incoming_domain=''):  # organi
             if not google_analytics_valid:
                 chosen_google_analytics_account_number = None
 
+    campaign_main_js = ''
+    if is_campaign:
+        req_url = 'https://' + organization_incoming_domain + '/' + campaign_main
+        print(req_url)
+        verify_bool = not ('localhost' in organization_incoming_domain or '127.0.0.1' in organization_incoming_domain)
+        text = requests.get(req_url, verify=verify_bool).text
+        # text = '<!DOCTYPE html><html><body>main.3bdb849a6b28de49eb2e.js</body></html>'
+        campaign_main_js = re.search(r"<body>(.*?)<\/body>", text)[1]
+
     template_values = {
         'chosen_favicon_url_https':         chosen_favicon_url_https,
         'chosen_google_analytics_account_number': chosen_google_analytics_account_number,
@@ -221,8 +233,13 @@ def organization_index_view(request, organization_incoming_domain=''):  # organi
         'html_title':                       html_title,
         'organization_incoming_domain':     organization_incoming_domain,
         'some_numerical_string':            '12345hi',
+        'campaign_main_js':                 campaign_main_js,
     }
-    return render(request, 'organization/organization_index.html', template_values)
+
+    if is_campaign:
+        return render(request, 'campaign/campaignx_index.html', template_values)
+    else:
+        return render(request, 'organization/organization_index.html', template_values)
 
 
 def organizations_found_on_url_api_view(request):  # organizationsFoundOnUrl
