@@ -1213,6 +1213,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         results = contest_office_manager.retrieve_contest_office_from_ctcl_uuid(ctcl_uuid)
         if results['contest_office_found']:
             contest_office = results['contest_office']
+            contest_office_we_vote_id = contest_office.we_vote_id
             contest_office_name = contest_office.office_name
             keep_looking_for_duplicates = False
             kind_of_action = IMPORT_ADD_TO_EXISTING
@@ -1226,6 +1227,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
             google_civic_election_id=google_civic_election_id)
         if results['contest_office_found']:
             contest_office = results['contest_office']
+            contest_office_we_vote_id = contest_office.we_vote_id
             contest_office_name = contest_office.office_name
             keep_looking_for_duplicates = False
             kind_of_action = IMPORT_ADD_TO_EXISTING
@@ -1365,7 +1367,10 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         batch_row_action_contest_office.contest_office_we_vote_id = contest_office_we_vote_id
         batch_row_action_contest_office.ctcl_uuid = ctcl_uuid
         batch_row_action_contest_office.district_name = contest_office_district_name
-        batch_row_action_contest_office.district_id = district_id
+        if positive_value_exists(vote_usa_district_number):
+            batch_row_action_contest_office.district_id = vote_usa_district_number
+        else:
+            batch_row_action_contest_office.district_id = district_id
         batch_row_action_contest_office.district_scope = district_scope
         batch_row_action_contest_office.elected_office_name = elected_office_name
         batch_row_action_contest_office.google_civic_election_id = google_civic_election_id
@@ -1389,7 +1394,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         success = True
     except Exception as e:
         success = False
-        status += "BATCH_ROW_ACTION_CONTEST_OFFICE_UNABLE_TO_SAVE "
+        status += "BATCH_ROW_ACTION_CONTEST_OFFICE_UNABLE_TO_SAVE: " + str(e) + " "
 
     # If a state was figured out, then update the batch_row with the state_code so we can use that for filtering
     if positive_value_exists(state_code) and state_code.lower() != one_batch_row.state_code:
@@ -1400,7 +1405,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
             one_batch_row.state_code = state_code
             one_batch_row.save()
         except Exception as e:
-            pass
+            status += "COULD_NOT_SAVE_ONE_BATCH_ROW: " + str(e) + ' '
 
     results = {
         'success':                          success,
@@ -2260,7 +2265,10 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.ballotpedia_candidate_id = convert_to_int(ballotpedia_candidate_id)
         batch_row_action_candidate.ballotpedia_candidate_name = ballotpedia_candidate_name
         batch_row_action_candidate.ballotpedia_candidate_summary = ballotpedia_candidate_summary
-        batch_row_action_candidate.ballotpedia_candidate_url = ballotpedia_candidate_url
+        if positive_value_exists(vote_usa_ballotpedia_candidate_url):
+            batch_row_action_candidate.ballotpedia_candidate_url = vote_usa_ballotpedia_candidate_url
+        else:
+            batch_row_action_candidate.ballotpedia_candidate_url = ballotpedia_candidate_url
         batch_row_action_candidate.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
         batch_row_action_candidate.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
         batch_row_action_candidate.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
@@ -2284,8 +2292,15 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             batch_row_action_candidate.candidate_is_top_ticket = False
         batch_row_action_candidate.candidate_name = candidate_name
         batch_row_action_candidate.candidate_participation_status = candidate_participation_status
-        batch_row_action_candidate.candidate_twitter_handle = candidate_twitter_handle
-        batch_row_action_candidate.candidate_url = candidate_url
+        if positive_value_exists(vote_usa_candidate_url):
+            vote_usa_candidate_twitter_handle = extract_twitter_handle_from_text_string(vote_usa_candidate_twitter_url)
+            batch_row_action_candidate.candidate_twitter_handle = vote_usa_candidate_twitter_handle
+        else:
+            batch_row_action_candidate.candidate_twitter_handle = candidate_twitter_handle
+        if positive_value_exists(vote_usa_candidate_url):
+            batch_row_action_candidate.candidate_url = vote_usa_candidate_url
+        else:
+            batch_row_action_candidate.candidate_url = candidate_url
         batch_row_action_candidate.candidate_contact_form_url = candidate_contact_form_url
         batch_row_action_candidate.candidate_we_vote_id = candidate_we_vote_id
         batch_row_action_candidate.contest_office_name = contest_office_name
@@ -2293,7 +2308,10 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.contest_office_id = contest_office_id
         batch_row_action_candidate.crowdpac_candidate_id = convert_to_int(crowdpac_candidate_id)
         batch_row_action_candidate.ctcl_uuid = ctcl_uuid
-        batch_row_action_candidate.facebook_url = facebook_url
+        if positive_value_exists(vote_usa_facebook_url):
+            batch_row_action_candidate.facebook_url = vote_usa_facebook_url
+        else:
+            batch_row_action_candidate.facebook_url = facebook_url
         batch_row_action_candidate.kind_of_action = kind_of_action
         batch_row_action_candidate.google_civic_election_id = google_civic_election_id
         if positive_value_exists(vote_usa_party_name):
@@ -3687,15 +3705,15 @@ def import_contest_office_data_from_batch_row_actions(
         batch_row_action_list_found = False
         pass
 
-    if not batch_row_action_list_found:
-        status += "IMPORT_CONTEST_OFFICE_ENTRY-BATCH_ROW_ACTION_LIST_MISSING"
-        results = {
-            'success':                              success,
-            'status':                               status,
-            'number_of_contest_offices_created':    number_of_contest_offices_created,
-            'number_of_contest_offices_updated':    number_of_contest_offices_updated
-        }
-        return results
+    # if not batch_row_action_list_found:
+    #     status += "IMPORT_CONTEST_OFFICE_ENTRY-BATCH_ROW_ACTION_LIST_MISSING "
+    #     results = {
+    #         'success':                              success,
+    #         'status':                               status,
+    #         'number_of_contest_offices_created':    number_of_contest_offices_created,
+    #         'number_of_contest_offices_updated':    number_of_contest_offices_updated
+    #     }
+    #     return results
 
     for one_batch_row_action in batch_row_action_list:
 
@@ -3789,9 +3807,9 @@ def import_contest_office_data_from_batch_row_actions(
                 return results
 
     if number_of_contest_offices_created:
-        status += "IMPORT_CONTEST_OFFICE_ENTRY:CONTEST_OFFICE_CREATED"
+        status += "IMPORT_CONTEST_OFFICE_ENTRY:CONTEST_OFFICE_CREATED "
     elif number_of_contest_offices_updated:
-        status += "IMPORT_CONTEST_OFFICE_ENTRY:CONTEST_OFFICE_UPDATED"
+        status += "IMPORT_CONTEST_OFFICE_ENTRY:CONTEST_OFFICE_UPDATED "
 
     results = {
         'success':                              success,
@@ -4178,6 +4196,12 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
             update_values['party'] = one_batch_row_action.party
         if positive_value_exists(one_batch_row_action.photo_url):
             update_values['photo_url'] = one_batch_row_action.photo_url
+        if positive_value_exists(one_batch_row_action.vote_usa_office_id):
+            update_values['vote_usa_office_id'] = one_batch_row_action.vote_usa_office_id
+        if positive_value_exists(one_batch_row_action.vote_usa_politician_id):
+            update_values['vote_usa_politician_id'] = one_batch_row_action.vote_usa_politician_id
+        if positive_value_exists(one_batch_row_action.vote_usa_profile_image_url):
+            update_values['vote_usa_profile_image_url'] = one_batch_row_action.vote_usa_profile_image_url
         if positive_value_exists(one_batch_row_action.state_code):
             update_values['state_code'] = one_batch_row_action.state_code
 

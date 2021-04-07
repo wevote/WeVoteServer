@@ -934,7 +934,6 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
 
     messages_on_stage = get_messages(request)
     candidate_id = convert_to_int(candidate_id)
-    candidate_we_vote_id = ''
     candidate_on_stage_found = False
     candidate_on_stage = CandidateCampaign()
     candidate_list_manager = CandidateListManager()

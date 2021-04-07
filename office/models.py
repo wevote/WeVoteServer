@@ -999,9 +999,15 @@ class ContestOfficeManager(models.Manager):
 
         return state_code
 
-    def create_contest_office_row_entry(self, contest_office_name, contest_office_votes_allowed, ctcl_uuid,
-                                        contest_office_number_elected, google_civic_election_id, state_code,
-                                        defaults):
+    def create_contest_office_row_entry(
+            self,
+            contest_office_name,
+            contest_office_votes_allowed,
+            ctcl_uuid,
+            contest_office_number_elected,
+            google_civic_election_id,
+            state_code,
+            defaults):
         """
         Create ContestOffice table entry with ContestOffice details 
         :param contest_office_name: 
@@ -1082,10 +1088,16 @@ class ContestOfficeManager(models.Manager):
             }
         return results
 
-    def update_contest_office_row_entry(self, contest_office_name, contest_office_votes_allowed, ctcl_uuid,
-                                        contest_office_number_elected, contest_office_we_vote_id,
-                                        google_civic_election_id, state_code,
-                                        defaults):
+    def update_contest_office_row_entry(
+            self,
+            contest_office_name,
+            contest_office_votes_allowed,
+            ctcl_uuid,
+            contest_office_number_elected,
+            contest_office_we_vote_id,
+            google_civic_election_id,
+            state_code,
+            defaults):
         """
         Update ContestOffice table entry with matching we_vote_id 
         :param contest_office_name: 
@@ -1162,19 +1174,19 @@ class ContestOfficeManager(models.Manager):
                 existing_office_entry.save()
                 contest_office_updated = True
                 success = True
-                status = "CONTEST_OFFICE_UPDATED"
+                status += "CONTEST_OFFICE_UPDATED "
         except Exception as e:
             success = False
             contest_office_updated = False
-            status = "CONTEST_OFFICE_RETRIEVE_ERROR"
+            status += "CONTEST_OFFICE_RETRIEVE_ERROR " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
-                'success':                      success,
-                'status':                       status,
-                'contest_office_updated':       contest_office_updated,
-                'contest_office':       existing_office_entry,
-            }
+            'success':                  success,
+            'status':                   status,
+            'contest_office_updated':   contest_office_updated,
+            'contest_office':           existing_office_entry,
+        }
         return results
 
     def count_contest_offices_for_election(self, google_civic_election_id):
