@@ -2088,9 +2088,10 @@ class CandidateManager(models.Manager):
             candidate_we_vote_id_list = candidate_query.values_list('we_vote_id', flat=True)
             if len(candidate_we_vote_id_list) > 0:
                 candidate_options_found = True
+                status += "CANDIDATE_LIST_FROM_VOTE_USA_POLITICIAN_RETRIEVED "
             else:
                 exception_does_not_exist = True
-            status += "CANDIDATE_LIST_FROM_VOTE_USA_POLITICIAN_RETRIEVED "
+                status += "CANDIDATE_LIST_FROM_VOTE_USA_POLITICIAN_NOT_FOUND "
         except Exception as e:
             candidate_found = False
             status += "CANDIDATE_LIST_FROM_VOTE_USA_POLITICIAN_EXCEPTION " + str(e) + " "

@@ -192,6 +192,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
     'contest_office_votes_allowed': 'contest_office_votes_allowed',
     'contest_office_number_elected': 'contest_office_number_elected',
     'contest_office_district_name': 'contest_office_district_name',
+    'district_id': 'district_id',
     'elected_office_id': 'elected_office_id',
     'election_day': 'election_day',
     'electoral_district_id': 'electoral_district_id',
