@@ -731,7 +731,6 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
         election = Election.objects.get(google_civic_election_id=google_civic_election_id)
 
     office_search_results_list = []
-    contest_office = []
     if positive_value_exists(office_search):
         office_queryset = ContestOffice.objects.all()
         office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)

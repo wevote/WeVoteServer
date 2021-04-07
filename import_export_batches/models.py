@@ -88,6 +88,8 @@ BATCH_SET_SOURCE_CTCL = 'CTCL'
 BATCH_SET_SOURCE_IMPORT_EXPORT_ENDORSEMENTS = 'IMPORT_EXPORT_ENDORSEMENTS'
 BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS = 'IMPORT_BALLOTPEDIA_BALLOT_ITEMS'
 
+# Match incoming headers (on left), and place the values in the variable name on the
+# right in `create_batch_row_action_candidate` (This dict doesn't actually remap the values)
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'ballotpedia_candidate_id': 'ballotpedia_candidate_id',
     'ballotpedia_candidate_name': 'ballotpedia_candidate_name',
@@ -120,6 +122,17 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'facebook_url': 'facebook_url',
     'google_civic_election_id': 'google_civic_election_id',
     'state_code': 'state_code',
+    'voteusa office id': 'vote_usa_office_id',
+    'voteusa politician id': 'vote_usa_politician_id',
+    'candidate': 'vote_usa_candidate_name',
+    'state code': 'vote_usa_state_code',
+    'photo300 url': 'vote_usa_profile_image_url',
+    'party': 'vote_usa_party_name',
+    'email': 'vote_usa_candidate_email',
+    'website url': 'vote_usa_candidate_url',
+    'facebook url': 'vote_usa_facebook_url',
+    'twitter url': 'vote_usa_candidate_twitter_url',
+    'ballotpedia url': 'vote_usa_ballotpedia_candidate_url',
 }
 
 # We Vote contest office key on the left, and Ballotpedia field name on right
@@ -148,6 +161,8 @@ BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES = {
     'state_code': 'state_code',
 }
 
+# Match incoming headers (on left), and place the values in the variable name on the
+# right in `create_batch_row_action_contest_office` (This dict doesn't actually remap the values)
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
     'ballotpedia_candidate_id': 'ballotpedia_candidate_id *',  # For matching only
     'ballotpedia_district_id': 'ballotpedia_district_id',
@@ -186,6 +201,10 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
     'is_ballotpedia_primary_election': 'is_ballotpedia_primary_election',
     'is_ballotpedia_primary_runoff_election': 'is_ballotpedia_primary_runoff_election',
     'state_code': 'state_code',
+    'voteusa office id': 'vote_usa_office_id',
+    'office': 'vote_usa_office_name',
+    'district': 'vote_usa_district_number',
+    'state code': 'vote_usa_state_code',
 }
 
 # We Vote contest office key on the left, and Ballotpedia field name on right
@@ -1875,7 +1894,10 @@ class BatchManager(models.Manager):
             if value_from_batch_header_map is None:
                 # Break out when we stop getting batch_header_map values
                 return ""
-            if batch_header_name_we_want == value_from_batch_header_map.lower().strip():
+            value_from_batch_header_map = value_from_batch_header_map.replace('"', '')
+            value_from_batch_header_map = value_from_batch_header_map.replace('﻿', '')
+            value_from_batch_header_map = value_from_batch_header_map.lower().strip()
+            if batch_header_name_we_want == value_from_batch_header_map:
                 one_batch_row_attribute_name = "batch_row_" + index_number_string
                 value_from_batch_row = getattr(one_batch_row, one_batch_row_attribute_name)
                 if isinstance(value_from_batch_row, str):
@@ -5559,6 +5581,8 @@ class BatchRowActionContestOffice(models.Model):
                                                null=True, blank=True, default=None)
     candidate_selection_id10 = models.CharField(verbose_name="temporary id of candidate selection 10", max_length=255,
                                                 null=True, blank=True, default=None)
+    vote_usa_office_id = models.CharField(
+        verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
 
     status = models.TextField(verbose_name="batch row action contest office status", null=True, blank=True, default="")
 
@@ -5755,6 +5779,9 @@ class BatchRowActionCandidate(models.Model):
         verbose_name="maplight candidate id", max_length=255, default=None, null=True, blank=True)
     vote_smart_id = models.CharField(
         verbose_name="vote smart candidate id", max_length=15, default=None, null=True, blank=True, unique=False)
+    vote_usa_office_id = models.CharField(max_length=64, default=None, null=True, blank=True)
+    vote_usa_politician_id = models.CharField(max_length=64, default=None, null=True, blank=True)
+    vote_usa_profile_image_url = models.TextField(null=True, blank=True, default=None)
     # The internal We Vote id for the ContestOffice that this candidate is competing for. During setup we need to allow
     # this to be null.
     contest_office_id = models.CharField(

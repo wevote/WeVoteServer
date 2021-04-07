@@ -14,6 +14,7 @@ from wevote_functions.functions import convert_to_int, extract_state_from_ocd_di
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+# These are used for conflict resolution between duplicate records
 CONTEST_OFFICE_UNIQUE_IDENTIFIERS = [
     'ballotpedia_district_id',
     'ballotpedia_election_id',
@@ -810,9 +811,17 @@ class ContestOfficeManager(models.Manager):
         return results
 
     # NOTE: searching by all other variables seems to return a list of objects
-    def retrieve_contest_office(self, contest_office_id, contest_office_we_vote_id='',
-                                maplight_id=None, ctcl_uuid=None, ballotpedia_race_id=None,
-                                google_civic_election_id=None, ballotpedia_office_id=None, read_only=False):
+    def retrieve_contest_office(
+            self,
+            contest_office_id=0,
+            contest_office_we_vote_id='',
+            maplight_id=None,
+            ctcl_uuid=None,
+            ballotpedia_race_id=None,
+            google_civic_election_id=None,
+            ballotpedia_office_id=None,
+            vote_usa_office_id=None,
+            read_only=False):
         contest_office_found = False
         error_result = False
         exception_does_not_exist = False
@@ -889,6 +898,19 @@ class ContestOfficeManager(models.Manager):
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 contest_office_found = True
                 status += "RETRIEVE_OFFICE_FOUND_BY_BALLOTPEDIA_OFFICE_ID "
+            elif positive_value_exists(vote_usa_office_id) and positive_value_exists(google_civic_election_id):
+                if positive_value_exists(read_only):
+                    contest_office_on_stage = ContestOffice.objects.using('readonly').get(
+                        vote_usa_office_id=vote_usa_office_id,
+                        google_civic_election_id=google_civic_election_id)
+                else:
+                    contest_office_on_stage = ContestOffice.objects.get(
+                        vote_usa_office_id=vote_usa_office_id,
+                        google_civic_election_id=google_civic_election_id)
+                contest_office_id = contest_office_on_stage.id
+                contest_office_we_vote_id = contest_office_on_stage.we_vote_id
+                contest_office_found = True
+                status += "RETRIEVE_OFFICE_FOUND_BY_VOTE_USA_OFFICE_ID "
             else:
                 status += "RETRIEVE_OFFICE_SEARCH_INDEX_MISSING "
                 success = False
@@ -1039,6 +1061,8 @@ class ContestOfficeManager(models.Manager):
                 if 'is_ballotpedia_primary_runoff_election' in defaults:
                     new_contest_office.is_ballotpedia_primary_runoff_election = \
                         defaults['is_ballotpedia_primary_runoff_election']
+                if 'vote_usa_office_id' in defaults:
+                    new_contest_office.vote_usa_office_id = defaults['vote_usa_office_id']
                 new_contest_office.save()
             else:
                 success = False
@@ -1132,6 +1156,8 @@ class ContestOfficeManager(models.Manager):
                 if 'is_ballotpedia_primary_runoff_election' in defaults:
                     existing_office_entry.is_ballotpedia_primary_runoff_election = \
                         defaults['is_ballotpedia_primary_runoff_election']
+                if 'vote_usa_office_id' in defaults:
+                    existing_office_entry.vote_usa_office_id = defaults['vote_usa_office_id']
                 # now go ahead and save this entry (update)
                 existing_office_entry.save()
                 contest_office_updated = True

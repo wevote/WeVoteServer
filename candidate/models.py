@@ -1538,9 +1538,10 @@ class CandidateCampaign(models.Model):
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
     vote_usa_office_id = models.CharField(
-        verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
+        verbose_name="Vote USA permanent id for the office", max_length=64, default=None, null=True, blank=True)
     vote_usa_politician_id = models.CharField(
         verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
+    vote_usa_profile_image_url = models.TextField(null=True, blank=True, default=None)
     we_vote_hosted_profile_image_url_large = models.TextField(verbose_name='we vote hosted large image url',
                                                               blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.TextField(verbose_name='we vote hosted medium image url',
@@ -1892,66 +1893,9 @@ class CandidateManager(models.Manager):
             return candidate.google_civic_candidate_name
         return 0
 
-    def retrieve_candidate_from_maplight_id(self, candidate_maplight_id):
-        candidate_id = 0
-        we_vote_id = ''
-        candidate_manager = CandidateManager()
-        return candidate_manager.retrieve_candidate(
-            candidate_id, we_vote_id, candidate_maplight_id)
-
-    def retrieve_candidate_from_vote_smart_id(self, candidate_vote_smart_id):
-        candidate_id = 0
-        we_vote_id = ''
-        candidate_maplight_id = ''
-        candidate_name = ''
-        candidate_manager = CandidateManager()
-        return candidate_manager.retrieve_candidate(
-            candidate_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id)
-
-    def retrieve_candidate_from_ballotpedia_candidate_id(
-            self, ballotpedia_candidate_id, read_only=False):
-        candidate_id = 0
-        we_vote_id = ''
-        candidate_maplight_id = ''
-        candidate_name = ''
-        candidate_vote_smart_id = 0
-        return self.retrieve_candidate(
-            candidate_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id,
-            ballotpedia_candidate_id, read_only=read_only)
-
-    def retrieve_candidate_from_candidate_name(self, candidate_name):
-        candidate_id = 0
-        we_vote_id = ''
-        candidate_maplight_id = ''
-        candidate_manager = CandidateManager()
-
-        results = candidate_manager.retrieve_candidate(
-            candidate_id, we_vote_id, candidate_maplight_id, candidate_name)
-        if results['success']:
-            return results
-
-        # Try to modify the candidate name, and search again
-        # MapLight for example will pass in "Ronald  Gold" for example
-        candidate_name_try2 = candidate_name.replace('  ', ' ')
-        results = candidate_manager.retrieve_candidate(
-            candidate_id, we_vote_id, candidate_maplight_id, candidate_name_try2)
-        if results['success']:
-            return results
-
-        # MapLight also passes in "Kamela D Harris" for example, and Google Civic uses "Kamela D. Harris"
-        candidate_name_try3 = mimic_google_civic_initials(candidate_name)
-        if candidate_name_try3 != candidate_name:
-            results = candidate_manager.retrieve_candidate(
-                candidate_id, we_vote_id, candidate_maplight_id, candidate_name_try3)
-            if results['success']:
-                return results
-
-        # Otherwise return failed results
-        return results
-
     # NOTE: searching by all other variables seems to return a list of objects
     def retrieve_candidate(
-            self, candidate_id, candidate_we_vote_id=None, candidate_maplight_id=None,
+            self, candidate_id=0, candidate_we_vote_id=None, candidate_maplight_id=None,
             candidate_name=None, candidate_vote_smart_id=None,
             ballotpedia_candidate_id=None, google_civic_election_id=None, read_only=False):
         error_result = False
@@ -2052,6 +1996,136 @@ class CandidateManager(models.Manager):
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'candidate_found':          candidate_found,
             'candidate_id':             convert_to_int(candidate_id),
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'candidate':                candidate_on_stage,
+        }
+        return results
+
+    def retrieve_candidate_from_ballotpedia_candidate_id(
+            self, ballotpedia_candidate_id, read_only=False):
+        candidate_id = 0
+        we_vote_id = ''
+        candidate_maplight_id = ''
+        candidate_name = ''
+        candidate_vote_smart_id = 0
+        return self.retrieve_candidate(
+            candidate_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id,
+            ballotpedia_candidate_id, read_only=read_only)
+
+    def retrieve_candidate_from_candidate_name(self, candidate_name):
+        candidate_id = 0
+        we_vote_id = ''
+        candidate_maplight_id = ''
+        candidate_manager = CandidateManager()
+
+        results = candidate_manager.retrieve_candidate(
+            candidate_id, we_vote_id, candidate_maplight_id, candidate_name)
+        if results['success']:
+            return results
+
+        # Try to modify the candidate name, and search again
+        # MapLight for example will pass in "Ronald  Gold" for example
+        candidate_name_try2 = candidate_name.replace('  ', ' ')
+        results = candidate_manager.retrieve_candidate(
+            candidate_id, we_vote_id, candidate_maplight_id, candidate_name_try2)
+        if results['success']:
+            return results
+
+        # MapLight also passes in "Kamela D Harris" for example, and Google Civic uses "Kamela D. Harris"
+        candidate_name_try3 = mimic_google_civic_initials(candidate_name)
+        if candidate_name_try3 != candidate_name:
+            results = candidate_manager.retrieve_candidate(
+                candidate_id, we_vote_id, candidate_maplight_id, candidate_name_try3)
+            if results['success']:
+                return results
+
+        # Otherwise return failed results
+        return results
+
+    def retrieve_candidate_from_maplight_id(self, candidate_maplight_id):
+        candidate_id = 0
+        we_vote_id = ''
+        candidate_manager = CandidateManager()
+        return candidate_manager.retrieve_candidate(
+            candidate_id, we_vote_id, candidate_maplight_id)
+
+    def retrieve_candidate_from_vote_smart_id(self, candidate_vote_smart_id):
+        candidate_id = 0
+        we_vote_id = ''
+        candidate_maplight_id = ''
+        candidate_name = ''
+        candidate_manager = CandidateManager()
+        return candidate_manager.retrieve_candidate(
+            candidate_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id)
+
+    def retrieve_candidate_from_vote_usa_variables(
+            self,
+            vote_usa_politician_id='',
+            vote_usa_office_id='',
+            google_civic_election_id=0,
+            read_only=True):
+        error_result = False
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        candidate_found = False
+        candidate_id = 0
+        candidate_on_stage = None
+        candidate_options_found = False
+        candidate_we_vote_id = ''
+        candidate_we_vote_id_list = []
+        status = ""
+        success = True
+
+        try:
+            if positive_value_exists(read_only):
+                candidate_query = CandidateCampaign.objects.using('readonly').all()
+            else:
+                candidate_query = CandidateCampaign.objects.all()
+            candidate_query = candidate_query.filter(
+                vote_usa_politician_id=vote_usa_politician_id,
+                vote_usa_office_id=vote_usa_office_id,
+            )
+            candidate_we_vote_id_list = candidate_query.values_list('we_vote_id', flat=True)
+            if len(candidate_we_vote_id_list) > 0:
+                candidate_options_found = True
+            else:
+                exception_does_not_exist = True
+            status += "CANDIDATE_LIST_FROM_VOTE_USA_POLITICIAN_RETRIEVED "
+        except Exception as e:
+            candidate_found = False
+            status += "CANDIDATE_LIST_FROM_VOTE_USA_POLITICIAN_EXCEPTION " + str(e) + " "
+            success = False
+
+        if candidate_options_found:
+            candidate_list_manager = CandidateListManager()
+            results = candidate_list_manager.retrieve_candidate_to_office_link_list(
+                candidate_we_vote_id_list=candidate_we_vote_id_list,
+                google_civic_election_id_list=[google_civic_election_id],
+                read_only=True,
+            )
+            if results['success']:
+                candidate_to_office_link_list = results['candidate_to_office_link_list']
+                if len(candidate_to_office_link_list) > 1:
+                    candidate_found = False
+                    exception_multiple_object_returned = True
+                elif len(candidate_to_office_link_list) == 1:
+                    candidate_found = True
+                    candidate_to_office_link = candidate_to_office_link_list[0]
+                    if positive_value_exists(candidate_to_office_link.candidate_we_vote_id):
+                        candidate_manager = CandidateManager()
+                        return candidate_manager.retrieve_candidate_from_we_vote_id(
+                            candidate_to_office_link.candidate_we_vote_id)
+                else:
+                    candidate_found = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'error_result':             error_result,
+            'DoesNotExist':             exception_does_not_exist,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'candidate_found':          candidate_found,
+            'candidate_id':             candidate_id,
             'candidate_we_vote_id':     candidate_we_vote_id,
             'candidate':                candidate_on_stage,
         }
@@ -3205,6 +3279,12 @@ class CandidateManager(models.Manager):
         state_code = update_values['state_code'] if 'state_code' in update_values else ''
         if positive_value_exists(state_code):
             state_code = state_code.lower()
+        vote_usa_office_id = update_values['vote_usa_office_id'] \
+            if 'vote_usa_office_id' in update_values else None
+        vote_usa_politician_id = update_values['vote_usa_politician_id'] \
+            if 'vote_usa_politician_id' in update_values else None
+        vote_usa_profile_image_url = update_values['vote_usa_profile_image_url'] \
+            if 'vote_usa_profile_image_url' in update_values else None
 
         if not positive_value_exists(candidate_name) or not positive_value_exists(contest_office_we_vote_id) \
                 or not positive_value_exists(contest_office_id) \
@@ -3276,6 +3356,9 @@ class CandidateManager(models.Manager):
                             candidate.we_vote_hosted_profile_image_url_medium
                         new_candidate.we_vote_hosted_profile_image_url_tiny = \
                             candidate.we_vote_hosted_profile_image_url_tiny
+                new_candidate.vote_usa_office_id = vote_usa_office_id
+                new_candidate.vote_usa_politician_id = vote_usa_politician_id
+                new_candidate.vote_usa_profile_image_url = vote_usa_profile_image_url
                 new_candidate.save()
 
                 status += "CANDIDATE_CREATE_THEN_UPDATE_SUCCESS "
@@ -3433,6 +3516,15 @@ class CandidateManager(models.Manager):
                             candidate.we_vote_hosted_profile_image_url_medium
                         existing_candidate_entry.we_vote_hosted_profile_image_url_tiny = \
                             candidate.we_vote_hosted_profile_image_url_tiny
+                if 'vote_usa_office_id' in update_values:
+                    existing_candidate_entry.vote_usa_office_id = update_values['vote_usa_office_id']
+                    values_changed = True
+                if 'vote_usa_politician_id' in update_values:
+                    existing_candidate_entry.vote_usa_politician_id = update_values['vote_usa_politician_id']
+                    values_changed = True
+                if 'vote_usa_profile_image_url' in update_values:
+                    existing_candidate_entry.vote_usa_profile_image_url = update_values['vote_usa_profile_image_url']
+                    values_changed = True
 
                 # now go ahead and save this entry (update)
                 if values_changed:
