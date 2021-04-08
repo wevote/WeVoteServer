@@ -5012,7 +5012,9 @@ def refresh_positions_with_candidate_details_for_election(google_civic_election_
     return_list_of_objects = True
     google_civic_election_id_list = [google_civic_election_id]
     candidates_results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
-        google_civic_election_id_list, state_code, return_list_of_objects)
+        google_civic_election_id_list=google_civic_election_id_list,
+        state_code=state_code,
+        return_list_of_objects=return_list_of_objects)
     if candidates_results['candidate_list_found']:
         candidate_list = candidates_results['candidate_list_objects']
 

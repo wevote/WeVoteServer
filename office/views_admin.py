@@ -94,22 +94,24 @@ def offices_sync_out_view(request):  # officesSyncOut
         # serializer = ContestOfficeSerializer(contest_office_list, many=True)
         # return Response(serializer.data)
         # get the data using values_list
-        contest_office_list_dict = contest_office_list.values('we_vote_id', 'office_name', 'google_civic_election_id',
-                                                              'ocd_division_id', 'maplight_id',
-                                                              'ballotpedia_id', 'ballotpedia_district_id',
-                                                              'ballotpedia_is_marquee', 'ballotpedia_office_id',
-                                                              'ballotpedia_office_name', 'ballotpedia_office_url',
-                                                              'ballotpedia_race_id', 'ballotpedia_race_office_level',
-                                                              'google_ballot_placement',
-                                                              'google_civic_office_name', 'google_civic_office_name2',
-                                                              'google_civic_office_name3', 'google_civic_office_name4',
-                                                              'google_civic_office_name5',
-                                                              'is_battleground_race',
-                                                              'wikipedia_id', 'number_voting_for', 'number_elected',
-                                                              'state_code', 'primary_party', 'district_name',
-                                                              'district_scope', 'district_id', 'contest_level0',
-                                                              'contest_level1', 'contest_level2',
-                                                              'electorate_specifications', 'special', 'state_code')
+        contest_office_list_dict = contest_office_list.values(
+            'we_vote_id', 'office_name', 'google_civic_election_id',
+            'ocd_division_id', 'maplight_id',
+            'ballotpedia_id', 'ballotpedia_district_id',
+            'ballotpedia_is_marquee', 'ballotpedia_office_id',
+            'ballotpedia_office_name', 'ballotpedia_office_url',
+            'ballotpedia_race_id', 'ballotpedia_race_office_level',
+            'google_ballot_placement',
+            'google_civic_office_name', 'google_civic_office_name2',
+            'google_civic_office_name3', 'google_civic_office_name4',
+            'google_civic_office_name5',
+            'is_battleground_race',
+            'wikipedia_id', 'number_voting_for', 'number_elected',
+            'state_code', 'primary_party', 'district_name',
+            'district_scope', 'district_id', 'contest_level0',
+            'contest_level1', 'contest_level2',
+            'electorate_specifications', 'special', 'state_code',
+            'vote_usa_office_id')
         if contest_office_list_dict:
             contest_office_list_json = list(contest_office_list_dict)
             return HttpResponse(json.dumps(contest_office_list_json), content_type='application/json')

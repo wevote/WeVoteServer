@@ -823,6 +823,12 @@ def candidates_import_from_structured_json(structured_json):
                 updated_candidate_values['twitter_description'] = one_candidate['twitter_description']
             if 'vote_smart_id' in one_candidate:
                 updated_candidate_values['vote_smart_id'] = one_candidate['vote_smart_id']
+            if 'vote_usa_office_id' in one_candidate:
+                updated_candidate_values['vote_usa_office_id'] = one_candidate['vote_usa_office_id']
+            if 'vote_usa_politician_id' in one_candidate:
+                updated_candidate_values['vote_usa_politician_id'] = one_candidate['vote_usa_politician_id']
+            if 'vote_usa_profile_image_url' in one_candidate:
+                updated_candidate_values['vote_usa_profile_image_url'] = one_candidate['vote_usa_profile_image_url']
             if 'we_vote_hosted_profile_image_url_large' in one_candidate:
                 updated_candidate_values['we_vote_hosted_profile_image_url_large'] = \
                     one_candidate['we_vote_hosted_profile_image_url_large']

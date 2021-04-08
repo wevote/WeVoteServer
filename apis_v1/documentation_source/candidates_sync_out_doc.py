@@ -77,6 +77,9 @@ def candidates_sync_out_doc_template_values(url_root):
                    '  "twitter_profile_image_url_https": string,\n' \
                    '  "twitter_description": string,\n' \
                    '  "vote_smart_id": integer,\n' \
+                   '  "vote_usa_office_id": string,\n' \
+                   '  "vote_usa_politician_id": string,\n' \
+                   '  "vote_usa_profile_image_url": string,\n' \
                    '  "we_vote_id": string,\n' \
                    '  "wikipedia_page_id": string,\n' \
                    '  "wikipedia_page_title": string,\n' \
