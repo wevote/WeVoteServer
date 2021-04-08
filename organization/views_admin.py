@@ -1878,8 +1878,8 @@ def organization_position_new_view(request, organization_id):
     candidate_list = CandidateListManager()
     candidates_for_this_election_list = []
     results = candidate_list.retrieve_all_candidates_for_upcoming_election(
-        google_civic_election_id_list,
-        state_code,
+        google_civic_election_id_list=google_civic_election_id_list,
+        state_code=state_code,
         search_string=candidate_search,
         return_list_of_objects=True)
     if results['candidate_list_found']:

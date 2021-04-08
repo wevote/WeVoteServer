@@ -61,6 +61,7 @@ def offices_sync_out_doc_template_values(url_root):
                    '  "special": string,\n' \
                    '  "state_code": string,\n' \
                    '  "wikipedia_id": string,\n' \
+                   '  "vote_usa_office_id": string,\n' \
                    '}]'
 
     template_values = {

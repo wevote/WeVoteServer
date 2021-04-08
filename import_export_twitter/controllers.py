@@ -1179,7 +1179,9 @@ def scrape_and_save_social_media_for_candidates_in_one_election(google_civic_ele
     return_list_of_objects = True
     google_civic_election_id_list = [google_civic_election_id]
     results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
-        google_civic_election_id_list, state_code, return_list_of_objects)
+        google_civic_election_id_list=google_civic_election_id_list,
+        state_code=state_code,
+        return_list_of_objects=return_list_of_objects)
     status += results['status']
     if results['success']:
         candidate_list = results['candidate_list_objects']
@@ -1228,7 +1230,9 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
     return_list_of_objects = True
     google_civic_election_id_list = [google_civic_election_id]
     candidates_results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
-        google_civic_election_id_list, state_code, return_list_of_objects)
+        google_civic_election_id_list=google_civic_election_id_list,
+        state_code=state_code,
+        return_list_of_objects=return_list_of_objects)
     if candidates_results['candidate_list_found']:
         candidate_list = candidates_results['candidate_list_objects']
 
@@ -1276,7 +1280,9 @@ def transfer_candidate_twitter_handles_from_google_civic(google_civic_election_i
     return_list_of_objects = True
     google_civic_election_id_list = [google_civic_election_id]
     results = candidate_list_object.retrieve_all_candidates_for_upcoming_election(
-        google_civic_election_id_list, state_code, return_list_of_objects)
+        google_civic_election_id_list=google_civic_election_id_list,
+        state_code=state_code,
+        return_list_of_objects=return_list_of_objects)
     status += results['status']
     if results['success']:
         candidate_list = results['candidate_list_objects']

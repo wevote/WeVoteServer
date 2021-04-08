@@ -578,6 +578,7 @@ def offices_import_from_structured_json(structured_json):
                 if 'ballotpedia_race_office_level' in one_office else ''
             is_battleground_race = one_office['is_battleground_race'] if 'is_battleground_race' in one_office else ''
             wikipedia_id = one_office['wikipedia_id'] if 'wikipedia_id' in one_office else ''
+            vote_usa_office_id = one_office['vote_usa_office_id'] if 'vote_usa_office_id' in one_office else None
             updated_contest_office_values = {
                 'we_vote_id': we_vote_id,
                 'google_civic_election_id': google_civic_election_id,
@@ -612,6 +613,7 @@ def offices_import_from_structured_json(structured_json):
                 'ballotpedia_race_id': ballotpedia_race_id,
                 'ballotpedia_race_office_level': ballotpedia_race_office_level,
                 'wikipedia_id': wikipedia_id,
+                'vote_usa_office_id': vote_usa_office_id,
             }
             results = office_manager.update_or_create_contest_office(
                 office_we_vote_id=we_vote_id,
