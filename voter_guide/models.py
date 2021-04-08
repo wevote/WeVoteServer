@@ -1567,7 +1567,11 @@ class VoterGuideListManager(models.Manager):
 
             if search_string:
                 # Each word in the search string can be anywhere in any field we search
-                data = search_string.split()  # split search_string into a list
+                try:
+                    data = search_string.split()
+                except Exception as e:
+                    status += "SEARCH_STRING_COULD_NOT_BE_SPLIT "
+                    data = []
 
                 for search_string_part in data:
                     voter_guide_query = voter_guide_query.filter(Q(display_name__icontains=search_string_part) |
@@ -1683,7 +1687,10 @@ class VoterGuideListManager(models.Manager):
                 voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
 
             if positive_value_exists(search_string):
-                search_words = search_string.split()
+                try:
+                    search_words = search_string.split()
+                except Exception as e:
+                    search_words = []
                 for one_word in search_words:
                     filters = []
 
@@ -2299,7 +2306,11 @@ class VoterGuidePossibilityManager(models.Manager):
 
             # Allow searching for voter guide possibilities that are being ignored
             if positive_value_exists(search_string):
-                search_words = search_string.split()
+                try:
+                    search_words = search_string.split()
+                except Exception as e:
+                    status += "SEARCH_STRING_COULD_NOT_BE_SPLIT "
+                    search_words = []
                 # possibility_number_list = POSSIBLE_ENDORSEMENT_NUMBER_LIST
                 for one_word in search_words:
                     filters = []
