@@ -182,11 +182,15 @@ class CandidateListManager(models.Manager):
         candidate_list_objects = []
         candidate_list_light = []
         candidate_list_found = False
+        status = ""
         if positive_value_exists(search_string):
-            search_words = search_string.split()
+            try:
+                search_words = search_string.split()
+            except Exception as e:
+                status += "SEARCH_STRING_INVALID "
+                search_words = []
         else:
             search_words = []
-        status = ""
 
         results = self.retrieve_candidate_we_vote_id_list_from_election_list(
             google_civic_election_id_list=google_civic_election_id_list,
@@ -1253,7 +1257,11 @@ class CandidateListManager(models.Manager):
         candidate_list_json = []
         candidate_list_found = False
 
-        search_words = search_string.split()
+        try:
+            search_words = search_string.split()
+        except Exception as e:
+            status += "SEARCH_STRING_COULD_NOT_BE_SPLIT "
+            search_words = []
 
         # candidate_website = voter_guide_website,
         # facebook_page_list = facebook_page_list_modified,
