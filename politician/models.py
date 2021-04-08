@@ -234,43 +234,60 @@ class PoliticianManager(models.Manager):
     def retrieve_politician_from_we_vote_id(self, politician_we_vote_id):
         return self.retrieve_politician(0, politician_we_vote_id)
 
-    def retrieve_all_politicians_that_might_match_candidate(self, vote_smart_id, maplight_id, candidate_twitter_handle,
-                                                            candidate_name='', state_code=''):
+    def retrieve_all_politicians_that_might_match_candidate(
+            self,
+            vote_smart_id='',
+            maplight_id='',
+            candidate_twitter_handle='',
+            vote_usa_politician_id='',
+            candidate_name='',
+            state_code=''):
         politician_list = []
         politician_list_found = False
         politician = Politician()
         politician_found = False
-
-        # if not positive_value_exists(politician_id) and not positive_value_exists(politician_we_vote_id):
-        #     status = 'VALID_POLITICIAN_ID_AND_POLITICIAN_WE_VOTE_ID_MISSING'
-        #     results = {
-        #         'success':                  True if politician_list_found else False,
-        #         'status':                   status,
-        #         'politician_id':            politician_id,
-        #         'politician_we_vote_id':    politician_we_vote_id,
-        #         'politician_list_found':    politician_list_found,
-        #         'politician_list':          politician_list,
-        #     }
-        #     return results
+        status = ''
 
         try:
             filter_set = False
             politician_queryset = Politician.objects.all()
+
+            filters = []
             if positive_value_exists(vote_smart_id):
+                new_filter = Q(vote_smart_id__iexact=vote_smart_id)
                 filter_set = True
-                politician_queryset = politician_queryset.filter(vote_smart_id=vote_smart_id)
-            elif positive_value_exists(maplight_id):
+                filters.append(new_filter)
+
+            if positive_value_exists(vote_usa_politician_id):
+                new_filter = Q(vote_usa_politician_id__iexact=vote_usa_politician_id)
                 filter_set = True
-                politician_queryset = politician_queryset.filter(maplight_id=maplight_id)
-            elif positive_value_exists(candidate_twitter_handle):
+                filters.append(new_filter)
+
+            if positive_value_exists(maplight_id):
+                new_filter = Q(maplight_id__iexact=maplight_id)
                 filter_set = True
-                politician_queryset = politician_queryset.filter(
-                    politician_twitter_handle__iexact=candidate_twitter_handle)
-            elif positive_value_exists(candidate_name) and positive_value_exists(state_code):
+                filters.append(new_filter)
+
+            if positive_value_exists(candidate_twitter_handle):
+                new_filter = Q(politician_twitter_handle__iexact=candidate_twitter_handle)
                 filter_set = True
-                # Note, this won't catch Presidential candidates
-                politician_queryset = politician_queryset.filter(politician_name__iexact=candidate_name)
-                politician_queryset = politician_queryset.filter(state_code__iexact=state_code)
+                filters.append(new_filter)
+
+            if positive_value_exists(candidate_name) and positive_value_exists(state_code):
+                new_filter = Q(politician_name__iexact=candidate_name,
+                               state_code__iexact=state_code)
+                filter_set = True
+                filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                politician_queryset = politician_queryset.filter(final_filters)
 
             if filter_set:
                 politician_list = politician_queryset
@@ -281,13 +298,13 @@ class PoliticianManager(models.Manager):
                 politician_found = True
                 politician_list_found = False
                 politician = politician_list[0]
-                status = 'ONE_POLITICIAN_RETRIEVED'
+                status += 'ONE_POLITICIAN_RETRIEVED '
             elif len(politician_list):
                 politician_found = False
                 politician_list_found = True
-                status = 'POLITICIAN_LIST_RETRIEVED'
+                status += 'POLITICIAN_LIST_RETRIEVED '
             else:
-                status = 'NO_POLITICIANS_RETRIEVED'
+                status += 'NO_POLITICIANS_RETRIEVED '
             success = True
         except Exception as e:
             status = 'FAILED retrieve_all_politicians_for_office ' \
@@ -475,6 +492,7 @@ class PoliticianManager(models.Manager):
         # TODO Add all other identifiers from other systems
         updated_politician_values = {
             'vote_smart_id':                            candidate.vote_smart_id,
+            'vote_usa_politician_id':                   candidate.vote_usa_politician_id,
             'maplight_id':                              candidate.maplight_id,
             'politician_name':                          candidate.candidate_name,
             'google_civic_candidate_name':              candidate.google_civic_candidate_name,
@@ -489,19 +507,35 @@ class PoliticianManager(models.Manager):
             'political_party':                          political_party,
         }
 
-        return self.update_or_create_politician(updated_politician_values, candidate.politician_we_vote_id)
+        return self.update_or_create_politician(
+            updated_politician_values,
+            politician_we_vote_id=candidate.politician_we_vote_id,
+            vote_usa_politician_id=candidate.vote_usa_politician_id,
+            candidate_twitter_handle=candidate.candidate_twitter_handle,
+            candidate_name=candidate.candidate_name,
+            state_code=candidate.state_code)
 
-    def update_or_create_politician(self, updated_politician_values, politician_we_vote_id,
-                                    vote_smart_id=0, maplight_id="",
-                                    candidate_twitter_handle="", candidate_name="", state_code="",
-                                    first_name="", middle_name="", last_name=""):
+    def update_or_create_politician(
+            self,
+            updated_politician_values,
+            politician_we_vote_id='',
+            vote_smart_id=0,
+            vote_usa_politician_id='',
+            maplight_id="",
+            candidate_twitter_handle="",
+            candidate_name="",
+            state_code="",
+            first_name="",
+            middle_name="",
+            last_name=""):
         """
         Either update or create a politician entry. The individual variables passed in are for the purpose of finding
         a politician to update, and the updated_politician_values variable contains the values we want to update to.
         """
-        politician_found = False
         new_politician_created = False
+        politician_found = False
         politician = Politician()
+        status = ''
 
         try:
             # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
@@ -520,10 +554,24 @@ class PoliticianManager(models.Manager):
                         vote_smart_id=vote_smart_id,
                         defaults=updated_politician_values)
                 politician_found = True
+            elif positive_value_exists(vote_usa_politician_id):
+                politician, new_politician_created = \
+                    Politician.objects.update_or_create(
+                        vote_usa_politician_id=vote_usa_politician_id,
+                        defaults=updated_politician_values)
+                politician_found = True
             elif positive_value_exists(candidate_twitter_handle):
                 politician, new_politician_created = \
                     Politician.objects.update_or_create(
                         politician_twitter_handle=candidate_twitter_handle,
+                        defaults=updated_politician_values)
+                politician_found = True
+            elif positive_value_exists(candidate_name) and positive_value_exists(state_code):
+                state_code = state_code.lower()
+                politician, new_politician_created = \
+                    Politician.objects.update_or_create(
+                        politician_name=candidate_name,
+                        state_code=state_code,
                         defaults=updated_politician_values)
                 politician_found = True
             elif positive_value_exists(first_name) and positive_value_exists(last_name) \
@@ -543,12 +591,12 @@ class PoliticianManager(models.Manager):
 
             success = True
             if politician_found:
-                status = 'POLITICIAN_SAVED'
+                status += 'POLITICIAN_SAVED '
             else:
-                status = 'POLITICIAN_NOT_SAVED'
+                status += 'POLITICIAN_NOT_SAVED '
         except Exception as e:
             success = False
-            status = 'UNABLE_TO_UPDATE_OR_CREATE_POLITICIAN'
+            status = 'UNABLE_TO_UPDATE_OR_CREATE_POLITICIAN: ' + str(e) + ' '
 
         results = {
             'success':              success,

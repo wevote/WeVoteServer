@@ -118,6 +118,9 @@ def politician_list_view(request):
                 new_filter = Q(political_party__icontains=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(vote_usa_politician_id__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(we_vote_id__icontains=one_word)
                 filters.append(new_filter)
 

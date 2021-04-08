@@ -166,10 +166,10 @@
                     (office missing)
                 {% endif %}
             </td>
-            <td class="padded">twee{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
+            <td class="padded">{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
                     target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
                 ({{ candidate.twitter_followers_count|intcomma }} followers){% endif %}</td>
-            <td class="padded">web{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
+            <td class="padded">{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
             <td class="padded">{% if candidate.candidate_contact_form_url %}<a href="{{ candidate.candidate_contact_form_url }}" target="_blank" target="_blank">{{ candidate.candidate_contact_form_url }}</a>{% endif %}</td>
             <td class="padded">{{ candidate.id }}</td>
             <td class="padded">{{ candidate.we_vote_id }}
@@ -294,6 +294,11 @@
 <a href="{% url 'politician:politician_retrieve_photos' politician.id %}">Retrieve photos</a><br />
     {% if politician.politician_photo_url %}
     <img src='{{ politician.politician_photo_url }}' />
+    {% endif %}
+
+    {% if politician.we_vote_hosted_profile_image_url_large %}
+    <img src='{{ politician.we_vote_hosted_profile_image_url_large }}' /><br />
+    we_vote_hosted_profile_image_url_large
     {% endif %}
 
     <h4>We Vote Positions Related to {{ politician.politician_name  }}</h4>
