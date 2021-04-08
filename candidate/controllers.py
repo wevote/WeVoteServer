@@ -1365,10 +1365,6 @@ def retrieve_candidate_photos(we_vote_candidate, force_retrieve=False):
 
 def candidate_politician_match(we_vote_candidate):
     politician_manager = PoliticianManager()
-    politician_created = False
-    politician_found = False
-    politician_list_found = False
-    politician_list = []
 
     # Does this candidate already have a we_vote_id for a politician?
     if positive_value_exists(we_vote_candidate.politician_we_vote_id):
@@ -1395,8 +1391,12 @@ def candidate_politician_match(we_vote_candidate):
     else:
         # Search the politician table for a match
         results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
-            we_vote_candidate.vote_smart_id, we_vote_candidate.maplight_id, we_vote_candidate.candidate_twitter_handle,
-            we_vote_candidate.candidate_name, we_vote_candidate.state_code)
+            vote_smart_id=we_vote_candidate.vote_smart_id,
+            vote_usa_politician_id=we_vote_candidate.vote_usa_politician_id,
+            maplight_id=we_vote_candidate.maplight_id,
+            candidate_twitter_handle=we_vote_candidate.candidate_twitter_handle,
+            candidate_name=we_vote_candidate.candidate_name,
+            state_code=we_vote_candidate.state_code)
         if results['politician_list_found']:
             # If here, return
             politician_list = results['politician_list']
@@ -1451,40 +1451,36 @@ def candidate_politician_match(we_vote_candidate):
             }
             return results
 
-    success = False
-    status = "TO_BE_IMPLEMENTED"
-    results = {
-        'success':                  success,
-        'status':                   status,
-        'politician_list_found':    politician_list_found,
-        'politician_list':          politician_list,
-        'politician_found':         politician_found,
-        'politician_created':       politician_created,
-        'politician':               None,
-    }
 
-    return results
-
-
-def retrieve_candidate_politician_match_options(vote_smart_id, maplight_id, candidate_twitter_handle,
-                                                candidate_name, state_code):
+def retrieve_candidate_politician_match_options(
+        vote_smart_id,
+        vote_usa_politician_id='',
+        maplight_id='',
+        candidate_twitter_handle='',
+        candidate_name='',
+        state_code=''):
     politician_manager = PoliticianManager()
     politician_created = False
     politician_found = False
     politician_list_found = False
     politician_list = []
+    status = ""
 
     # Search the politician table for a match
     results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
-        vote_smart_id, maplight_id, candidate_twitter_handle,
-        candidate_name, state_code)
+        vote_smart_id=vote_smart_id,
+        vote_usa_politician_id=vote_usa_politician_id,
+        maplight_id=maplight_id,
+        candidate_twitter_handle=candidate_twitter_handle,
+        candidate_name=candidate_name,
+        state_code=state_code)
     if results['politician_list_found']:
         # If here, return
         politician_list = results['politician_list']
-
+        status += results['status']
         results = {
             'success':                  results['success'],
-            'status':                   results['status'],
+            'status':                   status,
             'politician_list_found':    True,
             'politician_list':          politician_list,
             'politician_found':         False,
@@ -1495,10 +1491,11 @@ def retrieve_candidate_politician_match_options(vote_smart_id, maplight_id, cand
     elif results['politician_found']:
         # Return this politician entry
         politician = results['politician']
+        status += results['status']
 
         results = {
             'success':                  results['success'],
-            'status':                   results['status'],
+            'status':                   status,
             'politician_list_found':    False,
             'politician_list':          [],
             'politician_found':         True,
@@ -1508,7 +1505,7 @@ def retrieve_candidate_politician_match_options(vote_smart_id, maplight_id, cand
         return results
 
     success = False
-    status = "TO_BE_IMPLEMENTED"
+    status += "TO_BE_IMPLEMENTED "
     results = {
         'success':                  success,
         'status':                   status,

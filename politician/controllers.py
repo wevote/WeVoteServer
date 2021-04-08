@@ -129,7 +129,9 @@ def politicians_import_from_structured_json(structured_json):
             if 'politician_email_address' in one_politician:
                 updated_politician_values['politician_email_address'] = one_politician['politician_email_address']
 
-            results = politician_manager.update_or_create_politician(updated_politician_values, politician_we_vote_id)
+            results = politician_manager.update_or_create_politician(
+                updated_politician_values,
+                politician_we_vote_id=politician_we_vote_id)
         else:
             politicians_not_processed += 1
             results = {

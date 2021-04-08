@@ -249,19 +249,22 @@ def office_list_view(request):
             search_words = office_search.split()
             for one_word in search_words:
                 filters = []  # Reset for each search word
+                new_filter = Q(ballotpedia_office_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballotpedia_race_id__iexact=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(office_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(vote_usa_office_id__icontains=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(we_vote_id__icontains=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(wikipedia_id__icontains=one_word)
-                filters.append(new_filter)
-
-                new_filter = Q(ballotpedia_office_id__iexact=one_word)
-                filters.append(new_filter)
-
-                new_filter = Q(ballotpedia_race_id__iexact=one_word)
                 filters.append(new_filter)
 
                 # Add the first query

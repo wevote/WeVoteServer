@@ -324,8 +324,7 @@
                 <th>Google Search Results</th>
                 <th>Website / Facebook / Email</th>
                 <th>Ballotpedia</th>
-                <th>Vote USA Politician</th>
-                <th>Vote USA Office</th>
+                <th>Vote USA</th>
             </tr>
           </thead>
         {% endif %}
@@ -343,7 +342,9 @@
                 <span class="u-no-break">
                   <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
                      class="u-no-break"
-                     target="_blank">{{ candidate.candidate_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+                     target="_blank">
+                      <strong>{{ candidate.candidate_name }}</strong> <span class="glyphicon glyphicon-new-window"></span>
+                  </a>
                 </span>
                 {% if candidate.withdrawn_from_election %}
                     <br />
@@ -356,7 +357,10 @@
                 <br />
                     {{ candidate.we_vote_id }}
                     {% if candidate.politician_we_vote_id %}
-                        <br />{{ candidate.politician_we_vote_id }}
+                        <br />
+                        <a href="{% url 'politician:politician_we_vote_id_edit' candidate.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                        {{ candidate.politician_we_vote_id }}
+                        </a>
                     {% endif %}
                     {% if candidate.ballotpedia_candidate_summary %}
                     <br /><span style="color: darkgray">{{ candidate.ballotpedia_candidate_summary|default_if_none:""|truncatechars:50 }}</span>
@@ -497,8 +501,10 @@
                     Vote Smart: <a href="https://votesmart.org/candidate/biography/{{ candidate.vote_smart_id }}" target="_blank">{{ candidate.vote_smart_id|default_if_none:"" }}</a>
                   {% endif %}
                 </td>
-                <td>{{ candidate.vote_usa_politician_id|default_if_none:"" }}</td>
-                <td>{{ candidate.vote_usa_office_id|default_if_none:"" }}</td>
+                <td>
+                    Politician:&nbsp;{{ candidate.vote_usa_politician_id|default_if_none:"" }}
+                    Office:&nbsp;{{ candidate.vote_usa_office_id|default_if_none:"" }}
+                </td>
             </tr>
         {% endfor %}
         </table>

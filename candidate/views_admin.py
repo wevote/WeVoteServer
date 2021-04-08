@@ -492,6 +492,12 @@ def candidate_list_view(request):
                 new_filter = Q(twitter_description__icontains=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(vote_usa_office_id__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(vote_usa_politician_id__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(we_vote_id__icontains=one_word)
                 filters.append(new_filter)
 
@@ -1369,9 +1375,13 @@ def candidate_edit_process_view(request):
 
     if positive_value_exists(look_for_politician):
         # If here, we specifically want to see if a politician exists, given the information submitted
-        match_results = retrieve_candidate_politician_match_options(vote_smart_id, maplight_id,
-                                                                    candidate_twitter_handle,
-                                                                    candidate_name, best_state_code)
+        match_results = retrieve_candidate_politician_match_options(
+            vote_smart_id=vote_smart_id,
+            vote_usa_politician_id=vote_usa_politician_id,
+            maplight_id=maplight_id,
+            candidate_twitter_handle=candidate_twitter_handle,
+            candidate_name=candidate_name,
+            state_code=best_state_code)
         if match_results['politician_found']:
             messages.add_message(request, messages.INFO, 'Politician found! Information filled into this form.')
             matching_politician = match_results['politician']
