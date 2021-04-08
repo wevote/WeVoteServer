@@ -4229,6 +4229,12 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
                             results = retrieve_and_save_ballotpedia_candidate_images(new_candidate)
                             if results['success']:
                                 new_candidate = results['candidate']
+                        # Create link to office if it doesn't exist
+                        results = candidate_manager.get_or_create_candidate_to_office_link(
+                            candidate_we_vote_id=new_candidate.we_vote_id,
+                            contest_office_we_vote_id=one_batch_row_action.contest_office_we_vote_id,
+                            google_civic_election_id=google_civic_election_id,
+                            state_code=new_candidate.state_code)
                     except Exception as e:
                         success = False
                         status += "CANDIDATE_RETRIEVE_ERROR"
@@ -4247,6 +4253,12 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
                     results = retrieve_and_save_ballotpedia_candidate_images(new_candidate)
                     if results['success']:
                         new_candidate = results['candidate']
+                # Create link to office if it doesn't exist
+                results = candidate_manager.get_or_create_candidate_to_office_link(
+                    candidate_we_vote_id=new_candidate.we_vote_id,
+                    contest_office_we_vote_id=one_batch_row_action.contest_office_we_vote_id,
+                    google_civic_election_id=google_civic_election_id,
+                    state_code=new_candidate.state_code)
         else:
             # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
             status += "IMPORT_CANDIDATE_ENTRY:NO_CREATE_OR_UPDATE_ERROR"
