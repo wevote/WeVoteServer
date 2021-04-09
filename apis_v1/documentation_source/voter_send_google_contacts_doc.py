@@ -56,8 +56,9 @@ def voter_send_google_contacts_doc_template_values(url_root):
         'api_introduction':
             'Receive a voter&apos;s Google contacts for saving.<br>'
             '<b>Example JSON string to add one contact:</b><br>'
-            '&nbsp;&nbsp;[{"display_name": "George Washington","family_name": "Washington","given_name": "George","email":'
-            '"george@whitehouse.com","update_time": "2014-03-20T16:36:33.176Z","type": "OTHER_CONTACT"}]<br>',
+            '&nbsp;&nbsp;[{"display_name": "George Washington","family_name": "Washington",'
+            '"given_name": "George","email": "george@whitehouse.com","update_time": "2014-03-20T16:36:33.176Z",'
+            '"type": "OTHER_CONTACT"}]<br>',
         'try_now_link': 'apis_v1:voterSendGoogleContactsView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
