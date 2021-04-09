@@ -504,12 +504,11 @@ def politician_edit_process_view(request):
             if len(politician_query):
                 politician_on_stage = politician_query[0]
                 politician_we_vote_id = politician_on_stage.we_vote_id
-                vote_usa_politician_id = politician_on_stage.vote_usa_politician_id
                 politician_on_stage_found = True
         except Exception as e:
             pass
 
-    # Check to see if there is a duplicate politician already saved for this election
+    # Check to see if there is a duplicate politician already saved
     existing_politician_found = False
     if not positive_value_exists(politician_id):
         try:
