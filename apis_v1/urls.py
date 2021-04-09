@@ -329,6 +329,7 @@ urlpatterns = [
         views_voter.voter_position_visibility_save_view, name='voterPositionVisibilitySaveView'),
     url(r'^voterRetrieve/', views_voter.voter_retrieve_view, name='voterRetrieveView'),
     url(r'^voterSignOut/', views_voter.voter_sign_out_view, name='voterSignOutView'),
+    url(r'^voterSendGoogleContacts/', views_voter.voter_send_google_contacts_view, name='voterSendGoogleContactsView'),
     url(r'^voterSMSPhoneNumberRetrieve/', views_voter.voter_sms_phone_number_retrieve_view,
         name='voterSMSPhoneNumberRetrieveView'),
     url(r'^voterSMSPhoneNumberSave/', views_voter.voter_sms_phone_number_save_view, name='voterSMSPhoneNumberSaveView'),
