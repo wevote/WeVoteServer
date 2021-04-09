@@ -622,6 +622,8 @@ urlpatterns = [
         views_docs.voter_position_visibility_save_doc_view, name='voterPositionVisibilitySaveDocs'),
     url(r'^docs/voterRetrieve/$', views_docs.voter_retrieve_doc_view, name='voterRetrieveDocs'),
     url(r'^docs/voterSignOut/$', views_docs.voter_sign_out_doc_view, name='voterSignOutDocs'),
+    url(r'^docs/voterSendGoogleContacts/$', views_docs.voter_send_google_contacts_doc_view,
+        name='voterSendGoogleContactsDocs'),
     url(r'^docs/voterSMSPhoneNumberRetrieve/$',
         views_docs.voter_sms_phone_number_retrieve_doc_view, name='voterSMSPhoneNumberRetrieveDocs'),
     url(r'^docs/voterSMSPhoneNumberSave/$',

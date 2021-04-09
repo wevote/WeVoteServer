@@ -69,7 +69,7 @@ from apis_v1.documentation_source import \
     voter_plan_list_retrieve_doc, voter_plan_save_doc, \
     voter_reaction_like_off_save_doc, voter_reaction_like_on_save_doc, reaction_like_status_retrieve_doc, \
     voter_position_comment_save_doc, voter_position_retrieve_doc, voter_position_visibility_save_doc, \
-    voter_opposing_save_doc, voter_retrieve_doc, voter_sign_out_doc, \
+    voter_opposing_save_doc, voter_retrieve_doc, voter_send_google_contacts_doc, voter_sign_out_doc, \
     voter_sms_phone_number_retrieve_doc, voter_sms_phone_number_save_doc, \
     voter_split_into_two_accounts_doc, \
     voter_stop_opposing_save_doc, \
@@ -1499,6 +1499,16 @@ def voter_plan_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_plan_save_doc.voter_plan_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_send_google_contacts_doc_view(request):
+    """
+    Show documentation about voterPlanSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = voter_send_google_contacts_doc.voter_send_google_contacts_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

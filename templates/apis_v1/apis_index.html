@@ -281,6 +281,12 @@
           <td>Delete the voter sign in session. (Remove voter_device_id from database.)
           </td>
         </tr>
+        <tr>
+          <td><a href="{% url 'apis_v1:voterSendGoogleContactsDocs' %}">voterSendGoogleContacts</a></td>
+          <td></td>
+          <td>Send the voter&apos;s Google contacts for processing.  (Voter has explicitly opted in.)
+          </td>
+        </tr>
 
         {###  ###}
         <tr>
