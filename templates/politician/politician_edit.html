@@ -122,7 +122,6 @@
 
 <p><a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">cancel</a>
 <input name="submit_text" type="submit" value="{% if politician %}Update Politician{% else %}Save New Politician{% endif %}" /></p>
-</form>
 
 <br />
 {% if politician %}
@@ -130,7 +129,7 @@
 
 {% if linked_candidate_list %}
     <h4>Candidates Linked to this Politician</h4>
-    <table border="1" cellpadding="5" cellspacing="5">
+    <table class="table">
         <tr>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
@@ -142,7 +141,7 @@
             <td class="padded">Website</td>
             <td class="padded">Contact Form</td>
             <td class="padded">Id</td>
-            <td class="padded">We Vote Id</td>
+            <td class="padded">We Vote Ids</td>
             <td class="padded">Vote Smart Id</td>
             <td class="padded">Vote USA Politician Id</td>
         </tr>
@@ -192,7 +191,7 @@
 
 {% if related_candidate_list %}
     <h4>Candidates That Might Match This Politician</h4>
-    <table border="1" cellpadding="5" cellspacing="5">
+    <table class="table">
         <tr>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
@@ -203,8 +202,8 @@
             <td>Twitter Handle</td>
             <td>Website</td>
             <td>Id</td>
-            <td>We Vote Id</td>
-            <td>Vote Smart Id</td>
+            <td>We Vote Ids</td>
+            <td>Vote Smart Vote USA Id</td>
         </tr>
     {% for candidate in related_candidate_list %}
         <tr>
@@ -218,10 +217,21 @@
             </td>
             <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">{{ candidate.candidate_name }}</a>
             &nbsp;
-                (<a href="{% url 'candidate:candidate_politician_match' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}" target="_blank">match to politician</a>)
+                <br />
+                <input type="checkbox"
+                       name="link_candidate_{{ candidate.id }}_to_politician"
+                       id="link_candidate_{{ candidate.id }}_to_politician_id"
+                       value=1
+                />
+                link&nbsp;to&nbsp;politician
             </td>
             <td>{{ candidate.get_candidate_state }}</td>
-            <td>{{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}</td>
+            <td>
+                {{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}
+                {% if candidate.candidate_year %}
+                ({{ candidate.candidate_year }})
+                {% endif %}
+            </td>
             <td>
                 {% if candidate.office %}
                         <a href="{% url 'office:office_summary' candidate.office.id %}" target="_blank">{{ candidate.office.office_name }}</a>
@@ -232,27 +242,35 @@
             <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
                     target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
                 ({{ candidate.twitter_followers_count|intcomma }} followers){% endif %}</td>
-            <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
-            <td>{% if candidate.candidate_contact_form_url %}<a href="{{ candidate.candidate_contact_form_url }}" target="_blank">{{ candidate.candidate_contact_form_url }}</a>{% endif %}</td>
+            <td>
+                {% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}
+                {% if candidate.candidate_contact_form_url %}<br /><a href="{{ candidate.candidate_contact_form_url }}" target="_blank">{{ candidate.candidate_contact_form_url }}</a>{% endif %}
+            </td>
             <td>{{ candidate.id }}</td>
             <td>{{ candidate.we_vote_id }}
                 {% if candidate.politician_we_vote_id %}
                     {{ candidate.politician_we_vote_id }}
+                {% else %}
+                    ("pol"&nbsp;missing)
                 {% endif %}
             </td>
-            <td>{{ candidate.vote_smart_id|default_if_none:"" }}</td>
-            <td>{{ candidate.vote_usa_politician_id|default_if_none:"" }}</td>
+            <td>
+                {{ candidate.vote_smart_id|default_if_none:"" }}
+                {{ candidate.vote_usa_politician_id|default_if_none:"" }}
+            </td>
         </tr>
     {% endfor %}
     </table>
-
+<input name="submit_text" type="submit" value="{% if politician %}Link These Candidates to This Politician{% endif %}" />
+<br />
 {% endif %}
+</form>
 
 
 
 {% if duplicate_politician_list %}
     <h4>Possible Duplicate Politicians</h4>
-    <table border="1" cellpadding="5" cellspacing="5">
+    <table class="table">
         <tr>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
@@ -310,15 +328,17 @@
             Add Position (start with Endorser taking the Position)</a> (open in new window)</p>
 
     {% if politician_position_list %}
-        <table border="1">
+    <table class="table">
+      <thead>
         <tr>
-            <td></td>
-            <td>Endorser</td>
-            <td>Stance</td>
-            <td>Rating Time Span</td>
+            <th></th>
+            <th>Endorser</th>
+            <th>Stance</th>
+            <th>Election</th>
+            <th>Election Date</th>
         </tr>
-
-        {% for politician_position in politician_position_list %}
+      </thead>
+    {% for politician_position in politician_position_list %}
         {% if not politician_position.id %}
         <tr>
             <td colspan="3">
@@ -335,11 +355,26 @@
                 {% else %}
                     (not an org)
                 {% endif %}
+                {% if politician_position.organization.twitter_followers_count %}
+                    <br />
+                    <span style="color: darkgray" class="u-no-break">(<i class="fa fa-twitter"></i> {{ politician_position.organization.twitter_followers_count|intcomma }} Twitter Followers)</span>
+                {% endif %}
             </td>
             <td>{{ politician_position.get_stance_display }}
+                {% if politician_position.statement_text %}
+                <span style="color: darkgray">{{ politician_position.statement_text }}</span>
+                {% endif %}
 {#                {% if politician_position.vote_smart_rating %} {{ politician_position.vote_smart_rating }}%{% endif %}#}
+                {% if politician_position.more_info_url %}
+                    <br />
+                    <a href="{{ politician_position.more_info_url }}"
+                       target="_blank"
+                       class="u-no-break"
+                    >{{ politician_position.more_info_url }} <span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
             </td>
-            <td>{{ politician_position.vote_smart_time_span|default_if_none:"" }}</td>
+            <td>{{ politician_position.election.google_civic_election_id }}</td>
+            <td>{{ politician_position.election.election_day_text }}</td>
         </tr>
         {% endif %}
         {% endfor %}

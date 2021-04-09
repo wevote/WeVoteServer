@@ -4065,6 +4065,73 @@ class PositionListManager(models.Manager):
 
         return position_count
 
+    @staticmethod
+    def fetch_positions_count_for_politician(
+            politician_id=0,
+            politician_we_vote_id='',
+            stance_we_are_looking_for=ANY_STANCE,
+            public_or_private=PUBLIC_ONLY):
+        if stance_we_are_looking_for not \
+                in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+            stance_we_are_looking_for = ANY_STANCE
+
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
+        #  which means we want to return all stances
+
+        if not positive_value_exists(politician_id) and not \
+                positive_value_exists(politician_we_vote_id):
+            return 0
+
+        if public_or_private not in (PUBLIC_ONLY, FRIENDS_ONLY):
+            public_or_private = PUBLIC_ONLY
+        if public_or_private == FRIENDS_ONLY:
+            position_list_query = PositionForFriends.objects.using('readonly').all()
+        else:
+            position_list_query = PositionEntered.objects.using('readonly').all()
+
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
+        # Retrieve the support positions for this politician_id
+        position_count = 0
+        try:
+            if positive_value_exists(politician_id):
+                position_list_query = position_list_query.filter(politician_id=politician_id)
+            else:
+                position_list_query = position_list_query.filter(
+                    politician_we_vote_id__iexact=politician_we_vote_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            if stance_we_are_looking_for != ANY_STANCE:
+                position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
+
+            position_count = position_list_query.count()
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        return position_count
+
+    def fetch_public_positions_count_for_politician(
+            self,
+            politician_id=0,
+            politician_we_vote_id='',
+            stance_we_are_looking_for=ANY_STANCE):
+        return self.fetch_positions_count_for_politician(
+            politician_id=politician_id,
+            politician_we_vote_id=politician_we_vote_id,
+            stance_we_are_looking_for=stance_we_are_looking_for,
+            public_or_private=PUBLIC_ONLY)
+
+    def fetch_friends_only_positions_count_for_politician(
+            self,
+            politician_id=0,
+            politician_we_vote_id='',
+            stance_we_are_looking_for=ANY_STANCE):
+        return self.fetch_positions_count_for_politician(
+            politician_id=politician_id,
+            politician_we_vote_id=politician_we_vote_id,
+            stance_we_are_looking_for=stance_we_are_looking_for,
+            public_or_private=FRIENDS_ONLY)
+
     def fetch_public_positions_count_for_organization(
             self, organization_id,
             organization_we_vote_id,
@@ -4256,6 +4323,69 @@ class PositionListManager(models.Manager):
         else:
             position_network_score_list = {}
             return position_network_score_list
+
+    def update_politician_we_vote_id_in_all_positions(
+            self,
+            candidate_we_vote_id='',
+            politician_id=0,
+            politician_we_vote_id='',
+            new_politician_id=None,
+            new_politician_we_vote_id=None):
+        success = True
+        status = ''
+        number_changed = 0
+
+        if positive_value_exists(candidate_we_vote_id):
+            number_changed += PositionEntered.objects.all().filter(
+                candidate_campaign_we_vote_id=candidate_we_vote_id,
+            ).update(
+                politician_id=new_politician_id,
+                politician_we_vote_id=new_politician_we_vote_id,
+            )
+
+            number_changed += PositionForFriends.objects.all().filter(
+                candidate_campaign_we_vote_id=candidate_we_vote_id,
+            ).update(
+                politician_id=new_politician_id,
+                politician_we_vote_id=new_politician_we_vote_id,
+            )
+
+        if positive_value_exists(politician_id):
+            number_changed += PositionEntered.objects.all().filter(
+                politician_id=politician_id,
+            ).update(
+                politician_id=new_politician_id,
+                politician_we_vote_id=new_politician_we_vote_id,
+            )
+
+            number_changed += PositionForFriends.objects.all().filter(
+                politician_id=politician_id,
+            ).update(
+                politician_id=new_politician_id,
+                politician_we_vote_id=new_politician_we_vote_id,
+            )
+
+        if positive_value_exists(politician_we_vote_id):
+            number_changed += PositionEntered.objects.all().filter(
+                politician_we_vote_id=politician_we_vote_id,
+            ).update(
+                politician_id=new_politician_id,
+                politician_we_vote_id=new_politician_we_vote_id,
+            )
+
+            number_changed += PositionForFriends.objects.all().filter(
+                politician_we_vote_id=politician_we_vote_id,
+            ).update(
+                politician_id=new_politician_id,
+                politician_we_vote_id=new_politician_we_vote_id,
+            )
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'number_changed':   number_changed,
+        }
+        return results
 
     def remove_position_network_scores_when_voter_stops_following(
             self, viewing_voter_id, organization_we_vote_id):

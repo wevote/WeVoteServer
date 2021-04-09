@@ -83,6 +83,8 @@ def politicians_import_from_structured_json(structured_json):
                 updated_politician_values['opensecrets_id'] = one_politician['opensecrets_id']
             if 'vote_smart_id' in one_politician:
                 updated_politician_values['vote_smart_id'] = one_politician['vote_smart_id']
+            if 'vote_usa_politician_id' in one_politician:
+                updated_politician_values['vote_usa_politician_id'] = one_politician['vote_usa_politician_id']
             if 'fec_id' in one_politician:
                 updated_politician_values['fec_id'] = one_politician['fec_id']
             if 'cspan_id' in one_politician:
