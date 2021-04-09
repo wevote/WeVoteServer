@@ -10,6 +10,7 @@ from ballot.models import BallotItemListManager, BallotReturnedManager, find_bes
 from bookmark.controllers import voter_all_bookmarks_status_retrieve_for_api, voter_bookmark_off_save_for_api, \
     voter_bookmark_on_save_for_api, voter_bookmark_status_retrieve_for_api
 from config.base import get_environment_variable
+from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django_user_agents.utils import get_user_agent
 from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
@@ -2731,3 +2732,54 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
         'voter_must_request_new_code':              voter_must_request_new_code,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+@csrf_exempt
+def voter_send_google_contacts_view(request):  # voterSendGoogleContacts
+    """
+    Receive the voter's google contacts that they allowed the download from the Campaign app
+    :param request:
+    :return:
+    """
+    status = ''
+    success = True
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    voter_found = False
+    voter = None
+    voter_manager = VoterManager()
+    voter_device_link_manager = VoterDeviceLinkManager()
+    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+
+    voter_device_link = None
+    link_results = voter_device_link_manager.retrieve_voter_device_link(
+        voter_device_id=voter_device_id)
+    if link_results['voter_device_link_found']:
+        voter_device_link = link_results['voter_device_link']
+        if positive_value_exists(voter_device_link.voter_id):
+            results = voter_manager.retrieve_voter_by_id(voter_device_link.voter_id, read_only=False)
+            if results['voter_found']:
+                voter = results['voter']
+                voter_found = True
+            else:
+                status += results['status']
+    else:
+        status += link_results['status']
+
+    contacts_string = request.POST.get('contacts', None)
+    contacts = json.loads(contacts_string)
+
+    j = 0
+    if contacts is not None:
+        success = True
+        for contact in contacts:
+            j += 1
+            print(str(j) + " " + json.dumps(contact))
+
+    json_data = {
+        'status':                                   status,
+        'success':                                  success,
+        'we_vote_id_for_google_contacts':           voter.we_vote_id,
+        'contacts_stored':                          len(contacts),
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
