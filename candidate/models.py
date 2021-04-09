@@ -1452,6 +1452,48 @@ class CandidateListManager(models.Manager):
 
         return results_list, number_of_rows
 
+    def update_politician_we_vote_id_in_all_candidates(
+            self,
+            candidate_we_vote_id='',
+            politician_id=0,
+            politician_we_vote_id='',
+            new_politician_id=None,
+            new_politician_we_vote_id=None):
+        success = True
+        status = ''
+        number_changed = 0
+
+        if positive_value_exists(candidate_we_vote_id):
+            number_changed += CandidateCampaign.objects.all().filter(
+                candidate_campaign_we_vote_id=candidate_we_vote_id,
+            ).update(
+                politician_id=new_politician_id,
+                politician_we_vote_id=new_politician_we_vote_id,
+            )
+
+        if positive_value_exists(politician_id):
+            number_changed += CandidateCampaign.objects.all().filter(
+                politician_id=politician_id,
+            ).update(
+                politician_id=new_politician_id,
+                politician_we_vote_id=new_politician_we_vote_id,
+            )
+
+        if positive_value_exists(politician_we_vote_id):
+            number_changed += CandidateCampaign.objects.all().filter(
+                politician_we_vote_id=politician_we_vote_id,
+            ).update(
+                politician_id=new_politician_id,
+                politician_we_vote_id=new_politician_we_vote_id,
+            )
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'number_changed':   number_changed,
+        }
+        return results
+
 
 class CandidateCampaign(models.Model):
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other

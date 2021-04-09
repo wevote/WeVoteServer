@@ -355,6 +355,10 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 new_filter = Q(vote_smart_id=politician_on_stage.vote_smart_id)
                 filters.append(new_filter)
 
+            if positive_value_exists(politician_on_stage.vote_usa_politician_id):
+                new_filter = Q(vote_usa_politician_id=politician_on_stage.vote_usa_politician_id)
+                filters.append(new_filter)
+
             # Add the first query
             if len(filters):
                 final_filters = filters.pop()
@@ -499,6 +503,8 @@ def politician_edit_process_view(request):
             politician_query = Politician.objects.filter(id=politician_id)
             if len(politician_query):
                 politician_on_stage = politician_query[0]
+                politician_we_vote_id = politician_on_stage.we_vote_id
+                vote_usa_politician_id = politician_on_stage.vote_usa_politician_id
                 politician_on_stage_found = True
         except Exception as e:
             pass
@@ -597,11 +603,13 @@ def politician_edit_process_view(request):
                 if maplight_id is not False:
                     politician_on_stage.maplight_id = maplight_id
                 if politician_we_vote_id is not False:
-                    politician_on_stage.politician_we_vote_id = politician_we_vote_id
+                    politician_on_stage.we_vote_id = politician_we_vote_id
                 if vote_usa_politician_id is not False:
                     politician_on_stage.vote_usa_politician_id = vote_usa_politician_id
 
                 politician_on_stage.save()
+                politician_we_vote_id = politician_on_stage.we_vote_id
+                vote_usa_politician_id = politician_on_stage.vote_usa_politician_id
                 politician_id = politician_on_stage.id
                 messages.add_message(request, messages.INFO, 'New politician saved.')
             else:
@@ -626,6 +634,70 @@ def politician_edit_process_view(request):
         handle_record_not_saved_exception(e, logger=logger)
         messages.add_message(request, messages.ERROR, 'Could not save politician.')
         return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
+
+    # ##################################
+    # Link Candidates to this Politician
+    # Finding Candidates that *might* be "children" of this politician
+    try:
+        related_candidate_list = CandidateCampaign.objects.all()
+        related_candidate_list = related_candidate_list.exclude(
+            politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
+
+        filters = []
+        new_filter = \
+            Q(candidate_name__icontains=politician_on_stage.first_name) & \
+            Q(candidate_name__icontains=politician_on_stage.last_name)
+        filters.append(new_filter)
+
+        if positive_value_exists(politician_on_stage.politician_twitter_handle):
+            new_filter = Q(candidate_twitter_handle__iexact=politician_on_stage.politician_twitter_handle)
+            filters.append(new_filter)
+
+        if positive_value_exists(politician_on_stage.vote_smart_id):
+            new_filter = Q(vote_smart_id=politician_on_stage.vote_smart_id)
+            filters.append(new_filter)
+
+        if positive_value_exists(politician_on_stage.vote_usa_politician_id):
+            new_filter = Q(vote_usa_politician_id=politician_on_stage.vote_usa_politician_id)
+            filters.append(new_filter)
+
+        # Add the first query
+        if len(filters):
+            final_filters = filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in filters:
+                final_filters |= item
+
+            related_candidate_list = related_candidate_list.filter(final_filters)
+
+        related_candidate_list = related_candidate_list.order_by('candidate_name')[:20]
+    except Exception as e:
+        messages.add_message(request, messages.ERROR, 'RELATED_CANDIDATE_PROBLEM: ' + str(e))
+        related_candidate_list = []
+    position_list_manager = PositionListManager()
+    for candidate in related_candidate_list:
+        if positive_value_exists(candidate.id):
+            variable_name = "link_candidate_" + str(candidate.id) + "_to_politician"
+            link_candidate = positive_value_exists(request.POST.get(variable_name, False))
+            if positive_value_exists(link_candidate) and positive_value_exists(politician_we_vote_id):
+                candidate.politician_we_vote_id = politician_we_vote_id
+                if not positive_value_exists(candidate.vote_usa_politician_id) and \
+                        positive_value_exists(vote_usa_politician_id):
+                    candidate.vote_usa_politician_id = vote_usa_politician_id
+                candidate.save()
+                # Now update positions
+                from candidate.models import CandidateListManager
+                results = position_list_manager.update_politician_we_vote_id_in_all_positions(
+                    candidate_we_vote_id=candidate.we_vote_id,
+                    new_politician_id=politician_id,
+                    new_politician_we_vote_id=politician_we_vote_id)
+
+                messages.add_message(request, messages.INFO,
+                                     'Candidate linked, number of positions changed: {number_changed}'
+                                     ''.format(number_changed=results['number_changed']))
+            else:
+                pass
 
     if politician_id:
         return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
@@ -662,7 +734,7 @@ def politician_retrieve_photos_view(request, candidate_id):  # TODO DALE Transit
 
 
 @login_required
-def politician_delete_process_view(request):  # TODO DALE Transition fully to politician
+def politician_delete_process_view(request):
     """
     Delete this politician
     :param request:
@@ -676,41 +748,40 @@ def politician_delete_process_view(request):  # TODO DALE Transition fully to po
     politician_id = convert_to_int(request.GET.get('politician_id', 0))
 
     # Retrieve this politician
+    politician_we_vote_id = ''
     politician_on_stage_found = False
-    politician_on_stage = Politician()
+    politician_on_stage = None
     if positive_value_exists(politician_id):
         try:
             politician_query = Politician.objects.filter(id=politician_id)
             if len(politician_query):
                 politician_on_stage = politician_query[0]
+                politician_we_vote_id = politician_on_stage.we_vote_id
                 politician_on_stage_found = True
         except Exception as e:
-            messages.add_message(request, messages.ERROR, 'Could not find politician -- exception.')
+            messages.add_message(request, messages.ERROR, 'Could not find politician -- exception: ', str(e))
 
     if not politician_on_stage_found:
         messages.add_message(request, messages.ERROR, 'Could not find politician.')
         return HttpResponseRedirect(reverse('politician:politician_list', args=()))
 
-    # Are there any positions attached to this politician that should be moved to another
-    # instance of this politician?
-    position_list_manager = PositionListManager()
-    retrieve_public_positions = True  # The alternate is positions for friends-only
-    position_list = position_list_manager.retrieve_all_positions_for_politician(retrieve_public_positions,
-                                                                                politician_id)
-    if positive_value_exists(len(position_list)):
-        positions_found_for_this_politician = True
-    else:
-        positions_found_for_this_politician = False
+    # Are there any positions attached to this politician that should be moved to another instance of this politician?
+    if positive_value_exists(politician_id) or positive_value_exists(politician_we_vote_id):
+        position_list_manager = PositionListManager()
+        from candidate.models import CandidateListManager
+        candidate_list_manager = CandidateListManager()
+        # By not passing in new values, we remove politician_id and politician_we_vote_id
+        results = position_list_manager.update_politician_we_vote_id_in_all_positions(
+            politician_id=politician_id,
+            politician_we_vote_id=politician_we_vote_id)
+        results = candidate_list_manager.update_politician_we_vote_id_in_all_candidates(
+            politician_id=politician_id,
+            politician_we_vote_id=politician_we_vote_id)
 
     try:
-        if not positions_found_for_this_politician:
-            # Delete the politician
-            politician_on_stage.delete()
-            messages.add_message(request, messages.INFO, 'CandidateCampaign deleted.')
-        else:
-            messages.add_message(request, messages.ERROR, 'Could not delete -- '
-                                                          'positions still attached to this politician.')
-            return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
+        # Delete the politician
+        politician_on_stage.delete()
+        messages.add_message(request, messages.INFO, 'Politician deleted.')
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not delete politician -- exception.')
         return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
@@ -765,7 +836,8 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
             'politician_twitter_handle',
             'we_vote_hosted_profile_image_url_large', 'we_vote_hosted_profile_image_url_medium',
             'we_vote_hosted_profile_image_url_tiny', 'ctcl_uuid', 'politician_facebook_id',
-            'politician_phone_number', 'politician_googleplus_id', 'politician_youtube_id', 'politician_email_address')
+            'politician_phone_number', 'politician_googleplus_id', 'politician_youtube_id', 'politician_email_address',
+            'vote_usa_politician_id')
         if politician_query:
             politician_list_json = list(politician_query)
             return HttpResponse(json.dumps(politician_list_json), content_type='application/json')
