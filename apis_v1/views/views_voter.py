@@ -43,6 +43,7 @@ from voter_guide.controllers import voter_follow_all_organizations_followed_by_o
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_maximum_number_to_retrieve_from_request, \
     get_voter_device_id, is_voter_device_id_valid, positive_value_exists
+from apis_v1.views import views_voter_utils
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -2555,20 +2556,7 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
     voter = None
     voter_device_link = None
     if positive_value_exists(secret_code_verified):
-        link_results = voter_device_link_manager.retrieve_voter_device_link(
-            voter_device_id=voter_device_id)
-        if link_results['voter_device_link_found']:
-            voter_device_link = link_results['voter_device_link']
-            if positive_value_exists(voter_device_link.voter_id):
-                results = voter_manager.retrieve_voter_by_id(voter_device_link.voter_id, read_only=False)
-                if results['voter_found']:
-                    voter = results['voter']
-                    voter_found = True
-                else:
-                    status += results['status']
-        else:
-            status += link_results['status']
-
+        status, voter, voter_found, voter_device_link = views_voter_utils.get_voter_from_request(request, status)
         if not voter_found:
             secret_code_verified = False
             voter_must_request_new_code = True
@@ -2740,31 +2728,9 @@ def voter_send_google_contacts_view(request):  # voterSendGoogleContacts
     :param request:
     :return:
     """
-    status = ''
     success = True
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-
-    voter_found = False
-    voter = None
-    voter_manager = VoterManager()
-    voter_device_link_manager = VoterDeviceLinkManager()
-    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
-
-    voter_device_link = None
-    link_results = voter_device_link_manager.retrieve_voter_device_link(
-        voter_device_id=voter_device_id)
-    if link_results['voter_device_link_found']:
-        voter_device_link = link_results['voter_device_link']
-        if positive_value_exists(voter_device_link.voter_id):
-            results = voter_manager.retrieve_voter_by_id(voter_device_link.voter_id, read_only=False)
-            if results['voter_found']:
-                voter = results['voter']
-                voter_found = True
-            else:
-                status += results['status']
-    else:
-        status += link_results['status']
-
+    status = ''
+    status, voter, voter_found, voter_device_link = views_voter_utils.get_voter_from_request(request, status)
     contacts_string = request.POST.get('contacts', None)
     contacts = json.loads(contacts_string)
 
