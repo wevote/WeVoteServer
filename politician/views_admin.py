@@ -94,15 +94,14 @@ def politician_list_view(request):
     politician_search = request.GET.get('politician_search', '')
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     show_all = request.GET.get('show_all', False)
-    politician_list = []
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
     try:
-        politician_list = Politician.objects.all()
+        politician_query = Politician.objects.all()
         if positive_value_exists(state_code):
-            politician_list = politician_list.filter(state_code__iexact=state_code)
+            politician_query = politician_query.filter(state_code__iexact=state_code)
 
         if positive_value_exists(politician_search):
             search_words = politician_search.split()
@@ -132,16 +131,17 @@ def politician_list_view(request):
                     for item in filters:
                         final_filters |= item
 
-                    politician_list = politician_list.filter(final_filters)
+                    politician_query = politician_query.filter(final_filters)
 
         if not positive_value_exists(show_all):
-            politician_list = politician_list.order_by('politician_name')[:25]
+            politician_query = politician_query.order_by('politician_name')[:25]
     except ObjectDoesNotExist:
         # This is fine
         pass
 
     # Cycle through all Politicians and find unlinked Candidates that *might* be "children" of this politician
     temp_politician_list = []
+    politician_list = list(politician_query)
     for one_politician in politician_list:
         try:
             linked_candidate_query = CandidateCampaign.objects.all()

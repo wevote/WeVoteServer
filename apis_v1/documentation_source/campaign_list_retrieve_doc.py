@@ -48,6 +48,7 @@ def campaign_list_retrieve_doc_template_values(url_root):
                    '     "in_draft_mode": boolean,\n' \
                    '     "seo_friendly_path": string,\n' \
                    '     "supporters_count": integer,\n' \
+                   '     "visible_on_this_site": boolean,\n' \
                    '     "voter_signed_in_with_email": boolean,\n' \
                    '     "voter_we_vote_id": string,\n' \
                    '     "we_vote_hosted_campaign_photo_large_url": string,\n' \
@@ -60,6 +61,17 @@ def campaign_list_retrieve_doc_template_values(url_root):
                    '       "visible_to_public": boolean,\n' \
                    '     ],\n' \
                    '     "campaignx_politician_list": list\n' \
+                   '     [\n' \
+                   '       "campaignx_politician_id": integer,\n' \
+                   '       "politician_name": string,\n' \
+                   '       "politician_we_vote_id": string,\n' \
+                   '       "state_code": string,\n' \
+                   '       "we_vote_hosted_profile_image_url_large": string,\n' \
+                   '       "we_vote_hosted_profile_image_url_medium": string,\n' \
+                   '       "we_vote_hosted_profile_image_url_tiny": string,\n' \
+                   '     ],\n' \
+                   '     "campaignx_politician_list_exists": boolean,\n' \
+                   '     "campaignx_politician_starter_list": list\n' \
                    '     [\n' \
                    '       "value": string,\n' \
                    '       "label": string,\n' \

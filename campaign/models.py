@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.utils.text import slugify
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception
+import json
 import string
 import wevote_functions.admin
 from wevote_functions.functions import generate_random_string, positive_value_exists
@@ -36,7 +37,7 @@ class CampaignX(models.Model):
     is_ok_to_promote_on_we_vote = models.BooleanField(default=True, db_index=True)
     is_still_active = models.BooleanField(default=True, db_index=True)
     is_victorious = models.BooleanField(default=False, db_index=True)
-    politician_list_serialized = models.TextField(null=True, blank=True)
+    politician_starter_list_serialized = models.TextField(null=True, blank=True)
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=True, db_index=True)
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     supporters_count = models.PositiveIntegerField(default=0)
@@ -362,6 +363,26 @@ class CampaignXManager(models.Manager):
     def remove_campaignx_owner(self, campaignx_we_vote_id='', voter_we_vote_id=''):
         return
 
+    def remove_campaignx_politicians_from_delete_list(self, campaignx_we_vote_id='', politician_delete_list=''):
+        success = True
+        status = ''
+        campaignx_manager = CampaignXManager()
+        campaignx_politician_list = \
+            campaignx_manager.retrieve_campaignx_politician_list(campaignx_we_vote_id=campaignx_we_vote_id)
+
+        for campaignx_politician in campaignx_politician_list:
+            if campaignx_politician.id in politician_delete_list:
+                try:
+                    campaignx_politician.delete()
+                except Exception as e:
+                    status += "DELETE_FAILED: " + str(e) + ' '
+
+        results = {
+            'status':                       status,
+            'success':                      success,
+        }
+        return results
+
     def retrieve_campaignx_as_owner(
             self,
             campaignx_we_vote_id='',
@@ -675,6 +696,7 @@ class CampaignXManager(models.Manager):
         success = True
         status = ""
         approved_campaignx_we_vote_id_list = []
+        campaignx_list_modified = []
         voter_started_campaignx_we_vote_ids = []
         voter_supported_campaignx_we_vote_ids = []
 
@@ -698,10 +720,10 @@ class CampaignXManager(models.Manager):
             # #########
             # All "OR" queries
             filters = []
-            # Campaigns started by this voter and still in draft mode
+            # Campaigns started by this voter
             if positive_value_exists(including_started_by_voter_we_vote_id):
                 new_filter = \
-                    Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id, in_draft_mode=True)
+                    Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)  # , in_draft_mode=True
                 filters.append(new_filter)
 
             # Campaigns approved to be shown on this site
@@ -724,6 +746,12 @@ class CampaignXManager(models.Manager):
 
             campaignx_list = campaignx_queryset[:limit]
             campaignx_list_found = positive_value_exists(len(campaignx_list))
+            for one_campaignx in campaignx_list:
+                if one_campaignx.we_vote_id in approved_campaignx_we_vote_id_list:
+                    one_campaignx.visible_on_this_site = True
+                else:
+                    one_campaignx.visible_on_this_site = False
+                campaignx_list_modified.append(one_campaignx)
             status += "RETRIEVE_CAMPAIGNX_LIST_FOR_PRIVATE_LABEL_SUCCEEDED "
         except Exception as e:
             success = False
@@ -733,8 +761,9 @@ class CampaignXManager(models.Manager):
         results = {
             'success':                                  success,
             'status':                                   status,
+            'approved_campaignx_we_vote_id_list':       approved_campaignx_we_vote_id_list,
             'campaignx_list_found':                     campaignx_list_found,
-            'campaignx_list':                           campaignx_list,
+            'campaignx_list':                           campaignx_list_modified,
             'voter_started_campaignx_we_vote_ids':      voter_started_campaignx_we_vote_ids,
             'voter_supported_campaignx_we_vote_ids':    voter_supported_campaignx_we_vote_ids,
         }
@@ -848,6 +877,18 @@ class CampaignXManager(models.Manager):
                         politician_we_vote_id=politician_we_vote_id)
                 campaignx_politician_found = True
                 status += 'CAMPAIGNX_POLITICIAN_FOUND_WITH_WE_VOTE_ID '
+                success = True
+            elif positive_value_exists(campaignx_we_vote_id) and positive_value_exists(politician_name):
+                if positive_value_exists(read_only):
+                    campaignx_politician = CampaignXPolitician.objects.using('readonly').get(
+                        campaignx_we_vote_id=campaignx_we_vote_id,
+                        politician_name=politician_name)
+                else:
+                    campaignx_politician = CampaignXPolitician.objects.get(
+                        campaignx_we_vote_id=campaignx_we_vote_id,
+                        politician_name=politician_name)
+                campaignx_politician_found = True
+                status += 'CAMPAIGNX_POLITICIAN_FOUND_WITH_NAME '
                 success = True
             else:
                 status += 'CAMPAIGNX_POLITICIAN_NOT_FOUND-MISSING_VARIABLES '
@@ -1135,10 +1176,39 @@ class CampaignXManager(models.Manager):
                     if in_draft_mode_may_be_updated:
                         campaignx.in_draft_mode = positive_value_exists(update_values['in_draft_mode'])
                         campaignx_changed = True
-                if 'politician_list_changed' in update_values \
-                        and positive_value_exists(update_values['politician_list_changed']):
-                    campaignx.politician_list_serialized = update_values['politician_list_serialized']
-                    campaignx_changed = True
+                if 'politician_delete_list_serialized' in update_values \
+                        and positive_value_exists(update_values['politician_delete_list_serialized']):
+                    # Delete from politician_delete_list
+                    if update_values['politician_delete_list_serialized']:
+                        politician_delete_list = \
+                            json.loads(update_values['politician_delete_list_serialized'])
+                    else:
+                        politician_delete_list = []
+                    results = campaignx_manager.remove_campaignx_politicians_from_delete_list(
+                        campaignx_we_vote_id=campaignx.we_vote_id,
+                        politician_delete_list=politician_delete_list,
+                    )
+                    status += results['status']
+                if 'politician_starter_list_changed' in update_values \
+                        and positive_value_exists(update_values['politician_starter_list_changed']):
+                    # Save to politician list
+                    if update_values['politician_starter_list_serialized']:
+                        campaignx_politician_starter_list = \
+                            json.loads(update_values['politician_starter_list_serialized'])
+                    else:
+                        campaignx_politician_starter_list = []
+                    results = campaignx_manager.update_or_create_campaignx_politicians_from_starter(
+                        campaignx_we_vote_id=campaignx.we_vote_id,
+                        politician_starter_list=campaignx_politician_starter_list,
+                    )
+                    if results['success']:
+                        campaignx.politician_starter_list_serialized = None
+                        campaignx_changed = True
+                    else:
+                        # If save to politician list fails, save starter_list
+                        campaignx.politician_starter_list_serialized = \
+                            update_values['politician_starter_list_serialized']
+                        campaignx_changed = True
                 if 'supporters_count' in update_values \
                         and positive_value_exists(update_values['supporters_count']):
                     campaignx.supporters_count = update_values['supporters_count']
@@ -1159,7 +1229,6 @@ class CampaignXManager(models.Manager):
                     campaign_description=update_values['campaign_description'],
                     campaign_title=update_values['campaign_title'],
                     in_draft_mode=True,
-                    politician_list_serialized=update_values['politician_list_serialized'],
                     started_by_voter_we_vote_id=voter_we_vote_id,
                     supporters_count=1,
                 )
@@ -1168,18 +1237,45 @@ class CampaignXManager(models.Manager):
                         and positive_value_exists(update_values['campaign_photo_changed']):
                     campaignx.we_vote_hosted_campaign_photo_large_url = \
                         update_values['we_vote_hosted_campaign_photo_large_url']
+                if 'politician_starter_list_changed' in update_values \
+                        and positive_value_exists(update_values['politician_starter_list_changed']):
+                    # Save to politician list
+                    if update_values['politician_starter_list_serialized']:
+                        campaignx_politician_starter_list = \
+                            json.loads(update_values['politician_starter_list_serialized'])
+                    else:
+                        campaignx_politician_starter_list = []
+                    results = campaignx_manager.update_or_create_campaignx_politicians_from_starter(
+                        campaignx_we_vote_id=campaignx.we_vote_id,
+                        politician_starter_list=campaignx_politician_starter_list,
+                    )
+                    if results['success']:
+                        campaignx.politician_starter_list_serialized = None
+                        campaignx_changed = True
+                    else:
+                        # If save to politician list fails, save starter_list
+                        campaignx.politician_starter_list_serialized = \
+                            update_values['politician_starter_list_serialized']
+                        campaignx_changed = True
                 if campaignx_changed:
                     campaignx.save()
-                    status += "CAMPAIGNX_PHOTO_SAVED "
+                    status += "CAMPAIGNX_CREATED_AND_THEN_CHANGED "
+                else:
+                    status += "CAMPAIGNX_CREATED "
                 campaignx_created = True
                 campaignx_found = True
                 success = True
-                status += "CAMPAIGNX_CREATED "
             except Exception as e:
                 campaignx_created = False
                 campaignx = CampaignX()
                 success = False
                 status += "CAMPAIGNX_NOT_CREATED: " + str(e) + " "
+
+        if success:
+            if 'politician_starter_list_changed' in update_values \
+                    and positive_value_exists(update_values['politician_starter_list_changed']):
+                campaignx.politician_starter_list_serialized = update_values['politician_starter_list_serialized']
+                campaignx_changed = True
 
         results = {
             'success':              success,
@@ -1284,7 +1380,7 @@ class CampaignXManager(models.Manager):
             self,
             campaignx_we_vote_id='',
             politician_name=None,
-            politician_we_vote_id='',
+            politician_we_vote_id=None,
             state_code='',
             we_vote_hosted_profile_image_url_large=None,
             we_vote_hosted_profile_image_url_medium=None,
@@ -1380,6 +1476,93 @@ class CampaignXManager(models.Manager):
             'campaignx_politician_found':   campaignx_politician_found,
             'campaignx_politician_updated': campaignx_politician_updated,
             'campaignx_politician':         campaignx_politician,
+        }
+        return results
+
+    def update_or_create_campaignx_politicians_from_starter(
+            self,
+            campaignx_we_vote_id='',
+            politician_starter_list=[]):
+        success = True
+        status = ''
+
+        campaignx_politician_existing_name_list = []
+        campaignx_politician_existing_we_vote_id_list = []
+        campaignx_politician_list_created = False
+        campaignx_politician_list_found = False
+        campaignx_politician_list_updated = False
+        politician_starter_we_vote_id_list = []
+        politician_starter_names_without_we_vote_id_list = []
+        for politician_starter in politician_starter_list:
+            # When politician_starter['value'] and politician_starter['label'] match, it means there isn't we_vote_id
+            if positive_value_exists(politician_starter['value']) and \
+                    politician_starter['value'] != politician_starter['label']:
+                politician_starter_we_vote_id_list.append(politician_starter['value'])
+            elif positive_value_exists(politician_starter['label']):
+                politician_starter_names_without_we_vote_id_list.append(politician_starter['label'])
+
+        campaignx_manager = CampaignXManager()
+        campaignx_politician_list = campaignx_manager.retrieve_campaignx_politician_list(
+            campaignx_we_vote_id=campaignx_we_vote_id,
+        )
+        for campaignx_politician in campaignx_politician_list:
+            campaignx_politician_existing_we_vote_id_list.append(campaignx_politician.politician_we_vote_id)
+            if not positive_value_exists(campaignx_politician.politician_we_vote_id):
+                campaignx_politician_existing_name_list.append(campaignx_politician.politician_name)
+            if campaignx_politician.politician_we_vote_id not in politician_starter_we_vote_id_list:
+                # NOTE: For now we won't delete any names -- only add them
+                if len(politician_starter_names_without_we_vote_id_list) == 0:
+                    # Delete this campaignx_politician
+                    pass
+                else:
+                    # Make sure this politician isn't in the politician_starter_names_without_we_vote_id_list
+                    pass
+
+        from politician.models import PoliticianManager
+        politician_manager = PoliticianManager()
+        for campaignx_politician_we_vote_id in politician_starter_we_vote_id_list:
+            if campaignx_politician_we_vote_id not in campaignx_politician_existing_we_vote_id_list:
+                results = politician_manager.retrieve_politician(
+                    we_vote_id=campaignx_politician_we_vote_id,
+                    read_only=True)
+                if results['politician_found']:
+                    # Create campaignx_politician
+                    create_results = campaignx_manager.update_or_create_campaignx_politician(
+                        campaignx_we_vote_id=campaignx_we_vote_id,
+                        politician_name=results['politician'].politician_name,
+                        politician_we_vote_id=campaignx_politician_we_vote_id,
+                        state_code=results['politician'].state_code,
+                        we_vote_hosted_profile_image_url_large=
+                        results['politician'].we_vote_hosted_profile_image_url_large,
+                        we_vote_hosted_profile_image_url_medium=
+                        results['politician'].we_vote_hosted_profile_image_url_medium,
+                        we_vote_hosted_profile_image_url_tiny=
+                        results['politician'].we_vote_hosted_profile_image_url_tiny,
+                    )
+                    if campaignx_politician_we_vote_id not in campaignx_politician_existing_we_vote_id_list and \
+                            create_results['campaignx_politician_found'] or \
+                            create_results['campaignx_politician_created']:
+                        campaignx_politician_existing_we_vote_id_list.append(campaignx_politician_we_vote_id)
+        for campaignx_politician_name in politician_starter_names_without_we_vote_id_list:
+            if campaignx_politician_name not in campaignx_politician_existing_name_list:
+                # Create campaignx_politician
+                create_results = campaignx_manager.update_or_create_campaignx_politician(
+                    campaignx_we_vote_id=campaignx_we_vote_id,
+                    politician_name=campaignx_politician_name,
+                    politician_we_vote_id=None,
+                )
+                if campaignx_politician_name not in campaignx_politician_existing_name_list and \
+                        create_results['campaignx_politician_found'] or \
+                        create_results['campaignx_politician_created']:
+                    campaignx_politician_existing_name_list.append(campaignx_politician_name)
+
+        results = {
+            'success': success,
+            'status': status,
+            'campaignx_politician_list_created':    campaignx_politician_list_created,
+            'campaignx_politician_list_found':      campaignx_politician_list_found,
+            'campaignx_politician_list_updated':    campaignx_politician_list_updated,
+            'campaignx_politician_list':            campaignx_politician_list,
         }
         return results
 

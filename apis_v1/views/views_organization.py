@@ -113,12 +113,12 @@ def organization_follow_ignore_api_view(request):  # organizationFollowIgnore
                                       user_agent_string=user_agent_string, user_agent_object=user_agent_object)
 
 
-def organization_index_view(request, organization_incoming_domain='', campaign_main='' ):  # organizationIndex
+def organization_index_view(request, organization_incoming_domain='', campaign_main=''):  # organizationIndex
     status = ""
     success = True
     organization = None
     organization_found = False
-    is_campaign = positive_value_exists(campaign_main)
+    # is_campaign = positive_value_exists(campaign_main)
 
     if positive_value_exists(organization_incoming_domain):
         organization_incoming_domain = organization_incoming_domain.strip().lower()
@@ -130,6 +130,7 @@ def organization_index_view(request, organization_incoming_domain='', campaign_m
         status += results['status']
 
     # Default values
+    chosen_domain_type_is_campaign = True
     chosen_favicon_url_https = None
     chosen_google_analytics_account_number = ''
     chosen_html_verification_string = None
@@ -145,6 +146,7 @@ def organization_index_view(request, organization_incoming_domain='', campaign_m
 
     if organization_found:
         master_features_provided_bitmap = 0
+        chosen_domain_type_is_campaign = organization.chosen_domain_type_is_campaign
         features_provided_bitmap = organization.features_provided_bitmap
         chosen_hide_we_vote_logo = organization.chosen_hide_we_vote_logo
         chosen_html_verification_string = organization.chosen_html_verification_string
@@ -213,8 +215,9 @@ def organization_index_view(request, organization_incoming_domain='', campaign_m
                 chosen_google_analytics_account_number = None
 
     campaign_main_js = ''
-    if is_campaign:
-        req_url = 'https://' + organization_incoming_domain + '/' + campaign_main
+    if chosen_domain_type_is_campaign:
+        req_url = 'https://campaigns.wevote.us/main.name.html'
+        # req_url = 'https://' + organization_incoming_domain + '/' + campaign_main
         print(req_url)
         verify_bool = not ('localhost' in organization_incoming_domain or '127.0.0.1' in organization_incoming_domain)
         text = requests.get(req_url, verify=verify_bool).text
@@ -236,7 +239,7 @@ def organization_index_view(request, organization_incoming_domain='', campaign_m
         'campaign_main_js':                 campaign_main_js,
     }
 
-    if is_campaign:
+    if chosen_domain_type_is_campaign:
         return render(request, 'campaign/campaignx_index.html', template_values)
     else:
         return render(request, 'organization/organization_index.html', template_values)
