@@ -34,7 +34,6 @@ def organization_follow_doc_template_values(url_root):
                             'NOTE: In the future we '
                             'might support other identifiers used in the industry.',
         },
-
         {
             'name':         'api_key',
             'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string

@@ -24,7 +24,8 @@ def organization_index_doc_template_values(url_root):
         'api_name': 'organizationIndex',
         'api_slug': 'organizationIndex',
         'api_introduction':
-            "Return a customized index.html (as text). Add /ORGANIZATION_URL after organizationIndex in the URL.",
+            "Return a customized index.html (as text). Add /ORGANIZATION_URL after organizationIndex in the URL. "
+            "Ex/ https://api.wevoteusa.org/apis/v1/organizationIndex/www.domain.org",
         'try_now_link': 'apis_v1:organizationIndexView',
         'try_now_link_additional_path': 'www.domain.org',
         'try_now_link_variables_dict': try_now_link_variables_dict,
