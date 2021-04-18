@@ -1284,6 +1284,7 @@ def organization_edit_account_process_view(request):
 
     organization_id = convert_to_int(request.POST.get('organization_id', 0))
     chosen_domain_string = request.POST.get('chosen_domain_string', None)
+    chosen_domain_type_is_campaign = request.POST.get('chosen_domain_type_is_campaign', None)
     chosen_favicon_url_https = request.POST.get('chosen_favicon_url_https', None)
     chosen_google_analytics_account_number = request.POST.get('chosen_google_analytics_account_number', None)
     chosen_html_verification_string = request.POST.get('chosen_html_verification_string', None)
@@ -1327,6 +1328,8 @@ def organization_edit_account_process_view(request):
                         status += domain_results['status']
                 else:
                     organization_on_stage.chosen_domain_string = None
+            if chosen_domain_type_is_campaign is not None:
+                organization_on_stage.chosen_domain_type_is_campaign = chosen_domain_type_is_campaign
             if chosen_favicon_url_https is not None:
                 organization_on_stage.chosen_favicon_url_https = chosen_favicon_url_https
             if chosen_google_analytics_account_number is not None:

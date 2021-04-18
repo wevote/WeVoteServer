@@ -70,10 +70,12 @@ span.nobr { white-space: nowrap; }
                 <img src="{{ campaignx_politician.we_vote_hosted_profile_image_url_tiny }}" />
             {% endif %}
             {{ campaignx_politician.politician_name }}&nbsp;&nbsp;
+        {% if campaignx_politician.politician_we_vote_id %}
             <a href="{% url 'politician:politician_we_vote_id_edit' campaignx_politician.politician_we_vote_id %}"
                target="_blank">
                 view
                 <span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
         </td>
         <td>
             {% if campaignx_politician.state_code %}
@@ -112,9 +114,9 @@ Politician List Serialized (For Reference Only)
     <textarea
         class="form-control animated"
         disabled
-        id="politician_list_serialized_id"
-        name="politician_list_serialized"
-        rows="2">{{ campaignx.politician_list_serialized|default_if_none:"" }}</textarea>
+        id="politician_starter_list_serialized_id"
+        name="politician_starter_list_serialized"
+        rows="2">{{ campaignx.politician_starter_list_serialized|default_if_none:"" }}</textarea>
 
 {% endif %}
   <br />

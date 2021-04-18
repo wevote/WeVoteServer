@@ -47,6 +47,7 @@ def campaign_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "campaign_description": string,\n' \
                    '  "campaign_title": string,\n' \
+                   '  "campaignx_politician_list_exists": boolean,\n' \
                    '  "campaignx_we_vote_id": string,\n' \
                    '  "in_draft_mode": boolean,\n' \
                    '  "organization_we_vote_id": string,\n' \
@@ -65,8 +66,38 @@ def campaign_retrieve_doc_template_values(url_root):
                    '   ],\n' \
                    '  "campaignx_politician_list": list\n' \
                    '   [\n' \
+                   '     "campaignx_politician_id": integer,\n' \
+                   '     "politician_name": string,\n' \
+                   '     "politician_we_vote_id": string,\n' \
+                   '     "state_code": string,\n' \
+                   '     "we_vote_hosted_profile_image_url_large": string,\n' \
+                   '     "we_vote_hosted_profile_image_url_medium": string,\n' \
+                   '     "we_vote_hosted_profile_image_url_tiny": string,\n' \
+                   '   ],\n' \
+                   '  "campaignx_politician_starter_list": list\n' \
+                   '   [\n' \
                    '     "value": string,\n' \
                    '     "label": string,\n' \
+                   '   ],\n' \
+                   '  "latest_campaignx_supporter_endorsement_list": list\n' \
+                   '   [\n' \
+                   '     "id": integer,\n' \
+                   '     "date_supported": string,\n' \
+                   '     "organization_we_vote_id": string,\n' \
+                   '     "supporter_endorsement": string,\n' \
+                   '     "supporter_name": string,\n' \
+                   '     "voter_we_vote_id": string,\n' \
+                   '     "we_vote_hosted_profile_image_url_tiny": string,\n' \
+                   '   ],\n' \
+                   '  "latest_campaignx_supporter_list": list\n' \
+                   '   [\n' \
+                   '     "id": integer,\n' \
+                   '     "date_supported": string,\n' \
+                   '     "organization_we_vote_id": string,\n' \
+                   '     "supporter_endorsement": string,\n' \
+                   '     "supporter_name": string,\n' \
+                   '     "voter_we_vote_id": string,\n' \
+                   '     "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '   ],\n' \
                    '  "seo_friendly_path_list": list\n' \
                    '   [],\n' \

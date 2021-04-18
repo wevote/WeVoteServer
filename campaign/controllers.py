@@ -62,11 +62,13 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
     # including_politicians_in_any_of_these_states = None,
     # including_politicians_with_support_in_any_of_these_issues = None):
 
+    approved_campaignx_we_vote_id_list = []
     campaignx_manager = CampaignXManager()
     if positive_value_exists(site_owner_organization_we_vote_id):
         results = campaignx_manager.retrieve_campaignx_list_for_private_label(
             including_started_by_voter_we_vote_id=voter_we_vote_id,
             site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
+        approved_campaignx_we_vote_id_list = results['approved_campaignx_we_vote_id_list']
     else:
         results = campaignx_manager.retrieve_campaignx_list(
             including_started_by_voter_we_vote_id=voter_we_vote_id)
@@ -84,7 +86,11 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
                     voter_started_campaignx_we_vote_ids.append(campaignx.we_vote_id)
                     viewer_is_owner = True
             if campaignx.is_still_active and campaignx.is_ok_to_promote_on_we_vote:
-                promoted_campaignx_we_vote_ids.append(campaignx.we_vote_id)
+                if positive_value_exists(site_owner_organization_we_vote_id):
+                    if campaignx.we_vote_id in approved_campaignx_we_vote_id_list:
+                        promoted_campaignx_we_vote_ids.append(campaignx.we_vote_id)
+                else:
+                    promoted_campaignx_we_vote_ids.append(campaignx.we_vote_id)
 
             campaignx_owner_object_list = campaignx_manager.retrieve_campaignx_owner_list(
                 campaignx_we_vote_id=campaignx.we_vote_id, viewer_is_owner=viewer_is_owner)
@@ -98,10 +104,31 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
                 }
                 campaignx_owner_list.append(campaign_owner_dict)
 
-            if campaignx.politician_list_serialized:
-                campaignx_politician_list = json.loads(campaignx.politician_list_serialized)
+            if campaignx.politician_starter_list_serialized:
+                campaignx_politician_starter_list = json.loads(campaignx.politician_starter_list_serialized)
             else:
-                campaignx_politician_list = []
+                campaignx_politician_starter_list = []
+
+            campaignx_politician_list_modified = []
+            campaignx_politician_list_exists = False
+            campaignx_politician_list = campaignx_manager.retrieve_campaignx_politician_list(
+                campaignx_we_vote_id=campaignx.we_vote_id,
+            )
+
+            for campaignx_politician in campaignx_politician_list:
+                campaignx_politician_list_exists = True
+                campaignx_politician_dict = {
+                    'campaignx_politician_id':  campaignx_politician.id,
+                    'politician_name': campaignx_politician.politician_name,
+                    'politician_we_vote_id': campaignx_politician.politician_we_vote_id,
+                    'state_code': campaignx_politician.state_code,
+                    'we_vote_hosted_profile_image_url_large':
+                        campaignx_politician.we_vote_hosted_profile_image_url_large,
+                    'we_vote_hosted_profile_image_url_medium':
+                        campaignx_politician.we_vote_hosted_profile_image_url_medium,
+                    'we_vote_hosted_profile_image_url_tiny': campaignx_politician.we_vote_hosted_profile_image_url_tiny,
+                }
+                campaignx_politician_list_modified.append(campaignx_politician_dict)
 
             # Get list of SEO Friendly Paths related to this campaignX. For most campaigns, there will only be one.
             seo_friendly_path_list = campaignx_manager.retrieve_seo_friendly_path_simple_list(
@@ -144,16 +171,23 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
                 we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_medium_url
             else:
                 we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_large_url
+            if hasattr(campaignx, 'visible_on_this_site'):
+                visible_on_this_site = campaignx.visible_on_this_site
+            else:
+                visible_on_this_site = True
             one_campaignx = {
                 'campaign_description':                     campaignx.campaign_description,
                 'campaignx_owner_list':                     campaignx_owner_list,
-                'campaignx_politician_list':                campaignx_politician_list,
+                'campaignx_politician_list':                campaignx_politician_list_modified,
+                'campaignx_politician_list_exists':         campaignx_politician_list_exists,
+                'campaignx_politician_starter_list':        campaignx_politician_starter_list,
                 'campaign_title':                           campaignx.campaign_title,
                 'campaignx_we_vote_id':                     campaignx.we_vote_id,
                 'in_draft_mode':                            campaignx.in_draft_mode,
                 'seo_friendly_path':                        campaignx.seo_friendly_path,
                 'seo_friendly_path_list':                   seo_friendly_path_list,
                 'supporters_count':                         campaignx.supporters_count,
+                'visible_on_this_site':                     visible_on_this_site,
                 'voter_campaignx_supporter':                voter_campaignx_supporter_dict,
                 'voter_signed_in_with_email':               voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url':  campaignx.we_vote_hosted_campaign_photo_large_url,
@@ -180,7 +214,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         as_owner=False):
     status = ''
     campaignx_owner_list = []
-    campaignx_politician_list = []
+    campaignx_politician_starter_list = []
     seo_friendly_path_list = []
     voter_signed_in_with_email = False
     voter_we_vote_id = ''
@@ -201,7 +235,9 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
                 'campaign_description':             '',
                 'campaign_title':                   '',
                 'campaignx_owner_list':             campaignx_owner_list,
-                'campaignx_politician_list':        campaignx_politician_list,
+                'campaignx_politician_list':        [],
+                'campaignx_politician_list_exists': False,
+                'campaignx_politician_starter_list': campaignx_politician_starter_list,
                 'campaignx_we_vote_id':             '',
                 'in_draft_mode':                    True,
                 'seo_friendly_path':                '',
@@ -234,7 +270,9 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             'campaign_description':             '',
             'campaign_title':                   '',
             'campaignx_owner_list':             campaignx_owner_list,
-            'campaignx_politician_list':        campaignx_politician_list,
+            'campaignx_politician_list':        [],
+            'campaignx_politician_list_exists': False,
+            'campaignx_politician_starter_list': campaignx_politician_starter_list,
             'campaignx_we_vote_id':             '',
             'in_draft_mode':                    True,
             'seo_friendly_path':                '',
@@ -255,7 +293,9 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             'campaign_description':             '',
             'campaign_title':                   '',
             'campaignx_owner_list':             campaignx_owner_list,
-            'campaignx_politician_list':        campaignx_politician_list,
+            'campaignx_politician_list':        [],
+            'campaignx_politician_list_exists': False,
+            'campaignx_politician_starter_list': campaignx_politician_starter_list,
             'campaignx_we_vote_id':             '',
             'in_draft_mode':                    True,
             'seo_friendly_path':                '',
@@ -271,10 +311,29 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
     campaignx = results['campaignx']
     campaignx_owner_list = results['campaignx_owner_list']
     seo_friendly_path_list = results['seo_friendly_path_list']
-    if campaignx.politician_list_serialized:
-        campaignx_politician_list = json.loads(campaignx.politician_list_serialized)
+    if campaignx.politician_starter_list_serialized:
+        campaignx_politician_starter_list = json.loads(campaignx.politician_starter_list_serialized)
     else:
-        campaignx_politician_list = []
+        campaignx_politician_starter_list = []
+
+    campaignx_politician_list_modified = []
+    campaignx_politician_list_exists = False
+    campaignx_politician_list = campaignx_manager.retrieve_campaignx_politician_list(
+        campaignx_we_vote_id=campaignx.we_vote_id,
+    )
+
+    for campaignx_politician in campaignx_politician_list:
+        campaignx_politician_list_exists = True
+        campaignx_politician_dict = {
+            'campaignx_politician_id': campaignx_politician.id,
+            'politician_name':  campaignx_politician.politician_name,
+            'politician_we_vote_id':  campaignx_politician.politician_we_vote_id,
+            'state_code':  campaignx_politician.state_code,
+            'we_vote_hosted_profile_image_url_large': campaignx_politician.we_vote_hosted_profile_image_url_large,
+            'we_vote_hosted_profile_image_url_medium': campaignx_politician.we_vote_hosted_profile_image_url_medium,
+            'we_vote_hosted_profile_image_url_tiny': campaignx_politician.we_vote_hosted_profile_image_url_tiny,
+        }
+        campaignx_politician_list_modified.append(campaignx_politician_dict)
 
     supporter_results = campaignx_manager.retrieve_campaignx_supporter(
         campaignx_we_vote_id=campaignx.we_vote_id,
@@ -369,7 +428,9 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         'campaign_title':                   campaignx.campaign_title,
         'in_draft_mode':                    campaignx.in_draft_mode,
         'campaignx_owner_list':             campaignx_owner_list,
-        'campaignx_politician_list':        campaignx_politician_list,
+        'campaignx_politician_list':        campaignx_politician_list_modified,
+        'campaignx_politician_list_exists': campaignx_politician_list_exists,
+        'campaignx_politician_starter_list': campaignx_politician_starter_list,
         'campaignx_we_vote_id':             campaignx.we_vote_id,
         'latest_campaignx_supporter_endorsement_list':  latest_campaignx_supporter_endorsement_list,
         'latest_campaignx_supporter_list':  latest_campaignx_supporter_list,
@@ -394,13 +455,14 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
         campaign_title='',
         campaign_title_changed=False,
         campaignx_we_vote_id='',
-        politician_list_serialized='',
-        politician_list_changed=False,
+        politician_delete_list_serialized='',
+        politician_starter_list_serialized='',
+        politician_starter_list_changed=False,
         voter_device_id=''):
     status = ''
     success = True
     campaignx_owner_list = []
-    campaignx_politician_list = []
+    campaignx_politician_starter_list = []
     seo_friendly_path_list = []
     voter_signed_in_with_email = False
 
@@ -420,7 +482,9 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'campaign_title':               '',
             'in_draft_mode':                True,
             'campaignx_owner_list':         campaignx_owner_list,
-            'campaignx_politician_list':    campaignx_politician_list,
+            'campaignx_politician_list':    [],
+            'campaignx_politician_list_exists': False,
+            'campaignx_politician_starter_list':    campaignx_politician_starter_list,
             'campaignx_we_vote_id':         '',
             'seo_friendly_path':            '',
             'seo_friendly_path_list':       seo_friendly_path_list,
@@ -441,7 +505,9 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                 'campaign_description':         '',
                 'campaign_title':               '',
                 'campaignx_owner_list':         campaignx_owner_list,
-                'campaignx_politician_list':    campaignx_politician_list,
+                'campaignx_politician_list':    [],
+                'campaignx_politician_list_exists': False,
+                'campaignx_politician_starter_list': campaignx_politician_starter_list,
                 'campaignx_we_vote_id':         '',
                 'in_draft_mode':                True,
                 'seo_friendly_path':            '',
@@ -465,7 +531,9 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                 'campaign_description':         '',
                 'campaign_title':               '',
                 'campaignx_owner_list':         campaignx_owner_list,
-                'campaignx_politician_list':    campaignx_politician_list,
+                'campaignx_politician_list':    [],
+                'campaignx_politician_list_exists': False,
+                'campaignx_politician_starter_list': campaignx_politician_starter_list,
                 'campaignx_we_vote_id':         '',
                 'in_draft_mode':                False,
                 'seo_friendly_path':            '',
@@ -503,8 +571,9 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'campaign_photo_changed':       campaign_photo_changed,
             'campaign_title':               campaign_title,
             'campaign_title_changed':       campaign_title_changed,
-            'politician_list_changed':      politician_list_changed,
-            'politician_list_serialized':   politician_list_serialized,
+            'politician_delete_list_serialized':   politician_delete_list_serialized,
+            'politician_starter_list_changed':      politician_starter_list_changed,
+            'politician_starter_list_serialized':   politician_starter_list_serialized,
             'we_vote_hosted_campaign_photo_large_url': we_vote_hosted_campaign_photo_large_url,
             'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,
             'we_vote_hosted_campaign_photo_original_url': we_vote_hosted_campaign_photo_original_url,
@@ -526,8 +595,9 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'in_draft_mode_changed':        in_draft_mode_changed,
             'campaign_title':               campaign_title,
             'campaign_title_changed':       campaign_title_changed,
-            'politician_list_changed':      politician_list_changed,
-            'politician_list_serialized':   politician_list_serialized,
+            'politician_delete_list_serialized':   politician_delete_list_serialized,
+            'politician_starter_list_changed':      politician_starter_list_changed,
+            'politician_starter_list_serialized':   politician_starter_list_serialized,
         }
         create_results = campaignx_manager.update_or_create_campaignx(
             voter_we_vote_id=voter_we_vote_id,
@@ -582,11 +652,38 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
         )
         campaignx_owner_list = results['campaignx_owner_list']
 
-        # Get politician_list
-        if campaignx.politician_list_serialized:
-            campaignx_politician_list = json.loads(campaignx.politician_list_serialized)
+        # Get politician_starter_list
+        if campaignx.politician_starter_list_serialized:
+            campaignx_politician_starter_list = json.loads(campaignx.politician_starter_list_serialized)
         else:
-            campaignx_politician_list = []
+            campaignx_politician_starter_list = []
+
+        campaignx_politician_list_modified = []
+        campaignx_politician_list_exists = False
+        # if positive_value_exists(politician_starter_list_changed):
+        #     results = campaignx_manager.update_or_create_campaignx_politicians_from_starter(
+        #         campaignx_we_vote_id=campaignx.we_vote_id,
+        #         politician_starter_list=campaignx_politician_starter_list,
+        #     )
+        #     campaignx_politician_list_exists = results['campaignx_politician_list_found']
+        #     campaignx_politician_list = results['campaignx_politician_list']
+        # else:
+        campaignx_politician_list = campaignx_manager.retrieve_campaignx_politician_list(
+            campaignx_we_vote_id=campaignx_we_vote_id,
+        )
+        # Convert to json-friendly
+        for campaignx_politician in campaignx_politician_list:
+            campaignx_politician_list_exists = True
+            campaignx_politician_dict = {
+                'campaignx_politician_id': campaignx_politician.id,
+                'politician_name':  campaignx_politician.politician_name,
+                'politician_we_vote_id':  campaignx_politician.politician_we_vote_id,
+                'state_code':  campaignx_politician.state_code,
+                'we_vote_hosted_profile_image_url_large': campaignx_politician.we_vote_hosted_profile_image_url_large,
+                'we_vote_hosted_profile_image_url_medium': campaignx_politician.we_vote_hosted_profile_image_url_medium,
+                'we_vote_hosted_profile_image_url_tiny': campaignx_politician.we_vote_hosted_profile_image_url_tiny,
+            }
+            campaignx_politician_list_modified.append(campaignx_politician_dict)
 
         # Get list of SEO Friendly Paths related to this campaignX. For most campaigns, there will only be one.
         seo_friendly_path_list = campaignx_manager.retrieve_seo_friendly_path_simple_list(
@@ -629,7 +726,9 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'campaign_description':         campaignx.campaign_description,
             'campaign_title':               campaignx.campaign_title,
             'campaignx_owner_list':         campaignx_owner_list,
-            'campaignx_politician_list':    campaignx_politician_list,
+            'campaignx_politician_list':            campaignx_politician_list_modified,
+            'campaignx_politician_list_exists':     campaignx_politician_list_exists,
+            'campaignx_politician_starter_list':    campaignx_politician_starter_list,
             'campaignx_we_vote_id':         campaignx.we_vote_id,
             'in_draft_mode':                campaignx.in_draft_mode,
             'seo_friendly_path':            campaignx.seo_friendly_path,
@@ -649,6 +748,8 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'campaign_title':               '',
             'campaignx_owner_list':         [],
             'campaignx_politician_list':    [],
+            'campaignx_politician_list_exists': False,
+            'campaignx_politician_starter_list':    [],
             'campaignx_we_vote_id':         '',
             'in_draft_mode':                True,
             'seo_friendly_path':            '',

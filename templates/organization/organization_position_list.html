@@ -228,6 +228,12 @@
                     <td>{{organization.chosen_subdomain_string|default_if_none:""}}{% if organization.chosen_subdomain_string %}.WeVote.US{% endif %}</td>
                 </tr>
             {% endif %}
+            {% if organization.chosen_subdomain_string or organization.chosen_domain_string %}
+                <tr>
+                    <th>Which Kind of Site:</th>
+                    <td>{% if organization.chosen_domain_type_is_campaign %}Campaigns Site{% else %}Ballot Site{% endif %}</td>
+                </tr>
+            {% endif %}
             {% if organization.chosen_domain_string %}
                 <tr>
                     <th>Domain string:</th>
@@ -578,19 +584,19 @@
 
     {% if organization.twitter_profile_background_image_url_https %}
         twitter_profile_background_image_url_https: {{ organization.twitter_profile_background_image_url_https }}<br />
-        <img src="{{ organization.twitter_profile_background_image_url_https }}"><br />
+        <img src="{{ organization.twitter_profile_background_image_url_https }}" style="max-width:800px;width:100%"><br />
         <br />
     {% endif %}
 
     {% if organization.wikipedia_thumbnail_url %}
         Wikipedia Thumbnail<br />
-        <img src="{{ organization.wikipedia_thumbnail_url }}"><br />
+        <img src="{{ organization.wikipedia_thumbnail_url }}" style="max-width:800px;width:100%"><br />
         <br />
     {% endif %}
 
     {% if organization.wikipedia_photo_url %}
         Wikipedia Full size<br />
-        <img src="{{ organization.wikipedia_photo_url }}" width="100px"><br />
+        <img src="{{ organization.wikipedia_photo_url }}" style="max-width:800px;width:100%"><br />
         <br />
     {% endif %}
 

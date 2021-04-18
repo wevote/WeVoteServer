@@ -321,7 +321,7 @@ def campaign_edit_process_view(request):
     campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', None)
     campaign_title = request.POST.get('campaign_title', None)
     campaign_description = request.POST.get('campaign_description', None)
-    politician_list_serialized = request.POST.get('politician_list_serialized', None)
+    politician_starter_list_serialized = request.POST.get('politician_starter_list_serialized', None)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     state_code = request.POST.get('state_code', None)
 
@@ -347,8 +347,8 @@ def campaign_edit_process_view(request):
                 campaignx.campaign_title = campaign_title
             if campaign_description is not None:
                 campaignx.campaign_description = campaign_description.strip()
-            if politician_list_serialized is not None:
-                campaignx.politician_list_serialized = politician_list_serialized.strip()
+            if politician_starter_list_serialized is not None:
+                campaignx.politician_starter_list_serialized = politician_starter_list_serialized.strip()
             campaignx.save()
 
             messages.add_message(request, messages.INFO, 'CampaignX updated.')

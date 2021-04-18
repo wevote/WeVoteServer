@@ -193,38 +193,54 @@ class PoliticianManager(models.Manager):
             return politician.politician_photo_url()
         return ""
 
-    def retrieve_politician(self, politician_id, we_vote_id=None):
+    def retrieve_politician(self, politician_id=0, we_vote_id=None, read_only=False):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
-        politician_on_stage = Politician()
-        politician_on_stage_id = 0
+        politician = None
+        politician_found = False
+        politician_id = 0
         politician_we_vote_id = ""
+        success = True
+        status = ''
         try:
             if positive_value_exists(politician_id):
-                politician_on_stage = Politician.objects.get(id=politician_id)
-                politician_on_stage_id = politician_on_stage.id
-                politician_we_vote_id = politician_on_stage.we_vote_id
+                if positive_value_exists(read_only):
+                    politician = Politician.objects.using('readonly').get(id=politician_id)
+                else:
+                    politician = Politician.objects.get(id=politician_id)
+                politician_id = politician.id
+                politician_we_vote_id = politician.we_vote_id
+                politician_found = True
             elif positive_value_exists(we_vote_id):
-                politician_on_stage = Politician.objects.get(we_vote_id__iexact=we_vote_id)
-                politician_on_stage_id = politician_on_stage.id
-                politician_we_vote_id = politician_on_stage.we_vote_id
+                if positive_value_exists(read_only):
+                    politician = Politician.objects.using('readonly').get(we_vote_id__iexact=we_vote_id)
+                else:
+                    politician = Politician.objects.get(we_vote_id__iexact=we_vote_id)
+                politician_id = politician.id
+                politician_we_vote_id = politician.we_vote_id
+                politician_found = True
         except Politician.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True
             exception_multiple_object_returned = True
+            success = False
+            status += "MULTIPLE_POLITICIANS_FOUND "
         except Politician.DoesNotExist:
             error_result = True
             exception_does_not_exist = True
+            status += "NO_POLITICIAN_FOUND "
+        except Exception as e:
+            success = False
+            status += "PROBLEM_WITH_RETRIEVE_POLITICIAN: " + str(e) + ' '
 
-        # politician_on_stage_found2 = politician_on_stage_id > 0  # TODO Why not this simpler case?
-        politician_on_stage_found = True if politician_on_stage_id > 0 else False
         results = {
-            'success':                      True if politician_on_stage_found else False,
-            'politician_found':             politician_on_stage_found,
-            'politician_id':                politician_on_stage_id,
+            'success':                      success,
+            'status':                       status,
+            'politician':                   politician,
+            'politician_found':             politician_found,
+            'politician_id':                politician_id,
             'politician_we_vote_id':        politician_we_vote_id,
-            'politician':                   politician_on_stage,
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,
             'MultipleObjectsReturned':      exception_multiple_object_returned,
