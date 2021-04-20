@@ -99,8 +99,9 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
                 campaign_owner_dict = {
                     'organization_name':                        campaignx_owner.organization_name,
                     'organization_we_vote_id':                  campaignx_owner.organization_we_vote_id,
-                    'we_vote_hosted_profile_image_url_tiny':    campaignx_owner.we_vote_hosted_profile_image_url_tiny,
+                    'feature_this_profile_image':                       campaignx_owner.feature_this_profile_image,
                     'visible_to_public':                        campaignx_owner.visible_to_public,
+                    'we_vote_hosted_profile_image_url_tiny':    campaignx_owner.we_vote_hosted_profile_image_url_tiny,
                 }
                 campaignx_owner_list.append(campaign_owner_dict)
 
