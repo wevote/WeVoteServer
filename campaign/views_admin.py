@@ -44,6 +44,8 @@ def campaign_edit_owners_process_view(request):
     campaignx_owner_organization_we_vote_id = request.POST.get('campaignx_owner_organization_we_vote_id', None)
     campaignx_owner_visible_to_public = \
         positive_value_exists(request.POST.get('campaignx_owner_visible_to_public', False))
+    campaignx_owner_feature_this_profile_image = \
+        positive_value_exists(request.POST.get('campaignx_owner_feature_this_profile_image', False))
     google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
     state_code = request.POST.get('state_code', '')
 
@@ -85,6 +87,7 @@ def campaign_edit_owners_process_view(request):
                     campaignx_we_vote_id=campaignx_we_vote_id,
                     organization_name=organization_name,
                     organization_we_vote_id=campaignx_owner_organization_we_vote_id,
+                    feature_this_profile_image=campaignx_owner_feature_this_profile_image,
                     voter_we_vote_id=voter_we_vote_id,
                     we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
                     visible_to_public=campaignx_owner_visible_to_public)
@@ -104,18 +107,26 @@ def campaign_edit_owners_process_view(request):
     )
     for campaignx_owner in campaignx_owner_list:
         if positive_value_exists(campaignx_owner.campaignx_we_vote_id):
-            variable_name = "delete_campaignx_owner_" + str(campaignx_owner.id)
-            delete_campaignx_owner = positive_value_exists(request.POST.get(variable_name, False))
+            delete_variable_name = "delete_campaignx_owner_" + str(campaignx_owner.id)
+            delete_campaignx_owner = positive_value_exists(request.POST.get(delete_variable_name, False))
             if positive_value_exists(delete_campaignx_owner):
                 campaignx_owner.delete()
                 messages.add_message(request, messages.INFO, 'Deleted CampaignXOwner.')
             else:
                 owner_changed = False
-                exists_variable_name = "campaignx_owner_visible_to_public_" + str(campaignx_owner.id) + "_exists"
-                campaignx_owner_visible_to_public_exists = request.POST.get(exists_variable_name, None)
-                variable_name = "campaignx_owner_visible_to_public_" + str(campaignx_owner.id)
-                campaignx_owner_visible_to_public = positive_value_exists(request.POST.get(variable_name, False))
+                visible_to_public_exists_variable_name = \
+                    "campaignx_owner_visible_to_public_" + str(campaignx_owner.id) + "_exists"
+                campaignx_owner_visible_to_public_exists = \
+                    request.POST.get(visible_to_public_exists_variable_name, None)
+                visible_to_public_variable_name = "campaignx_owner_visible_to_public_" + str(campaignx_owner.id)
+                campaignx_owner_visible_to_public = \
+                    positive_value_exists(request.POST.get(visible_to_public_variable_name, False))
+                feature_this_profile_image_variable_name = \
+                    "campaignx_owner_feature_this_profile_image_" + str(campaignx_owner.id)
+                campaignx_owner_feature_this_profile_image = \
+                    positive_value_exists(request.POST.get(feature_this_profile_image_variable_name, False))
                 if campaignx_owner_visible_to_public_exists is not None:
+                    campaignx_owner.feature_this_profile_image = campaignx_owner_feature_this_profile_image
                     campaignx_owner.visible_to_public = campaignx_owner_visible_to_public
                     owner_changed = True
 
@@ -259,8 +270,8 @@ def campaign_edit_politicians_process_view(request):
     )
     for campaignx_politician in campaignx_politician_list:
         if positive_value_exists(campaignx_politician.campaignx_we_vote_id):
-            variable_name = "delete_campaignx_politician_" + str(campaignx_politician.id)
-            delete_campaignx_politician = positive_value_exists(request.POST.get(variable_name, False))
+            delete_variable_name = "delete_campaignx_politician_" + str(campaignx_politician.id)
+            delete_campaignx_politician = positive_value_exists(request.POST.get(delete_variable_name, False))
             if positive_value_exists(delete_campaignx_politician):
                 campaignx_politician.delete()
                 messages.add_message(request, messages.INFO, 'Deleted CampaignXPolitician.')
@@ -535,6 +546,7 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
     messages_on_stage = get_messages(request)
     campaignx_manager = CampaignXManager()
     campaignx = None
+
     results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx_we_vote_id)
 
     if results['campaignx_found']:
@@ -557,10 +569,22 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
     for campaignx_politician in campaignx_politician_list:
         campaignx_politician_list_modified.append(campaignx_politician)
 
+    supporters_query = CampaignXSupporter.objects.all()
+    supporters_query = supporters_query.filter(campaignx_we_vote_id__iexact=campaignx_we_vote_id)
+    supporters_query = supporters_query.exclude(
+        Q(supporter_endorsement__isnull=True) |
+        Q(supporter_endorsement__exact='')
+    )
+    campaignx_supporter_list = list(supporters_query[:4])
+
+    campaignx_supporters_count = campaignx_manager.fetch_campaignx_supporter_count(campaignx_we_vote_id)
+
     template_values = {
         'campaignx':                campaignx,
         'campaignx_owner_list':     campaignx_owner_list_modified,
         'campaignx_politician_list': campaignx_politician_list_modified,
+        'campaignx_supporters_count': campaignx_supporters_count,
+        'campaignx_supporter_list': campaignx_supporter_list,
         'google_civic_election_id': google_civic_election_id,
         'messages_on_stage':        messages_on_stage,
         'state_code':               state_code,

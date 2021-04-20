@@ -88,6 +88,18 @@ class CampaignXManager(models.Manager):
     def __unicode__(self):
         return "CampaignXManager"
 
+    def fetch_campaignx_supporter_count(self, campaignx_we_vote_id=None):
+        status = ""
+
+        try:
+            campaignx_queryset = CampaignXSupporter.objects.using('readonly').all()
+            campaignx_queryset = campaignx_queryset.filter(campaignx_we_vote_id=campaignx_we_vote_id)
+            return campaignx_queryset.count()
+        except Exception as e:
+            status += "RETRIEVE_CAMPAIGNX_SUPPORTER_LIST_FAILED: " + str(e) + " "
+
+        return 0
+
     def generate_seo_friendly_path(self, campaignx_we_vote_id='', campaignx_title=None):
         """
         Generate the closest possible SEO friendly path for this campaign. Note that these paths
@@ -469,8 +481,9 @@ class CampaignXManager(models.Manager):
                 campaign_owner_dict = {
                     'organization_name':                        campaignx_owner_organization_name,
                     'organization_we_vote_id':                  campaignx_owner_organization_we_vote_id,
-                    'we_vote_hosted_profile_image_url_tiny':    campaignx_owner_we_vote_hosted_profile_image_url_tiny,
+                    'feature_this_profile_image':                       campaignx_owner.feature_this_profile_image,
                     'visible_to_public':                        campaignx_owner.visible_to_public,
+                    'we_vote_hosted_profile_image_url_tiny':    campaignx_owner_we_vote_hosted_profile_image_url_tiny,
                 }
                 campaignx_owner_list.append(campaign_owner_dict)
 
@@ -537,6 +550,7 @@ class CampaignXManager(models.Manager):
                 else:
                     campaignx = CampaignX.objects.get(seo_friendly_path__iexact=seo_friendly_path)
                 campaignx_found = True
+                campaignx_we_vote_id = campaignx.we_vote_id
                 status += 'CAMPAIGNX_FOUND_WITH_SEO_FRIENDLY_PATH '
                 success = True
             else:
@@ -559,8 +573,9 @@ class CampaignXManager(models.Manager):
                 campaign_owner_dict = {
                     'organization_name':                        campaignx_owner.organization_name,
                     'organization_we_vote_id':                  campaignx_owner.organization_we_vote_id,
-                    'we_vote_hosted_profile_image_url_tiny':    campaignx_owner.we_vote_hosted_profile_image_url_tiny,
+                    'feature_this_profile_image':                       campaignx_owner.feature_this_profile_image,
                     'visible_to_public':                        campaignx_owner.visible_to_public,
+                    'we_vote_hosted_profile_image_url_tiny':    campaignx_owner.we_vote_hosted_profile_image_url_tiny,
                 }
                 campaignx_owner_list.append(campaign_owner_dict)
 
@@ -1715,8 +1730,9 @@ class CampaignXOwner(models.Model):
     voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     organization_name = models.CharField(max_length=255, null=False, blank=False)
-    we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
+    feature_this_profile_image = models.BooleanField(default=True)
     visible_to_public = models.BooleanField(default=False)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
 
 

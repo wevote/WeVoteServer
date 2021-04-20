@@ -41,7 +41,8 @@ span.nobr { white-space: nowrap; }
             <thead>
                 <tr>
                     <th>Endorser Organization We Vote Id</th>
-                    <th>Visible to Public</th>
+                    <th>Visible to Public &nbsp;&nbsp;</th>
+                    <th>Feature This Profile Image</th>
                 </tr>
             </thead>
             <tr>
@@ -58,6 +59,14 @@ span.nobr { white-space: nowrap; }
                            checked
                     />
                 </td>
+                <td>
+                    <input type="checkbox"
+                           name="campaignx_owner_feature_this_profile_image"
+                           id="campaignx_owner_feature_this_profile_image_id"
+                           value=1
+                           checked
+                    />
+                </td>
             </tr>
         </table>
     </div>
@@ -69,6 +78,7 @@ span.nobr { white-space: nowrap; }
         <tr>
             <th>Campaign Owners</th>
             <th>Owner Visible to Public</th>
+            <th>Feature This Profile Image</th>
             <th>Delete Owner</th>
         </tr>
     </thead>
@@ -95,6 +105,18 @@ span.nobr { white-space: nowrap; }
                    {% endif %}
             />
             visible
+        </td>
+        <td>
+            <input type="hidden" name="campaignx_owner_feature_this_profile_image_{{ campaignx_owner.id }}_exists" value="1">
+            <input type="checkbox"
+                   name="campaignx_owner_feature_this_profile_image_{{ campaignx_owner.id }}"
+                   id="campaignx_owner_feature_this_profile_image_{{ campaignx_owner.id }}_id"
+                   value="True"
+                   {% if campaignx_owner.feature_this_profile_image %}
+                     checked="checked"
+                   {% endif %}
+            />
+            feature
         </td>
         <td>
             <input type="checkbox"
