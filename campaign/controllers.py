@@ -99,7 +99,7 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
                 campaign_owner_dict = {
                     'organization_name':                        campaignx_owner.organization_name,
                     'organization_we_vote_id':                  campaignx_owner.organization_we_vote_id,
-                    'feature_this_profile_image':                       campaignx_owner.feature_this_profile_image,
+                    'feature_this_profile_image':               campaignx_owner.feature_this_profile_image,
                     'visible_to_public':                        campaignx_owner.visible_to_public,
                     'we_vote_hosted_profile_image_url_tiny':    campaignx_owner.we_vote_hosted_profile_image_url_tiny,
                 }
@@ -212,7 +212,8 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         voter_device_id='',
         campaignx_we_vote_id='',
         seo_friendly_path='',
-        as_owner=False):
+        as_owner=False,
+        hostname=''):
     status = ''
     campaignx_owner_list = []
     campaignx_politician_starter_list = []
@@ -244,6 +245,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
                 'seo_friendly_path':                '',
                 'seo_friendly_path_list':           seo_friendly_path_list,
                 'supporters_count':                 0,
+                'visible_on_this_site':             False,
                 'voter_campaignx_supporter':        {},
                 'voter_signed_in_with_email':       voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url':  '',
@@ -279,6 +281,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             'seo_friendly_path':                '',
             'seo_friendly_path_list':           seo_friendly_path_list,
             'supporters_count':                 0,
+            'visible_on_this_site':             False,
             'voter_campaignx_supporter':        {},
             'voter_signed_in_with_email':       voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
@@ -302,6 +305,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             'seo_friendly_path':                '',
             'seo_friendly_path_list':           seo_friendly_path_list,
             'supporters_count':                 0,
+            'visible_on_this_site':             False,
             'voter_campaignx_supporter':        {},
             'voter_signed_in_with_email':       voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url':  '',
@@ -312,6 +316,26 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
     campaignx = results['campaignx']
     campaignx_owner_list = results['campaignx_owner_list']
     seo_friendly_path_list = results['seo_friendly_path_list']
+
+    from organization.controllers import site_configuration_retrieve_for_api
+    site_results = site_configuration_retrieve_for_api(hostname)
+    site_owner_organization_we_vote_id = site_results['organization_we_vote_id']
+
+    if positive_value_exists(site_owner_organization_we_vote_id):
+        try:
+            approved_campaignx_we_vote_id_list = \
+                campaignx_manager.retrieve_campaignx_listed_by_organization_simple_list(
+                    site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
+            if campaignx.we_vote_id in approved_campaignx_we_vote_id_list:
+                campaignx.visible_on_this_site = True
+            else:
+                campaignx.visible_on_this_site = False
+        except Exception as e:
+            success = False
+            status += "RETRIEVE_CAMPAIGNX_LIST_FOR_PRIVATE_LABEL_FAILED: " + str(e) + " "
+    else:
+        campaignx.visible_on_this_site = True
+
     if campaignx.politician_starter_list_serialized:
         campaignx_politician_starter_list = json.loads(campaignx.politician_starter_list_serialized)
     else:
@@ -438,6 +462,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         'seo_friendly_path':                campaignx.seo_friendly_path,
         'seo_friendly_path_list':           seo_friendly_path_list,
         'supporters_count':                 campaignx.supporters_count,
+        'visible_on_this_site':             campaignx.visible_on_this_site,
         'voter_campaignx_supporter':        voter_campaignx_supporter_dict,
         'voter_signed_in_with_email':       voter_signed_in_with_email,
         'we_vote_hosted_campaign_photo_large_url':  campaignx.we_vote_hosted_campaign_photo_large_url,
@@ -490,6 +515,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'seo_friendly_path':            '',
             'seo_friendly_path_list':       seo_friendly_path_list,
             'supporters_count':             0,
+            'visible_on_this_site':         False,
             'voter_signed_in_with_email':   voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
             'we_vote_hosted_campaign_photo_medium_url': '',
@@ -514,6 +540,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                 'seo_friendly_path':            '',
                 'seo_friendly_path_list':       seo_friendly_path_list,
                 'supporters_count':             0,
+                'visible_on_this_site':         False,
                 'voter_signed_in_with_email':   voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url': '',
                 'we_vote_hosted_campaign_photo_medium_url': '',
@@ -540,6 +567,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                 'seo_friendly_path':            '',
                 'seo_friendly_path_list':       seo_friendly_path_list,
                 'supporters_count':             0,
+                'visible_on_this_site':         False,
                 'voter_signed_in_with_email':   voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url': '',
                 'we_vote_hosted_campaign_photo_medium_url': '',
@@ -735,6 +763,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'seo_friendly_path':            campaignx.seo_friendly_path,
             'seo_friendly_path_list':       seo_friendly_path_list,
             'supporters_count':             campaignx.supporters_count,
+            'visible_on_this_site':         campaignx.visible_on_this_site,
             'voter_signed_in_with_email':   voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': campaignx.we_vote_hosted_campaign_photo_large_url,
             'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,
@@ -756,6 +785,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'seo_friendly_path':            '',
             'seo_friendly_path_list':       [],
             'supporters_count':             0,
+            'visible_on_this_site':         False,
             'voter_signed_in_with_email':   voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
             'we_vote_hosted_campaign_photo_medium_url': '',

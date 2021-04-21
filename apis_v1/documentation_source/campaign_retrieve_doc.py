@@ -53,6 +53,7 @@ def campaign_retrieve_doc_template_values(url_root):
                    '  "organization_we_vote_id": string,\n' \
                    '  "seo_friendly_path": string,\n' \
                    '  "supporters_count": integer,\n' \
+                   '  "visible_on_this_site": boolean,\n' \
                    '  "voter_signed_in_with_email": boolean,\n' \
                    '  "voter_we_vote_id": string,\n' \
                    '  "we_vote_hosted_campaign_photo_large_url": string,\n' \

@@ -431,7 +431,7 @@ class CampaignXManager(models.Manager):
                     campaignx = CampaignX.objects.get(seo_friendly_path__iexact=seo_friendly_path)
                 campaignx_found = True
                 campaignx_we_vote_id = campaignx.we_vote_id
-                status += 'CAMPAIGNX_FOUND_WITH_SEO_FRIENDLY_PATH '
+                status += 'CAMPAIGNX_AS_OWNER_FOUND_WITH_SEO_FRIENDLY_PATH '
                 success = True
             elif positive_value_exists(voter_we_vote_id):
                 # If ONLY the voter_we_vote_id is passed in, get the campaign for that voter in draft mode
@@ -691,11 +691,16 @@ class CampaignXManager(models.Manager):
             status += "RETRIEVE_CAMPAIGNX_LIST_FAILED: " + str(e) + " "
             campaignx_list_found = False
 
+        campaignx_list_modified = []
+        for campaignx in campaignx_list:
+            campaignx.visible_on_this_site = True
+            campaignx_list_modified.append(campaignx)
+
         results = {
             'success':                                  success,
             'status':                                   status,
             'campaignx_list_found':                     campaignx_list_found,
-            'campaignx_list':                           campaignx_list,
+            'campaignx_list':                           campaignx_list_modified,
             'voter_started_campaignx_we_vote_ids':      voter_started_campaignx_we_vote_ids,
             'voter_supported_campaignx_we_vote_ids':    voter_supported_campaignx_we_vote_ids,
         }
@@ -1674,7 +1679,7 @@ class CampaignXManager(models.Manager):
                     organization_we_vote_id=organization_we_vote_id,
                     voter_we_vote_id=voter_we_vote_id,
                 )
-                status += "CAMPAIGNX_CREATED "
+                status += "CAMPAIGNX_SUPPORTER_CREATED "
                 # Retrieve the supporter_name and we_vote_hosted_profile_image_url_tiny from the organization entry
                 from organization.models import OrganizationManager
                 organization_manager = OrganizationManager()
