@@ -2856,8 +2856,9 @@ class Organization(models.Model):
         verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
     date_last_changed = models.DateTimeField(null=True, auto_now=True)
 
-    # This is the domain name the client has configured for their We Vote configured site
+    chosen_about_organization_external_url = models.TextField(blank=True, null=True)
     chosen_domain_type_is_campaign = models.BooleanField(default=False)
+    # This is the domain name the client has configured for their We Vote configured site
     chosen_domain_string = models.CharField(
         verbose_name="client domain name for we vote site", max_length=255, null=True, blank=True)
     chosen_favicon_url_https = models.TextField(

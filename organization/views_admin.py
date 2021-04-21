@@ -1283,6 +1283,7 @@ def organization_edit_account_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     organization_id = convert_to_int(request.POST.get('organization_id', 0))
+    chosen_about_organization_external_url = request.POST.get('chosen_about_organization_external_url', None)
     chosen_domain_string = request.POST.get('chosen_domain_string', None)
     chosen_domain_type_is_campaign = request.POST.get('chosen_domain_type_is_campaign', None)
     chosen_favicon_url_https = request.POST.get('chosen_favicon_url_https', None)
@@ -1315,6 +1316,9 @@ def organization_edit_account_process_view(request):
     try:
         if organization_on_stage_found:
             # Update
+            if chosen_about_organization_external_url is not None:
+                organization_on_stage.chosen_about_organization_external_url = \
+                    chosen_about_organization_external_url.strip()
             if chosen_domain_string is not None:
                 if positive_value_exists(chosen_domain_string):
                     domain_results = full_domain_string_available(chosen_domain_string,

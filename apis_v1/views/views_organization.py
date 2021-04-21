@@ -658,6 +658,7 @@ def site_configuration_retrieve_view(request):  # siteConfigurationRetrieve
     json_data = {
         'success':                  results['success'],
         'status':                   results['status'],
+        'chosen_about_organization_external_url': results['chosen_about_organization_external_url'],
         'chosen_hide_we_vote_logo': results['chosen_hide_we_vote_logo'],
         'chosen_logo_url_https':    results['chosen_logo_url_https'],
         'chosen_prevent_sharing_opinions': results['chosen_prevent_sharing_opinions'],

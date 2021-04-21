@@ -2886,6 +2886,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
     """
     status = ""
     success = True
+    chosen_about_organization_external_url = ''
     chosen_hide_we_vote_logo = False
     chosen_logo_url_https = ''
     chosen_prevent_sharing_opinions = False
@@ -2899,6 +2900,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
         results = {
             'success':                          success,
             'status':                           status,
+            'chosen_about_organization_external_url': chosen_about_organization_external_url,
             'chosen_hide_we_vote_logo':         chosen_hide_we_vote_logo,
             'chosen_logo_url_https':            chosen_logo_url_https,
             'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
@@ -2923,6 +2925,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
         results = {
             'success':                          success,
             'status':                           status,
+            'chosen_about_organization_external_url': chosen_about_organization_external_url,
             'chosen_hide_we_vote_logo':         chosen_hide_we_vote_logo,
             'chosen_logo_url_https':            chosen_logo_url_https,
             'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
@@ -2940,6 +2943,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
     status += results['status']
 
     if organization_found:
+        chosen_about_organization_external_url = organization.chosen_about_organization_external_url
         chosen_hide_we_vote_logo = organization.chosen_hide_we_vote_logo
         chosen_logo_url_https = organization.chosen_logo_url_https
         chosen_prevent_sharing_opinions = organization.chosen_prevent_sharing_opinions
@@ -2962,6 +2966,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
     results = {
         'success':                          success,
         'status':                           status,
+        'chosen_about_organization_external_url': chosen_about_organization_external_url,
         'chosen_hide_we_vote_logo':         chosen_hide_we_vote_logo,
         'chosen_logo_url_https':            chosen_logo_url_https,
         'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,

@@ -24,17 +24,17 @@
   {% elif chosen_social_share_master_image_url_https %}
     <meta property="og:image"         content="{{ chosen_social_share_master_image_url_https }}" />
   {% else %}
-    <meta property="og:image"         content="https://WeVote.US/img/global/logos/we-vote-logo-wordmark-vertical-color-on-white-256x256.png" />
+    <meta property="og:image"         content="https://campaigns.WeVote.US/img/global/logos/we-vote-logo-wordmark-vertical-color-on-white-256x256.png" />
   {% endif %}
     <base href="/">
-    <link href="/css/main.css" rel="stylesheet" type="text/css" />
+    <link href="https://campaigns.WeVote.US/css/main.css" rel="stylesheet" type="text/css" />
   {% if hide_favicon %}  <!-- Favicon hidden //-->
   {% elif chosen_favicon_url_https %}
     <link rel="icon" sizes="32x32" href="{{ chosen_favicon_url_https }}" >
   {% else %}
-    <link rel="icon" type="image/png" sizes="32x32" href="/img/global/icons/favicon-32x32.png" >
-    <link rel="icon" type="image/png" sizes="16x16" href="/img/global/icons/favicon-16x16.png" >
-    <link rel="icon" sizes="48x48" href="/img/global/icons/favicon.ico" >
+    <link rel="icon" type="image/png" sizes="32x32" href="https://campaigns.WeVote.US/img/global/icons/favicon-32x32.png" >
+    <link rel="icon" type="image/png" sizes="16x16" href="https://campaigns.WeVote.US/img/global/icons/favicon-16x16.png" >
+    <link rel="icon" sizes="48x48" href="https://campaigns.WeVote.US/img/global/icons/favicon.ico" >
   {% endif %}
 
     <!-- Google Analytics -->
@@ -60,6 +60,6 @@
     <div>
       <div id="app"></div>
     </div>
-    <script src="https://campaigns.wevote.us{{ campaign_main_js }}"></script>
+    <script src="https://campaigns.WeVote.US{{ campaign_main_js }}"></script>
   </body>
 </html>
