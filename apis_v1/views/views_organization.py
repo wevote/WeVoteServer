@@ -188,6 +188,9 @@ def organization_index_view(request, organization_incoming_domain='', campaign_m
             if positive_value_exists(organization.chosen_social_share_master_image_url_https):
                 chosen_social_share_master_image_url_https = organization.chosen_social_share_master_image_url_https
                 hide_social_share_image = False
+            elif positive_value_exists(organization.chosen_logo_url_https):
+                chosen_social_share_master_image_url_https = organization.chosen_logo_url_https
+                hide_social_share_image = False
             elif positive_value_exists(chosen_hide_we_vote_logo):
                 chosen_social_share_master_image_url_https = None
                 hide_social_share_image = True
