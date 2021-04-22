@@ -6,6 +6,8 @@ from .controllers import full_domain_string_available, merge_these_two_organizat
     move_organization_followers_to_another_organization, move_organization_membership_link_to_another_organization, \
     organizations_import_from_master_server, \
     push_organization_data_to_other_table_caches, subdomain_string_available
+from .controllers_fastly import add_wevote_subdomain_to_fastly, add_subdomain_route53_record, \
+    get_wevote_subdomain_status
 from .models import GROUP, INDIVIDUAL, Organization, OrganizationReservedDomain, ORGANIZATION_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
 from campaign.models import CampaignXListedByOrganization, CampaignXManager
@@ -804,12 +806,14 @@ def organization_edit_account_view(request, organization_id=0, organization_we_v
     # Sort by organization_type value (instead of key)
     organization_types_list = sorted(organization_types_map.items(), key=operator.itemgetter(1))
 
+    on_development_server = 'localhost' in WE_VOTE_SERVER_ROOT_URL
     if organization_on_stage_found:
         template_values = {
             'google_civic_election_id': google_civic_election_id,
             'issue_list':               new_issue_list,
             'master_feature_package_list': master_feature_package_list,
             'messages_on_stage':        messages_on_stage,
+            'on_development_server':    on_development_server,
             'organization':             organization_on_stage,
             'organization_types':       organization_types_list,
             'state_list':               sorted_state_list,
@@ -822,6 +826,7 @@ def organization_edit_account_view(request, organization_id=0, organization_we_v
             'issue_list':               new_issue_list,
             'master_feature_package_list': master_feature_package_list,
             'messages_on_stage':        messages_on_stage,
+            'on_development_server':    on_development_server,
             'state_list':               sorted_state_list,
             'upcoming_election_list':   upcoming_election_list,
         }
@@ -1305,7 +1310,10 @@ def organization_edit_account_process_view(request):
     # Check to see if this organization is already being used anywhere
     organization_on_stage = None
     organization_on_stage_found = False
+    chosen_subdomain_string_allowed = False
+    chosen_subdomain_string_previous = ''
     status = ""
+
     try:
         organization_on_stage = Organization.objects.get(id=organization_id)
         organization_on_stage_found = True
@@ -1315,6 +1323,8 @@ def organization_edit_account_process_view(request):
 
     try:
         if organization_on_stage_found:
+            chosen_subdomain_string_previous = organization_on_stage.chosen_subdomain_string
+
             # Update
             if chosen_about_organization_external_url is not None:
                 organization_on_stage.chosen_about_organization_external_url = \
@@ -1365,6 +1375,7 @@ def organization_edit_account_process_view(request):
                                                                 requesting_organization_id=organization_id)
                     if domain_results['subdomain_string_available']:
                         organization_on_stage.chosen_subdomain_string = chosen_subdomain_string.strip()
+                        chosen_subdomain_string_allowed = True
                     else:
                         message = 'Cannot save sub domain: \'' + chosen_subdomain_string + '\', status: ' + \
                                   domain_results['status']
@@ -1391,6 +1402,40 @@ def organization_edit_account_process_view(request):
         messages.add_message(request, messages.ERROR, 'Could not save organization.'
                                                       ' {error} [type: {error_type}]'.format(error=e,
                                                                                              error_type=type(e)))
+
+    # Now see about adding chosen_subdomain_string networking information
+    if positive_value_exists(chosen_subdomain_string_allowed):
+        on_development_server = 'localhost' in WE_VOTE_SERVER_ROOT_URL
+        if on_development_server:
+            status += "FASTLY_NOT_UPDATED-ON_DEVELOPMENT_SERVER: " + str(WE_VOTE_SERVER_ROOT_URL) + " "
+        elif positive_value_exists(chosen_subdomain_string) or positive_value_exists(chosen_subdomain_string_previous):
+            if positive_value_exists(chosen_subdomain_string):
+                subdomain_results = get_wevote_subdomain_status(chosen_subdomain_string)
+                status += subdomain_results['status']
+                if not subdomain_results['success']:
+                    status += "COULD_NOT_GET_SUBDOMAIN_STATUS "
+                elif not positive_value_exists(subdomain_results['subdomain_exists']):
+                    # If here, this is a new chosen_subdomain_string to add to our network
+                    status += "NEW_CHOSEN_SUBDOMAIN_STRING_DOES_NOT_EXIST "
+                    add_results = add_wevote_subdomain_to_fastly(chosen_subdomain_string)
+                    status += add_results['status']
+                else:
+                    status += "CHOSEN_SUBDOMAIN_ALREADY_EXISTS "
+
+                # add domain to aws route53 DNS
+                route53_results = add_subdomain_route53_record(chosen_subdomain_string)
+                if route53_results['success']:
+                    status += "SUBDOMAIN_ROUTE53_ADDED "
+                else:
+                    status += route53_results['status']
+                    status += "SUBDOMAIN_ROUTE53_NOT_ADDED "
+                # We don't delete subdomain records from our DNS
+            if positive_value_exists(chosen_subdomain_string_previous):
+                if chosen_subdomain_string_previous is not chosen_subdomain_string:
+                    # Any benefit to deleting prior subdomain from Fastly?
+                    pass
+
+    messages.add_message(request, messages.INFO, 'Processing Status: {status}'.format(status=status))
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +

@@ -62,13 +62,13 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
     # including_politicians_in_any_of_these_states = None,
     # including_politicians_with_support_in_any_of_these_issues = None):
 
-    approved_campaignx_we_vote_id_list = []
+    visible_on_this_site_campaignx_we_vote_id_list = []
     campaignx_manager = CampaignXManager()
     if positive_value_exists(site_owner_organization_we_vote_id):
         results = campaignx_manager.retrieve_campaignx_list_for_private_label(
             including_started_by_voter_we_vote_id=voter_we_vote_id,
             site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
-        approved_campaignx_we_vote_id_list = results['approved_campaignx_we_vote_id_list']
+        visible_on_this_site_campaignx_we_vote_id_list = results['visible_on_this_site_campaignx_we_vote_id_list']
     else:
         results = campaignx_manager.retrieve_campaignx_list(
             including_started_by_voter_we_vote_id=voter_we_vote_id)
@@ -87,7 +87,7 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
                     viewer_is_owner = True
             if campaignx.is_still_active and campaignx.is_ok_to_promote_on_we_vote:
                 if positive_value_exists(site_owner_organization_we_vote_id):
-                    if campaignx.we_vote_id in approved_campaignx_we_vote_id_list:
+                    if campaignx.we_vote_id in visible_on_this_site_campaignx_we_vote_id_list:
                         promoted_campaignx_we_vote_ids.append(campaignx.we_vote_id)
                 else:
                     promoted_campaignx_we_vote_ids.append(campaignx.we_vote_id)
@@ -323,10 +323,10 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
 
     if positive_value_exists(site_owner_organization_we_vote_id):
         try:
-            approved_campaignx_we_vote_id_list = \
-                campaignx_manager.retrieve_campaignx_listed_by_organization_simple_list(
+            visible_on_this_site_campaignx_we_vote_id_list = \
+                campaignx_manager.retrieve_visible_on_this_site_campaignx_simple_list(
                     site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
-            if campaignx.we_vote_id in approved_campaignx_we_vote_id_list:
+            if campaignx.we_vote_id in visible_on_this_site_campaignx_we_vote_id_list:
                 campaignx.visible_on_this_site = True
             else:
                 campaignx.visible_on_this_site = False

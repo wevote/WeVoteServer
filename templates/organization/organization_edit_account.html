@@ -58,6 +58,10 @@ span.nobr { white-space: nowrap; }
         <input type="text" name="chosen_subdomain_string" id="chosen_subdomain_string_id" class="form-control"
                value="{{ organization.chosen_subdomain_string|default_if_none:"" }}" />
         .WeVote.US
+        {% if on_development_server %}
+            &nbsp;
+            (NOTE: ON DEVELOPMENT SERVER - WILL NOT UPDATE FASTLY)
+        {% endif %}
     </div>
 </div>
 
