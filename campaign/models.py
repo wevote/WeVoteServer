@@ -638,6 +638,25 @@ class CampaignXManager(models.Manager):
             simple_list.append(one_link.campaignx_we_vote_id)
         return simple_list
 
+    def retrieve_visible_on_this_site_campaignx_simple_list(
+            self,
+            site_owner_organization_we_vote_id='',
+            visible_to_public=True):
+        campaignx_listed_by_organization_list = \
+            self.retrieve_campaignx_listed_by_organization_list(
+                site_owner_organization_we_vote_id=site_owner_organization_we_vote_id,
+                visible_to_public=visible_to_public,
+                read_only=True)
+        simple_list = []
+        for one_link in campaignx_listed_by_organization_list:
+            simple_list.append(one_link.campaignx_we_vote_id)
+
+        campaignx_owned_by_organization_list = \
+            self.retrieve_campaignx_owner_list(organization_we_vote_id=site_owner_organization_we_vote_id)
+        for one_owner in campaignx_owned_by_organization_list:
+            simple_list.append(one_owner.campaignx_we_vote_id)
+        return simple_list
+
     def retrieve_campaignx_list(
             self,
             including_started_by_voter_we_vote_id=None,
@@ -715,7 +734,7 @@ class CampaignXManager(models.Manager):
         campaignx_list = []
         success = True
         status = ""
-        approved_campaignx_we_vote_id_list = []
+        visible_on_this_site_campaignx_we_vote_id_list = []
         campaignx_list_modified = []
         voter_started_campaignx_we_vote_ids = []
         voter_supported_campaignx_we_vote_ids = []
@@ -724,8 +743,8 @@ class CampaignXManager(models.Manager):
         if positive_value_exists(site_owner_organization_we_vote_id):
             try:
                 campaignx_manager = CampaignXManager()
-                approved_campaignx_we_vote_id_list = \
-                    campaignx_manager.retrieve_campaignx_listed_by_organization_simple_list(
+                visible_on_this_site_campaignx_we_vote_id_list = \
+                    campaignx_manager.retrieve_visible_on_this_site_campaignx_simple_list(
                         site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
             except Exception as e:
                 success = False
@@ -748,7 +767,9 @@ class CampaignXManager(models.Manager):
 
             # Campaigns approved to be shown on this site
             new_filter = \
-                Q(we_vote_id__in=approved_campaignx_we_vote_id_list, in_draft_mode=False, is_still_active=True)
+                Q(we_vote_id__in=visible_on_this_site_campaignx_we_vote_id_list,
+                  in_draft_mode=False,
+                  is_still_active=True)
             filters.append(new_filter)
 
             # Add the first query
@@ -767,7 +788,7 @@ class CampaignXManager(models.Manager):
             campaignx_list = campaignx_queryset[:limit]
             campaignx_list_found = positive_value_exists(len(campaignx_list))
             for one_campaignx in campaignx_list:
-                if one_campaignx.we_vote_id in approved_campaignx_we_vote_id_list:
+                if one_campaignx.we_vote_id in visible_on_this_site_campaignx_we_vote_id_list:
                     one_campaignx.visible_on_this_site = True
                 else:
                     one_campaignx.visible_on_this_site = False
@@ -781,7 +802,7 @@ class CampaignXManager(models.Manager):
         results = {
             'success':                                  success,
             'status':                                   status,
-            'approved_campaignx_we_vote_id_list':       approved_campaignx_we_vote_id_list,
+            'visible_on_this_site_campaignx_we_vote_id_list': visible_on_this_site_campaignx_we_vote_id_list,
             'campaignx_list_found':                     campaignx_list_found,
             'campaignx_list':                           campaignx_list_modified,
             'voter_started_campaignx_we_vote_ids':      voter_started_campaignx_we_vote_ids,

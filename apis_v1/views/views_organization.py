@@ -147,6 +147,9 @@ def organization_index_view(request, organization_incoming_domain='', campaign_m
     if organization_found:
         master_features_provided_bitmap = 0
         chosen_domain_type_is_campaign = organization.chosen_domain_type_is_campaign
+        if positive_value_exists(chosen_domain_type_is_campaign):
+            # Change the default
+            chosen_social_share_description = "Vote for candidates you like. Oppose candidates you don't."
         features_provided_bitmap = organization.features_provided_bitmap
         chosen_hide_we_vote_logo = organization.chosen_hide_we_vote_logo
         chosen_html_verification_string = organization.chosen_html_verification_string
