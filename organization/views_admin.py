@@ -1412,7 +1412,13 @@ def organization_edit_account_process_view(request):
         if on_development_server:
             status += "FASTLY_NOT_UPDATED-ON_DEVELOPMENT_SERVER: " + str(WE_VOTE_SERVER_ROOT_URL) + " "
         elif positive_value_exists(chosen_subdomain_string) or positive_value_exists(chosen_subdomain_string_previous):
-            if positive_value_exists(chosen_subdomain_string):
+            chosen_subdomain_has_changed = True
+            if positive_value_exists(chosen_subdomain_string) and \
+                    positive_value_exists(chosen_subdomain_string_previous):
+                chosen_subdomain_has_changed = chosen_subdomain_string != chosen_subdomain_string_previous
+            if not chosen_subdomain_has_changed:
+                status += "SUBDOMAIN_HAS_NOT_CHANGED "
+            elif positive_value_exists(chosen_subdomain_string):
                 subdomain_results = get_wevote_subdomain_status(chosen_subdomain_string)
                 status += subdomain_results['status']
                 if not subdomain_results['success']:
@@ -1432,7 +1438,7 @@ def organization_edit_account_process_view(request):
                 else:
                     status += route53_results['status']
                     status += "SUBDOMAIN_ROUTE53_NOT_ADDED "
-                # We don't delete subdomain records from our DNS
+            # We don't delete subdomain records from our DNS
             if positive_value_exists(chosen_subdomain_string_previous):
                 if chosen_subdomain_string_previous is not chosen_subdomain_string:
                     # Any benefit to deleting prior subdomain from Fastly?
