@@ -1303,6 +1303,7 @@ def organization_edit_account_process_view(request):
     chosen_social_share_description = request.POST.get('chosen_social_share_description', None)
     chosen_social_share_image_256x256_url_https = request.POST.get('chosen_social_share_image_256x256_url_https', None)
     chosen_subdomain_string = request.POST.get('chosen_subdomain_string', None)
+    chosen_website_name = request.POST.get('chosen_website_name', None)
     chosen_feature_package = request.POST.get('chosen_feature_package', None)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     state_code = request.POST.get('state_code', None)
@@ -1383,6 +1384,8 @@ def organization_edit_account_process_view(request):
                         status += domain_results['status']
                 else:
                     organization_on_stage.chosen_subdomain_string = None
+            if chosen_website_name is not None:
+                organization_on_stage.chosen_website_name = chosen_website_name.strip()
             if chosen_feature_package is not None:
                 master_feature_package_query = MasterFeaturePackage.objects.all()
                 master_feature_package_list = list(master_feature_package_query)

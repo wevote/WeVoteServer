@@ -72,6 +72,28 @@
     </div>
 </div>
 
+<div class="form-group">
+    <label class="col-sm-3 control-label">CampaignX Owner Allows Promotion</label>
+    <div class="col-sm-8 ">
+        <input type="checkbox" name="is_ok_to_promote_on_we_vote" id="is_ok_to_promote_on_we_vote_id" value="1"
+                {% if campaignx.is_ok_to_promote_on_we_vote %}checked{% endif %} />
+        <label for="is_ok_to_promote_on_we_vote_id" style="font-weight: normal !important;"><span style="color: darkgray">If checked, campaign may be promoted on WeVote.US. Uncheck if the campaign owner(s) don&apos;t want promotion.</span></label>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">Is Blocked By We Vote?</label>
+    <div class="col-sm-8 ">
+        <input type="checkbox" name="is_blocked_by_we_vote" id="is_blocked_by_we_vote_id" value="1"
+                {% if campaignx.is_blocked_by_we_vote %}checked{% endif %} />
+        <label for="is_blocked_by_we_vote_id" style="font-weight: normal !important;">Block this campaign</label>
+        <textarea name="is_blocked_by_we_vote_reason"
+                  class="form-control animated"
+                  id="is_blocked_by_we_vote_reason_id"
+                  placeholder="If blocked by We Vote, why?">{{ campaignx.is_blocked_by_we_vote_reason|default_if_none:"" }}</textarea>
+    </div>
+</div>
+
 {% endif %}
 
 
@@ -99,7 +121,7 @@
 {% endif %}
 
 
-{% if campaignx %}
+{% if campaignx and do_not_allow_deleting_yet %}
   <br />
   <br />
 {#<form action="{% url "campaign:campaignx_delete_process" %}" method="post" class="form-horizontal">#}

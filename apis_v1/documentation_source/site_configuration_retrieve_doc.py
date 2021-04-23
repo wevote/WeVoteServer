@@ -40,12 +40,17 @@ def site_configuration_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \
+                   '  "chosen_about_organization_external_url": string,\n' \
                    '  "chosen_hide_we_vote_logo": boolean,\n' \
-                   '  "chosen_prevent_sharing_opinions": boolean,\n' \
                    '  "chosen_logo_url_https": string,\n' \
+                   '  "chosen_prevent_sharing_opinions": boolean,\n' \
+                   '  "chosen_ready_introduction_text": string,\n' \
+                   '  "chosen_ready_introduction_title": string,\n' \
+                   '  "chosen_website_name": string,\n' \
                    '  "features_provided_bitmap": integer,\n' \
                    '  "hostname": string,\n' \
                    '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
+                   '  "reserved_by_we_vote": boolean,\n' \
                    '}'
 
     template_values = {

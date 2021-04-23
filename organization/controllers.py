@@ -2892,6 +2892,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
     chosen_prevent_sharing_opinions = False
     chosen_ready_introduction_text = ''
     chosen_ready_introduction_title = ''
+    chosen_website_name = ''
     features_provided_bitmap = 0
     organization_we_vote_id = ''
     reserved_by_we_vote = False
@@ -2906,6 +2907,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
             'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
             'chosen_ready_introduction_text':   chosen_ready_introduction_text,
             'chosen_ready_introduction_title':  chosen_ready_introduction_title,
+            'chosen_website_name':              chosen_website_name,
             'features_provided_bitmap':         features_provided_bitmap,
             'hostname':                         hostname,
             'organization_we_vote_id':          organization_we_vote_id,
@@ -2931,6 +2933,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
             'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
             'chosen_ready_introduction_text':   chosen_ready_introduction_text,
             'chosen_ready_introduction_title':  chosen_ready_introduction_title,
+            'chosen_website_name':              chosen_website_name,
             'features_provided_bitmap':         features_provided_bitmap,
             'hostname':                         hostname,
             'organization_we_vote_id':          organization_we_vote_id,
@@ -2949,6 +2952,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
         chosen_prevent_sharing_opinions = organization.chosen_prevent_sharing_opinions
         chosen_ready_introduction_text = organization.chosen_ready_introduction_text
         chosen_ready_introduction_title = organization.chosen_ready_introduction_title
+        chosen_website_name = organization.chosen_website_name
         features_provided_bitmap = organization.features_provided_bitmap
         organization_we_vote_id = organization.we_vote_id
     else:
@@ -2972,6 +2976,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
         'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
         'chosen_ready_introduction_text':   chosen_ready_introduction_text,
         'chosen_ready_introduction_title':  chosen_ready_introduction_title,
+        'chosen_website_name':              chosen_website_name,
         'features_provided_bitmap':         features_provided_bitmap,
         'hostname':                         hostname,
         'organization_we_vote_id':          organization_we_vote_id,

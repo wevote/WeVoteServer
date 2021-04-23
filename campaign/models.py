@@ -33,8 +33,10 @@ class CampaignX(models.Model):
     campaign_title = models.CharField(verbose_name="title of campaign", max_length=255, null=False, blank=False)
     # Has not been released for view
     in_draft_mode = models.BooleanField(default=True, db_index=True)
-    # Can be promoted by We Vote on free home page and elsewhere
+    # Campaign owner allows campaignX to be promoted by We Vote on free home page and elsewhere
     is_ok_to_promote_on_we_vote = models.BooleanField(default=True, db_index=True)
+    is_blocked_by_we_vote = models.BooleanField(default=False, db_index=True)
+    is_blocked_by_we_vote_reason = models.TextField(null=True, blank=True)
     is_still_active = models.BooleanField(default=True, db_index=True)
     is_victorious = models.BooleanField(default=False, db_index=True)
     politician_starter_list_serialized = models.TextField(null=True, blank=True)
@@ -686,7 +688,10 @@ class CampaignXManager(models.Manager):
                 new_filter = Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)
                 filters.append(new_filter)
 
-            new_filter = Q(in_draft_mode=False, is_still_active=True, is_ok_to_promote_on_we_vote=True)
+            new_filter = Q(in_draft_mode=False,
+                           is_blocked_by_we_vote=False,
+                           is_still_active=True,
+                           is_ok_to_promote_on_we_vote=True)
             filters.append(new_filter)
 
             # Add the first query
@@ -769,6 +774,7 @@ class CampaignXManager(models.Manager):
             new_filter = \
                 Q(we_vote_id__in=visible_on_this_site_campaignx_we_vote_id_list,
                   in_draft_mode=False,
+                  is_blocked_by_we_vote=False,
                   is_still_active=True)
             filters.append(new_filter)
 
@@ -1360,6 +1366,15 @@ class CampaignXManager(models.Manager):
         campaignx_owner = results['campaignx_owner']
         success = results['success']
         status += results['status']
+
+        if organization_name is None and positive_value_exists(organization_we_vote_id):
+            from organization.models import OrganizationManager
+            organization_manager = OrganizationManager()
+            organization_results = \
+                organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+            if organization_results['organization_found']:
+                organization = organization_results['organization']
+                organization_name = organization.organization_name
 
         if campaignx_owner_found:
             if organization_name is not None \

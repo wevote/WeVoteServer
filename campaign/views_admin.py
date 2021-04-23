@@ -332,6 +332,9 @@ def campaign_edit_process_view(request):
     campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', None)
     campaign_title = request.POST.get('campaign_title', None)
     campaign_description = request.POST.get('campaign_description', None)
+    is_blocked_by_we_vote = request.POST.get('is_blocked_by_we_vote', False)
+    is_blocked_by_we_vote_reason = request.POST.get('is_blocked_by_we_vote_reason', None)
+    is_ok_to_promote_on_we_vote = request.POST.get('is_ok_to_promote_on_we_vote', False)
     politician_starter_list_serialized = request.POST.get('politician_starter_list_serialized', None)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     state_code = request.POST.get('state_code', None)
@@ -358,6 +361,10 @@ def campaign_edit_process_view(request):
                 campaignx.campaign_title = campaign_title
             if campaign_description is not None:
                 campaignx.campaign_description = campaign_description.strip()
+            campaignx.is_blocked_by_we_vote = positive_value_exists(is_blocked_by_we_vote)
+            if is_blocked_by_we_vote_reason is not None:
+                campaignx.is_blocked_by_we_vote_reason = is_blocked_by_we_vote_reason.strip()
+            campaignx.is_ok_to_promote_on_we_vote = positive_value_exists(is_ok_to_promote_on_we_vote)
             if politician_starter_list_serialized is not None:
                 campaignx.politician_starter_list_serialized = politician_starter_list_serialized.strip()
             campaignx.save()

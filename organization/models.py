@@ -2886,6 +2886,8 @@ class Organization(models.Model):
     chosen_subdomain_string = models.CharField(
         verbose_name="client we vote subdomain", max_length=255, null=True, blank=True)
     chosen_subscription_plan = models.PositiveIntegerField(verbose_name="number of the plan client chose", default=0)
+    # Name added to end of HTML title and used other places throughout private-labeled site
+    chosen_website_name = models.CharField(max_length=255, null=True, blank=True)
     # Last date the subscription is paid through ex/ 20200415
     subscription_plan_end_day_text = models.CharField(
         verbose_name="paid through day", max_length=8, null=True, blank=True)

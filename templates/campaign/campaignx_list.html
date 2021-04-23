@@ -142,6 +142,12 @@
                     {{ campaignx.we_vote_id }}&nbsp;
                 </span><br />
                 (<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}">edit</a>)
+                {% if not campaignx.is_ok_to_promote_on_we_vote %}
+                    &nbsp;NO-PROMOTE
+                {% endif %}
+                {% if campaignx.is_blocked_by_we_vote %}
+                    &nbsp;BLOCKED
+                {% endif %}
             </td>
             <td>
             {% for campaignx_owner in campaignx.campaignx_owner_list %}
@@ -157,7 +163,7 @@
                     {{ campaignx.supporters_count|intcomma }}
                 </a>
             {% endif %}</td>
-            <td>{{ campaignx.campaign_description|default_if_none:"" }}</td>
+            <td>{{ campaignx.campaign_description|default_if_none:""|truncatechars:250 }}</td>
         </tr>
     {% endfor %}
     </table>
@@ -176,17 +182,11 @@
     {% endif %}
 
     <p></p>
-{#    <p>#}
-{#        <a href="{% url 'apis_v1:campaignxsSyncOutView' %}?format=json" target="_blank" >Export Campaigns</a>#}
-{#    </p>#}
 {% else %}
     <p>(no campaigns found with current filters)</p>
 {% endif %}
 
     <p></p>
-{#    <p>#}
-{#        <a href="{% url 'campaign:campaignxs_import' %}" >Import Campaigns From Master Server</a>#}
-{#    </p>#}
 
     <script>
         $(function() {
@@ -199,9 +199,6 @@
             $('#campaignx_type_filter_id').change(function() {
                 this.form.submit();
             });
-            {#$('#show_campaignxs_without_email_id').change(function() {#}
-            {#    this.form.submit();#}
-            {# });#}
             $('#show_campaigns_in_draft_id').change(function() {
                 this.form.submit();
             });
