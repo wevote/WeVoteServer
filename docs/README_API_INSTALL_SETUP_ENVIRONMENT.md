@@ -34,8 +34,19 @@ It works as a hierarchy (i.e. INFO picks up all messages logged as INFO, ERROR a
 specify the level assigned to each message. You can change this to info items by changing the LOG_FILE_LEVEL variable 
 in the WeVoteServer/config/environment_variables.json file to "INFO".
 
+## Setup - WeVote Settings - WeVoteServer/wevote_settings/migrations/
 
+Add an empty file named "\_\_init\_\_.py" to "WeVoteServer/wevote_settings/migrations/". You may need to create this directory if it does not exist. 
+   
+    $ cd ~/PythonProjects/WeVoteServer/
+    $ mkdir wevote_settings/migrations/
+    $ touch wevote_settings/migrations/__init__.py
 
+You will need to makemigrations and migrate again.
+
+    $ source ~/WeVoteServer3.5/WeVoteServer/bin/activate
+    (WeVoteServer) $ python manage.py makemigrations
+    (WeVoteServer) $ python manage.py migrate
 
 [NEXT: 5. Set up Database](README_API_INSTALL_SETUP_DATABASE.md)
     
