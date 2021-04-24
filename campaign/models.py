@@ -44,8 +44,12 @@ class CampaignX(models.Model):
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     supporters_count = models.PositiveIntegerField(default=0)
     we_vote_hosted_campaign_photo_original_url = models.TextField(blank=True, null=True)
+    # Full sized desktop
     we_vote_hosted_campaign_photo_large_url = models.TextField(blank=True, null=True)
+    # Maximum size needed for desktop lists
     we_vote_hosted_campaign_photo_medium_url = models.TextField(blank=True, null=True)
+    # Maximum size needed for image grids - Stored as "tiny" image
+    we_vote_hosted_campaign_photo_small_url = models.TextField(blank=True, null=True)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -1089,6 +1093,56 @@ class CampaignXManager(models.Manager):
             simple_list.append(one_path.final_pathname_string)
         return simple_list
 
+    def update_campaignx_owners_with_organization_change(
+            self,
+            organization_we_vote_id,
+            organization_name,
+            we_vote_hosted_profile_image_url_tiny):
+        status = ''
+        success = True
+        campaignx_owner_entries_updated = 0
+
+        try:
+            campaignx_owner_entries_updated = CampaignXOwner.objects \
+                .filter(organization_we_vote_id__iexact=organization_we_vote_id) \
+                .update(organization_name=organization_name,
+                        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_OWNER_UPDATE_WITH_ORGANIZATION_CHANGE: " + str(e) + " "
+            success = False
+
+        results = {
+            'success': success,
+            'status': status,
+            'campaignx_owner_entries_updated': campaignx_owner_entries_updated,
+        }
+        return results
+
+    def update_campaignx_supporters_with_organization_change(
+            self,
+            organization_we_vote_id,
+            supporter_name,
+            we_vote_hosted_profile_image_url_tiny):
+        status = ''
+        success = True
+        campaignx_supporter_entries_updated = 0
+
+        try:
+            campaignx_supporter_entries_updated = CampaignXSupporter.objects \
+                .filter(organization_we_vote_id__iexact=organization_we_vote_id) \
+                .update(supporter_name=supporter_name,
+                        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_SUPPORTER_UPDATE_WITH_ORGANIZATION_CHANGE: " + str(e) + " "
+            success = False
+
+        results = {
+            'success': success,
+            'status': status,
+            'campaignx_supporter_entries_updated': campaignx_supporter_entries_updated,
+        }
+        return results
+
     def update_campaignx_supporters_count(self, campaignx_we_vote_id):
         status = ''
         supporters_count = 0
@@ -1198,9 +1252,26 @@ class CampaignXManager(models.Manager):
                     campaignx_changed = True
                 if 'campaign_photo_changed' in update_values \
                         and positive_value_exists(update_values['campaign_photo_changed']):
-                    campaignx.we_vote_hosted_campaign_photo_large_url = \
-                        update_values['we_vote_hosted_campaign_photo_large_url']
-                    campaignx_changed = True
+                    if 'we_vote_hosted_campaign_photo_original_url' in update_values \
+                            and positive_value_exists(update_values['we_vote_hosted_campaign_photo_original_url']):
+                        campaignx.we_vote_hosted_campaign_photo_original_url = \
+                            update_values['we_vote_hosted_campaign_photo_original_url']
+                        campaignx_changed = True
+                    if 'we_vote_hosted_campaign_photo_large_url' in update_values \
+                            and positive_value_exists(update_values['we_vote_hosted_campaign_photo_large_url']):
+                        campaignx.we_vote_hosted_campaign_photo_large_url = \
+                            update_values['we_vote_hosted_campaign_photo_large_url']
+                        campaignx_changed = True
+                    if 'we_vote_hosted_campaign_photo_medium_url' in update_values \
+                            and positive_value_exists(update_values['we_vote_hosted_campaign_photo_medium_url']):
+                        campaignx.we_vote_hosted_campaign_photo_medium_url = \
+                            update_values['we_vote_hosted_campaign_photo_medium_url']
+                        campaignx_changed = True
+                    if 'we_vote_hosted_campaign_photo_small_url' in update_values \
+                            and positive_value_exists(update_values['we_vote_hosted_campaign_photo_small_url']):
+                        campaignx.we_vote_hosted_campaign_photo_large_url = \
+                            update_values['we_vote_hosted_campaign_photo_small_url']
+                        campaignx_changed = True
                 if 'campaign_title_changed' in update_values \
                         and positive_value_exists(update_values['campaign_title_changed']):
                     campaignx.campaign_title = update_values['campaign_title']
@@ -1282,8 +1353,26 @@ class CampaignXManager(models.Manager):
                 campaignx_we_vote_id = campaignx.we_vote_id
                 if 'campaign_photo_changed' in update_values \
                         and positive_value_exists(update_values['campaign_photo_changed']):
-                    campaignx.we_vote_hosted_campaign_photo_large_url = \
-                        update_values['we_vote_hosted_campaign_photo_large_url']
+                    if 'we_vote_hosted_campaign_photo_original_url' in update_values \
+                            and positive_value_exists(update_values['we_vote_hosted_campaign_photo_original_url']):
+                        campaignx.we_vote_hosted_campaign_photo_original_url = \
+                            update_values['we_vote_hosted_campaign_photo_original_url']
+                        campaignx_changed = True
+                    if 'we_vote_hosted_campaign_photo_large_url' in update_values \
+                            and positive_value_exists(update_values['we_vote_hosted_campaign_photo_large_url']):
+                        campaignx.we_vote_hosted_campaign_photo_large_url = \
+                            update_values['we_vote_hosted_campaign_photo_large_url']
+                        campaignx_changed = True
+                    if 'we_vote_hosted_campaign_photo_medium_url' in update_values \
+                            and positive_value_exists(update_values['we_vote_hosted_campaign_photo_medium_url']):
+                        campaignx.we_vote_hosted_campaign_photo_medium_url = \
+                            update_values['we_vote_hosted_campaign_photo_medium_url']
+                        campaignx_changed = True
+                    if 'we_vote_hosted_campaign_photo_small_url' in update_values \
+                            and positive_value_exists(update_values['we_vote_hosted_campaign_photo_small_url']):
+                        campaignx.we_vote_hosted_campaign_photo_large_url = \
+                            update_values['we_vote_hosted_campaign_photo_small_url']
+                        campaignx_changed = True
                 if 'politician_starter_list_changed' in update_values \
                         and positive_value_exists(update_values['politician_starter_list_changed']):
                     # Save to politician list

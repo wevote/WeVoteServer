@@ -53,6 +53,7 @@ def campaign_list_retrieve_doc_template_values(url_root):
                    '     "voter_we_vote_id": string,\n' \
                    '     "we_vote_hosted_campaign_photo_large_url": string,\n' \
                    '     "we_vote_hosted_campaign_photo_medium_url": string,\n' \
+                   '     "we_vote_hosted_campaign_photo_small_url": string,\n' \
                    '     "campaignx_owner_list": list\n' \
                    '     [\n' \
                    '       "organization_name": string,\n' \

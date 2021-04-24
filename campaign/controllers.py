@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import CampaignX, CampaignXManager, CampaignXOwner
+from .models import CampaignX, CampaignXManager, CampaignXOwner, CampaignXSupporter
 import base64
 from django.db.models import Q
 from django.http import HttpResponse
@@ -19,8 +19,14 @@ from wevote_functions.functions import is_voter_device_id_valid, positive_value_
 logger = wevote_functions.admin.get_logger(__name__)
 
 # Search for in image/controllers.py as well
-CAMPAIGN_PHOTO_LARGE_MAX_WIDTH = 640  # 1600
-CAMPAIGN_PHOTO_LARGE_MAX_HEIGHT = 360  # 900
+CAMPAIGN_PHOTO_ORIGINAL_MAX_WIDTH = 1200
+CAMPAIGN_PHOTO_ORIGINAL_MAX_HEIGHT = 628
+CAMPAIGN_PHOTO_LARGE_MAX_WIDTH = 575
+CAMPAIGN_PHOTO_LARGE_MAX_HEIGHT = 301
+CAMPAIGN_PHOTO_MEDIUM_MAX_WIDTH = 224
+CAMPAIGN_PHOTO_MEDIUM_MAX_HEIGHT = 117
+CAMPAIGN_PHOTO_SMALL_MAX_WIDTH = 140
+CAMPAIGN_PHOTO_SMALL_MAX_HEIGHT = 73
 
 
 def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignListRetrieve
@@ -167,15 +173,20 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
             else:
                 voter_campaignx_supporter_dict = {}
 
-            # Temp
-            if campaignx.we_vote_hosted_campaign_photo_medium_url:
-                we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_medium_url
-            else:
-                we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_large_url
             if hasattr(campaignx, 'visible_on_this_site'):
                 visible_on_this_site = campaignx.visible_on_this_site
             else:
                 visible_on_this_site = True
+
+            # If smaller sizes weren't stored, use large image
+            if campaignx.we_vote_hosted_campaign_photo_medium_url:
+                we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_medium_url
+            else:
+                we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_large_url
+            if campaignx.we_vote_hosted_campaign_photo_small_url:
+                we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_small_url
+            else:
+                we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_large_url
             one_campaignx = {
                 'campaign_description':                     campaignx.campaign_description,
                 'campaignx_owner_list':                     campaignx_owner_list,
@@ -193,6 +204,7 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
                 'voter_signed_in_with_email':               voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url':  campaignx.we_vote_hosted_campaign_photo_large_url,
                 'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,
+                'we_vote_hosted_campaign_photo_small_url':  we_vote_hosted_campaign_photo_small_url,
             }
             campaignx_display_list.append(one_campaignx)
 
@@ -250,6 +262,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
                 'voter_signed_in_with_email':       voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url':  '',
                 'we_vote_hosted_campaign_photo_medium_url': '',
+                'we_vote_hosted_campaign_photo_small_url': '',
             }
             return results
         results = campaignx_manager.retrieve_campaignx_as_owner(
@@ -286,6 +299,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             'voter_signed_in_with_email':       voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
             'we_vote_hosted_campaign_photo_medium_url': '',
+            'we_vote_hosted_campaign_photo_small_url': '',
         }
         return results
     elif not results['campaignx_found']:
@@ -310,6 +324,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             'voter_signed_in_with_email':       voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url':  '',
             'we_vote_hosted_campaign_photo_medium_url': '',
+            'we_vote_hosted_campaign_photo_small_url': '',
         }
         return results
 
@@ -441,11 +456,15 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             }
             latest_campaignx_supporter_endorsement_list.append(one_supporter_dict)
 
-    # Temp
+    # If smaller sizes weren't stored, use large image
     if campaignx.we_vote_hosted_campaign_photo_medium_url:
         we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_medium_url
     else:
         we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_large_url
+    if campaignx.we_vote_hosted_campaign_photo_small_url:
+        we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_small_url
+    else:
+        we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_large_url
     results = {
         'status':                           status,
         'success':                          True,
@@ -467,6 +486,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         'voter_signed_in_with_email':       voter_signed_in_with_email,
         'we_vote_hosted_campaign_photo_large_url':  campaignx.we_vote_hosted_campaign_photo_large_url,
         'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,
+        'we_vote_hosted_campaign_photo_small_url': we_vote_hosted_campaign_photo_small_url,
     }
     return results
 
@@ -519,6 +539,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'voter_signed_in_with_email':   voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
             'we_vote_hosted_campaign_photo_medium_url': '',
+            'we_vote_hosted_campaign_photo_small_url': '',
         }
         return results
 
@@ -544,6 +565,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                 'voter_signed_in_with_email':   voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url': '',
                 'we_vote_hosted_campaign_photo_medium_url': '',
+                'we_vote_hosted_campaign_photo_small_url': '',
             }
             return results
 
@@ -571,12 +593,14 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                 'voter_signed_in_with_email':   voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url': '',
                 'we_vote_hosted_campaign_photo_medium_url': '',
+                'we_vote_hosted_campaign_photo_small_url': '',
             }
             return results
         # Save campaign_photo_from_file_reader and get back we_vote_hosted_campaign_photo_original_url
         we_vote_hosted_campaign_photo_large_url = None
         we_vote_hosted_campaign_photo_medium_url = None
         we_vote_hosted_campaign_photo_original_url = None
+        we_vote_hosted_campaign_photo_small_url = None
         if campaign_photo_changed and campaign_photo_from_file_reader:
             photo_results = campaignx_save_photo_from_file_reader(
                 campaignx_we_vote_id=campaignx_we_vote_id,
@@ -586,11 +610,13 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                 # Now we want to resize to a large version
                 create_resized_image_results = create_resized_images(
                     campaignx_we_vote_id=campaignx_we_vote_id,
-                    we_vote_hosted_campaign_photo_original_url=we_vote_hosted_campaign_photo_original_url)
+                    campaignx_photo_url_https=we_vote_hosted_campaign_photo_original_url)
                 we_vote_hosted_campaign_photo_large_url = \
                     create_resized_image_results['cached_resized_image_url_large']
-                # To be updated
-                we_vote_hosted_campaign_photo_medium_url = we_vote_hosted_campaign_photo_large_url
+                we_vote_hosted_campaign_photo_medium_url = \
+                    create_resized_image_results['cached_resized_image_url_medium']
+                we_vote_hosted_campaign_photo_small_url = \
+                    create_resized_image_results['cached_resized_image_url_tiny']
 
         update_values = {
             'campaign_description':         campaign_description,
@@ -605,6 +631,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'politician_starter_list_serialized':   politician_starter_list_serialized,
             'we_vote_hosted_campaign_photo_large_url': we_vote_hosted_campaign_photo_large_url,
             'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,
+            'we_vote_hosted_campaign_photo_small_url': we_vote_hosted_campaign_photo_small_url,
             'we_vote_hosted_campaign_photo_original_url': we_vote_hosted_campaign_photo_original_url,
         }
         create_results = campaignx_manager.update_or_create_campaignx(
@@ -655,17 +682,19 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                     # Now we want to resize to a large version
                     create_resized_image_results = create_resized_images(
                         campaignx_we_vote_id=campaignx_we_vote_id,
-                        we_vote_hosted_campaign_photo_original_url=campaignx.we_vote_hosted_campaign_photo_original_url)
+                        campaignx_photo_url_https=campaignx.we_vote_hosted_campaign_photo_original_url)
                     campaignx.we_vote_hosted_campaign_photo_large_url = \
                         create_resized_image_results['cached_resized_image_url_large']
-                    # To be updated
                     campaignx.we_vote_hosted_campaign_photo_medium_url = \
-                        campaignx.we_vote_hosted_campaign_photo_large_url
+                        create_resized_image_results['cached_resized_image_url_medium']
+                    campaignx.we_vote_hosted_campaign_photo_small_url = \
+                        create_resized_image_results['cached_resized_image_url_tiny']
                     campaignx.save()
             else:
                 # Deleting image
                 campaignx.we_vote_hosted_campaign_photo_large_url = None
                 campaignx.we_vote_hosted_campaign_photo_medium_url = None
+                campaignx.we_vote_hosted_campaign_photo_small_url = None
                 campaignx.save()
 
     status += create_results['status']
@@ -744,11 +773,20 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                     voter_we_vote_id=voter_we_vote_id)
                 status += owner_results['status']
 
-        # Temp
+        if hasattr(campaignx, 'visible_on_this_site'):
+            visible_on_this_site = campaignx.visible_on_this_site
+        else:
+            visible_on_this_site = True
+
+        # If smaller sizes weren't stored, use large image
         if campaignx.we_vote_hosted_campaign_photo_medium_url:
             we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_medium_url
         else:
             we_vote_hosted_campaign_photo_medium_url = campaignx.we_vote_hosted_campaign_photo_large_url
+        if campaignx.we_vote_hosted_campaign_photo_small_url:
+            we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_small_url
+        else:
+            we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_large_url
         results = {
             'status':                       status,
             'success':                      success,
@@ -763,10 +801,11 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'seo_friendly_path':            campaignx.seo_friendly_path,
             'seo_friendly_path_list':       seo_friendly_path_list,
             'supporters_count':             campaignx.supporters_count,
-            'visible_on_this_site':         campaignx.visible_on_this_site,
+            'visible_on_this_site':         visible_on_this_site,
             'voter_signed_in_with_email':   voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': campaignx.we_vote_hosted_campaign_photo_large_url,
             'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,
+            'we_vote_hosted_campaign_photo_small_url': we_vote_hosted_campaign_photo_small_url,
         }
         return results
     else:
@@ -789,6 +828,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'voter_signed_in_with_email':   voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
             'we_vote_hosted_campaign_photo_medium_url': '',
+            'we_vote_hosted_campaign_photo_small_url': '',
         }
         return results
 
@@ -830,7 +870,7 @@ def campaignx_save_photo_from_file_reader(
             python_image_library_image = Image.open(image_data)
             format_to_cache = python_image_library_image.format
             python_image_library_image.thumbnail(
-                (CAMPAIGN_PHOTO_LARGE_MAX_WIDTH, CAMPAIGN_PHOTO_LARGE_MAX_HEIGHT), Image.ANTIALIAS)
+                (CAMPAIGN_PHOTO_ORIGINAL_MAX_WIDTH, CAMPAIGN_PHOTO_ORIGINAL_MAX_HEIGHT), Image.ANTIALIAS)
             python_image_library_image.format = format_to_cache
             image_data_found = True
         except Exception as e:
@@ -1104,6 +1144,7 @@ def move_campaignx_to_another_voter(
     success = True
     campaignx_entries_moved = 0
     campaignx_owner_entries_moved = 0
+    campaignx_supporter_entries_moved = 0
 
     if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
         status += "MOVE_CAMPAIGNX-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID "
@@ -1141,13 +1182,22 @@ def move_campaignx_to_another_voter(
         status += "FAILED-CAMPAIGNX_UPDATE: " + str(e) + " "
 
     # ######################
-    # Move based on voter_we_vote_id
+    # Move owners based on voter_we_vote_id
     try:
         campaignx_owner_entries_moved += CampaignXOwner.objects\
             .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
             .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-CAMPAIGNX_OWNER_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
+
+    # ######################
+    # Move supporters based on voter_we_vote_id
+    try:
+        campaignx_supporter_entries_moved += CampaignXSupporter.objects\
+            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .update(voter_we_vote_id=to_voter_we_vote_id)
+    except Exception as e:
+        status += "FAILED-CAMPAIGNX_SUPPORTER_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
 
     # #############################################
     # Move based on organization_we_vote_id
@@ -1159,6 +1209,13 @@ def move_campaignx_to_another_voter(
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
+        try:
+            campaignx_supporter_entries_moved += CampaignXSupporter.objects \
+                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(supporter_name=to_organization_name,
+                        organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
     else:
         try:
             campaignx_owner_entries_moved += CampaignXOwner.objects \
@@ -1166,6 +1223,12 @@ def move_campaignx_to_another_voter(
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+        try:
+            campaignx_supporter_entries_moved += CampaignXSupporter.objects \
+                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
 
     results = {
         'status':                           status,
