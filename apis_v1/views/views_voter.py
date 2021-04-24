@@ -2273,6 +2273,21 @@ def voter_update_view(request):  # voterUpdate
                         # TODO This can be made much more efficient
                         position_results = update_position_entered_details_from_organization(organization)
                         status += position_results['status']
+                    if positive_value_exists(organization_name_changed) and not not_real_name:
+                        from campaign.models import CampaignXManager
+                        campaignx_manager = CampaignXManager()
+                        owner_results = campaignx_manager.update_campaignx_owners_with_organization_change(
+                            organization_we_vote_id=organization.we_vote_id,
+                            organization_name=organization.organization_name,
+                            we_vote_hosted_profile_image_url_tiny=organization.we_vote_hosted_profile_image_url_tiny,
+                        )
+                        status += owner_results['status']
+                        supporter_results = campaignx_manager.update_campaignx_supporters_with_organization_change(
+                            organization_we_vote_id=organization.we_vote_id,
+                            supporter_name=organization.organization_name,
+                            we_vote_hosted_profile_image_url_tiny=organization.we_vote_hosted_profile_image_url_tiny,
+                        )
+                        status += supporter_results['status']
                 except Exception as e:
                     status += "COULD_NOT_SAVE_ORGANIZATION: " + str(e) + " "
                     pass

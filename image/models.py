@@ -84,7 +84,8 @@ class WeVoteImage(models.Model):
     issue_image_url_https = models.URLField(verbose_name='url of issue image', blank=True, null=True)
     ballotpedia_profile_image_url = models.TextField(
         verbose_name='profile image from ballotpedia', blank=True, null=True)
-    we_vote_hosted_campaign_photo_original_url = models.URLField(blank=True, null=True)
+    # we_vote_hosted_campaign_photo_original_url = models.URLField(blank=True, null=True)
+    campaignx_photo_url_https = models.TextField(blank=True, null=True)
     chosen_favicon_image_url_https = models.URLField(verbose_name='org favicon image', blank=True, null=True)
     chosen_logo_image_url_https = models.URLField(verbose_name='org logo image', blank=True, null=True)
     chosen_social_share_master_image_url_https = models.URLField(
@@ -128,6 +129,8 @@ class WeVoteImage(models.Model):
     kind_of_image_tiny = models.BooleanField(verbose_name="is image size tiny", default=False)
 
     def display_kind_of_image(self):
+        if self.kind_of_image_campaignx_photo:
+            return "campaignx_photo"
         if self.kind_of_image_chosen_favicon:
             return "chosen_favicon"
         if self.kind_of_image_chosen_logo:
@@ -558,9 +561,7 @@ class WeVoteImageManager(models.Manager):
             image_height='',
             image_url_https='',
             same_day_image_version=0,
-            image_url_valid=False,
-            kind_of_image_original=False,
-            kind_of_image_large=False):
+            image_url_valid=False):
         """
         Save campaignx information to WeVoteImage
         :param we_vote_image:
@@ -569,8 +570,6 @@ class WeVoteImageManager(models.Manager):
         :param image_url_https:
         :param same_day_image_version:
         :param image_url_valid:
-        :param kind_of_image_original:
-        :param kind_of_image_large:
         :return:
         """
         try:
@@ -578,10 +577,7 @@ class WeVoteImageManager(models.Manager):
             we_vote_image.image_height = image_height
             we_vote_image.source_image_still_valid = image_url_valid
             we_vote_image.same_day_image_version = same_day_image_version
-            if positive_value_exists(kind_of_image_original):
-                we_vote_image.we_vote_hosted_campaign_photo_original_url = image_url_https
-            elif positive_value_exists(kind_of_image_large):
-                we_vote_image.we_vote_hosted_campaign_photo_large_url = image_url_https
+            we_vote_image.campaignx_photo_url_https = image_url_https
             we_vote_image.save()
             success = True
             status = "SAVED_WE_VOTE_IMAGE_CAMPAIGNX_INFO "
@@ -895,7 +891,7 @@ class WeVoteImageManager(models.Manager):
                 we_vote_image_list = we_vote_image_list.exclude(ballotpedia_profile_image_url=image_url_https)
             if kind_of_image_campaignx_photo:
                 we_vote_image_list = we_vote_image_list.exclude(
-                    we_vote_hosted_campaign_photo_original_url=image_url_https)
+                    campaignx_photo_url_https=image_url_https)
             if kind_of_image_linkedin_profile:
                 we_vote_image_list = we_vote_image_list.exclude(linkedin_profile_image_url=image_url_https)
             if kind_of_image_wikipedia_profile:
@@ -1080,7 +1076,7 @@ class WeVoteImageManager(models.Manager):
             vote_smart_image_url_https=None,
             issue_image_url_https=None,
             ballotpedia_profile_image_url=None,
-            we_vote_hosted_campaign_photo_original_url=None,
+            campaignx_photo_url_https=None,
             linkedin_profile_image_url=None,
             wikipedia_profile_image_url=None,
             other_source_image_url=None,
@@ -1104,7 +1100,7 @@ class WeVoteImageManager(models.Manager):
         :param vote_smart_image_url_https:
         :param issue_image_url_https:
         :param ballotpedia_profile_image_url:
-        :param we_vote_hosted_campaign_photo_original_url:
+        :param campaignx_photo_url_https:
         :param linkedin_profile_image_url:
         :param wikipedia_profile_image_url:
         :param other_source_image_url:
@@ -1135,7 +1131,7 @@ class WeVoteImageManager(models.Manager):
                 vote_smart_image_url_https__iexact=vote_smart_image_url_https,
                 issue_image_url_https__iexact=issue_image_url_https,
                 ballotpedia_profile_image_url__iexact=ballotpedia_profile_image_url,
-                we_vote_hosted_campaign_photo_original_url__iexact=we_vote_hosted_campaign_photo_original_url,
+                campaignx_photo_url_https__iexact=campaignx_photo_url_https,
                 linkedin_profile_image_url__iexact=linkedin_profile_image_url,
                 wikipedia_profile_image_url__iexact=wikipedia_profile_image_url,
                 other_source_image_url__iexact=other_source_image_url,
@@ -1180,7 +1176,7 @@ class WeVoteImageManager(models.Manager):
             vote_smart_image_url_https=None,
             issue_image_url_https=None,
             ballotpedia_profile_image_url=None,
-            we_vote_hosted_campaign_photo_original_url=None,
+            campaignx_photo_url_https=None,
             linkedin_profile_image_url=None,
             wikipedia_profile_image_url=None,
             other_source_image_url=None):
@@ -1200,7 +1196,7 @@ class WeVoteImageManager(models.Manager):
         :param vote_smart_image_url_https:
         :param issue_image_url_https:
         :param ballotpedia_profile_image_url:
-        :param we_vote_hosted_campaign_photo_original_url:
+        :param campaignx_photo_url_https:
         :param linkedin_profile_image_url:
         :param wikipedia_profile_image_url:
         :param other_source_image_url:
@@ -1225,7 +1221,7 @@ class WeVoteImageManager(models.Manager):
                 vote_smart_image_url_https__iexact=vote_smart_image_url_https,
                 issue_image_url_https__iexact=issue_image_url_https,
                 ballotpedia_profile_image_url__iexact=ballotpedia_profile_image_url,
-                we_vote_hosted_campaign_photo_original_url__iexact=we_vote_hosted_campaign_photo_original_url,
+                campaignx_photo_url_https__iexact=campaignx_photo_url_https,
                 linkedin_profile_image_url__iexact=linkedin_profile_image_url,
                 wikipedia_profile_image_url__iexact=wikipedia_profile_image_url,
                 other_source_image_url__iexact=other_source_image_url,

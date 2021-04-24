@@ -491,7 +491,8 @@ def issue_edit_process_view(request):
                     kind_of_image_large=True)
                 if cache_large_resized_image_results['success']:
                     cached_resized_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                        issue_we_vote_id=issue_we_vote_id, issue_image_url_https=master_we_vote_hosted_image_url,
+                        issue_we_vote_id=issue_we_vote_id,
+                        issue_image_url_https=master_we_vote_hosted_image_url,
                         kind_of_image_large=True)
                     if cached_resized_image_results['success']:
                         we_vote_hosted_image_url_large = \
@@ -507,7 +508,8 @@ def issue_edit_process_view(request):
                     kind_of_image_medium=True)
                 if cache_medium_resized_image_results['success']:
                     cached_resized_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                        issue_we_vote_id=issue_we_vote_id, issue_image_url_https=master_we_vote_hosted_image_url,
+                        issue_we_vote_id=issue_we_vote_id,
+                        issue_image_url_https=master_we_vote_hosted_image_url,
                         kind_of_image_medium=True)
                     if cached_resized_image_results['success']:
                         we_vote_hosted_image_url_medium = \
@@ -523,7 +525,8 @@ def issue_edit_process_view(request):
                     kind_of_image_tiny=True)
                 if cache_tiny_resized_image_results['success']:
                     cached_resized_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                        issue_we_vote_id=issue_we_vote_id, issue_image_url_https=master_we_vote_hosted_image_url,
+                        issue_we_vote_id=issue_we_vote_id,
+                        issue_image_url_https=master_we_vote_hosted_image_url,
                         kind_of_image_tiny=True)
                     if cached_resized_image_results['success']:
                         we_vote_hosted_image_url_tiny = \

@@ -58,8 +58,18 @@ ALL_KIND_OF_IMAGE = ['kind_of_image_twitter_profile', 'kind_of_image_twitter_bac
                      'kind_of_image_facebook_background', 'kind_of_image_maplight', 'kind_of_image_vote_smart']
 
 # Search for in campaign/controllers.py as well
-CAMPAIGN_PHOTO_LARGE_MAX_WIDTH = 640  # 1600
-CAMPAIGN_PHOTO_LARGE_MAX_HEIGHT = 360  # 900
+# Facebook shared image: 1200 x 630
+# Facebook shared link: 1200 x 628
+# Tweet with image in shared link: 1200 x 628
+# Tweet with single image: 1200 x 675 (Twitter recommended aspect ratio is 16:9)
+CAMPAIGN_PHOTO_ORIGINAL_MAX_WIDTH = 1200
+CAMPAIGN_PHOTO_ORIGINAL_MAX_HEIGHT = 628
+CAMPAIGN_PHOTO_LARGE_MAX_WIDTH = 575
+CAMPAIGN_PHOTO_LARGE_MAX_HEIGHT = 301
+CAMPAIGN_PHOTO_MEDIUM_MAX_WIDTH = 224
+CAMPAIGN_PHOTO_MEDIUM_MAX_HEIGHT = 117
+CAMPAIGN_PHOTO_SMALL_MAX_WIDTH = 140
+CAMPAIGN_PHOTO_SMALL_MAX_HEIGHT = 73
 PROFILE_IMAGE_LARGE_WIDTH = convert_to_int(get_environment_variable("PROFILE_IMAGE_LARGE_WIDTH"))
 PROFILE_IMAGE_LARGE_HEIGHT = convert_to_int(get_environment_variable("PROFILE_IMAGE_LARGE_HEIGHT"))
 PROFILE_IMAGE_MEDIUM_WIDTH = convert_to_int(get_environment_variable("PROFILE_IMAGE_MEDIUM_WIDTH"))
@@ -787,6 +797,10 @@ def cache_image_locally(
                                                        we_vote_image.date_image_saved.day,
                                                        year=we_vote_image.date_image_saved.year)
         # ex twitter_profile_image_master-2017210_1_48x48.png
+        analyze_image_url_results = analyze_source_images_results['analyze_image_url_results']
+        image_width = analyze_image_url_results['image_width'] if 'image_width' in analyze_image_url_results else 0
+        image_height = analyze_image_url_results['image_height'] if 'image_height' in analyze_image_url_results else 0
+        image_format = analyze_image_url_results['image_format'] if 'image_format' in analyze_image_url_results else ''
         we_vote_image_file_name = \
             "{image_type}_{master_image}-{date_image_saved}_{counter}_" \
             "{image_width}x{image_height}.{image_format}" \
@@ -795,12 +809,9 @@ def cache_image_locally(
                 master_image=MASTER_IMAGE,
                 date_image_saved=date_image_saved,
                 counter=str(same_day_image_version),
-                image_width=str(analyze_source_images_results['analyze_image_url_results']
-                                ['image_width']),
-                image_height=str(analyze_source_images_results['analyze_image_url_results']
-                                 ['image_height']),
-                image_format=str(analyze_source_images_results['analyze_image_url_results']
-                                 ['image_format']))
+                image_width=str(image_width),
+                image_height=str(image_height),
+                image_format=str(image_format))
 
         if voter_we_vote_id:
             we_vote_image_file_location = voter_we_vote_id + "/" + we_vote_image_file_name
@@ -1783,9 +1794,7 @@ def cache_campaignx_image(
         image_height=analyze_source_images_results['image_height'],
         image_url_https=we_vote_image.we_vote_image_url,
         same_day_image_version=same_day_image_version,
-        image_url_valid=image_url_valid,
-        kind_of_image_original=kind_of_image_original,
-        kind_of_image_large=kind_of_image_large)
+        image_url_valid=image_url_valid)
     status += " " + save_source_info_results['status']
     if not save_source_info_results['success']:
         error_results = {
@@ -1925,7 +1934,7 @@ def create_resized_image_if_not_created(we_vote_image):
     elif we_vote_image.kind_of_image_ballotpedia_profile:
         image_url_https = we_vote_image.ballotpedia_profile_image_url
     elif we_vote_image.kind_of_image_campaignx_photo:
-        image_url_https = we_vote_image.we_vote_hosted_campaign_photo_original_url
+        image_url_https = we_vote_image.campaignx_photo_url_https
     elif we_vote_image.kind_of_image_linkedin_profile:
         image_url_https = we_vote_image.linkedin_profile_image_url
     elif we_vote_image.kind_of_image_wikipedia_profile:
@@ -1986,13 +1995,13 @@ def create_resized_image_if_not_created(we_vote_image):
             image_offset_x=image_offset_x,
             image_offset_y=image_offset_y,
             other_source=other_source)
-        create_resized_image_results['cached_large_image'] = \
-            cache_resized_image_locally_results['success']
+        create_resized_image_results['cached_large_image'] = cache_resized_image_locally_results['success']
     else:
         create_resized_image_results['cached_large_image'] = IMAGE_ALREADY_CACHED
 
     # Only some of our kinds of images have medium or tiny sizes
-    if we_vote_image.kind_of_image_twitter_profile or \
+    if we_vote_image.kind_of_image_campaignx_photo or \
+            we_vote_image.kind_of_image_twitter_profile or \
             we_vote_image.kind_of_image_facebook_profile or \
             we_vote_image.kind_of_image_maplight or \
             we_vote_image.kind_of_image_vote_smart or \
@@ -2005,6 +2014,7 @@ def create_resized_image_if_not_created(we_vote_image):
             cache_resized_image_locally_results = cache_resized_image_locally(
                 google_civic_election_id, image_url_https, we_vote_parent_image_id,
                 voter_we_vote_id=voter_we_vote_id,
+                campaignx_we_vote_id=campaignx_we_vote_id,
                 candidate_we_vote_id=candidate_we_vote_id,
                 organization_we_vote_id=organization_we_vote_id,
                 twitter_id=twitter_id,
@@ -2020,6 +2030,7 @@ def create_resized_image_if_not_created(we_vote_image):
                 kind_of_image_maplight=kind_of_image_maplight,
                 kind_of_image_vote_smart=kind_of_image_vote_smart,
                 kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+                kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
                 kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
                 kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
                 kind_of_image_other_source=kind_of_image_other_source,
@@ -2027,8 +2038,7 @@ def create_resized_image_if_not_created(we_vote_image):
                 image_offset_x=image_offset_x,
                 image_offset_y=image_offset_y,
                 other_source=other_source)
-            create_resized_image_results['cached_medium_image'] = \
-                cache_resized_image_locally_results['success']
+            create_resized_image_results['cached_medium_image'] = cache_resized_image_locally_results['success']
         else:
             create_resized_image_results['cached_medium_image'] = IMAGE_ALREADY_CACHED
 
@@ -2037,6 +2047,7 @@ def create_resized_image_if_not_created(we_vote_image):
             cache_resized_image_locally_results = cache_resized_image_locally(
                 google_civic_election_id, image_url_https, we_vote_parent_image_id,
                 voter_we_vote_id=voter_we_vote_id,
+                campaignx_we_vote_id=campaignx_we_vote_id,
                 candidate_we_vote_id=candidate_we_vote_id,
                 organization_we_vote_id=organization_we_vote_id,
                 twitter_id=twitter_id,
@@ -2052,6 +2063,7 @@ def create_resized_image_if_not_created(we_vote_image):
                 kind_of_image_maplight=kind_of_image_maplight,
                 kind_of_image_vote_smart=kind_of_image_vote_smart,
                 kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+                kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
                 kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
                 kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
                 kind_of_image_other_source=kind_of_image_other_source,
@@ -2059,8 +2071,7 @@ def create_resized_image_if_not_created(we_vote_image):
                 image_offset_x=image_offset_x,
                 image_offset_y=image_offset_y,
                 other_source=other_source)
-            create_resized_image_results['cached_tiny_image'] = \
-                cache_resized_image_locally_results['success']
+            create_resized_image_results['cached_tiny_image'] = cache_resized_image_locally_results['success']
         else:
             create_resized_image_results['cached_tiny_image'] = IMAGE_ALREADY_CACHED
     return create_resized_image_results
@@ -2150,7 +2161,7 @@ def check_resized_version_exists(
     elif kind_of_image_campaignx_photo:
         we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
             campaignx_we_vote_id,
-            we_vote_hosted_campaign_photo_original_url=image_url_https)
+            campaignx_photo_url_https=image_url_https)
     elif kind_of_image_linkedin_profile:
         we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
             voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
@@ -2318,6 +2329,16 @@ def cache_resized_image_locally(
         elif kind_of_image_tiny:
             image_width = ISSUES_IMAGE_TINY_WIDTH
             image_height = ISSUES_IMAGE_TINY_HEIGHT
+    elif kind_of_image_campaignx_photo:
+        if kind_of_image_large:
+            image_width = CAMPAIGN_PHOTO_LARGE_MAX_WIDTH
+            image_height = CAMPAIGN_PHOTO_LARGE_MAX_HEIGHT
+        elif kind_of_image_medium:
+            image_width = CAMPAIGN_PHOTO_MEDIUM_MAX_WIDTH
+            image_height = CAMPAIGN_PHOTO_MEDIUM_MAX_HEIGHT
+        elif kind_of_image_tiny:
+            image_width = CAMPAIGN_PHOTO_SMALL_MAX_WIDTH
+            image_height = CAMPAIGN_PHOTO_SMALL_MAX_HEIGHT
     else:
         if kind_of_image_large:
             image_width = PROFILE_IMAGE_LARGE_WIDTH
@@ -2351,8 +2372,6 @@ def cache_resized_image_locally(
         image_type = BALLOTPEDIA_IMAGE_NAME
     elif kind_of_image_campaignx_photo:
         image_type = CAMPAIGNX_PHOTO_IMAGE_NAME
-        image_width = CAMPAIGN_PHOTO_LARGE_MAX_WIDTH
-        image_height = CAMPAIGN_PHOTO_LARGE_MAX_HEIGHT
     elif kind_of_image_linkedin_profile:
         image_type = LINKEDIN_IMAGE_NAME
     elif kind_of_image_wikipedia_profile:
@@ -2432,7 +2451,6 @@ def cache_resized_image_locally(
             image_height=image_height,
             image_url_https=image_url_https,
             same_day_image_version=same_day_image_version,
-            kind_of_image_original=True,
         )
     elif kind_of_image_linkedin_profile:
         # image url is valid so store source image of linkedin to WeVoteImage
@@ -2520,8 +2538,8 @@ def cache_resized_image_locally(
             return error_results
 
         status += " RESIZED_IMAGE_CREATED "
-        image_stored_to_aws = we_vote_image_manager.store_image_to_aws(we_vote_image_file_name,
-                                                                       we_vote_image_file_location, image_format)
+        image_stored_to_aws = we_vote_image_manager.store_image_to_aws(
+            we_vote_image_file_name, we_vote_image_file_location, image_format)
         if not image_stored_to_aws:
             error_results = {
                 'success':                      success,
@@ -2613,7 +2631,7 @@ def create_resized_images(
         maplight_image_url_https=None,
         vote_smart_image_url_https=None,
         ballotpedia_profile_image_url=None,
-        we_vote_hosted_campaign_photo_original_url=None,
+        campaignx_photo_url_https=None,
         linkedin_profile_image_url=None,
         wikipedia_profile_image_url=None,
         other_source_image_url=None):
@@ -2631,7 +2649,7 @@ def create_resized_images(
     :param maplight_image_url_https:
     :param vote_smart_image_url_https:
     :param ballotpedia_profile_image_url:
-    :param we_vote_hosted_campaign_photo_original_url:
+    :param campaignx_photo_url_https:
     :param linkedin_profile_image_url:
     :param wikipedia_profile_image_url:
     :param other_source_image_url:
@@ -2657,7 +2675,7 @@ def create_resized_images(
         maplight_image_url_https=maplight_image_url_https,
         vote_smart_image_url_https=vote_smart_image_url_https,
         ballotpedia_profile_image_url=ballotpedia_profile_image_url,
-        we_vote_hosted_campaign_photo_original_url=we_vote_hosted_campaign_photo_original_url,
+        campaignx_photo_url_https=campaignx_photo_url_https,
         linkedin_profile_image_url=linkedin_profile_image_url,
         wikipedia_profile_image_url=wikipedia_profile_image_url,
         other_source_image_url=other_source_image_url,
@@ -2683,7 +2701,7 @@ def create_resized_images(
                 maplight_image_url_https=maplight_image_url_https,
                 vote_smart_image_url_https=vote_smart_image_url_https,
                 ballotpedia_profile_image_url=ballotpedia_profile_image_url,
-                we_vote_hosted_campaign_photo_original_url=we_vote_hosted_campaign_photo_original_url,
+                campaignx_photo_url_https=campaignx_photo_url_https,
                 linkedin_profile_image_url=linkedin_profile_image_url,
                 wikipedia_profile_image_url=wikipedia_profile_image_url,
                 other_source_image_url=other_source_image_url,
@@ -2706,6 +2724,7 @@ def create_resized_images(
                 maplight_image_url_https=maplight_image_url_https,
                 vote_smart_image_url_https=vote_smart_image_url_https,
                 ballotpedia_profile_image_url=ballotpedia_profile_image_url,
+                campaignx_photo_url_https=campaignx_photo_url_https,
                 linkedin_profile_image_url=linkedin_profile_image_url,
                 wikipedia_profile_image_url=wikipedia_profile_image_url,
                 other_source_image_url=other_source_image_url,
@@ -2728,6 +2747,7 @@ def create_resized_images(
                 maplight_image_url_https=maplight_image_url_https,
                 vote_smart_image_url_https=vote_smart_image_url_https,
                 ballotpedia_profile_image_url=ballotpedia_profile_image_url,
+                campaignx_photo_url_https=campaignx_photo_url_https,
                 linkedin_profile_image_url=linkedin_profile_image_url,
                 wikipedia_profile_image_url=wikipedia_profile_image_url, other_source_image_url=other_source_image_url,
                 kind_of_image_tiny=True)
