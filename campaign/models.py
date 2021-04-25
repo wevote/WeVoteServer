@@ -880,11 +880,20 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def retrieve_campaignx_owner_list(self, campaignx_we_vote_id='', organization_we_vote_id='', viewer_is_owner=False):
+    def retrieve_campaignx_owner_list(
+            self,
+            campaignx_we_vote_id='',
+            organization_we_vote_id='',
+            voter_we_vote_id='',
+            viewer_is_owner=False,
+            read_only=False):
         campaignx_owner_list_found = False
         campaignx_owner_list = []
         try:
-            campaignx_owner_query = CampaignXOwner.objects.all()
+            if positive_value_exists(read_only):
+                campaignx_owner_query = CampaignXOwner.objects.using('readonly').all()
+            else:
+                campaignx_owner_query = CampaignXOwner.objects.all()
             if not positive_value_exists(viewer_is_owner):
                 # If not already an owner, limit to owners who are visible to public
                 campaignx_owner_query = campaignx_owner_query.filter(visible_to_public=True)
@@ -892,6 +901,8 @@ class CampaignXManager(models.Manager):
                 campaignx_owner_query = campaignx_owner_query.filter(campaignx_we_vote_id=campaignx_we_vote_id)
             if positive_value_exists(organization_we_vote_id):
                 campaignx_owner_query = campaignx_owner_query.filter(organization_we_vote_id=organization_we_vote_id)
+            if positive_value_exists(voter_we_vote_id):
+                campaignx_owner_query = campaignx_owner_query.filter(voter_we_vote_id=voter_we_vote_id)
             campaignx_owner_list = list(campaignx_owner_query)
             if len(campaignx_owner_list):
                 campaignx_owner_list_found = True
@@ -1028,11 +1039,12 @@ class CampaignXManager(models.Manager):
     def retrieve_campaignx_supporter_list(
             self,
             campaignx_we_vote_id=None,
+            voter_we_vote_id=None,
             require_supporter_endorsement=False,
+            require_visible_to_public=True,
             limit=10,
             read_only=True):
         supporter_list = []
-        supporter_list_found = False
         success = True
         status = ""
 
@@ -1042,8 +1054,12 @@ class CampaignXManager(models.Manager):
             else:
                 campaignx_queryset = CampaignXSupporter.objects.all()
 
-            campaignx_queryset = campaignx_queryset.filter(campaignx_we_vote_id=campaignx_we_vote_id)
-            campaignx_queryset = campaignx_queryset.filter(visible_to_public=True)
+            if positive_value_exists(campaignx_we_vote_id):
+                campaignx_queryset = campaignx_queryset.filter(campaignx_we_vote_id=campaignx_we_vote_id)
+            else:
+                campaignx_queryset = campaignx_queryset.filter(voter_we_vote_id=voter_we_vote_id)
+            if positive_value_exists(require_visible_to_public):
+                campaignx_queryset = campaignx_queryset.filter(visible_to_public=True)
             if positive_value_exists(require_supporter_endorsement):
                 campaignx_queryset = campaignx_queryset.exclude(
                     Q(supporter_endorsement__isnull=True) |
@@ -1051,7 +1067,10 @@ class CampaignXManager(models.Manager):
                 )
             campaignx_queryset = campaignx_queryset.order_by('-date_supported')
 
-            supporter_list = campaignx_queryset[:limit]
+            if limit > 0:
+                supporter_list = campaignx_queryset[:limit]
+            else:
+                supporter_list = list(campaignx_queryset)
             supporter_list_found = positive_value_exists(len(supporter_list))
             status += "RETRIEVE_CAMPAIGNX_SUPPORTER_LIST_SUCCEEDED "
         except Exception as e:

@@ -39,6 +39,7 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
     campaignx_display_list = []
     status = ""
     promoted_campaignx_we_vote_ids = []
+    voter_owned_campaignx_we_vote_ids = []
     voter_started_campaignx_we_vote_ids = []
     voter_supported_campaignx_we_vote_ids = []
 
@@ -208,12 +209,30 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
             }
             campaignx_display_list.append(one_campaignx)
 
+        voter_owned_list = campaignx_manager.retrieve_campaignx_owner_list(
+            voter_we_vote_id=voter_we_vote_id,
+            viewer_is_owner=True,
+            read_only=True)
+        for one_owner in voter_owned_list:
+            voter_owned_campaignx_we_vote_ids.append(one_owner.campaignx_we_vote_id)
+
+        supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
+            voter_we_vote_id=voter_we_vote_id,
+            limit=0,
+            require_visible_to_public=False,
+            read_only=True)
+        if supporter_list_results['supporter_list_found']:
+            supporter_list = supporter_list_results['supporter_list']
+            for one_supporter in supporter_list:
+                voter_supported_campaignx_we_vote_ids.append(one_supporter.campaignx_we_vote_id)
+
     json_data = {
         'status':                                   status,
         'success':                                  success,
         'campaignx_list':                           campaignx_display_list,
         'campaignx_list_found':                     campaignx_list_found,
         'promoted_campaignx_we_vote_ids':           promoted_campaignx_we_vote_ids,
+        'voter_owned_campaignx_we_vote_ids':        voter_owned_campaignx_we_vote_ids,
         'voter_started_campaignx_we_vote_ids':      voter_started_campaignx_we_vote_ids,
         'voter_supported_campaignx_we_vote_ids':    voter_supported_campaignx_we_vote_ids,
     }
