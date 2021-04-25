@@ -52,7 +52,8 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
             'success': False,
             'campaignx_list': [],
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        # return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
     voter = voter_results['voter']
     voter_signed_in_with_email = voter.signed_in_with_email()
     voter_we_vote_id = voter.we_vote_id
