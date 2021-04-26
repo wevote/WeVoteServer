@@ -894,9 +894,9 @@ class CampaignXManager(models.Manager):
                 campaignx_owner_query = CampaignXOwner.objects.using('readonly').all()
             else:
                 campaignx_owner_query = CampaignXOwner.objects.all()
-            if not positive_value_exists(viewer_is_owner):
-                # If not already an owner, limit to owners who are visible to public
-                campaignx_owner_query = campaignx_owner_query.filter(visible_to_public=True)
+            # if not positive_value_exists(viewer_is_owner):
+            #     # If not already an owner, limit to owners who are visible to public
+            #     campaignx_owner_query = campaignx_owner_query.filter(visible_to_public=True)
             if positive_value_exists(campaignx_we_vote_id):
                 campaignx_owner_query = campaignx_owner_query.filter(campaignx_we_vote_id=campaignx_we_vote_id)
             if positive_value_exists(organization_we_vote_id):

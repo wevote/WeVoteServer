@@ -1465,6 +1465,9 @@ def organization_edit_listed_campaigns_process_view(request):
 
     campaignx_listed_by_organization_campaignx_we_vote_id = \
         request.POST.get('campaignx_listed_by_organization_campaignx_we_vote_id', None)
+    if positive_value_exists(campaignx_listed_by_organization_campaignx_we_vote_id):
+        campaignx_listed_by_organization_campaignx_we_vote_id = \
+            campaignx_listed_by_organization_campaignx_we_vote_id.strip()
     campaignx_listed_by_organization_visible_to_public = \
         positive_value_exists(request.POST.get('campaignx_listed_by_organization_visible_to_public', False))
     google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
@@ -1474,36 +1477,39 @@ def organization_edit_listed_campaigns_process_view(request):
 
     # Create new CampaignXListedByOrganization
     if positive_value_exists(campaignx_listed_by_organization_campaignx_we_vote_id):
-        do_not_create = False
-        link_already_exists = False
-        status = ""
-        # Does it already exist?
-        try:
-            CampaignXListedByOrganization.objects.get(
-                campaignx_we_vote_id=campaignx_listed_by_organization_campaignx_we_vote_id,
-                site_owner_organization_we_vote_id=organization_we_vote_id)
-            link_already_exists = True
-        except CampaignXListedByOrganization.DoesNotExist:
+        if 'camp' not in campaignx_listed_by_organization_campaignx_we_vote_id:
+            messages.add_message(request, messages.ERROR, 'Valid CampaignXWeVoteId missing.')
+        else:
+            do_not_create = False
             link_already_exists = False
-        except Exception as e:
-            do_not_create = True
-            messages.add_message(request, messages.ERROR, 'Link already exists.')
-            status += "ADD_LISTED_CAMPAIGN_ALREADY_EXISTS " + str(e) + " "
-
-        if not do_not_create and not link_already_exists:
-            # Now create new link
+            status = ""
+            # Does it already exist?
             try:
-                # Create the Campaign
-                CampaignXListedByOrganization.objects.create(
+                CampaignXListedByOrganization.objects.get(
                     campaignx_we_vote_id=campaignx_listed_by_organization_campaignx_we_vote_id,
-                    site_owner_organization_we_vote_id=organization_we_vote_id,
-                    visible_to_public=campaignx_listed_by_organization_visible_to_public)
-
-                messages.add_message(request, messages.INFO, 'New CampaignXListedByOrganization created.')
+                    site_owner_organization_we_vote_id=organization_we_vote_id)
+                link_already_exists = True
+            except CampaignXListedByOrganization.DoesNotExist:
+                link_already_exists = False
             except Exception as e:
-                messages.add_message(request, messages.ERROR,
-                                     'Could not create CampaignXListedByOrganization.'
-                                     ' {error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+                do_not_create = True
+                messages.add_message(request, messages.ERROR, 'Link already exists.')
+                status += "ADD_LISTED_CAMPAIGN_ALREADY_EXISTS " + str(e) + " "
+
+            if not do_not_create and not link_already_exists:
+                # Now create new link
+                try:
+                    # Create the Campaign
+                    CampaignXListedByOrganization.objects.create(
+                        campaignx_we_vote_id=campaignx_listed_by_organization_campaignx_we_vote_id,
+                        site_owner_organization_we_vote_id=organization_we_vote_id,
+                        visible_to_public=campaignx_listed_by_organization_visible_to_public)
+
+                    messages.add_message(request, messages.INFO, 'New CampaignXListedByOrganization created.')
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR,
+                                         'Could not create CampaignXListedByOrganization.'
+                                         ' {error} [type: {error_type}]'.format(error=e, error_type=type(e)))
 
     # ##################################
     # Deleting or Adding a new CampaignXListedByOrganization
