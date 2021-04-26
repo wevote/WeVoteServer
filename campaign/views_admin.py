@@ -41,27 +41,51 @@ def campaign_edit_owners_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', None)
-    campaignx_owner_organization_we_vote_id = request.POST.get('campaignx_owner_organization_we_vote_id', None)
     campaignx_owner_visible_to_public = \
         positive_value_exists(request.POST.get('campaignx_owner_visible_to_public', False))
     campaignx_owner_feature_this_profile_image = \
         positive_value_exists(request.POST.get('campaignx_owner_feature_this_profile_image', False))
     google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+    incoming_campaignx_owner_we_vote_id = request.POST.get('incoming_campaignx_owner_we_vote_id', None)
+    if positive_value_exists(incoming_campaignx_owner_we_vote_id):
+        incoming_campaignx_owner_we_vote_id = incoming_campaignx_owner_we_vote_id.strip()
     state_code = request.POST.get('state_code', '')
 
     organization_manager = OrganizationManager()
+    voter_manager = VoterManager()
+    campaignx_owner_organization_we_vote_id = ''
+    campaignx_owner_voter_we_vote_id = ''
+
+    if positive_value_exists(incoming_campaignx_owner_we_vote_id):
+        # We allow either organization_we_vote_id or voter_we_vote_id
+        if 'org' in incoming_campaignx_owner_we_vote_id:
+            campaignx_owner_organization_we_vote_id = incoming_campaignx_owner_we_vote_id
+            campaignx_owner_voter_we_vote_id = \
+                voter_manager.fetch_voter_we_vote_id_by_linked_organization_we_vote_id(
+                    campaignx_owner_organization_we_vote_id)
+        elif 'voter' in incoming_campaignx_owner_we_vote_id:
+            campaignx_owner_voter_we_vote_id = incoming_campaignx_owner_we_vote_id
+            campaignx_owner_organization_we_vote_id = \
+                voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(campaignx_owner_voter_we_vote_id)
 
     # Create new CampaignXOwner
-    if positive_value_exists(campaignx_owner_organization_we_vote_id):
+    if positive_value_exists(campaignx_owner_organization_we_vote_id) or \
+            positive_value_exists(campaignx_owner_voter_we_vote_id):
         do_not_create = False
         link_already_exists = False
         status = ""
         # Does it already exist?
         try:
-            CampaignXOwner.objects.get(
-                campaignx_we_vote_id=campaignx_we_vote_id,
-                organization_we_vote_id=campaignx_owner_organization_we_vote_id)
-            link_already_exists = True
+            if positive_value_exists(campaignx_owner_organization_we_vote_id):
+                CampaignXOwner.objects.get(
+                    campaignx_we_vote_id=campaignx_we_vote_id,
+                    organization_we_vote_id=campaignx_owner_organization_we_vote_id)
+                link_already_exists = True
+            elif positive_value_exists(campaignx_owner_voter_we_vote_id):
+                CampaignXOwner.objects.get(
+                    campaignx_we_vote_id=campaignx_we_vote_id,
+                    voter_we_vote_id=campaignx_owner_voter_we_vote_id)
+                link_already_exists = True
         except CampaignXOwner.DoesNotExist:
             link_already_exists = False
         except Exception as e:
@@ -79,7 +103,6 @@ def campaign_edit_owners_process_view(request):
             else:
                 organization_name = ''
                 we_vote_hosted_profile_image_url_tiny = ''
-            voter_we_vote_id = ''
             # Now create new link
             try:
                 # Create the CampaignXOwner
@@ -88,7 +111,7 @@ def campaign_edit_owners_process_view(request):
                     organization_name=organization_name,
                     organization_we_vote_id=campaignx_owner_organization_we_vote_id,
                     feature_this_profile_image=campaignx_owner_feature_this_profile_image,
-                    voter_we_vote_id=voter_we_vote_id,
+                    voter_we_vote_id=campaignx_owner_voter_we_vote_id,
                     we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
                     visible_to_public=campaignx_owner_visible_to_public)
 
@@ -135,13 +158,22 @@ def campaign_edit_owners_process_view(request):
                     organization_manager.retrieve_organization_from_we_vote_id(campaignx_owner.organization_we_vote_id)
                 if organization_results['organization_found']:
                     organization_name = organization_results['organization'].organization_name
-                    if positive_value_exists(organization_name):
+                    if positive_value_exists(organization_name) and \
+                            campaignx_owner.organization_name != organization_name:
                         campaignx_owner.organization_name = organization_name
                         owner_changed = True
                     we_vote_hosted_profile_image_url_tiny = \
                         organization_results['organization'].we_vote_hosted_profile_image_url_tiny
-                    if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                    if positive_value_exists(we_vote_hosted_profile_image_url_tiny) and \
+                            campaignx_owner.we_vote_hosted_profile_image_url_tiny != \
+                            we_vote_hosted_profile_image_url_tiny:
                         campaignx_owner.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                        owner_changed = True
+                if not positive_value_exists(campaignx_owner.voter_we_vote_id):
+                    voter_we_vote_id = voter_manager.fetch_voter_we_vote_id_by_linked_organization_we_vote_id(
+                        campaignx_owner.organization_we_vote_id)
+                    if positive_value_exists(voter_we_vote_id):
+                        campaignx_owner.voter_we_vote_id = voter_we_vote_id
                         owner_changed = True
                 if owner_changed:
                     campaignx_owner.save()
@@ -204,63 +236,68 @@ def campaign_edit_politicians_process_view(request):
 
     campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', None)
     politician_we_vote_id = request.POST.get('politician_we_vote_id', None)
+    if positive_value_exists(politician_we_vote_id):
+        politician_we_vote_id = politician_we_vote_id.strip()
     google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
     state_code = request.POST.get('state_code', '')
 
     # Create new CampaignXPolitician
     if positive_value_exists(politician_we_vote_id):
-        do_not_create = False
-        link_already_exists = False
-        status = ""
-        # Does it already exist?
-        try:
-            CampaignXPolitician.objects.get(
-                campaignx_we_vote_id=campaignx_we_vote_id,
-                politician_we_vote_id=politician_we_vote_id)
-            link_already_exists = True
-        except CampaignXPolitician.DoesNotExist:
+        if 'pol' not in politician_we_vote_id:
+            messages.add_message(request, messages.ERROR, 'Valid PoliticianWeVoteId missing.')
+        else:
+            do_not_create = False
             link_already_exists = False
-        except Exception as e:
-            do_not_create = True
-            messages.add_message(request, messages.ERROR, 'Link already exists.')
-            status += "ADD_CAMPAIGN_POLITICIAN_ALREADY_EXISTS " + str(e) + " "
-
-        if not do_not_create and not link_already_exists:
-            politician_manager = PoliticianManager()
-            politician_results = \
-                politician_manager.retrieve_politician_from_we_vote_id(politician_we_vote_id)
-            if politician_results['politician_found']:
-                politician_name = politician_results['politician'].politician_name
-                state_code = politician_results['politician'].state_code
-                we_vote_hosted_profile_image_url_large = \
-                    politician_results['politician'].we_vote_hosted_profile_image_url_large
-                we_vote_hosted_profile_image_url_medium = \
-                    politician_results['politician'].we_vote_hosted_profile_image_url_medium
-                we_vote_hosted_profile_image_url_tiny = \
-                    politician_results['politician'].we_vote_hosted_profile_image_url_tiny
-            else:
-                politician_name = ''
-                we_vote_hosted_profile_image_url_large = ''
-                we_vote_hosted_profile_image_url_medium = ''
-                we_vote_hosted_profile_image_url_tiny = ''
-            voter_we_vote_id = ''
+            status = ""
+            # Does it already exist?
             try:
-                # Create the CampaignXPolitician
-                CampaignXPolitician.objects.create(
+                CampaignXPolitician.objects.get(
                     campaignx_we_vote_id=campaignx_we_vote_id,
-                    politician_name=politician_name,
-                    politician_we_vote_id=politician_we_vote_id,
-                    state_code=state_code,
-                    we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
-                    we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
-                    we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
-                )
-
-                messages.add_message(request, messages.INFO, 'New CampaignXPolitician created.')
+                    politician_we_vote_id=politician_we_vote_id)
+                link_already_exists = True
+            except CampaignXPolitician.DoesNotExist:
+                link_already_exists = False
             except Exception as e:
-                messages.add_message(request, messages.ERROR,
-                                     'Could not create CampaignXPolitician.'
-                                     ' {error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+                do_not_create = True
+                messages.add_message(request, messages.ERROR, 'Link already exists.')
+                status += "ADD_CAMPAIGN_POLITICIAN_ALREADY_EXISTS " + str(e) + " "
+
+            if not do_not_create and not link_already_exists:
+                politician_manager = PoliticianManager()
+                politician_results = \
+                    politician_manager.retrieve_politician_from_we_vote_id(politician_we_vote_id)
+                if politician_results['politician_found']:
+                    politician_name = politician_results['politician'].politician_name
+                    state_code = politician_results['politician'].state_code
+                    we_vote_hosted_profile_image_url_large = \
+                        politician_results['politician'].we_vote_hosted_profile_image_url_large
+                    we_vote_hosted_profile_image_url_medium = \
+                        politician_results['politician'].we_vote_hosted_profile_image_url_medium
+                    we_vote_hosted_profile_image_url_tiny = \
+                        politician_results['politician'].we_vote_hosted_profile_image_url_tiny
+                else:
+                    politician_name = ''
+                    we_vote_hosted_profile_image_url_large = ''
+                    we_vote_hosted_profile_image_url_medium = ''
+                    we_vote_hosted_profile_image_url_tiny = ''
+                voter_we_vote_id = ''
+                try:
+                    # Create the CampaignXPolitician
+                    CampaignXPolitician.objects.create(
+                        campaignx_we_vote_id=campaignx_we_vote_id,
+                        politician_name=politician_name,
+                        politician_we_vote_id=politician_we_vote_id,
+                        state_code=state_code,
+                        we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                        we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
+                    )
+
+                    messages.add_message(request, messages.INFO, 'New CampaignXPolitician created.')
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR,
+                                         'Could not create CampaignXPolitician.'
+                                         ' {error} [type: {error_type}]'.format(error=e, error_type=type(e)))
 
     # ##################################
     # Deleting or editing a CampaignXPolitician
