@@ -908,8 +908,13 @@ def campaignx_save_photo_from_file_reader(
         status += cache_results['status']
         if cache_results['success']:
             cached_master_we_vote_image = cache_results['we_vote_image']
-            we_vote_hosted_campaign_photo_original_url = cached_master_we_vote_image.we_vote_image_url
-
+            try:
+                we_vote_hosted_campaign_photo_original_url = cached_master_we_vote_image.we_vote_image_url
+            except Exception as e:
+                status += "FAILED_TO_CACHE_CAMPAIGNX_IMAGE: " + str(e) + ' '
+                success = False
+        else:
+            success = False
     results = {
         'status':                   status,
         'success':                  success,

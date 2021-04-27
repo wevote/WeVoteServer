@@ -1288,7 +1288,7 @@ class CampaignXManager(models.Manager):
                         campaignx_changed = True
                     if 'we_vote_hosted_campaign_photo_small_url' in update_values \
                             and positive_value_exists(update_values['we_vote_hosted_campaign_photo_small_url']):
-                        campaignx.we_vote_hosted_campaign_photo_large_url = \
+                        campaignx.we_vote_hosted_campaign_photo_small_url = \
                             update_values['we_vote_hosted_campaign_photo_small_url']
                         campaignx_changed = True
                 if 'campaign_title_changed' in update_values \
