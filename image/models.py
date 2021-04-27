@@ -582,7 +582,7 @@ class WeVoteImageManager(models.Manager):
             success = True
             status = "SAVED_WE_VOTE_IMAGE_CAMPAIGNX_INFO "
         except Exception as e:
-            status = "UNABLE_TO_SAVE_WE_VOTE_IMAGE_CAMPAIGNX_INFO "
+            status = "UNABLE_TO_SAVE_WE_VOTE_IMAGE_CAMPAIGNX_INFO " + str(e) + ' '
             success = False
             handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 

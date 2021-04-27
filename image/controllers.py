@@ -2714,6 +2714,7 @@ def create_resized_images(
             # Retrieve resized medium version image url
             cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
                 voter_we_vote_id=voter_we_vote_id,
+                campaignx_we_vote_id=campaignx_we_vote_id,
                 candidate_we_vote_id=candidate_we_vote_id,
                 organization_we_vote_id=organization_we_vote_id,
                 twitter_profile_image_url_https=twitter_profile_image_url_https,
@@ -2737,6 +2738,7 @@ def create_resized_images(
             # Retrieve resized tiny version image url
             cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
                 voter_we_vote_id=voter_we_vote_id,
+                campaignx_we_vote_id=campaignx_we_vote_id,
                 candidate_we_vote_id=candidate_we_vote_id,
                 organization_we_vote_id=organization_we_vote_id,
                 twitter_profile_image_url_https=twitter_profile_image_url_https,
