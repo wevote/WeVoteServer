@@ -245,78 +245,12 @@ th, td {
 </div>
 
 <div class="form-group">
-    <label for="ballotpedia_race_id_id" class="col-sm-3 control-label">Ballotpedia Race Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_race_id" id="ballotpedia_race_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_race_id|default_if_none:"" }}{% else %}{{ ballotpedia_race_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="ballotpedia_office_id_id" class="col-sm-3 control-label">Ballotpedia Elected Office Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_office_id" id="ballotpedia_office_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_office_id|default_if_none:"" }}{% else %}{{ ballotpedia_office_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="ballotpedia_candidate_id_id" class="col-sm-3 control-label">Ballotpedia Candidate Id
-        {% if candidate and candidate.ballotpedia_candidate_url %}(<a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">Go</a>){% endif %}
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_candidate_id" id="ballotpedia_candidate_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_candidate_id|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="ballotpedia_person_id_id" class="col-sm-3 control-label">Ballotpedia Person Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_person_id" id="ballotpedia_person_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_person_id|default_if_none:"" }}{% else %}{{ ballotpedia_person_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="vote_usa_politician_id_id" class="col-sm-3 control-label">Vote USA Politician Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="vote_usa_politician_id" id="vote_usa_politician_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="vote_usa_office_id_id" class="col-sm-3 control-label">Vote USA Office Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="vote_usa_office_id" id="vote_usa_office_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.vote_usa_office_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
     <label for="state_code_id" class="col-sm-3 control-label">Candidate State Code</label>
     <div class="col-sm-8">
         <input type="text" name="state_code" id="state_code_id" class="form-control"
                value="{% if candidate %}{{ candidate.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
-
-<div class="form-group">
-    <label for="vote_smart_id_id" class="col-sm-3 control-label">Vote Smart Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="vote_smart_id" id="vote_smart_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.vote_smart_id|default_if_none:"" }}{% else %}{{ vote_smart_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-{#<div class="form-group">#}
-{#    <label for="maplight_id_id" class="col-sm-3 control-label">MapLight Id</label>#}
-{#    <div class="col-sm-8">#}
-{#        <input type="text" name="maplight_id" id="maplight_id_id" class="form-control"#}
-{#               value="{% if candidate %}{{ candidate.maplight_id|default_if_none:"" }}{% else %}{{ maplight_id|default_if_none:"" }}{% endif %}" />#}
-{#    </div>#}
-{#</div>#}
 
 <a name="twitter_link_possibility_list" />
 
@@ -515,6 +449,79 @@ th, td {
                   placeholder="Enter official candidate statement">{% if candidate %}{{ candidate.ballot_guide_official_statement|default_if_none:"" }}{% else %}{{ ballot_guide_official_statement|default_if_none:"" }}{% endif %}</textarea>
     </div>
 </div>
+<div class="form-group">
+    <label for="ballotpedia_race_id_id" class="col-sm-3 control-label">Ballotpedia Race Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="ballotpedia_race_id" id="ballotpedia_race_id_id" class="form-control"
+               value="{% if candidate %}{{ candidate.ballotpedia_race_id|default_if_none:"" }}{% else %}{{ ballotpedia_race_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="ballotpedia_office_id_id" class="col-sm-3 control-label">Ballotpedia Elected Office Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="ballotpedia_office_id" id="ballotpedia_office_id_id" class="form-control"
+               value="{% if candidate %}{{ candidate.ballotpedia_office_id|default_if_none:"" }}{% else %}{{ ballotpedia_office_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="ballotpedia_candidate_id_id" class="col-sm-3 control-label">Ballotpedia Candidate Id
+        {% if candidate and candidate.ballotpedia_candidate_url %}(<a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">Go</a>){% endif %}
+    </label>
+    <div class="col-sm-8">
+        <input type="text" name="ballotpedia_candidate_id" id="ballotpedia_candidate_id_id" class="form-control"
+               value="{% if candidate %}{{ candidate.ballotpedia_candidate_id|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="ballotpedia_person_id_id" class="col-sm-3 control-label">Ballotpedia Person Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="ballotpedia_person_id" id="ballotpedia_person_id_id" class="form-control"
+               value="{% if candidate %}{{ candidate.ballotpedia_person_id|default_if_none:"" }}{% else %}{{ ballotpedia_person_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="vote_usa_politician_id_id" class="col-sm-3 control-label">Vote USA Politician Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="vote_usa_politician_id" id="vote_usa_politician_id_id" class="form-control"
+               value="{% if candidate %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="vote_usa_office_id_id" class="col-sm-3 control-label">Vote USA Office Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="vote_usa_office_id" id="vote_usa_office_id_id" class="form-control"
+               value="{% if candidate %}{{ candidate.vote_usa_office_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="vote_usa_profile_image_id" class="col-sm-3 control-label">Vote USA Image</label>
+    <div class="col-sm-8">
+        <input type="text" name="vote_usa_profile_image" id="vote_usa_profile_image_id" class="form-control"
+               value="{% if candidate %}{{ candidate.vote_usa_profile_image|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="vote_smart_id_id" class="col-sm-3 control-label">Vote Smart Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="vote_smart_id" id="vote_smart_id_id" class="form-control"
+               value="{% if candidate %}{{ candidate.vote_smart_id|default_if_none:"" }}{% else %}{{ vote_smart_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+{#<div class="form-group">#}
+{#    <label for="maplight_id_id" class="col-sm-3 control-label">MapLight Id</label>#}
+{#    <div class="col-sm-8">#}
+{#        <input type="text" name="maplight_id" id="maplight_id_id" class="form-control"#}
+{#               value="{% if candidate %}{{ candidate.maplight_id|default_if_none:"" }}{% else %}{{ maplight_id|default_if_none:"" }}{% endif %}" />#}
+{#    </div>#}
+{#</div>#}
 
 <p>{# There is another submit button at top of form #}
 {% if candidate %}

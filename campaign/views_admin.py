@@ -514,10 +514,10 @@ def campaign_list_view(request):
             new_filter = Q(campaign_description__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(started_by_voter_we_vote_id__icontains=one_word)
+            new_filter = Q(started_by_voter_we_vote_id__iexact=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__icontains=one_word)
+            new_filter = Q(we_vote_id__iexact=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -713,10 +713,10 @@ def campaign_supporters_list_view(request, campaignx_we_vote_id=""):
             new_filter = Q(supporter_endorsement__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(voter_we_vote_id__icontains=one_word)
+            new_filter = Q(voter_we_vote_id__iexact=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(organization_we_vote_id__icontains=one_word)
+            new_filter = Q(organization_we_vote_id__iexact=one_word)
             filters.append(new_filter)
 
             # Add the first query

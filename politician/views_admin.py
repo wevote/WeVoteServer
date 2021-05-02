@@ -120,7 +120,7 @@ def politician_list_view(request):
                 new_filter = Q(vote_usa_politician_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__icontains=one_word)
+                new_filter = Q(we_vote_id__iexact=one_word)
                 filters.append(new_filter)
 
                 # Add the first query
@@ -811,7 +811,7 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
             new_filter = Q(party__icontains=politician_search)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__icontains=politician_search)
+            new_filter = Q(we_vote_id__iexact=politician_search)
             filters.append(new_filter)
 
             # Add the first query

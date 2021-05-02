@@ -97,7 +97,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
             new_filter = Q(party__icontains=candidate_search)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__icontains=candidate_search)
+            new_filter = Q(we_vote_id__iexact=candidate_search)
             filters.append(new_filter)
 
             # Add the first query
@@ -113,7 +113,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
         candidate_list_dict = candidate_list.values(
             'we_vote_id', 'maplight_id', 'vote_smart_id', 'contest_office_name',
             'contest_office_we_vote_id', 'politician_we_vote_id',
-            'candidate_name', 'google_civic_candidate_name',
+            'candidate_name', 'candidate_year', 'ctcl_uuid', 'google_civic_candidate_name',
             'google_civic_candidate_name2', 'google_civic_candidate_name3',
             'party',
             'photo_url', 'photo_url_from_maplight',
@@ -498,7 +498,7 @@ def candidate_list_view(request):
                 new_filter = Q(vote_usa_politician_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__icontains=one_word)
+                new_filter = Q(we_vote_id__iexact=one_word)
                 filters.append(new_filter)
 
                 # Add the first query
@@ -1226,6 +1226,7 @@ def candidate_edit_process_view(request):
     ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)
     vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
     vote_usa_office_id = request.POST.get('vote_usa_office_id', False)
+    vote_usa_profile_image = request.POST.get('vote_usa_profile_image', False)
     vote_smart_id = request.POST.get('vote_smart_id', False)
     maplight_id = request.POST.get('maplight_id', False)
     page = convert_to_int(request.POST.get('page', 0))
@@ -1525,6 +1526,8 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.vote_usa_politician_id = vote_usa_politician_id
             if vote_usa_office_id is not False:
                 candidate_on_stage.vote_usa_office_id = vote_usa_office_id
+            if vote_usa_profile_image is not False:
+                candidate_on_stage.vote_usa_profile_image = vote_usa_profile_image
             if vote_smart_id is not False:
                 candidate_on_stage.vote_smart_id = vote_smart_id
             if maplight_id is not False:

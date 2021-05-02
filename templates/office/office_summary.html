@@ -70,6 +70,44 @@
     </tr>
     {% endif %}
     <tr>
+      <td style="padding-right: 8px;">Is Marquee? :: Is Battleground?</td>
+      <td><strong>{{ office.ballotpedia_is_marquee|default_if_none:"No" }} :: {{ office.is_battleground_race|default_if_none:"No" }}</strong></td>
+    </tr>
+    <tr>
+      <td>Ballotpedia Office URL:</td>
+      <td><strong>{{ office.ballotpedia_office_url|default_if_none:"" }}</strong></td>
+    </tr>
+    {% if office.ballotpedia_race_office_level %}
+    <tr>
+      <td>Ballotpedia Race Office Level:</td>
+      <td><strong>{{ office.ballotpedia_race_office_level|default_if_none:"" }}</strong></td>
+    </tr>
+    {% endif %}
+    <tr>
+      <td>Google Ballot Placement:</td>
+      <td><strong>{{ office.google_ballot_placement|default_if_none:"" }}</strong></td>
+    </tr>
+    <tr>
+      <td>District ID:</td>
+      <td><strong>{{ office.district_id|default_if_none:"" }}</strong></td>
+    </tr>
+    <tr>
+      <td>District Name:</td>
+      <td><strong>{{ office.district_name|default_if_none:"" }}</strong></td>
+    </tr>
+    <tr>
+      <td>District Scope:</td>
+      <td><strong>{{ office.district_scope|default_if_none:"" }}</strong></td>
+    </tr>
+    <tr>
+      <td>Number Elected:</td>
+      <td><strong>{{ office.number_elected|default_if_none:"" }}</strong></td>
+    </tr>
+    <tr>
+      <td>Number Voting For:</td>
+      <td><strong>{{ office.number_voting_for|default_if_none:"" }}</strong></td>
+    </tr>
+    <tr>
       <td>Ballotpedia Election ID:</td>
       <td><strong>{{ office.ballotpedia_election_id|default_if_none:"" }}</strong></td>
     </tr>
@@ -92,42 +130,16 @@
       <td><strong>{{ office.ballotpedia_district_id|default_if_none:"" }}</strong></td>
     </tr>
     <tr>
-      <td style="padding-right: 8px;">Is Marquee? :: Is Battleground?</td>
-      <td><strong>{{ office.ballotpedia_is_marquee|default_if_none:"No" }} :: {{ office.is_battleground_race|default_if_none:"No" }}</strong></td>
-    </tr>
-    <tr>
-      <td>Ballotpedia Office URL:</td>
-      <td><strong>{{ office.ballotpedia_office_url|default_if_none:"" }}</strong></td>
-    </tr>
-    {% if office.ballotpedia_race_office_level %}
-    <tr>
-      <td>Ballotpedia Race Office Level:</td>
-      <td><strong>{{ office.ballotpedia_race_office_level|default_if_none:"" }}</strong></td>
-    </tr>
-    {% endif %}
-    <tr>
-      <td>Vote Office USA ID:</td>
-      <td><strong>{{ office.vote_usa_office_id|default_if_none:"" }}</strong></td>
-    </tr>
-    <tr>
-      <td>Google Ballot Placement:</td>
-      <td><strong>{{ office.google_ballot_placement|default_if_none:"" }}</strong></td>
+      <td>CTCL UUID:</td>
+      <td><strong>{{ office.ctcl_uuid|default_if_none:"" }}</strong></td>
     </tr>
     <tr>
       <td>OCD Division ID:</td>
       <td><strong>{{ office.ocd_division_id|default_if_none:"" }}</strong></td>
     </tr>
     <tr>
-      <td>District Name:</td>
-      <td><strong>{{ office.district_name|default_if_none:"" }}</strong></td>
-    </tr>
-    <tr>
-      <td>Number Elected:</td>
-      <td><strong>{{ office.number_elected|default_if_none:"" }}</strong></td>
-    </tr>
-    <tr>
-      <td>Number Voting For:</td>
-      <td><strong>{{ office.number_voting_for|default_if_none:"" }}</strong></td>
+      <td>Vote Office USA ID:</td>
+      <td><strong>{{ office.vote_usa_office_id|default_if_none:"" }}</strong></td>
     </tr>
     </table>
 
@@ -156,9 +168,7 @@
                 <th>Id</th>
                 <th>We Vote Id</th>
                 <th>State</th>
-                <th>Ballotpedia Ids</th>
-                <th>Vote USA Office Id</th>
-                <th>Vote Smart Id</th>
+                <th>IDs</th>
                 <th>&nbsp;</th>
             </tr>
         </thead>
@@ -198,13 +208,25 @@
             <td>{{ candidate.we_vote_id }}</td>
             <td>{{ candidate.get_candidate_state }}</td>
             <td>
-                Candidate&nbsp;ID:&nbsp;{{ candidate.ballotpedia_candidate_id|default_if_none:"" }},
-                Person&nbsp;ID:&nbsp;{{ candidate.ballotpedia_person_id|default_if_none:"" }},
-                Race&nbsp;ID:&nbsp;{{ candidate.ballotpedia_race_id|default_if_none:"" }},
-                Office&nbsp;ID:&nbsp;{{ candidate.ballotpedia_office_id|default_if_none:"" }}
+                {% if candidate.ballotpedia_candidate_id %}
+                    {% if candidate.ballotpedia_candidate_url %}
+                      BP: <a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">{{ candidate.ballotpedia_candidate_id|default_if_none:"" }}</a>
+                    {% else %}
+                      BP Candidate: {{ candidate.ballotpedia_candidate_id|default_if_none:"" }}
+                    {% endif %}
+                    <br />
+                {% endif %}
+                {% if candidate.ballotpedia_person_id %}BP Person: {{ candidate.ballotpedia_person_id|default_if_none:"" }}<br />{% endif %}
+                {% if candidate.ballotpedia_office_id %}BP Office: {{ candidate.ballotpedia_office_id|default_if_none:"" }}<br />{% endif %}
+                {% if candidate.ballotpedia_race_id %}BP Race: {{ candidate.ballotpedia_race_id|default_if_none:"" }}<br />{% endif %}
+                {% if candidate.ctcl_uuid %}CTCL: <span style="font-size: 10px;">{{ candidate.ctcl_uuid|default_if_none:"" }}</span><br />{% endif %}
+                {% if candidate.vote_usa_politician_id %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}<br />{% endif %}
+                {% if candidate.vote_usa_office_id %}{{ candidate.vote_usa_office_id|default_if_none:"" }}<br />{% endif %}
+                {% if candidate.vote_smart_id %}
+                    Vote Smart: <a href="https://votesmart.org/candidate/biography/{{ candidate.vote_smart_id }}" target="_blank">{{ candidate.vote_smart_id|default_if_none:"" }}</a>
+                    <br />
+                {% endif %}
             </td>
-            <td>{{ office.vote_usa_office_id|default_if_none:"" }}</td>
-            <td>{{ candidate.vote_smart_id|default_if_none:"" }}</td>
             <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em">(edit)</a></td>
         </tr>
     {% endfor %}

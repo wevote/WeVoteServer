@@ -323,8 +323,7 @@
                 <th>Twitter Handle</th>
                 <th>Google Search Results</th>
                 <th>Website / Facebook / Email</th>
-                <th>Ballotpedia</th>
-                <th>Vote USA</th>
+                <th>IDs</th>
             </tr>
           </thead>
         {% endif %}
@@ -489,21 +488,21 @@
                   {% if candidate.candidate_email %}{{ candidate.candidate_email }}{% endif %}
                 </td>
                 <td>
-                  {% if candidate.ballotpedia_candidate_id %}
+                {% if candidate.ballotpedia_candidate_id %}
                     {% if candidate.ballotpedia_candidate_url %}
-                      <a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">{{ candidate.ballotpedia_candidate_id|default_if_none:"" }}</a>
+                      BP: <a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">{{ candidate.ballotpedia_candidate_id|default_if_none:"" }}</a>
                     {% else %}
-                      {{ candidate.ballotpedia_candidate_id|default_if_none:"" }}
+                      BP: {{ candidate.ballotpedia_candidate_id|default_if_none:"" }}
                     {% endif %}
-                  {% endif %}
-                  {% if candidate.vote_smart_id %}
                     <br />
+                {% endif %}
+                {% if candidate.vote_smart_id %}
                     Vote Smart: <a href="https://votesmart.org/candidate/biography/{{ candidate.vote_smart_id }}" target="_blank">{{ candidate.vote_smart_id|default_if_none:"" }}</a>
-                  {% endif %}
-                </td>
-                <td>
-                    Politician:&nbsp;{{ candidate.vote_usa_politician_id|default_if_none:"" }}
-                    Office:&nbsp;{{ candidate.vote_usa_office_id|default_if_none:"" }}
+                    <br />
+                {% endif %}
+                {% if candidate.ctcl_uuid %}CTCL: <span style="font-size: 10px;">{{ candidate.ctcl_uuid|default_if_none:"" }}</span><br />{% endif %}
+                {% if candidate.vote_usa_politician_id %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}<br />{% endif %}
+                {% if candidate.vote_usa_office_id %}{{ candidate.vote_usa_office_id|default_if_none:"" }}<br />{% endif %}
                 </td>
             </tr>
         {% endfor %}

@@ -27,7 +27,7 @@ CONTEST_MEASURE_UNIQUE_IDENTIFIERS = [
     'ballotpedia_no_vote_description',
     'ballotpedia_page_title',
     'ballotpedia_yes_vote_description',
-    'cctl_uuid',
+    'ctcl_uuid',
     'district_id',
     'district_name',
     'district_scope',
@@ -47,6 +47,7 @@ CONTEST_MEASURE_UNIQUE_IDENTIFIERS = [
     'ocd_division_id',
     'primary_party',
     'state_code',
+    # 'vote_usa_measure_id',
     'vote_smart_id',
     'we_vote_id',
     'wikipedia_page_id',
@@ -151,7 +152,7 @@ class ContestMeasure(models.Model):
         verbose_name="what a yes vote means", null=True, blank=True, default=None)
     ballotpedia_no_vote_description = models.TextField(
         verbose_name="what a no vote means", null=True, blank=True, default=None)
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
     position_dates_set = models.BooleanField(default=False)  # Have we finished data update process?
 
     def get_measure_state(self):

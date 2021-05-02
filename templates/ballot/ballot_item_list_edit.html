@@ -193,7 +193,7 @@
         {% if ballot_returned and ballot_returned.polling_location_we_vote_id %}
           &nbsp;&nbsp;&nbsp;&nbsp;
           <a href="{% url 'polling_location:polling_location_we_vote_id_edit' ballot_returned.polling_location_we_vote_id %}" target="_blank">
-            Edit Original Map Point</a> (in new window)
+            Edit Original Map Point <span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </div>
 </div>
@@ -243,10 +243,16 @@
 {% endif %}
 
 <ul>
-    <li>Prepare: <a href="{% url 'ballotpedia:import_ballot_items_for_location' %}?google_civic_election_id={{ google_civic_election_id }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}&state_code={{ state_code }}" target="_blank" >
-        Ballotpedia: Retrieve Ballot Items for this Map Point</a> (in new window)</li>
-    <li>Prepare: <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}">
-        Import Complete Ballot at One Location (Import/Export Batches)</a></li>
+    {% if election.use_ballotpedia_as_data_source %}
+        <li>Prepare: <a href="{% url 'import_export_batches:import_ballot_items_for_location' %}?use_ballotpedia=1&google_civic_election_id={{ google_civic_election_id }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}&state_code={{ state_code }}" target="_blank" >
+            Ballotpedia: Retrieve Ballot Items for this Map Point <span class="glyphicon glyphicon-new-window"></span></a></li>
+    {% endif %}
+    {% if election.use_ctcl_as_data_source %}
+        <li>Prepare: <a href="{% url 'import_export_batches:import_ballot_items_for_location' %}?use_ctcl=1&google_civic_election_id={{ google_civic_election_id }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}&state_code={{ state_code }}" target="_blank" >
+            CTCL: Retrieve Ballot Items for this Map Point <span class="glyphicon glyphicon-new-window"></span></a></li>
+    {% endif %}
+        <li>Prepare: <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}">
+            Import Complete Ballot at One Location (Import/Export Batches)</a></li>
 </ul>
 {#{% if election.id %}#}
 {#    {% if ballot_returned_id %}#}
@@ -298,11 +304,11 @@
         {% endfor %}
         </select>
         <a href="{% url 'measure:measure_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-            add measures to the election</a> (in new window)
+            add measures to the election <span class="glyphicon glyphicon-new-window"></span></a>
     {% else %}
         (no measures exist for this election yet -- you need to
         <a href="{% url 'measure:measure_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-            add measures to the election first</a> (in new window))
+            add measures to the election first <span class="glyphicon glyphicon-new-window"></span></a>)
     {% endif %}
     <br />
 
@@ -318,11 +324,11 @@
 <br />
 <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}"
    target="_blank">
-      Import Offices (Import/Export Batches)</a> (in new window)
+      Import Offices (Import/Export Batches) <span class="glyphicon glyphicon-new-window"></span></a>
 <br />
 <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}"
    target="_blank">
-      Import Measures (Import/Export Batches)</a> (in new window)
+      Import Measures (Import/Export Batches) <span class="glyphicon glyphicon-new-window"></span></a>
 
 <br />
 

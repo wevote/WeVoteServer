@@ -7,9 +7,9 @@ from django.db.models import Q
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from wevote_settings.models import fetch_next_we_vote_id_contest_office_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, positive_value_exists, \
-    OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES, OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS, \
-    OFFICE_NAME_EQUIVALENT_DISTRICT_PHRASE_PAIRS, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, \
+    generate_office_equivalent_district_phrase_pairs, positive_value_exists, \
+    OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES, OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS, STATE_CODE_MAP
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -19,15 +19,17 @@ CONTEST_OFFICE_UNIQUE_IDENTIFIERS = [
     'ballotpedia_district_id',
     'ballotpedia_election_id',
     'ballotpedia_id',
+    'ballotpedia_is_marquee',
     'ballotpedia_office_id',
     'ballotpedia_office_name',
     'ballotpedia_office_url',
     'ballotpedia_race_id',
+    'ballotpedia_race_url',
     'ballotpedia_race_office_level',
     'contest_level0',
     'contest_level1',
     'contest_level2',
-    'cctl_uuid',
+    'ctcl_uuid',
     'district_id',
     'district_name',
     'district_scope',
@@ -37,6 +39,7 @@ CONTEST_OFFICE_UNIQUE_IDENTIFIERS = [
     'google_civic_election_id',
     'google_civic_election_id_new',
     'google_civic_office_name',
+    'is_battleground_race',
     'maplight_id',
     'number_elected',
     'number_voting_for',
@@ -46,6 +49,7 @@ CONTEST_OFFICE_UNIQUE_IDENTIFIERS = [
     'special',
     'state_code',
     # 'we_vote_id',  # We don't care which we_vote_id gets used
+    'vote_usa_office_id',
     'wikipedia_id',
 ]
 
@@ -157,7 +161,7 @@ class ContestOffice(models.Model):
                                                  max_length=255, null=True, blank=True)
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
     elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255, null=True,
                                            blank=True, default=None)
 
@@ -219,12 +223,9 @@ class ContestOfficeManager(models.Manager):
                                                               read_only=read_only)
 
     def retrieve_contest_office_from_ctcl_uuid(self, ctcl_uuid):
-        contest_office_id = 0
-        contest_office_we_vote_id = ''
-        maplight_id = ''
         contest_office_manager = ContestOfficeManager()
-        return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id,
-                                                              maplight_id, ctcl_uuid)
+        return contest_office_manager.retrieve_contest_office(
+            ctcl_uuid=ctcl_uuid)
 
     def retrieve_contest_office_from_maplight_id(self, maplight_id):
         contest_office_id = 0
@@ -1001,13 +1002,13 @@ class ContestOfficeManager(models.Manager):
 
     def create_contest_office_row_entry(
             self,
-            contest_office_name,
-            contest_office_votes_allowed,
-            ctcl_uuid,
-            contest_office_number_elected,
-            google_civic_election_id,
-            state_code,
-            defaults):
+            contest_office_name='',
+            contest_office_votes_allowed=1,
+            ctcl_uuid='',
+            contest_office_number_elected=1,
+            google_civic_election_id='',
+            state_code='',
+            defaults={}):
         """
         Create ContestOffice table entry with ContestOffice details 
         :param contest_office_name: 
@@ -1023,6 +1024,7 @@ class ContestOfficeManager(models.Manager):
         contest_office_updated = False
         new_contest_office_created = False
         new_contest_office = ''
+        status = ''
 
         try:
             new_contest_office = ContestOffice.objects.create(
@@ -1034,10 +1036,11 @@ class ContestOfficeManager(models.Manager):
                 state_code=state_code)
             if new_contest_office:
                 success = True
-                status = "CONTEST_OFFICE_CREATED"
+                status += "CONTEST_OFFICE_CREATED "
                 contest_office_updated = True
                 new_contest_office_created = True
-                new_contest_office.district_id = defaults['district_id']
+                if 'district_id' in defaults:
+                    new_contest_office.district_id = defaults['district_id']
                 new_contest_office.district_name = defaults['district_name']
                 new_contest_office.district_scope = defaults['district_scope']
                 if 'ballotpedia_district_id' in defaults:
@@ -1057,6 +1060,8 @@ class ContestOfficeManager(models.Manager):
                     new_contest_office.ballotpedia_race_id = convert_to_int(defaults['ballotpedia_race_id'])
                 if 'ballotpedia_race_office_level' in defaults:
                     new_contest_office.ballotpedia_race_office_level = defaults['ballotpedia_race_office_level']
+                if 'google_civic_office_name' in defaults:
+                    new_contest_office.google_civic_office_name = defaults['google_civic_office_name']
                 if 'is_ballotpedia_general_election' in defaults:
                     new_contest_office.is_ballotpedia_general_election = defaults['is_ballotpedia_general_election']
                 if 'is_ballotpedia_general_runoff_election' in defaults:
@@ -1067,22 +1072,25 @@ class ContestOfficeManager(models.Manager):
                 if 'is_ballotpedia_primary_runoff_election' in defaults:
                     new_contest_office.is_ballotpedia_primary_runoff_election = \
                         defaults['is_ballotpedia_primary_runoff_election']
+                if 'ocd_division_id' in defaults:
+                    new_contest_office.ocd_division_id = defaults['ocd_division_id']
                 if 'vote_usa_office_id' in defaults:
                     new_contest_office.vote_usa_office_id = defaults['vote_usa_office_id']
                 new_contest_office.save()
             else:
                 success = False
-                status = "CONTEST_OFFICE_CREATE_FAILED"
+                status += "CONTEST_OFFICE_CREATE_FAILED "
         except Exception as e:
             success = False
             new_contest_office_created = False
-            status = "CONTEST_OFFICE_RETRIEVE_ERROR"
+            status += "CONTEST_OFFICE_RETRIEVE_ERROR: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
                 'success':                      success,
                 'status':                       status,
                 'new_contest_office_created':   new_contest_office_created,
+                'contest_office_found':         new_contest_office_created or contest_office_updated,
                 'contest_office_updated':       contest_office_updated,
                 'contest_office':               new_contest_office,
             }
@@ -1158,6 +1166,8 @@ class ContestOfficeManager(models.Manager):
                     existing_office_entry.ballotpedia_race_id = convert_to_int(defaults['ballotpedia_race_id'])
                 if 'ballotpedia_race_office_level' in defaults:
                     existing_office_entry.ballotpedia_race_office_level = defaults['ballotpedia_race_office_level']
+                if 'ctcl_uuid' in defaults:
+                    existing_office_entry.ctcl_uuid = defaults['ctcl_uuid']
                 if 'is_ballotpedia_general_election' in defaults:
                     existing_office_entry.is_ballotpedia_general_election = defaults['is_ballotpedia_general_election']
                 if 'is_ballotpedia_general_runoff_election' in defaults:
@@ -1168,6 +1178,8 @@ class ContestOfficeManager(models.Manager):
                 if 'is_ballotpedia_primary_runoff_election' in defaults:
                     existing_office_entry.is_ballotpedia_primary_runoff_election = \
                         defaults['is_ballotpedia_primary_runoff_election']
+                if 'ocd_division_id' in defaults:
+                    existing_office_entry.ocd_division_id = defaults['ocd_division_id']
                 if 'vote_usa_office_id' in defaults:
                     existing_office_entry.vote_usa_office_id = defaults['vote_usa_office_id']
                 # now go ahead and save this entry (update)
@@ -1435,8 +1447,15 @@ class ContestOfficeListManager(models.Manager):
         return results
 
     def retrieve_contest_offices_from_non_unique_identifiers(
-            self, contest_office_name, google_civic_election_id, incoming_state_code, district_id='', district_name='',
-            ballotpedia_race_id=0, ignore_office_we_vote_id_list=[], read_only=False):
+            self,
+            contest_office_name='',
+            google_civic_election_id='',
+            incoming_state_code='',
+            district_id='',
+            district_name='',
+            ballotpedia_race_id=0,
+            ignore_office_we_vote_id_list=[],
+            read_only=False):
         keep_looking_for_duplicates = True
         success = False
         contest_office = ContestOffice()
@@ -1526,12 +1545,17 @@ class ContestOfficeListManager(models.Manager):
                     remove_this = " of " + state_name.lower()
                     stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
 
+                # Remove leading state code, ex/ "CA "
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = state_code + " "
+                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
+
                 # Remove leading state, ex/ "California "
                 for state_code, state_name in STATE_CODE_MAP.items():
                     remove_this = state_name.lower() + " "
                     stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
 
-                # Remove trailing state, ex/ "California "
+                # Remove trailing state, ex/ " California"
                 for state_code, state_name in STATE_CODE_MAP.items():
                     remove_this = " " + state_name.lower()
                     stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
@@ -1609,12 +1633,17 @@ class ContestOfficeListManager(models.Manager):
                     remove_this = " of " + state_name.lower()
                     stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
 
+                # Remove leading state code, ex/ "CA "
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = state_code + " "
+                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
+
                 # Remove leading state, ex/ "California "
                 for state_code, state_name in STATE_CODE_MAP.items():
                     remove_this = state_name.lower() + " "
                     stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
 
-                # Remove trailing state, ex/ "California "
+                # Remove trailing state, ex/ " California"
                 for state_code, state_name in STATE_CODE_MAP.items():
                     remove_this = " " + state_name.lower()
                     stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
@@ -1627,7 +1656,8 @@ class ContestOfficeListManager(models.Manager):
                 district_found = False
                 equivalent_phrase_found = False
                 office_without_district_found = False
-                for left_term, right_term in OFFICE_NAME_EQUIVALENT_DISTRICT_PHRASE_PAIRS.items():
+                office_equivalent_district_phrase_pairs = generate_office_equivalent_district_phrase_pairs()
+                for left_term, right_term in office_equivalent_district_phrase_pairs:
                     if left_term in stripped_down_contest_office_name:
                         new_filter = Q(office_name__icontains=right_term) | Q(office_name__icontains=left_term)
                         filters.append(new_filter)
@@ -1645,17 +1675,28 @@ class ContestOfficeListManager(models.Manager):
 
                 for left_term, right_term in OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS.items():
                     if left_term in stripped_down_contest_office_name:
-                        new_filter = Q(office_name__icontains=right_term) | Q(office_name__icontains=left_term)
+                        if district_found:
+                            # If the district was matched with an alternative, restrict to alternate name
+                            new_filter = Q(office_name__icontains=right_term)
+                        else:
+                            new_filter = Q(office_name__icontains=right_term) | Q(office_name__icontains=left_term)
                         filters.append(new_filter)
                         equivalent_phrase_found = True
                         continue
                     if right_term in stripped_down_contest_office_name:
-                        new_filter = Q(office_name__icontains=left_term) | Q(office_name__icontains=right_term)
+                        if district_found:
+                            # If the district was matched with an alternative, restrict to alternate name
+                            new_filter = Q(office_name__icontains=left_term)
+                        else:
+                            new_filter = Q(office_name__icontains=left_term) | Q(office_name__icontains=right_term)
                         filters.append(new_filter)
                         equivalent_phrase_found = True
                         continue
 
                 if district_found and not equivalent_phrase_found:
+                    # Remove visual separator characters, like " -"
+                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(" --", "")
+                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(" -", "")
                     # Remove leading and trailing spaces
                     stripped_down_contest_office_name = stripped_down_contest_office_name.strip()
                     if positive_value_exists(stripped_down_contest_office_name):

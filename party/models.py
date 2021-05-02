@@ -19,7 +19,7 @@ class Party(models.Model):
     party_name = models.CharField(verbose_name="party name", max_length=255, null=False, unique=False)
     party_abbreviation = models.CharField(verbose_name="party abbreviation", max_length=255, null=True, unique=False,
                                           blank=True)
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", null=True, blank=True, max_length=255, unique=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", null=True, blank=True, max_length=36, unique=True)
 
     # TRUE = 'True'
     # FALSE = 'False'

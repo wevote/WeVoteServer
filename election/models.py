@@ -85,6 +85,7 @@ class Election(models.Model):
         verbose_name="google civic election id", null=True, unique=False)  # Make unique=True after data is migrated
     ballotpedia_election_id = models.PositiveIntegerField(
         verbose_name="ballotpedia election id", null=True, unique=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
     # A displayable name for the election.
     election_name = models.CharField(verbose_name="election name", max_length=255, null=False, blank=False)
     # Day of the election in YYYY-MM-DD format.
@@ -94,22 +95,6 @@ class Election(models.Model):
 
     ballotpedia_kind_of_election = models.CharField(
         verbose_name="election filter", max_length=255, null=True, blank=True)
-
-    # DALE 2015-05-01 The election type is currently in the contests, and not in the election
-    # is_general_election = False  # Reset to false
-    # is_primary_election = False  # Reset to false
-    # is_runoff_election = False  # Reset to false
-    # for case in switch(election_structured_data['type']):
-    #     if case('Primary'):
-    #         is_primary_election = True
-    #         break
-    #     if case('Run-off'):
-    #         is_runoff_election = True
-    #         break
-    #     if case('General'): pass
-    #     if case():  # default
-    #         is_general_election = True
-
     # The state code for the election. This is not directly provided from Google Civic, but useful when we are
     # entering elections manually.
     state_code = models.CharField(verbose_name="state code for the election",
@@ -130,6 +115,11 @@ class Election(models.Model):
 
     # This is a multi-state election
     is_national_election = models.BooleanField(default=False)
+
+    use_ballotpedia_as_data_source = models.BooleanField(default=False)
+    use_ctcl_as_data_source = models.BooleanField(default=False)
+    use_google_civic_as_data_source = models.BooleanField(default=False)
+    use_vote_usa_as_data_source = models.BooleanField(default=False)
 
     def election_is_upcoming(self):
         if not positive_value_exists(self.election_day_text):
@@ -198,9 +188,20 @@ class ElectionManager(models.Manager):
 
     def update_or_create_election(
             self, google_civic_election_id, election_name, election_day_text, ocd_division_id,
-            ballotpedia_election_id=None, ballotpedia_kind_of_election=None, candidate_photos_finished=None,
-            election_preparation_finished=None, ignore_this_election=None, include_in_list_for_voters=None,
-            internal_notes=None, is_national_election=None, state_code=''):
+            ballotpedia_election_id=None,
+            ballotpedia_kind_of_election=None,
+            candidate_photos_finished=None,
+            ctcl_uuid=None,
+            election_preparation_finished=None,
+            ignore_this_election=None,
+            include_in_list_for_voters=None,
+            internal_notes=None,
+            is_national_election=None,
+            state_code='',
+            use_ballotpedia_as_data_source=None,
+            use_ctcl_as_data_source=None,
+            use_google_civic_as_data_source=None,
+            use_vote_usa_as_data_source=None):
         """
         Either update or create an election entry.
         """
@@ -243,6 +244,9 @@ class ElectionManager(models.Manager):
                 if candidate_photos_finished is not None:
                     election_on_stage.candidate_photos_finished = candidate_photos_finished
                     election_changed = True
+                if ctcl_uuid is not None:
+                    election_on_stage.ctcl_uuid = ctcl_uuid
+                    election_changed = True
                 if election_preparation_finished is not None:
                     election_on_stage.election_preparation_finished = election_preparation_finished
                     election_changed = True
@@ -257,6 +261,22 @@ class ElectionManager(models.Manager):
                     election_changed = True
                 if is_national_election is not None:
                     election_on_stage.is_national_election = is_national_election
+                    election_changed = True
+                if use_ballotpedia_as_data_source is not None:
+                    election_on_stage.use_ballotpedia_as_data_source = \
+                        positive_value_exists(use_ballotpedia_as_data_source)
+                    election_changed = True
+                if use_ctcl_as_data_source is not None:
+                    election_on_stage.use_ctcl_as_data_source = \
+                        positive_value_exists(use_ctcl_as_data_source)
+                    election_changed = True
+                if use_google_civic_as_data_source is not None:
+                    election_on_stage.use_google_civic_as_data_source = \
+                        positive_value_exists(use_google_civic_as_data_source)
+                    election_changed = True
+                if use_vote_usa_as_data_source is not None:
+                    election_on_stage.use_vote_usa_as_data_source = \
+                        positive_value_exists(use_vote_usa_as_data_source)
                     election_changed = True
                 if election_changed:
                     election_on_stage.save()
@@ -380,6 +400,7 @@ class ElectionManager(models.Manager):
     def retrieve_election(self, google_civic_election_id=0, election_id=0, read_only=True):
         google_civic_election_id = convert_to_int(google_civic_election_id)
 
+        ctcl_uuid = ''
         election = Election()
         try:
             if positive_value_exists(google_civic_election_id):
@@ -388,6 +409,7 @@ class ElectionManager(models.Manager):
                 else:
                     election = Election.objects.get(google_civic_election_id=google_civic_election_id)
                 if election.id:
+                    ctcl_uuid = election.ctcl_uuid
                     election_found = True
                     status = "ELECTION_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID "
                 else:
@@ -400,6 +422,7 @@ class ElectionManager(models.Manager):
                 else:
                     election = Election.objects.get(id=election_id)
                 if election.id:
+                    ctcl_uuid = election.ctcl_uuid
                     election_found = True
                     status = "ELECTION_FOUND_WITH_ELECTION_ID "
                 else:
@@ -423,6 +446,7 @@ class ElectionManager(models.Manager):
             'success':                  success,
             'status':                   status,
             'election_found':           election_found,
+            'ctcl_uuid':                ctcl_uuid,
             'google_civic_election_id': google_civic_election_id,
             'election':                 election,
         }

@@ -186,6 +186,12 @@
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_smart_id" field_label="Vote Smart ID" conflict_status=conflict_values.vote_smart_id candidate1_field_value=candidate_option1.vote_smart_id candidate2_field_value=candidate_option2.vote_smart_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_office_id" field_label="Vote USA Office" conflict_status=conflict_values.vote_usa_office_id candidate1_field_value=candidate_option1.vote_usa_office_id candidate2_field_value=candidate_option2.vote_usa_office_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_politician_id" field_label="Vote USA Politician" conflict_status=conflict_values.vote_usa_politician_id candidate1_field_value=candidate_option1.vote_usa_politician_id candidate2_field_value=candidate_option2.vote_usa_politician_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_profile_image_url" field_label="Vote USA Image" conflict_status=conflict_values.vote_usa_profile_image_url candidate1_field_value=candidate_option1.vote_usa_profile_image_url candidate2_field_value=candidate_option2.vote_usa_profile_image_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_tiny" field_label="We Vote Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_medium" field_label="We Vote Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
