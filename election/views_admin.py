@@ -515,6 +515,7 @@ def election_edit_view(request, election_local_id):
 
     messages_on_stage = get_messages(request)
 
+    ctcl_uuid = request.GET.get('ctcl_uuid', '')
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     election_local_id = convert_to_int(election_local_id)
@@ -525,6 +526,7 @@ def election_edit_view(request, election_local_id):
         try:
             election_on_stage = Election.objects.get(id=election_local_id)
             election_on_stage_found = True
+            ctcl_uuid = election_on_stage.ctcl_uuid
             google_civic_election_id = election_on_stage.google_civic_election_id
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
@@ -542,6 +544,7 @@ def election_edit_view(request, election_local_id):
 
         template_values = {
             'ballotpedia_election_list': ballotpedia_election_list,
+            'ctcl_uuid': ctcl_uuid,
             'google_civic_election_id': google_civic_election_id,
             'election': election_on_stage,
             'messages_on_stage': messages_on_stage,
@@ -621,6 +624,7 @@ def election_edit_process_view(request):
     ballotpedia_election_id = request.POST.get('ballotpedia_election_id', False)
     ballotpedia_kind_of_election = request.POST.get('ballotpedia_kind_of_election', False)
     candidate_photos_finished = request.POST.get('candidate_photos_finished', False)
+    ctcl_uuid = request.POST.get('ctcl_uuid', False)
     election_day_text = request.POST.get('election_day_text', False)
     election_local_id = convert_to_int(request.POST.get('election_id', 0))
     election_name = request.POST.get('election_name', False)
@@ -630,7 +634,16 @@ def election_edit_process_view(request):
     include_in_list_for_voters = request.POST.get('include_in_list_for_voters', False)
     internal_notes = request.POST.get('internal_notes', False)
     is_national_election = request.POST.get('is_national_election', False)
+    ocd_division_id = request.POST.get('ocd_division_id', False)
     state_code = request.POST.get('state_code', False)
+    use_ballotpedia_as_data_source = request.POST.get('use_ballotpedia_as_data_source', False)
+    use_ballotpedia_as_data_source = positive_value_exists(use_ballotpedia_as_data_source)
+    use_ctcl_as_data_source = request.POST.get('use_ctcl_as_data_source', False)
+    use_ctcl_as_data_source = positive_value_exists(use_ctcl_as_data_source)
+    use_google_civic_as_data_source = request.POST.get('use_google_civic_as_data_source', False)
+    use_google_civic_as_data_source = positive_value_exists(use_google_civic_as_data_source)
+    use_vote_usa_as_data_source = request.POST.get('use_vote_usa_as_data_source', False)
+    use_vote_usa_as_data_source = positive_value_exists(use_vote_usa_as_data_source)
 
     election_on_stage = Election()
 
@@ -670,6 +683,17 @@ def election_edit_process_view(request):
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
+    if not election_on_stage_found and positive_value_exists(ctcl_uuid):
+        status += "RETRIEVING_ELECTION_BY_CTCL_UUID "
+        try:
+            election_query = Election.objects.filter(ctcl_uuid=ctcl_uuid)
+            if len(election_query):
+                election_on_stage = election_query[0]
+                election_local_id = election_on_stage.id
+                election_on_stage_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
     if election_on_stage_found:
         status += "UPDATING_EXISTING_ELECTION "
         # if convert_to_int(election_on_stage.google_civic_election_id) < 1000000:  # Not supported currently
@@ -702,11 +726,25 @@ def election_edit_process_view(request):
         if ballotpedia_kind_of_election is not False:
             election_on_stage.ballotpedia_kind_of_election = ballotpedia_kind_of_election
 
+        if ctcl_uuid is not False:
+            if not positive_value_exists(ctcl_uuid):
+                ctcl_uuid = None
+            election_on_stage.ctcl_uuid = ctcl_uuid
+
+        if ocd_division_id is not False:
+            if not positive_value_exists(ocd_division_id):
+                ocd_division_id = None
+            election_on_stage.ocd_division_id = ocd_division_id
+
         election_on_stage.candidate_photos_finished = candidate_photos_finished
         election_on_stage.election_preparation_finished = election_preparation_finished
         election_on_stage.include_in_list_for_voters = include_in_list_for_voters
         election_on_stage.ignore_this_election = ignore_this_election
         election_on_stage.is_national_election = is_national_election
+        election_on_stage.use_ballotpedia_as_data_source = use_ballotpedia_as_data_source
+        election_on_stage.use_ctcl_as_data_source = use_ctcl_as_data_source
+        election_on_stage.use_google_civic_as_data_source = use_google_civic_as_data_source
+        election_on_stage.use_vote_usa_as_data_source = use_vote_usa_as_data_source
 
         if internal_notes is not False:
             election_on_stage.internal_notes = internal_notes
@@ -726,6 +764,9 @@ def election_edit_process_view(request):
         if not state_code:
             state_code = ""
 
+        if not positive_value_exists(ctcl_uuid):
+            ctcl_uuid = None
+
         try:
             election_on_stage = Election(
                 candidate_photos_finished=candidate_photos_finished,
@@ -735,17 +776,25 @@ def election_edit_process_view(request):
                 is_national_election=is_national_election,
                 include_in_list_for_voters=include_in_list_for_voters,
                 state_code=state_code,
+                use_ballotpedia_as_data_source=use_ballotpedia_as_data_source,
+                use_ctcl_as_data_source=use_ctcl_as_data_source,
+                use_google_civic_as_data_source=use_google_civic_as_data_source,
+                use_vote_usa_as_data_source=use_vote_usa_as_data_source,
             )
             if positive_value_exists(ballotpedia_election_id):
                 election_on_stage.ballotpedia_election_id = ballotpedia_election_id
             if positive_value_exists(ballotpedia_kind_of_election):
                 election_on_stage.ballotpedia_kind_of_election = ballotpedia_kind_of_election
+            if positive_value_exists(ctcl_uuid):
+                election_on_stage.ctcl_uuid = ctcl_uuid
             if positive_value_exists(election_name):
                 election_on_stage.election_name = election_name
             if positive_value_exists(election_day_text):
                 election_on_stage.election_day_text = election_day_text
             if positive_value_exists(internal_notes):
                 election_on_stage.internal_notes = internal_notes
+            if positive_value_exists(ocd_division_id):
+                election_on_stage.ocd_division_id = ocd_division_id
             election_on_stage.save()
             election_local_id = election_on_stage.id
             status += "CREATED_NEW_ELECTION "
@@ -1353,6 +1402,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
     state_code = request.GET.get('state_code', '')
     election_local_id = convert_to_int(election_local_id)
     ballot_returned_search = request.GET.get('ballot_returned_search', '')
+    ballot_returned_search = ballot_returned_search.strip() if positive_value_exists(ballot_returned_search) else ''
     voter_ballot_saved_search = request.GET.get('voter_ballot_saved_search', '')
     merge_ballot_returned_duplicates = \
         positive_value_exists(request.GET.get('merge_ballot_returned_duplicates', False))
@@ -1673,7 +1723,7 @@ def elections_import_from_master_server_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
-    results = elections_import_from_master_server(request)
+    results = elections_import_from_master_server(request)  # Consumes electionsSyncOut
 
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])

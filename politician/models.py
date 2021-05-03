@@ -105,7 +105,7 @@ class Politician(models.Model):
     we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
                                                             blank=True, null=True)
     # ctcl politician fields
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
     politician_facebook_id = models.CharField(verbose_name='politician facebook user name', max_length=255, null=True,
                                               unique=False)
     politician_phone_number = models.CharField(verbose_name='politician phone number', max_length=255, null=True,

@@ -48,7 +48,7 @@ def issues_sync_out_view(request):  # issuesSyncOut
             new_filter = Q(issue_description__icontains=issue_search)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__icontains=issue_search)
+            new_filter = Q(we_vote_id__iexact=issue_search)
             filters.append(new_filter)
 
             # Add the first query
@@ -238,7 +238,7 @@ def issue_list_view(request):
                 new_filter = Q(issue_description__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__icontains=one_word)
+                new_filter = Q(we_vote_id__iexact=one_word)
                 filters.append(new_filter)
 
                 # Add the first query
@@ -786,7 +786,7 @@ def organization_link_to_issue_sync_out_view(request):  # organizationLinkToIssu
         #     new_filter = Q(issue_description__icontains=issue_search)
         #     filters.append(new_filter)
         #
-        #     new_filter = Q(we_vote_id__icontains=issue_search)
+        #     new_filter = Q(we_vote_id__iexact=issue_search)
         #     filters.append(new_filter)
         #
         #     # Add the first query

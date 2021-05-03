@@ -65,7 +65,7 @@ def elected_office_list_view(request):
                 new_filter = Q(elected_office_name__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__icontains=one_word)
+                new_filter = Q(we_vote_id__iexact=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(wikipedia_id__icontains=one_word)

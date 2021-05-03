@@ -539,7 +539,7 @@ def polling_location_list_view(request):
         for one_word in search_words:
             filters = []
 
-            new_filter = Q(we_vote_id__icontains=one_word)
+            new_filter = Q(we_vote_id__iexact=one_word)
             filters.append(new_filter)
 
             new_filter = Q(location_name__icontains=one_word)

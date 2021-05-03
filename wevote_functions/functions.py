@@ -415,6 +415,7 @@ for letter_identifier in LETTER_IDENTIFIERS:
 
 OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS = {
     'commissioner of insurance': 'insurance commissioner',
+    'house of delegates': 'state representative',
     'member state board of equalization': 'state board of equalization',
     'member of the state assembly': 'state assembly',
     'superintendent of public instruction': 'state superintendent of public instruction',
@@ -423,188 +424,79 @@ OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS = {
     'united states senator': 'u.s. senate',
 }
 
-# Single digit districts go last, so we can find the double digit districts first
-OFFICE_NAME_EQUIVALENT_DISTRICT_PHRASE_PAIRS = {
-    'district 10': '10th district',
-    'district 11': '11th district',
-    'district 12': '12th district',
-    'district 13': '13th district',
-    'district 14': '14th district',
-    'district 15': '15th district',
-    'district 16': '16th district',
-    'district 17': '17th district',
-    'district 18': '18th district',
-    'district 19': '19th district',
-    '10th congressional district': 'district 10',
-    '11th congressional district': 'district 11',
-    '12th congressional district': 'district 12',
-    '13th congressional district': 'district 13',
-    '14th congressional district': 'district 14',
-    '15th congressional district': 'district 15',
-    '16th congressional district': 'district 16',
-    '17th congressional district': 'district 17',
-    '18th congressional district': 'district 18',
-    '19th congressional district': 'district 19',
-    'district 20': '20th district',
-    'district 21': '21st district',
-    'district 22': '22nd district',
-    'district 23': '23rd district',
-    'district 24': '24th district',
-    'district 25': '25th district',
-    'district 26': '26th district',
-    'district 27': '27th district',
-    'district 28': '28th district',
-    'district 29': '29th district',
-    '20th congressional district': 'district 20',
-    '21st congressional district': 'district 21',
-    '22nd congressional district': 'district 22',
-    '23th congressional district': 'district 23',
-    '24th congressional district': 'district 24',
-    '25th congressional district': 'district 25',
-    '26th congressional district': 'district 26',
-    '27th congressional district': 'district 27',
-    '28th congressional district': 'district 28',
-    '29th congressional district': 'district 29',
-    'district 30': '30th district',
-    'district 31': '31st district',
-    'district 32': '32nd district',
-    'district 33': '33rd district',
-    'district 34': '34th district',
-    'district 35': '35th district',
-    'district 36': '36th district',
-    'district 37': '37th district',
-    'district 38': '38th district',
-    'district 39': '39th district',
-    '30th congressional district': 'district 30',
-    '31st congressional district': 'district 31',
-    '32nd congressional district': 'district 32',
-    '33th congressional district': 'district 33',
-    '34th congressional district': 'district 34',
-    '35th congressional district': 'district 35',
-    '36th congressional district': 'district 36',
-    '37th congressional district': 'district 37',
-    '38th congressional district': 'district 38',
-    '39th congressional district': 'district 39',
-    'district 40': '40th district',
-    'district 41': '41st district',
-    'district 42': '42nd district',
-    'district 43': '43rd district',
-    'district 44': '44th district',
-    'district 45': '45th district',
-    'district 46': '46th district',
-    'district 47': '47th district',
-    'district 48': '48th district',
-    'district 49': '49th district',
-    '40th congressional district': 'district 40',
-    '41st congressional district': 'district 41',
-    '42nd congressional district': 'district 42',
-    '43th congressional district': 'district 43',
-    '44th congressional district': 'district 44',
-    '45th congressional district': 'district 45',
-    '46th congressional district': 'district 46',
-    '47th congressional district': 'district 47',
-    '48th congressional district': 'district 48',
-    '49th congressional district': 'district 49',
-    'district 50': '50th district',
-    'district 51': '51st district',
-    'district 52': '52nd district',
-    'district 53': '53rd district',
-    'district 54': '54th district',
-    'district 55': '55th district',
-    'district 56': '56th district',
-    'district 57': '57th district',
-    'district 58': '58th district',
-    'district 59': '59th district',
-    '50th congressional district': 'district 50',
-    '51st congressional district': 'district 51',
-    '52nd congressional district': 'district 52',
-    '53th congressional district': 'district 53',
-    '54th congressional district': 'district 54',
-    '55th congressional district': 'district 55',
-    '56th congressional district': 'district 56',
-    '57th congressional district': 'district 57',
-    '58th congressional district': 'district 58',
-    '59th congressional district': 'district 59',
-    'district 60': '60th district',
-    'district 61': '61st district',
-    'district 62': '62nd district',
-    'district 63': '63rd district',
-    'district 64': '64th district',
-    'district 65': '65th district',
-    'district 66': '66th district',
-    'district 67': '67th district',
-    'district 68': '68th district',
-    'district 69': '69th district',
-    '60th congressional district': 'district 60',
-    '61st congressional district': 'district 61',
-    '62nd congressional district': 'district 62',
-    '63th congressional district': 'district 63',
-    '64th congressional district': 'district 64',
-    '65th congressional district': 'district 65',
-    '66th congressional district': 'district 66',
-    '67th congressional district': 'district 67',
-    '68th congressional district': 'district 68',
-    '69th congressional district': 'district 69',
-    'district 70': '70th district',
-    'district 71': '71st district',
-    'district 72': '72nd district',
-    'district 73': '73rd district',
-    'district 74': '74th district',
-    'district 75': '75th district',
-    'district 76': '76th district',
-    'district 77': '77th district',
-    'district 78': '78th district',
-    'district 79': '79th district',
-    '70th congressional district': 'district 70',
-    '71st congressional district': 'district 71',
-    '72nd congressional district': 'district 72',
-    '73th congressional district': 'district 73',
-    '74th congressional district': 'district 74',
-    '75th congressional district': 'district 75',
-    '76th congressional district': 'district 76',
-    '77th congressional district': 'district 77',
-    '78th congressional district': 'district 78',
-    '79th congressional district': 'district 79',
-    'district 80': '80th district',
-    'district 81': '81st district',
-    'district 82': '82nd district',
-    'district 83': '83rd district',
-    'district 84': '84th district',
-    'district 85': '85th district',
-    'district 86': '86th district',
-    'district 87': '87th district',
-    'district 88': '88th district',
-    'district 89': '89th district',
-    'district 90': '90th district',
-    '90th congressional district': 'district 90',
-    '91st congressional district': 'district 91',
-    '92nd congressional district': 'district 92',
-    '93th congressional district': 'district 93',
-    '94th congressional district': 'district 94',
-    '95th congressional district': 'district 95',
-    '96th congressional district': 'district 96',
-    '97th congressional district': 'district 97',
-    '98th congressional district': 'district 98',
-    '99th congressional district': 'district 99',
-    'district 1': '1st district',
-    'district 2': '2nd district',
-    'district 3': '3rd district',
-    'district 4': '4th district',
-    'district 5': '5th district',
-    'district 6': '6th district',
-    'district 7': '7th district',
-    'district 8': '8th district',
-    'district 9': '9th district',
-    '1st congressional district': 'district 1',
-    '2nd congressional district': 'district 2',
-    '3rd congressional district': 'district 3',
-    '4th congressional district': 'district 4',
-    '5th congressional district': 'district 5',
-    '6th congressional district': 'district 6',
-    '7th congressional district': 'district 7',
-    '8th congressional district': 'district 8',
-    '9th congressional district': 'district 9',
-}
+DISTRICT_PAIR_PATTERNS_XND = [
+    ['district {district_number}', '{district_number}nd district'],
+    ['{district_number}nd congressional district', 'district {district_number}'],
+]
+DISTRICT_PAIR_PATTERNS_XRD = [
+    ['district {district_number}', '{district_number}rd district'],
+    ['{district_number}rd congressional district', 'district {district_number}'],
+]
+DISTRICT_PAIR_PATTERNS_XST = [
+    ['district {district_number}', '{district_number}st district'],
+    ['{district_number}st congressional district', 'district {district_number}'],
+]
+DISTRICT_PAIR_PATTERNS_XTH = [
+    ['district {district_number}', '{district_number}th district'],
+    ['{district_number}th congressional district', 'district {district_number}'],
+]
+
+
+def is_ordinal_number(incoming_integer):
+    if incoming_integer in range(1, 4):  # Numbers equal 1, 2, or 3
+        return True
+    if incoming_integer < 10:
+        return False
+    tens_digits = incoming_integer % 100
+    if tens_digits in range(1, 4):
+        return True
+    if tens_digits in range(21, 99):
+        last_digit = tens_digits % 10
+        if last_digit in range(1, 4):
+            return True
+    return False
+
+
+def generate_office_equivalent_district_phrase_pairs():
+    district_numbers_in_chosen_order = []
+    district_number = 200
+    while district_number < 300:
+        district_numbers_in_chosen_order.append(district_number)
+        district_number += 1
+    district_number = 100
+    while district_number < 200:
+        district_numbers_in_chosen_order.append(district_number)
+        district_number += 1
+    district_number = 10
+    while district_number < 100:
+        district_numbers_in_chosen_order.append(district_number)
+        district_number += 1
+    district_number = 1
+    while district_number < 10:
+        district_numbers_in_chosen_order.append(district_number)
+        district_number += 1
+    office_equivalent_district_phrase_pairs = []
+    for district_number in district_numbers_in_chosen_order:
+        if is_ordinal_number(district_number):
+            last_digit = district_number % 10
+            if last_digit == 1:
+                patterns_to_use = DISTRICT_PAIR_PATTERNS_XST
+            elif last_digit == 2:
+                patterns_to_use = DISTRICT_PAIR_PATTERNS_XND
+            elif last_digit == 3:
+                patterns_to_use = DISTRICT_PAIR_PATTERNS_XRD
+            else:
+                patterns_to_use = DISTRICT_PAIR_PATTERNS_XTH
+        else:
+            patterns_to_use = DISTRICT_PAIR_PATTERNS_XTH
+        for left_template, right_template in patterns_to_use:
+            new_pair = [
+                left_template.format(district_number=district_number),
+                right_template.format(district_number=district_number)
+            ]
+            office_equivalent_district_phrase_pairs.append(new_pair)
+    return office_equivalent_district_phrase_pairs
+
 
 # We also check generate state specific phrases like "of california"
 OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES = [
@@ -857,6 +749,9 @@ def extract_state_code_from_address_string(text_for_map_search):
 
 
 def extract_district_from_ocd_division_id(ocd_division_id):
+    if not positive_value_exists(ocd_division_id):
+        return ''
+
     # Pull this from ocdDivisionId
     pieces = [piece.split(':', 1) for piece in ocd_division_id.split('/')]
     fields = {}
@@ -873,13 +768,42 @@ def extract_district_from_ocd_division_id(ocd_division_id):
     if len(pieces) < 2:
         return ''
 
-    if pieces[1][0] != 'district':
-        # raise ValueError('Expecting state from OCD, and district not found')
+    if pieces[1][0] != 'state':
+        # raise ValueError('Expecting state from OCD, and state not found')
         return ''
 
-    fields['district'] = pieces[1][1]
+    fields['state'] = pieces[1][1]
 
-    return fields['district']
+    try:
+        if pieces[2][0] in ['place']:
+            # These do not have district numbers
+            pass
+        else:
+            return pieces[2][0]
+    except Exception as e:
+        pass
+
+    return None
+
+
+def extract_district_id_from_ocd_division_id(ocd_division_id):
+    if not positive_value_exists(ocd_division_id):
+        return ''
+
+    # Pull this from ocdDivisionId
+    pieces = [piece.split(':', 1) for piece in ocd_division_id.split('/')]
+    fields = {}
+
+    try:
+        last_piece = pieces[-1]
+        string_at_end = last_piece[1]
+        integer_at_end = convert_to_int(string_at_end)
+        if integer_at_end > 0:
+            return integer_at_end
+    except Exception as e:
+        pass
+
+    return None
 
 
 def extract_zip5_from_zip9(zip9):
@@ -965,6 +889,24 @@ def display_full_name_with_correct_capitalization(full_name):
 
         return full_name_str
     return ""
+
+
+def convert_district_scope_to_ballotpedia_race_office_level(district_scope):
+    federal_scope_list = ['congressional', 'national']
+    local_scope_list = [
+        'cityCouncil', 'citywide', 'countyCouncil', 'countywide', 'schoolBoard', 'special',
+        'city', 'county', 'county-council']  # ids in this line not in specification
+    state_scope_list = [
+        'judicial', 'stateLower', 'stateUpper', 'statewide', 'township', 'ward',
+        'state', 'state-house']  # ids in this line not in specification
+    if district_scope in federal_scope_list:
+        return 'Federal'
+    elif district_scope in local_scope_list:
+        return 'Local'
+    elif district_scope in state_scope_list:
+        return 'State'
+    else:
+        return ''
 
 
 def extract_email_addresses_from_string(incoming_string):
@@ -1075,6 +1017,29 @@ def extract_nickname_from_full_name(full_name):
         nickname = full_name_parsed.nickname
         return nickname
     return ""
+
+
+def extract_vote_usa_office_id(raw_vote_usa_office_id):
+    if positive_value_exists(raw_vote_usa_office_id):
+        if '|' in raw_vote_usa_office_id:
+            parts = raw_vote_usa_office_id.split("|")
+            vote_usa_office_id = parts[1]
+        else:
+            vote_usa_office_id = raw_vote_usa_office_id
+        return vote_usa_office_id
+    else:
+        return ''
+
+
+def extract_vote_usa_politician_id(raw_vote_usa_politician_id):
+    if positive_value_exists(raw_vote_usa_politician_id):
+        if '|' in raw_vote_usa_politician_id:
+            parts = raw_vote_usa_politician_id.split("|")
+            vote_usa_office_id = parts[1]
+        else:
+            vote_usa_office_id = raw_vote_usa_politician_id
+    else:
+        pass
 
 
 def extract_website_from_url(url_string):

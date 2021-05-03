@@ -48,7 +48,7 @@ def elections_import_from_sample_file():
     return elections_import_from_structured_json(structured_json)
 
 
-def elections_import_from_master_server(request=None):
+def elections_import_from_master_server(request=None):  # Consumes electionsSyncOut
     """
     Get the json data, and either create new entries or update existing
     :return:
@@ -66,7 +66,7 @@ def elections_import_from_master_server(request=None):
     return elections_import_from_structured_json(structured_json)
 
 
-def elections_import_from_structured_json(structured_json):
+def elections_import_from_structured_json(structured_json):  # Consumes electionsSyncOut
 
     election_manager = ElectionManager()
     elections_saved = 0
@@ -84,6 +84,7 @@ def elections_import_from_structured_json(structured_json):
             if "ballotpedia_kind_of_election" in one_election else ''
         candidate_photos_finished = one_election["candidate_photos_finished"] \
             if "candidate_photos_finished" in one_election else ''
+        ctcl_uuid = one_election["ctcl_uuid"] if "ctcl_uuid" in one_election else ''
         election_name = one_election["election_name"] if "election_name" in one_election else ''
         election_day_text = one_election["election_day_text"] if "election_day_text" in one_election else ''
         election_preparation_finished = one_election["election_preparation_finished"] \
@@ -100,6 +101,14 @@ def elections_import_from_structured_json(structured_json):
         is_national_election = positive_value_exists(is_national_election_raw)
         ocd_division_id = one_election["ocd_division_id"] if "ocd_division_id" in one_election else ''
         state_code = one_election["state_code"] if "state_code" in one_election else ''
+        use_ballotpedia_as_data_source = one_election["use_ballotpedia_as_data_source"] \
+            if "use_ballotpedia_as_data_source" in one_election else ''
+        use_ctcl_as_data_source = one_election["use_ctcl_as_data_source"] \
+            if "use_ctcl_as_data_source" in one_election else ''
+        use_google_civic_as_data_source = one_election["use_google_civic_as_data_source"] \
+            if "use_google_civic_as_data_source" in one_election else ''
+        use_vote_usa_as_data_source = one_election["use_vote_usa_as_data_source"] \
+            if "use_vote_usa_as_data_source" in one_election else ''
 
         # Make sure we have the minimum required variables
         if not positive_value_exists(google_civic_election_id) or not positive_value_exists(election_name):
@@ -107,10 +116,21 @@ def elections_import_from_structured_json(structured_json):
             continue
 
         results = election_manager.update_or_create_election(
-                google_civic_election_id, election_name, election_day_text, ocd_division_id,
-                ballotpedia_election_id, ballotpedia_kind_of_election, candidate_photos_finished,
-                election_preparation_finished, ignore_this_election, include_in_list_for_voters,
-                internal_notes, is_national_election, state_code)
+            google_civic_election_id, election_name, election_day_text, ocd_division_id,
+            ballotpedia_election_id=ballotpedia_election_id,
+            ballotpedia_kind_of_election=ballotpedia_kind_of_election,
+            candidate_photos_finished=candidate_photos_finished,
+            ctcl_uuid=ctcl_uuid,
+            election_preparation_finished=election_preparation_finished,
+            ignore_this_election=ignore_this_election,
+            include_in_list_for_voters=include_in_list_for_voters,
+            internal_notes=internal_notes,
+            is_national_election=is_national_election,
+            state_code=state_code,
+            use_ballotpedia_as_data_source=use_ballotpedia_as_data_source,
+            use_ctcl_as_data_source=use_ctcl_as_data_source,
+            use_google_civic_as_data_source=use_google_civic_as_data_source,
+            use_vote_usa_as_data_source=use_vote_usa_as_data_source)
 
         if results['success']:
             if results['new_election_created']:

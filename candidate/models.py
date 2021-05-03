@@ -76,6 +76,9 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'twitter_url',
     'twitter_user_id',
     'vote_smart_id',
+    'vote_usa_office_id',
+    'vote_usa_politician_id',
+    'vote_usa_profile_image_url',
     'we_vote_hosted_profile_image_url_large',
     'we_vote_hosted_profile_image_url_medium',
     'we_vote_hosted_profile_image_url_tiny',
@@ -90,7 +93,7 @@ class CandidateListManager(models.Manager):
     This is a class to make it easy to retrieve lists of Candidates
     """
 
-    def retrieve_all_candidates_for_office(self, office_id='', office_we_vote_id='', read_only=False):
+    def retrieve_all_candidates_for_office(self, office_id=0, office_we_vote_id='', read_only=False):
         candidate_list = []
         candidate_list_found = False
         candidate_we_vote_id_list = []
@@ -371,7 +374,7 @@ class CandidateListManager(models.Manager):
         }
         return results
 
-    def retrieve_candidate_count_for_office(self, office_id='', office_we_vote_id=''):
+    def retrieve_candidate_count_for_office(self, office_id=0, office_we_vote_id=''):
         status = ""
         if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
             status += 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING '
@@ -829,10 +832,14 @@ class CandidateListManager(models.Manager):
         }
         return results
 
-    def retrieve_candidates_from_non_unique_identifiers(self, google_civic_election_id_list, state_code,
-                                                        candidate_twitter_handle, candidate_name,
-                                                        ignore_candidate_id_list=[],
-                                                        read_only=False):
+    def retrieve_candidates_from_non_unique_identifiers(
+            self,
+            google_civic_election_id_list,
+            state_code,
+            candidate_twitter_handle,
+            candidate_name,
+            ignore_candidate_id_list=[],
+            read_only=False):
         """
         This function, retrieve_candidates_from_non_unique_identifiers, is built to find possible duplicate candidates
         with stricter parameters.
@@ -853,8 +860,6 @@ class CandidateListManager(models.Manager):
         candidate_list_found = False
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
         multiple_entries_found = False
-        from office.models import ContestOfficeManager
-        office_manager = ContestOfficeManager()
         success = True
         status = ""
 
@@ -904,6 +909,7 @@ class CandidateListManager(models.Manager):
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND "
             except Exception as e:
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED1 " + str(e) + " "
+                success = False
                 keep_looking_for_duplicates = False
         # twitter handle does not exist, next look up against other data that might match
 
@@ -952,6 +958,7 @@ class CandidateListManager(models.Manager):
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND-EXACT_MATCH "
             except Exception as e:
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED2 " + str(e) + " "
+                success = False
 
         if keep_looking_for_duplicates and positive_value_exists(candidate_name):
             # Search for Candidate(s) that contains the same first and last names
@@ -1000,6 +1007,7 @@ class CandidateListManager(models.Manager):
                 success = True
             except Exception as e:
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED3 " + str(e) + " "
+                success = False
 
         results = {
             'success':                          success,
@@ -1653,7 +1661,7 @@ class CandidateCampaign(models.Model):
     crowdpac_candidate_id = models.PositiveIntegerField(
         verbose_name="crowdpac integer id", null=True, blank=True)
     # CTCL candidate data fields
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
 
     candidate_is_top_ticket = models.BooleanField(verbose_name="candidate is top ticket", default=False)
     candidate_is_incumbent = models.BooleanField(verbose_name="candidate is the current incumbent", default=False)
@@ -1945,9 +1953,16 @@ class CandidateManager(models.Manager):
 
     # NOTE: searching by all other variables seems to return a list of objects
     def retrieve_candidate(
-            self, candidate_id=0, candidate_we_vote_id=None, candidate_maplight_id=None,
-            candidate_name=None, candidate_vote_smart_id=None,
-            ballotpedia_candidate_id=None, google_civic_election_id=None, read_only=False):
+            self,
+            candidate_id=0,
+            candidate_we_vote_id=None,
+            candidate_maplight_id=None,
+            candidate_name=None,
+            candidate_vote_smart_id=None,
+            ballotpedia_candidate_id=None,
+            google_civic_election_id=None,
+            candidate_year=None,
+            read_only=False):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -1999,10 +2014,19 @@ class CandidateManager(models.Manager):
                 status += "RETRIEVE_CANDIDATE_FOUND_BY_VOTE_SMART_ID "
             elif positive_value_exists(candidate_name):
                 if positive_value_exists(read_only):
-                    candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
-                        candidate_name=candidate_name)
+                    if positive_value_exists(candidate_year):
+                        candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
+                            candidate_name=candidate_name,
+                            candidate_year=candidate_year)
+                    else:
+                        candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
+                            candidate_name=candidate_name)
                 else:
-                    candidate_on_stage = CandidateCampaign.objects.get(candidate_name=candidate_name)
+                    if positive_value_exists(candidate_year):
+                        candidate_on_stage = CandidateCampaign.objects.get(candidate_name=candidate_name,
+                                                                           candidate_year=candidate_year)
+                    else:
+                        candidate_on_stage = CandidateCampaign.objects.get(candidate_name=candidate_name)
                 candidate_id = candidate_on_stage.id
                 candidate_we_vote_id = candidate_on_stage.we_vote_id
                 candidate_found = True
@@ -2399,9 +2423,15 @@ class CandidateManager(models.Manager):
         results = self.retrieve_candidates_are_not_duplicates_list(candidate_we_vote_id)
         return results['candidates_are_not_duplicates_list_we_vote_ids']
 
-    def update_or_create_candidate(self, candidate_we_vote_id, google_civic_election_id, ocd_division_id,
-                                   contest_office_id, contest_office_we_vote_id, google_civic_candidate_name,
-                                   updated_candidate_values):
+    def update_or_create_candidate(
+            self,
+            candidate_we_vote_id='',
+            google_civic_election_id='',
+            ocd_division_id='',
+            contest_office_id=0,
+            contest_office_we_vote_id='',
+            google_civic_candidate_name='',
+            updated_candidate_values={}):
         """
         Either update or create a candidate entry.
         """
@@ -2409,6 +2439,7 @@ class CandidateManager(models.Manager):
         success = False
         new_candidate_created = False
         candidate_on_stage = CandidateCampaign()
+        candidate_found = False
         status = ""
         google_civic_candidate_name2 = updated_candidate_values['google_civic_candidate_name2'] \
             if 'google_civic_candidate_name2' in updated_candidate_values else ""
@@ -2437,6 +2468,7 @@ class CandidateManager(models.Manager):
                         we_vote_id__iexact=candidate_we_vote_id,
                         # contest_office_we_vote_id__iexact=contest_office_we_vote_id,
                         defaults=updated_candidate_values)
+                candidate_found = True
                 success = True
                 status += "CANDIDATE_CAMPAIGN_UPDATED_OR_CREATED_BY_CANDIDATE_WE_VOTE_ID "
             except CandidateCampaign.MultipleObjectsReturned as e:
@@ -2450,7 +2482,6 @@ class CandidateManager(models.Manager):
         else:
             # Given we might have the office listed by google_civic_office_name
             # OR office_name, we need to check both before we try to create a new entry
-            candidate_found = False
             try:
                 if not positive_value_exists(google_civic_candidate_name):
                     google_civic_candidate_name = "NO_NAME_IGNORE"
@@ -2718,6 +2749,7 @@ class CandidateManager(models.Manager):
                         contest_office_id=contest_office_id,
                         contest_office_we_vote_id=contest_office_we_vote_id,
                         google_civic_candidate_name=google_civic_candidate_name)
+                    candidate_found = True
                     if positive_value_exists(candidate_on_stage.id):
                         for key, value in updated_candidate_values.items():
                             if hasattr(candidate_on_stage, key):
@@ -2742,6 +2774,7 @@ class CandidateManager(models.Manager):
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'new_candidate_created':    new_candidate_created,
             'candidate':                candidate_on_stage,
+            'candidate_found':          candidate_found,
         }
         return results
 
@@ -3140,9 +3173,9 @@ class CandidateManager(models.Manager):
                     candidate.twitter_location = twitter_json['location']
                     values_changed = True
             if 'entities' in twitter_json and \
-                'url' in twitter_json['entities'] and \
-                'urls' in twitter_json['entities']['url'] and \
-                len(twitter_json['entities']['url']['urls']) > 0:
+                    'url' in twitter_json['entities'] and \
+                    'urls' in twitter_json['entities']['url'] and \
+                    len(twitter_json['entities']['url']['urls']) > 0:
                 # scan and pick the first encountered
                 for url_data in twitter_json['entities']['url']['urls']:
                     if 'expanded_url' in url_data and positive_value_exists(url_data['expanded_url']):
@@ -3323,6 +3356,8 @@ class CandidateManager(models.Manager):
         ctcl_uuid = update_values['ctcl_uuid'] if 'ctcl_uuid' in update_values else ''
         facebook_url = update_values['facebook_url'] \
             if 'facebook_url' in update_values else ''
+        google_civic_candidate_name = update_values['google_civic_candidate_name'] \
+            if 'google_civic_candidate_name' in update_values else ''
         google_civic_election_id = update_values['google_civic_election_id'] \
             if 'google_civic_election_id' in update_values else ''
         photo_url = update_values['photo_url'] \
@@ -3394,6 +3429,7 @@ class CandidateManager(models.Manager):
                 new_candidate.crowdpac_candidate_id = convert_to_int(crowdpac_candidate_id)
                 new_candidate.ctcl_uuid = ctcl_uuid
                 new_candidate.facebook_url = facebook_url
+                new_candidate.google_civic_candidate_name = google_civic_candidate_name
                 new_candidate.party = candidate_party_name
                 new_candidate.photo_url = photo_url
                 if new_candidate.photo_url:
@@ -3628,10 +3664,12 @@ class CandidateManager(models.Manager):
         if "http" not in temp_url_string:
             modified_url_string = "https:{0}".format(temp_url_string)
         # image_source=OTHER_SOURCE is not currently used
-        cache_results = cache_master_and_resized_image(candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
-                                                       other_source_image_url=modified_url_string,
-                                                       other_source=ORGANIZATION_ENDORSEMENTS_IMAGE_NAME,
-                                                       image_source=OTHER_SOURCE)
+        cache_results = cache_master_and_resized_image(
+            candidate_id=candidate.id,
+            candidate_we_vote_id=candidate.we_vote_id,
+            other_source_image_url=modified_url_string,
+            other_source=ORGANIZATION_ENDORSEMENTS_IMAGE_NAME,
+            image_source=OTHER_SOURCE)
         cached_other_source_image_url_https = cache_results['cached_other_source_image_url_https']
         # We store the original source of the candidate photo, even though we don't use this url to display the image
         candidate.other_source_url = candidate_photo_url
@@ -3739,7 +3777,8 @@ class CandidateToOfficeLink(models.Model):
             logger.error("CandidateToOfficeLink.election Found multiple")
             return
         except Election.DoesNotExist:
-            logger.error("CandidateToOfficeLink.election not attached to object, id: " + str(self.google_civic_election_id))
+            logger.error("CandidateToOfficeLink.election not attached to object, id: "
+                         "" + str(self.google_civic_election_id))
             return
         return election
 
@@ -3751,7 +3790,7 @@ class CandidateToOfficeLink(models.Model):
             logger.error("CandidateToOfficeLink.office Found multiple")
             return
         except ContestOffice.DoesNotExist:
-            logger.error("CandidateToOfficeLink.office not attached to object, id: " + str(self.contest_office_we_vote_id))
+            logger.error("CandidateToOfficeLink.office not attached to object, id: "
+                         "" + str(self.contest_office_we_vote_id))
             return
         return office
-

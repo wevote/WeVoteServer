@@ -121,14 +121,10 @@
           {% endif %}
             <th>State</th>
             <th>District ID</th>
-            <th>Ballotpedia District ID</th>
-            <th>Vote USA Office ID</th>
             <th># of Candidates</th>
             <th>Public Positions</th>
             <th>Battleground</th>
-            <th>Ocd Division ID</th>
-            <th>BP Race ID</th>
-            <th>BP Elected Office ID</th>
+            <th>IDs</th>
             <th>Select</th>
         </tr>
       </thead>
@@ -143,15 +139,20 @@
             <td>{{ office.google_civic_election_id|default_if_none:"" }}</td>
           {% endif %}
             <td>{{ office.state_code }}</td>
-            <td>{{ office.district_id|default_if_none:"" }}</td>
-            <td>{{ office.ballotpedia_district_id|default_if_none:"" }}</td>
-            <td>{{ office.vote_usa_office_id|default_if_none:"" }}</td>
+            <td>
+                {% if office.district_id %}{{ office.district_id|default_if_none:"" }}<br />{% endif %}
+                {% if office.ballotpedia_district_id %}BP: {{ office.ballotpedia_district_id|default_if_none:"" }}<br />{% endif %}
+            </td>
             <td>{{ office.candidate_count }}</td>
             <td>{{ office.positions_count }}</td>
             <td>{{ office.is_battleground_race|default_if_none:"" }}</td>
-            <td>{{ office.ocd_division_id|default_if_none:"" }}</td>
-            <td>{{ office.ballotpedia_race_id|default_if_none:"" }}</td>
-            <td>{{ office.ballotpedia_office_id|default_if_none:"" }}</td>
+            <td>
+                {% if office.ocd_division_id %}{{ office.ocd_division_id|default_if_none:"" }}<br />{% endif %}
+                {% if office.ballotpedia_race_id %}BP Race Id: {{ office.ballotpedia_race_id|default_if_none:"" }}<br />{% endif %}
+                {% if office.ballotpedia_office_id %}BP Office Id: {{ office.ballotpedia_office_id|default_if_none:"" }}<br />{% endif %}
+                {% if office.ctcl_uuid %}CTCL: <span style="font-size: 10px;">{{ office.ctcl_uuid|default_if_none:"" }}</span><br />{% endif %}
+                {% if office.vote_usa_office_id %}Vote USA: {{ office.vote_usa_office_id|default_if_none:"" }}<br />{% endif %}
+            </td>
             <td>
                 <input type="checkbox" name="select_for_marking_checks[]" id="select_for_marking_id" value="{{ office.we_vote_id }}"/>
             </td>

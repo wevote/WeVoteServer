@@ -261,7 +261,7 @@ def office_list_view(request):
                 new_filter = Q(vote_usa_office_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__icontains=one_word)
+                new_filter = Q(we_vote_id__iexact=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(wikipedia_id__icontains=one_word)
@@ -524,6 +524,7 @@ def office_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    ctcl_uuid = request.POST.get('ctcl_uuid', False)
     office_id = convert_to_int(request.POST.get('office_id', 0))
     office_name = request.POST.get('office_name', False)
     google_civic_office_name = request.POST.get('google_civic_office_name', False)
@@ -571,6 +572,8 @@ def office_edit_process_view(request):
         if office_on_stage_found:
             # Update
             # Removed for now: convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and
+            if ctcl_uuid is not False:
+                office_on_stage.ctcl_uuid = ctcl_uuid
             if office_name is not False:
                 office_on_stage.office_name = office_name
             if google_civic_office_name is not False:
@@ -755,10 +758,10 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
             new_filter = Q(office_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__icontains=one_word)
+            new_filter = Q(we_vote_id__iexact=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(wikipedia_id__icontains=one_word)
+            new_filter = Q(wikipedia_id__iexact=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -1197,12 +1200,14 @@ def office_merge_process_view(request):
 
     for attribute in CONTEST_OFFICE_UNIQUE_IDENTIFIERS:
         conflict_value = conflict_values.get(attribute, None)
-        if conflict_value == "CONFLICT":
+        if conflict_value is "CONFLICT":
             choice = request.POST.get(attribute + '_choice', '')
             if contest_office2_we_vote_id == choice:
                 setattr(contest_office1_on_stage, attribute, getattr(contest_office2_on_stage, attribute))
-        elif conflict_value == "CONTEST_OFFICE2":
+        elif conflict_value is "CONTEST_OFFICE2":
             setattr(contest_office1_on_stage, attribute, getattr(contest_office2_on_stage, attribute))
+        else:
+            pass
 
     # Preserve unique google_civic_office_name, _name2, _name3, _name4, and _name5
     if positive_value_exists(contest_office2_on_stage.google_civic_office_name):

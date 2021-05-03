@@ -156,15 +156,7 @@
 <form action="{% url "election:election_edit_process" %}" method="post" class="form-horizontal">
 
     <div class="form-group">
-        <label for="election_id" class="col-sm-3 control-label">Election Name{% if election %} (ID: {{ election.id }}){% endif %}</label>
-        <div class="col-sm-8">
-            <input type="text" name="election" id="election_id" class="form-control" disabled
-                   value="{% if election %}{{ election.election_name }}{% endif %}" />
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label for="include_in_list_for_voters_id" class="col-sm-3 control-label"></label>
+        <label for="include_in_list_for_voters_id" class="col-sm-3 control-label">Election Settings</label>
         <div class="col-sm-8">
             <input type="checkbox" name="include_in_list_for_voters" id="include_in_list_for_voters_id" disabled
                value={% if election %}{% if election.include_in_list_for_voters %}True{% else %}False{% endif %}{% else %}False{% endif %}
@@ -185,36 +177,43 @@
                    value="True"
                    {% if election.candidate_photos_finished %}checked{% endif %} />
               Candidate photos finished
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label for="google_civic_election_id_id" class="col-sm-3 control-label">Google Civic ID</label>
-        <div class="col-sm-8">
-            <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" class="form-control" disabled
-                   value="{% if election %}{{ election.google_civic_election_id|default_if_none:"" }}{% endif %}" />
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label for="is_national_election_id" class="col-sm-3 control-label"></label>
-        <div class="col-sm-8">
+            &nbsp;&nbsp;&nbsp;
             <input type="checkbox" name="is_national_election" id="is_national_election_id" disabled
                value={% if election %}{% if election.is_national_election %}True{% else %}False{% endif %}{% else %}False{% endif %}
                {% if election.is_national_election %}checked{% endif %} />
             Is National Election (<a href="{% url 'election:election_edit' election.id %}">edit</a>)
+      <br />
+      <input type="checkbox" name="use_ctcl_as_data_source" id="use_ctcl_as_data_source_id" disabled
+             value="True"
+             {% if election.use_ctcl_as_data_source %}checked{% endif %} />
+        Use CTCL as data source
+      &nbsp;&nbsp;&nbsp;
+      <input type="checkbox" name="use_google_civic_as_data_source" id="use_google_civic_as_data_source_id" disabled
+             value="True"
+             {% if election.use_google_civic_as_data_source %}checked{% endif %} />
+        Use Google Civic
+      &nbsp;&nbsp;&nbsp;
+      <input type="checkbox" name="use_ballotpedia_as_data_source" id="use_ballotpedia_as_data_source_id" disabled
+             value="True"
+             {% if election.use_ballotpedia_as_data_source %}checked{% endif %} />
+        Use Ballotpedia
+      &nbsp;&nbsp;&nbsp;
+      <input type="checkbox" name="use_vote_usa_as_data_source" id="use_vote_usa_as_data_source_id" disabled
+             value="True"
+             {% if election.use_vote_usa_as_data_source %}checked{% endif %} />
+        Use Vote USA
         </div>
     </div>
 
     <div class="form-group">
-        <label for="election_day_text_id" class="col-sm-3 control-label">Election Day
-            <span class="no_break">(Format: "YYYY-MM-DD")</span></label>
+        <label for="ctcl_uuid_id" class="col-sm-3 control-label">CTCL UUID</label>
         <div class="col-sm-8">
-            <input type="text" name="election_day_text" id="election_day_text_id" class="form-control" disabled
-                   value="{% if election %}{{ election.election_day_text|default_if_none:"" }}{% endif %}" />
+            <input type="text" name="ctcl_uuid" id="ctcl_uuid_id" class="form-control" disabled
+                   value="{% if election %}{{ election.ctcl_uuid|default_if_none:"" }}{% endif %}" />
         </div>
     </div>
 
+{% if election.is_national_election %}{% else %}
     <div class="form-group">
         <label for="state_id" class="col-sm-3 control-label">State Code</label>
         <div class="col-sm-8">
@@ -222,6 +221,7 @@
                    value="{% if election %}{{ election.state_code|default_if_none:"" }}{% endif %}" />
         </div>
     </div>
+{% endif %}
 
 {#    <div class="form-group">#}
 {#        <label for="raw_ocd_division_id_id" class="col-sm-3 control-label">OCD Division ID</label>#}
@@ -231,6 +231,7 @@
 {#        </div>#}
 {#    </div>#}
 
+{% if ballotpedia_election_list %}
     <div class="form-group">
         <label for="google_civic_election_id_id" class="col-sm-3 control-label">
           Ballotpedia Elections
@@ -239,7 +240,6 @@
           {% endif %}
         </label>
         <div class="col-sm-8">
-        {% if ballotpedia_election_list %}
             <table class="table">
                 <tr>
                     <th></th>
@@ -271,16 +271,11 @@
                      <a href="{% url 'election:election_summary' election.id %}?show_all_ballotpedia_elections=1&state_code={{ state_code|default_if_none:"" }}">show all Ballotpedia elections</a>
                 {% endif %}
             {% endif %}
-        {% else %}
-            {% if state_code %}
-              None found for {{ state_code|upper }}
-            {% endif %}
-
 {#            <input type="text" name="ballotpedia_election_id" id="ballotpedia_election_id_id" class="form-control" disabled#}
 {#                   value="{% if election %}{{ election.ballotpedia_election_id|default_if_none:"" }}{% endif %}" />#}
-        {% endif %}{# End of if ballotpedia_election_list #}
         </div>
     </div>
+{% endif %}{# End of if ballotpedia_election_list #}
 
 {% if ballotpedia_election_list %}
 {% else %}
@@ -327,86 +322,137 @@
 <form name="ballot_returned_search_form" method="get" action="{% url 'election:election_summary' election.id %}">
     {% csrf_token %}
 
-<strong>Steps to Prepare for Election</strong><br />
+<strong>Retrieve Data for Election</strong><br />
 
 <ol>
-{% if not is_national_election or is_national_election and state_code %}
-  <li>
-    <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1" target="_blank">
-        Ballotpedia: Retrieve Ballots for this Election, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
-    <span class="glyphicon glyphicon-new-window"></span></a>
-    (<a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}"
-       target="_blank">old version</a>)
-    <br />
-    Clicking this link schedules a Batch Process that does the following:
-  <ul>
-    <li>Start with all of the map points in this state.</li>
-    <li>For each map point, reach out to Ballotpedia "sample_ballot_elections" API with lat/long and retrieve the districts covered by one map point.</li>
-    <li>Reach out to Ballotpedia "sample_ballot_results" API with the districts and election date.</li>
-    <li>Store the offices, candidates and measures returned.</li>
-  </ul>
-  </li>
-  <li>
-    <a href="{% url 'import_export_batches:batch_process_list' %}" target="_blank">
-      Watch Batch Process Status List <span class="glyphicon glyphicon-new-window"></span></a> (for all states/elections)
-  </li>
-{% else %}
-  <li>
-    (To retrieve Ballot Data from Ballotpedia for this National Election, please specify a state.)<br />
-  </li>
-{% endif %}
+{% if election.use_ballotpedia_as_data_source %}
+    {% if not is_national_election or is_national_election and state_code %}
+      <li>
+        <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_ballotpedia=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1" target="_blank">
+            Ballotpedia: <strong>Retrieve</strong> Ballots from Bulk Map Points, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+            <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+        <br />
+        Clicking this link schedules a Batch Process that does the following:
+          <ul>
+            <li>For each map point in this state, reach out to Ballotpedia "sample_ballot_elections" API with lat/long and retrieve the districts covered.</li>
+            <li>Reach out to Ballotpedia "sample_ballot_results" API with the districts and election date.</li>
+            <li>Store the offices, candidates and measures returned.</li>
+          </ul>
+      </li>
+      <li>
+        <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_ballotpedia=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1&use_batch_process=1">
+            Ballotpedia: <strong>Refresh</strong> BallotItems from Bulk Map Points, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+            <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+      </li>
+    {% else %}
+      <li>
+        Ballotpedia: To retrieve Ballot Data for this National Election, please specify a state.<br />
+      </li>
+    {% endif %}
+    <li>
+        <a href="{% url 'import_export_batches:retrieve_ballots_for_entire_election_api_v4' %}?use_ballotpedia=1&google_civic_election_id={{ election.google_civic_election_id }}" target="_blank">
+            Ballotpedia - ALL STATES: Schedule Batch Processes to Retrieve Ballots for this Election (All States), up to 125 at a time
+            <span class="glyphicon glyphicon-new-window"></span></a>
+    </li>
+{% endif %}{# if election.use_ballotpedia_as_data_source #}
 
-{% if election.google_civic_election_id|convert_to_int < 1000000 %}
-  <li>
-    <a href="{% url 'election:election_all_ballots_retrieve' election.id %}?state_code={{ state_code }}" target="_blank">
-        Google: Retrieve Ballot Data for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}</a><br />
-        Reach out to Google Civic API and ask for ballots from many map points so we can stitch
-        together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
-        map points to retrieve ballots from.
-  </li>
-{% else %}
-  <li>
-    (To retrieve Ballot Data from Google Civic, add google_civic_election_id from Google.)<br />
-  </li>
-{% endif %}
-  <li>
-    <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_entire_election_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}" target="_blank">
-        Ballotpedia - ALL STATES: Schedule Batch Processes to Retrieve Ballots for this Election (All States), up to 125 at a time
-        <span class="glyphicon glyphicon-new-window"></span></a>
-  </li>
+
+{% if election.use_ctcl_as_data_source %}
+    {% if not is_national_election or is_national_election and state_code %}
+        <li>
+            <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_ctcl=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1"
+               target="_blank">
+                CTCL: <strong>Retrieve</strong> Ballots from Bulk Map Points, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+                <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            <br />
+            Clicking this link schedules a Batch Process that does the following:
+            <ul>
+                <li>For each map point in this state, reach out to CTCL "voterinfo" API and retrieve the offices/candidates/measures.</li>
+                <li>Store the offices, candidates and measures returned.</li>
+            </ul>
+        </li>
+        <li>
+            <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_ctcl=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1&use_batch_process=1"
+               target="_blank">
+                CTCL: <strong>Refresh</strong> Ballots from <strong>Bulk Map Points</strong>, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+                <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            (Oldest: {{ ballot_returned_oldest_date }})
+        </li>
+        <li>
+            <a href="{% url 'import_export_batches:refresh_ballots_for_voters_api_v4' %}?use_ctcl=1&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1"
+               target="_blank">
+                CTCL-IN_DEVELOPMENT: <strong>Refresh</strong> BallotItems from <strong>Voter</strong>-entered Street Addresses, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+                <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            (Oldest: {{ ballot_returned_voter_oldest_date }})
+        </li>
+    {% else %}
+        <li>
+          CTCL: To retrieve Ballot Data for this National Election, please specify a state.<br />
+        </li>
+    {% endif %}
+{% endif %}{# if election.use_ctcl_as_data_source #}
+
+
+{% if election.use_google_civic_as_data_source %}
+    {% if election.google_civic_election_id|convert_to_int < 1000000 %}
+        <li>
+            <a href="{% url 'election:election_all_ballots_retrieve' election.id %}?state_code={{ state_code }}" target="_blank">
+                Google Civic: Retrieve Ballot Data for this Election{% if state_code %} (for {{ state_code|upper }}){% endif %}</a><br />
+                Reach out to Google Civic API and ask for ballots from many map points so we can stitch
+                together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
+                map points to retrieve ballots from.
+        </li>
+    {% else %}
+        <li>
+        Google Civic: To retrieve Ballot Data from Google Civic, add google_civic_election_id from Google.<br />
+        </li>
+    {% endif %}
+{% endif %}{# if election.use_google_civic_as_data_source #}
+
+    {% if election.use_ballotpedia_as_data_source %}
+    {% endif %}{# if election.use_ballotpedia_as_data_source #}
+
+    <li>
+        <a href="{% url 'import_export_batches:batch_process_list' %}"
+           target="_blank">
+            Watch Batch Process Status List <span class="glyphicon glyphicon-new-window"></span></a> (for all states/elections)
+    </li>
 </ol>
 
 <strong>Data Grooming Tools</strong>
 
 <ul>
-  <li>
-    <a href="{% url 'import_export_batches:batch_set_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
-      See latest Batch Sets <span class="glyphicon glyphicon-new-window"></span></a>
-  </li>
+      <li>
+        <a href="{% url 'import_export_batches:batch_set_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+          See latest Batch Sets <span class="glyphicon glyphicon-new-window"></span></a>
+      </li>
 
-  <li>
-    <a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
-      Update Lat/Long{% if state_code %} for {{ state_code|upper }}{% endif %}: {{ entries_missing_latitude_longitude }} missing</a>
-  </li>
+      <li>
+        <a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+          Update Lat/Long{% if state_code %} for {{ state_code|upper }}{% endif %}: {{ entries_missing_latitude_longitude }} missing</a>
+      </li>
 
-  <li>
-    <a href="{% url 'ballot:ballot_items_repair' %}?local_election_id={{ election.id }}&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
-      Repair Ballot Item Text for this Election (Update Voter Ballot Items with Latest Cached Office/Measure info)</a>
-  </li>
+      <li>
+        <a href="{% url 'ballot:ballot_items_repair' %}?local_election_id={{ election.id }}&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+          Repair Ballot Item Text for this Election (Update Voter Ballot Items with Latest Cached Office/Measure info)</a>
+      </li>
 
-  <li>
-    <a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1&use_batch_process=1" target="_blank">
-      Refresh <strong>Map Point</strong> BallotItems from Ballotpedia from existing BallotReturned entries (up to 125 at a time) <span class="glyphicon glyphicon-new-window"></span></a> (Oldest: {{ ballot_returned_oldest_date }})
-    (<a href="{% url 'ballotpedia:retrieve_ballotpedia_ballots_for_polling_locations_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1"
-        target="_blank">old version</a>)
-  </li>
+{% if election.use_ballotpedia_as_data_source %}
+      <li>
+        <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_ballotpedia=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1&use_batch_process=1" target="_blank">
+          Ballotpedia: Refresh <strong>Map Point</strong> BallotItems from Ballotpedia from existing BallotReturned entries (up to 125 at a time) <span class="glyphicon glyphicon-new-window"></span></a> (Oldest: {{ ballot_returned_oldest_date }})
+      </li>
 
-  <li>
-    <a href="{% url 'ballotpedia:refresh_ballotpedia_ballots_for_voters_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1" target="_blank">
-      Refresh <strong>Voter</strong> BallotItems from Ballotpedia from existing BallotReturned entries (up to 125 at a time) <span class="glyphicon glyphicon-new-window"></span></a> (Oldest: {{ ballot_returned_voter_oldest_date }})
-    (<a href="{% url 'ballotpedia:refresh_ballotpedia_ballots_for_voters_api_v4' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}"
-        target="_blank">old version</a>)
-  </li>
+      <li>
+        <a href="{% url 'import_export_batches:refresh_ballots_for_voters_api_v4' %}?use_ballotpedia=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1" target="_blank">
+          Ballotpedia: Refresh <strong>Voter</strong> BallotItems from Ballotpedia from existing BallotReturned entries (up to 125 at a time) <span class="glyphicon glyphicon-new-window"></span></a> (Oldest: {{ ballot_returned_voter_oldest_date }})
+      </li>
+{% endif %}{# if election.use_ballotpedia_as_data_source #}
 </ul>
 
 

@@ -3749,6 +3749,7 @@ def import_contest_office_data_from_batch_row_actions(
                 positive_value_exists(google_civic_election_id):
             contest_office_manager = ContestOfficeManager()
             if create_entry_flag:
+                defaults['google_civic_office_name'] = one_batch_row_action.contest_office_name
                 results = contest_office_manager.create_contest_office_row_entry(
                     contest_office_name,
                     contest_office_votes_allowed,

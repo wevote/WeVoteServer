@@ -333,7 +333,7 @@ def organization_list_view(request):
             new_filter = Q(twitter_description__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__icontains=one_word)
+            new_filter = Q(we_vote_id__iexact=one_word)
             filters.append(new_filter)
 
             new_filter = Q(vote_smart_id__icontains=one_word)

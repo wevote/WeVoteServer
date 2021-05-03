@@ -65,7 +65,7 @@ def figure_out_measure_conflict_values(contest_measure1, contest_measure2):
     return contest_measure_merge_conflict_values
 
 
-def filter_measures_structured_json_for_local_duplicates(structured_json):
+def filter_measures_structured_json_for_local_duplicates(structured_json):  # Consumes measuresSyncOut
     """
     With this function, we remove measures that seem to be duplicates, but have different we_vote_id's.
     :param structured_json:
@@ -270,7 +270,7 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def measures_import_from_master_server(request, google_civic_election_id, state_code=''):
+def measures_import_from_master_server(request, google_civic_election_id, state_code=''):  # Consumes measuresSyncOut
     """
     Get the json data, and either create new entries or update existing
     :return:
@@ -298,7 +298,7 @@ def measures_import_from_master_server(request, google_civic_election_id, state_
     return import_results
 
 
-def measures_import_from_structured_json(structured_json):
+def measures_import_from_structured_json(structured_json):  # Consumes measuresSyncOut
     """
     This pathway in requires a we_vote_id, and is not used when we import from Google Civic
     :param structured_json:

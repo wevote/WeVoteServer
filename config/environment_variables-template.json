@@ -82,6 +82,9 @@
   "BALLOTPEDIA_API_MEASURES_URL":   "https://api.ballotpedia.org/v3/api/1.1/tables/ballot_measures/rows",
   "BALLOTPEDIA_API_RACES_URL":      "https://api.ballotpedia.org/v3/api/1.1/tables/races/rows",
 
+  "_comment":                       "import_export_ctcl",
+  "CTCL_API_KEY":                   "",
+
   "_comment":                       "import_export_google_civic",
   "GOOGLE_CIVIC_API_KEY":           "",
   "GOOGLE_MAPS_API_KEY":            "",

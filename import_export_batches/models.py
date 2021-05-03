@@ -12,7 +12,6 @@ from django.utils.timezone import localtime, now
 from election.models import ElectionManager
 from electoral_district.controllers import electoral_district_import_from_xml_data
 from exception.models import handle_exception
-from import_export_ctcl.controllers import create_candidate_selection_rows, retrieve_candidate_from_candidate_selection
 import json
 import magic
 from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN, alphanumeric
@@ -87,6 +86,8 @@ KIND_OF_ACTION_CHOICES = (
 BATCH_SET_SOURCE_CTCL = 'CTCL'
 BATCH_SET_SOURCE_IMPORT_EXPORT_ENDORSEMENTS = 'IMPORT_EXPORT_ENDORSEMENTS'
 BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS = 'IMPORT_BALLOTPEDIA_BALLOT_ITEMS'
+BATCH_SET_SOURCE_IMPORT_CTCL_BALLOT_ITEMS = 'IMPORT_CTCL_BALLOT_ITEMS'
+BATCH_SET_SOURCE_IMPORT_VOTE_USA_BALLOT_ITEMS = 'IMPORT_VOTE_USA_BALLOT_ITEMS'
 
 # Match incoming headers (on left), and place the values in the variable name on the
 # right in `create_batch_row_action_candidate` (This dict doesn't actually remap the values)
@@ -138,6 +139,30 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
 # We Vote contest office key on the left, and Ballotpedia field name on right
 # This gives us the option of putting the same field from a remote source into two We Vote fields
 BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES = {
+    'ballotpedia_candidate_id': 'ballotpedia_candidate_id',
+    'ballotpedia_candidate_name': 'ballotpedia_candidate_name',
+    'ballotpedia_candidate_summary': 'ballotpedia_candidate_summary',
+    'ballotpedia_candidate_url': 'ballotpedia_candidate_url',
+    'ballotpedia_election_id': 'ballotpedia_election_id',
+    'ballotpedia_image_id': 'ballotpedia_image_id',
+    'ballotpedia_office_id': 'ballotpedia_office_id',
+    'ballotpedia_person_id': 'ballotpedia_person_id',
+    'ballotpedia_race_id': 'ballotpedia_race_id',
+    'birth_day_text': 'birth_day_text',
+    'candidate_email': 'candidate_email',
+    'candidate_gender': 'candidate_gender',
+    'candidate_is_incumbent': 'is_incumbent',
+    'candidate_participation_status': 'candidate_participation_status',
+    'candidate_party_name': 'candidate_party_name',
+    'candidate_twitter_handle': 'candidate_twitter_handle',
+    'candidate_url': 'candidate_url',
+    'candidate_contact_form_url': 'candidate_contact_form_url',
+    'crowdpac_candidate_id': 'crowdpac_candidate_id',
+    'facebook_url': 'facebook_url',
+    'state_code': 'state_code',
+}
+
+BATCH_HEADER_MAP_CANDIDATES_TO_CTCL_CANDIDATES = {
     'ballotpedia_candidate_id': 'ballotpedia_candidate_id',
     'ballotpedia_candidate_name': 'ballotpedia_candidate_name',
     'ballotpedia_candidate_summary': 'ballotpedia_candidate_summary',
@@ -229,6 +254,25 @@ BATCH_HEADER_MAP_CONTEST_OFFICES_TO_BALLOTPEDIA_RACES = {
     'state_code': 'office_district_state',
 }
 
+BATCH_HEADER_MAP_CONTEST_OFFICES_TO_CTCL_OFFICES = {
+    'ballotpedia_district_id': 'ballotpedia_district_id',
+    'ballotpedia_election_id': 'ballotpedia_election_id',
+    'ballotpedia_is_marquee': 'ballotpedia_is_marquee',
+    'ballotpedia_office_id': 'ballotpedia_office_id',
+    'ballotpedia_office_name': 'office_name',
+    'ballotpedia_race_id': 'ballotpedia_race_id',
+    'ballotpedia_race_office_level': 'office_level',
+    'ballotpedia_office_url': 'url',
+    'contest_office_number_elected': 'number_of_seats',
+    'contest_office_district_name': 'office_district_name',
+    'election_day': 'election_date',
+    'is_ballotpedia_general_election': 'is_ballotpedia_general_election',
+    'is_ballotpedia_general_runoff_election': 'is_ballotpedia_general_runoff_election',
+    'is_ballotpedia_primary_election': 'is_ballotpedia_primary_election',
+    'is_ballotpedia_primary_runoff_election': 'is_ballotpedia_primary_runoff_election',
+    'state_code': 'office_district_state',
+}
+
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES = {
     'elected_office_name': 'elected_office_name',
     'electoral_district_id': 'electoral_district_id',
@@ -265,6 +309,21 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES = {
 # We Vote contest office key on the left, and Ballotpedia field name on right
 # This gives us the option of putting the same field from a remote source into two We Vote fields
 BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES = {
+    'ballotpedia_district_id': 'ballotpedia_district_id',
+    'ballotpedia_election_id': 'ballotpedia_election_id',
+    'ballotpedia_measure_id': 'ballotpedia_measure_id',
+    'ballotpedia_measure_name': 'name',
+    'ballotpedia_measure_status': 'status',
+    'ballotpedia_measure_summary': 'summary',
+    'ballotpedia_measure_text': 'text',
+    'ballotpedia_measure_url': 'ballotpedia_measure_url',
+    'ballotpedia_yes_vote_description': 'ballotpedia_yes_vote_description',
+    'ballotpedia_no_vote_description': 'ballotpedia_no_vote_description',
+    'election_day_text': 'election_day_text',
+    'state_code': 'state_code',
+}
+
+BATCH_HEADER_MAP_MEASURES_TO_CTCL_MEASURES = {
     'ballotpedia_district_id': 'ballotpedia_district_id',
     'ballotpedia_election_id': 'ballotpedia_election_id',
     'ballotpedia_measure_id': 'ballotpedia_measure_id',
@@ -420,6 +479,24 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS = {
 }
 
 BATCH_HEADER_MAP_BALLOT_ITEMS_TO_BALLOTPEDIA_BALLOT_ITEMS = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
+
+BATCH_HEADER_MAP_BALLOT_ITEMS_TO_CTCL_BALLOT_ITEMS = {
+    'contest_office_we_vote_id': 'contest_office_we_vote_id',
+    'contest_office_id': 'contest_office_id',
+    'contest_office_name': 'contest_office_name',
+    'contest_measure_we_vote_id': 'contest_measure_we_vote_id',
+    'contest_measure_id': 'contest_measure_id',
+    'contest_measure_name': 'contest_measure_name',
+    'contest_measure_text': 'contest_measure_text',
+    'contest_measure_url': 'contest_measure_url',
+    'election_day_text': 'election_day_text',
+    'local_ballot_order': 'local_ballot_order',
+    'no_vote_description': 'no_vote_description',
+    'yes_vote_description': 'yes_vote_description',
+    'polling_location_we_vote_id': 'polling_location_we_vote_id',
+    'state_code': 'state_code',
+    'voter_id': 'voter_id',
+}
 
 # We Vote contest office key on the left, and Ballotpedia field name on right
 # This gives us the option of putting the same field from a remote source into two We Vote fields
@@ -2336,6 +2413,7 @@ class BatchManager(models.Manager):
         :param batch_set_id
         :return:
         """
+        from import_export_ctcl.controllers import retrieve_candidate_from_candidate_selection
         # Process VIP CandidateContest data
         number_of_batch_rows = 0
         first_line = True
@@ -3280,6 +3358,7 @@ class BatchManager(models.Manager):
         :param organization_we_vote_id:
         :return:
         """
+        from import_export_ctcl.controllers import create_candidate_selection_rows
         import_date = date.today()
 
         # Retrieve from XML
@@ -4744,10 +4823,17 @@ class BatchProcessManager(models.Manager):
             voter_id=None,
             analytics_date_as_integer=None,
             api_name=None,
-            election_id_list_serialized=''):
+            election_id_list_serialized='',
+            use_ballotpedia=False,
+            use_ctcl=False,
+            use_vote_usa=False,
+    ):
         status = ""
         success = True
         batch_process = None
+        use_ballotpedia = positive_value_exists(use_ballotpedia)
+        use_ctcl = positive_value_exists(use_ctcl)
+        use_vote_usa = positive_value_exists(use_vote_usa)
 
         if kind_of_process not in \
                 [
@@ -4789,6 +4875,9 @@ class BatchProcessManager(models.Manager):
                 polling_location_we_vote_id=polling_location_we_vote_id,
                 state_code=state_code,
                 voter_id=voter_id,
+                use_ballotpedia=use_ballotpedia,
+                use_ctcl=use_ctcl,
+                use_vote_usa=use_vote_usa,
             )
             status += 'BATCH_PROCESS_SAVED '
         except Exception as e:
@@ -5292,6 +5381,9 @@ class BatchProcess(models.Model):
     date_checked_out = models.DateTimeField(null=True)
     batch_process_paused = models.BooleanField(default=False)
     completion_summary = models.TextField(null=True, blank=True)
+    use_ballotpedia = models.BooleanField(default=False)
+    use_ctcl = models.BooleanField(default=False)
+    use_vote_usa = models.BooleanField(default=False)
 
 
 class BatchProcessAnalyticsChunk(models.Model):
@@ -5454,7 +5546,7 @@ class BatchRowActionMeasure(models.Model):
         verbose_name="what a yes vote means", null=True, blank=True, default=None)
     ballotpedia_no_vote_description = models.TextField(
         verbose_name="what a no vote means", null=True, blank=True, default=None)
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
 
     status = models.TextField(verbose_name="batch row action measure status", null=True, blank=True, default="")
 
@@ -5559,7 +5651,7 @@ class BatchRowActionContestOffice(models.Model):
                                                  max_length=255, null=True, blank=True)
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
     elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255, null=True,
                                            blank=True, default=None)
     candidate_selection_id1 = models.CharField(verbose_name="temporary id of candidate selection 1", max_length=255,
@@ -5666,7 +5758,7 @@ class BatchRowActionElectedOffice(models.Model):
                                                  max_length=255, null=True, blank=True)
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
     elected_office_description = models.CharField(verbose_name="office description", max_length=255,
                                                      null=True, blank=True)
     elected_office_description_es = models.CharField(verbose_name="office description spanish", max_length=255,
@@ -5745,7 +5837,7 @@ class BatchRowActionPolitician(models.Model):
         verbose_name='we vote hosted medium image url', max_length=255, blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.URLField(
         verbose_name='we vote hosted tiny image url', max_length=255, blank=True, null=True)
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
     politician_facebook_id = models.CharField(verbose_name='politician facebook user name', max_length=255, null=True,
                                               unique=False)
     politician_phone_number = models.CharField(verbose_name='politician phone number', max_length=255, null=True,
@@ -5891,9 +5983,9 @@ class BatchRowActionCandidate(models.Model):
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
                                                        null=True, blank=True, default="")
-    batch_row_action_office_ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    batch_row_action_office_ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
     crowdpac_candidate_id = models.PositiveIntegerField(verbose_name="crowdpac integer id", null=True, blank=True)
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
     candidate_is_top_ticket = models.BooleanField(verbose_name="candidate is top ticket", default=False)
     candidate_is_incumbent = models.BooleanField(verbose_name="candidate is currently in the office", default=False)
     candidate_participation_status = models.CharField(verbose_name="candidate participation status",
@@ -6232,9 +6324,10 @@ class BatchRowActionBallotItem(models.Model):
     status = models.TextField(verbose_name="batch row action ballot item status", null=True, blank=True, default="")
 
 
-def create_batch_from_json(file_name, structured_json_list, mapping_dict, kind_of_batch,
-                           google_civic_election_id=0, organization_we_vote_id="", polling_location_we_vote_id="",
-                           batch_set_id=0, state_code=""):
+def create_batch_from_json_wrapper(
+        file_name, structured_json_list, mapping_dict, kind_of_batch,
+        google_civic_election_id=0, organization_we_vote_id="", polling_location_we_vote_id="",
+        batch_set_id=0, state_code=""):
     batch_manager = BatchManager()
     return batch_manager.create_batch_from_json(
         file_name, structured_json_list, mapping_dict, kind_of_batch,

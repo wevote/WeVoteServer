@@ -24,7 +24,7 @@ from politician.models import PoliticianManager
 from position.controllers import move_positions_to_another_candidate, update_all_position_details_from_candidate
 from twitter.models import TwitterUserManager
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
-    convert_date_to_we_vote_date_string, \
+    convert_date_to_we_vote_date_string, convert_to_int, \
     convert_to_political_party_constant, positive_value_exists, process_request_from_master, \
     extract_twitter_handle_from_text_string, extract_website_from_url, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
@@ -139,7 +139,8 @@ def candidates_import_from_sample_file():
     return candidates_import_from_structured_json(structured_json)
 
 
-def candidates_import_from_master_server(request, google_civic_election_id='', state_code=''):
+def candidates_import_from_master_server(
+        request, google_civic_election_id='', state_code=''):  # Consumes candidatesSyncOut
     """
     Get the json data, and either create new entries or update existing
     :param request:
@@ -690,7 +691,7 @@ def filter_candidates_structured_json_for_local_duplicates(structured_json):
     return candidates_results
 
 
-def candidates_import_from_structured_json(structured_json):
+def candidates_import_from_structured_json(structured_json):  # Consumes candidatesSyncOut
     candidate_manager = CandidateManager()
     candidates_saved = 0
     candidates_updated = 0
@@ -770,10 +771,14 @@ def candidates_import_from_structured_json(structured_json):
                     one_candidate['candidate_twitter_handle']
             if 'candidate_url' in one_candidate:
                 updated_candidate_values['candidate_url'] = one_candidate['candidate_url']
+            if 'candidate_year' in one_candidate:
+                updated_candidate_values['candidate_year'] = convert_to_int(one_candidate['candidate_year'])
             if 'candidate_contact_form_url' in one_candidate:
                 updated_candidate_values['candidate_contact_form_url'] = one_candidate['candidate_contact_form_url']
             if 'contest_office_name' in one_candidate:
                 updated_candidate_values['contest_office_name'] = one_candidate['contest_office_name']
+            if 'ctcl_uuid' in one_candidate:
+                updated_candidate_values['ctcl_uuid'] = one_candidate['ctcl_uuid']
             if 'crowdpac_candidate_id' in one_candidate:
                 updated_candidate_values['crowdpac_candidate_id'] = one_candidate['crowdpac_candidate_id']
             if 'facebook_url' in one_candidate:

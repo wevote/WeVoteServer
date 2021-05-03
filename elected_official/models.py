@@ -741,7 +741,7 @@ class ElectedOfficial(models.Model):
         verbose_name='url of ballotpedia logo', max_length=255, blank=True, null=True)
 
     # CTCL elected official data fields
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
 
     def elected_office(self):
         try:

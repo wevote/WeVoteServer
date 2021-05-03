@@ -862,7 +862,7 @@ def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_
                     new_filter = Q(action_constant=action_constant_integer)
                     filters.append(new_filter)
 
-                new_filter = Q(ballot_item_we_vote_id__icontains=one_word)
+                new_filter = Q(ballot_item_we_vote_id__iexact=one_word)
                 filters.append(new_filter)
 
                 if positive_value_exists(one_word_integer):
@@ -877,13 +877,13 @@ def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_
                     new_filter = Q(id=one_word_integer)
                     filters.append(new_filter)
 
-                new_filter = Q(organization_we_vote_id__icontains=one_word)
+                new_filter = Q(organization_we_vote_id__iexact=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(state_code__iexact=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(voter_we_vote_id__icontains=one_word)
+                new_filter = Q(voter_we_vote_id__iexact=one_word)
                 filters.append(new_filter)
 
                 # Add the first query
