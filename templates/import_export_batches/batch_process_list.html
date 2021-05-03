@@ -319,6 +319,7 @@
                 <table class="table">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Chunk ID</th>
                             <th>Set ID</th>
                             <th>Retrieve Start</th>
@@ -334,6 +335,7 @@
                     </thead>
                     {% for batch_process_ballot_item_chunk in batch_process.batch_process_ballot_item_chunk_list %}
                     <tr>
+                        <td>{{ forloop.counter }}</td>
                         <td>
                           {{ batch_process_ballot_item_chunk.id }}
                           (<a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?batch_process_id={{ batch_process.id }}&batch_process_chunk_id={{ batch_process_ballot_item_chunk.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}"
@@ -388,6 +390,7 @@
                 <table class="table">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Chunk ID</th>
                             <th>Start</th>
                             <th>Completed</th>
@@ -396,6 +399,7 @@
                     </thead>
                     {% for batch_process_analytics_chunk in batch_process.batch_process_analytics_chunk_list %}
                     <tr>
+                        <td>{{ forloop.counter }}</td>
                         <td>{{ batch_process_analytics_chunk.id }}</td>
                         <td>{{ batch_process_analytics_chunk.date_started|localtime|default_if_none:"" }}</td>
                         <td>

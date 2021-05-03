@@ -2843,6 +2843,7 @@ def refresh_ballots_for_voters_api_v4_internal_view(
     # put ballot items for this location onto a ballot
     existing_offices_by_election_dict = {}
     existing_candidate_objects_dict = {}
+    existing_candidate_to_office_links_dict = {}
     existing_measure_objects_dict = {}
     new_office_we_vote_ids_list = []
     new_candidate_we_vote_ids_list = []
@@ -2926,6 +2927,7 @@ def refresh_ballots_for_voters_api_v4_internal_view(
                 batch_set_id=batch_set_id,
                 existing_offices_by_election_dict=existing_offices_by_election_dict,
                 existing_candidate_objects_dict=existing_candidate_objects_dict,
+                existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
                 existing_measure_objects_dict=existing_measure_objects_dict,
                 new_office_we_vote_ids_list=new_office_we_vote_ids_list,
                 new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
@@ -2939,12 +2941,13 @@ def refresh_ballots_for_voters_api_v4_internal_view(
                 ballot_returned=ballot_returned,
                 state_code=state_code,
                 batch_set_id=batch_set_id,
-                existing_offices_by_election_dict={},
-                existing_candidate_objects_dict={},
-                existing_measure_objects_dict={},
-                new_office_we_vote_ids_list=[],
-                new_candidate_we_vote_ids_list=[],
-                new_measure_we_vote_ids_list=[],
+                existing_offices_by_election_dict=existing_offices_by_election_dict,
+                existing_candidate_objects_dict=existing_candidate_objects_dict,
+                existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
+                existing_measure_objects_dict=existing_measure_objects_dict,
+                new_office_we_vote_ids_list=new_office_we_vote_ids_list,
+                new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
+                new_measure_we_vote_ids_list=new_measure_we_vote_ids_list,
                 update_or_create_rules={})
         else:
             # It shouldn't be possible to get here
@@ -2958,6 +2961,7 @@ def refresh_ballots_for_voters_api_v4_internal_view(
 
         existing_offices_by_election_dict = one_ballot_results['existing_offices_by_election_dict']
         existing_candidate_objects_dict = one_ballot_results['existing_candidate_objects_dict']
+        existing_candidate_to_office_links_dict = one_ballot_results['existing_candidate_to_office_links_dict']
         existing_measure_objects_dict = one_ballot_results['existing_measure_objects_dict']
         new_office_we_vote_ids_list = one_ballot_results['new_office_we_vote_ids_list']
         new_candidate_we_vote_ids_list = one_ballot_results['new_candidate_we_vote_ids_list']
@@ -3381,6 +3385,7 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
     # put ballot items for this location onto a ballot
     existing_offices_by_election_dict = {}
     existing_candidate_objects_dict = {}
+    existing_candidate_to_office_links_dict = {}
     existing_measure_objects_dict = {}
     new_office_we_vote_ids_list = []
     new_candidate_we_vote_ids_list = []
@@ -3475,6 +3480,7 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
                     batch_set_id=batch_set_id,
                     existing_offices_by_election_dict=existing_offices_by_election_dict,
                     existing_candidate_objects_dict=existing_candidate_objects_dict,
+                    existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
                     existing_measure_objects_dict=existing_measure_objects_dict,
                     new_office_we_vote_ids_list=new_office_we_vote_ids_list,
                     new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
@@ -3491,6 +3497,7 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
                     batch_set_id=batch_set_id,
                     existing_offices_by_election_dict=existing_offices_by_election_dict,
                     existing_candidate_objects_dict=existing_candidate_objects_dict,
+                    existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
                     existing_measure_objects_dict=existing_measure_objects_dict,
                     new_office_we_vote_ids_list=new_office_we_vote_ids_list,
                     new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
@@ -3506,6 +3513,7 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
 
             existing_offices_by_election_dict = one_ballot_results['existing_offices_by_election_dict']
             existing_candidate_objects_dict = one_ballot_results['existing_candidate_objects_dict']
+            existing_candidate_to_office_links_dict = one_ballot_results['existing_candidate_to_office_links_dict']
             existing_measure_objects_dict = one_ballot_results['existing_measure_objects_dict']
             new_office_we_vote_ids_list = one_ballot_results['new_office_we_vote_ids_list']
             new_candidate_we_vote_ids_list = one_ballot_results['new_candidate_we_vote_ids_list']

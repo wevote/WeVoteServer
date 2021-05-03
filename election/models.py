@@ -117,7 +117,7 @@ class Election(models.Model):
     is_national_election = models.BooleanField(default=False)
 
     use_ballotpedia_as_data_source = models.BooleanField(default=False)
-    use_ctcl_as_data_source = models.BooleanField(default=False)
+    use_ctcl_as_data_source = models.BooleanField(default=True)
     use_google_civic_as_data_source = models.BooleanField(default=False)
     use_vote_usa_as_data_source = models.BooleanField(default=False)
 
