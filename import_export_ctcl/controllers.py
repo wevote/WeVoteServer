@@ -293,6 +293,7 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
         batch_set_id=0,
         existing_offices_by_election_dict={},
         existing_candidate_objects_dict={},
+        existing_candidate_to_office_links_dict={},
         existing_measure_objects_dict={},
         new_office_we_vote_ids_list=[],
         new_candidate_we_vote_ids_list=[],
@@ -311,6 +312,7 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
             'batch_header_id':  batch_header_id,
             'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
+            'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
             'existing_measure_objects_dict': existing_measure_objects_dict,
             'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
             'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
@@ -326,6 +328,7 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
             'batch_header_id':  batch_header_id,
             'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
+            'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
             'existing_measure_objects_dict': existing_measure_objects_dict,
             'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
             'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
@@ -355,6 +358,7 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
             'batch_header_id':  batch_header_id,
             'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
+            'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
             'existing_measure_objects_dict': existing_measure_objects_dict,
             'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
             'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
@@ -403,6 +407,7 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
             'batch_header_id': batch_header_id,
             'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
+            'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
             'existing_measure_objects_dict': existing_measure_objects_dict,
             'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
             'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
@@ -437,6 +442,7 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
             election_day_text=election_day_text,
             existing_offices_by_election_dict=existing_offices_by_election_dict,
             existing_candidate_objects_dict=existing_candidate_objects_dict,
+            existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
             existing_measure_objects_dict=existing_measure_objects_dict,
             new_office_we_vote_ids_list=new_office_we_vote_ids_list,
             new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
@@ -448,6 +454,7 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
         ballot_item_dict_list = groom_results['ballot_item_dict_list']
         existing_offices_by_election_dict = groom_results['existing_offices_by_election_dict']
         existing_candidate_objects_dict = groom_results['existing_candidate_objects_dict']
+        existing_candidate_to_office_links_dict = groom_results['existing_candidate_to_office_links_dict'],
         existing_measure_objects_dict = groom_results['existing_measure_objects_dict']
         new_office_we_vote_ids_list = groom_results['new_office_we_vote_ids_list']
         new_candidate_we_vote_ids_list = groom_results['new_candidate_we_vote_ids_list']
@@ -498,6 +505,7 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
         'batch_header_id': batch_header_id,
         'existing_offices_by_election_dict': existing_offices_by_election_dict,
         'existing_candidate_objects_dict': existing_candidate_objects_dict,
+        'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
         'existing_measure_objects_dict': existing_measure_objects_dict,
         'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
         'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
@@ -516,6 +524,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
         batch_set_id=0,
         existing_offices_by_election_dict={},
         existing_candidate_objects_dict={},
+        existing_candidate_to_office_links_dict={},
         existing_measure_objects_dict={},
         new_office_we_vote_ids_list=[],
         new_candidate_we_vote_ids_list=[],
@@ -534,6 +543,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
             'batch_header_id':  batch_header_id,
             'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
+            'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
             'existing_measure_objects_dict': existing_measure_objects_dict,
             'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
             'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
@@ -549,6 +559,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
             'batch_header_id':  batch_header_id,
             'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
+            'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
             'existing_measure_objects_dict': existing_measure_objects_dict,
             'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
             'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
@@ -594,6 +605,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
                 'batch_header_id': batch_header_id,
                 'existing_offices_by_election_dict': existing_offices_by_election_dict,
                 'existing_candidate_objects_dict': existing_candidate_objects_dict,
+                'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
                 'existing_measure_objects_dict': existing_measure_objects_dict,
                 'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
                 'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
@@ -621,8 +633,8 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
             one_ballot_json = json.loads(response.text)
 
             # Use Ballotpedia API call counter to track the number of queries we are doing each day
-            ballotpedia_api_counter_manager = CTCLApiCounterManager()
-            ballotpedia_api_counter_manager.create_counter_entry(
+            api_counter_manager = CTCLApiCounterManager()
+            api_counter_manager.create_counter_entry(
                 CTCL_API_VOTER_INFO_QUERY_TYPE,
                 google_civic_election_id=google_civic_election_id)
 
@@ -634,6 +646,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
                 election_day_text=election_day_text,
                 existing_offices_by_election_dict=existing_offices_by_election_dict,
                 existing_candidate_objects_dict=existing_candidate_objects_dict,
+                existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
                 existing_measure_objects_dict=existing_measure_objects_dict,
                 new_office_we_vote_ids_list=new_office_we_vote_ids_list,
                 new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
@@ -645,6 +658,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
             ballot_item_dict_list = groom_results['ballot_item_dict_list']
             existing_offices_by_election_dict = groom_results['existing_offices_by_election_dict']
             existing_candidate_objects_dict = groom_results['existing_candidate_objects_dict']
+            existing_candidate_to_office_links_dict = groom_results['existing_candidate_to_office_links_dict']
             existing_measure_objects_dict = groom_results['existing_measure_objects_dict']
             new_office_we_vote_ids_list = groom_results['new_office_we_vote_ids_list']
             new_candidate_we_vote_ids_list = groom_results['new_candidate_we_vote_ids_list']
@@ -697,6 +711,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
         'batch_header_id': batch_header_id,
         'existing_offices_by_election_dict': existing_offices_by_election_dict,
         'existing_candidate_objects_dict': existing_candidate_objects_dict,
+        'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
         'existing_measure_objects_dict': existing_measure_objects_dict,
         'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
         'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,

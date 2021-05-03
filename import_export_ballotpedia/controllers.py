@@ -992,6 +992,7 @@ def retrieve_ballotpedia_ballot_items_for_one_voter_api_v4(
         existing_offices_by_election_dict={},
         existing_office_objects_dict={},
         existing_candidate_objects_dict={},
+        existing_candidate_to_office_links_dict={},
         existing_measure_objects_dict={},
         new_office_we_vote_ids_list=[],
         new_candidate_we_vote_ids_list=[],
@@ -1173,6 +1174,7 @@ def retrieve_ballotpedia_ballot_items_for_one_voter_api_v4(
             existing_offices_by_election_dict=existing_offices_by_election_dict,
             existing_office_objects_dict=existing_office_objects_dict,
             existing_candidate_objects_dict=existing_candidate_objects_dict,
+            existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
             existing_measure_objects_dict=existing_measure_objects_dict,
             new_office_we_vote_ids_list=new_office_we_vote_ids_list,
             new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
@@ -1183,6 +1185,7 @@ def retrieve_ballotpedia_ballot_items_for_one_voter_api_v4(
         existing_offices_by_election_dict = groom_results['existing_offices_by_election_dict']
         existing_office_objects_dict = groom_results['existing_office_objects_dict']
         existing_candidate_objects_dict = groom_results['existing_candidate_objects_dict']
+        existing_candidate_to_office_links_dict = groom_results['existing_candidate_to_office_links_dict']
         existing_measure_objects_dict = groom_results['existing_measure_objects_dict']
         new_office_we_vote_ids_list = groom_results['new_office_we_vote_ids_list']
         new_candidate_we_vote_ids_list = groom_results['new_candidate_we_vote_ids_list']
@@ -1217,6 +1220,7 @@ def retrieve_ballotpedia_ballot_items_for_one_voter_api_v4(
         'existing_offices_by_election_dict': existing_offices_by_election_dict,
         'existing_office_objects_dict': existing_office_objects_dict,
         'existing_candidate_objects_dict': existing_candidate_objects_dict,
+        'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
         'existing_measure_objects_dict': existing_measure_objects_dict,
         'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
         'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
@@ -1910,6 +1914,7 @@ def groom_and_store_sample_ballot_results_api_v4(
         existing_office_objects_dict={},
         existing_offices_by_election_dict={},
         existing_candidate_objects_dict={},
+        existing_candidate_to_office_links_dict={},  # Not supported yet
         existing_measure_objects_dict={},
         new_office_we_vote_ids_list=[],
         new_candidate_we_vote_ids_list=[],
@@ -2411,6 +2416,7 @@ def groom_and_store_sample_ballot_results_api_v4(
         'existing_office_objects_dict':         existing_office_objects_dict,
         'existing_offices_by_election_dict':    existing_offices_by_election_dict,
         'existing_candidate_objects_dict':      existing_candidate_objects_dict,
+        'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
         'existing_measure_objects_dict':        existing_measure_objects_dict,
         'new_office_we_vote_ids_list':          new_office_we_vote_ids_list,
         'new_candidate_we_vote_ids_list':       new_candidate_we_vote_ids_list,

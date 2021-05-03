@@ -221,6 +221,7 @@ def groom_and_store_google_civic_ballot_json_2021(
         voter_id=0,
         existing_offices_by_election_dict={},
         existing_candidate_objects_dict={},
+        existing_candidate_to_office_links_dict={},
         existing_measure_objects_dict={},
         new_office_we_vote_ids_list=[],
         new_candidate_we_vote_ids_list=[],
@@ -265,6 +266,7 @@ def groom_and_store_google_civic_ballot_json_2021(
             'ballot_item_dict_list': ballot_item_dict_list,
             'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
+            'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
             'existing_measure_objects_dict': existing_measure_objects_dict,
             'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
             'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
@@ -367,6 +369,7 @@ def groom_and_store_google_civic_ballot_json_2021(
                     polling_location_we_vote_id=polling_location_we_vote_id,
                     ballot_item_dict_list=ballot_item_dict_list,
                     existing_candidate_objects_dict=existing_candidate_objects_dict,
+                    existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
                     existing_offices_by_election_dict=existing_offices_by_election_dict,
                     new_office_we_vote_ids_list=new_office_we_vote_ids_list,
                     new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
@@ -375,6 +378,8 @@ def groom_and_store_google_civic_ballot_json_2021(
                     update_or_create_rules=update_or_create_rules,
                 )
                 existing_candidate_objects_dict = process_contest_results['existing_candidate_objects_dict']
+                existing_candidate_to_office_links_dict = \
+                    process_contest_results['existing_candidate_to_office_links_dict']
                 existing_offices_by_election_dict = process_contest_results['existing_offices_by_election_dict']
                 new_office_we_vote_ids_list = process_contest_results['new_office_we_vote_ids_list']
                 new_candidate_we_vote_ids_list = process_contest_results['new_candidate_we_vote_ids_list']
@@ -502,6 +507,7 @@ def groom_and_store_google_civic_ballot_json_2021(
         'ballot_item_dict_list':                ballot_item_dict_list,
         'existing_offices_by_election_dict':    existing_offices_by_election_dict,
         'existing_candidate_objects_dict':      existing_candidate_objects_dict,
+        'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
         'existing_measure_objects_dict':        existing_measure_objects_dict,
         'new_office_we_vote_ids_list':          new_office_we_vote_ids_list,
         'new_candidate_we_vote_ids_list':       new_candidate_we_vote_ids_list,
@@ -520,6 +526,7 @@ def groom_and_store_google_civic_candidates_json_2021(
         contest_office_name='',
         election_year_integer=0,
         existing_candidate_objects_dict={},
+        existing_candidate_to_office_links_dict={},
         new_candidate_we_vote_ids_list=[],
         update_or_create_rules={},
         use_ctcl=False,
@@ -549,6 +556,9 @@ def groom_and_store_google_civic_candidates_json_2021(
     results = {}
     candidate_manager = CandidateManager()
     for one_candidate in candidates_structured_json:
+        # Reset
+        candidate_we_vote_id = ''
+
         candidate_name = one_candidate['name'] if 'name' in one_candidate else ''
         # For some reason Google Civic API violates the JSON standard and uses a / in front of '
         candidate_name = candidate_name.replace("/'", "'")
@@ -763,28 +773,65 @@ def groom_and_store_google_civic_candidates_json_2021(
                         if candidate_name not in existing_candidate_objects_dict:
                             existing_candidate_objects_dict[candidate_name] = candidate  # ctcl_candidate_uuid
 
-                # Now make sure we have a CandidateToOfficeLink
-                if positive_value_exists(candidate_we_vote_id):
-                    # TODO NOTE, 2020-09-12: We could pass a dict through with whether there is a
-                    #  candidate_to_office_link, in order to save looking in the database
-                    link_results = candidate_manager.get_or_create_candidate_to_office_link(
-                        candidate_we_vote_id=candidate_we_vote_id,
+        if positive_value_exists(candidate_we_vote_id):
+            # Now make sure we have a CandidateToOfficeLink
+            results = is_there_existing_candidate_to_office_link(
+                existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
+                contest_office_we_vote_id=contest_office_we_vote_id,
+                candidate_we_vote_id=candidate_we_vote_id,
+            )
+            existing_candidate_to_office_links_dict = results['existing_candidate_to_office_links_dict']
+            if not results['candidate_to_office_link_found']:
+                link_results = candidate_manager.get_or_create_candidate_to_office_link(
+                    candidate_we_vote_id=candidate_we_vote_id,
+                    contest_office_we_vote_id=contest_office_we_vote_id,
+                    google_civic_election_id=google_civic_election_id,
+                    state_code=state_code)
+                if positive_value_exists(link_results['success']):
+                    results = update_existing_candidate_to_office_links_dict(
+                        existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
                         contest_office_we_vote_id=contest_office_we_vote_id,
-                        google_civic_election_id=google_civic_election_id,
-                        state_code=state_code)
-                    if positive_value_exists(link_results['success']):
-                        try:
-                            if not positive_value_exists(candidate.migrated_to_link):
-                                candidate.migrated_to_link = True
-                                candidate.save()
-                        except Exception as e:
-                            status += "MIGRATED_TO_LINK_NOT_UPDATED: " + str(e) + " "
+                        candidate_we_vote_id=candidate_we_vote_id,
+                    )
+                    existing_candidate_to_office_links_dict = results['existing_candidate_to_office_links_dict']
 
     results = {
         'status':                           status,
         'success':                          success,
         'existing_candidate_objects_dict':  existing_candidate_objects_dict,
+        'existing_candidate_to_office_links_dict':  existing_candidate_to_office_links_dict,
         'new_candidate_we_vote_ids_list':   new_candidate_we_vote_ids_list,
+    }
+    return results
+
+
+def is_there_existing_candidate_to_office_link(
+        existing_candidate_to_office_links_dict={},
+        contest_office_we_vote_id='',
+        candidate_we_vote_id=''):
+    candidate_to_office_link_found = False
+    if positive_value_exists(contest_office_we_vote_id) and positive_value_exists(candidate_we_vote_id):
+        if contest_office_we_vote_id in existing_candidate_to_office_links_dict:
+            if candidate_we_vote_id in existing_candidate_to_office_links_dict[contest_office_we_vote_id]:
+                candidate_to_office_link_found = True
+    results = {
+        'existing_candidate_to_office_links_dict':  existing_candidate_to_office_links_dict,
+        'candidate_to_office_link_found':   candidate_to_office_link_found,
+    }
+    return results
+
+
+def update_existing_candidate_to_office_links_dict(
+        existing_candidate_to_office_links_dict={},
+        contest_office_we_vote_id='',
+        candidate_we_vote_id=''):
+    if positive_value_exists(contest_office_we_vote_id) and positive_value_exists(candidate_we_vote_id):
+        if contest_office_we_vote_id not in existing_candidate_to_office_links_dict:
+            existing_candidate_to_office_links_dict[contest_office_we_vote_id] = {}
+        if candidate_we_vote_id not in existing_candidate_to_office_links_dict[contest_office_we_vote_id]:
+            existing_candidate_to_office_links_dict[contest_office_we_vote_id][candidate_we_vote_id] = True
+    results = {
+        'existing_candidate_to_office_links_dict':  existing_candidate_to_office_links_dict,
     }
     return results
 
@@ -1037,6 +1084,7 @@ def groom_and_store_google_civic_office_json_2021(
         ballot_item_dict_list=[],
         existing_offices_by_election_dict={},
         existing_candidate_objects_dict={},
+        existing_candidate_to_office_links_dict={},
         new_office_we_vote_ids_list=[],
         new_candidate_we_vote_ids_list=[],
         use_ctcl=False,
@@ -1423,12 +1471,14 @@ def groom_and_store_google_civic_office_json_2021(
             contest_office_name=office_name,
             election_year_integer=election_year_integer,
             existing_candidate_objects_dict=existing_candidate_objects_dict,
+            existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
             new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
             update_or_create_rules=update_or_create_rules,
             use_ctcl=use_ctcl,
             use_vote_usa=use_vote_usa,
             vote_usa_office_id=vote_usa_office_id)
         existing_candidate_objects_dict = candidates_results['existing_candidate_objects_dict']
+        existing_candidate_to_office_links_dict = candidates_results['existing_candidate_to_office_links_dict']
         new_candidate_we_vote_ids_list = candidates_results['new_candidate_we_vote_ids_list']
     results = {
         'success':                          success,
@@ -1436,6 +1486,7 @@ def groom_and_store_google_civic_office_json_2021(
         'ballot_item_dict_list':            ballot_item_dict_list,
         'existing_offices_by_election_dict': existing_offices_by_election_dict,
         'existing_candidate_objects_dict':  existing_candidate_objects_dict,
+        'existing_candidate_to_office_links_dict':  existing_candidate_to_office_links_dict,
         'new_candidate_we_vote_ids_list':   new_candidate_we_vote_ids_list,
         'new_office_we_vote_ids_list':      new_office_we_vote_ids_list,
     }
