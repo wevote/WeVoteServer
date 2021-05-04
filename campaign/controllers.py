@@ -29,9 +29,10 @@ CAMPAIGN_PHOTO_SMALL_MAX_WIDTH = 140
 CAMPAIGN_PHOTO_SMALL_MAX_HEIGHT = 73
 
 
-def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignListRetrieve
+def campaignx_list_retrieve_for_api(request, voter_device_id, hostname=''):  # campaignListRetrieve
     """
 
+    :param request:
     :param voter_device_id:
     :param hostname:
     :return:
@@ -69,6 +70,12 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
     # excluding_campaignx_we_vote_id_list = [],
     # including_politicians_in_any_of_these_states = None,
     # including_politicians_with_support_in_any_of_these_issues = None):
+
+    # We need to know all of the politicians this voter can vote for so we can figure out
+    #  if the voter can vote for any politicians in the election
+    from ballot.controllers import what_voter_can_vote_for
+    results = what_voter_can_vote_for(request=request, voter_device_id=voter_device_id)
+    voter_can_vote_for_politician_we_vote_ids = results['voter_can_vote_for_politician_we_vote_ids']
 
     visible_on_this_site_campaignx_we_vote_id_list = []
     campaignx_manager = CampaignXManager()
@@ -233,6 +240,7 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
         'campaignx_list':                           campaignx_display_list,
         'campaignx_list_found':                     campaignx_list_found,
         'promoted_campaignx_we_vote_ids':           promoted_campaignx_we_vote_ids,
+        'voter_can_vote_for_politician_we_vote_ids': voter_can_vote_for_politician_we_vote_ids,
         'voter_owned_campaignx_we_vote_ids':        voter_owned_campaignx_we_vote_ids,
         'voter_started_campaignx_we_vote_ids':      voter_started_campaignx_we_vote_ids,
         'voter_supported_campaignx_we_vote_ids':    voter_supported_campaignx_we_vote_ids,
@@ -241,6 +249,7 @@ def campaignx_list_retrieve_for_api(voter_device_id, hostname=''):  # campaignLi
 
 
 def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (No CDN)
+        request=None,
         voter_device_id='',
         campaignx_we_vote_id='',
         seo_friendly_path='',
@@ -382,6 +391,12 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         campaignx_we_vote_id=campaignx.we_vote_id,
     )
 
+    # We need to know all of the politicians this voter can vote for so we can figure out
+    #  if the voter can vote for any politicians in the election
+    from ballot.controllers import what_voter_can_vote_for
+    results = what_voter_can_vote_for(request=request, voter_device_id=voter_device_id)
+    voter_can_vote_for_politician_we_vote_ids = results['voter_can_vote_for_politician_we_vote_ids']
+
     for campaignx_politician in campaignx_politician_list:
         campaignx_politician_list_exists = True
         campaignx_politician_dict = {
@@ -503,6 +518,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         'supporters_count':                 campaignx.supporters_count,
         'visible_on_this_site':             campaignx.visible_on_this_site,
         'voter_campaignx_supporter':        voter_campaignx_supporter_dict,
+        'voter_can_vote_for_politician_we_vote_ids': voter_can_vote_for_politician_we_vote_ids,
         'voter_signed_in_with_email':       voter_signed_in_with_email,
         'we_vote_hosted_campaign_photo_large_url':  campaignx.we_vote_hosted_campaign_photo_large_url,
         'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,

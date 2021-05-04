@@ -1522,8 +1522,10 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
                 offices_count = 0
                 if positive_value_exists(one_ballot_returned.polling_location_we_vote_id):
                     office_list = []
+                    google_civic_election_id_list = [google_civic_election_id]
                     results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
-                        one_ballot_returned.polling_location_we_vote_id, google_civic_election_id)
+                        polling_location_we_vote_id=one_ballot_returned.polling_location_we_vote_id,
+                        google_civic_election_id_list=google_civic_election_id_list)
                     ballot_items_count = 0
                     if results['ballot_item_list_found']:
                         ballot_item_list = results['ballot_item_list']

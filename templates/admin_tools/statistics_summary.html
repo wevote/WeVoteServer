@@ -4,8 +4,43 @@
 {% block title %}Quick Statistics{% endblock %}
 
 {%  block content %}
+{% load humanize %}
 
 <h1>Quick Statistics</h1>
+
+<h4>CTCL API Calls</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th># of Calls</th>
+            </tr>
+        </thead>
+       {% for ctcl_daily_summary in ctcl_daily_summary_list %}
+        <tr>
+            <td>{{ ctcl_daily_summary.date_string }}</td>
+            <td>{{ ctcl_daily_summary.count|intcomma }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br />
+
+    <h4>Ballotpedia API Calls</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th># of Calls</th>
+            </tr>
+        </thead>
+       {% for ballotpedia_daily_summary in ballotpedia_daily_summary_list %}
+        <tr>
+            <td>{{ ballotpedia_daily_summary.date_string }}</td>
+            <td>{{ ballotpedia_daily_summary.count|intcomma }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br />
 
 <h4>Google API Calls</h4>
 <p>We need to track the number of calls to the Google Civic API because there are limits to
@@ -20,13 +55,13 @@
        {% for google_civic_daily_summary in google_civic_daily_summary_list %}
         <tr>
             <td>{{ google_civic_daily_summary.date_string }}</td>
-            <td>{{ google_civic_daily_summary.count }}</td>
+            <td>{{ google_civic_daily_summary.count|intcomma }}</td>
         </tr>
         {% endfor %}
     </table>
+    <br />
 
 <h4>Vote Smart API Calls</h4>
-<p>We track the number of calls to the Vote Smart API so we don't overwhelm their servers.</p>
     <table class="table">
         <thead>
             <tr>
@@ -37,24 +72,7 @@
        {% for vote_smart_daily_summary in vote_smart_daily_summary_list %}
         <tr>
             <td>{{ vote_smart_daily_summary.date_string }}</td>
-            <td>{{ vote_smart_daily_summary.count }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-<h4>Ballotpedia API Calls</h4>
-<p>We track the number of calls to the Ballotpedia API so we don't overwhelm their servers.</p>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th># of Calls</th>
-            </tr>
-        </thead>
-       {% for ballotpedia_daily_summary in ballotpedia_daily_summary_list %}
-        <tr>
-            <td>{{ ballotpedia_daily_summary.date_string }}</td>
-            <td>{{ ballotpedia_daily_summary.count }}</td>
+            <td>{{ vote_smart_daily_summary.count|intcomma }}</td>
         </tr>
         {% endfor %}
     </table>

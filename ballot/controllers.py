@@ -1189,8 +1189,12 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
     return error_json_data
 
 
-def choose_election_and_prepare_ballot_data(voter_device_link, google_civic_election_id, voter_address,
-                                            ballot_returned_we_vote_id='', ballot_location_shortcut=''):
+def choose_election_and_prepare_ballot_data(
+        voter_device_link,
+        google_civic_election_id,
+        voter_address,
+        ballot_returned_we_vote_id='',
+        ballot_location_shortcut=''):
     voter_id = voter_device_link.voter_id
     status = ""
 
@@ -1253,7 +1257,6 @@ def choose_election_and_prepare_ballot_data(voter_device_link, google_civic_elec
 
 def generate_ballot_data(voter_device_link, google_civic_election_id, voter_address,
                          ballot_returned_we_vote_id='', ballot_location_shortcut=''):
-    from import_export_ballotpedia.controllers import voter_ballot_items_retrieve_from_ballotpedia_for_api_v4
     voter_device_id = voter_device_link.voter_device_id
     voter_id = voter_device_link.voter_id
     voter_ballot_saved_manager = VoterBallotSavedManager()
@@ -1415,10 +1418,10 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
             }
             return results
 
-        # Most incoming addresses are just City, State Zip. 2018-08-27 We don't want to look those up from
-        # Ballotpedia -- we want to work with cached map points.
         turn_off_direct_voter_ballot_retrieve = False  # Search for this variable elsewhere
-        default_election_data_source_is_ballotpedia = True
+        default_election_data_source_is_ballotpedia = False
+        default_election_data_source_is_ctcl = True
+        default_election_data_source_is_google_civic = False
         if turn_off_direct_voter_ballot_retrieve:
             # We set this option when we want to force the retrieval of a nearby ballot
             pass
@@ -1450,6 +1453,8 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
             if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
                 status += "TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
                 # 1a) Get ballot data from Ballotpedia for the actual VoterAddress
+                from import_export_ballotpedia.controllers import \
+                    voter_ballot_items_retrieve_from_ballotpedia_for_api_v4
                 ballotpedia_retrieve_results = voter_ballot_items_retrieve_from_ballotpedia_for_api_v4(
                     voter_device_id, text_for_map_search)
                 status += ballotpedia_retrieve_results['status']
@@ -1492,6 +1497,63 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
                     return results
             else:
                 status += "NOT_REACHING_OUT_TO_BALLOTPEDIA "
+        elif default_election_data_source_is_ctcl:
+            status += "SHOULD_WE_USE_CTCL_API? "
+            length_at_which_we_suspect_address_has_street = 25
+            length_of_text_for_map_search = 0
+            if isinstance(text_for_map_search, str):
+                length_of_text_for_map_search = len(text_for_map_search)
+
+            # We don't want to call Ballotpedia when we just have "City, State ZIP". Since we don't always know
+            #  whether we have a street address or not, then we use a simple string length cut-off.
+            if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
+                status += "TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
+                # 1a) Get ballot data for the actual VoterAddress
+                from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_2021
+                ctcl_retrieve_results = voter_ballot_items_retrieve_from_google_civic_2021(
+                    voter_device_id,
+                    text_for_map_search=text_for_map_search,
+                    use_ctcl=True)
+                status += ctcl_retrieve_results['status']
+                if ctcl_retrieve_results['google_civic_election_id'] \
+                        and ctcl_retrieve_results['ballot_returned_found']:
+                    is_from_substituted_address = False
+                    substituted_address_nearby = ''
+                    is_from_test_address = False
+                    polling_location_we_vote_id_source = ''  # Not used when retrieving directly for the voter
+
+                    # We update the voter_address with this google_civic_election_id outside of this function
+
+                    # Save the meta information for this ballot data
+                    save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
+                        voter_id=voter_id,
+                        google_civic_election_id=ctcl_retrieve_results['google_civic_election_id'],
+                        state_code=ctcl_retrieve_results['state_code'],
+                        election_day_text=ctcl_retrieve_results['election_day_text'],
+                        election_description_text=ctcl_retrieve_results['election_description_text'],
+                        original_text_for_map_search=ctcl_retrieve_results['text_for_map_search'],
+                        substituted_address_nearby=substituted_address_nearby,
+                        is_from_substituted_address=is_from_substituted_address,
+                        is_from_test_ballot=is_from_test_address,
+                        polling_location_we_vote_id_source=polling_location_we_vote_id_source,
+                        ballot_location_display_name=ctcl_retrieve_results['ballot_location_display_name'],
+                        ballot_returned_we_vote_id=ctcl_retrieve_results['ballot_returned_we_vote_id'],
+                        ballot_location_shortcut=ctcl_retrieve_results['ballot_location_shortcut'],
+                        original_text_city=ctcl_retrieve_results['original_text_city'],
+                        original_text_state=ctcl_retrieve_results['original_text_state'],
+                        original_text_zip=ctcl_retrieve_results['original_text_zip'],
+                    )
+                    status += save_results['status']
+                    results = {
+                        'status': status,
+                        'success': save_results['success'],
+                        'google_civic_election_id': save_results['google_civic_election_id'],
+                        'voter_ballot_saved_found': save_results['voter_ballot_saved_found'],
+                        'voter_ballot_saved': save_results['voter_ballot_saved'],
+                    }
+                    return results
+            else:
+                status += "NOT_REACHING_OUT_TO_CTCL "
         else:
             # 1b) Get ballot data from Google Civic for the actual VoterAddress
             use_test_election = False
@@ -2358,6 +2420,97 @@ def ballot_items_search_retrieve_for_api(search_string):  # ballotItemsSearchRet
     return results
 
 
+def retrieve_politician_we_vote_ids_voter_can_vote_for(
+        voter_device_id,
+        voter_id=0,
+        polling_location_we_vote_id=''):
+    """
+
+    :param voter_device_id:
+    :param voter_id:
+    :param polling_location_we_vote_id:
+    :return:
+    """
+
+    status = ""
+    success = True
+    ballot_item_list_manager = BallotItemListManager()
+    candidate_list_object = CandidateListManager()
+    election_manager = ElectionManager()
+
+    ballot_item_list = []
+    politician_we_vote_id_list_found = False
+    politician_we_vote_id_list = []
+    results = {}
+
+    upcoming_google_civic_election_id_list = []
+    upcoming_results = election_manager.retrieve_upcoming_google_civic_election_id_list(
+        require_include_in_list_for_voters=True
+    )
+    if upcoming_results['upcoming_google_civic_election_id_list_found']:
+        upcoming_google_civic_election_id_list = upcoming_results['upcoming_google_civic_election_id_list']
+    try:
+        if positive_value_exists(polling_location_we_vote_id):
+            results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                google_civic_election_id_list=upcoming_google_civic_election_id_list,
+                ignore_ballot_item_order=True,
+                read_only=True)
+            success = results['success']
+            status += results['status']
+            ballot_item_list = results['ballot_item_list']
+        elif positive_value_exists(voter_id):
+            results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
+                voter_id=voter_id,
+                google_civic_election_id_list=upcoming_google_civic_election_id_list,
+                ignore_ballot_item_order=True,
+                read_only=True)
+            success = results['success']
+            status += results['status']
+            ballot_item_list = results['ballot_item_list']
+        else:
+            success = False
+            status += "MISSING_POLLING_LOCATION_AND_VOTER_ID "
+    except Exception as e:
+        status += 'FAILED voter_ballot_items_retrieve. ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        handle_exception(e, logger=logger, exception_message=status)
+        success = False
+
+    if success:
+        status += "LOOKING_FOR_POLITICIANS-BALLOT_ITEM_LIST_FOUND "
+        office_we_vote_id_list = []
+        measure_we_vote_id_list = []
+        for ballot_item in ballot_item_list:
+            if positive_value_exists(ballot_item.contest_office_we_vote_id):
+                if ballot_item.contest_office_we_vote_id not in office_we_vote_id_list:
+                    office_we_vote_id_list.append(ballot_item.contest_office_we_vote_id)
+            elif positive_value_exists(ballot_item.contest_measure_we_vote_id):
+                if ballot_item.contest_measure_we_vote_id not in measure_we_vote_id_list:
+                    measure_we_vote_id_list.append(ballot_item.contest_measure_we_vote_id)
+
+        if len(office_we_vote_id_list) > 0:
+            results = candidate_list_object.retrieve_candidate_we_vote_id_list_from_office_list(
+                contest_office_we_vote_id_list=office_we_vote_id_list
+            )
+            candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+            if len(candidate_we_vote_id_list) > 0:
+                results = candidate_list_object.retrieve_politician_we_vote_id_list_from_candidate_we_vote_id_list(
+                    candidate_we_vote_id_list=candidate_we_vote_id_list)
+                politician_we_vote_id_list = results['politician_we_vote_id_list']
+                if len(politician_we_vote_id_list) > 0:
+                    politician_we_vote_id_list_found = True
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'voter_device_id':                  voter_device_id,
+        'politician_we_vote_id_list_found': politician_we_vote_id_list_found,
+        'politician_we_vote_id_list':       politician_we_vote_id_list,
+    }
+    return results
+
+
 def voter_ballot_items_retrieve_for_one_election_for_api(
         voter_device_id, voter_id=0, google_civic_election_id='', ballot_returned_we_vote_id=''):
     """
@@ -2386,18 +2539,21 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
     ballot_item_list = []
     ballot_items_to_display = []
     results = {}
+    google_civic_election_id_list = [google_civic_election_id]
     try:
         if positive_value_exists(polling_location_we_vote_id):
             results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
-                google_civic_election_id=google_civic_election_id,
                 polling_location_we_vote_id=polling_location_we_vote_id,
+                google_civic_election_id_list=google_civic_election_id_list,
                 read_only=True)
             success = results['success']
             status += results['status']
             ballot_item_list = results['ballot_item_list']
         else:
             results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
-                voter_id, google_civic_election_id, read_only=True)
+                voter_id=voter_id,
+                google_civic_election_id_list=google_civic_election_id_list,
+                read_only=True)
             success = results['success']
             status += results['status']
             ballot_item_list = results['ballot_item_list']
@@ -2707,3 +2863,123 @@ def ballot_item_options_retrieve_for_api(google_civic_election_id='', search_str
         'json_data':                json_data,
     }
     return results
+
+
+def what_voter_can_vote_for(request, voter_device_id):
+    status = ''
+    ballot_returned_we_vote_id = ''
+    google_civic_election_id = 0
+
+    # We retrieve voter_device_link
+    voter_device_link_manager = VoterDeviceLinkManager()
+    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+    if not voter_device_link_results['voter_device_link_found']:
+        status += "VALID_VOTER_DEVICE_ID_MISSING "
+        error_json_data = {
+            'status':                               status,
+            'success':                              False,
+            'voter_can_vote_for_politician_we_vote_ids': [],
+        }
+        return error_json_data
+
+    voter_device_link = voter_device_link_results['voter_device_link']
+    voter_id = voter_device_link.voter_id
+
+    if not positive_value_exists(voter_id):
+        status += " " + "VALID_VOTER_ID_MISSING"
+        error_json_data = {
+            'status':                       status,
+            'success':                      False,
+            'voter_can_vote_for_politician_we_vote_ids': [],
+        }
+        return error_json_data
+
+    voter_address_manager = VoterAddressManager()
+    voter_address_id = 0
+    address_type = BALLOT_ADDRESS
+    voter_address_results = voter_address_manager.retrieve_address(voter_address_id, voter_id, address_type)
+    status += " " + voter_address_results['status']
+    # Note that this might be an empty VoterAddress object
+    voter_address = voter_address_results['voter_address']
+    if positive_value_exists(voter_address_results['voter_address_has_value']):
+        ballot_retrieval_based_on_voter_address = True
+    else:
+        ballot_retrieval_based_on_voter_address = False
+
+        from geoip.controllers import voter_location_retrieve_from_ip_for_api
+        voter_location_results = voter_location_retrieve_from_ip_for_api(request)
+        if voter_location_results['voter_location_found']:
+            status += 'VOTER_ADDRESS_RETRIEVE-VOTER_LOCATION_FOUND_FROM_IP '
+            text_for_map_search = voter_location_results['voter_location']
+            status += '*** ' + text_for_map_search + ' ***, '
+
+            google_civic_election_id = 0
+
+            voter_address_results = voter_address_manager.update_or_create_voter_address(
+                voter_id=voter_id,
+                address_type=BALLOT_ADDRESS,
+                raw_address_text=text_for_map_search,
+                voter_entered_address=False)
+            status += voter_address_results['status'] + ", "
+
+            if voter_address_results['voter_address_found']:
+                voter_address = voter_address_results['voter_address']
+                if positive_value_exists(voter_address_results['voter_address_has_value']):
+                    ballot_retrieval_based_on_voter_address = True
+                else:
+                    ballot_retrieval_based_on_voter_address = False
+
+    results = choose_election_and_prepare_ballot_data(
+        voter_device_link,
+        google_civic_election_id,
+        voter_address)
+    status += " " + results['status']
+    if not results['voter_ballot_saved_found']:
+        if positive_value_exists(voter_address.text_for_map_search):
+            ballot_caveat = "We could not find a ballot near '{text_for_map_search}'.".format(
+                text_for_map_search=voter_address.text_for_map_search)
+        else:
+            ballot_caveat = "Please save your address so we can find your ballot."
+
+        error_json_data = {
+            'status':                       status,
+            'success':                      True,
+            'voter_can_vote_for_politician_we_vote_ids': [],
+        }
+        return error_json_data
+
+    google_civic_election_id = results['google_civic_election_id']
+    voter_ballot_saved = results['voter_ballot_saved']
+
+    # Update voter_device_link
+    if voter_device_link.google_civic_election_id != google_civic_election_id:
+        voter_device_link_manager.update_voter_device_link_with_election_id(voter_device_link, google_civic_election_id)
+
+    # Update voter_address to include matching google_civic_election_id and voter_ballot_saved entry
+    if positive_value_exists(google_civic_election_id):
+        # 2017-10-25 DALE It turns out we don't want to update the address with just the election_id unless
+        #  the election was calculated from an address. We want to keep google_civic_election_id tied
+        #  to the voter's address
+        if ballot_retrieval_based_on_voter_address:
+            if google_civic_election_id != voter_address.google_civic_election_id:
+                voter_address.google_civic_election_id = google_civic_election_id
+                voter_address_manager.update_existing_voter_address_object(voter_address)
+
+    polling_location_we_vote_id_source = voter_ballot_saved.polling_location_we_vote_id_source
+    results = retrieve_politician_we_vote_ids_voter_can_vote_for(
+        voter_device_id,
+        voter_id=voter_id,
+        polling_location_we_vote_id=polling_location_we_vote_id_source)
+
+    if results['politician_we_vote_id_list_found']:
+        politician_we_vote_id_list = results['politician_we_vote_id_list']
+    else:
+        politician_we_vote_id_list = []
+        status += " " + results['status']
+
+    json_data = {
+        'status':                       status,
+        'success':                      True,
+        'voter_can_vote_for_politician_we_vote_ids': politician_we_vote_id_list,
+    }
+    return json_data

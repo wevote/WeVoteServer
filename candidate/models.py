@@ -1460,6 +1460,33 @@ class CandidateListManager(models.Manager):
 
         return results_list, number_of_rows
 
+    def retrieve_politician_we_vote_id_list_from_candidate_we_vote_id_list(
+            self,
+            candidate_we_vote_id_list=[]):
+        success = True
+        status = ""
+        politician_we_vote_id_list = []
+        politician_we_vote_id_list_found = False
+        try:
+            candidate_query = CandidateCampaign.objects.all()
+            candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+            candidate_query = candidate_query.exclude(
+                Q(politician_we_vote_id__isnull=True) | Q(politician_we_vote_id="")
+            )
+            candidate_query = candidate_query.values_list('politician_we_vote_id', flat=True).distinct()
+            politician_we_vote_id_list = list(candidate_query)
+            politician_we_vote_id_list_found = len(politician_we_vote_id_list) > 0
+        except Exception as e:
+            success = False
+            status += "COULD_NOT_RETRIEVE_POLITICIAN_LIST: " + str(e) + ' '
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'politician_we_vote_id_list':       politician_we_vote_id_list,
+            'politician_we_vote_id_list_found': politician_we_vote_id_list_found,
+        }
+        return results
+
     def update_politician_we_vote_id_in_all_candidates(
             self,
             candidate_we_vote_id='',
