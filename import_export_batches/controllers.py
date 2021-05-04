@@ -311,9 +311,10 @@ def create_batch_row_actions(
                 if positive_value_exists(polling_location_we_vote_id) and \
                         positive_value_exists(batch_description.google_civic_election_id):
                     ballot_item_list_manager = BallotItemListManager()
+                    google_civic_election_id_list = [batch_description.google_civic_election_id]
                     results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
-                        polling_location_we_vote_id,
-                        batch_description.google_civic_election_id,
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        google_civic_election_id_list=google_civic_election_id_list,
                         read_only=False)
                     if results['ballot_item_list_found']:
                         existing_ballot_item_list = results['ballot_item_list']

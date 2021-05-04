@@ -22,6 +22,7 @@ def campaignx_list_retrieve_view(request):  # campaignListRetrieve (No CDN)
     hostname = request.GET.get('hostname', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     json_data = campaignx_list_retrieve_for_api(
+        request=request,
         hostname=hostname,
         voter_device_id=voter_device_id,
     )
@@ -52,6 +53,7 @@ def campaignx_retrieve_view(request):  # campaignRetrieve (CDN)
     hostname = request.GET.get('hostname', '')
     seo_friendly_path = request.GET.get('seo_friendly_path', '')
     json_data = campaignx_retrieve_for_api(
+        request=request,
         voter_device_id=voter_device_id,
         campaignx_we_vote_id=campaignx_we_vote_id,
         hostname=hostname,
@@ -65,6 +67,7 @@ def campaignx_retrieve_as_owner_view(request):  # campaignRetrieveAsOwner (No CD
     campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
     hostname = request.GET.get('hostname', '')
     json_data = campaignx_retrieve_for_api(
+        request=request,
         voter_device_id=voter_device_id,
         campaignx_we_vote_id=campaignx_we_vote_id,
         as_owner=True,

@@ -3421,8 +3421,13 @@ class VoterAddressManager(models.Manager):
             text_for_map_search = voter_address.text_for_map_search
         return text_for_map_search
 
-    def update_or_create_voter_address(self, voter_id, address_type, raw_address_text, google_civic_election_id=False,
-                                       voter_entered_address=True):
+    def update_or_create_voter_address(
+            self,
+            voter_id=0,
+            address_type='',
+            raw_address_text='',
+            google_civic_election_id=False,
+            voter_entered_address=True):
         """
         NOTE: This approach won't support multiple FORMER_BALLOT_ADDRESS
         :param voter_id:
@@ -3435,6 +3440,7 @@ class VoterAddressManager(models.Manager):
         status = ''
         exception_multiple_object_returned = False
         new_address_created = False
+        voter_address_has_value = False
         voter_address_on_stage = None
         voter_address_on_stage_found = False
         google_civic_election_id = google_civic_election_id if positive_value_exists(google_civic_election_id) else 0
@@ -3464,6 +3470,7 @@ class VoterAddressManager(models.Manager):
                 voter_address_on_stage, new_address_created = VoterAddress.objects.update_or_create(
                     voter_id__exact=voter_id, address_type=address_type, defaults=updated_values)
                 voter_address_on_stage_found = voter_address_on_stage.id
+                voter_address_has_value = positive_value_exists(voter_address_on_stage.text_for_map_search)
                 success = True
                 status += "UPDATE_OR_CREATE_SUCCESSFUL "
             except VoterAddress.MultipleObjectsReturned as e:
@@ -3483,6 +3490,7 @@ class VoterAddressManager(models.Manager):
             'address_type':             address_type,
             'new_address_created':      new_address_created,
             'voter_address_found':      voter_address_on_stage_found,
+            'voter_address_has_value':  voter_address_has_value,
             'voter_address':            voter_address_on_stage,
         }
         return results

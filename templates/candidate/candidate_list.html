@@ -357,9 +357,10 @@
                     {{ candidate.we_vote_id }}
                     {% if candidate.politician_we_vote_id %}
                         <br />
-                        <a href="{% url 'politician:politician_we_vote_id_edit' candidate.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                         {{ candidate.politician_we_vote_id }}
-                        </a>
+                    {% else %}
+                        <br />
+                        <span style="color: #999;">(no&nbsp;politician&nbsp;link)</span>
                     {% endif %}
                     {% if candidate.ballotpedia_candidate_summary %}
                     <br /><span style="color: darkgray">{{ candidate.ballotpedia_candidate_summary|default_if_none:""|truncatechars:50 }}</span>

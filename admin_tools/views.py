@@ -20,10 +20,11 @@ from election.controllers import elections_import_from_sample_file
 from email_outbound.models import EmailAddress
 from follow.models import FollowOrganizationList
 from friend.models import CurrentFriend, FriendManager, SuggestedFriend
+from import_export_ballotpedia.models import BallotpediaApiCounterManager
+from import_export_ctcl.models import CTCLApiCounterManager
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from import_export_google_civic.models import GoogleCivicApiCounterManager
 from import_export_vote_smart.models import VoteSmartApiCounterManager
-from import_export_ballotpedia.models import BallotpediaApiCounterManager
 from measure.models import ContestMeasure, ContestMeasureManager
 from office.controllers import offices_import_from_sample_file
 from office.models import ContestOffice
@@ -1883,16 +1884,19 @@ def statistics_summary_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+    ballotpedia_daily_summary_list = ballotpedia_api_counter_manager.retrieve_daily_summaries()
+    ctcl_api_counter_manager = CTCLApiCounterManager()
+    ctcl_daily_summary_list = ctcl_api_counter_manager.retrieve_daily_summaries()
     google_civic_api_counter_manager = GoogleCivicApiCounterManager()
     google_civic_daily_summary_list = google_civic_api_counter_manager.retrieve_daily_summaries()
     vote_smart_api_counter_manager = VoteSmartApiCounterManager()
     vote_smart_daily_summary_list = vote_smart_api_counter_manager.retrieve_daily_summaries()
-    ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-    ballotpedia_daily_summary_list = ballotpedia_api_counter_manager.retrieve_daily_summaries()
     template_values = {
+        'ctcl_daily_summary_list':          ctcl_daily_summary_list,
+        'ballotpedia_daily_summary_list':   ballotpedia_daily_summary_list,
         'google_civic_daily_summary_list':  google_civic_daily_summary_list,
         'vote_smart_daily_summary_list':    vote_smart_daily_summary_list,
-        'ballotpedia_daily_summary_list':   ballotpedia_daily_summary_list
     }
     response = render(request, 'admin_tools/statistics_summary.html', template_values)
 

@@ -289,7 +289,10 @@ def calculate_positions_count_for_all_ballot_items_for_api(
     # Get a list of all candidates and measures from this election (in the active election)
     ballot_item_list_manager = BallotItemListManager()
     if positive_value_exists(google_civic_election_id):
-        results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(voter_id, google_civic_election_id)
+        google_civic_election_id_list = [google_civic_election_id]
+        results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
+            voter_id=voter_id,
+            google_civic_election_id_list=google_civic_election_id_list)
         status += results['status']
         ballot_item_list = results['ballot_item_list']
     else:
@@ -307,8 +310,10 @@ def calculate_positions_count_for_all_ballot_items_for_api(
             }
             return json_data
 
+        google_civic_election_id_list = [google_civic_election_id_local_scope]
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
-            voter_id, google_civic_election_id_local_scope)
+            voter_id=voter_id,
+            google_civic_election_id_list=google_civic_election_id_list)
         status += results['status']
         ballot_item_list = results['ballot_item_list']
         google_civic_election_id = google_civic_election_id_local_scope
@@ -555,8 +560,11 @@ def count_for_all_ballot_items_from_position_network_score_for_api(  # positions
     candidate_list_manager = CandidateListManager()
     ballot_item_list = []
     if google_civic_election_id:
+        google_civic_election_id_list = [google_civic_election_id]
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
-            voter_id, google_civic_election_id, read_only=True)
+            voter_id=voter_id,
+            google_civic_election_id_list=google_civic_election_id_list,
+            read_only=True)
         status += results['status']
         ballot_item_list = results['ballot_item_list']
 
