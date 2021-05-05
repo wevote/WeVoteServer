@@ -1084,54 +1084,56 @@ def voter_list_view(request):
 
         # Now search voter object
         voter_query = Voter.objects.all()
-        filters = []
-        new_filter = Q(first_name__icontains=voter_search)
-        filters.append(new_filter)
-
-        new_filter = Q(middle_name__icontains=voter_search)
-        filters.append(new_filter)
-
-        new_filter = Q(last_name__icontains=voter_search)
-        filters.append(new_filter)
-
-        new_filter = Q(we_vote_id__iexact=voter_search)
-        filters.append(new_filter)
-
-        if len(voter_we_vote_ids_with_email) > 0:
-            new_filter = Q(we_vote_id__in=voter_we_vote_ids_with_email)
+        search_words = voter_search.split()
+        for one_word in search_words:
+            filters = []  # Reset for each search word
+            new_filter = Q(first_name__icontains=one_word)
             filters.append(new_filter)
 
-        if len(voter_we_vote_ids_with_sms_phone_number) > 0:
-            new_filter = Q(we_vote_id__in=voter_we_vote_ids_with_sms_phone_number)
+            new_filter = Q(middle_name__icontains=one_word)
             filters.append(new_filter)
 
-        new_filter = Q(email__icontains=voter_search)
-        filters.append(new_filter)
+            new_filter = Q(last_name__icontains=one_word)
+            filters.append(new_filter)
 
-        new_filter = Q(normalized_sms_phone_number__icontains=voter_search)
-        filters.append(new_filter)
+            new_filter = Q(we_vote_id__iexact=one_word)
+            filters.append(new_filter)
 
-        new_filter = Q(facebook_email__icontains=voter_search)
-        filters.append(new_filter)
+            if len(voter_we_vote_ids_with_email) > 0:
+                new_filter = Q(we_vote_id__in=voter_we_vote_ids_with_email)
+                filters.append(new_filter)
 
-        new_filter = Q(twitter_screen_name__icontains=voter_search)
-        filters.append(new_filter)
+            if len(voter_we_vote_ids_with_sms_phone_number) > 0:
+                new_filter = Q(we_vote_id__in=voter_we_vote_ids_with_sms_phone_number)
+                filters.append(new_filter)
 
-        new_filter = Q(twitter_name__icontains=voter_search)
-        filters.append(new_filter)
+            new_filter = Q(email__icontains=one_word)
+            filters.append(new_filter)
 
-        new_filter = Q(linked_organization_we_vote_id__iexact=voter_search)
-        filters.append(new_filter)
+            new_filter = Q(normalized_sms_phone_number__icontains=one_word)
+            filters.append(new_filter)
 
-        # Add the first query
-        if len(filters):
-            final_filters = filters.pop()
+            new_filter = Q(facebook_email__icontains=one_word)
+            filters.append(new_filter)
 
-            # ...and "OR" the remaining items in the list
-            for item in filters:
-                final_filters |= item
+            new_filter = Q(twitter_screen_name__icontains=one_word)
+            filters.append(new_filter)
 
-            voter_query = voter_query.filter(final_filters)
+            new_filter = Q(twitter_name__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(linked_organization_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                voter_query = voter_query.filter(final_filters)
     else:
         voter_query = Voter.objects.order_by(
             '-is_admin', '-is_verified_volunteer', 'email', 'twitter_screen_name',

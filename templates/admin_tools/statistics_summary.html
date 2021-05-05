@@ -7,7 +7,9 @@
 {% load humanize %}
 
 <h1>Quick Statistics</h1>
+<p>API Calls in the last 30 days.</p>
 
+{% if ctcl_daily_summary_list %}
 <h4>CTCL API Calls</h4>
     <table class="table">
         <thead>
@@ -24,7 +26,9 @@
         {% endfor %}
     </table>
     <br />
+{% endif %}
 
+{% if ballotpedia_daily_summary_list %}
     <h4>Ballotpedia API Calls</h4>
     <table class="table">
         <thead>
@@ -41,7 +45,9 @@
         {% endfor %}
     </table>
     <br />
+{% endif %}
 
+{% if google_civic_daily_summary_list %}
 <h4>Google API Calls</h4>
 <p>We need to track the number of calls to the Google Civic API because there are limits to
     the number of calls we can make per day. This also gives us a glimpse into new network activity.</p>
@@ -60,8 +66,10 @@
         {% endfor %}
     </table>
     <br />
+{% endif %}
 
-<h4>Vote Smart API Calls</h4>
+{% if vote_smart_daily_summary_list %}
+    <h4>Vote Smart API Calls</h4>
     <table class="table">
         <thead>
             <tr>
@@ -76,5 +84,6 @@
         </tr>
         {% endfor %}
     </table>
+{% endif %}
 
 {%  endblock %}
