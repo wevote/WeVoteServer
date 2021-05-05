@@ -1884,19 +1884,19 @@ def statistics_summary_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-    ballotpedia_daily_summary_list = ballotpedia_api_counter_manager.retrieve_daily_summaries()
+    # ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+    # ballotpedia_daily_summary_list = ballotpedia_api_counter_manager.retrieve_daily_summaries()
     ctcl_api_counter_manager = CTCLApiCounterManager()
     ctcl_daily_summary_list = ctcl_api_counter_manager.retrieve_daily_summaries()
     google_civic_api_counter_manager = GoogleCivicApiCounterManager()
     google_civic_daily_summary_list = google_civic_api_counter_manager.retrieve_daily_summaries()
-    vote_smart_api_counter_manager = VoteSmartApiCounterManager()
-    vote_smart_daily_summary_list = vote_smart_api_counter_manager.retrieve_daily_summaries()
+    # vote_smart_api_counter_manager = VoteSmartApiCounterManager()
+    # vote_smart_daily_summary_list = vote_smart_api_counter_manager.retrieve_daily_summaries()
     template_values = {
         'ctcl_daily_summary_list':          ctcl_daily_summary_list,
-        'ballotpedia_daily_summary_list':   ballotpedia_daily_summary_list,
+        # 'ballotpedia_daily_summary_list':   ballotpedia_daily_summary_list,
         'google_civic_daily_summary_list':  google_civic_daily_summary_list,
-        'vote_smart_daily_summary_list':    vote_smart_daily_summary_list,
+        # 'vote_smart_daily_summary_list':    vote_smart_daily_summary_list,
     }
     response = render(request, 'admin_tools/statistics_summary.html', template_values)
 

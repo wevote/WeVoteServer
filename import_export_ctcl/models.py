@@ -23,8 +23,10 @@ class CandidateSelection(models.Model):
 
 class CTCLApiCounter(models.Model):
     datetime_of_action = models.DateTimeField(verbose_name='date and time of action', null=False, auto_now=True)
-    kind_of_action = models.CharField(verbose_name="kind of call to CTCL", max_length=50, null=True, blank=True)
-    google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
+    kind_of_action = models.CharField(
+        verbose_name="kind of call to CTCL", max_length=50, null=True, blank=True, db_index=True)
+    google_civic_election_id = models.PositiveIntegerField(
+        verbose_name="google civic election id", null=True, db_index=True)
 
 
 class CTCLApiCounterDailySummary(models.Model):
