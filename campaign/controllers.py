@@ -29,16 +29,34 @@ CAMPAIGN_PHOTO_SMALL_MAX_WIDTH = 140
 CAMPAIGN_PHOTO_SMALL_MAX_HEIGHT = 73
 
 
-def campaignx_list_retrieve_for_api(request, voter_device_id, hostname=''):  # campaignListRetrieve
+def campaignx_list_retrieve_for_api(  # campaignListRetrieve
+        request=None,
+        voter_device_id='',
+        hostname='',
+        recommended_campaigns_for_campaignx_we_vote_id=''):
     """
 
     :param request:
     :param voter_device_id:
     :param hostname:
+    :param recommended_campaigns_for_campaignx_we_vote_id:
     :return:
     """
     campaignx_display_list = []
     status = ""
+    promoted_campaignx_list_returned = True
+    voter_can_vote_for_politicians_list_returned = True
+    voter_owned_campaignx_list_returned = True
+    voter_started_campaignx_list_returned = True
+    voter_supported_campaignx_list_returned = True
+
+    if positive_value_exists(recommended_campaigns_for_campaignx_we_vote_id):
+        promoted_campaignx_list_returned = False
+        voter_can_vote_for_politicians_list_returned = False
+        voter_owned_campaignx_list_returned = False
+        voter_started_campaignx_list_returned = False
+        voter_supported_campaignx_list_returned = False
+
     promoted_campaignx_we_vote_ids = []
     voter_owned_campaignx_we_vote_ids = []
     voter_started_campaignx_we_vote_ids = []
@@ -63,30 +81,32 @@ def campaignx_list_retrieve_for_api(request, voter_device_id, hostname=''):  # c
     results = site_configuration_retrieve_for_api(hostname)
     site_owner_organization_we_vote_id = results['organization_we_vote_id']
 
-    # owned_by_voter_we_vote_id_list = [],
-    # owned_by_organization_we_vote_id_list = []):
-
-    # including_campaignx_we_vote_id_list = [],
-    # excluding_campaignx_we_vote_id_list = [],
-    # including_politicians_in_any_of_these_states = None,
-    # including_politicians_with_support_in_any_of_these_issues = None):
-
-    # We need to know all of the politicians this voter can vote for so we can figure out
-    #  if the voter can vote for any politicians in the election
-    from ballot.controllers import what_voter_can_vote_for
-    results = what_voter_can_vote_for(request=request, voter_device_id=voter_device_id)
-    voter_can_vote_for_politician_we_vote_ids = results['voter_can_vote_for_politician_we_vote_ids']
+    voter_can_vote_for_politician_we_vote_ids = []
+    if voter_can_vote_for_politicians_list_returned:
+        # We need to know all of the politicians this voter can vote for so we can figure out
+        #  if the voter can vote for any politicians in the election
+        from ballot.controllers import what_voter_can_vote_for
+        results = what_voter_can_vote_for(request=request, voter_device_id=voter_device_id)
+        voter_can_vote_for_politician_we_vote_ids = results['voter_can_vote_for_politician_we_vote_ids']
 
     visible_on_this_site_campaignx_we_vote_id_list = []
     campaignx_manager = CampaignXManager()
-    if positive_value_exists(site_owner_organization_we_vote_id):
-        results = campaignx_manager.retrieve_campaignx_list_for_private_label(
-            including_started_by_voter_we_vote_id=voter_we_vote_id,
+    if positive_value_exists(recommended_campaigns_for_campaignx_we_vote_id):
+        results = retrieve_recommended_campaignx_list_for_campaignx_we_vote_id(
+            request=request,
+            voter_device_id=voter_device_id,
+            voter_we_vote_id=voter_we_vote_id,
+            campaignx_we_vote_id=recommended_campaigns_for_campaignx_we_vote_id,
             site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
-        visible_on_this_site_campaignx_we_vote_id_list = results['visible_on_this_site_campaignx_we_vote_id_list']
     else:
-        results = campaignx_manager.retrieve_campaignx_list(
-            including_started_by_voter_we_vote_id=voter_we_vote_id)
+        if positive_value_exists(site_owner_organization_we_vote_id):
+            results = campaignx_manager.retrieve_campaignx_list_for_private_label(
+                including_started_by_voter_we_vote_id=voter_we_vote_id,
+                site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
+            visible_on_this_site_campaignx_we_vote_id_list = results['visible_on_this_site_campaignx_we_vote_id_list']
+        else:
+            results = campaignx_manager.retrieve_campaignx_list(
+                including_started_by_voter_we_vote_id=voter_we_vote_id)
     success = results['success']
     status += results['status']
     campaignx_list = results['campaignx_list']
@@ -94,11 +114,9 @@ def campaignx_list_retrieve_for_api(request, voter_device_id, hostname=''):  # c
 
     if success:
         for campaignx in campaignx_list:
-            # Now calculate which campaigns belong to this voter
             viewer_is_owner = False
             if positive_value_exists(voter_we_vote_id):
                 if campaignx.started_by_voter_we_vote_id == voter_we_vote_id:
-                    voter_started_campaignx_we_vote_ids.append(campaignx.we_vote_id)
                     viewer_is_owner = True
             if campaignx.is_still_active and campaignx.is_ok_to_promote_on_we_vote:
                 if positive_value_exists(site_owner_organization_we_vote_id):
@@ -217,6 +235,7 @@ def campaignx_list_retrieve_for_api(request, voter_device_id, hostname=''):  # c
             }
             campaignx_display_list.append(one_campaignx)
 
+    if success and voter_owned_campaignx_list_returned:
         voter_owned_list = campaignx_manager.retrieve_campaignx_owner_list(
             voter_we_vote_id=voter_we_vote_id,
             viewer_is_owner=True,
@@ -224,6 +243,15 @@ def campaignx_list_retrieve_for_api(request, voter_device_id, hostname=''):  # c
         for one_owner in voter_owned_list:
             voter_owned_campaignx_we_vote_ids.append(one_owner.campaignx_we_vote_id)
 
+    if success and voter_started_campaignx_list_returned:
+        results = campaignx_manager.retrieve_campaignx_we_vote_id_list_started_by_voter(
+            started_by_voter_we_vote_id=voter_we_vote_id)
+        if not results['success']:
+            voter_started_campaignx_list_returned = False
+        else:
+            voter_started_campaignx_we_vote_ids = results['campaignx_we_vote_id_list']
+
+    if success and voter_supported_campaignx_list_returned:
         supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
             voter_we_vote_id=voter_we_vote_id,
             limit=0,
@@ -239,12 +267,24 @@ def campaignx_list_retrieve_for_api(request, voter_device_id, hostname=''):  # c
         'success':                                  success,
         'campaignx_list':                           campaignx_display_list,
         'campaignx_list_found':                     campaignx_list_found,
-        'promoted_campaignx_we_vote_ids':           promoted_campaignx_we_vote_ids,
-        'voter_can_vote_for_politician_we_vote_ids': voter_can_vote_for_politician_we_vote_ids,
-        'voter_owned_campaignx_we_vote_ids':        voter_owned_campaignx_we_vote_ids,
-        'voter_started_campaignx_we_vote_ids':      voter_started_campaignx_we_vote_ids,
-        'voter_supported_campaignx_we_vote_ids':    voter_supported_campaignx_we_vote_ids,
     }
+    if promoted_campaignx_list_returned:
+        json_data['promoted_campaignx_list_returned'] = True
+        json_data['promoted_campaignx_we_vote_ids'] = promoted_campaignx_we_vote_ids
+    if positive_value_exists(recommended_campaigns_for_campaignx_we_vote_id):
+        json_data['recommended_campaigns_for_campaignx_we_vote_id'] = recommended_campaigns_for_campaignx_we_vote_id
+    if voter_can_vote_for_politicians_list_returned:
+        json_data['voter_can_vote_for_politicians_list_returned'] = True
+        json_data['voter_can_vote_for_politician_we_vote_ids'] = voter_can_vote_for_politician_we_vote_ids
+    if voter_owned_campaignx_list_returned:
+        json_data['voter_owned_campaignx_list_returned'] = True
+        json_data['voter_owned_campaignx_we_vote_ids'] = voter_owned_campaignx_we_vote_ids
+    if voter_started_campaignx_list_returned:
+        json_data['voter_started_campaignx_list_returned'] = True
+        json_data['voter_started_campaignx_we_vote_ids'] = voter_started_campaignx_we_vote_ids
+    if voter_supported_campaignx_list_returned:
+        json_data['voter_supported_campaignx_list_returned'] = True
+        json_data['voter_supported_campaignx_we_vote_ids'] = voter_supported_campaignx_we_vote_ids
     return json_data
 
 
@@ -1278,5 +1318,116 @@ def move_campaignx_to_another_voter(
         'to_voter_we_vote_id':              to_voter_we_vote_id,
         'campaignx_entries_moved':          campaignx_owner_entries_moved,
         'campaignx_owner_entries_moved':    campaignx_owner_entries_moved,
+    }
+    return results
+
+
+def retrieve_recommended_campaignx_list_for_campaignx_we_vote_id(
+        request=None,
+        voter_device_id='',
+        campaignx_we_vote_id='',
+        voter_we_vote_id='',
+        site_owner_organization_we_vote_id='',
+        minimum_number_of_campaignx_options=15,
+        read_only=True):
+    """
+    Regarding minimum_number_of_campaignx_options:
+    If we ask voters to sign 5 more campaigns, we want to make sure we send 3x options so we have enough
+    available on the front end so we can filter out campaigns with duplicate politicians
+    (after the voter makes choices) and let the voter skip campaigns they aren't interested in
+
+    :param request:
+    :param voter_device_id:
+    :param campaignx_we_vote_id:
+    :param voter_we_vote_id:
+    :param site_owner_organization_we_vote_id:
+    :param minimum_number_of_campaignx_options:
+    :param read_only:
+    :return:
+    """
+    campaignx_manager = CampaignXManager()
+    campaignx_list = []
+    original_campaignx_we_vote_id_list = [campaignx_we_vote_id]
+    success = True
+    status = ""
+
+    # Remove campaigns already supported by this voter
+    supported_by_voter_campaignx_we_vote_id_list = []
+    if positive_value_exists(voter_we_vote_id):
+        results = campaignx_manager.retrieve_campaignx_we_vote_id_list_supported_by_voter(
+            voter_we_vote_id=voter_we_vote_id)
+        if results['campaignx_we_vote_id_list_found']:
+            supported_by_voter_campaignx_we_vote_id_list = results['campaignx_we_vote_id_list']
+
+    campaignx_we_vote_id_list_voter_can_vote_for = []
+    if positive_value_exists(voter_device_id):
+        from ballot.controllers import what_voter_can_vote_for
+        results = what_voter_can_vote_for(request=request, voter_device_id=voter_device_id)
+        if len(results['voter_can_vote_for_politician_we_vote_ids']) > 0:
+            voter_can_vote_for_politician_we_vote_ids = results['voter_can_vote_for_politician_we_vote_ids']
+            politician_results = campaignx_manager.retrieve_campaignx_we_vote_id_list_by_politician_we_vote_id(
+                politician_we_vote_id_list=voter_can_vote_for_politician_we_vote_ids)
+            if politician_results['campaignx_we_vote_id_list_found']:
+                campaignx_we_vote_id_list_voter_can_vote_for = politician_results['campaignx_we_vote_id_list']
+
+    # Create pool of options
+    # recommended_campaignx_we_vote_id_list = ['wv02camp4']
+    continue_searching_for_options = True
+    if positive_value_exists(site_owner_organization_we_vote_id):
+        # Retrieve all campaigns visible on this site
+        visible_on_this_site_campaignx_we_vote_id_list = \
+            campaignx_manager.retrieve_visible_on_this_site_campaignx_simple_list(
+                site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
+        recommended_campaignx_we_vote_id_list = \
+            list(set(visible_on_this_site_campaignx_we_vote_id_list) - set(original_campaignx_we_vote_id_list))
+        if len(supported_by_voter_campaignx_we_vote_id_list) > 0:
+            recommended_campaignx_we_vote_id_list = \
+                list(set(recommended_campaignx_we_vote_id_list) - set(supported_by_voter_campaignx_we_vote_id_list))
+        continue_searching_for_options = False
+    else:
+        recommended_campaignx_we_vote_id_list = campaignx_we_vote_id_list_voter_can_vote_for
+        recommended_campaignx_we_vote_id_list = \
+            list(set(recommended_campaignx_we_vote_id_list) - set(original_campaignx_we_vote_id_list))
+        if len(supported_by_voter_campaignx_we_vote_id_list) > 0:
+            recommended_campaignx_we_vote_id_list = \
+                list(set(recommended_campaignx_we_vote_id_list) - set(supported_by_voter_campaignx_we_vote_id_list))
+        if len(recommended_campaignx_we_vote_id_list) >= minimum_number_of_campaignx_options:
+            # If we have the number we need, we can stop here
+            continue_searching_for_options = False
+
+    if continue_searching_for_options:
+        number_of_options_already_found = len(recommended_campaignx_we_vote_id_list)
+        number_to_find = minimum_number_of_campaignx_options - number_of_options_already_found
+        if number_to_find > 0:
+            campaignx_we_vote_id_list_to_exclude = \
+                list(set(recommended_campaignx_we_vote_id_list +
+                         supported_by_voter_campaignx_we_vote_id_list +
+                         original_campaignx_we_vote_id_list))
+
+            results = campaignx_manager.retrieve_campaignx_we_vote_id_list_filler_options(
+                campaignx_we_vote_id_list_to_exclude=campaignx_we_vote_id_list_to_exclude,
+                limit=number_to_find)
+            if results['campaignx_we_vote_id_list_found']:
+                campaignx_we_vote_id_list = results['campaignx_we_vote_id_list']
+                recommended_campaignx_we_vote_id_list = \
+                    list(set(recommended_campaignx_we_vote_id_list + campaignx_we_vote_id_list))
+
+    results = campaignx_manager.retrieve_campaignx_list_by_campaignx_we_vote_id_list(
+        campaignx_we_vote_id_list=recommended_campaignx_we_vote_id_list,
+        read_only=read_only)
+    campaignx_list_found = results['campaignx_list_found']
+    campaignx_list = results['campaignx_list']
+    status += results['status']
+
+    if campaignx_list_found:
+        if len(campaignx_list) > minimum_number_of_campaignx_options:
+            # Consider sorting this list and filtering out ones with lowest "score"
+            pass
+
+    results = {
+        'success': success,
+        'status': status,
+        'campaignx_list_found': campaignx_list_found,
+        'campaignx_list': campaignx_list,
     }
     return results

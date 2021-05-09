@@ -65,7 +65,7 @@ FACEBOOK_BLACKLIST = ['group', 'group.php', 'None']
 # Only pays attention to https://twitter.com or http://twitter.com and ignores www.twitter.com
 RE_TWITTER = r'//twitter\.com/(?:#!/)?(\w+)'
 RE_TWITTER_WWW = r'//www\.twitter\.com/(?:#!/)?(\w+)'
-TWITTER_BLACKLIST = ['home', 'https', 'intent', 'none', 'search', 'share', 'twitterapi']
+TWITTER_BLACKLIST = ['home', 'https', 'intent', 'none', 'search', 'share', 'twitterapi', 'wix']
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
