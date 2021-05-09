@@ -642,6 +642,7 @@ class CampaignXManager(models.Manager):
         simple_list = []
         for one_link in campaignx_listed_by_organization_list:
             simple_list.append(one_link.campaignx_we_vote_id)
+        simple_list = list(set(simple_list))
         return simple_list
 
     def retrieve_visible_on_this_site_campaignx_simple_list(
@@ -661,6 +662,8 @@ class CampaignXManager(models.Manager):
             self.retrieve_campaignx_owner_list(organization_we_vote_id=site_owner_organization_we_vote_id)
         for one_owner in campaignx_owned_by_organization_list:
             simple_list.append(one_owner.campaignx_we_vote_id)
+
+        simple_list = list(set(simple_list))
         return simple_list
 
     def retrieve_campaignx_list(
@@ -820,21 +823,150 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def retrieve_campaignx_list_for_voter(self, voter_id):
-        campaignx_list_found = False
-        campaignx_list = {}
+    def retrieve_campaignx_we_vote_id_list_filler_options(self, campaignx_we_vote_id_list_to_exclude=[], limit=0):
+        campaignx_we_vote_id_list_found = False
+        campaignx_we_vote_id_list = []
+        status = ''
+        success = True
         try:
-            campaignx_list = CampaignX.objects.all()
-            campaignx_list = campaignx_list.filter(voter_id=voter_id)
+            campaignx_query = CampaignX.objects.all()
+            campaignx_query = campaignx_query.filter(
+                in_draft_mode=False,
+                is_blocked_by_we_vote=False,
+                is_still_active=True)
+            if len(campaignx_we_vote_id_list_to_exclude) > 0:
+                campaignx_query = campaignx_query.exclude(we_vote_id__in=campaignx_we_vote_id_list_to_exclude)
+            campaignx_query = campaignx_query.values_list('we_vote_id', flat=True).distinct()
+            if positive_value_exists(limit):
+                campaignx_query = campaignx_query[:limit]
+            campaignx_we_vote_id_list = list(campaignx_query)
+            campaignx_we_vote_id_list_found = len(campaignx_we_vote_id_list)
+        except Exception as e:
+            status += "ERROR_RETRIEVING_CAMPAIGNX_FILLER_LIST: " + str(e) + ' '
+            success = False
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'campaignx_we_vote_id_list_found':  campaignx_we_vote_id_list_found,
+            'campaignx_we_vote_id_list':        campaignx_we_vote_id_list,
+        }
+        return results
+
+    def retrieve_campaignx_we_vote_id_list_by_politician_we_vote_id(self, politician_we_vote_id_list=[]):
+        campaignx_we_vote_id_list = []
+        success = True
+        status = ""
+
+        try:
+            campaignx_queryset = CampaignXPolitician.objects.using('readonly').all()
+            campaignx_queryset = campaignx_queryset.filter(politician_we_vote_id__in=politician_we_vote_id_list)
+            campaignx_queryset = campaignx_queryset.values_list('campaignx_we_vote_id', flat=True).distinct()
+            campaignx_we_vote_id_list = list(campaignx_queryset)
+            campaignx_we_vote_id_list_found = positive_value_exists(len(campaignx_we_vote_id_list))
+            status += "RETRIEVE_CAMPAIGNX_BY_POLITICIAN_LIST_SUCCEEDED "
+        except Exception as e:
+            success = False
+            status += "RETRIEVE_CAMPAIGNX_BY_POLITICIAN_LIST_FAILED: " + str(e) + " "
+            campaignx_we_vote_id_list_found = False
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'campaignx_we_vote_id_list_found':  campaignx_we_vote_id_list_found,
+            'campaignx_we_vote_id_list':        campaignx_we_vote_id_list,
+        }
+        return results
+
+    def retrieve_campaignx_we_vote_id_list_started_by_voter(self, started_by_voter_we_vote_id=''):
+        campaignx_we_vote_id_list_found = False
+        campaignx_we_vote_id_list = []
+        status = ''
+        success = True
+        try:
+            campaignx_query = CampaignX.objects.all()
+            campaignx_query = campaignx_query.filter(started_by_voter_we_vote_id=started_by_voter_we_vote_id)
+            campaignx_query = campaignx_query.values_list('we_vote_id', flat=True).distinct()
+            campaignx_we_vote_id_list = list(campaignx_query)
+            campaignx_we_vote_id_list_found = len(campaignx_we_vote_id_list)
+        except Exception as e:
+            status += "ERROR_RETRIEVING_CAMPAIGNX: " + str(e) + ' '
+            success = False
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'campaignx_we_vote_id_list_found':  campaignx_we_vote_id_list_found,
+            'campaignx_we_vote_id_list':        campaignx_we_vote_id_list,
+        }
+        return results
+
+    def retrieve_campaignx_we_vote_id_list_supported_by_voter(self, voter_we_vote_id=None):
+        campaignx_we_vote_id_list = []
+        success = True
+        status = ""
+
+        try:
+            campaignx_queryset = CampaignXSupporter.objects.using('readonly').all()
+            campaignx_queryset = campaignx_queryset.filter(voter_we_vote_id=voter_we_vote_id)
+            campaignx_queryset = campaignx_queryset.values_list('campaignx_we_vote_id', flat=True).distinct()
+            campaignx_we_vote_id_list = list(campaignx_queryset)
+            campaignx_we_vote_id_list_found = positive_value_exists(len(campaignx_we_vote_id_list))
+            status += "RETRIEVE_CAMPAIGNX_SUPPORTED_LIST_SUCCEEDED "
+        except Exception as e:
+            success = False
+            status += "RETRIEVE_CAMPAIGNX_SUPPORTED_LIST_FAILED: " + str(e) + " "
+            campaignx_we_vote_id_list_found = False
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'campaignx_we_vote_id_list_found':  campaignx_we_vote_id_list_found,
+            'campaignx_we_vote_id_list':        campaignx_we_vote_id_list,
+        }
+        return results
+
+    def retrieve_campaignx_list_by_campaignx_we_vote_id_list(self, campaignx_we_vote_id_list=[], read_only=True):
+        campaignx_list = []
+        campaignx_list_found = False
+        status = ''
+        success = True
+        try:
+            if positive_value_exists(read_only):
+                campaignx_query = CampaignX.objects.using('readonly').all()
+            else:
+                campaignx_query = CampaignX.objects.all()
+            campaignx_query = campaignx_query.filter(we_vote_id__in=campaignx_we_vote_id_list)
+            campaignx_list = list(campaignx_query)
             if len(campaignx_list):
                 campaignx_list_found = True
         except Exception as e:
-            handle_record_not_found_exception(e, logger=logger)
+            status += "ERROR_RETRIEVING_CAMPAIGNX_LIST: " + str(e) + ' '
+            success = False
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'campaignx_list_found': campaignx_list_found,
+            'campaignx_list':       campaignx_list,
+        }
+        return results
+
+    def retrieve_campaignx_list_for_voter(self, started_by_voter_we_vote_id=''):
+        campaignx_list_found = False
+        campaignx_list = []
+        status = ''
+        try:
+            campaignx_query = CampaignX.objects.all()
+            campaignx_query = campaignx_query.filter(started_by_voter_we_vote_id=started_by_voter_we_vote_id)
+            campaignx_list = list(campaignx_query)
+            if len(campaignx_list):
+                campaignx_list_found = True
+        except Exception as e:
+            status += "ERROR_RETRIEVING_CAMPAIGNX: " + str(e) + ' '
 
         if campaignx_list_found:
             return campaignx_list
         else:
-            campaignx_list = {}
+            campaignx_list = []
             return campaignx_list
 
     def retrieve_campaignx_owner(self, campaignx_we_vote_id='', voter_we_vote_id='', read_only=False):
