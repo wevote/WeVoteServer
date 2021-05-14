@@ -20,7 +20,6 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
 
 
     def setUp(self):
-        self.voter_create_url = reverse("apis_v1:voterCreateView")
         self.generate_voter_device_id_url = reverse("apis_v1:deviceIdGenerateView")
         self.campaign_save_url = reverse("apis_v1:campaignSaveView")
         self.campaign_retrieve_url = reverse("apis_v1:campaignRetrieveView")
