@@ -1718,8 +1718,10 @@ def cache_campaignx_image(
 
     if kind_of_image_original:
         master_image = MASTER_IMAGE
+        image_format_filtered = image_format
     else:
         master_image = 'calculated'
+        image_format_filtered = 'jpg'
 
     # ex issue_image_master-2017210_1_48x48.png
     we_vote_image_file_name = "{image_type}_{master_image}-{date_image_saved}_{counter}_" \
@@ -1730,7 +1732,7 @@ def cache_campaignx_image(
                                         counter=str(same_day_image_version),
                                         image_width=str(image_width),
                                         image_height=str(image_height),
-                                        image_format=str(image_format))
+                                        image_format=str(image_format_filtered))
 
     we_vote_image_file_location = campaignx_we_vote_id + "/" + we_vote_image_file_name
 
@@ -2413,6 +2415,8 @@ def cache_resized_image_locally(
     else:
         same_day_image_version = 1
 
+    # 2021-05-09 We default to storing all resized images as jpg
+    convert_image_to_jpg = True
     if kind_of_image_facebook_profile or kind_of_image_facebook_background:
         # image url is valid so store source image of facebook to WeVoteImage
         save_source_info_results = we_vote_image_manager.save_we_vote_image_facebook_info(
@@ -2424,6 +2428,7 @@ def cache_resized_image_locally(
         save_source_info_results = we_vote_image_manager.save_we_vote_image_twitter_info(
             we_vote_image, twitter_id, image_width, image_height, image_url_https, same_day_image_version,
             kind_of_image_twitter_profile, kind_of_image_twitter_background, kind_of_image_twitter_banner)
+        convert_image_to_jpg = False
     elif kind_of_image_maplight:
         # image url is valid so store source image of maplight to WeVoteImage
         save_source_info_results = we_vote_image_manager.save_we_vote_image_maplight_info(
@@ -2438,6 +2443,7 @@ def cache_resized_image_locally(
         # image url is valid so store source image of issue to WeVoteImage
         save_source_info_results = we_vote_image_manager.save_we_vote_image_issue_info(
             we_vote_image, image_width, image_height, image_url_https, same_day_image_version)
+        convert_image_to_jpg = False
     elif kind_of_image_ballotpedia_profile:
         # image url is valid so store source image of ballotpedia to WeVoteImage
         save_source_info_results = we_vote_image_manager.save_we_vote_image_ballotpedia_info(
@@ -2482,6 +2488,10 @@ def cache_resized_image_locally(
                                                        we_vote_image.date_image_saved.day,
                                                        year=we_vote_image.date_image_saved.year)
         # ex twitter_profile_image_master-2017210_1_48x48.png
+        if convert_image_to_jpg:
+            image_format_filtered = 'jpg'
+        else:
+            image_format_filtered = image_format
         we_vote_image_file_name = "{image_type}-{date_image_saved}_{counter}_" \
                                   "{image_width}x{image_height}.{image_format}" \
                                   "".format(image_type=image_type,
@@ -2489,7 +2499,7 @@ def cache_resized_image_locally(
                                             counter=str(same_day_image_version),
                                             image_width=str(image_width),
                                             image_height=str(image_height),
-                                            image_format=str(image_format))
+                                            image_format=str(image_format_filtered))
         if voter_we_vote_id:
             we_vote_image_file_location = voter_we_vote_id + "/" + we_vote_image_file_name
         elif campaignx_we_vote_id:
@@ -2523,7 +2533,8 @@ def cache_resized_image_locally(
             image_height=image_height,
             image_type=image_type,
             image_offset_x=image_offset_x,
-            image_offset_y=image_offset_y)
+            image_offset_y=image_offset_y,
+            convert_image_to_jpg=convert_image_to_jpg)
         if not resized_image_created:
             error_results = {
                 'success':                      success,
@@ -2539,7 +2550,7 @@ def cache_resized_image_locally(
 
         status += " RESIZED_IMAGE_CREATED "
         image_stored_to_aws = we_vote_image_manager.store_image_to_aws(
-            we_vote_image_file_name, we_vote_image_file_location, image_format)
+            we_vote_image_file_name, we_vote_image_file_location, image_format_filtered)
         if not image_stored_to_aws:
             error_results = {
                 'success':                      success,
