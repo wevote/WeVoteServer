@@ -214,6 +214,9 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                 we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_small_url
             else:
                 we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_large_url
+            supporters_count_next_goal = campaignx_manager.fetch_supporters_count_next_goal(
+                supporters_count=campaignx.supporters_count,
+                supporters_count_victory_goal=campaignx.supporters_count_victory_goal)
             one_campaignx = {
                 'campaign_description':                     campaignx.campaign_description,
                 'campaignx_owner_list':                     campaignx_owner_list,
@@ -226,6 +229,8 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                 'seo_friendly_path':                        campaignx.seo_friendly_path,
                 'seo_friendly_path_list':                   seo_friendly_path_list,
                 'supporters_count':                         campaignx.supporters_count,
+                'supporters_count_next_goal':               supporters_count_next_goal,
+                'supporters_count_victory_goal':            campaignx.supporters_count_victory_goal,
                 'visible_on_this_site':                     visible_on_this_site,
                 'voter_campaignx_supporter':                voter_campaignx_supporter_dict,
                 'voter_signed_in_with_email':               voter_signed_in_with_email,
@@ -326,6 +331,8 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
                 'seo_friendly_path':                '',
                 'seo_friendly_path_list':           seo_friendly_path_list,
                 'supporters_count':                 0,
+                'supporters_count_next_goal':       0,
+                'supporters_count_victory_goal':    0,
                 'visible_on_this_site':             False,
                 'voter_campaignx_supporter':        {},
                 'voter_signed_in_with_email':       voter_signed_in_with_email,
@@ -363,6 +370,8 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             'seo_friendly_path':                '',
             'seo_friendly_path_list':           seo_friendly_path_list,
             'supporters_count':                 0,
+            'supporters_count_next_goal':       0,
+            'supporters_count_victory_goal':    0,
             'visible_on_this_site':             False,
             'voter_campaignx_supporter':        {},
             'voter_signed_in_with_email':       voter_signed_in_with_email,
@@ -388,6 +397,8 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             'seo_friendly_path':                '',
             'seo_friendly_path_list':           seo_friendly_path_list,
             'supporters_count':                 0,
+            'supporters_count_next_goal':       0,
+            'supporters_count_victory_goal':    0,
             'visible_on_this_site':             False,
             'voter_campaignx_supporter':        {},
             'voter_signed_in_with_email':       voter_signed_in_with_email,
@@ -540,6 +551,9 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_small_url
     else:
         we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_large_url
+    supporters_count_next_goal = campaignx_manager.fetch_supporters_count_next_goal(
+        supporters_count=campaignx.supporters_count,
+        supporters_count_victory_goal=campaignx.supporters_count_victory_goal)
     results = {
         'status':                           status,
         'success':                          True,
@@ -556,6 +570,8 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         'seo_friendly_path':                campaignx.seo_friendly_path,
         'seo_friendly_path_list':           seo_friendly_path_list,
         'supporters_count':                 campaignx.supporters_count,
+        'supporters_count_next_goal':       supporters_count_next_goal,
+        'supporters_count_victory_goal':    campaignx.supporters_count_victory_goal,
         'visible_on_this_site':             campaignx.visible_on_this_site,
         'voter_campaignx_supporter':        voter_campaignx_supporter_dict,
         'voter_can_vote_for_politician_we_vote_ids': voter_can_vote_for_politician_we_vote_ids,
@@ -611,6 +627,8 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'seo_friendly_path':            '',
             'seo_friendly_path_list':       seo_friendly_path_list,
             'supporters_count':             0,
+            'supporters_count_next_goal':       0,
+            'supporters_count_victory_goal':    0,
             'visible_on_this_site':         False,
             'voter_signed_in_with_email':   voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
@@ -637,6 +655,8 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                 'seo_friendly_path':            '',
                 'seo_friendly_path_list':       seo_friendly_path_list,
                 'supporters_count':             0,
+                'supporters_count_next_goal':   0,
+                'supporters_count_victory_goal': 0,
                 'visible_on_this_site':         False,
                 'voter_signed_in_with_email':   voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url': '',
@@ -665,6 +685,8 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                 'seo_friendly_path':            '',
                 'seo_friendly_path_list':       seo_friendly_path_list,
                 'supporters_count':             0,
+                'supporters_count_next_goal':   0,
+                'supporters_count_victory_goal': 0,
                 'visible_on_this_site':         False,
                 'voter_signed_in_with_email':   voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url': '',
@@ -863,6 +885,9 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_small_url
         else:
             we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_large_url
+        supporters_count_next_goal = campaignx_manager.fetch_supporters_count_next_goal(
+            supporters_count=campaignx.supporters_count,
+            supporters_count_victory_goal=campaignx.supporters_count_victory_goal)
         results = {
             'status':                       status,
             'success':                      success,
@@ -877,6 +902,8 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'seo_friendly_path':            campaignx.seo_friendly_path,
             'seo_friendly_path_list':       seo_friendly_path_list,
             'supporters_count':             campaignx.supporters_count,
+            'supporters_count_next_goal':   supporters_count_next_goal,
+            'supporters_count_victory_goal': campaignx.supporters_count_victory_goal,
             'visible_on_this_site':         visible_on_this_site,
             'voter_signed_in_with_email':   voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': campaignx.we_vote_hosted_campaign_photo_large_url,
@@ -900,6 +927,8 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'seo_friendly_path':            '',
             'seo_friendly_path_list':       [],
             'supporters_count':             0,
+            'supporters_count_next_goal':   0,
+            'supporters_count_victory_goal': 0,
             'visible_on_this_site':         False,
             'voter_signed_in_with_email':   voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
