@@ -406,7 +406,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
             id_card = charge['source']['id']
             stripe_object = charge['source']['object']
             stripe_status = charge['status']
-            logger.debug("Stripe charge successful: " + charge_id + ", amount: " + str(amount) + ", voter_we_vote_id:" +
+            logger.debug("donation_with_stripe_for_api - charge successful: " + charge_id + ", amount: " + str(amount) + ", voter_we_vote_id:" +
                          voter_we_vote_id)
         else:
             amount = donation_amount
