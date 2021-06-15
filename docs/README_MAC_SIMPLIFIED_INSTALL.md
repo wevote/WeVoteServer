@@ -234,6 +234,10 @@ the following command:
      
 ## June 14, 2021 Changes that were necessary for MacOS Big Sur
 
+![ScreenShot](images/PythonErrorOnBigSur.png)
+
+**Needed to upgrade Python.....  3.9.1 was the latest.**
+
 This is very rough, I will do a from scratch install on a blank Mac, to find out what is exactly needed.
 
 1) Install Python 3.9, MacOS warns about an incompatibility with Python 3.6, via a system level popup. The following command
