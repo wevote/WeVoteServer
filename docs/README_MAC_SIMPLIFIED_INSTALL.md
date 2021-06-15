@@ -232,6 +232,39 @@ the following command:
     Error: pg_config executable not found.
     ```
      
+## June 14, 2021 Changes that were necessary for MacOS Big Sur
+
+This is very rough, I will do a from scratch install on a blank mac, to find out what is exactly needed.
+
+1) Install Python 3.9, MacOS warns on 3.6 with a system level popup (in a MacOS "Terminal app window, ie. no virtual environments)
+stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 ~ % brew install python
+1) link it
+stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 ~ % brew link python@3.9
+1) Need to do it again to clear warnings about overwriting other links
+stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 ~ % brew link --overwrite python@3.9
+1) Installed python again ...
+stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 ~ % brew reinstall python@3.9
+1) In the PyCharm IDE UI
+    1)  Navigate to PyCharm/Preferences/'Project: WeVoteServer'/'Python Interpreter' and press the gear icon and setup
+    a path to 3.9
+    1) On the 'Python Interpreter' summary pop-up, click the pencil and rename the interpreter to be 'WeVoteServer 3.9'so that you know it is 3.9 
+       when it loads into the IDE terminal window. ![ScreenShot](images/PythonInterpretersList2021.png)    
+    1) Open a **new** termanal window in the IDE, and run 'python --version' to double check that it is using Python 3.9
+    1) Close the older terminal windows, that will have confused paths to the older python versions.
+1) Get the new requirements.txt from git.
+1) Get the latest setuptools
+(PycharmEnvironments) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pip3 install --upgrade setuptools   
+1) Try requirements.txt in the Pycharm terminal window
+(PycharmEnvironments) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pip3 install -r requirements.txt
+1) doctor
+(PycharmEnvironments) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % brew doctor
+1) brew cleanup
+(PycharmEnvironments) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % brew cleanup
+1) I had an old String.h first in the path, and causing a `fatal error: 'cstddef' file not found` error in String.h
+(PycharmEnvironments) mv /usr/local/include/String.h /usr/local/include/String.h.saveoff
+1) This install requirements.txt worked
+(PycharmEnvironments) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pip3 install -r requirements.txt
+
 ## Install and set up PostgreSQL and pgAdmin4
 
 1. If you are sure that Postgres has not already been installed, and is not currently running on this Mac, you can skip
