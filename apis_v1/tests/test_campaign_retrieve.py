@@ -13,8 +13,27 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TestCase):
     def setUp(self):
         self.generate_voter_device_id_url = reverse("apis_v1:deviceIdGenerateView")
         self.voter_create_url = reverse("apis_v1:voterCreateView")
+        self.campaign_save_url = reverse("apis_v1:campaignSaveView")
         self.campaign_retrieve_url = reverse("apis_v1:campaignRetrieveView")
         
+    
+    def test_campaign_retrieve_with_no_voter_device_id(self):
+        response = self.client.get(self.campaign_retrieve_url)
+        json_data = json.loads(response.content.decode())
+        self.assertEqual('status' in json_data, True, "status expected in the json response, and not found")
+        # self.assertEqual(json_data['status'],
+        #                  "CAMPAIGNX_NOT_FOUND-MISSING_VARIABLES CAMPAIGNX_RETRIEVE_ERROR ",
+        #                  "status = {status} Expected status VALID_VOTER_ID_MISSING".format(status=json_data['status']))
+        self.assertEqual(json_data['status'],
+                         "VALID_VOTER_ID_MISSING",
+                         "status = {status} Expected status VALID_VOTER_ID_MISSING".format(status=json_data['status']))
+        self.assertEqual(json_data['success'], False, "success = {success} Expected success FALSE".format(success=json_data['success']))
+        
+
+        # self.assertEqual(len(json_data["email_address_list"]), 0,
+        #                  "Expected email_address_list to have length 0, "
+        #                  "actual length = {length}".format(length=len(json_data['email_address_list'])))
+                         
 #   campaignx = CampaignX.objects.create(
 #                     campaign_description=update_values['campaign_description'],
 #                     campaign_title=update_values['campaign_title'],
