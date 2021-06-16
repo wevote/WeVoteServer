@@ -10,7 +10,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
 import json
 import string
 import wevote_functions.admin
-from wevote_functions.functions import generate_random_string, positive_value_exists
+from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_campaignx_integer, fetch_site_unique_id_prefix
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -43,6 +43,7 @@ class CampaignX(models.Model):
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=True, db_index=True)
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     supporters_count = models.PositiveIntegerField(default=0)
+    supporters_count_victory_goal = models.PositiveIntegerField(default=0)
     we_vote_hosted_campaign_photo_original_url = models.TextField(blank=True, null=True)
     # Full sized desktop
     we_vote_hosted_campaign_photo_large_url = models.TextField(blank=True, null=True)
@@ -105,6 +106,59 @@ class CampaignXManager(models.Manager):
             status += "RETRIEVE_CAMPAIGNX_SUPPORTER_LIST_FAILED: " + str(e) + " "
 
         return 0
+
+    def fetch_next_goal_level(
+            self,
+            supporters_count=1,
+            tier_size=1000):
+        try:
+            supporters_count = convert_to_int(supporters_count)
+        except Exception as e:
+            supporters_count = 0
+        try:
+            tier_size = convert_to_int(tier_size)
+        except Exception as e:
+            tier_size = 1000
+        return supporters_count if supporters_count % tier_size == 0 \
+            else supporters_count + tier_size - supporters_count % tier_size
+
+    def fetch_supporters_count_next_goal(
+            self,
+            supporters_count=1,
+            supporters_count_victory_goal=0):
+        try:
+            supporters_count = convert_to_int(supporters_count)
+        except Exception as e:
+            supporters_count = 0
+        try:
+            supporters_count_victory_goal = convert_to_int(supporters_count_victory_goal)
+        except Exception as e:
+            supporters_count_victory_goal = 0
+        if supporters_count_victory_goal >= supporters_count:
+            return supporters_count
+        try:
+            if supporters_count >= 100000:
+                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=50000)
+            elif supporters_count >= 25000:
+                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=25000)
+            elif supporters_count >= 10000:
+                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=15000)
+            elif supporters_count >= 5000:
+                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=5000)
+            elif supporters_count >= 2500:
+                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=2500)
+            elif supporters_count >= 1000:
+                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=1500)
+            elif supporters_count >= 500:
+                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=500)
+            elif supporters_count >= 250:
+                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=250)
+            elif supporters_count >= 125:
+                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=125)
+            else:
+                return 125
+        except Exception as e:
+            return 0
 
     def generate_seo_friendly_path(self, campaignx_we_vote_id='', campaignx_title=None):
         """
