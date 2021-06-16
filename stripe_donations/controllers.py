@@ -363,7 +363,7 @@ def donation_with_stripe_for_api(request, token, payment_method_id, client_ip, e
             results['saved_stripe_donation'] = True
             results['status'] += ' DONATION_PROCESSED_SUCCESSFULLY '
             amount = charge['amount']
-            logger.debug("Stripe charge successful: " + charge.id + ", amount: " + str(amount) + ", voter_we_vote_id:" +
+            logger.debug("donation_with_stripe_for_api - charge successful: " + charge.id + ", amount: " + str(amount) + ", voter_we_vote_id:" +
                          voter_we_vote_id)
 
     except stripe.error.CardError as e:
