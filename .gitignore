@@ -65,10 +65,6 @@ loadtest/test_variables.json
 *.mo
 *.pot
 
-# Sphinx documentation #
-########################
-docs/_build/
-
 # PyBuilder #
 #############
 target/

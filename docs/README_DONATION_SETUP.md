@@ -66,24 +66,26 @@ public internet.
 
     Start ngrok on the same port that your Python/Django local server is running on, in my example port 8000.
 
-    So in my example any http request to http://df35f3739.ngrok.io on the public internet will end up redirected to my local
+    So in my example any http request to https://1cf01df55b1d.ngrok.io on the public internet will end up redirected to my local
 Python server's port 8000.
 
     ```
-    (WeVoteServer3.6) Steves-MacBook-Pro-32GB-Oct-3171:PythonProjects stevepodell$ ./ngrok http 8000
-    
-    ngrok by @inconshreveable                        (Ctrl+C to quit)
-    
-    Session Status                online     
-    Account                       Steve Podell (Plan: Free) 
-    Version                       2.2.8 
-    Region                        United States (us)   
-    Web Interface                 http://127.0.0.1:4040 
-    Forwarding                    http://d35f3739.ngrok.io -> localhost:8000   
-    Forwarding                    https://d35f3739.ngrok.io -> localhost:8000  
-      
-    Connections                   ttl     opn     rt1     rt5     p50     p90 
-                                  0       0       0.00    0.00    0.00    0.00 
+    (WeVoteServerPy3.7) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % ./ngrok http 8000
+ 
+   ngrok by @inconshreveable                                                                                                                                                  (Ctrl+C to quit)
+                                                                                                                                                                                           
+    Session Status                online                                                                                                                                                       
+    Account                       stevepodell37@gmail.com (Plan: Free)                                                                                                                         
+    Update                        update available (version 2.3.40, Ctrl-U to update)                                                                                                          
+    Version                       2.3.35                                                                                                                                                       
+    Region                        United States (us)                                                                                                                                           
+    Web Interface                 http://127.0.0.1:4040                                                                                                                                        
+    Forwarding                    http://1cf01df55b1d.ngrok.io -> http://localhost:8000                                                                                                        
+    Forwarding                    https://1cf01df55b1d.ngrok.io -> http://localhost:8000                                                                                                       
+                                                                                                                                                                                               
+    Connections                   ttl     opn     rt1     rt5     p50     p90                                                                                                                  
+                                  0       0       0.00    0.00    0.00    0.00                                                                                                                 
+ 
      ```
 
     Keep this ngrok server running in a terminal window, since everytime you restart (with the free version) 
@@ -94,7 +96,7 @@ Python server's port 8000.
 
     In production the webhook endpoint will be [https://api.wevoteusa.org/apis/v1/donationStripeWebhook/](https://api.wevoteusa.org/apis/v1/donationStripeWebhook/)
 
-    But in our test environment (for this example) it will be [https://d35f3739.ngrok.io/apis/v1/donationStripeWebhook/](https://d35f3739.ngrok.io/apis/v1/donationStripeWebhook/)
+    But in our test environment (for this example) it will be [https://1cf01df55b1d.ngrok.io/apis/v1/donationStripeWebhook/](https://1cf01df55b1d.ngrok.io/apis/v1/donationStripeWebhook/)
 
     ![ScreenShot](images/StripeAddTestEndpoint.png)
 

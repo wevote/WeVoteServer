@@ -61,7 +61,7 @@ def get_environment_variable_default(var_name, default_value):
 
 def get_python_version():
     version = os.popen('python --version').read().strip().replace('Python', '')
-    print(version)    # Something like 'Python 3.7.2'
+    print('Python version: ' + version)    # Something like 'Python 3.7.2'
     return version
 
 
@@ -71,7 +71,7 @@ def get_node_version():
     version = 'Node not installed on this server'
     if len(raw) > 0:
         version = os.popen('node -v').read().replace('\n', '').strip()
-    print(version)    # Something like 'v14.15.1'
+    print('Node version: ' + version)    # Something like 'v14.15.1'
     return version
 
 
@@ -98,7 +98,7 @@ def get_postgres_version():
         formatted = version[0:2] + '.' + version[2:4] + '.' + version[4:6]
     except Exception:
         pass
-    print('Postgres ', formatted)
+    print('Postgres version: ', formatted)
     return formatted
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)

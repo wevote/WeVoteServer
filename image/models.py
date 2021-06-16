@@ -1568,7 +1568,8 @@ class WeVoteImageManager(models.Manager):
             image_height=0,
             image_type='',
             image_offset_x=0,
-            image_offset_y=0):
+            image_offset_y=0,
+            convert_image_to_jpg=True):
         """
         Resize image and save it to the same location
         Note re the facebook background:  We are scaling and sizing here to match the size of the html pane on the
@@ -1579,6 +1580,7 @@ class WeVoteImageManager(models.Manager):
         :param image_type:
         :param image_offset_x:
         :param image_offset_y:
+        :param convert_image_to_jpg:
         :return:
         """
         try:
@@ -1593,7 +1595,11 @@ class WeVoteImageManager(models.Manager):
                                      centering=(centering_x, centering_y))
             else:
                 image = ImageOps.fit(image, (image_width, image_height), Image.ANTIALIAS, centering=(0.5, 0.5))
-            image.save(image_local_path)
+            if convert_image_to_jpg:
+                image = image.convert('RGB')
+                image.save(image_local_path, quality=95, subsampling=0)
+            else:
+                image.save(image_local_path)
             resized_image_created = True
         except Exception as e:
             resized_image_created = False
