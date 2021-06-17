@@ -4,11 +4,11 @@ boto3==1.13.16
 cryptography==3.4.7
 dj-database-url==0.5.0
 dj-static==0.0.6
-django==2.2.22
+django==3.2.4
 django-background-tasks==1.2.5
-django-bootstrap3==10.0.1
+django-bootstrap3==15.0.0
 django-cors-headers==3.7.0
-django-crispy-forms==1.8.1
+django-crispy-forms==1.12.0
 django-twitter-bootstrap==3.3.0
 django-user_agents==0.4.0
 djangorestframework==3.12.4
@@ -38,7 +38,9 @@ pygeoip==0.3.2
 pyjwkest==1.4.2
 PyJWT==1.7.1          # We are stuck at 1.7.1 until twillio can handle a newer version  (as of 6/15/21)
 python-magic==0.4.18  # Requires "brew install libmagic" or "brew upgrade libmagic" or "pip install libmagic"
-python-openid3==2.2.6
+# python-openid3==2.2.6
+python-openid -e git+https://github.com/wevote/python-openid.git#egg={python-openid}
+# python-openid -e git+https://github.com/openid/python-openid.git@d093a0919198eb53826ae5753e517af10ad95d5b#egg={python-openid}
 # python-social-auth==0.2.21
 pytz==2021.1
 requests==2.25.1

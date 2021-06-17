@@ -273,6 +273,7 @@ STATIC_ROOT = os.path.join(PROJECT_PATH, "static", "static") if DEBUG else \
     os.path.join(PROJECT_PATH, "apis_v1", "static")  # Django Cookbook
 MEDIA_URL = '/media/'  # Django Cookbook
 MEDIA_ROOT = os.path.join(PROJECT_PATH, "static", "media")  # Django Cookbook
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'  # Added for Django 3.2, June 2021
 
 # We want to default to cookie storage of messages so we don't overload our app servers with session data
 # MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
@@ -288,7 +289,7 @@ BOOTSTRAP3 = {
     'base_url': '//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/',
 
     # The complete URL to the Bootstrap CSS file (None means derive it from base_url)
-    'css_url': None,
+    'css_url': '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css',
 
     # The complete URL to the Bootstrap CSS file (None means no theme)
     'theme_url': None,

@@ -1,5 +1,5 @@
 <div class="sidebar">
-  {% load staticfiles %}
+  {% load static %}
   <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     <div class="sidebar-item">
       <img src="{% static "apis_v1/Home.svg" %}" alt="">

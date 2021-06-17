@@ -5392,7 +5392,7 @@ class BatchProcessAnalyticsChunk(models.Model):
     batch_process_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
 
     date_started = models.DateTimeField(default=None, null=True)
-    timed_out = models.NullBooleanField(default=None, null=True)
+    timed_out = models.BooleanField(default=None, null=True)
     date_completed = models.DateTimeField(default=None, null=True)
     number_of_rows_being_reviewed = models.PositiveIntegerField(default=0, null=True)
     number_of_rows_successfully_reviewed = models.PositiveIntegerField(default=0, null=True)
@@ -5408,17 +5408,17 @@ class BatchProcessBallotItemChunk(models.Model):
 
     retrieve_date_started = models.DateTimeField(null=True)
     retrieve_date_completed = models.DateTimeField(null=True)
-    retrieve_timed_out = models.NullBooleanField(default=None, null=True)
+    retrieve_timed_out = models.BooleanField(default=None, null=True)
     retrieve_row_count = models.PositiveIntegerField(default=0, null=False)
 
     analyze_date_started = models.DateTimeField(null=True)
     analyze_date_completed = models.DateTimeField(null=True)
-    analyze_timed_out = models.NullBooleanField(default=None, null=True)
+    analyze_timed_out = models.BooleanField(default=None, null=True)
     analyze_row_count = models.PositiveIntegerField(default=0, null=False)
 
     create_date_started = models.DateTimeField(null=True)
     create_date_completed = models.DateTimeField(null=True)
-    create_timed_out = models.NullBooleanField(default=None, null=True)
+    create_timed_out = models.BooleanField(default=None, null=True)
     create_row_count = models.PositiveIntegerField(default=0, null=False)
 
 
@@ -5441,7 +5441,7 @@ class BatchProcessLogEntry(models.Model):
         verbose_name="we vote permanent id of the map point", max_length=255, default=None, null=True,
         blank=True, unique=False)
 
-    critical_failure = models.NullBooleanField(default=None, null=True)
+    critical_failure = models.BooleanField(default=None, null=True)
     date_added = models.DateTimeField(null=True, auto_now_add=True)
     kind_of_process = models.CharField(max_length=50, default="")
     analytics_date_as_integer = models.PositiveIntegerField(default=None, null=True)
@@ -5591,7 +5591,7 @@ class BatchRowActionContestOffice(models.Model):
     ballotpedia_district_id = models.PositiveIntegerField(
         verbose_name="ballotpedia district id", null=True, blank=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
-    ballotpedia_is_marquee = models.NullBooleanField(default=None, null=True)
+    ballotpedia_is_marquee = models.BooleanField(default=None, null=True)
     is_ballotpedia_general_election = models.BooleanField(default=False)
     is_ballotpedia_general_runoff_election = models.BooleanField(default=False)
     is_ballotpedia_primary_election = models.BooleanField(default=False)
@@ -6086,7 +6086,7 @@ class BatchRowActionOrganization(models.Model):
         verbose_name='url of ballotpedia logo', max_length=255, blank=True, null=True)
 
     organization_type = models.CharField(
-        verbose_name="type of org", max_length=1, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
+        verbose_name="type of org", max_length=8, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
 
     status = models.TextField(verbose_name="batch row action organization status", null=True, blank=True, default="")
 
