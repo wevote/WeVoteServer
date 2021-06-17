@@ -1783,7 +1783,7 @@ def login_we_vote(request):
     template_values = {
         'request':              request,
         'username':             username,
-        'next':                 next,
+        'next':                 '.',
         'voter_signed_in':      voter_signed_in,
         'messages_on_stage':    messages_on_stage,
     }

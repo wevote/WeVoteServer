@@ -3,14 +3,14 @@
 # -*- coding: UTF-8 -*-
 
 from . import views_admin
-from django.conf.urls import url
+from django.conf.urls import re_path
 
 
 urlpatterns = [
     # views_admin
-    url(r'^$', views_admin.electoral_district_list_view, name='electoral_district_list',),
-    url(r'^electoral_district_import_from_xml_view/$',
+    re_path(r'^$', views_admin.electoral_district_list_view, name='electoral_district_list',),
+    re_path(r'^electoral_district_import_from_xml_view/$',
         views_admin.electoral_district_import_from_xml_view, name='electoral_district_import_from_xml'),
-    url(r'^summary/$',
+    re_path(r'^summary/$',
         views_admin.electoral_district_summary_view, name='electoral_district_summary'),
 ]
