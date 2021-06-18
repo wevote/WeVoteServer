@@ -36,7 +36,7 @@ installed on your Mac), these instructions should take an hour or so to complete
     ![ScreenShot](images/FindXcode.png)
     </div>
 
-1. When prompted, download the "Additional Components" (the Command Line Tools).  This takes a many minutes to complete.
+1. When prompted, download the "Additional Components" (the Command Line Tools).  This takes many minutes to complete.
 
 1. When you get to "Welcome to Xcode", quit out of the app. (For the WeVoteServer, we only need the command line tools that 
 come with Xcode.)
