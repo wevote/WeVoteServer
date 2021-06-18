@@ -51,7 +51,7 @@ come with Xcode.)
 1. Within the GitHub site, navigate to [https://GitHub.com/wevote/WeVoteServer](https://GitHub.com/wevote/WeVoteServer). 
     Create a fork of wevote/WeVoteServer.git by selecting the "Fork" button (in the upper right of screen).
     
-   <div style="max-width:800px">
+   <div style="max-width:800px; border: 1px solid lightgrey; padding: 2px;">
    
    ![ScreenShot](images/Fork.png)
    </div>
@@ -100,7 +100,7 @@ Feel free to add any other PyCharm tools that you would like!  When done press '
 
 1. If the Apple top menu, shows "Git" skip this step.  If it says "VCS", the follow this step to configure Git
 
-    <div style="width:500px">
+    <div style="max-width:500px; border: 1px solid lightgrey; padding: 2px;">
 
      ![ScreenShot](images/VCSorGIT.png)
     </div>
@@ -135,6 +135,7 @@ Feel free to add any other PyCharm tools that you would like!  When done press '
 1.  When the cloning is complete, it will look something like this.
     
     ![ScreenShot](images/CorrectOrigin2021.png)
+    
     Press Ok to close the dialog
     <div style="height: 10px"/>
 
@@ -151,15 +152,16 @@ Feel free to add any other PyCharm tools that you would like!  When done press '
     
     **There are a number of secret values in `environment_variables.json` that are not in source control,
     you will need to check in with Dale, as you find that you need them.**
+    <div style="height: 16px"/>
 
-1. In PyCharm, open the Terminal window and accept use of the z shell (if you love some other shell, feel free to skip this step)
+1. In PyCharm, open the Terminal window and accept use of the z shell (if you want to use some other shell, feel free to skip this step).
 
    <div style="max-width:900px">
    
     ![ScreenShot](images/AcceptZShell.png)
     </div>
     The terminal opens up with the project root directory set as the pwd (which is handy).
-    <div style="height: 10px"/>
+    
 
 1. In the PyCharm terminal window download [Homebrew]( https://brew.sh/) ("the missing package manager for macOS") by entering
 the following command:
@@ -193,8 +195,7 @@ the following command:
     ```
 1. Test that the newly installed Python is in the path. macOS comes with Python 2 preinstalled,
 if the reported version is 2, then add the newly loaded python to the path with the export command,
-and confirm that the default python is now version 3.9 or later.  (Version 3.6 has problems with   
-macOS Big Sur or later)
+and confirm that the default python is now version 3.9 or later.  (Version 3.6 has problems with macOS Big Sur or later)
 
     ```
     Steve@Vickies-MacBook-Pro-2037 WeVoteServer % python --version
@@ -204,18 +205,6 @@ macOS Big Sur or later)
     Python 3.9.5
     Steve@Vickies-MacBook-Pro-2037 WeVoteServer % 
     ```   
-
-1. Create a log directory
-
-   List a file to find the owner and group, in this case Steve and staff, then use sudo to force the creation of a
-   log directory.  Then uses sudo to change the ownership of that directory to yourself.
-    ```
-    (venv) Steve@Vickies-MacBook-Pro-2037 WeVoteServer % ls -la requirements.txt
-    -rwxr-xr-x  1 Steve  staff  1755 Jun 17 10:06 requirements.txt
-    (venv) Steve@Vickies-MacBook-Pro-2037 WeVoteServer % 
-    (venv) Steve@Vickies-MacBook-Pro-2037 WeVoteServer % sudo mkdir /var/log/wevote
-    (venv) Steve@Vickies-MacBook-Pro-2037 WeVoteServer % sudo chown Steve:staff  /var/log/wevote
-    ```
 
 1. Set up a Virtual Environment with the new Python Interpreter.  
 Navigate to: PyCharm/Preferences/Project: WeVoteServer/Python Interpreter.
@@ -230,26 +219,25 @@ Navigate to: PyCharm/Preferences/Project: WeVoteServer/Python Interpreter.
    
    <div style="max-width:800px">
    
-   ![ScreenShot](images/VenvCompleted.png)
+   ![ScreenShot](images/Py3-9Selected.png)
    </div>
 
-   Confirm that we are using the Python version that you just downloaded, and it knows the location for pip, setuptools, and wheel (3 python utilities).
+   Confirm that the 'Base interpreter' field shows us using the Python version that you just downloaded, and it knows the location for pip, setuptools, and wheel (3 python utilities).
    Then press Ok.
+   <div style="height: 10px"/>
    
-   <div style="max-width:800px">
-   
-   ![ScreenShot](images/PyEnv37.png)
-   </div>
-
+   ![ScreenShot](images/VenvCompleted.png)
+   <div style="height: 10px"/>
 1. Confirm that the new virtual environment is in effect, by closing all open Terminal windows within
 PyCharm and opening a new one.
 
-   <div style="max-width:700px">
+   <div style="height: 16px"/>
+   <div style="max-width:700px; border: 1px solid lightgrey; padding: 2px;">
   
    ![ScreenShot](images/VenvConfirm.png)
    </div>
     <div style="height: 10px"/>
-   If you see `(venv)` at the beginning of the command line, all is well.
+   If you see '(venv)' at the beginning of the command line, all is well.
     <div style="height: 16px"/>
    
 1. Install OpenSSL, the pyopenssl and https clients:
@@ -301,31 +289,31 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     assignment" mess to clean up. 
     <div style="height: 10px"/>
    
-    **If that lsof line returns nothing, then you don't currently have postgres running, and you can continue on to the next step.**
+    **If that lsof line returns nothing**, then you don't currently have postgres running, and you can continue on to the next step.
     <div style="height: 10px"/>
     or
     <div style="height: 10px"/>
    
-    **If you don't mind fully deleting any Postgres database data that you have already installed, then delete the existing Postgres now.  Postgres
+    **If you don't mind fully deleting any Postgres database data that you have already installed**, then delete the existing Postgres now.  Postgres
     can be setup in many ways, so there are no instructions here on how to delete Postgres. You can start with running `which postgres`
     in a terminal and going to that directory and deleting the instance or the symbolic links to the instance, then it is
-    probably easiest to reboot your Mac to see if Postgres starts up again.**
-    
-    or
-    
-    **If you have to keep some data that is already stored in a Postgres instance that is installed on your Mac that you absolutely need to 
-    retain, then you must take the time to upgrade that Postgres to the latest version.**  This is a ton of work, and is rarely needed.
+    probably easiest to reboot your Mac to see if Postgres starts up again.
     <div style="height: 10px"/>
+    or
+    <div style="height: 10px"/>
+    **If you have to keep some data that is already stored in the Postgres instance  on your Mac** that you absolutely need to 
+    retain, then you must take the time to upgrade that Postgres to the latest version.  This is a ton of work, and is rarely needed.
+    <div style="height: 16px"/>
    
 1. Install PostgreSQL by running the following command:
 
     `(venv) $ brew install postgresql`
-
+    <div style="height: 16px"/>
 1. Start PostgreSQL (this is actually instructing the macOS [launchd](https://en.wikipedia.org/wiki/Launchd) to start 
     Postgres every time you start your Mac):
 
     `(venv) $ brew services start postgresql`
-
+    <div style="height: 16px"/>
 1. Create a default database, and a default user, and then log into the 'psql' PostgreSQL command interpreter:
 
     ```
@@ -357,7 +345,7 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     ```
 
     That `\du` command confirms that we have a 'postgres' role.  The `\q` command quits psql.
-    <div style="height: 10px"/>
+    <div style="height: 16px"/>
 
  1. Now you are ready to install pgAdmin4 (a powerful WYSIWYG database administration tool that is open source 
  and built by volunteers (Many thanks to the pgAdmin team!)). Run:
@@ -370,19 +358,20 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     <div style="height: 10px"/>
     The latest pgAdmin4 has a webapp architecture, where the app you start from the Application folder is actually a 
     single purpose web server, and the UI for the app appears in Chrome as a local website.
-    <div style="height: 10px"/>
+    <div style="height: 16px"/>
 
 1. Use Spotlight to find and launch the pgAdmin4 app.  Once launched, the pgAdmin4 webapp will display in a new tab within Chrome.
     On that new tab, Right-click on "Servers" 
     and choose "Create > Server"
-    <div style="max-width:800px">
+   <div style="height: 10px"/>
+    <div style="max-width:800px; border: 1px solid lightgrey; padding: 2px;">
 
     ![ScreenShot](images/CreateServerInPgAdmin.png)
    </div>
     <div style="height: 10px"/>
 
 1. On the first tab of the "Create - Server" dialog, add into the Name field: WeVoteServer
-    <div style="max-width:800px">
+    <div style="max-width:500px">
 
     ![ScreenShot](images/CreateServerDialog.png)
    </div>
@@ -439,7 +428,7 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     **Note:** Logging slows down Python app execution in production, so only use it for very important or very rarely used code or 
     code that is only used by the admin pages by developers.  You can also write your log files at the DEBUG level, and then they
     won't execute on the production server.
-    <div style="height: 10px"/>
+    <div style="height: 16px"/>
 
 1. "Migrations are Django’s way of propagating changes you make to your software models into your local postgres database schema."
    Everytime you create a table, change a field name or description, you are changing the model, and those changes need to 
@@ -453,9 +442,10 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     ```
      (January 28, 2019:  that second makemigrations for the wevote_settings table should not be necessary, but as of today, 
      it is necessary.  That second makemigrations line will be harmless, if it becomes unnecessary at some point.)
-    <div style="height: 10px"/>
+    <div style="height: 16px"/>
    
 1. Run 'migrate'.  Django "migrate is responsible for applying and un-applying migrations."
+    <div style="height: 10px"/>
 
     `(venv) $ python manage.py migrate`
  
@@ -471,19 +461,24 @@ this step.  To see if postgres is already running, check with lsof in a terminal
    
    Press the '+' sign in the upper-left corner of the dialog.  
    <div style="height: 10px"/>
+   <div style="max-width:600px">
    
    ![ScreenShot](images/RunConfigurationSelectPy.png)
+   </div>
    <div style="height: 10px"/>
    Then select Python, and click 'Add new run configuration...'
+   <div style="max-width:700px">
    
     ![ScreenShot](images/RunConfigBlank.png)   
-   
+   </div>
     For "Script path", add the path 
    to your `manage.py` file that will be in your project root directory, and for "Parameters" add `runserver` as the command.  
    Then press "Ok".
    
-    ![ScreenShot](images/RunConfigFilled.png)
-    
+   <div style="max-width:800px">
+   
+   ![ScreenShot](images/RunConfigFilled.png)
+   </div> 
 1.  Run the app:  Press the triangular Run button on the top line of the ide, and note that a run window opens at the bottom of the IDE,
     on the same line as the "Terminal" tab.
     <div style="height: 10px"/>
@@ -494,17 +489,18 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     to both this runtime log, and the log file that we created a few steps back.  On the production servers in AWS, these 
     log lines can be searched using Splunk (ask Dale for Splunk access if you could use it.)
     <div style="height: 10px"/>
-1.  Now, with the server still running, open a terminal window, and create a simple default user (a voter), so you can log in to the 
+1.  Now, with the server still running, open a terminal window, and create an account for yourself to login to the 
     management pages of the WeVoteServer.
     <div style="height: 10px"/>
 
-    At We Vote, "voters" are what we call end users.  This new "voter" will have all the 
+    At WeVote, we call end users "voters".  This new "voter" will have all the 
     rights that you (as a developer) need to login to 
     [http://localhost:8000/admin/](http://localhost:8000/admin/) and start synchronizing data (downloading ballot and issue 
     data from the master server in the cloud, to your local server).
 
    <div style="height: 10px"/>
-   The usage is:  python manage.py create_dev_user first_name last_name email password
+
+   The usage is:  `python manage.py create_dev_user first_name last_name email password`
 
     ```
     (WeVoteServer3.7) admin$ python manage.py create_dev_user Samuel Adams samuel@adams.com ale 
@@ -514,8 +510,9 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     ```
     
 1.  Navigate to [http://localhost:8000/admin/](http://localhost:8000/admin/) and sign in with your new username/password.    
-  
-1.  The local instance of the WeVoteServer is now setup and running (although there is no election 
+   <div style="height: 10px"/>
+
+1.  Your local instance of the WeVoteServer is now setup and running (although there is no election 
     data stored in your Postgres instance, for it to serve to clients at this point).
 
 ## import some ballot data from the live production API Server
@@ -535,7 +532,7 @@ Step 6:  [Set up Initial Data](README_API_INSTALL_SETUP_DATA.md)
 ## June 14, 2021, Changes that were necessary for macOS Big Sur
 
 **This is not list of sequential steps to complete a re-installation.  This list describes a few problems
-that occurred, what was done to work around them**
+that occurred, what was done to work around them.**
 
 *  macOS BigSur (11.3.1) was complaining about Python 3.6.1, and the app would not work, so
    I upgraded Python to the latest 3.9.1
@@ -572,9 +569,13 @@ that occurred, what was done to work around them**
 
        ![ScreenShot](images/PythonInterpretersList2021.png)
        </div>
-    1) Open a **new** terminal window in the IDE, and run 'python --version' to double-check that it is using Python 3.9
+    1) Open a **new** terminal window in the IDE, and run `python --version` to double-check that it is using Python 3.9
     1) Close the older terminal windows, that will have confused paths to the older python versions.
+    <div style="height: 16px"/>
+
 *  Get the latest requirements.txt from git.
+    <div style="height: 10px"/>
+
 *  Install the latest setuptools
    ```
    (venv) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pip3 install --upgrade setuptools   
@@ -602,6 +603,7 @@ that occurred, what was done to work around them**
 *  If problems appear with the openid package
 Look in External Libraries/site-packages and use 'pip uninstall' to remove any libraries with 'openid' in their
 name, and then try 'pip3 install -r requirements.txt' to reload openid.
+    <div style="height: 10px"/>
 
 *  'pip3 install -r requirements.txt' does not reload openid, try from the command line
 
