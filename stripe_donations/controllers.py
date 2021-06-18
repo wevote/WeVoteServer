@@ -3,7 +3,7 @@
 
 # -*- coding: UTF-8 -*-
 
-from config.base import get_environment_variable
+from config.base import get_environment_variable, get_environment_variable_default
 from datetime import datetime, timezone
 from stripe_donations.models import StripeManager
 # from organization.models import OrganizationManager
@@ -17,8 +17,8 @@ import textwrap
 
 
 logger = get_logger(__name__)
-stripe.api_key = get_environment_variable("STRIPE_SECRET_KEY")
-if not stripe.api_key.startswith("sk_"):
+stripe.api_key = get_environment_variable_default("STRIPE_SECRET_KEY", "")
+if len(stripe.api_key) and not stripe.api_key.startswith("sk_"):
     logger.error("Configuration error, the stripe secret key, must begin with 'sk_' -- don't use the publishable key "
                  "on the server!")
 
