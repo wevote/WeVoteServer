@@ -534,8 +534,8 @@ Step 6:  [Set up Initial Data](README_API_INSTALL_SETUP_DATA.md)
      
 ## June 14, 2021, Changes that were necessary for macOS Big Sur
 
-**This is not list of sequential steps to complete a re-installation.  This list describes a few events
-that happened, with what I did to work around them**
+**This is not list of sequential steps to complete a re-installation.  This list describes a few problems
+that occurred, what was done to work around them**
 
 *  macOS BigSur (11.3.1) was complaining about Python 3.6.1, and the app would not work, so
    I upgraded Python to the latest 3.9.1
