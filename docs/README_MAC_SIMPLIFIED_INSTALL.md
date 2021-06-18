@@ -11,7 +11,7 @@ Python development before.  Some of these tools may already be setup on your Mac
 reinstalling them causes no harm, skip the parts you are sure you already have.
 
 If you have never installed Postgres on your Mac (or don't mind fully deleting any Postgres that you have already 
-installed on your Mac), these instructions should take an hour or so to complete. 
+installed on your Mac), follow these instructions.  They should take an hour or so to complete. 
 
 1. Install the Chrome browser for Mac
 
@@ -19,8 +19,9 @@ installed on your Mac), these instructions should take an hour or so to complete
     and native git integration. This download also includes Apple's Xcode IDE for macOS and iOS native development.
 
     **Note: Xcode requires about 30 GB of disk space, if you don't have much that room on your Mac, it is sufficient 
-    to download only the "Xcode Command Line Tools", but you need to sign up as an Apple developer to do that.  Download (the latest version of) "Command Line Tools for Xcode 13" at 
-    [https://developer.apple.com/download/more/](https://developer.apple.com/download/more/)  These tools only require 185 MB 
+    to download only the "Xcode Command Line Tools".  Unfortunately you need to sign up as an Apple developer to do that.
+    Download (the latest version of) "Command Line Tools for Xcode 13" at 
+    [https://developer.apple.com/download/more/](https://developer.apple.com/download/more/).  These tools only require 185 MB 
     of disk space.  If you choose to download only the tools, skip on to Step 6.**
     
     If you have enough disk space, it is much easier to just install all of Xcode (including the full Xcode IDE) from 
@@ -54,7 +55,7 @@ come with Xcode.)
 
 1. Clone your fork of the git repository, by copying the URL to the repository into the URL filed, then press the Clone button.
 _What this means in english is that you have created a copy in GitHub of the WeVoteServer codebase, and cloning it downloads
-a copy of your copy to your Mac._  At this instant, the 'develop' branch of wevote/WeVoteServer matches
+a copy of your copy to your Mac.  At this instant, the 'develop' branch of wevote/WeVoteServer matches
    your branch (in this example) SailingSteve/WeVoteServer and also matches the code on your Mac.
 
    <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/PyCharmStartScreenURL2021.png">
@@ -113,16 +114,15 @@ Feel free to add any other PyCharm tools that you would like!  When done press '
     `environment_variables.json`
     
     If you skip this step, in a much later step, when you run "makemigrations", it will fail with an 
-    'Unable to set the SECRET_KEY variable from "os.environ" or JSON file' error.
+    'Unable to set the **** variable from "os.environ" or JSON file' error.
     
     **There are a number of secret values in `environment_variables.json` that are not in source control,
     you will need to check in with Dale, as you find that you need them.**
 
 1. In PyCharm, open the Terminal window and accept use of the z shell (if you want to use some other shell, feel free to skip this step).
-
    
     ![ScreenShot](images/AcceptZShell.png)
-    </div>
+
     The terminal opens up with the project root directory set as the pwd (which is handy).
     
 
@@ -151,13 +151,13 @@ the following command:
       brew upgrade python@3.9
     Steve@Vickies-MacBook-Pro-2037 WeVoteServer % 
     ```
-     In which case you run `brew upgrade python@3.9`, then finally export the path as shown below.
+    In which case you run the suggested upgrade command, in this example it would be `brew upgrade python@3.9`, then finally export the path as shown below.
     ```
     $ export PATH="/usr/local/opt/python/libexec/bin:$PATH"
     ```
-1. Test that the newly installed Python is in the path. macOS comes with Python 2 preinstalled,
-if the reported version is 2, then add the newly loaded python to the path with the export command,
-and confirm that the default python is now version 3.9 or later.  (Version 3.6 has problems with macOS Big Sur or later)
+1. Test that the newly installed Python is in the path. macOS comes with Python 2 preinstalled, so
+if the reported version is 2, then add the newly loaded python to the path with the export command. 
+Then confirm that the default python is now version 3.9 or later.  (Version 3.6 has problems with macOS Big Sur or later)
 
     ```
     Steve@Vickies-MacBook-Pro-2037 WeVoteServer % python --version
@@ -209,12 +209,12 @@ PyCharm and opening a new one.
     `(WeVoteServer3.7) $ pip3 install -r requirements.txt`
 
     This is a big operation that loads a number of wheels definitions and then compiles them.   Wheels are
-    linux/macOS binary libraries based on c language packages and compiled with gcc.  Using binary wheels instead of
-    interpreted Python code speeds up execution.  (Some Wheel objects are downloaded as binary objects, instead of locally 
-    compiled, and those wheels are specifically pre-compiled for the current macOS version).
+    linux/macOS binary libraries based on c language packages and compiled with gcc. 
+    Wheels allow python library developers to speed up execution by coding critical or complex sections the c language.
+    Interpreted Python code runs slower than compiled c. 
     
-    If this install succeeds with no missing libraries, or other compiler errors, we are
-    most of the way to done.  If this install fails, please ask for help.
+    If this installation succeeds with no missing libraries, or other compiler errors, we are
+    almost done.  If this installation fails, please ask for help.
 
 
 ## Install and set up PostgreSQL and pgAdmin4
@@ -229,7 +229,7 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     (venv) $
     ```  
  
-     If the output shows postgres has already been installed and is listening on port 5432.  Stop and fix this,  
+    If the output shows postgres has already been installed and is listening on port 5432.  Stop and fix this,  
     otherwise you would install a second postgres instance running on port 5433, and the result would be hours of "port 
     assignment" mess to clean up. 
    
@@ -239,13 +239,13 @@ this step.  To see if postgres is already running, check with lsof in a terminal
    
     **If you don't mind fully deleting any Postgres database data that you have already installed**, then delete the existing Postgres now.  Postgres
     can be setup in many ways, so there are no instructions here on how to delete Postgres. You can start with running `which postgres`
-    in a terminal and going to that directory and deleting the instance or the symbolic links to the instance, then it is
-    probably easiest to reboot your Mac to see if Postgres starts up again.
+    in a terminal and going to that directory and deleting the instance or the symbolic links to the instance.  
+    Next step is to reboot your Mac to see if Postgres starts up again.
 
     or
 
-    **If you have to keep some data that is already stored in the Postgres instance  on your Mac** that you absolutely need to 
-    retain, then you must take the time to upgrade that Postgres to the latest version.  This is a ton of work, and is rarely needed.
+    **If you have to keep some data that is already stored in the Postgres instance on your Mac** that you absolutely need to 
+    retain, then you will need to manually upgrade Postgres.  This is a ton of work, and is rarely necessary.
    
 1. Install PostgreSQL by running the following command:
 
@@ -268,7 +268,7 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     admin=# 
     ```
 
-    The `psql` command starts a PostgresSQL command session which is started in the bash terminal window, within this 
+    The `psql` command starts a PostgresSQL command session which is started in the bash terminal window. Within this 
     PostgresSQL command session type the following Postgres commands... ("admin" is just an example password, use whatever
     password you would like to go with your postgres role name.)
 
@@ -295,12 +295,11 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     
     This can take a few minutes to complete.  When `brew install --cask pgadmin4` finishes, it prints out `Moving App 'pgAdmin 4.app' to '/Applications/pgAdmin 4.app'.`
 
-    The latest pgAdmin4 has a webapp architecture, where the app you start from the Application folder is actually a 
+    The latest pgAdmin4 has a webapp architecture (it is not a compiled program).  The app you start from the Application folder is actually a 
     single purpose web server, and the UI for the app appears in Chrome as a local website.
 
 1. Use Spotlight to find and launch the pgAdmin4 app.  Once launched, the pgAdmin4 webapp will display in a new tab within Chrome.
-    On that new tab, Right-click on "Servers" 
-    and choose "Create > Server"
+   On that new tab, Right-click on "Servers" and choose "Create > Server"
    
    <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/CreateServerInPgAdmin2.png"> 
 
@@ -390,10 +389,9 @@ this step.  To see if postgres is already running, check with lsof in a terminal
    
    <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/RunConfigFilled.png"> 
 
-1.  Run the app:  Press the triangular Run button on the top line of the ide, and note that a run window opens at the bottom of the IDE,
+1.  Run the app:  Press the triangular Run button on the top line of the ide.  Note that a run window opens at the bottom of the IDE,
     on the same line as the "Terminal" tab.
-    As API calls are made to the server, the http requests will be displayed in 
-    this runtime log.
+    As API calls arrive at the server, the http requests will be displayed in this runtime log.
 
     Python print commands, only send their output to this log.  Python logger commands send the output
     to both this runtime log, and the log file that we created a few steps back.  On the production servers in AWS, these 
@@ -403,8 +401,8 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     management pages of the WeVoteServer.
     
     At WeVote, we call end users "voters".  This new "voter" will have all the 
-    rights that you (as a developer) need to login to 
-    [http://localhost:8000/admin/](http://localhost:8000/admin/) and start synchronizing data (downloading ballot and issue 
+    rights that you (as a developer) need to log in to 
+    [http://localhost:8000/admin/](http://localhost:8000/admin/).  Once logged in you can start synchronizing data (downloading ballot and issue 
     data from the master server in the cloud, to your local server).
     
    The usage is:  `python manage.py create_dev_user first_name last_name email password`
@@ -441,6 +439,7 @@ that occurred, what was done to work around them.**
 
 *  macOS BigSur (11.3.1) was complaining about Python 3.6.1, and the app would not work, so
    I upgraded Python to the latest 3.9.1
+   
    <img width="500" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/PythonErrorOnBigSur.png"> 
 
 *  Uninstall Python (which was previously installed with Homebrew)
@@ -465,8 +464,8 @@ that occurred, what was done to work around them.**
 *  In the PyCharm IDE UI
     1)  Navigate to PyCharm/Preferences/'Project: WeVoteServer'/'Python Interpreter' and press the gear icon and set up
     a path to 3.9
-    1) On the 'Python Interpreter' summary pop-up, click the pencil and rename the interpreter to be 'WeVoteServer 3.9'so that you know it is 3.9 
-       when it loads into the IDE terminal window.
+    1) On the 'Python Interpreter' summary pop-up select 'WeVoteServer 3.9' (or the latest version you installed).
+       
        <img width="600" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/PythonInterpretersList2021.png"> 
 
     1) Open a **new** terminal window in the IDE, and run `python --version` to double-check that it is using Python 3.9
@@ -479,29 +478,36 @@ that occurred, what was done to work around them.**
    ```
    (venv) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pip3 install --upgrade setuptools   
    ```
+   
 *  Try to install requirements.txt in the Pycharm terminal window
     ```
     (venv) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pip3 install -r requirements.txt
    ```
+   
 *  If the installation fails, run brew's doctor
     ```
     (venv) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % brew doctor
    ```
+   
 *  brew cleanup
     ```
     (venv) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % brew cleanup
    ```
+   
 *  I had an old String.h first in the path, and causing a `fatal error: 'cstddef' file not found` error in String.h
    ```
     (venv) mv /usr/local/include/String.h /usr/local/include/String.h.saveoff
    ```
+   
 *  This final installation of requirements.txt worked
     ```
     (venv) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pip3 install -r requirements.txt
    ```
-*  If problems appear with the openid package
-Look in External Libraries/site-packages and use 'pip uninstall' to remove any libraries with 'openid' in their
-name, and then try 'pip3 install -r requirements.txt' to reload openid.
+   
+*  If problems appear with the openid package...
+
+    Look in External Libraries/site-packages and use 'pip uninstall' to remove any libraries with 'openid' in their
+    name, and then try 'pip3 install -r requirements.txt' to reload openid.
 
 *  'pip3 install -r requirements.txt' does not reload openid, try from the command line
 
