@@ -66,6 +66,7 @@ a copy of your copy to your Mac._  At this instant, the 'develop' branch of wevo
 1. If you like 'Dracula' mode, you can skip this step.  Open PyCharm/Preferences and press the
 'Sync with OS' button to match the display mode of your Mac.  
    
+   <img src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/transparent8x8.png"> 
    <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/PyCharm2021OutOfDracula.png"> 
 
 1. In PyCharm/Preferences/Plugins enable the Markdown and IdeaVim tools (this takes a while).  
@@ -368,8 +369,11 @@ this step.  To see if postgres is already running, check with lsof in a terminal
  
 ## Set up a PyCharm run configuration
 
-1. Set up a run configuration (this will enable the green play button, and the green debug button on the top line)    
-   Click in the the "Add Configuration..." field that is to the left of the play button.
+1. Set up a run configuration (this will enable the green play button, and the green debug button on the top line)
+   
+   Click in the "Add Configuration..." field that is to the left of the play button.
+
+   <img src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/transparent8x8.png"> 
    <img width="900" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/InitRunConfiguration.png"> 
    
    Press the '+' sign in the upper-left corner of the dialog.  
@@ -377,7 +381,9 @@ this step.  To see if postgres is already running, check with lsof in a terminal
    <img width="600" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/RunConfigurationSelectPy.png"> 
 
    Then select Python, and click 'Add new run configuration...'
+
    <img width="700" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/RunConfigBlank.png"> 
+
    For "Script path", add the path 
    to your `manage.py` file that will be in your project root directory, and for "Parameters" add `runserver` as the command.  
    Then press "Ok".
