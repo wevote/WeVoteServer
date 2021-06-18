@@ -1,8 +1,8 @@
 # README for Simplified Installation with PyCharm on a Mac
 [Back to root README](../README.md)
 
-Caveat: Stuff changes --  Operating Systems, IDEs, tools, packages, dependencies, and languages.  We do our best to keep up with change, but 
-there may be outdated information on this change.  Tell us if you run into troubles.
+**Caveat:  Operating Systems, IDEs, tools, packages, dependencies, and languages are constantly changing.**
+We do our best to keep this procedure current with the external changes.  Tell us if you run into troubles.
 
 ## Installing WeVoteServer: On a new Mac
 These instructions are for a new Mac, or at least a Mac that hasn't been used for 
