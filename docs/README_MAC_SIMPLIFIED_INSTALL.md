@@ -18,7 +18,7 @@ installed on your Mac), these instructions should take an hour or so to complete
     and native git integration. This download also includes Apple's Xcode IDE for macOS and iOS native development.
 
     **Note: Xcode requires about 30 GB of disk space, if you don't have much that room on your Mac, it is sufficient 
-    to download only the "Xcode Command Line Tools", but you need to sign up as an Apple developer to do that.  Download (the latest version of) "Command Line Tools (macOS 10.14) for Xcode 10" at 
+    to download only the "Xcode Command Line Tools", but you need to sign up as an Apple developer to do that.  Download (the latest version of) "Command Line Tools for Xcode 13" at 
     [https://developer.apple.com/download/more/](https://developer.apple.com/download/more/)  These tools only require 185 MB 
     of disk space.  If you choose to download only the tools, skip on to Step 6.**
     
