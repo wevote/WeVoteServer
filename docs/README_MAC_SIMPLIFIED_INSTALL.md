@@ -43,7 +43,7 @@ come with Xcode.)
 1. Within the GitHub site, navigate to [https://GitHub.com/wevote/WeVoteServer](https://GitHub.com/wevote/WeVoteServer). 
     Create a fork of wevote/WeVoteServer.git by selecting the "Fork" button (in the upper right of screen).
     
-   <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/Fork.png"> 
+   <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/Fork3.png"> 
 
 1. Download and install the Community version of PyCharm, it's free!
     [https://www.jetbrains.com/pycharm/download/#section=mac](https://www.jetbrains.com/pycharm/download/#section=mac)
@@ -75,7 +75,7 @@ Feel free to add any other PyCharm tools that you would like!  When done press '
 
 1. If the Apple top menu, shows "Git" skip this step.  If it says "VCS", the follow this step to configure Git
 
-   <img width="500" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/VCSorGIT.png"> 
+   <img width="500" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/VCSorGIT2.png"> 
    
    Select 'Git' on the VCS meu, and press Ok.
    
@@ -185,7 +185,7 @@ Navigate to: PyCharm/Preferences/Project: WeVoteServer/Python Interpreter.
 1. Confirm that the new virtual environment is in effect, by closing all open Terminal windows within
 PyCharm and opening a new one.
 
-   <img width="700" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/VenvConfirm.png"> 
+   <img width="700" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/VenvConfirm2.png"> 
 
    If you see '(venv)' at the beginning of the command line, all is well.
    
@@ -301,7 +301,7 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     On that new tab, Right-click on "Servers" 
     and choose "Create > Server"
    
-   <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/CreateServerInPgAdmin.png"> 
+   <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/CreateServerInPgAdmin2.png"> 
 
 1. On the first tab of the "Create - Server" dialog, add into the Name field: WeVoteServer
 
