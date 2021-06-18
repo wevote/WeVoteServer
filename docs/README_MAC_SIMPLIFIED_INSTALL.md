@@ -301,6 +301,7 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     <div style="height: 10px"/>
     or
     <div style="height: 10px"/>
+
     **If you have to keep some data that is already stored in the Postgres instance  on your Mac** that you absolutely need to 
     retain, then you must take the time to upgrade that Postgres to the latest version.  This is a ton of work, and is rarely needed.
     <div style="height: 16px"/>
@@ -363,14 +364,16 @@ this step.  To see if postgres is already running, check with lsof in a terminal
 1. Use Spotlight to find and launch the pgAdmin4 app.  Once launched, the pgAdmin4 webapp will display in a new tab within Chrome.
     On that new tab, Right-click on "Servers" 
     and choose "Create > Server"
-   <div style="height: 10px"/>
+    <div style="height: 10px"/>
+   
     <div style="max-width:800px; border: 1px solid lightgrey; padding: 2px;">
 
     ![ScreenShot](images/CreateServerInPgAdmin.png)
-   </div>
+    </div>
     <div style="height: 10px"/>
 
 1. On the first tab of the "Create - Server" dialog, add into the Name field: WeVoteServer
+
     <div style="max-width:500px">
 
     ![ScreenShot](images/CreateServerDialog.png)
@@ -397,7 +400,7 @@ this step.  To see if postgres is already running, check with lsof in a terminal
    <div style="max-width:800px">
 
    ![ScreenShot](images/CreateDatabase.png)
-    </div>
+   </div>
 
 1. Name the new database WeVoteServerDB and press save.
 
