@@ -108,8 +108,8 @@ Feel free to add any other PyCharm tools that you would like!  When done press '
    Select 'Git' on the VCS meu, and press Ok.
    <div style="height: 20px"/>
    
-   <div style="max-width:800px">
-   
+   <div style="max-width:700px">
+
    ![ScreenShot](images/AddGit.png)
     </div>
 
@@ -474,10 +474,11 @@ this step.  To see if postgres is already running, check with lsof in a terminal
    
    ![ScreenShot](images/RunConfigurationSelectPy.png)
    <div style="height: 10px"/>
-   Then select Python,
-    and click 'Add new run configuration...'
+   Then select Python, and click 'Add new run configuration...'
+   
     ![ScreenShot](images/RunConfigBlank.png)   
-   For "Script path", add the path 
+   
+    For "Script path", add the path 
    to your `manage.py` file that will be in your project root directory, and for "Parameters" add `runserver` as the command.  
    Then press "Ok".
    
@@ -496,6 +497,7 @@ this step.  To see if postgres is already running, check with lsof in a terminal
 1.  Now, with the server still running, open a terminal window, and create a simple default user (a voter), so you can log in to the 
     management pages of the WeVoteServer.
     <div style="height: 10px"/>
+
     At We Vote, "voters" are what we call end users.  This new "voter" will have all the 
     rights that you (as a developer) need to login to 
     [http://localhost:8000/admin/](http://localhost:8000/admin/) and start synchronizing data (downloading ballot and issue 
@@ -537,7 +539,6 @@ that happened, with what I did to work around them**
 
 *  macOS BigSur (11.3.1) was complaining about Python 3.6.1, and the app would not work, so
    I upgraded Python to the latest 3.9.1
-
    <div style="max-width:500px">
    
    ![ScreenShot](images/PythonErrorOnBigSur.png)
