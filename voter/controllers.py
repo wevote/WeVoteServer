@@ -17,6 +17,7 @@ from analytics.controllers import delete_analytics_info_for_voter, move_analytic
 from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, \
     ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
     ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
+import base64
 from campaign.controllers import move_campaignx_to_another_voter
 from datetime import timedelta
 from django.http import HttpResponse
@@ -41,7 +42,8 @@ from friend.controllers import delete_friend_invitations_for_voter, delete_frien
     retrieve_voter_and_email_address, \
     store_internal_friend_invitation_with_two_voters, store_internal_friend_invitation_with_unknown_email
 from friend.models import FriendManager
-from image.controllers import cache_master_and_resized_image, TWITTER, FACEBOOK
+from image.controllers import cache_master_and_resized_image, cache_voter_master_uploaded_image, FACEBOOK, \
+    PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT, TWITTER
 from import_export_facebook.models import FacebookManager
 from import_export_twitter.models import TwitterAuthManager
 import json
@@ -53,6 +55,9 @@ from organization.models import OrganizationListManager, OrganizationManager, IN
 from position.controllers import delete_positions_for_voter, duplicate_positions_to_another_voter, \
     move_positions_to_another_voter
 from position.models import PositionListManager
+from io import BytesIO, StringIO
+from PIL import Image, ImageOps
+import re
 import robot_detection
 from share.controllers import move_shared_items_to_another_voter
 from sms.controllers import delete_sms_phone_number_entries_for_voter, move_sms_phone_number_entries_to_another_voter
@@ -2799,7 +2804,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
                                 facebook_profile_image_different = \
                                     not positive_value_exists(organization.facebook_profile_image_url_https) \
                                     or facebook_user.facebook_profile_image_url_https != \
-                                       organization.facebook_profile_image_url_https
+                                    organization.facebook_profile_image_url_https
                                 if facebook_profile_image_different:
                                     organization.facebook_profile_image_url_https = \
                                         facebook_user.facebook_profile_image_url_https
@@ -2899,7 +2904,10 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
                                           is_desktop=user_agent_object.is_pc,
                                           is_tablet=user_agent_object.is_tablet)
 
-        facebook_profile, voter_photo_large, voter_photo_medium = get_displayable_images(voter, facebook_user)
+        facebook_profile_image_url_https, \
+            we_vote_hosted_profile_image_url_large, \
+            we_vote_hosted_profile_image_url_medium = \
+            get_displayable_images(voter, facebook_user)
         # donation_list = donation_journal_history_for_a_voter(voter.we_vote_id)
         json_data = {
             'status':                           status,
@@ -2912,7 +2920,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             'facebook_id':                      voter.facebook_id,
             'email':                            voter.email,
             'facebook_email':                   voter.facebook_email,
-            'facebook_profile_image_url_https': facebook_profile,
+            'facebook_profile_image_url_https': facebook_profile_image_url_https,
             'full_name':                        voter.get_full_name(),
             'first_name':                       voter.first_name,
             'last_name':                        voter.last_name,
@@ -2934,8 +2942,8 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             'has_data_to_preserve':             voter.has_data_to_preserve(),
             'has_email_with_verified_ownership':    voter.has_email_with_verified_ownership(),
             'linked_organization_we_vote_id':   voter.linked_organization_we_vote_id,
-            'voter_photo_large':                voter_photo_large,
-            'voter_photo_url_medium':           voter_photo_medium,
+            'voter_photo_url_large':            we_vote_hosted_profile_image_url_large,
+            'voter_photo_url_medium':           we_vote_hosted_profile_image_url_medium,
             'voter_photo_url_tiny':             voter.we_vote_hosted_profile_image_url_tiny,
             # 'voter_donation_history_list':      donation_list,
             'interface_status_flags':           voter.interface_status_flags,
@@ -2992,16 +3000,17 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
 def get_displayable_images(voter, facebook_user):
     # Hack to find any usable voter images.
     # We have too many duplicate image urls setters, repairers, and healers -- some of those setters are broken
-    facebook_profile = voter.facebook_profile_image_url_https
-    if not positive_value_exists(facebook_profile) and facebook_user is not None:
-        facebook_profile = facebook_user.facebook_profile_image_url_https
-    voter_photo_large = voter.we_vote_hosted_profile_image_url_large
-    if not positive_value_exists(voter_photo_large):
-        voter_photo_large = facebook_profile
-    voter_photo_medium = voter.we_vote_hosted_profile_image_url_medium
-    if not positive_value_exists(voter_photo_medium):
-        voter_photo_medium = facebook_profile
-    return facebook_profile, voter_photo_large, voter_photo_medium
+    facebook_profile_image_url_https = voter.facebook_profile_image_url_https
+    if not positive_value_exists(facebook_profile_image_url_https) and facebook_user is not None:
+        facebook_profile_image_url_https = facebook_user.facebook_profile_image_url_https
+    we_vote_hosted_profile_image_url_large = voter.we_vote_hosted_profile_image_url_large
+    if not positive_value_exists(we_vote_hosted_profile_image_url_large):
+        we_vote_hosted_profile_image_url_large = facebook_profile_image_url_https
+    we_vote_hosted_profile_image_url_medium = voter.we_vote_hosted_profile_image_url_medium
+    if not positive_value_exists(we_vote_hosted_profile_image_url_medium):
+        we_vote_hosted_profile_image_url_medium = facebook_profile_image_url_https
+    return facebook_profile_image_url_https, we_vote_hosted_profile_image_url_large, \
+        we_vote_hosted_profile_image_url_medium
 
 
 def voter_retrieve_list_for_api(voter_device_id):
@@ -3285,6 +3294,73 @@ def refresh_voter_primary_email_cached_information_by_voter_we_vote_id(voter_we_
     }
     return results
 
+
+def voter_save_photo_from_file_reader(
+        voter_we_vote_id='',
+        voter_photo_from_file_reader=None):
+    image_data_found = False
+    python_image_library_image = None
+    status = ""
+    success = True
+    we_vote_hosted_voter_photo_original_url = ''
+
+    if not positive_value_exists(voter_we_vote_id):
+        status += "MISSING_VOTER_WE_VOTE_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'we_vote_hosted_voter_photo_original_url': we_vote_hosted_voter_photo_original_url,
+        }
+        return results
+
+    if not positive_value_exists(voter_photo_from_file_reader):
+        status += "MISSING_VOTER_PHOTO_FROM_FILE_READER "
+        results = {
+            'status': status,
+            'success': success,
+            'we_vote_hosted_voter_photo_original_url': we_vote_hosted_voter_photo_original_url,
+        }
+        return results
+
+    img_dict = re.match("data:(?P<type>.*?);(?P<encoding>.*?),(?P<data>.*)",
+                        voter_photo_from_file_reader).groupdict()
+    if img_dict['encoding'] == 'base64':
+        try:
+            base64_data = img_dict['data']
+            byte_data = base64.b64decode(base64_data)
+            image_data = BytesIO(byte_data)
+            python_image_library_image = Image.open(image_data)
+            format_to_cache = python_image_library_image.format
+            python_image_library_image.thumbnail(
+                (PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT), Image.ANTIALIAS)
+            python_image_library_image.format = format_to_cache
+            image_data_found = True
+        except Exception as e:
+            status += 'PROBLEM_DECODING_CAMPAIGN_PHOTO_LARGE: {error} [type: {error_type}] ' \
+                      ''.format(error=e, error_type=type(e))
+    else:
+        status += "INCOMING_VOTER_PHOTO_LARGE-BASE64_NOT_FOUND "
+
+    if image_data_found:
+        cache_results = cache_voter_master_uploaded_image(
+            python_image_library_image=python_image_library_image,
+            voter_we_vote_id=voter_we_vote_id)
+        status += cache_results['status']
+        if cache_results['success']:
+            cached_master_we_vote_image = cache_results['we_vote_image']
+            try:
+                we_vote_hosted_voter_photo_original_url = cached_master_we_vote_image.we_vote_image_url
+            except Exception as e:
+                status += "FAILED_TO_CACHE_VOTER_IMAGE: " + str(e) + ' '
+                success = False
+        else:
+            success = False
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'we_vote_hosted_voter_photo_original_url': we_vote_hosted_voter_photo_original_url,
+    }
+    return results
 
 def voter_sign_out_for_api(voter_device_id, sign_out_all_devices=False):  # voterSignOut
     """
