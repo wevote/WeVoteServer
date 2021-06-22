@@ -1213,10 +1213,14 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
 
         # The current voter does not have first or last name, and we have incoming names that can be used
         if update_voter_name:
+            recipient_first_name = friend_invitation_email_link.recipient_first_name \
+                if positive_value_exists(friend_invitation_email_link.recipient_first_name) else False
+            recipient_last_name = friend_invitation_email_link.recipient_last_name \
+                if positive_value_exists(friend_invitation_email_link.recipient_last_name) else False
             results = voter_manager.update_voter_name_by_object(
                 voter,
-                first_name=friend_invitation_email_link.recipient_first_name,
-                last_name=friend_invitation_email_link.recipient_last_name)
+                first_name=recipient_first_name,
+                last_name=recipient_last_name)
             if results['voter_updated']:
                 voter = results['voter']
 
