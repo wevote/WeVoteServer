@@ -1,8 +1,8 @@
 # voter/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, \
-    MAINTENANCE_STATUS_FLAGS_TASK_ONE, MAINTENANCE_STATUS_FLAGS_TASK_TWO, MAINTENANCE_STATUS_FLAGS_COMPLETED, \
+from .models import fetch_voter_id_from_voter_device_link, \
+    MAINTENANCE_STATUS_FLAGS_TASK_ONE, MAINTENANCE_STATUS_FLAGS_TASK_TWO, \
     NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL, \
     NOTIFICATION_FRIEND_REQUESTS_EMAIL, NOTIFICATION_SUGGESTED_FRIENDS_EMAIL, \
     NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL, NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS, \
@@ -22,7 +22,7 @@ from datetime import timedelta
 from django.http import HttpResponse
 from django.db.models import F
 from django.utils.timezone import now
-from stripe_donations.controllers import donation_journal_history_for_a_voter, move_donation_info_to_another_voter
+from stripe_donations.controllers import move_donation_info_to_another_voter
 from email_outbound.controllers import delete_email_address_entries_for_voter, \
     move_email_address_entries_to_another_voter, schedule_verification_email, \
     WE_VOTE_SERVER_ROOT_URL, schedule_email_with_email_outbound_description
