@@ -2908,47 +2908,60 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             we_vote_hosted_profile_image_url_large, \
             we_vote_hosted_profile_image_url_medium = \
             get_displayable_images(voter, facebook_user)
-        # donation_list = donation_journal_history_for_a_voter(voter.we_vote_id)
+
+
+        # Make a best effort to get the text_for_map_search.  Adds 7ms to this API call with WeVoteServer running
+        # locally on a Mac, vs 500ms as a separate API call with queuing due to too many request channels from a browser
+        text_for_map_search = ""
+        try:
+            voter_address_manager = VoterAddressManager()
+            results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
+            if results['voter_address_found']:
+                voter_address = results['voter_address']
+                text_for_map_search = voter_address.text_for_map_search if voter_address.text_for_map_search[0] else '',
+        except Exception as e:
+            pass
+
         json_data = {
             'status':                           status,
             'success':                          True,
             'date_joined':                      voter.date_joined.strftime('%Y-%m-%d %H:%M:%S'),
-            'voter_device_id':                  voter_device_id,
-            'voter_created':                    voter_created,
-            'voter_found':                      True,
-            'we_vote_id':                       voter.we_vote_id,
-            'facebook_id':                      voter.facebook_id,
             'email':                            voter.email,
             'facebook_email':                   voter.facebook_email,
+            'facebook_id':                      voter.facebook_id,
             'facebook_profile_image_url_https': facebook_profile_image_url_https,
-            'full_name':                        voter.get_full_name(),
             'first_name':                       voter.first_name,
-            'last_name':                        voter.last_name,
-            'twitter_screen_name':              voter.twitter_screen_name,
-            'is_signed_in':                     voter.is_signed_in(),
+            'full_name':                        voter.get_full_name(),
+            'has_data_to_preserve':             voter.has_data_to_preserve(),
+            'has_email_with_verified_ownership':    voter.has_email_with_verified_ownership(),
+            'has_valid_email':                  voter.has_valid_email(),
+            'interface_status_flags':           voter.interface_status_flags,
             'is_admin':                         voter.is_admin,
             'is_analytics_admin':               voter.is_analytics_admin,
             'is_partner_organization':          voter.is_partner_organization,
             'is_political_data_manager':        voter.is_political_data_manager,
             'is_political_data_viewer':         voter.is_political_data_viewer,
+            'is_signed_in':                     voter.is_signed_in(),
             'is_verified_volunteer':            voter.is_verified_volunteer,
+            'last_name':                        voter.last_name,
+            'linked_organization_we_vote_id':   voter.linked_organization_we_vote_id,
+            'notification_settings_flags':      voter.notification_settings_flags,
             'signed_in_facebook':               voter.signed_in_facebook(),
             'signed_in_google':                 voter.signed_in_google(),
             'signed_in_twitter':                voter.signed_in_twitter(),
             'signed_in_with_apple':             voter.signed_in_with_apple(),
             'signed_in_with_email':             voter.signed_in_with_email(),
             'signed_in_with_sms_phone_number':  voter.signed_in_with_sms_phone_number(),
-            'has_valid_email':                  voter.has_valid_email(),
-            'has_data_to_preserve':             voter.has_data_to_preserve(),
-            'has_email_with_verified_ownership':    voter.has_email_with_verified_ownership(),
-            'linked_organization_we_vote_id':   voter.linked_organization_we_vote_id,
+            'state_code_from_ip_address':       state_code_from_ip_address,
+            'text_for_map_search':              text_for_map_search,
+            'twitter_screen_name':              voter.twitter_screen_name,
+            'voter_created':                    voter_created,
+            'voter_device_id':                  voter_device_id,
+            'voter_found':                      True,
             'voter_photo_url_large':            we_vote_hosted_profile_image_url_large,
             'voter_photo_url_medium':           we_vote_hosted_profile_image_url_medium,
             'voter_photo_url_tiny':             voter.we_vote_hosted_profile_image_url_tiny,
-            # 'voter_donation_history_list':      donation_list,
-            'interface_status_flags':           voter.interface_status_flags,
-            'notification_settings_flags':      voter.notification_settings_flags,
-            'state_code_from_ip_address':       state_code_from_ip_address,
+            'we_vote_id':                       voter.we_vote_id,
         }
         return json_data
 
