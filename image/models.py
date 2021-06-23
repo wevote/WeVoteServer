@@ -1413,45 +1413,47 @@ class WeVoteImageManager(models.Manager):
             candidate_we_vote_id=None,
             organization_we_vote_id=None,
             issue_we_vote_id=None,
-            kind_of_image_twitter_profile=False,
-            kind_of_image_twitter_background=False,
-            kind_of_image_twitter_banner=False,
+            kind_of_image_ballotpedia_profile=False,
             kind_of_image_facebook_profile=False,
             kind_of_image_facebook_background=False,
-            kind_of_image_maplight=False,
-            kind_of_image_vote_smart=False,
             kind_of_image_issue=False,
-            kind_of_image_ballotpedia_profile=False,
-            kind_of_image_linkedin_profile=False,
-            kind_of_image_wikipedia_profile=False,
-            kind_of_image_other_source=False,
-            kind_of_image_original=False,
             kind_of_image_large=False,
+            kind_of_image_linkedin_profile=False,
+            kind_of_image_maplight=False,
             kind_of_image_medium=False,
+            kind_of_image_original=False,
+            kind_of_image_other_source=False,
             kind_of_image_tiny=False,
+            kind_of_image_twitter_background=False,
+            kind_of_image_twitter_banner=False,
+            kind_of_image_twitter_profile=False,
+            kind_of_image_vote_smart=False,
+            kind_of_image_voter_uploaded_profile=False,
+            kind_of_image_wikipedia_profile=False,
             is_active_version=True):
         """
         Retrieve cached we vote image list as per kind of image
         :param voter_we_vote_id:
         :param candidate_we_vote_id:
-        :param organization_we_vote_id
+        :param organization_we_vote_id:
         :param issue_we_vote_id:
-        :param kind_of_image_twitter_profile:
-        :param kind_of_image_twitter_background:
-        :param kind_of_image_twitter_banner:
+        :param kind_of_image_ballotpedia_profile:
         :param kind_of_image_facebook_profile:
         :param kind_of_image_facebook_background:
-        :param kind_of_image_maplight:
-        :param kind_of_image_vote_smart:
         :param kind_of_image_issue:
-        :param kind_of_image_ballotpedia_profile:
-        :param kind_of_image_linkedin_profile:
-        :param kind_of_image_wikipedia_profile:
-        :param kind_of_image_other_source:
-        :param kind_of_image_original:
         :param kind_of_image_large:
+        :param kind_of_image_linkedin_profile:
+        :param kind_of_image_maplight:
         :param kind_of_image_medium:
+        :param kind_of_image_original:
+        :param kind_of_image_other_source:
         :param kind_of_image_tiny:
+        :param kind_of_image_twitter_background:
+        :param kind_of_image_twitter_banner:
+        :param kind_of_image_twitter_profile:
+        :param kind_of_image_vote_smart:
+        :param kind_of_image_voter_uploaded_profile:
+        :param kind_of_image_wikipedia_profile:
         :param is_active_version:
         :return:
         """
@@ -1463,22 +1465,23 @@ class WeVoteImageManager(models.Manager):
                 candidate_we_vote_id__iexact=candidate_we_vote_id,
                 organization_we_vote_id__iexact=organization_we_vote_id,
                 issue_we_vote_id__iexact=issue_we_vote_id,
-                kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+                kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+                kind_of_image_facebook_background=kind_of_image_facebook_background,
+                kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+                kind_of_image_issue=kind_of_image_issue,
+                kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+                kind_of_image_large=kind_of_image_large,
+                kind_of_image_maplight=kind_of_image_maplight,
+                kind_of_image_medium=kind_of_image_medium,
+                kind_of_image_original=kind_of_image_original,
+                kind_of_image_other_source=kind_of_image_other_source,
+                kind_of_image_tiny=kind_of_image_tiny,
                 kind_of_image_twitter_background=kind_of_image_twitter_background,
                 kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-                kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-                kind_of_image_facebook_background=kind_of_image_facebook_background,
-                kind_of_image_maplight=kind_of_image_maplight,
+                kind_of_image_twitter_profile=kind_of_image_twitter_profile,
                 kind_of_image_vote_smart=kind_of_image_vote_smart,
-                kind_of_image_issue=kind_of_image_issue,
-                kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
-                kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+                kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
                 kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-                kind_of_image_other_source=kind_of_image_other_source,
-                kind_of_image_original=kind_of_image_original,
-                kind_of_image_large=kind_of_image_large,
-                kind_of_image_medium=kind_of_image_medium,
-                kind_of_image_tiny=kind_of_image_tiny,
                 is_active_version=is_active_version)
             success = True
             we_vote_image_found = True
