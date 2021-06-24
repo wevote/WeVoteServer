@@ -46,39 +46,40 @@ def voter_retrieve_doc_template_values(url_root):
                    '  "status": string (description of what happened),\n' \
                    '  "success": boolean (True as long as no db errors),\n' \
                    '  "date_joined": string,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '  "voter_created": boolean,\n' \
-                   '  "voter_found": boolean,\n' \
-                   '  "we_vote_id": string,\n' \
-                   '  "facebook_id": integer,\n' \
                    '  "email": string,\n' \
                    '  "facebook_email": string,\n' \
+                   '  "facebook_id": integer,\n' \
                    '  "facebook_profile_image_url_https": string,\n' \
-                   '  "full_name": string,\n' \
                    '  "first_name": string,\n' \
-                   '  "last_name": string,\n' \
-                   '  "twitter_screen_name": string,\n' \
-                   '  "is_signed_in": boolean,\n' \
+                   '  "full_name": string,\n' \
+                   '  "has_data_to_preserve": boolean,\n' \
+                   '  "has_email_with_verified_ownership": boolean,\n' \
+                   '  "has_valid_email": boolean,\n' \
+                   '  "interface_status_flags": integer,\n' \
                    '  "is_admin": boolean,\n' \
                    '  "is_analytics_admin": boolean,\n' \
                    '  "is_partner_organization": boolean,\n' \
                    '  "is_political_data_manager": boolean,\n' \
                    '  "is_political_data_viewer": boolean,\n' \
+                   '  "is_signed_in": boolean,\n' \
                    '  "is_verified_volunteer": boolean,\n' \
+                   '  "last_name": string,\n' \
+                   '  "linked_organization_we_vote_id": string,\n' \
+                   '  "notification_settings_flags": integer,\n' \
                    '  "signed_in_facebook": boolean,\n' \
                    '  "signed_in_google": boolean,\n' \
                    '  "signed_in_twitter": boolean,\n' \
                    '  "signed_in_with_email": boolean,\n' \
                    '  "signed_in_with_sms_phone_number": boolean,\n' \
-                   '  "has_valid_email": boolean,\n' \
-                   '  "has_data_to_preserve": boolean,\n' \
-                   '  "has_email_with_verified_ownership": boolean,\n' \
-                   '  "linked_organization_we_vote_id": string,\n' \
+                   '  "text_for_map_search": string,\n' \
+                   '  "twitter_screen_name": string,\n' \
+                   '  "voter_created": boolean,\n' \
+                   '  "voter_device_id": string (88 characters long),\n' \
+                   '  "voter_found": boolean,\n' \
                    '  "voter_photo_url_large": string,\n' \
                    '  "voter_photo_url_medium": string,\n' \
                    '  "voter_photo_url_tiny": string,\n' \
-                   '  "interface_status_flags": integer,\n' \
-                   '  "notification_settings_flags": integer,\n' \
+                   '  "we_vote_id": string,\n' \
                    '}'
 
     template_values = {
