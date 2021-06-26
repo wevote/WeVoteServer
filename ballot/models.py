@@ -2433,7 +2433,7 @@ class BallotReturnedManager(models.Manager):
                 ballot = ballot_returned_query.first()
             except Exception as e:
                 ballot = None
-                status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_LOCATION_NONE: " + str(e) + ' '
             # ballot_returned_list = list(ballot_returned_query)
             # if len(ballot_returned_list):
             #     ballot = ballot_returned_list[0]
@@ -2473,7 +2473,7 @@ class BallotReturnedManager(models.Manager):
                     ballot = ballot_returned_query.first()
                 except Exception as e:
                     ballot = None
-                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID: " + str(e) + ' '
                 # ballot_returned_list = list(ballot_returned_query)
                 # if len(ballot_returned_list):
                 #     ballot = ballot_returned_list[0]
@@ -2490,7 +2490,7 @@ class BallotReturnedManager(models.Manager):
                         ballot = ballot_returned_query.first()
                     except Exception as e:
                         ballot = None
-                        status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                        status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID: " + str(e) + ' '
                     # ballot_returned_list = list(ballot_returned_query)
                     # if len(ballot_returned_list):
                     #     ballot = ballot_returned_list[0]
@@ -2515,7 +2515,7 @@ class BallotReturnedManager(models.Manager):
                                     ballot = ballot_returned_query.first()
                                 except Exception as e:
                                     ballot = None
-                                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_BALLOT_NONE_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID: " + str(e) + ' '
                                 # ballot_returned_list = list(ballot_returned_query)
                                 # if len(ballot_returned_list):
                                 #     ballot = ballot_returned_list[0]
@@ -2533,7 +2533,7 @@ class BallotReturnedManager(models.Manager):
                         ballot = ballot_returned_query.first()
                     except Exception as e:
                         ballot = None
-                        status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                        status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_PAST_GOOGLE_CIVIC_ID: " + str(e) + ' '
                     # ballot_returned_list = list(ballot_returned_query)
                     # if len(ballot_returned_list):
                     #     ballot = ballot_returned_list[0]
@@ -2574,7 +2574,7 @@ class BallotReturnedManager(models.Manager):
                     ballot_returned = ballot_returned_query.first()
                 except Exception as e:
                     ballot_returned = None
-                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED: " + str(e) + ' '
+                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_BALLOT_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID: " + str(e) + ' '
                 # ballot_returned_list = list(ballot_returned_query)
                 # if len(ballot_returned_list):
                 #     ballot_returned = ballot_returned_list[0]
