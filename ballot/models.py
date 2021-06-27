@@ -2465,7 +2465,7 @@ class BallotReturnedManager(models.Manager):
                     distance=ExpressionWrapper(((F('latitude') - location.latitude) ** 2 +
                               (F('longitude') - location.longitude) ** 2), output_field=FloatField()))
             except Exception as e:
-                status += "EXCEPTION_IN_ANNOTATE_CALCULATION:" + str(e) + ' '
+                status += "EXCEPTION_IN_ANNOTATE_CALCULATION1-" + str(e) + ' '
 
             ballot_returned_query = ballot_returned_query.order_by('distance')
 
@@ -2564,10 +2564,13 @@ class BallotReturnedManager(models.Manager):
                 ballot_returned_query = ballot_returned_query.exclude(
                     Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
 
-                # TODO: Update to a more modern approach? I think this will be deprecated in > Django 1.9
-                ballot_returned_query = ballot_returned_query.annotate(
-                    distance=(F('latitude') - location.latitude) ** 2 +
-                             (F('longitude') - location.longitude) ** 2)
+                try:
+                    ballot_returned_query = ballot_returned_query.annotate(
+                        distance=ExpressionWrapper(((F('latitude') - location.latitude) ** 2 +
+                                                    (F('longitude') - location.longitude) ** 2),
+                                                   output_field=FloatField()))
+                except Exception as e:
+                    status += "EXCEPTION_IN_ANNOTATE_CALCULATION2-" + str(e) + ' '
                 ballot_returned_query = ballot_returned_query.order_by('distance')
 
                 status += "SEARCHING_BY_GOOGLE_CIVIC_ID-ATTEMPT2 "
