@@ -6,7 +6,7 @@ from candidate.models import CandidateCampaign
 from config.base import get_environment_variable
 from datetime import date, datetime
 from django.db import models
-from django.db.models import F, Q, Count
+from django.db.models import F, Q, Count, FloatField, ExpressionWrapper
 from election.models import ElectionManager
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from geopy.geocoders import get_geocoder_for_service
@@ -2460,10 +2460,13 @@ class BallotReturnedManager(models.Manager):
                 # This search for normalized_state is NOT redundant because some elections are in many states
                 ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
 
-            # TODO: Update to a more modern approach? I think this will be deprecated in > Django 1.9
-            ballot_returned_query = ballot_returned_query.annotate(
-                distance=(F('latitude') - location.latitude) ** 2 +
-                         (F('longitude') - location.longitude) ** 2)
+            try:
+                ballot_returned_query = ballot_returned_query.annotate(
+                    distance=ExpressionWrapper(((F('latitude') - location.latitude) ** 2 +
+                              (F('longitude') - location.longitude) ** 2), output_field=FloatField()))
+            except Exception as e:
+                status += "EXCEPTION_IN_ANNOTATE_CALCULATION1-" + str(e) + ' '
+
             ballot_returned_query = ballot_returned_query.order_by('distance')
 
             if positive_value_exists(google_civic_election_id):
@@ -2561,10 +2564,13 @@ class BallotReturnedManager(models.Manager):
                 ballot_returned_query = ballot_returned_query.exclude(
                     Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
 
-                # TODO: Update to a more modern approach? I think this will be deprecated in > Django 1.9
-                ballot_returned_query = ballot_returned_query.annotate(
-                    distance=(F('latitude') - location.latitude) ** 2 +
-                             (F('longitude') - location.longitude) ** 2)
+                try:
+                    ballot_returned_query = ballot_returned_query.annotate(
+                        distance=ExpressionWrapper(((F('latitude') - location.latitude) ** 2 +
+                                                    (F('longitude') - location.longitude) ** 2),
+                                                   output_field=FloatField()))
+                except Exception as e:
+                    status += "EXCEPTION_IN_ANNOTATE_CALCULATION2-" + str(e) + ' '
                 ballot_returned_query = ballot_returned_query.order_by('distance')
 
                 status += "SEARCHING_BY_GOOGLE_CIVIC_ID-ATTEMPT2 "
