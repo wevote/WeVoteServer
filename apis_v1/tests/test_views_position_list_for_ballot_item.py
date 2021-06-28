@@ -160,3 +160,79 @@ class WeVoteAPIsV1TestsPositionListForBallotItem(TestCase):
         self.assertEqual(len(json_data["position_list"]),
                          len(expected["position_list"]),
                          f"Expected failed response to return empty position_list")
+
+    def test_retrieve_valid_but_wrong_kind_of_ballot_item(self):
+        """
+        Tests when parameters sent are valid/exist but mismatched
+        eg.  ballot_item_id or ballot_item_we_vote_id belongs to "MEASURE" but kind_of_ballot_item: "CANDIDATE"
+        """
+        # Stub Measure
+        measure = ContestMeasure(
+            google_civic_election_id=1,
+            measure_title="A Measure",
+            district_id=234,
+            district_name='CityVille',
+            state_code='CA')
+        measure.save()
+
+        # passing in ballot_item_we_vote_id instead of ballot_item_id because
+        # different objects from different tables may return ballot_item_id
+        parameters = {
+            "kind_of_ballot_item": "CANDIDATE",
+            "ballot_item_we_vote_id": measure.we_vote_id
+        }
+
+        response = self.client.get(self.position_list_for_ballot_item_url, parameters)
+        json_data = json.loads(response.content.decode())
+
+        # Note: this status has no trailing whitespace
+        expected = {
+            "status": "POSITION_LIST_RETRIEVE_BALLOT_ITEM_NOT_FOUND",
+            "success": False,
+            "count": 0,
+            "kind_of_ballot_item": "UNKNOWN",
+            "ballot_item_id": 0,
+            "ballot_item_we_vote_id": measure.we_vote_id,
+            "position_list": []
+        }
+
+        # status key should be in response
+        self.assertEqual('status' in json_data, True,
+                        "no 'status' returned in json response")
+
+        # "status": "POSITION_LIST_RETRIEVE_BALLOT_ITEM_NOT_FOUND",
+        self.assertEqual(json_data['status'], expected['status'],
+                         f"Expected: {expected['status']}\n \
+                         Received: {json_data['status']} ")
+
+        # "success": False,
+        self.assertEqual(json_data['success'], expected['success'],
+                        f"Expected: {expected['success']}\n \
+                        Received: {json_data['success']} ")
+
+        # "count": 0,
+        self.assertEqual(json_data["count"], expected['count'],
+                         f"Expected: {expected['count']}\n \
+                         Received: {json_data['count']} ")
+
+        # "kind_of_ballot_item": "UNKNOWN",
+        self.assertEqual(json_data["kind_of_ballot_item"],
+                         expected['kind_of_ballot_item'],
+                         f"Expected: {expected['kind_of_ballot_item']}\n \
+                        Received: {json_data['kind_of_ballot_item']} ")
+
+        # "ballot_item_id": 0,
+        self.assertEqual(json_data["ballot_item_id"],
+                         expected['ballot_item_id'],
+                         f"Expected: {expected['ballot_item_id']}\n \
+                        Received: {json_data['ballot_item_id']} ")
+
+        # "ballot_item_we_vote_id" returns original request parameter
+        self.assertEqual(json_data["ballot_item_we_vote_id"],
+                         expected['ballot_item_we_vote_id'],
+                         f"Expected: {expected['ballot_item_we_vote_id']} \n \ Received: {json_data['ballot_item_we_vote_id']} ")
+                        
+        # "position_list": []
+        self.assertEqual(len(json_data["position_list"]),
+                         len(expected["position_list"]),
+                         f"Expected failed response to return empty position_list")
