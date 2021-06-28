@@ -231,8 +231,106 @@ class WeVoteAPIsV1TestsPositionListForBallotItem(TestCase):
         self.assertEqual(json_data["ballot_item_we_vote_id"],
                          expected['ballot_item_we_vote_id'],
                          f"Expected: {expected['ballot_item_we_vote_id']} \n \ Received: {json_data['ballot_item_we_vote_id']} ")
-                        
+
         # "position_list": []
         self.assertEqual(len(json_data["position_list"]),
                          len(expected["position_list"]),
                          f"Expected failed response to return empty position_list")
+
+    def test_retrieve_valid_parameters_for_measure(self):
+        """
+        Tests response with valid parameters for valid ballot_item_id & valid kind_of_ballot_item: "MEASURE"
+        """
+
+        # Stub Measure
+        measure = ContestMeasure(
+            google_civic_election_id=1,
+            measure_title="Mock Measure",
+            district_id=123,
+            district_name='LandTown',
+            state_code='CA')
+        measure.save()
+
+        # Stub Position
+        position = PositionEntered(
+            date_entered=timezone.now(),
+            candidate_campaign_id=0,
+            candidate_campaign_we_vote_id=0,
+            contest_measure_id=measure.id,
+            contest_measure_we_vote_id=measure.we_vote_id,
+            organization_id=123,
+            organization_we_vote_id="wvy9org3",
+            stance="SUPPORT",
+            speaker_display_name="REAL DUDE",
+        )
+        position.save()
+
+        # make request
+        parameters = {
+            "kind_of_ballot_item": "MEASURE",
+            "ballot_item_id": measure.id,
+            "ballot_item_we_vote_id": measure.we_vote_id,
+        }
+
+        response = self.client.get(self.position_list_for_ballot_item_url, parameters)
+        json_data = json.loads(response.content.decode())
+
+        # print(json.dumps(json_data, indent=2))
+
+        expected = {
+            "status": "POSITION_LIST_FOR_BALLOT_ITEM KIND_OF_BALLOT_ITEM_MEASURE ",
+            "success": True,
+            "count": 1,
+            "kind_of_ballot_item": "MEASURE",
+            "ballot_item_id": measure.id,
+            "ballot_item_we_vote_id": measure.we_vote_id,
+            "position_list": [
+                {
+                    "ballot_item_display_name": measure.measure_title,
+                    "speaker_id": position.id,
+                    "speaker_display_name": position.speaker_display_name
+                }
+            ],
+        }
+
+        # status key should be in response
+        self.assertEqual('status' in json_data, True,
+                        "no 'status' returned in json response")
+
+        # status: "POSITION_LIST_FOR_BALLOT_ITEM KIND_OF_BALLOT_ITEM_MEASURE "
+        # this status has trailing whitespace
+        self.assertEqual(json_data['status'], expected['status'],
+                         f"Expected: {expected['status']}\n \
+                         Received: {json_data['status']} ")
+
+        # "success": True,
+        self.assertEqual(json_data['success'], expected['success'],
+                        f"Expected: {expected['success']}\n \
+                        Received: {json_data['success']} ")
+
+        # "count": 1,
+        self.assertEqual(json_data["count"], expected['count'],
+                         f"Expected: {expected['count']}\n \
+                         Received: {json_data['count']} ")
+
+        # "kind_of_ballot_item": "MEASURE",
+        self.assertEqual(json_data["kind_of_ballot_item"],
+                         expected['kind_of_ballot_item'],
+                         f"Expected: {expected['kind_of_ballot_item']}\n \
+                        Received: {json_data['kind_of_ballot_item']} ")
+
+        # "ballot_item_id":
+        self.assertEqual(json_data["ballot_item_id"],
+                         expected['ballot_item_id'],
+                         f"Expected: {expected['ballot_item_id']}\n \
+                        Received: {json_data['ballot_item_id']} ")
+
+        # "ballot_item_we_vote_id": measure.we_vote_id
+        self.assertEqual(json_data["ballot_item_we_vote_id"],
+                         expected['ballot_item_we_vote_id'],
+                         f"Expected: {expected['ballot_item_we_vote_id']} \n \ Received: {json_data['ballot_item_we_vote_id']} ")
+
+        # len(position_list) == 1
+        self.assertEqual(len(json_data["position_list"]),
+                         len(expected['position_list']),
+                         f"Expected: len({expected['position_list']})\n \ Received: {json_data['position_list']} ")
