@@ -19,7 +19,7 @@ from email_outbound.models import EmailAddress, EmailManager
 from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
 from follow.controllers import voter_issue_follow_for_api
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
-from image.controllers import TWITTER, FACEBOOK, cache_master_and_resized_image
+from image.controllers import TWITTER, FACEBOOK, cache_master_and_resized_image, create_resized_images
 from import_export_ballotpedia.controllers import voter_ballot_items_retrieve_from_ballotpedia_for_api_v4
 from import_export_facebook.controllers import voter_facebook_sign_in_retrieve_for_api, \
     voter_facebook_sign_in_save_for_api
@@ -34,10 +34,12 @@ from sms.models import SMSManager
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
     voter_stop_supporting_save, voter_supporting_save_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
-    voter_merge_two_accounts_action, voter_photo_save_for_api, voter_retrieve_for_api, voter_sign_out_for_api, \
-    voter_split_into_two_accounts_for_api
-from voter.models import BALLOT_ADDRESS, fetch_voter_we_vote_id_from_voter_device_link, VoterAddress, \
-    VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager, Voter, voter_has_authority
+    voter_merge_two_accounts_action, voter_photo_save_for_api, voter_retrieve_for_api, \
+    voter_save_photo_from_file_reader, voter_sign_out_for_api, voter_split_into_two_accounts_for_api
+from voter.models import BALLOT_ADDRESS, fetch_voter_we_vote_id_from_voter_device_link, \
+    PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_UPLOADED, \
+    VoterAddress, VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager, Voter, \
+    voter_has_authority
 
 from voter_guide.controllers import voter_follow_all_organizations_followed_by_organization_for_api
 import wevote_functions.admin
@@ -1906,73 +1908,143 @@ def voter_twitter_save_to_current_account_view(request):  # voterTwitterSaveToCu
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def return_flag_value(request, variable_name, is_post=False):
+    try:
+        if is_post:
+            value = request.POST[variable_name]
+        else:
+            value = request.GET[variable_name]
+        value = value.strip()
+        value = convert_to_int(value)
+    except KeyError:
+        value = False
+    return value
+
+
+def return_string_value_and_changed_boolean_from_get(request, variable_name):
+    value = request.GET.get(variable_name, False)
+    value_changed = False
+    if value is not False:
+        value = value.strip()
+        if value.lower() == 'false':
+            value = False
+            value_changed = False
+        else:
+            value_changed = True
+    return value, value_changed
+
+
+@csrf_exempt
 def voter_update_view(request):  # voterUpdate
     """
     Update profile-related information for this voter
     :param request:
     :return:
     """
+    from django.core.exceptions import RequestDataTooBig
 
     status = ""
     voter_updated = False
     voter_name_needs_to_be_updated_in_activity = False
 
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-
-    # If we have an incoming GET value for a variable, use it. If we don't pass "False" into voter_update_for_api
-    # as a signal to not change the variable. (To set variables to False, pass in the string "False".)
     try:
-        facebook_email = request.GET['facebook_email']
-        facebook_email = facebook_email.strip()
-        if facebook_email.lower() == 'false':
-            facebook_email = False
-    except KeyError:
-        facebook_email = False
+        voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    except RequestDataTooBig:
+        status += "RequestDataTooBig"
+        json_data = {
+            'status': status,
+            'success': False,
+            'voter_device_id': False,
+            'facebook_email': False,
+            'facebook_profile_image_url_https': False,
+            'first_name': '',
+            'middle_name': '',
+            'last_name': '',
+            'twitter_profile_image_url_https': '',
+            'we_vote_hosted_profile_image_url_large': '',
+            'we_vote_hosted_profile_image_url_medium': '',
+            'we_vote_hosted_profile_image_url_tiny': '',
+            'voter_updated': False,
+            'interface_status_flags': 0,
+            'flag_integer_to_set': 0,
+            'flag_integer_to_unset': 0,
+            'notification_settings_flags': 0,
+            'notification_flag_integer_to_set': 0,
+            'notification_flag_integer_to_unset': 0,
+        }
 
-    try:
-        facebook_profile_image_url_https = request.GET['facebook_profile_image_url_https']
-        facebook_profile_image_url_https = facebook_profile_image_url_https.strip()
-        if facebook_profile_image_url_https.lower() == 'false':
-            facebook_profile_image_url_https = False
-    except KeyError:
-        facebook_profile_image_url_https = False
+        response = HttpResponse(json.dumps(json_data), content_type='application/json')
+        return response
 
-    first_name = request.GET.get('first_name', False)
-    if first_name is not False:
-        first_name = first_name.strip()
-        if first_name.lower() == 'false':
-            first_name = False
+    is_post = True if request.method == 'POST' else False
 
-    middle_name = request.GET.get('middle_name', False)
-    if middle_name is not False:
-        middle_name = middle_name.strip()
-        if middle_name.lower() == 'false':
-            middle_name = False
+    if is_post:
+        facebook_email_changed = positive_value_exists(request.POST.get('facebook_email_changed', False))
+        facebook_email = request.POST.get('facebook_email', '') if facebook_email_changed else False
+        facebook_profile_image_url_https_changed = \
+            positive_value_exists(request.POST.get('facebook_profile_image_url_https_changed', False))
+        facebook_profile_image_url_https = request.POST.get('facebook_profile_image_url_https', '') \
+            if facebook_profile_image_url_https_changed else False
+        first_name_changed = positive_value_exists(request.POST.get('first_name_changed', False))
+        first_name = request.POST.get('first_name', '') if first_name_changed else False
+        middle_name_changed = positive_value_exists(request.POST.get('middle_name_changed', False))
+        middle_name = request.POST.get('middle_name', '') if middle_name_changed else False
+        last_name_changed = positive_value_exists(request.POST.get('last_name_changed', False))
+        last_name = request.POST.get('last_name', '') if last_name_changed else False
+        full_name_changed = positive_value_exists(request.POST.get('full_name_changed', False))
+        full_name = request.POST.get('full_name', '') if full_name_changed else False
+        name_save_only_if_no_existing_names = request.POST.get('name_save_only_if_no_existing_names', False)
+        external_voter_id = request.POST.get('external_voter_id', False)
+        membership_organization_we_vote_id = request.POST.get('membership_organization_we_vote_id', False)
+        twitter_profile_image_url_https_changed = \
+            positive_value_exists(request.POST.get('twitter_profile_image_url_https_changed', False))
+        twitter_profile_image_url_https = request.POST.get('twitter_profile_image_url_https', '') \
+            if twitter_profile_image_url_https_changed else False
+        interface_status_flags = return_flag_value(request, 'interface_status_flags', is_post=True)
+        flag_integer_to_set = return_flag_value(request, 'flag_integer_to_set', is_post=True)
+        flag_integer_to_unset = return_flag_value(request, 'flag_integer_to_unset', is_post=True)
+        notification_settings_flags = return_flag_value(request, 'notification_settings_flags', is_post=True)
+        notification_flag_integer_to_set = return_flag_value(request, 'notification_flag_integer_to_set', is_post=True)
+        notification_flag_integer_to_unset = \
+            return_flag_value(request, 'notification_flag_integer_to_unset', is_post=True)
+        try:
+            send_journal_list = request.POST['send_journal_list']
+        except KeyError:
+            send_journal_list = False
+        voter_photo_from_file_reader = request.POST.get('voter_photo_from_file_reader', '')
+        voter_photo_changed = positive_value_exists(request.POST.get('voter_photo_changed', False))
+        profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
+        profile_image_type_currently_active_changed = \
+            positive_value_exists(request.POST.get('profile_image_type_currently_active_changed', False))
+    else:
+        facebook_email, facebook_email_changed = \
+            return_string_value_and_changed_boolean_from_get(request, 'facebook_email')
+        facebook_profile_image_url_https, facebook_profile_image_url_https_changed = \
+            return_string_value_and_changed_boolean_from_get(request, 'facebook_profile_image_url_https')
+        first_name, first_name_changed = return_string_value_and_changed_boolean_from_get(request, 'first_name')
+        middle_name, middle_name_changed = return_string_value_and_changed_boolean_from_get(request, 'middle_name')
+        last_name, last_name_changed = return_string_value_and_changed_boolean_from_get(request, 'last_name')
+        full_name, full_name_changed = return_string_value_and_changed_boolean_from_get(request, 'full_name')
+        name_save_only_if_no_existing_names = request.GET.get('name_save_only_if_no_existing_names', False)
+        external_voter_id = request.GET.get('external_voter_id', False)
+        membership_organization_we_vote_id = request.GET.get('membership_organization_we_vote_id', False)
+        twitter_profile_image_url_https, twitter_profile_image_url_https_changed = \
+            return_string_value_and_changed_boolean_from_get(request, 'twitter_profile_image_url_https')
+        interface_status_flags = return_flag_value(request, 'interface_status_flags')
+        flag_integer_to_set = return_flag_value(request, 'flag_integer_to_set')
+        flag_integer_to_unset = return_flag_value(request, 'flag_integer_to_unset')
+        notification_settings_flags = return_flag_value(request, 'notification_settings_flags')
+        notification_flag_integer_to_set = return_flag_value(request, 'notification_flag_integer_to_set')
+        notification_flag_integer_to_unset = return_flag_value(request, 'notification_flag_integer_to_unset')
+        try:
+            send_journal_list = request.GET['send_journal_list']
+        except KeyError:
+            send_journal_list = False
+        voter_photo_from_file_reader = ''
+        voter_photo_changed = False
+        profile_image_type_currently_active = False
+        profile_image_type_currently_active_changed = False
 
-    last_name = request.GET.get('last_name', False)
-    if last_name is not False:
-        last_name = last_name.strip()
-        if last_name.lower() == 'false':
-            last_name = False
-
-    try:
-        full_name = request.GET['full_name']
-        full_name = full_name.strip()
-        if full_name.lower() == 'false':
-            full_name = False
-    except KeyError:
-        full_name = False
-
-    try:
-        name_save_only_if_no_existing_names = request.GET['name_save_only_if_no_existing_names']
-        name_save_only_if_no_existing_names = name_save_only_if_no_existing_names.strip()
-        if name_save_only_if_no_existing_names.lower() == 'false':
-            name_save_only_if_no_existing_names = False
-    except KeyError:
-        name_save_only_if_no_existing_names = False
-
-    external_voter_id = request.GET.get('external_voter_id', False)
-    membership_organization_we_vote_id = request.GET.get('membership_organization_we_vote_id', False)
     # Voter has visited a private-labeled We Vote site, and we want to store that voter's id from another database
     if external_voter_id is not False:
         external_voter_id = external_voter_id.strip()
@@ -1983,61 +2055,6 @@ def voter_update_view(request):  # voterUpdate
         membership_organization_we_vote_id = membership_organization_we_vote_id.strip()
         if membership_organization_we_vote_id.lower() == 'false':
             membership_organization_we_vote_id = False
-
-    try:
-        twitter_profile_image_url_https = request.GET['twitter_profile_image_url_https']
-        twitter_profile_image_url_https = twitter_profile_image_url_https.strip()
-        if twitter_profile_image_url_https.lower() == 'false':
-            twitter_profile_image_url_https = False
-    except KeyError:
-        twitter_profile_image_url_https = False
-
-    try:
-        interface_status_flags = request.GET['interface_status_flags']
-        interface_status_flags = interface_status_flags.strip()
-        interface_status_flags = convert_to_int(interface_status_flags)
-    except KeyError:
-        interface_status_flags = False
-
-    try:
-        flag_integer_to_set = request.GET['flag_integer_to_set']
-        flag_integer_to_set = flag_integer_to_set.strip()
-        flag_integer_to_set = convert_to_int(flag_integer_to_set)
-    except KeyError:
-        flag_integer_to_set = False
-
-    try:
-        flag_integer_to_unset = request.GET['flag_integer_to_unset']
-        flag_integer_to_unset = flag_integer_to_unset.strip()
-        flag_integer_to_unset = convert_to_int(flag_integer_to_unset)
-    except KeyError:
-        flag_integer_to_unset = False
-
-    try:
-        notification_settings_flags = request.GET['notification_settings_flags']
-        notification_settings_flags = notification_settings_flags.strip()
-        notification_settings_flags = convert_to_int(notification_settings_flags)
-    except KeyError:
-        notification_settings_flags = False
-
-    try:
-        notification_flag_integer_to_set = request.GET['notification_flag_integer_to_set']
-        notification_flag_integer_to_set = notification_flag_integer_to_set.strip()
-        notification_flag_integer_to_set = convert_to_int(notification_flag_integer_to_set)
-    except KeyError:
-        notification_flag_integer_to_set = False
-
-    try:
-        notification_flag_integer_to_unset = request.GET['notification_flag_integer_to_unset']
-        notification_flag_integer_to_unset = notification_flag_integer_to_unset.strip()
-        notification_flag_integer_to_unset = convert_to_int(notification_flag_integer_to_unset)
-    except KeyError:
-        notification_flag_integer_to_unset = False
-
-    try:
-        send_journal_list = request.GET['send_journal_list']
-    except KeyError:
-        send_journal_list = False
 
     device_id_results = is_voter_device_id_valid(voter_device_id)
     if not device_id_results['success']:
@@ -2079,6 +2096,8 @@ def voter_update_view(request):  # voterUpdate
         or notification_settings_flags is not False \
         or notification_flag_integer_to_unset is not False \
         or notification_flag_integer_to_set is not False \
+        or voter_photo_changed is not False \
+        or profile_image_type_currently_active_changed is not False \
         or send_journal_list \
         else False
     external_voter_id_to_be_saved = True \
@@ -2114,10 +2133,10 @@ def voter_update_view(request):  # voterUpdate
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
 
+    # At this point, we have a valid voter
     voter = voter_results['voter']
     voter_we_vote_id = voter.we_vote_id
     voter_full_name_at_start = voter.get_full_name(real_name_only=True)
-    # At this point, we have a valid voter
 
     if at_least_one_variable_has_changed or external_voter_id_to_be_saved:
         pass
@@ -2125,33 +2144,37 @@ def voter_update_view(request):  # voterUpdate
         # If here, we want to return the latest data from the voter object
         status += "MISSING_VARIABLE-NO_VARIABLES_PASSED_IN_TO_CHANGE "
         json_data = {
-                'status':                           status,
-                'success':                          True,
-                'voter_device_id':                  voter_device_id,
-                'facebook_email':                   voter.facebook_email,
-                'facebook_profile_image_url_https': voter.facebook_profile_image_url_https,
-                'first_name':                       voter.first_name,
-                'middle_name':                      voter.middle_name,
-                'last_name':                        voter.last_name,
-                'twitter_profile_image_url_https':  voter.twitter_profile_image_url_https,
+                'status':                                   status,
+                'success':                                  True,
+                'voter_device_id':                          voter_device_id,
+                'facebook_email':                           voter.facebook_email,
+                'facebook_profile_image_url_https':         voter.facebook_profile_image_url_https,
+                'first_name':                               voter.first_name,
+                'middle_name':                              voter.middle_name,
+                'last_name':                                voter.last_name,
+                'twitter_profile_image_url_https':          voter.twitter_profile_image_url_https,
                 'we_vote_hosted_profile_image_url_large':   voter.we_vote_hosted_profile_image_url_large,
                 'we_vote_hosted_profile_image_url_medium':  voter.we_vote_hosted_profile_image_url_medium,
                 'we_vote_hosted_profile_image_url_tiny':    voter.we_vote_hosted_profile_image_url_tiny,
-                'voter_updated':                    voter_updated,
-                'interface_status_flags':           voter.interface_status_flags,
-                'flag_integer_to_set':              flag_integer_to_set,
-                'flag_integer_to_unset':            flag_integer_to_unset,
-                'notification_settings_flags':      voter.notification_settings_flags,
-                'notification_flag_integer_to_set': notification_flag_integer_to_set,
-                'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
+                'voter_updated':                            voter_updated,
+                'interface_status_flags':                   voter.interface_status_flags,
+                'flag_integer_to_set':                      flag_integer_to_set,
+                'flag_integer_to_unset':                    flag_integer_to_unset,
+                'notification_settings_flags':              voter.notification_settings_flags,
+                'notification_flag_integer_to_set':         notification_flag_integer_to_set,
+                'notification_flag_integer_to_unset':       notification_flag_integer_to_unset,
             }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
 
-    we_vote_hosted_profile_image_url_large = None
-    we_vote_hosted_profile_image_url_medium = None
-    we_vote_hosted_profile_image_url_tiny = None
+    # These variables will contain copy of default profile photo
+    we_vote_hosted_profile_image_url_large = False
+    we_vote_hosted_profile_image_url_medium = False
+    we_vote_hosted_profile_image_url_tiny = False
 
+    we_vote_hosted_profile_twitter_image_url_large = False
+    we_vote_hosted_profile_twitter_image_url_medium = False
+    we_vote_hosted_profile_twitter_image_url_tiny = False
     if twitter_profile_image_url_https:
         # Cache original and resized images
         # TODO: Replace voter.twitter_id with value from twitter link to voter
@@ -2162,12 +2185,15 @@ def voter_update_view(request):  # voterUpdate
             twitter_profile_image_url_https=twitter_profile_image_url_https,
             image_source=TWITTER)
         cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
-        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-        we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+        we_vote_hosted_profile_twitter_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+        we_vote_hosted_profile_twitter_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+        we_vote_hosted_profile_twitter_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
         if positive_value_exists(cached_twitter_profile_image_url_https):
             twitter_profile_image_url_https = cached_twitter_profile_image_url_https
 
+    we_vote_hosted_profile_facebook_image_url_large = False
+    we_vote_hosted_profile_facebook_image_url_medium = False
+    we_vote_hosted_profile_facebook_image_url_tiny = False
     if facebook_profile_image_url_https:
         # Cache original and resized images
         # TODO: Replace voter.facebook_id with value from facebook link to voter
@@ -2177,11 +2203,83 @@ def voter_update_view(request):  # voterUpdate
             facebook_profile_image_url_https=facebook_profile_image_url_https,
             image_source=FACEBOOK)
         cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
-        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-        we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+        we_vote_hosted_profile_facebook_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+        we_vote_hosted_profile_facebook_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+        we_vote_hosted_profile_facebook_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
         if positive_value_exists(cached_facebook_profile_image_url_https):
             facebook_profile_image_url_https = cached_facebook_profile_image_url_https
+
+    #
+    # Save voter_photo_from_file_reader and get back we_vote_hosted_voter_photo_original_url
+    we_vote_hosted_profile_uploaded_image_url_large = False
+    we_vote_hosted_profile_uploaded_image_url_medium = False
+    we_vote_hosted_profile_uploaded_image_url_tiny = False
+    if voter_photo_changed and voter_photo_from_file_reader:
+        photo_results = voter_save_photo_from_file_reader(
+            voter_we_vote_id=voter_we_vote_id,
+            voter_photo_from_file_reader=voter_photo_from_file_reader)
+        if photo_results['we_vote_hosted_voter_photo_original_url']:
+            we_vote_hosted_voter_photo_original_url = photo_results['we_vote_hosted_voter_photo_original_url']
+            # Now we want to resize to a large version
+            create_resized_image_results = create_resized_images(
+                voter_we_vote_id=voter_we_vote_id,
+                voter_uploaded_profile_image_url_https=we_vote_hosted_voter_photo_original_url)
+            we_vote_hosted_profile_uploaded_image_url_large = \
+                create_resized_image_results['cached_resized_image_url_large']
+            we_vote_hosted_profile_uploaded_image_url_medium = \
+                create_resized_image_results['cached_resized_image_url_medium']
+            we_vote_hosted_profile_uploaded_image_url_tiny = \
+                create_resized_image_results['cached_resized_image_url_tiny']
+    elif voter_photo_changed:
+        # If here we are deleting an existing photo
+        we_vote_hosted_profile_uploaded_image_url_large = ''
+        we_vote_hosted_profile_uploaded_image_url_medium = ''
+        we_vote_hosted_profile_uploaded_image_url_tiny = ''
+        we_vote_hosted_profile_image_url_large = ''
+        we_vote_hosted_profile_image_url_medium = ''
+        we_vote_hosted_profile_image_url_tiny = ''
+        voter.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+
+    # We need profile_image_type_currently_active setting
+    if profile_image_type_currently_active_changed:
+        # In this case it is coming in from API call and does not need to be calculated
+        pass
+    else:
+        profile_image_type_currently_active = voter.profile_image_type_currently_active
+        if profile_image_type_currently_active not in \
+                [PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UPLOADED]:
+            # Do we need to calculate a value to store?
+            continue_analyzing_profile_image_type_currently_active = True
+            if voter_photo_changed:
+                if we_vote_hosted_profile_uploaded_image_url_large and \
+                        we_vote_hosted_profile_uploaded_image_url_large != '':
+                    profile_image_type_currently_active_changed = True
+                    profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UPLOADED
+                    we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_uploaded_image_url_large
+                    we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_uploaded_image_url_medium
+                    we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_uploaded_image_url_tiny
+                    continue_analyzing_profile_image_type_currently_active = False
+            if continue_analyzing_profile_image_type_currently_active:
+                if we_vote_hosted_profile_facebook_image_url_large:
+                    profile_image_type_currently_active_changed = True
+                    profile_image_type_currently_active = PROFILE_IMAGE_TYPE_FACEBOOK
+                    we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_facebook_image_url_large
+                    we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_facebook_image_url_medium
+                    we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_facebook_image_url_tiny
+                    continue_analyzing_profile_image_type_currently_active = False
+            if continue_analyzing_profile_image_type_currently_active:
+                if we_vote_hosted_profile_twitter_image_url_large:
+                    profile_image_type_currently_active_changed = True
+                    profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
+                    we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_twitter_image_url_large
+                    we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_twitter_image_url_medium
+                    we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_twitter_image_url_tiny
+                    continue_analyzing_profile_image_type_currently_active = False
+
+    at_least_one_variable_has_changed = True if \
+        at_least_one_variable_has_changed \
+        or profile_image_type_currently_active_changed \
+        else False
 
     if positive_value_exists(voter.first_name) or positive_value_exists(voter.last_name):
         saved_first_or_last_name_exists = True
@@ -2211,14 +2309,33 @@ def voter_update_view(request):  # voterUpdate
     linked_organization_we_vote_id = ''
     if at_least_one_variable_has_changed:
         results = voter_manager.update_voter_by_id(
-            voter_id, facebook_email, facebook_profile_image_url_https,
-            first_name, middle_name, last_name,
-            interface_status_flags,
-            flag_integer_to_set, flag_integer_to_unset,
-            notification_settings_flags,
-            notification_flag_integer_to_set, notification_flag_integer_to_unset,
-            twitter_profile_image_url_https, we_vote_hosted_profile_image_url_large,
-            we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
+            voter_id,
+            facebook_email=facebook_email,
+            facebook_profile_image_url_https=facebook_profile_image_url_https,
+            first_name=first_name,
+            middle_name=middle_name,
+            last_name=last_name,
+            interface_status_flags=interface_status_flags,
+            flag_integer_to_set=flag_integer_to_set,
+            flag_integer_to_unset=flag_integer_to_unset,
+            notification_settings_flags=notification_settings_flags,
+            notification_flag_integer_to_set=notification_flag_integer_to_set,
+            notification_flag_integer_to_unset=notification_flag_integer_to_unset,
+            profile_image_type_currently_active=profile_image_type_currently_active,
+            twitter_profile_image_url_https=twitter_profile_image_url_https,
+            we_vote_hosted_profile_facebook_image_url_large=we_vote_hosted_profile_facebook_image_url_large,
+            we_vote_hosted_profile_facebook_image_url_medium=we_vote_hosted_profile_facebook_image_url_medium,
+            we_vote_hosted_profile_facebook_image_url_tiny=we_vote_hosted_profile_facebook_image_url_tiny,
+            we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+            we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
+            we_vote_hosted_profile_twitter_image_url_large=we_vote_hosted_profile_twitter_image_url_large,
+            we_vote_hosted_profile_twitter_image_url_medium=we_vote_hosted_profile_twitter_image_url_medium,
+            we_vote_hosted_profile_twitter_image_url_tiny=we_vote_hosted_profile_twitter_image_url_tiny,
+            we_vote_hosted_profile_uploaded_image_url_large=we_vote_hosted_profile_uploaded_image_url_large,
+            we_vote_hosted_profile_uploaded_image_url_medium=we_vote_hosted_profile_uploaded_image_url_medium,
+            we_vote_hosted_profile_uploaded_image_url_tiny=we_vote_hosted_profile_uploaded_image_url_tiny,
+        )
         status += results['status']
         success = results['success']
         voter = results['voter']
@@ -2241,9 +2358,12 @@ def voter_update_view(request):  # voterUpdate
         if voter_full_name != voter_full_name_at_start:
             voter_name_needs_to_be_updated_in_activity = True
 
+    voter_name_changed = False
     if positive_value_exists(voter_full_name) \
             and (incoming_first_or_last_name or incoming_full_name_can_be_processed) \
             and positive_value_exists(linked_organization_we_vote_id):
+        voter_name_changed = True
+    if voter_name_changed or voter_photo_changed:
         results = organization_manager.retrieve_organization_from_we_vote_id(linked_organization_we_vote_id)
         if results['organization_found']:
             organization = results['organization']
@@ -2260,6 +2380,15 @@ def voter_update_view(request):  # voterUpdate
                     organization.organization_name = voter_full_name
                     organization_changed = True
                     organization_name_changed = True
+            if we_vote_hosted_profile_image_url_large is not False:
+                organization.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                organization_changed = True
+            if we_vote_hosted_profile_image_url_medium is not False:
+                organization.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                organization_changed = True
+            if we_vote_hosted_profile_image_url_tiny is not False:
+                organization.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                organization_changed = True
             if organization_changed:
                 try:
                     organization.save()
@@ -2273,7 +2402,8 @@ def voter_update_view(request):  # voterUpdate
                         # TODO This can be made much more efficient
                         position_results = update_position_entered_details_from_organization(organization)
                         status += position_results['status']
-                    if positive_value_exists(organization_name_changed) and not not_real_name:
+                    if positive_value_exists(organization_name_changed) and not not_real_name or \
+                            organization.we_vote_hosted_profile_image_url_tiny is not False:
                         from campaign.models import CampaignXManager
                         campaignx_manager = CampaignXManager()
                         owner_results = campaignx_manager.update_campaignx_owners_with_organization_change(

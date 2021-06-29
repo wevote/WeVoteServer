@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.conf.urls import url
+from django.conf.urls import re_path
 
 from . import views_admin
 
@@ -10,6 +10,6 @@ from . import views_admin
 
 
 urlpatterns = [
-    url(r'^repair_follow_organization/$',
+    re_path(r'^repair_follow_organization/$',
         views_admin.repair_follow_organization_view, name='repair_follow_organization'),
 ]

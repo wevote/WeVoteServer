@@ -10,7 +10,7 @@ from .models import WeVoteImageManager, WeVoteImage, \
     FACEBOOK_PROFILE_IMAGE_NAME, FACEBOOK_BACKGROUND_IMAGE_NAME, \
     TWITTER_PROFILE_IMAGE_NAME, TWITTER_BACKGROUND_IMAGE_NAME, TWITTER_BANNER_IMAGE_NAME, MAPLIGHT_IMAGE_NAME, \
     VOTE_SMART_IMAGE_NAME, MASTER_IMAGE, ISSUE_IMAGE_NAME, BALLOTPEDIA_IMAGE_NAME, CAMPAIGNX_PHOTO_IMAGE_NAME, \
-    LINKEDIN_IMAGE_NAME, WIKIPEDIA_IMAGE_NAME
+    LINKEDIN_IMAGE_NAME, VOTER_UPLOADED_IMAGE_NAME, WIKIPEDIA_IMAGE_NAME
 from candidate.models import CandidateManager
 from config.base import get_environment_variable
 from django.db.models import Q
@@ -52,6 +52,7 @@ FACEBOOK_USER_DOES_NOT_EXIST = "facebook user does not exist"
 FACEBOOK_URL_NOT_FOUND = "facebook url not found"
 TWITTER_USER_DOES_NOT_EXIST = "twitter user does not exist"
 TWITTER_URL_NOT_FOUND = "twitter url not found"
+VOTER_UPLOADED_PROFILE_IMAGE_DOES_NOT_EXIST = "voter uploaded profile image does not exist"
 IMAGE_ALREADY_CACHED = "image already cached"
 ALL_KIND_OF_IMAGE = ['kind_of_image_twitter_profile', 'kind_of_image_twitter_background',
                      'kind_of_image_twitter_banner', 'kind_of_image_facebook_profile',
@@ -70,6 +71,8 @@ CAMPAIGN_PHOTO_MEDIUM_MAX_WIDTH = 224
 CAMPAIGN_PHOTO_MEDIUM_MAX_HEIGHT = 117
 CAMPAIGN_PHOTO_SMALL_MAX_WIDTH = 140
 CAMPAIGN_PHOTO_SMALL_MAX_HEIGHT = 73
+PROFILE_IMAGE_ORIGINAL_MAX_WIDTH = 2048
+PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT = 2048
 PROFILE_IMAGE_LARGE_WIDTH = convert_to_int(get_environment_variable("PROFILE_IMAGE_LARGE_WIDTH"))
 PROFILE_IMAGE_LARGE_HEIGHT = convert_to_int(get_environment_variable("PROFILE_IMAGE_LARGE_HEIGHT"))
 PROFILE_IMAGE_MEDIUM_WIDTH = convert_to_int(get_environment_variable("PROFILE_IMAGE_MEDIUM_WIDTH"))
@@ -180,19 +183,20 @@ def cache_image_if_not_cached(
         maplight_id=None,
         vote_smart_id=None,
         is_active_version=False,
-        kind_of_image_twitter_profile=False,
+        kind_of_image_ballotpedia_profile=False,
+        kind_of_image_facebook_background=False,
+        kind_of_image_facebook_profile=False,
+        kind_of_image_issue=False,
+        kind_of_image_linkedin_profile=False,
+        kind_of_image_original=False,
+        kind_of_image_other_source=False,
+        kind_of_image_maplight=False,
         kind_of_image_twitter_background=False,
         kind_of_image_twitter_banner=False,
-        kind_of_image_facebook_profile=False,
-        kind_of_image_facebook_background=False,
-        kind_of_image_maplight=False,
+        kind_of_image_twitter_profile=False,
         kind_of_image_vote_smart=False,
-        kind_of_image_issue=False,
-        kind_of_image_ballotpedia_profile=False,
-        kind_of_image_linkedin_profile=False,
+        kind_of_image_voter_uploaded_profile=False,
         kind_of_image_wikipedia_profile=False,
-        kind_of_image_other_source=False,
-        kind_of_image_original=False,
         facebook_background_image_offset_x=None,
         facebook_background_image_offset_y=None,
         other_source=None):
@@ -210,19 +214,20 @@ def cache_image_if_not_cached(
     :param maplight_id:
     :param vote_smart_id:
     :param is_active_version:
-    :param kind_of_image_twitter_profile:
+    :param kind_of_image_ballotpedia_profile:
+    :param kind_of_image_facebook_background:
+    :param kind_of_image_facebook_profile:
+    :param kind_of_image_issue:
+    :param kind_of_image_linkedin_profile:
+    :param kind_of_image_original:
+    :param kind_of_image_other_source:
+    :param kind_of_image_maplight:
     :param kind_of_image_twitter_background:
     :param kind_of_image_twitter_banner:
-    :param kind_of_image_facebook_profile:
-    :param kind_of_image_facebook_background:
-    :param kind_of_image_maplight:
+    :param kind_of_image_twitter_profile:
     :param kind_of_image_vote_smart:
-    :param kind_of_image_issue:
-    :param kind_of_image_ballotpedia_profile:
-    :param kind_of_image_linkedin_profile:
+    :param kind_of_image_voter_uploaded_profile:
     :param kind_of_image_wikipedia_profile:
-    :param kind_of_image_other_source:
-    :param kind_of_image_original:
     :param facebook_background_image_offset_x:
     :param facebook_background_image_offset_y:
     :param other_source:
@@ -234,36 +239,38 @@ def cache_image_if_not_cached(
         candidate_we_vote_id=candidate_we_vote_id,
         organization_we_vote_id=organization_we_vote_id,
         issue_we_vote_id=issue_we_vote_id,
-        kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+        kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+        kind_of_image_facebook_background=kind_of_image_facebook_background,
+        kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+        kind_of_image_issue=kind_of_image_issue,
+        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+        kind_of_image_maplight=kind_of_image_maplight,
+        kind_of_image_original=kind_of_image_original,
+        kind_of_image_other_source=kind_of_image_other_source,
         kind_of_image_twitter_background=kind_of_image_twitter_background,
         kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-        kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-        kind_of_image_facebook_background=kind_of_image_facebook_background,
-        kind_of_image_maplight=kind_of_image_maplight,
+        kind_of_image_twitter_profile=kind_of_image_twitter_profile,
         kind_of_image_vote_smart=kind_of_image_vote_smart,
-        kind_of_image_issue=kind_of_image_issue,
-        kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
-        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+        kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
         kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-        kind_of_image_other_source=kind_of_image_other_source,
-        kind_of_image_original=kind_of_image_original,
         is_active_version=True)
 
     # If recent cached image matches with the current one the image is already cached
     cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
     if cached_we_vote_image_results['we_vote_image_found'] and \
-            image_url_https == cached_we_vote_image.twitter_profile_image_url_https or \
+            image_url_https == cached_we_vote_image.ballotpedia_profile_image_url or \
+            image_url_https == cached_we_vote_image.facebook_background_image_url_https or \
+            image_url_https == cached_we_vote_image.facebook_profile_image_url_https or \
+            image_url_https == cached_we_vote_image.issue_image_url_https or \
+            image_url_https == cached_we_vote_image.linkedin_profile_image_url or \
+            image_url_https == cached_we_vote_image.maplight_image_url_https or \
+            image_url_https == cached_we_vote_image.other_source_image_url or \
             image_url_https == cached_we_vote_image.twitter_profile_background_image_url_https or \
             image_url_https == cached_we_vote_image.twitter_profile_banner_url_https or \
-            image_url_https == cached_we_vote_image.facebook_profile_image_url_https or \
-            image_url_https == cached_we_vote_image.facebook_background_image_url_https or \
-            image_url_https == cached_we_vote_image.maplight_image_url_https or \
+            image_url_https == cached_we_vote_image.twitter_profile_image_url_https or \
             image_url_https == cached_we_vote_image.vote_smart_image_url_https or \
-            image_url_https == cached_we_vote_image.issue_image_url_https or \
-            image_url_https == cached_we_vote_image.ballotpedia_profile_image_url or \
-            image_url_https == cached_we_vote_image.linkedin_profile_image_url or \
-            image_url_https == cached_we_vote_image.wikipedia_profile_image_url or \
-            image_url_https == cached_we_vote_image.other_source_image_url:
+            image_url_https == cached_we_vote_image.voter_uploaded_profile_image_url_https or \
+            image_url_https == cached_we_vote_image.wikipedia_profile_image_url:
         cache_image_results = IMAGE_ALREADY_CACHED
     else:
         # Image is not cached so caching it
@@ -280,19 +287,20 @@ def cache_image_if_not_cached(
             vote_smart_id=vote_smart_id,
             twitter_screen_name=twitter_screen_name,
             is_active_version=is_active_version,
-            kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+            kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+            kind_of_image_facebook_background=kind_of_image_facebook_background,
+            kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+            kind_of_image_issue=kind_of_image_issue,
+            kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+            kind_of_image_maplight=kind_of_image_maplight,
+            kind_of_image_original=kind_of_image_original,
+            kind_of_image_other_source=kind_of_image_other_source,
             kind_of_image_twitter_background=kind_of_image_twitter_background,
             kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-            kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-            kind_of_image_facebook_background=kind_of_image_facebook_background,
-            kind_of_image_maplight=kind_of_image_maplight,
+            kind_of_image_twitter_profile=kind_of_image_twitter_profile,
             kind_of_image_vote_smart=kind_of_image_vote_smart,
-            kind_of_image_issue=kind_of_image_issue,
-            kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
-            kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+            kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
             kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-            kind_of_image_other_source=kind_of_image_other_source,
-            kind_of_image_original=kind_of_image_original,
             facebook_background_image_offset_x=facebook_background_image_offset_x,
             facebook_background_image_offset_y=facebook_background_image_offset_y,
             other_source=other_source,
@@ -306,18 +314,19 @@ def cache_image_if_not_cached(
                 organization_we_vote_id=organization_we_vote_id,
                 issue_we_vote_id=issue_we_vote_id,
                 image_url_https=image_url_https,
+                kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+                kind_of_image_facebook_background=kind_of_image_facebook_background,
+                kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+                kind_of_image_issue=kind_of_image_issue,
+                kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+                kind_of_image_maplight=kind_of_image_maplight,
+                kind_of_image_other_source=kind_of_image_other_source,
                 kind_of_image_twitter_profile=kind_of_image_twitter_profile,
                 kind_of_image_twitter_background=kind_of_image_twitter_background,
                 kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-                kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-                kind_of_image_facebook_background=kind_of_image_facebook_background,
-                kind_of_image_maplight=kind_of_image_maplight,
                 kind_of_image_vote_smart=kind_of_image_vote_smart,
-                kind_of_image_issue=kind_of_image_issue,
-                kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
-                kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
-                kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-                kind_of_image_other_source=kind_of_image_other_source,)
+                kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
+                kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,)
     return cache_image_results
 
 
@@ -412,13 +421,14 @@ def cache_voter_master_images(voter_id):
     :return:
     """
     cache_all_kind_of_images_results = {
-        'voter_id':                         voter_id,
-        'voter_we_vote_id':                 "",
-        'cached_twitter_profile_image':     False,
-        'cached_twitter_background_image':  False,
-        'cached_twitter_banner_image':      False,
-        'cached_facebook_profile_image':    False,
-        'cached_facebook_background_image': False
+        'cached_facebook_background_image':     False,
+        'cached_facebook_profile_image':        False,
+        'cached_twitter_background_image':      False,
+        'cached_twitter_banner_image':          False,
+        'cached_twitter_profile_image':         False,
+        'cached_voter_uploaded_profile_image':  False,
+        'voter_id':                             voter_id,
+        'voter_we_vote_id':                     "",
     }
     google_civic_election_id = 0
     twitter_id = None
@@ -426,6 +436,8 @@ def cache_voter_master_images(voter_id):
     voter_address_manager = VoterAddressManager()
     voter_manager = VoterManager()
     voter_device_link_manager = VoterDeviceLinkManager()
+
+    cached_voter_uploaded_profile_image = VOTER_UPLOADED_PROFILE_IMAGE_DOES_NOT_EXIST
 
     voter_results = voter_manager.retrieve_voter_by_id(voter_id)
     if not voter_results['voter_found']:
@@ -445,6 +457,10 @@ def cache_voter_master_images(voter_id):
             voter_address = voter_address_results['voter_address']
         else:
             voter_address = VoterAddress()
+
+        if voter.we_vote_hosted_profile_uploaded_image_url_large:
+            cached_voter_uploaded_profile_image = True
+            cache_all_kind_of_images_results['cached_voter_uploaded_profile_image'] = True,
 
         from ballot.controllers import choose_election_from_existing_data
         results = choose_election_from_existing_data(voter_device_link, 0, voter_address)
@@ -476,15 +492,17 @@ def cache_voter_master_images(voter_id):
         facebook_id = facebook_link_to_voter_results['facebook_link_to_voter'].facebook_user_id
 
     if not positive_value_exists(twitter_id) and not positive_value_exists(facebook_id):
+        # If we don't have a Twitter or Facebook photo to update, then no need to update this voter further
         cache_all_kind_of_images_results = {
-            'voter_id':                         voter_id,
-            'voter_we_vote_id':                 voter.we_vote_id,
-            'voter_object':                     voter,
-            'cached_twitter_profile_image':     TWITTER_USER_DOES_NOT_EXIST,
-            'cached_twitter_background_image':  TWITTER_USER_DOES_NOT_EXIST,
-            'cached_twitter_banner_image':      TWITTER_USER_DOES_NOT_EXIST,
-            'cached_facebook_profile_image':    FACEBOOK_USER_DOES_NOT_EXIST,
-            'cached_facebook_background_image': FACEBOOK_USER_DOES_NOT_EXIST
+            'cached_facebook_background_image':     FACEBOOK_USER_DOES_NOT_EXIST,
+            'cached_facebook_profile_image':        FACEBOOK_USER_DOES_NOT_EXIST,
+            'cached_twitter_profile_image':         TWITTER_USER_DOES_NOT_EXIST,
+            'cached_twitter_background_image':      TWITTER_USER_DOES_NOT_EXIST,
+            'cached_twitter_banner_image':          TWITTER_USER_DOES_NOT_EXIST,
+            'cached_voter_uploaded_profile_image':  cached_voter_uploaded_profile_image,
+            'voter_id':                             voter_id,
+            'voter_object':                         voter,
+            'voter_we_vote_id':                     voter.we_vote_id,
         }
         return cache_all_kind_of_images_results
 
@@ -504,28 +522,40 @@ def cache_voter_master_images(voter_id):
             cache_all_kind_of_images_results['cached_twitter_profile_image'] = TWITTER_URL_NOT_FOUND
         else:
             cache_all_kind_of_images_results['cached_twitter_profile_image'] = cache_image_if_not_cached(
-                google_civic_election_id, twitter_profile_image_url_https,
+                google_civic_election_id,
+                twitter_profile_image_url_https,
                 voter_we_vote_id=voter.we_vote_id,
-                twitter_id=twitter_id, twitter_screen_name=twitter_screen_name, is_active_version=True,
-                kind_of_image_twitter_profile=True, kind_of_image_original=True)
+                twitter_id=twitter_id,
+                twitter_screen_name=twitter_screen_name,
+                is_active_version=True,
+                kind_of_image_twitter_profile=True,
+                kind_of_image_original=True)
 
         if not twitter_profile_background_image_url_https:
             cache_all_kind_of_images_results['cached_twitter_background_image'] = TWITTER_URL_NOT_FOUND
         else:
             cache_all_kind_of_images_results['cached_twitter_background_image'] = cache_image_if_not_cached(
-                google_civic_election_id, twitter_profile_background_image_url_https,
-                voter_we_vote_id=voter.we_vote_id, twitter_id=twitter_id,
-                twitter_screen_name=twitter_screen_name, is_active_version=True,
-                kind_of_image_twitter_background=True, kind_of_image_original=True)
+                google_civic_election_id,
+                twitter_profile_background_image_url_https,
+                voter_we_vote_id=voter.we_vote_id,
+                twitter_id=twitter_id,
+                twitter_screen_name=twitter_screen_name,
+                is_active_version=True,
+                kind_of_image_twitter_background=True,
+                kind_of_image_original=True)
 
         if not twitter_profile_banner_url_https:
             cache_all_kind_of_images_results['cached_twitter_banner_image'] = TWITTER_URL_NOT_FOUND
         else:
             cache_all_kind_of_images_results['cached_twitter_banner_image'] = cache_image_if_not_cached(
-                google_civic_election_id, twitter_profile_banner_url_https,
-                voter_we_vote_id=voter.we_vote_id, twitter_id=twitter_id,
-                twitter_screen_name=twitter_screen_name, is_active_version=True,
-                kind_of_image_twitter_banner=True, kind_of_image_original=True)
+                google_civic_election_id,
+                twitter_profile_banner_url_https,
+                voter_we_vote_id=voter.we_vote_id,
+                twitter_id=twitter_id,
+                twitter_screen_name=twitter_screen_name,
+                is_active_version=True,
+                kind_of_image_twitter_banner=True,
+                kind_of_image_original=True)
 
     if not positive_value_exists(facebook_id):
         cache_all_kind_of_images_results['cached_facebook_profile_image'] = FACEBOOK_USER_DOES_NOT_EXIST,
@@ -541,18 +571,25 @@ def cache_voter_master_images(voter_id):
             cache_all_kind_of_images_results['cached_facebook_profile_image'] = FACEBOOK_URL_NOT_FOUND
         else:
             cache_all_kind_of_images_results['cached_facebook_profile_image'] = cache_image_if_not_cached(
-                google_civic_election_id, facebook_profile_image_url_https,
+                google_civic_election_id,
+                facebook_profile_image_url_https,
                 voter_we_vote_id=voter.we_vote_id,
-                facebook_user_id=facebook_id, is_active_version=True,
-                kind_of_image_facebook_profile=True, kind_of_image_original=True)
+                facebook_user_id=facebook_id,
+                is_active_version=True,
+                kind_of_image_facebook_profile=True,
+                kind_of_image_original=True)
 
         if not facebook_background_image_url_https:
             cache_all_kind_of_images_results['cached_facebook_background_image'] = FACEBOOK_URL_NOT_FOUND
         else:
             cache_all_kind_of_images_results['cached_facebook_background_image'] = cache_image_if_not_cached(
-                google_civic_election_id, facebook_background_image_url_https,
-                voter_we_vote_id=voter.we_vote_id, facebook_user_id=facebook_id,
-                is_active_version=True, kind_of_image_facebook_background=True, kind_of_image_original=True)
+                google_civic_election_id,
+                facebook_background_image_url_https,
+                voter_we_vote_id=voter.we_vote_id,
+                facebook_user_id=facebook_id,
+                is_active_version=True,
+                kind_of_image_facebook_background=True,
+                kind_of_image_original=True)
 
     return cache_all_kind_of_images_results
 
@@ -571,22 +608,23 @@ def cache_image_locally(
         maplight_id=None,
         vote_smart_id=None,
         is_active_version=False,
+        kind_of_image_ballotpedia_profile=False,
+        kind_of_image_facebook_background=False,
+        kind_of_image_facebook_profile=False,
+        kind_of_image_issue=False,
+        kind_of_image_large=False,
+        kind_of_image_linkedin_profile=False,
+        kind_of_image_maplight=False,
+        kind_of_image_medium=False,
+        kind_of_image_original=False,
+        kind_of_image_other_source=False,
+        kind_of_image_tiny=False,
         kind_of_image_twitter_profile=False,
         kind_of_image_twitter_background=False,
         kind_of_image_twitter_banner=False,
-        kind_of_image_facebook_profile=False,
-        kind_of_image_facebook_background=False,
-        kind_of_image_maplight=False,
         kind_of_image_vote_smart=False,
-        kind_of_image_issue=False,
-        kind_of_image_ballotpedia_profile=False,
-        kind_of_image_linkedin_profile=False,
+        kind_of_image_voter_uploaded_profile=False,
         kind_of_image_wikipedia_profile=False,
-        kind_of_image_other_source=False,
-        kind_of_image_original=False,
-        kind_of_image_large=False,
-        kind_of_image_medium=False,
-        kind_of_image_tiny=False,
         facebook_background_image_offset_x=False,
         facebook_background_image_offset_y=False):
     """
@@ -600,27 +638,27 @@ def cache_image_locally(
     :param twitter_id:
     :param twitter_screen_name:
     :param facebook_user_id:
-    :param other_source:                        # can be MapLight or VoteSmart
+    :param other_source:
     :param maplight_id:
     :param vote_smart_id:
-    :param other_source_profile_image_url:      # TODO need to find a way to get this
     :param is_active_version:
+    :param kind_of_image_ballotpedia_profile:
+    :param kind_of_image_facebook_background:
+    :param kind_of_image_facebook_profile:
+    :param kind_of_image_issue:
+    :param kind_of_image_large:
+    :param kind_of_image_linkedin_profile:
+    :param kind_of_image_maplight:
+    :param kind_of_image_medium:
+    :param kind_of_image_original:
+    :param kind_of_image_other_source:
+    :param kind_of_image_tiny:
     :param kind_of_image_twitter_profile:
     :param kind_of_image_twitter_background:
     :param kind_of_image_twitter_banner:
-    :param kind_of_image_facebook_profile:
-    :param kind_of_image_facebook_background:
-    :param kind_of_image_maplight:
     :param kind_of_image_vote_smart:
-    :param kind_of_image_issue:
-    :param kind_of_image_ballotpedia_profile:
-    :param kind_of_image_linkedin_profile:
+    :param kind_of_image_voter_uploaded_profile:
     :param kind_of_image_wikipedia_profile:
-    :param kind_of_image_other_source:
-    :param kind_of_image_original:
-    :param kind_of_image_large:
-    :param kind_of_image_medium:
-    :param kind_of_image_tiny:
     :param facebook_background_image_offset_x:
     :param facebook_background_image_offset_y:
     :return:
@@ -645,22 +683,23 @@ def cache_image_locally(
         candidate_we_vote_id=candidate_we_vote_id,
         organization_we_vote_id=organization_we_vote_id,
         issue_we_vote_id=issue_we_vote_id,
-        kind_of_image_twitter_profile=kind_of_image_twitter_profile,
-        kind_of_image_twitter_background=kind_of_image_twitter_background,
-        kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+        kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
         kind_of_image_facebook_profile=kind_of_image_facebook_profile,
         kind_of_image_facebook_background=kind_of_image_facebook_background,
-        kind_of_image_maplight=kind_of_image_maplight,
-        kind_of_image_vote_smart=kind_of_image_vote_smart,
         kind_of_image_issue=kind_of_image_issue,
-        kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
-        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
-        kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-        kind_of_image_other_source=kind_of_image_other_source,
-        kind_of_image_original=kind_of_image_original,
         kind_of_image_large=kind_of_image_large,
+        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+        kind_of_image_maplight=kind_of_image_maplight,
         kind_of_image_medium=kind_of_image_medium,
+        kind_of_image_original=kind_of_image_original,
+        kind_of_image_other_source=kind_of_image_other_source,
         kind_of_image_tiny=kind_of_image_tiny,
+        kind_of_image_twitter_background=kind_of_image_twitter_background,
+        kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+        kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+        kind_of_image_vote_smart=kind_of_image_vote_smart,
+        kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
+        kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
         facebook_background_image_offset_x=facebook_background_image_offset_x,
         facebook_background_image_offset_y=facebook_background_image_offset_y)
     status += create_we_vote_image_results['status']
@@ -687,17 +726,18 @@ def cache_image_locally(
         maplight_id=maplight_id,
         vote_smart_id=vote_smart_id,
         image_url_https=image_url_https,
+        kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+        kind_of_image_facebook_background=kind_of_image_facebook_background,
+        kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+        kind_of_image_maplight=kind_of_image_maplight,
+        kind_of_image_other_source=kind_of_image_other_source,
         kind_of_image_twitter_profile=kind_of_image_twitter_profile,
         kind_of_image_twitter_background=kind_of_image_twitter_background,
         kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-        kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-        kind_of_image_facebook_background=kind_of_image_facebook_background,
-        kind_of_image_maplight=kind_of_image_maplight,
         kind_of_image_vote_smart=kind_of_image_vote_smart,
-        kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
-        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+        kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
         kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-        kind_of_image_other_source=kind_of_image_other_source,
         other_source=other_source)
 
     if 'analyze_image_url_results' not in analyze_source_images_results or \
@@ -724,19 +764,20 @@ def cache_image_locally(
         candidate_we_vote_id=candidate_we_vote_id,
         organization_we_vote_id=organization_we_vote_id,
         issue_we_vote_id=issue_we_vote_id,
-        kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+        kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+        kind_of_image_facebook_background=kind_of_image_facebook_background,
+        kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+        kind_of_image_issue=kind_of_image_issue,
+        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+        kind_of_image_maplight=kind_of_image_maplight,
+        kind_of_image_original=kind_of_image_original,
+        kind_of_image_other_source=kind_of_image_other_source,
         kind_of_image_twitter_background=kind_of_image_twitter_background,
         kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-        kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-        kind_of_image_facebook_background=kind_of_image_facebook_background,
-        kind_of_image_maplight=kind_of_image_maplight,
+        kind_of_image_twitter_profile=kind_of_image_twitter_profile,
         kind_of_image_vote_smart=kind_of_image_vote_smart,
-        kind_of_image_issue=kind_of_image_issue,
-        kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
-        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
-        kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-        kind_of_image_other_source=kind_of_image_other_source,
-        kind_of_image_original=kind_of_image_original)
+        kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
+        kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile)
     for cached_we_vote_image in cached_todays_we_vote_image_list_results['we_vote_image_list']:
         if cached_we_vote_image.same_day_image_version:
             image_versions.append(cached_we_vote_image.same_day_image_version)
@@ -745,13 +786,33 @@ def cache_image_locally(
     else:
         same_day_image_version = 1
 
-    if kind_of_image_facebook_profile or kind_of_image_facebook_background:
+    if kind_of_image_ballotpedia_profile:
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_ballotpedia_info(
+            we_vote_image, analyze_source_images_results['analyze_image_url_results']['image_width'],
+            analyze_source_images_results['analyze_image_url_results']['image_height'],
+            image_url_https, same_day_image_version, kind_of_image_ballotpedia_profile, image_url_valid)
+    elif kind_of_image_facebook_profile or kind_of_image_facebook_background:
         # image url is valid so store source image of facebook to WeVoteImage
         save_source_info_results = we_vote_image_manager.save_we_vote_image_facebook_info(
             we_vote_image, facebook_user_id, analyze_source_images_results['analyze_image_url_results']['image_width'],
             analyze_source_images_results['analyze_image_url_results']['image_height'],
             image_url_https, same_day_image_version, kind_of_image_facebook_profile,
             kind_of_image_facebook_background, image_url_valid)
+    elif kind_of_image_linkedin_profile:
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_linkedin_info(
+            we_vote_image, analyze_source_images_results['analyze_image_url_results']['image_width'],
+            analyze_source_images_results['analyze_image_url_results']['image_height'],
+            image_url_https, same_day_image_version, kind_of_image_linkedin_profile, image_url_valid)
+    elif kind_of_image_maplight:
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_maplight_info(
+            we_vote_image, maplight_id, analyze_source_images_results['analyze_image_url_results']['image_width'],
+            analyze_source_images_results['analyze_image_url_results']['image_height'],
+            image_url_https, same_day_image_version, kind_of_image_maplight, image_url_valid)
+    elif kind_of_image_other_source:
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_other_source_info(
+            we_vote_image, analyze_source_images_results['analyze_image_url_results']['image_width'],
+            analyze_source_images_results['analyze_image_url_results']['image_height'], other_source,
+            image_url_https, same_day_image_version, kind_of_image_other_source, image_url_valid)
     elif kind_of_image_twitter_profile or kind_of_image_twitter_background or kind_of_image_twitter_banner:
         # image url is valid so store source image of twitter to WeVoteImage
         save_source_info_results = we_vote_image_manager.save_we_vote_image_twitter_info(
@@ -759,36 +820,24 @@ def cache_image_locally(
             analyze_source_images_results['analyze_image_url_results']['image_height'],
             image_url_https, same_day_image_version, kind_of_image_twitter_profile,
             kind_of_image_twitter_background, kind_of_image_twitter_banner, image_url_valid)
-    elif kind_of_image_maplight:
-        save_source_info_results = we_vote_image_manager.save_we_vote_image_maplight_info(
-            we_vote_image, maplight_id, analyze_source_images_results['analyze_image_url_results']['image_width'],
-            analyze_source_images_results['analyze_image_url_results']['image_height'],
-            image_url_https, same_day_image_version, kind_of_image_maplight, image_url_valid)
     elif kind_of_image_vote_smart:
         save_source_info_results = we_vote_image_manager.save_we_vote_image_vote_smart_info(
             we_vote_image, vote_smart_id, analyze_source_images_results['analyze_image_url_results']['image_width'],
             analyze_source_images_results['analyze_image_url_results']['image_height'],
             image_url_https, same_day_image_version, kind_of_image_vote_smart, image_url_valid)
-    elif kind_of_image_ballotpedia_profile:
-        save_source_info_results = we_vote_image_manager.save_we_vote_image_ballotpedia_info(
-            we_vote_image, analyze_source_images_results['analyze_image_url_results']['image_width'],
-            analyze_source_images_results['analyze_image_url_results']['image_height'],
-            image_url_https, same_day_image_version, kind_of_image_ballotpedia_profile, image_url_valid)
-    elif kind_of_image_linkedin_profile:
-        save_source_info_results = we_vote_image_manager.save_we_vote_image_linkedin_info(
-            we_vote_image, analyze_source_images_results['analyze_image_url_results']['image_width'],
-            analyze_source_images_results['analyze_image_url_results']['image_height'],
-            image_url_https, same_day_image_version, kind_of_image_linkedin_profile, image_url_valid)
+    elif kind_of_image_voter_uploaded_profile:
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_voter_uploaded_info(
+            we_vote_image=we_vote_image,
+            image_width=analyze_source_images_results['analyze_image_url_results']['image_width'],
+            image_height=analyze_source_images_results['analyze_image_url_results']['image_height'],
+            image_url_https=image_url_https,
+            same_day_image_version=same_day_image_version,
+            image_url_valid=image_url_valid)
     elif kind_of_image_wikipedia_profile:
         save_source_info_results = we_vote_image_manager.save_we_vote_image_wikipedia_info(
             we_vote_image, analyze_source_images_results['analyze_image_url_results']['image_width'],
             analyze_source_images_results['analyze_image_url_results']['image_height'],
             image_url_https, same_day_image_version, kind_of_image_wikipedia_profile, image_url_valid)
-    elif kind_of_image_other_source:
-        save_source_info_results = we_vote_image_manager.save_we_vote_image_other_source_info(
-            we_vote_image, analyze_source_images_results['analyze_image_url_results']['image_width'],
-            analyze_source_images_results['analyze_image_url_results']['image_height'], other_source,
-            image_url_https, same_day_image_version, kind_of_image_other_source, image_url_valid)
 
     status += " " + save_source_info_results['status']
     if save_source_info_results['success']:
@@ -1056,18 +1105,19 @@ def analyze_source_images(
         maplight_id=0,
         vote_smart_id=0,
         image_url_https="",
-        kind_of_image_twitter_profile=False,
-        kind_of_image_twitter_background=False,
-        kind_of_image_twitter_banner=False,
-        kind_of_image_facebook_profile=False,
-        kind_of_image_facebook_background=False,
-        kind_of_image_maplight=False,
-        kind_of_image_vote_smart=False,
         kind_of_image_ballotpedia_profile=False,
         kind_of_image_campaignx_photo=False,
+        kind_of_image_facebook_background=False,
+        kind_of_image_facebook_profile=False,
         kind_of_image_linkedin_profile=False,
-        kind_of_image_wikipedia_profile=False,
+        kind_of_image_maplight=False,
         kind_of_image_other_source=False,
+        kind_of_image_twitter_background=False,
+        kind_of_image_twitter_banner=False,
+        kind_of_image_twitter_profile=False,
+        kind_of_image_vote_smart=False,
+        kind_of_image_voter_uploaded_profile=False,
+        kind_of_image_wikipedia_profile=False,
         other_source=False):
     """
 
@@ -1077,46 +1127,49 @@ def analyze_source_images(
     :param maplight_id:
     :param vote_smart_id:
     :param image_url_https:
-    :param kind_of_image_twitter_profile:
-    :param kind_of_image_twitter_background:
-    :param kind_of_image_twitter_banner:
-    :param kind_of_image_facebook_profile:
-    :param kind_of_image_facebook_background:
-    :param kind_of_image_maplight:
-    :param kind_of_image_vote_smart:
     :param kind_of_image_ballotpedia_profile:
     :param kind_of_image_campaignx_photo:
+    :param kind_of_image_facebook_background:
+    :param kind_of_image_facebook_profile:
     :param kind_of_image_linkedin_profile:
-    :param kind_of_image_wikipedia_profile:
+    :param kind_of_image_maplight:
     :param kind_of_image_other_source:
+    :param kind_of_image_twitter_background:
+    :param kind_of_image_twitter_banner:
+    :param kind_of_image_twitter_profile:
+    :param kind_of_image_vote_smart:
+    :param kind_of_image_voter_uploaded_profile:
+    :param kind_of_image_wikipedia_profile:
     :param other_source:
     :return:
     """
     image_type = None
-    if kind_of_image_twitter_profile:
-        image_type = TWITTER_PROFILE_IMAGE_NAME
+    if kind_of_image_ballotpedia_profile:
+        image_type = BALLOTPEDIA_IMAGE_NAME
+    elif kind_of_image_campaignx_photo:
+        image_type = CAMPAIGNX_PHOTO_IMAGE_NAME
+    elif kind_of_image_facebook_background:
+        image_type = FACEBOOK_BACKGROUND_IMAGE_NAME
+    elif kind_of_image_facebook_profile:
+        image_type = FACEBOOK_PROFILE_IMAGE_NAME
+    elif kind_of_image_linkedin_profile:
+        image_type = LINKEDIN_IMAGE_NAME
+    elif kind_of_image_maplight:
+        image_type = MAPLIGHT_IMAGE_NAME
+    elif kind_of_image_other_source:
+        image_type = other_source
     elif kind_of_image_twitter_background:
         image_type = TWITTER_BACKGROUND_IMAGE_NAME
     elif kind_of_image_twitter_banner:
         image_type = TWITTER_BANNER_IMAGE_NAME
-    elif kind_of_image_facebook_profile:
-        image_type = FACEBOOK_PROFILE_IMAGE_NAME
-    elif kind_of_image_facebook_background:
-        image_type = FACEBOOK_BACKGROUND_IMAGE_NAME
-    elif kind_of_image_maplight:
-        image_type = MAPLIGHT_IMAGE_NAME
+    elif kind_of_image_twitter_profile:
+        image_type = TWITTER_PROFILE_IMAGE_NAME
     elif kind_of_image_vote_smart:
         image_type = VOTE_SMART_IMAGE_NAME
-    elif kind_of_image_ballotpedia_profile:
-        image_type = BALLOTPEDIA_IMAGE_NAME
-    elif kind_of_image_campaignx_photo:
-        image_type = CAMPAIGNX_PHOTO_IMAGE_NAME
-    elif kind_of_image_linkedin_profile:
-        image_type = LINKEDIN_IMAGE_NAME
+    elif kind_of_image_voter_uploaded_profile:
+        image_type = VOTER_UPLOADED_IMAGE_NAME
     elif kind_of_image_wikipedia_profile:
         image_type = WIKIPEDIA_IMAGE_NAME
-    elif kind_of_image_other_source:
-        image_type = other_source
 
     analyze_image_url_results = analyze_remote_url(image_url_https)
     results = {
@@ -1288,9 +1341,12 @@ def delete_cached_images_for_organization(organization):
     if len(we_vote_image_list) > 0:
         we_vote_image_manager = WeVoteImageManager()
         for we_vote_image in we_vote_image_list:
-            if we_vote_image.kind_of_image_twitter_profile and we_vote_image.kind_of_image_original and \
+            if we_vote_image.kind_of_image_facebook_background and we_vote_image.kind_of_image_original and \
                     we_vote_image.is_active_version:
-                original_twitter_profile_image_url_https = we_vote_image.twitter_profile_image_url_https
+                original_facebook_background_image_url_https = we_vote_image.facebook_background_image_url_https
+            if we_vote_image.kind_of_image_facebook_profile and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_facebook_profile_image_url_https = we_vote_image.facebook_profile_image_url_https
             if we_vote_image.kind_of_image_twitter_background and we_vote_image.kind_of_image_original and \
                     we_vote_image.is_active_version:
                 original_twitter_profile_background_image_url_https = \
@@ -1298,12 +1354,9 @@ def delete_cached_images_for_organization(organization):
             if we_vote_image.kind_of_image_twitter_banner and we_vote_image.kind_of_image_original and \
                     we_vote_image.is_active_version:
                 original_twitter_profile_banner_url_https = we_vote_image.twitter_profile_banner_url_https
-            if we_vote_image.kind_of_image_facebook_profile and we_vote_image.kind_of_image_original and \
+            if we_vote_image.kind_of_image_twitter_profile and we_vote_image.kind_of_image_original and \
                     we_vote_image.is_active_version:
-                original_facebook_profile_image_url_https = we_vote_image.facebook_profile_image_url_https
-            if we_vote_image.kind_of_image_facebook_background and we_vote_image.kind_of_image_original and \
-                    we_vote_image.is_active_version:
-                original_facebook_background_image_url_https = we_vote_image.facebook_background_image_url_https
+                original_twitter_profile_image_url_https = we_vote_image.twitter_profile_image_url_https
 
         # Reset Organization with original image details
         organization_manager = OrganizationManager()
@@ -1381,9 +1434,12 @@ def delete_cached_images_for_voter(voter):
     if len(we_vote_image_list) > 0:
         we_vote_image_manager = WeVoteImageManager()
         for we_vote_image in we_vote_image_list:
-            if we_vote_image.kind_of_image_twitter_profile and we_vote_image.kind_of_image_original and \
+            if we_vote_image.kind_of_image_facebook_profile and we_vote_image.kind_of_image_original and \
                     we_vote_image.is_active_version:
-                original_twitter_profile_image_url_https = we_vote_image.twitter_profile_image_url_https
+                original_facebook_profile_image_url_https = we_vote_image.facebook_profile_image_url_https
+            if we_vote_image.kind_of_image_facebook_background and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_facebook_background_image_url_https = we_vote_image.facebook_background_image_url_https
             if we_vote_image.kind_of_image_twitter_background and we_vote_image.kind_of_image_original and \
                     we_vote_image.is_active_version:
                 original_twitter_profile_background_image_url_https = \
@@ -1391,12 +1447,9 @@ def delete_cached_images_for_voter(voter):
             if we_vote_image.kind_of_image_twitter_banner and we_vote_image.kind_of_image_original and \
                     we_vote_image.is_active_version:
                 original_twitter_profile_banner_url_https = we_vote_image.twitter_profile_banner_url_https
-            if we_vote_image.kind_of_image_facebook_profile and we_vote_image.kind_of_image_original and \
+            if we_vote_image.kind_of_image_twitter_profile and we_vote_image.kind_of_image_original and \
                     we_vote_image.is_active_version:
-                original_facebook_profile_image_url_https = we_vote_image.facebook_profile_image_url_https
-            if we_vote_image.kind_of_image_facebook_background and we_vote_image.kind_of_image_original and \
-                    we_vote_image.is_active_version:
-                original_facebook_background_image_url_https = we_vote_image.facebook_background_image_url_https
+                original_twitter_profile_image_url_https = we_vote_image.twitter_profile_image_url_https
 
         # Reset Voter with original image details
         voter_manager = VoterManager()
@@ -1830,6 +1883,199 @@ def cache_campaignx_image(
     return results
 
 
+def cache_voter_master_uploaded_image(
+        python_image_library_image=None,
+        voter_we_vote_id=None):
+    """
+    Cache master voter uploaded image to AWS.
+    :param python_image_library_image:
+    :param voter_we_vote_id:
+    :return:
+    """
+    we_vote_parent_image_id = None
+    success = False
+    status = ''
+    is_active_version = True
+    we_vote_image_created = False
+    image_url_valid = False
+    image_stored_from_source = False
+    image_stored_to_aws = False
+    image_versions = []
+
+    we_vote_image_manager = WeVoteImageManager()
+
+    create_we_vote_image_results = we_vote_image_manager.create_we_vote_image(
+        voter_we_vote_id=voter_we_vote_id,
+        kind_of_image_voter_uploaded_profile=True,
+        kind_of_image_original=True)
+    status += create_we_vote_image_results['status']
+    if not create_we_vote_image_results['we_vote_image_saved']:
+        error_results = {
+            'success':                      success,
+            'status':                       status,
+            'we_vote_image_created':        we_vote_image_created,
+            'image_url_valid':              image_url_valid,
+            'image_stored_from_source':     image_stored_from_source,
+            'image_stored_to_aws':          image_stored_to_aws,
+            'we_vote_image':                None
+        }
+        return error_results
+
+    we_vote_image_created = True
+    we_vote_image = create_we_vote_image_results['we_vote_image']
+
+    # image file validation and get source image properties
+    analyze_source_images_results = analyze_image_in_memory(python_image_library_image)
+
+    if not analyze_source_images_results['image_url_valid']:
+        error_results = {
+            'success':                      success,
+            'status':                       status + " IMAGE_URL_NOT_VALID ",
+            'we_vote_image_created':        True,
+            'image_url_valid':              False,
+            'image_stored_from_source':     image_stored_from_source,
+            'image_stored_to_aws':          image_stored_to_aws,
+            'we_vote_image':                None
+        }
+        delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        return error_results
+
+    image_url_valid = True
+    status += " IMAGE_URL_VALID "
+    image_width = analyze_source_images_results['image_width']
+    image_height = analyze_source_images_results['image_height']
+    image_format = analyze_source_images_results['image_format']
+
+    # Get today's cached images and their versions so that image version can be calculated
+    cached_todays_we_vote_image_list_results = we_vote_image_manager.retrieve_todays_cached_we_vote_image_list(
+        voter_we_vote_id=voter_we_vote_id,
+        kind_of_image_voter_uploaded_profile=True,
+        kind_of_image_original=True)
+
+    for cached_we_vote_image in cached_todays_we_vote_image_list_results['we_vote_image_list']:
+        if cached_we_vote_image.same_day_image_version:
+            image_versions.append(cached_we_vote_image.same_day_image_version)
+
+    if image_versions:
+        same_day_image_version = max(image_versions) + 1
+    else:
+        same_day_image_version = 1
+
+    image_stored_from_source = True
+    date_image_saved = "{year}{:02d}{:02d}".format(we_vote_image.date_image_saved.month,
+                                                   we_vote_image.date_image_saved.day,
+                                                   year=we_vote_image.date_image_saved.year)
+    image_type = 'voter_uploaded_profile_image'
+
+    master_image = MASTER_IMAGE  # "master"
+    image_format_filtered = image_format
+
+    # ex voter_uploaded_profile_image_master-2017210_1_48x48.png
+    we_vote_image_file_name = "{image_type}_{master_image}-{date_image_saved}_{counter}_" \
+                              "{image_width}x{image_height}.{image_format}" \
+                              "".format(image_type=image_type,
+                                        master_image=master_image,
+                                        date_image_saved=date_image_saved,
+                                        counter=str(same_day_image_version),
+                                        image_width=str(image_width),
+                                        image_height=str(image_height),
+                                        image_format=str(image_format_filtered))
+
+    we_vote_image_file_location = voter_we_vote_id + "/" + we_vote_image_file_name
+
+    image_stored_locally = we_vote_image_manager.store_python_image_locally(
+        python_image_library_image, we_vote_image_file_name)
+
+    if not image_stored_locally:
+        error_results = {
+            'success': success,
+            'status': status + " IMAGE_NOT_STORED_LOCALLY ",
+            'we_vote_image_created': we_vote_image_created,
+            'image_url_valid': image_url_valid,
+            'image_stored_from_source': image_stored_from_source,
+            'image_stored_locally': False,
+            'image_stored_to_aws': image_stored_to_aws,
+        }
+        delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        return error_results
+
+    image_stored_to_aws = we_vote_image_manager.store_image_to_aws(
+        we_vote_image_file_name, we_vote_image_file_location, image_format)
+    if not image_stored_to_aws:
+        error_results = {
+            'success':                      success,
+            'status':                       status + " IMAGE_NOT_STORED_TO_AWS ",
+            'we_vote_image_created':        we_vote_image_created,
+            'image_url_valid':              image_url_valid,
+            'image_stored_from_source':     image_stored_from_source,
+            'image_stored_to_aws':          False,
+            'we_vote_image':                None
+        }
+        delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        return error_results
+
+    we_vote_image_url = "https://{bucket_name}.s3.amazonaws.com/{we_vote_image_file_location}" \
+                        "".format(bucket_name=AWS_STORAGE_BUCKET_NAME,
+                                  we_vote_image_file_location=we_vote_image_file_location)
+    save_aws_info = we_vote_image_manager.save_we_vote_image_aws_info(
+        we_vote_image, we_vote_image_url,
+        we_vote_image_file_location,
+        we_vote_parent_image_id, is_active_version)
+    status += " IMAGE_STORED_TO_AWS " + save_aws_info['status'] + " "
+    success = save_aws_info['success']
+    if not success:
+        error_results = {
+            'success':                  success,
+            'status':                   status,
+            'we_vote_image_created':    we_vote_image_created,
+            'image_url_valid':          image_url_valid,
+            'image_stored_from_source': image_stored_from_source,
+            'image_stored_to_aws':      image_stored_to_aws,
+            'we_vote_image':            None
+        }
+        delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        return error_results
+
+    save_source_info_results = we_vote_image_manager.save_we_vote_image_voter_uploaded_info(
+        we_vote_image=we_vote_image,
+        image_width=analyze_source_images_results['image_width'],
+        image_height=analyze_source_images_results['image_height'],
+        image_url_https=we_vote_image.we_vote_image_url,
+        same_day_image_version=same_day_image_version,
+        image_url_valid=image_url_valid)
+    status += " " + save_source_info_results['status']
+    if not save_source_info_results['success']:
+        error_results = {
+            'success':                  success,
+            'status':                   status,
+            'we_vote_image_created':    we_vote_image_created,
+            'image_url_valid':          image_url_valid,
+            'image_stored_from_source': False,
+            'image_stored_to_aws':      image_stored_to_aws,
+            'we_vote_image':            None
+        }
+        delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        return error_results
+
+    # set active version False for other master images for same campaignx
+    set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
+        voter_we_vote_id=voter_we_vote_id,
+        image_url_https=we_vote_image.we_vote_image_url,
+        kind_of_image_voter_uploaded_profile=True)
+    status += set_active_version_false_results['status']
+
+    results = {
+        'success':                      success,
+        'status':                       status,
+        'we_vote_image_created':        we_vote_image_created,
+        'image_url_valid':              image_url_valid,
+        'image_stored_from_source':     image_stored_from_source,
+        'image_stored_to_aws':          image_stored_to_aws,
+        'we_vote_image':                we_vote_image
+    }
+    return results
+
+
 def retrieve_all_images_for_one_issue(issue_we_vote_id):
     """
     Retrieve all cached images for one issue
@@ -1889,16 +2135,17 @@ def create_resized_image_if_not_created(we_vote_image):
     maplight_id = we_vote_image.maplight_id
     vote_smart_id = we_vote_image.vote_smart_id
     other_source = we_vote_image.other_source
-    kind_of_image_twitter_profile = we_vote_image.kind_of_image_twitter_profile
-    kind_of_image_twitter_background = we_vote_image.kind_of_image_twitter_background
-    kind_of_image_twitter_banner = we_vote_image.kind_of_image_twitter_banner
-    kind_of_image_facebook_profile = we_vote_image.kind_of_image_facebook_profile
-    kind_of_image_facebook_background = we_vote_image.kind_of_image_facebook_background
-    kind_of_image_maplight = we_vote_image.kind_of_image_maplight
-    kind_of_image_vote_smart = we_vote_image.kind_of_image_vote_smart
     kind_of_image_ballotpedia_profile = we_vote_image.kind_of_image_ballotpedia_profile
     kind_of_image_campaignx_photo = we_vote_image.kind_of_image_campaignx_photo
+    kind_of_image_facebook_background = we_vote_image.kind_of_image_facebook_background
+    kind_of_image_facebook_profile = we_vote_image.kind_of_image_facebook_profile
     kind_of_image_linkedin_profile = we_vote_image.kind_of_image_linkedin_profile
+    kind_of_image_maplight = we_vote_image.kind_of_image_maplight
+    kind_of_image_twitter_background = we_vote_image.kind_of_image_twitter_background
+    kind_of_image_twitter_banner = we_vote_image.kind_of_image_twitter_banner
+    kind_of_image_twitter_profile = we_vote_image.kind_of_image_twitter_profile
+    kind_of_image_vote_smart = we_vote_image.kind_of_image_vote_smart
+    kind_of_image_voter_uploaded_profile = we_vote_image.kind_of_image_voter_uploaded_profile
     kind_of_image_wikipedia_profile = we_vote_image.kind_of_image_wikipedia_profile
     kind_of_image_other_source = we_vote_image.kind_of_image_other_source
     image_offset_x = we_vote_image.facebook_background_image_offset_x
@@ -1919,30 +2166,32 @@ def create_resized_image_if_not_created(we_vote_image):
         'cached_tiny_image':                        False,
     }
 
-    if we_vote_image.kind_of_image_twitter_profile:
-        image_url_https = we_vote_image.twitter_profile_image_url_https
+    if we_vote_image.kind_of_image_ballotpedia_profile:
+        image_url_https = we_vote_image.ballotpedia_profile_image_url
+    elif we_vote_image.kind_of_image_campaignx_photo:
+        image_url_https = we_vote_image.campaignx_photo_url_https
+    elif we_vote_image.kind_of_image_facebook_background:
+        image_url_https = we_vote_image.facebook_background_image_url_https
+    elif we_vote_image.kind_of_image_facebook_profile:
+        image_url_https = we_vote_image.facebook_profile_image_url_https
+    elif we_vote_image.kind_of_image_linkedin_profile:
+        image_url_https = we_vote_image.linkedin_profile_image_url
+    elif we_vote_image.kind_of_image_maplight:
+        image_url_https = we_vote_image.maplight_image_url_https
+    elif we_vote_image.kind_of_image_other_source:
+        image_url_https = we_vote_image.other_source_image_url
     elif we_vote_image.kind_of_image_twitter_background:
         image_url_https = we_vote_image.twitter_profile_background_image_url_https
     elif we_vote_image.kind_of_image_twitter_banner:
         image_url_https = we_vote_image.twitter_profile_banner_url_https
-    elif we_vote_image.kind_of_image_facebook_profile:
-        image_url_https = we_vote_image.facebook_profile_image_url_https
-    elif we_vote_image.kind_of_image_facebook_background:
-        image_url_https = we_vote_image.facebook_background_image_url_https
-    elif we_vote_image.kind_of_image_maplight:
-        image_url_https = we_vote_image.maplight_image_url_https
+    elif we_vote_image.kind_of_image_twitter_profile:
+        image_url_https = we_vote_image.twitter_profile_image_url_https
     elif we_vote_image.kind_of_image_vote_smart:
         image_url_https = we_vote_image.vote_smart_image_url_https
-    elif we_vote_image.kind_of_image_ballotpedia_profile:
-        image_url_https = we_vote_image.ballotpedia_profile_image_url
-    elif we_vote_image.kind_of_image_campaignx_photo:
-        image_url_https = we_vote_image.campaignx_photo_url_https
-    elif we_vote_image.kind_of_image_linkedin_profile:
-        image_url_https = we_vote_image.linkedin_profile_image_url
+    elif we_vote_image.kind_of_image_voter_uploaded_profile:
+        image_url_https = we_vote_image.voter_uploaded_profile_image_url_https
     elif we_vote_image.kind_of_image_wikipedia_profile:
         image_url_https = we_vote_image.wikipedia_profile_image_url
-    elif we_vote_image.kind_of_image_other_source:
-        image_url_https = we_vote_image.other_source_image_url
     else:
         image_url_https = ''
 
@@ -1953,18 +2202,19 @@ def create_resized_image_if_not_created(we_vote_image):
         candidate_we_vote_id=candidate_we_vote_id,
         organization_we_vote_id=organization_we_vote_id,
         image_url_https=image_url_https,
+        kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+        kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
+        kind_of_image_facebook_background=kind_of_image_facebook_background,
+        kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+        kind_of_image_maplight=kind_of_image_maplight,
+        kind_of_image_other_source=kind_of_image_other_source,
         kind_of_image_twitter_profile=kind_of_image_twitter_profile,
         kind_of_image_twitter_background=kind_of_image_twitter_background,
         kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-        kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-        kind_of_image_facebook_background=kind_of_image_facebook_background,
-        kind_of_image_maplight=kind_of_image_maplight,
         kind_of_image_vote_smart=kind_of_image_vote_smart,
-        kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
-        kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
-        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+        kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
         kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-        kind_of_image_other_source=kind_of_image_other_source
     )
     if not resized_version_exists_results['large_image_version_exists']:
         # Large version does not exist so create resize image and cache it
@@ -1981,18 +2231,19 @@ def create_resized_image_if_not_created(we_vote_image):
             maplight_id=maplight_id,
             vote_smart_id=vote_smart_id,
             image_format=image_format,
-            kind_of_image_twitter_profile=kind_of_image_twitter_profile,
-            kind_of_image_twitter_background=kind_of_image_twitter_background,
-            kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-            kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-            kind_of_image_facebook_background=kind_of_image_facebook_background,
-            kind_of_image_maplight=kind_of_image_maplight,
-            kind_of_image_vote_smart=kind_of_image_vote_smart,
             kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
             kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
+            kind_of_image_facebook_background=kind_of_image_facebook_background,
+            kind_of_image_facebook_profile=kind_of_image_facebook_profile,
             kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
-            kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
+            kind_of_image_maplight=kind_of_image_maplight,
             kind_of_image_other_source=kind_of_image_other_source,
+            kind_of_image_twitter_background=kind_of_image_twitter_background,
+            kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+            kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+            kind_of_image_vote_smart=kind_of_image_vote_smart,
+            kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
+            kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
             kind_of_image_large=True,
             image_offset_x=image_offset_x,
             image_offset_y=image_offset_y,
@@ -2003,12 +2254,13 @@ def create_resized_image_if_not_created(we_vote_image):
 
     # Only some of our kinds of images have medium or tiny sizes
     if we_vote_image.kind_of_image_campaignx_photo or \
-            we_vote_image.kind_of_image_twitter_profile or \
-            we_vote_image.kind_of_image_facebook_profile or \
-            we_vote_image.kind_of_image_maplight or \
-            we_vote_image.kind_of_image_vote_smart or \
             we_vote_image.kind_of_image_ballotpedia_profile or \
+            we_vote_image.kind_of_image_facebook_profile or \
             we_vote_image.kind_of_image_linkedin_profile or \
+            we_vote_image.kind_of_image_maplight or \
+            we_vote_image.kind_of_image_twitter_profile or \
+            we_vote_image.kind_of_image_vote_smart or \
+            we_vote_image.kind_of_image_voter_uploaded_profile or \
             we_vote_image.kind_of_image_wikipedia_profile or \
             we_vote_image.kind_of_image_other_source:
         if not resized_version_exists_results['medium_image_version_exists']:
@@ -2024,19 +2276,20 @@ def create_resized_image_if_not_created(we_vote_image):
                 maplight_id=maplight_id,
                 vote_smart_id=vote_smart_id,
                 image_format=image_format,
-                kind_of_image_twitter_profile=kind_of_image_twitter_profile,
-                kind_of_image_twitter_background=kind_of_image_twitter_background,
-                kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-                kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-                kind_of_image_facebook_background=kind_of_image_facebook_background,
-                kind_of_image_maplight=kind_of_image_maplight,
-                kind_of_image_vote_smart=kind_of_image_vote_smart,
                 kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
                 kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
+                kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+                kind_of_image_facebook_background=kind_of_image_facebook_background,
                 kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
-                kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-                kind_of_image_other_source=kind_of_image_other_source,
+                kind_of_image_maplight=kind_of_image_maplight,
                 kind_of_image_medium=True,
+                kind_of_image_other_source=kind_of_image_other_source,
+                kind_of_image_twitter_background=kind_of_image_twitter_background,
+                kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+                kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+                kind_of_image_vote_smart=kind_of_image_vote_smart,
+                kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
+                kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
                 image_offset_x=image_offset_x,
                 image_offset_y=image_offset_y,
                 other_source=other_source)
@@ -2057,19 +2310,20 @@ def create_resized_image_if_not_created(we_vote_image):
                 maplight_id=maplight_id,
                 vote_smart_id=vote_smart_id,
                 image_format=image_format,
-                kind_of_image_twitter_profile=kind_of_image_twitter_profile,
-                kind_of_image_twitter_background=kind_of_image_twitter_background,
-                kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-                kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-                kind_of_image_facebook_background=kind_of_image_facebook_background,
-                kind_of_image_maplight=kind_of_image_maplight,
-                kind_of_image_vote_smart=kind_of_image_vote_smart,
                 kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
                 kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
+                kind_of_image_facebook_background=kind_of_image_facebook_background,
+                kind_of_image_facebook_profile=kind_of_image_facebook_profile,
                 kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
-                kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
+                kind_of_image_maplight=kind_of_image_maplight,
                 kind_of_image_other_source=kind_of_image_other_source,
                 kind_of_image_tiny=True,
+                kind_of_image_twitter_background=kind_of_image_twitter_background,
+                kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+                kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+                kind_of_image_vote_smart=kind_of_image_vote_smart,
+                kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
+                kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
                 image_offset_x=image_offset_x,
                 image_offset_y=image_offset_y,
                 other_source=other_source)
@@ -2085,16 +2339,17 @@ def check_resized_version_exists(
         candidate_we_vote_id=None,
         organization_we_vote_id=None,
         image_url_https=None,
-        kind_of_image_twitter_profile=False,
+        kind_of_image_ballotpedia_profile=False,
+        kind_of_image_campaignx_photo=False,
+        kind_of_image_facebook_background=False,
+        kind_of_image_facebook_profile=False,
+        kind_of_image_linkedin_profile=False,
+        kind_of_image_maplight=False,
         kind_of_image_twitter_background=False,
         kind_of_image_twitter_banner=False,
-        kind_of_image_facebook_profile=False,
-        kind_of_image_facebook_background=False,
-        kind_of_image_maplight=False,
+        kind_of_image_twitter_profile=False,
         kind_of_image_vote_smart=False,
-        kind_of_image_campaignx_photo=False,
-        kind_of_image_ballotpedia_profile=False,
-        kind_of_image_linkedin_profile=False,
+        kind_of_image_voter_uploaded_profile=False,
         kind_of_image_wikipedia_profile=False,
         kind_of_image_other_source=False):
     """
@@ -2104,16 +2359,17 @@ def check_resized_version_exists(
     :param candidate_we_vote_id:
     :param organization_we_vote_id:
     :param image_url_https:
-    :param kind_of_image_twitter_profile:
-    :param kind_of_image_twitter_background:
-    :param kind_of_image_twitter_banner:
-    :param kind_of_image_facebook_profile:
-    :param kind_of_image_facebook_background:
-    :param kind_of_image_maplight:
-    :param kind_of_image_vote_smart:
     :param kind_of_image_ballotpedia_profile:
     :param kind_of_image_campaignx_photo:
+    :param kind_of_image_facebook_background:
+    :param kind_of_image_facebook_profile:
     :param kind_of_image_linkedin_profile:
+    :param kind_of_image_maplight:
+    :param kind_of_image_twitter_background:
+    :param kind_of_image_twitter_banner:
+    :param kind_of_image_twitter_profile:
+    :param kind_of_image_vote_smart:
+    :param kind_of_image_voter_uploaded_profile:
     :param kind_of_image_wikipedia_profile:
     :param kind_of_image_other_source:
     :return:
@@ -2128,35 +2384,7 @@ def check_resized_version_exists(
     }
     we_vote_image_manager = WeVoteImageManager()
 
-    if kind_of_image_twitter_profile:
-        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
-            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
-            twitter_profile_image_url_https=image_url_https)
-    elif kind_of_image_twitter_background:
-        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
-            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
-            twitter_profile_background_image_url_https=image_url_https)
-    elif kind_of_image_twitter_banner:
-        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
-            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
-            twitter_profile_banner_url_https=image_url_https)
-    elif kind_of_image_facebook_profile:
-        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
-            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
-            facebook_profile_image_url_https=image_url_https)
-    elif kind_of_image_facebook_background:
-        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
-            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
-            facebook_background_image_url_https=image_url_https)
-    elif kind_of_image_maplight:
-        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
-            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
-            maplight_image_url_https=image_url_https)
-    elif kind_of_image_vote_smart:
-        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
-            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
-            vote_smart_image_url_https=image_url_https)
-    elif kind_of_image_ballotpedia_profile:
+    if kind_of_image_ballotpedia_profile:
         we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
             voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
             ballotpedia_profile_image_url=image_url_https)
@@ -2164,10 +2392,42 @@ def check_resized_version_exists(
         we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
             campaignx_we_vote_id,
             campaignx_photo_url_https=image_url_https)
+    elif kind_of_image_facebook_background:
+        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
+            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
+            facebook_background_image_url_https=image_url_https)
+    elif kind_of_image_facebook_profile:
+        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
+            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
+            facebook_profile_image_url_https=image_url_https)
     elif kind_of_image_linkedin_profile:
         we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
             voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
             linkedin_profile_image_url=image_url_https)
+    elif kind_of_image_maplight:
+        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
+            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
+            maplight_image_url_https=image_url_https)
+    elif kind_of_image_twitter_banner:
+        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
+            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
+            twitter_profile_banner_url_https=image_url_https)
+    elif kind_of_image_twitter_background:
+        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
+            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
+            twitter_profile_background_image_url_https=image_url_https)
+    elif kind_of_image_twitter_profile:
+        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
+            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
+            twitter_profile_image_url_https=image_url_https)
+    elif kind_of_image_vote_smart:
+        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
+            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
+            vote_smart_image_url_https=image_url_https)
+    elif kind_of_image_voter_uploaded_profile:
+        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
+            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
+            voter_uploaded_profile_image_url_https=image_url_https)
     elif kind_of_image_wikipedia_profile:
         we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
             voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
@@ -2208,23 +2468,24 @@ def cache_resized_image_locally(
         maplight_id=None,
         vote_smart_id=None,
         is_active_version=True,
-        kind_of_image_twitter_profile=False,
-        kind_of_image_twitter_background=False,
-        kind_of_image_twitter_banner=False,
-        kind_of_image_facebook_profile=False,
-        kind_of_image_facebook_background=False,
-        kind_of_image_maplight=False,
-        kind_of_image_vote_smart=False,
-        kind_of_image_issue=False,
         kind_of_image_ballotpedia_profile=False,
         kind_of_image_campaignx_photo=False,
-        kind_of_image_linkedin_profile=False,
-        kind_of_image_wikipedia_profile=False,
-        kind_of_image_other_source=False,
-        kind_of_image_original=False,
+        kind_of_image_facebook_background=False,
+        kind_of_image_facebook_profile=False,
+        kind_of_image_issue=False,
         kind_of_image_large=False,
+        kind_of_image_linkedin_profile=False,
+        kind_of_image_maplight=False,
         kind_of_image_medium=False,
+        kind_of_image_original=False,
+        kind_of_image_other_source=False,
         kind_of_image_tiny=False,
+        kind_of_image_twitter_background=False,
+        kind_of_image_twitter_banner=False,
+        kind_of_image_twitter_profile=False,
+        kind_of_image_vote_smart=False,
+        kind_of_image_voter_uploaded_profile=False,
+        kind_of_image_wikipedia_profile=False,
         image_offset_x=0,
         image_offset_y=0):
     """
@@ -2233,39 +2494,39 @@ def cache_resized_image_locally(
     :param image_url_https:
     :param we_vote_parent_image_id:
     :param voter_we_vote_id:
-    :param campaignx_we_vote_id:
     :param candidate_we_vote_id:
+    :param campaignx_we_vote_id:
     :param organization_we_vote_id:
     :param issue_we_vote_id:
     :param twitter_id:
     :param image_format:
     :param facebook_user_id:
-    :param other_source:                        # can be MapLight or VoteSmart
+    :param other_source:
     :param maplight_id:
     :param vote_smart_id:
     :param is_active_version:
-    :param kind_of_image_twitter_profile:
-    :param kind_of_image_twitter_background:
-    :param kind_of_image_twitter_banner:
-    :param kind_of_image_facebook_profile:
-    :param kind_of_image_facebook_background:
-    :param kind_of_image_maplight:
-    :param kind_of_image_vote_smart:
-    :param kind_of_image_issue:
     :param kind_of_image_ballotpedia_profile:
     :param kind_of_image_campaignx_photo:
-    :param kind_of_image_linkedin_profile:
-    :param kind_of_image_wikipedia_profile:
-    :param kind_of_image_other_source:
-    :param kind_of_image_original:
+    :param kind_of_image_facebook_background:
+    :param kind_of_image_facebook_profile:
+    :param kind_of_image_issue:
     :param kind_of_image_large:
+    :param kind_of_image_linkedin_profile:
+    :param kind_of_image_maplight:
     :param kind_of_image_medium:
+    :param kind_of_image_original:
+    :param kind_of_image_other_source:
     :param kind_of_image_tiny:
-    :param image_offset_x:                      # For Facebook background
-    :param image_offset_y:                      # For Facebook background
+    :param kind_of_image_twitter_background:
+    :param kind_of_image_twitter_banner:
+    :param kind_of_image_twitter_profile:
+    :param kind_of_image_vote_smart:
+    :param kind_of_image_voter_uploaded_profile:
+    :param kind_of_image_wikipedia_profile:
+    :param image_offset_x:
+    :param image_offset_y:
     :return:
     """
-
     success = False
     status = ''
     we_vote_image_created = False
@@ -2286,23 +2547,25 @@ def cache_resized_image_locally(
         campaignx_we_vote_id=campaignx_we_vote_id,
         organization_we_vote_id=organization_we_vote_id,
         issue_we_vote_id=issue_we_vote_id,
-        kind_of_image_twitter_profile=kind_of_image_twitter_profile,
-        kind_of_image_twitter_background=kind_of_image_twitter_background,
-        kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-        kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-        kind_of_image_facebook_background=kind_of_image_facebook_background,
-        kind_of_image_maplight=kind_of_image_maplight,
-        kind_of_image_vote_smart=kind_of_image_vote_smart,
-        kind_of_image_issue=kind_of_image_issue,
         kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
         kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
-        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
-        kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-        kind_of_image_other_source=kind_of_image_other_source,
-        kind_of_image_original=kind_of_image_original,
+        kind_of_image_facebook_background=kind_of_image_facebook_background,
+        kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+        kind_of_image_issue=kind_of_image_issue,
         kind_of_image_large=kind_of_image_large,
+        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+        kind_of_image_maplight=kind_of_image_maplight,
         kind_of_image_medium=kind_of_image_medium,
-        kind_of_image_tiny=kind_of_image_tiny)
+        kind_of_image_original=kind_of_image_original,
+        kind_of_image_other_source=kind_of_image_other_source,
+        kind_of_image_tiny=kind_of_image_tiny,
+        kind_of_image_twitter_background=kind_of_image_twitter_background,
+        kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+        kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+        kind_of_image_vote_smart=kind_of_image_vote_smart,
+        kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
+        kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
+    )
     status += create_we_vote_image_results['status']
     if not create_we_vote_image_results['we_vote_image_saved']:
         error_results = {
@@ -2352,34 +2615,36 @@ def cache_resized_image_locally(
             image_width = PROFILE_IMAGE_TINY_WIDTH
             image_height = PROFILE_IMAGE_TINY_HEIGHT
 
-    if kind_of_image_twitter_profile:
-        image_type = TWITTER_PROFILE_IMAGE_NAME
-    elif kind_of_image_twitter_background:
-        image_type = TWITTER_BACKGROUND_IMAGE_NAME
-    elif kind_of_image_twitter_banner:
-        image_type = TWITTER_BANNER_IMAGE_NAME
-    elif kind_of_image_facebook_profile:
-        image_type = FACEBOOK_PROFILE_IMAGE_NAME
+    if kind_of_image_ballotpedia_profile:
+        image_type = BALLOTPEDIA_IMAGE_NAME
+    elif kind_of_image_campaignx_photo:
+        image_type = CAMPAIGNX_PHOTO_IMAGE_NAME
     elif kind_of_image_facebook_background:
         image_type = FACEBOOK_BACKGROUND_IMAGE_NAME
         image_height = SOCIAL_BACKGROUND_IMAGE_HEIGHT
         image_width = SOCIAL_BACKGROUND_IMAGE_WIDTH
-    elif kind_of_image_maplight:
-        image_type = MAPLIGHT_IMAGE_NAME
-    elif kind_of_image_vote_smart:
-        image_type = VOTE_SMART_IMAGE_NAME
+    elif kind_of_image_facebook_profile:
+        image_type = FACEBOOK_PROFILE_IMAGE_NAME
     elif kind_of_image_issue:
         image_type = ISSUE_IMAGE_NAME
-    elif kind_of_image_ballotpedia_profile:
-        image_type = BALLOTPEDIA_IMAGE_NAME
-    elif kind_of_image_campaignx_photo:
-        image_type = CAMPAIGNX_PHOTO_IMAGE_NAME
     elif kind_of_image_linkedin_profile:
         image_type = LINKEDIN_IMAGE_NAME
-    elif kind_of_image_wikipedia_profile:
-        image_type = WIKIPEDIA_IMAGE_NAME
+    elif kind_of_image_maplight:
+        image_type = MAPLIGHT_IMAGE_NAME
     elif kind_of_image_other_source:
         image_type = other_source
+    elif kind_of_image_twitter_background:
+        image_type = TWITTER_BACKGROUND_IMAGE_NAME
+    elif kind_of_image_twitter_banner:
+        image_type = TWITTER_BANNER_IMAGE_NAME
+    elif kind_of_image_twitter_profile:
+        image_type = TWITTER_PROFILE_IMAGE_NAME
+    elif kind_of_image_vote_smart:
+        image_type = VOTE_SMART_IMAGE_NAME
+    elif kind_of_image_voter_uploaded_profile:
+        image_type = VOTER_UPLOADED_IMAGE_NAME
+    elif kind_of_image_wikipedia_profile:
+        image_type = WIKIPEDIA_IMAGE_NAME
     else:
         image_type = ''
 
@@ -2390,23 +2655,25 @@ def cache_resized_image_locally(
         candidate_we_vote_id=candidate_we_vote_id,
         organization_we_vote_id=organization_we_vote_id,
         issue_we_vote_id=issue_we_vote_id,
-        kind_of_image_twitter_profile=kind_of_image_twitter_profile,
-        kind_of_image_twitter_background=kind_of_image_twitter_background,
-        kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-        kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-        kind_of_image_facebook_background=kind_of_image_facebook_background,
-        kind_of_image_maplight=kind_of_image_maplight,
-        kind_of_image_vote_smart=kind_of_image_vote_smart,
-        kind_of_image_issue=kind_of_image_issue,
         kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
         kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
-        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
-        kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-        kind_of_image_other_source=kind_of_image_other_source,
-        kind_of_image_original=kind_of_image_original,
+        kind_of_image_facebook_background=kind_of_image_facebook_background,
+        kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+        kind_of_image_issue=kind_of_image_issue,
         kind_of_image_large=kind_of_image_large,
+        kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+        kind_of_image_maplight=kind_of_image_maplight,
         kind_of_image_medium=kind_of_image_medium,
-        kind_of_image_tiny=kind_of_image_tiny)
+        kind_of_image_original=kind_of_image_original,
+        kind_of_image_other_source=kind_of_image_other_source,
+        kind_of_image_tiny=kind_of_image_tiny,
+        kind_of_image_twitter_background=kind_of_image_twitter_background,
+        kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+        kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+        kind_of_image_vote_smart=kind_of_image_vote_smart,
+        kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
+        kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
+    )
     for cached_we_vote_image in cached_todays_we_vote_image_list_results['we_vote_image_list']:
         if cached_we_vote_image.same_day_image_version:
             image_versions.append(cached_we_vote_image.same_day_image_version)
@@ -2417,34 +2684,7 @@ def cache_resized_image_locally(
 
     # 2021-05-09 We default to storing all resized images as jpg
     convert_image_to_jpg = True
-    if kind_of_image_facebook_profile or kind_of_image_facebook_background:
-        # image url is valid so store source image of facebook to WeVoteImage
-        save_source_info_results = we_vote_image_manager.save_we_vote_image_facebook_info(
-            we_vote_image, facebook_user_id, image_width, image_height,
-            image_url_https, same_day_image_version, kind_of_image_facebook_profile,
-            kind_of_image_facebook_background)
-    elif kind_of_image_twitter_profile or kind_of_image_twitter_background or kind_of_image_twitter_banner:
-        # image url is valid so store source image of twitter to WeVoteImage
-        save_source_info_results = we_vote_image_manager.save_we_vote_image_twitter_info(
-            we_vote_image, twitter_id, image_width, image_height, image_url_https, same_day_image_version,
-            kind_of_image_twitter_profile, kind_of_image_twitter_background, kind_of_image_twitter_banner)
-        convert_image_to_jpg = False
-    elif kind_of_image_maplight:
-        # image url is valid so store source image of maplight to WeVoteImage
-        save_source_info_results = we_vote_image_manager.save_we_vote_image_maplight_info(
-            we_vote_image, maplight_id, image_width, image_height, image_url_https, same_day_image_version,
-            kind_of_image_maplight)
-    elif kind_of_image_vote_smart:
-        # image url is valid so store source image of maplight to WeVoteImage
-        save_source_info_results = we_vote_image_manager.save_we_vote_image_vote_smart_info(
-            we_vote_image, vote_smart_id, image_width, image_height, image_url_https, same_day_image_version,
-            kind_of_image_vote_smart)
-    elif kind_of_image_issue:
-        # image url is valid so store source image of issue to WeVoteImage
-        save_source_info_results = we_vote_image_manager.save_we_vote_image_issue_info(
-            we_vote_image, image_width, image_height, image_url_https, same_day_image_version)
-        convert_image_to_jpg = False
-    elif kind_of_image_ballotpedia_profile:
+    if kind_of_image_ballotpedia_profile:
         # image url is valid so store source image of ballotpedia to WeVoteImage
         save_source_info_results = we_vote_image_manager.save_we_vote_image_ballotpedia_info(
             we_vote_image, image_width, image_height, image_url_https, same_day_image_version,
@@ -2458,22 +2698,57 @@ def cache_resized_image_locally(
             image_url_https=image_url_https,
             same_day_image_version=same_day_image_version,
         )
+    elif kind_of_image_facebook_profile or kind_of_image_facebook_background:
+        # image url is valid so store source image of facebook to WeVoteImage
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_facebook_info(
+            we_vote_image, facebook_user_id, image_width, image_height,
+            image_url_https, same_day_image_version, kind_of_image_facebook_profile,
+            kind_of_image_facebook_background)
+    elif kind_of_image_issue:
+        # image url is valid so store source image of issue to WeVoteImage
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_issue_info(
+            we_vote_image, image_width, image_height, image_url_https, same_day_image_version)
+        convert_image_to_jpg = False
     elif kind_of_image_linkedin_profile:
         # image url is valid so store source image of linkedin to WeVoteImage
         save_source_info_results = we_vote_image_manager.save_we_vote_image_linkedin_info(
             we_vote_image, image_width, image_height, image_url_https, same_day_image_version,
             kind_of_image_linkedin_profile)
-    elif kind_of_image_wikipedia_profile:
-        # image url is valid so store source image of wikipedia to WeVoteImage
-        save_source_info_results = we_vote_image_manager.save_we_vote_image_wikipedia_info(
-            we_vote_image, image_width, image_height, image_url_https, same_day_image_version,
-            kind_of_image_wikipedia_profile)
+    elif kind_of_image_maplight:
+        # image url is valid so store source image of maplight to WeVoteImage
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_maplight_info(
+            we_vote_image, maplight_id, image_width, image_height, image_url_https, same_day_image_version,
+            kind_of_image_maplight)
     elif kind_of_image_other_source:
         # image url is valid so store source image from other source to WeVoteImage
         save_source_info_results = we_vote_image_manager.save_we_vote_image_other_source_info(
             we_vote_image, image_width, image_height, other_source, image_url_https, same_day_image_version,
             kind_of_image_other_source)
-
+    elif kind_of_image_twitter_profile or kind_of_image_twitter_background or kind_of_image_twitter_banner:
+        # image url is valid so store source image of twitter to WeVoteImage
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_twitter_info(
+            we_vote_image, twitter_id, image_width, image_height, image_url_https, same_day_image_version,
+            kind_of_image_twitter_profile, kind_of_image_twitter_background, kind_of_image_twitter_banner)
+        convert_image_to_jpg = False
+    elif kind_of_image_vote_smart:
+        # image url is valid so store source image of maplight to WeVoteImage
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_vote_smart_info(
+            we_vote_image, vote_smart_id, image_width, image_height, image_url_https, same_day_image_version,
+            kind_of_image_vote_smart)
+    elif kind_of_image_voter_uploaded_profile:
+        # Update this new image with width, height, original url and version number
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_voter_uploaded_info(
+            we_vote_image=we_vote_image,
+            image_width=image_width,
+            image_height=image_height,
+            image_url_https=image_url_https,
+            same_day_image_version=same_day_image_version,
+        )
+    elif kind_of_image_wikipedia_profile:
+        # image url is valid so store source image of wikipedia to WeVoteImage
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_wikipedia_info(
+            we_vote_image, image_width, image_height, image_url_https, same_day_image_version,
+            kind_of_image_wikipedia_profile)
     else:
         save_source_info_results = {
             'status':           "KIND_OF_IMAGE_INVALID ",
@@ -2634,36 +2909,38 @@ def create_resized_images(
         campaignx_we_vote_id=None,
         candidate_we_vote_id=None,
         organization_we_vote_id=None,
+        ballotpedia_profile_image_url=None,
+        campaignx_photo_url_https=None,
+        facebook_background_image_url_https=None,
+        facebook_profile_image_url_https=None,
+        linkedin_profile_image_url=None,
+        maplight_image_url_https=None,
+        other_source_image_url=None,
         twitter_profile_image_url_https=None,
         twitter_profile_background_image_url_https=None,
         twitter_profile_banner_url_https=None,
-        facebook_profile_image_url_https=None,
-        facebook_background_image_url_https=None,
-        maplight_image_url_https=None,
         vote_smart_image_url_https=None,
-        ballotpedia_profile_image_url=None,
-        campaignx_photo_url_https=None,
-        linkedin_profile_image_url=None,
-        wikipedia_profile_image_url=None,
-        other_source_image_url=None):
+        voter_uploaded_profile_image_url_https=None,
+        wikipedia_profile_image_url=None):
     """
     Create resized images
     :param voter_we_vote_id:
     :param campaignx_we_vote_id:
     :param candidate_we_vote_id:
     :param organization_we_vote_id:
+    :param ballotpedia_profile_image_url:
+    :param campaignx_photo_url_https:
+    :param facebook_background_image_url_https:
+    :param facebook_profile_image_url_https:
+    :param linkedin_profile_image_url:
+    :param maplight_image_url_https:
+    :param other_source_image_url:
     :param twitter_profile_image_url_https:
     :param twitter_profile_background_image_url_https:
     :param twitter_profile_banner_url_https:
-    :param facebook_profile_image_url_https:
-    :param facebook_background_image_url_https:
-    :param maplight_image_url_https:
     :param vote_smart_image_url_https:
-    :param ballotpedia_profile_image_url:
-    :param campaignx_photo_url_https:
-    :param linkedin_profile_image_url:
+    :param voter_uploaded_profile_image_url_https:
     :param wikipedia_profile_image_url:
-    :param other_source_image_url:
     :return:
     """
     cached_master_image_url = None
@@ -2678,20 +2955,21 @@ def create_resized_images(
         campaignx_we_vote_id=campaignx_we_vote_id,
         candidate_we_vote_id=candidate_we_vote_id,
         organization_we_vote_id=organization_we_vote_id,
-        twitter_profile_image_url_https=twitter_profile_image_url_https,
-        twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
-        twitter_profile_banner_url_https=twitter_profile_banner_url_https,
-        facebook_profile_image_url_https=facebook_profile_image_url_https,
-        facebook_background_image_url_https=facebook_background_image_url_https,
-        maplight_image_url_https=maplight_image_url_https,
-        vote_smart_image_url_https=vote_smart_image_url_https,
         ballotpedia_profile_image_url=ballotpedia_profile_image_url,
         campaignx_photo_url_https=campaignx_photo_url_https,
+        facebook_background_image_url_https=facebook_background_image_url_https,
+        facebook_profile_image_url_https=facebook_profile_image_url_https,
         linkedin_profile_image_url=linkedin_profile_image_url,
-        wikipedia_profile_image_url=wikipedia_profile_image_url,
+        maplight_image_url_https=maplight_image_url_https,
         other_source_image_url=other_source_image_url,
+        twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+        twitter_profile_banner_url_https=twitter_profile_banner_url_https,
+        twitter_profile_image_url_https=twitter_profile_image_url_https,
+        vote_smart_image_url_https=vote_smart_image_url_https,
+        voter_uploaded_profile_image_url_https=voter_uploaded_profile_image_url_https,
+        wikipedia_profile_image_url=wikipedia_profile_image_url,
         kind_of_image_original=True)
-    if cached_we_vote_image_results['success']:
+    if cached_we_vote_image_results['we_vote_image_found']:
         cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
         cached_master_image_url = cached_we_vote_image.we_vote_image_url
 
@@ -2704,18 +2982,19 @@ def create_resized_images(
                 campaignx_we_vote_id=campaignx_we_vote_id,
                 candidate_we_vote_id=candidate_we_vote_id,
                 organization_we_vote_id=organization_we_vote_id,
-                twitter_profile_image_url_https=twitter_profile_image_url_https,
-                twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
-                twitter_profile_banner_url_https=twitter_profile_banner_url_https,
-                facebook_profile_image_url_https=facebook_profile_image_url_https,
-                facebook_background_image_url_https=facebook_background_image_url_https,
-                maplight_image_url_https=maplight_image_url_https,
-                vote_smart_image_url_https=vote_smart_image_url_https,
                 ballotpedia_profile_image_url=ballotpedia_profile_image_url,
                 campaignx_photo_url_https=campaignx_photo_url_https,
-                linkedin_profile_image_url=linkedin_profile_image_url,
-                wikipedia_profile_image_url=wikipedia_profile_image_url,
                 other_source_image_url=other_source_image_url,
+                facebook_background_image_url_https=facebook_background_image_url_https,
+                facebook_profile_image_url_https=facebook_profile_image_url_https,
+                linkedin_profile_image_url=linkedin_profile_image_url,
+                maplight_image_url_https=maplight_image_url_https,
+                twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+                twitter_profile_banner_url_https=twitter_profile_banner_url_https,
+                twitter_profile_image_url_https=twitter_profile_image_url_https,
+                vote_smart_image_url_https=vote_smart_image_url_https,
+                voter_uploaded_profile_image_url_https=voter_uploaded_profile_image_url_https,
+                wikipedia_profile_image_url=wikipedia_profile_image_url,
                 kind_of_image_large=True)
             if cached_resized_we_vote_image_results['success']:
                 cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
@@ -2728,18 +3007,19 @@ def create_resized_images(
                 campaignx_we_vote_id=campaignx_we_vote_id,
                 candidate_we_vote_id=candidate_we_vote_id,
                 organization_we_vote_id=organization_we_vote_id,
-                twitter_profile_image_url_https=twitter_profile_image_url_https,
-                twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
-                twitter_profile_banner_url_https=twitter_profile_banner_url_https,
-                facebook_profile_image_url_https=facebook_profile_image_url_https,
-                facebook_background_image_url_https=facebook_background_image_url_https,
-                maplight_image_url_https=maplight_image_url_https,
-                vote_smart_image_url_https=vote_smart_image_url_https,
                 ballotpedia_profile_image_url=ballotpedia_profile_image_url,
                 campaignx_photo_url_https=campaignx_photo_url_https,
+                facebook_background_image_url_https=facebook_background_image_url_https,
+                facebook_profile_image_url_https=facebook_profile_image_url_https,
                 linkedin_profile_image_url=linkedin_profile_image_url,
-                wikipedia_profile_image_url=wikipedia_profile_image_url,
+                maplight_image_url_https=maplight_image_url_https,
                 other_source_image_url=other_source_image_url,
+                twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+                twitter_profile_banner_url_https=twitter_profile_banner_url_https,
+                twitter_profile_image_url_https=twitter_profile_image_url_https,
+                vote_smart_image_url_https=vote_smart_image_url_https,
+                voter_uploaded_profile_image_url_https=voter_uploaded_profile_image_url_https,
+                wikipedia_profile_image_url=wikipedia_profile_image_url,
                 kind_of_image_medium=True)
             if cached_resized_we_vote_image_results['success']:
                 cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
@@ -2752,17 +3032,19 @@ def create_resized_images(
                 campaignx_we_vote_id=campaignx_we_vote_id,
                 candidate_we_vote_id=candidate_we_vote_id,
                 organization_we_vote_id=organization_we_vote_id,
-                twitter_profile_image_url_https=twitter_profile_image_url_https,
-                twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
-                twitter_profile_banner_url_https=twitter_profile_banner_url_https,
-                facebook_profile_image_url_https=facebook_profile_image_url_https,
-                facebook_background_image_url_https=facebook_background_image_url_https,
-                maplight_image_url_https=maplight_image_url_https,
-                vote_smart_image_url_https=vote_smart_image_url_https,
                 ballotpedia_profile_image_url=ballotpedia_profile_image_url,
                 campaignx_photo_url_https=campaignx_photo_url_https,
+                facebook_background_image_url_https=facebook_background_image_url_https,
+                facebook_profile_image_url_https=facebook_profile_image_url_https,
                 linkedin_profile_image_url=linkedin_profile_image_url,
-                wikipedia_profile_image_url=wikipedia_profile_image_url, other_source_image_url=other_source_image_url,
+                maplight_image_url_https=maplight_image_url_https,
+                other_source_image_url=other_source_image_url,
+                twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+                twitter_profile_banner_url_https=twitter_profile_banner_url_https,
+                twitter_profile_image_url_https=twitter_profile_image_url_https,
+                vote_smart_image_url_https=vote_smart_image_url_https,
+                voter_uploaded_profile_image_url_https=voter_uploaded_profile_image_url_https,
+                wikipedia_profile_image_url=wikipedia_profile_image_url,
                 kind_of_image_tiny=True)
             if cached_resized_we_vote_image_results['success']:
                 cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
