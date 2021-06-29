@@ -75,6 +75,17 @@ MAINTENANCE_STATUS_FLAGS_TASK_ONE = 1
 MAINTENANCE_STATUS_FLAGS_TASK_TWO = 2
 MAINTENANCE_STATUS_FLAGS_COMPLETED = MAINTENANCE_STATUS_FLAGS_TASK_ONE + MAINTENANCE_STATUS_FLAGS_TASK_TWO
 
+PROFILE_IMAGE_TYPE_FACEBOOK = 'FACEBOOK'
+PROFILE_IMAGE_TYPE_TWITTER = 'TWITTER'
+PROFILE_IMAGE_TYPE_UNKNOWN = 'UNKNOWN'
+PROFILE_IMAGE_TYPE_UPLOADED = 'UPLOADED'
+PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES = (
+    (PROFILE_IMAGE_TYPE_FACEBOOK, 'Facebook'),
+    (PROFILE_IMAGE_TYPE_TWITTER, 'Twitter'),
+    (PROFILE_IMAGE_TYPE_UNKNOWN, 'Unknown'),
+    (PROFILE_IMAGE_TYPE_UPLOADED, 'Uploaded'),
+)
+
 
 # See AUTH_USER_MODEL in config/base.py
 class VoterManager(BaseUserManager):
@@ -1791,16 +1802,34 @@ class VoterManager(BaseUserManager):
         return results
 
     def update_voter_by_id(
-            self, voter_id, facebook_email=False, facebook_profile_image_url_https=False,
-            first_name=False, middle_name=False, last_name=False,
+            self,
+            voter_id,
+            facebook_email=False,
+            facebook_profile_image_url_https=False,
+            first_name=False,
+            middle_name=False,
+            last_name=False,
             interface_status_flags=False,
-            flag_integer_to_set=False, flag_integer_to_unset=False,
+            flag_integer_to_set=False,
+            flag_integer_to_unset=False,
             notification_settings_flags=False,
-            notification_flag_integer_to_set=False, notification_flag_integer_to_unset=False,
+            notification_flag_integer_to_set=False,
+            notification_flag_integer_to_unset=False,
+            profile_image_type_currently_active=False,
             twitter_profile_image_url_https=False,
+            we_vote_hosted_profile_facebook_image_url_large=False,
+            we_vote_hosted_profile_facebook_image_url_medium=False,
+            we_vote_hosted_profile_facebook_image_url_tiny=False,
             we_vote_hosted_profile_image_url_large=False,
             we_vote_hosted_profile_image_url_medium=False,
-            we_vote_hosted_profile_image_url_tiny=False):
+            we_vote_hosted_profile_image_url_tiny=False,
+            we_vote_hosted_profile_twitter_image_url_large=False,
+            we_vote_hosted_profile_twitter_image_url_medium=False,
+            we_vote_hosted_profile_twitter_image_url_tiny=False,
+            we_vote_hosted_profile_uploaded_image_url_large=False,
+            we_vote_hosted_profile_uploaded_image_url_medium=False,
+            we_vote_hosted_profile_uploaded_image_url_tiny=False,
+    ):
         voter_updated = False
         success = False
         results = self.retrieve_voter(voter_id)
@@ -1810,16 +1839,33 @@ class VoterManager(BaseUserManager):
             voter = results['voter']
 
             results = self.update_voter_by_object(
-                voter, facebook_email, facebook_profile_image_url_https,
-                first_name, middle_name, last_name,
-                interface_status_flags,
-                flag_integer_to_set, flag_integer_to_unset,
-                notification_settings_flags,
-                notification_flag_integer_to_set, notification_flag_integer_to_unset,
-                twitter_profile_image_url_https,
-                we_vote_hosted_profile_image_url_large,
-                we_vote_hosted_profile_image_url_medium,
-                we_vote_hosted_profile_image_url_tiny)
+                voter,
+                facebook_email=facebook_email,
+                facebook_profile_image_url_https=facebook_profile_image_url_https,
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name,
+                interface_status_flags=interface_status_flags,
+                flag_integer_to_set=flag_integer_to_set,
+                flag_integer_to_unset=flag_integer_to_unset,
+                notification_settings_flags=notification_settings_flags,
+                notification_flag_integer_to_set=notification_flag_integer_to_set,
+                notification_flag_integer_to_unset=notification_flag_integer_to_unset,
+                profile_image_type_currently_active=profile_image_type_currently_active,
+                twitter_profile_image_url_https=twitter_profile_image_url_https,
+                we_vote_hosted_profile_facebook_image_url_large=we_vote_hosted_profile_facebook_image_url_large,
+                we_vote_hosted_profile_facebook_image_url_medium=we_vote_hosted_profile_facebook_image_url_medium,
+                we_vote_hosted_profile_facebook_image_url_tiny=we_vote_hosted_profile_facebook_image_url_tiny,
+                we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
+                we_vote_hosted_profile_twitter_image_url_large=we_vote_hosted_profile_twitter_image_url_large,
+                we_vote_hosted_profile_twitter_image_url_medium=we_vote_hosted_profile_twitter_image_url_medium,
+                we_vote_hosted_profile_twitter_image_url_tiny=we_vote_hosted_profile_twitter_image_url_tiny,
+                we_vote_hosted_profile_uploaded_image_url_large=we_vote_hosted_profile_uploaded_image_url_large,
+                we_vote_hosted_profile_uploaded_image_url_medium=we_vote_hosted_profile_uploaded_image_url_medium,
+                we_vote_hosted_profile_uploaded_image_url_tiny=we_vote_hosted_profile_uploaded_image_url_tiny,
+            )
             success = results['success']
             status += results['status']
             voter_updated = results['voter_updated']
@@ -1835,24 +1881,40 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def update_voter_name_by_object(self, voter, first_name='', last_name=''):
-        facebook_email = False
-        facebook_profile_image_url_https = False
-        middle_name = False
-        return self.update_voter_by_object(voter, facebook_email, facebook_profile_image_url_https,
-                                           first_name, middle_name, last_name)
+    def update_voter_name_by_object(self, voter, first_name=False, last_name=False):
+        return self.update_voter_by_object(
+            voter,
+            first_name=first_name,
+            last_name=last_name)
 
     def update_voter_by_object(
-            self, voter, facebook_email=False, facebook_profile_image_url_https=False,
-            first_name=False, middle_name=False, last_name=False,
+            self,
+            voter,
+            facebook_email=False,
+            facebook_profile_image_url_https=False,
+            first_name=False,
+            middle_name=False,
+            last_name=False,
             interface_status_flags=False,
-            flag_integer_to_set=False, flag_integer_to_unset=False,
+            flag_integer_to_set=False,
+            flag_integer_to_unset=False,
             notification_settings_flags=False,
-            notification_flag_integer_to_set=False, notification_flag_integer_to_unset=False,
+            notification_flag_integer_to_set=False,
+            notification_flag_integer_to_unset=False,
+            profile_image_type_currently_active=False,
             twitter_profile_image_url_https=False,
+            we_vote_hosted_profile_facebook_image_url_large=False,
+            we_vote_hosted_profile_facebook_image_url_medium=False,
+            we_vote_hosted_profile_facebook_image_url_tiny=False,
             we_vote_hosted_profile_image_url_large=False,
             we_vote_hosted_profile_image_url_medium=False,
             we_vote_hosted_profile_image_url_tiny=False,
+            we_vote_hosted_profile_twitter_image_url_large=False,
+            we_vote_hosted_profile_twitter_image_url_medium=False,
+            we_vote_hosted_profile_twitter_image_url_tiny=False,
+            we_vote_hosted_profile_uploaded_image_url_large=False,
+            we_vote_hosted_profile_uploaded_image_url_medium=False,
+            we_vote_hosted_profile_uploaded_image_url_tiny=False,
             data_to_preserve=False):
         status = ""
         voter_updated = False
@@ -1883,17 +1945,55 @@ class VoterManager(BaseUserManager):
                 if last_name is not False:
                     voter.last_name = last_name
                     should_save_voter = True
+                if profile_image_type_currently_active is not False:
+                    voter.profile_image_type_currently_active = profile_image_type_currently_active
+                    should_save_voter = True
                 if twitter_profile_image_url_https is not False:
                     voter.last_name = last_name
                     should_save_voter = True
-                if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                if we_vote_hosted_profile_facebook_image_url_large is not False:
+                    voter.we_vote_hosted_profile_facebook_image_url_large = \
+                        we_vote_hosted_profile_facebook_image_url_large
+                    should_save_voter = True
+                if we_vote_hosted_profile_facebook_image_url_medium is not False:
+                    voter.we_vote_hosted_profile_facebook_image_url_medium = \
+                        we_vote_hosted_profile_facebook_image_url_medium
+                    should_save_voter = True
+                if we_vote_hosted_profile_facebook_image_url_tiny is not False:
+                    voter.we_vote_hosted_profile_facebook_image_url_tiny = \
+                        we_vote_hosted_profile_facebook_image_url_tiny
+                    should_save_voter = True
+                if we_vote_hosted_profile_image_url_large is not False:
                     voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
                     should_save_voter = True
-                if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                if we_vote_hosted_profile_image_url_medium is not False:
                     voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
                     should_save_voter = True
-                if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                if we_vote_hosted_profile_image_url_tiny is not False:
                     voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                    should_save_voter = True
+                if we_vote_hosted_profile_twitter_image_url_large is not False:
+                    voter.we_vote_hosted_profile_twitter_image_url_large = \
+                        we_vote_hosted_profile_twitter_image_url_large
+                    should_save_voter = True
+                if we_vote_hosted_profile_twitter_image_url_medium is not False:
+                    voter.we_vote_hosted_profile_twitter_image_url_medium = \
+                        we_vote_hosted_profile_twitter_image_url_medium
+                    should_save_voter = True
+                if we_vote_hosted_profile_twitter_image_url_tiny is not False:
+                    voter.we_vote_hosted_profile_twitter_image_url_tiny = we_vote_hosted_profile_twitter_image_url_tiny
+                    should_save_voter = True
+                if we_vote_hosted_profile_uploaded_image_url_large is not False:
+                    voter.we_vote_hosted_profile_uploaded_image_url_large = \
+                        we_vote_hosted_profile_uploaded_image_url_large
+                    should_save_voter = True
+                if we_vote_hosted_profile_uploaded_image_url_medium is not False:
+                    voter.we_vote_hosted_profile_uploaded_image_url_medium = \
+                        we_vote_hosted_profile_uploaded_image_url_medium
+                    should_save_voter = True
+                if we_vote_hosted_profile_uploaded_image_url_tiny is not False:
+                    voter.we_vote_hosted_profile_uploaded_image_url_tiny = \
+                        we_vote_hosted_profile_uploaded_image_url_tiny
                     should_save_voter = True
                 if positive_value_exists(data_to_preserve):
                     voter.data_to_preserve = data_to_preserve
@@ -1929,7 +2029,7 @@ class VoterManager(BaseUserManager):
                 success = True
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
-                status += "UNABLE_TO_UPDATE_VOTER "
+                status += "UNABLE_TO_UPDATE_VOTER: " + str(e) + " "
                 success = False
                 voter_updated = False
 
@@ -2184,12 +2284,25 @@ class Voter(AbstractBaseUser):
     twitter_screen_name = models.CharField(
         verbose_name='twitter screen name / handle', max_length=255, null=True, unique=False)
     twitter_profile_image_url_https = models.TextField(verbose_name='url of logo from twitter', blank=True, null=True)
-    we_vote_hosted_profile_image_url_large = models.TextField(
-        verbose_name='we vote hosted large image url', blank=True, null=True)
-    we_vote_hosted_profile_image_url_medium = models.TextField(
-        verbose_name='we vote hosted medium image url', blank=True, null=True)
-    we_vote_hosted_profile_image_url_tiny = models.TextField(
-        verbose_name='we vote hosted tiny image url', blank=True, null=True)
+    # Image we are using as the profile photo (could be sourced from Twitter, Facebook or uploaded directly by voter)
+    we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
+    # Which voter image is currently active?
+    profile_image_type_currently_active = models.CharField(
+        max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
+    # Image for voter from Facebook
+    we_vote_hosted_profile_facebook_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_facebook_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_facebook_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for voter from Twitter
+    we_vote_hosted_profile_twitter_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_twitter_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_twitter_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image uploaded to We Vote from voter
+    we_vote_hosted_profile_uploaded_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_uploaded_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_uploaded_image_url_tiny = models.TextField(blank=True, null=True)
 
     twitter_request_token = models.TextField(verbose_name='twitter request token', null=True, blank=True)
     twitter_request_secret = models.TextField(verbose_name='twitter request secret', null=True, blank=True)

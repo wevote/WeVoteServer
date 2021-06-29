@@ -1328,7 +1328,6 @@ class ActivityManager(models.Manager):
             }
             return results
 
-
         try:
             updated_count = ActivityComment.objects.all().filter(
                 commenter_voter_we_vote_id__iexact=speaker_voter_we_vote_id,

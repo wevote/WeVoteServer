@@ -36,6 +36,11 @@ def voter_update_doc_template_values(url_root):
             'description':  'The first name to update to.',
         },
         {
+            'name':         'first_name_changed',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Are we trying to change the voter\'s first name?',
+        },
+        {
             'name':         'middle_name',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The middle name to update to.',
@@ -44,6 +49,11 @@ def voter_update_doc_template_values(url_root):
             'name':         'last_name',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The last name (family name) to update to.',
+        },
+        {
+            'name':         'last_name_changed',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Are we trying to change the voter\'s last name?',
         },
         {
             'name':         'twitter_profile_image_url_https',
@@ -68,21 +78,31 @@ def voter_update_doc_template_values(url_root):
                             'in interface_status_flags bit',
         },
         {
-            'name': 'notification_settings_flags',
-            'value': 'integer',  # boolean, integer, long, string
-            'description': 'An integer whose bits represent several flags for the user, such as the ',
+            'name':         'notification_settings_flags',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'An integer whose bits represent several flags for the user, such as the ',
         },
         {
-            'name': 'notification_flag_integer_to_set',
-            'value': 'integer',  # boolean, integer, long, string
-            'description': 'Sets the corresponding bit represented by this integer\'s bit, '
-                           'in notification_settings_flags bit',
+            'name':         'notification_flag_integer_to_set',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'Sets the corresponding bit represented by this integer\'s bit, '
+                            'in notification_settings_flags bit',
         },
         {
-            'name': 'notification_flag_integer_to_unset',
-            'value': 'integer',  # boolean, integer, long, string
-            'description': 'Unsets the corresponding bit represented by this integer\'s bit, '
-                           'in notification_settings_flags bit',
+            'name':         'notification_flag_integer_to_unset',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'Unsets the corresponding bit represented by this integer\'s bit, '
+                            'in notification_settings_flags bit',
+        },
+        {
+            'name':         'voter_photo_from_file_reader',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The binary photo uploaded by voter.',
+        },
+        {
+            'name':         'voter_photo_changed',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Are we trying to change the voter\'s uploaded photo?',
         },
     ]
 

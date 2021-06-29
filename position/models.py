@@ -135,7 +135,7 @@ class PositionEntered(models.Model):
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the organization", max_length=255, null=True,
         blank=True, unique=False, db_index=True)
-    is_private_citizen = models.NullBooleanField()
+    is_private_citizen = models.BooleanField(null=True)
 
     # The voter expressing the opinion
     # Note that for organizations who have friends, the voter_we_vote_id is what we use to link to the friends
@@ -550,7 +550,7 @@ class PositionForFriends(models.Model):
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the organization", max_length=255, null=True,
         blank=True, unique=False, db_index=True)
-    is_private_citizen = models.NullBooleanField()
+    is_private_citizen = models.BooleanField(null=True)
 
     # The voter expressing the opinion
     # Note that for organizations who have friends, the voter_we_vote_id is what we use to link to the friends.
