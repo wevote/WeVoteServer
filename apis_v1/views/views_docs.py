@@ -20,7 +20,7 @@ from apis_v1.documentation_source import \
     friend_invitation_by_email_verify_doc, friend_invitation_by_we_vote_id_send_doc, \
     friend_invitation_by_facebook_send_doc, friend_invitation_by_facebook_verify_doc, \
     friend_invitation_information_doc, \
-    friend_invite_response_doc, friend_list_doc, issue_descriptions_retrieve_doc, issue_follow_doc, \
+    friend_invite_response_doc, friend_list_doc, friend_lists_all_doc, issue_descriptions_retrieve_doc, issue_follow_doc, \
     issues_followed_retrieve_doc, issues_retrieve_doc, issues_under_ballot_items_retrieve_doc, issues_sync_out_doc, \
     issues_linked_to_organization_doc, issues_to_link_to_for_organization_doc, \
     measure_retrieve_doc, measures_sync_out_doc, measure_list_for_upcoming_elections_retrieve_doc, \
@@ -515,6 +515,16 @@ def friend_list_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = friend_list_doc.friend_list_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def friend_lists_all_doc_view(request):
+    """
+    Show documentation about friendList
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = friend_lists_all_doc.friend_lists_all_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

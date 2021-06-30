@@ -5,7 +5,7 @@ from .models import ACCEPTED, FriendInvitationVoterLink, FriendManager, CURRENT_
     DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, FRIEND_INVITATIONS_PROCESSED, \
     FRIEND_INVITATIONS_SENT_BY_ME, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION, \
     IGNORE_SUGGESTION, SUGGESTED_FRIEND_LIST, \
-    FRIENDS_IN_COMMON, UNFRIEND_CURRENT_FRIEND
+    UNFRIEND_CURRENT_FRIEND
 from config.base import get_environment_variable
 from email_outbound.controllers import schedule_email_with_email_outbound_description, schedule_verification_email
 from email_outbound.models import EmailAddress, EmailManager, FRIEND_ACCEPTED_INVITATION_TEMPLATE, \
@@ -1890,50 +1890,248 @@ def friend_list_for_api(voter_device_id,  # friendList
     # if kind_of_list in (
     # CURRENT_FRIENDS, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, FRIENDS_IN_COMMON,
     # IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIEND_LIST):
-    friend_manager = FriendManager()
-    position_metrics_manager = PositionMetricsManager()
     if kind_of_list_we_are_looking_for == CURRENT_FRIENDS:
-        status += "KIND_OF_LIST-CURRENT_FRIENDS "
-        retrieve_current_friends_as_voters_results = friend_manager.retrieve_current_friends_as_voters(voter.we_vote_id)
-        success = retrieve_current_friends_as_voters_results['success']
-        status += retrieve_current_friends_as_voters_results['status']
-        if retrieve_current_friends_as_voters_results['friend_list_found']:
-            current_friend_list = retrieve_current_friends_as_voters_results['friend_list']
-            for friend_voter in current_friend_list:
-                if not positive_value_exists(friend_voter.linked_organization_we_vote_id):
-                    # We need to retrieve another voter object that can be saved
-                    organization_manager = OrganizationManager()
-                    voter_results = voter_manager.retrieve_voter_by_we_vote_id(friend_voter.we_vote_id, read_only=False)
-                    if voter_results['voter_found']:
-                        friend_voter = voter_results['voter']
-                        heal_results = \
-                            organization_manager.heal_voter_missing_linked_organization_we_vote_id(friend_voter)
-                        if heal_results['voter_healed']:
-                            status += "FRIEND_HEALED-MISSING_LINKED_ORGANIZATION_WE_VOTE_ID: " \
-                                      "" + friend_voter.we_vote_id + " "
-                            friend_voter = heal_results['voter']
-                            # Now we need to make sure the friend entry gets updated
-                            friend_results = friend_manager.retrieve_current_friend(
-                                voter.we_vote_id, friend_voter.we_vote_id, read_only=False)
-                            if friend_results['current_friend_found']:
-                                status += "HEAL_CURRENT_FRIEND-FOUND "
-                                current_friend = friend_results['current_friend']
-                                heal_current_friend(current_friend)
-                            else:
-                                status += "COULD_NOT_RETRIEVE_CURRENT_FRIEND_FOR_HEALING "
+        friend_list, status, success = get_current_friends_list(status, voter)
+    elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_PROCESSED:
+        friend_list, status, success = get_friend_invitations_processed(status, voter)
+    elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_SENT_TO_ME:
+        friend_list, status, success = get_friend_invitations_sent_to_me(status, voter)
+    elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_SENT_BY_ME:
+        friend_list, status, success = get_friend_invitations_sent_by_me(status, voter)
+    elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION:
+        friend_list, status, success = get_friend_invitations_waiting_for_verification(status, voter)
+    elif kind_of_list_we_are_looking_for == SUGGESTED_FRIEND_LIST:
+        friend_list, status, success = get_suggested_friends_list(status, voter)
+    else:
+        status += kind_of_list_we_are_looking_for + " KIND_OF_LIST_NOT_IMPLEMENTED_YET "
+
+    friend_list_found = True if len(friend_list) else False
+
+    results = {
+        'success':              success,
+        'status':               status,
+        'voter_device_id':      voter_device_id,
+        'state_code':           state_code,
+        'kind_of_list':         kind_of_list_we_are_looking_for,
+        'friend_list_found':    friend_list_found,
+        'friend_list':          friend_list,
+    }
+    return results
+
+def friend_lists_all_for_api(voter_device_id,  # friendListsAll
+                             state_code=''):
+    """
+    friendLists API Endpoint
+    :param voter_device_id:
+    :param state_code:
+    :return:
+    """
+    status = ""
+    success = False
+    friend_list = []
+
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        error_results = {
+            'status':                               results['status'],
+            'success':                              False,
+            'voter_device_id':                      voter_device_id,
+            'state_code':                           state_code,
+            'current_friends':                      [],
+            'invitations_processed':                [],
+            'invitations_sent_to_me':               [],
+            'invitations_sent_by_me':               [],
+            'invitations_waiting_for_verify':       [],
+            'suggested_friends':                    [],
+        }
+        return error_results
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = voter_results['voter_id']
+    if not positive_value_exists(voter_id):
+        error_results = {
+            'status':                           "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success':                          False,
+            'voter_device_id':                  voter_device_id,
+            'state_code':                       state_code,
+            'current_friends':                  [],
+            'invitations_processed':            [],
+            'invitations_sent_to_me':           [],
+            'invitations_sent_by_me':           [],
+            'invitations_waiting_for_verify':   [],
+            'suggested_friends':                [],
+        }
+        return error_results
+    voter = voter_results['voter']
+
+    current_friends, status, success = get_current_friends_list(status, voter)
+    invitations_processed, status, success = get_friend_invitations_processed(status, voter)
+    invitations_sent_to_me, status, success = get_friend_invitations_sent_to_me(status, voter)
+    invitations_sent_by_me, status, success = get_friend_invitations_sent_by_me(status, voter)
+    invitations_waiting_for_verify, status, success = get_friend_invitations_waiting_for_verification(status, voter)
+    suggested_friends, status, success = get_suggested_friends_list(status, voter)
+
+    results = {
+        'success':                          success,
+        'status':                           status,          # This is not very useful, but not really needed
+        'voter_device_id':                  voter_device_id,
+        'state_code':                       state_code,
+        'current_friends':                  current_friends,
+        'invitations_processed':            invitations_processed,
+        'invitations_sent_to_me':           invitations_sent_to_me,
+        'invitations_sent_by_me':           invitations_sent_by_me,
+        'invitations_waiting_for_verify':   invitations_waiting_for_verify,
+        'suggested_friends':                suggested_friends,
+    }
+    return results
+
+
+def get_current_friends_list(status, voter):
+    friend_manager = FriendManager()
+    voter_manager = VoterManager()
+    position_metrics_manager = PositionMetricsManager()
+    friend_list = []
+    status += "KIND_OF_LIST-CURRENT_FRIENDS "
+    retrieve_current_friends_as_voters_results = friend_manager.retrieve_current_friends_as_voters(voter.we_vote_id)
+    success = retrieve_current_friends_as_voters_results['success']
+    status += retrieve_current_friends_as_voters_results['status']
+    if retrieve_current_friends_as_voters_results['friend_list_found']:
+        current_friend_list = retrieve_current_friends_as_voters_results['friend_list']
+        for friend_voter in current_friend_list:
+            if not positive_value_exists(friend_voter.linked_organization_we_vote_id):
+                # We need to retrieve another voter object that can be saved
+                organization_manager = OrganizationManager()
+                voter_results = voter_manager.retrieve_voter_by_we_vote_id(friend_voter.we_vote_id, read_only=False)
+                if voter_results['voter_found']:
+                    friend_voter = voter_results['voter']
+                    heal_results = \
+                        organization_manager.heal_voter_missing_linked_organization_we_vote_id(friend_voter)
+                    if heal_results['voter_healed']:
+                        status += "FRIEND_HEALED-MISSING_LINKED_ORGANIZATION_WE_VOTE_ID: " \
+                                  "" + friend_voter.we_vote_id + " "
+                        friend_voter = heal_results['voter']
+                        # Now we need to make sure the friend entry gets updated
+                        friend_results = friend_manager.retrieve_current_friend(
+                            voter.we_vote_id, friend_voter.we_vote_id, read_only=False)
+                        if friend_results['current_friend_found']:
+                            status += "HEAL_CURRENT_FRIEND-FOUND "
+                            current_friend = friend_results['current_friend']
+                            heal_current_friend(current_friend)
                         else:
-                            status += "VOTER_COULD_NOT_BE_HEALED " + heal_results['status']
+                            status += "COULD_NOT_RETRIEVE_CURRENT_FRIEND_FOR_HEALING "
                     else:
-                        status += "COULD_NOT_RETRIEVE_VOTER_THAT_CAN_BE_SAVED " + voter_results['status']
-                mutual_friends = friend_manager.fetch_mutual_friends_count(voter.we_vote_id, friend_voter.we_vote_id)
+                        status += "VOTER_COULD_NOT_BE_HEALED " + heal_results['status']
+                else:
+                    status += "COULD_NOT_RETRIEVE_VOTER_THAT_CAN_BE_SAVED " + voter_results['status']
+            mutual_friends = friend_manager.fetch_mutual_friends_count(voter.we_vote_id, friend_voter.we_vote_id)
+            positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
+            one_friend = {
+                "voter_we_vote_id":                 friend_voter.we_vote_id,
+                "voter_date_last_changed":          friend_voter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+                "voter_display_name":               friend_voter.get_full_name(),
+                "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
+                    if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
+                    else friend_voter.voter_photo_url(),
+                'voter_photo_url_medium':           friend_voter.we_vote_hosted_profile_image_url_medium,
+                'voter_photo_url_tiny':             friend_voter.we_vote_hosted_profile_image_url_tiny,
+                "voter_email_address":              friend_voter.email,
+                "voter_twitter_handle":             friend_voter.twitter_screen_name,
+                "voter_twitter_description":        "",  # To be implemented
+                "voter_twitter_followers_count":    0,  # To be implemented
+                "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
+                "voter_state_code":                 "",  # To be implemented
+                "invitation_status":                "",  # Not used with CurrentFriends
+                "invitation_sent_to":               "",  # Not used with CurrentFriends
+                "mutual_friends":                   mutual_friends,
+                "positions_taken":                  positions_taken,
+            }
+            friend_list.append(one_friend)
+    return friend_list, status, success
+
+
+def get_friend_invitations_processed(status, voter):
+    friend_manager = FriendManager()
+    voter_manager = VoterManager()
+    position_metrics_manager = PositionMetricsManager()
+    friend_list = []
+    status += "KIND_OF_LIST-FRIEND_INVITATIONS_PROCESSED "
+    retrieve_invitations_processed_results = friend_manager.retrieve_friend_invitations_processed(
+        voter.we_vote_id)
+    success = retrieve_invitations_processed_results['success']
+    status += retrieve_invitations_processed_results['status']
+    if retrieve_invitations_processed_results['friend_list_found']:
+        raw_friend_list = retrieve_invitations_processed_results['friend_list']
+        for one_friend_invitation in raw_friend_list:
+            # Augment the line with voter information
+            friend_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                one_friend_invitation.sender_voter_we_vote_id)  # This is the voter who sent the invitation to me
+            if friend_voter_results['voter_found']:
+                friend_voter = friend_voter_results['voter']
+                recipient_voter_email = one_friend_invitation.recipient_voter_email \
+                    if hasattr(one_friend_invitation, "recipient_voter_email") \
+                    else ""
+                mutual_friends = friend_manager.fetch_mutual_friends_count(
+                    voter.we_vote_id, friend_voter.we_vote_id)
                 positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                 one_friend = {
                     "voter_we_vote_id":                 friend_voter.we_vote_id,
                     "voter_date_last_changed":          friend_voter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
                     "voter_display_name":               friend_voter.get_full_name(),
                     "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
-                    if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
-                    else friend_voter.voter_photo_url(),
+                        if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
+                        else friend_voter.voter_photo_url(),
+                    'voter_photo_url_medium':           friend_voter.we_vote_hosted_profile_image_url_medium,
+                    'voter_photo_url_tiny':             friend_voter.we_vote_hosted_profile_image_url_tiny,
+                    "voter_email_address":              friend_voter.email,
+                    "voter_twitter_handle":             friend_voter.twitter_screen_name,
+                    "voter_twitter_description":        "", # To be implemented
+                    "voter_twitter_followers_count":    0,  # To be implemented
+                    "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
+                    "voter_state_code":                 "",  # To be implemented
+                    "invitation_status":                one_friend_invitation.invitation_status,
+                    "invitation_sent_to":               recipient_voter_email,
+                    "mutual_friends":                   mutual_friends,
+                    "positions_taken":                  positions_taken,
+                }
+                friend_list.append(one_friend)
+    return friend_list, status, success
+
+
+def get_friend_invitations_sent_to_me(status, voter):
+    friend_manager = FriendManager()
+    voter_manager = VoterManager()
+    position_metrics_manager = PositionMetricsManager()
+    friend_list = []
+    status += "KIND_OF_LIST-FRIEND_INVITATIONS_SENT_TO_ME "
+    retrieve_invitations_sent_to_me_results = friend_manager.retrieve_friend_invitations_sent_to_me(
+        voter.we_vote_id, read_only=True)
+    success = retrieve_invitations_sent_to_me_results['success']
+    status += retrieve_invitations_sent_to_me_results['status']
+    if retrieve_invitations_sent_to_me_results['friend_list_found']:
+        raw_friend_list = retrieve_invitations_sent_to_me_results['friend_list']
+        heal_results = heal_friend_invitations_sent_to_me(voter.we_vote_id, raw_friend_list)
+        verified_friend_list = heal_results['friend_list']
+        status += heal_results['status']
+        for one_friend_invitation in verified_friend_list:
+            # Augment the line with voter information
+            friend_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                one_friend_invitation.sender_voter_we_vote_id)  # This is the voter who sent the invitation to me
+            if friend_voter_results['voter_found']:
+                friend_voter = friend_voter_results['voter']
+                recipient_voter_email = one_friend_invitation.recipient_voter_email \
+                    if hasattr(one_friend_invitation, "recipient_voter_email") \
+                    else ""
+                mutual_friends = friend_manager.fetch_mutual_friends_count(
+                    voter.we_vote_id, friend_voter.we_vote_id)
+                positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
+                one_friend = {
+                    "voter_we_vote_id":                 friend_voter.we_vote_id,
+                    "voter_date_last_changed":          friend_voter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+                    "voter_display_name":               friend_voter.get_full_name(),
+                    "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
+                        if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
+                        else friend_voter.voter_photo_url(),
                     'voter_photo_url_medium':           friend_voter.we_vote_hosted_profile_image_url_medium,
                     'voter_photo_url_tiny':             friend_voter.we_vote_hosted_profile_image_url_tiny,
                     "voter_email_address":              friend_voter.email,
@@ -1942,32 +2140,80 @@ def friend_list_for_api(voter_device_id,  # friendList
                     "voter_twitter_followers_count":    0,  # To be implemented
                     "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
                     "voter_state_code":                 "",  # To be implemented
-                    "invitation_status":                "",  # Not used with CurrentFriends
-                    "invitation_sent_to":               "",  # Not used with CurrentFriends
+                    "invitation_status":                "",  # Not used for invitations sent to me
+                    "invitation_sent_to":               recipient_voter_email,
+                    "invitation_table":                 one_friend_invitation.invitation_table,
                     "mutual_friends":                   mutual_friends,
                     "positions_taken":                  positions_taken,
                 }
                 friend_list.append(one_friend)
-    elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_PROCESSED:
-        status += "KIND_OF_LIST-FRIEND_INVITATIONS_PROCESSED "
-        retrieve_invitations_processed_results = friend_manager.retrieve_friend_invitations_processed(
-            voter.we_vote_id)
-        success = retrieve_invitations_processed_results['success']
-        status += retrieve_invitations_processed_results['status']
-        if retrieve_invitations_processed_results['friend_list_found']:
-            raw_friend_list = retrieve_invitations_processed_results['friend_list']
-            for one_friend_invitation in raw_friend_list:
-                # Augment the line with voter information
+    return friend_list, status, success
+
+
+def get_friend_invitations_waiting_for_verification(status, voter):
+    friend_list = []
+    status += "KIND_OF_LIST-FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION "
+    send_status = WAITING_FOR_VERIFICATION
+    success = True
+    email_manager = EmailManager()
+    scheduled_email_results = email_manager.retrieve_scheduled_email_list_from_send_status(
+        voter.we_vote_id, send_status)
+    status += scheduled_email_results['status']
+    if scheduled_email_results['scheduled_email_list_found']:
+        scheduled_email_list = scheduled_email_results['scheduled_email_list']
+        for scheduled_email in scheduled_email_list:
+            one_friend = {
+                "voter_we_vote_id":                 "",
+                "voter_date_last_changed":          "",
+                "voter_display_name":               "",
+                "voter_photo_url_large":            "",
+                'voter_photo_url_medium':           "",
+                'voter_photo_url_tiny':             "",
+                "voter_twitter_handle":             "",
+                "voter_twitter_description":        "",
+                "voter_twitter_followers_count":    0,
+                "voter_state_code":                 "",
+                "voter_email_address":              "",
+                "invitation_status":                scheduled_email.send_status,
+                "invitation_sent_to":               scheduled_email.recipient_voter_email,
+                "mutual_friends":                   0,
+                "positions_taken":                  0,
+            }
+            friend_list.append(one_friend)
+    return friend_list, status, success
+
+
+def get_friend_invitations_sent_by_me(status, voter):
+    friend_manager = FriendManager()
+    voter_manager = VoterManager()
+    position_metrics_manager = PositionMetricsManager()
+    friend_list = []
+    status += "KIND_OF_LIST-FRIEND_INVITATIONS_SENT_BY_ME "
+    retrieve_invitations_sent_by_me_results = friend_manager.retrieve_friend_invitations_sent_by_me(
+        voter.we_vote_id)
+    success = retrieve_invitations_sent_by_me_results['success']
+    status += retrieve_invitations_sent_by_me_results['status']
+    if retrieve_invitations_sent_by_me_results['friend_list_found']:
+        raw_friend_list = retrieve_invitations_sent_by_me_results['friend_list']
+        for one_friend_invitation in raw_friend_list:
+            # Two kinds of invitations come in the raw_friend_list, 1) an invitation connected to voter
+            # 2) an invitation to a previously unrecognized email address
+            if hasattr(one_friend_invitation, 'recipient_voter_we_vote_id'):
+                recipient_voter_we_vote_id = one_friend_invitation.recipient_voter_we_vote_id
+            else:
+                recipient_voter_we_vote_id = ""
+            recipient_voter_email = one_friend_invitation.recipient_voter_email \
+                if hasattr(one_friend_invitation, "recipient_voter_email") \
+                else ""
+
+            if positive_value_exists(recipient_voter_we_vote_id):
                 friend_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
-                    one_friend_invitation.sender_voter_we_vote_id)  # This is the voter who sent the invitation to me
+                    recipient_voter_we_vote_id)  # This is the voter who received invitation
                 if friend_voter_results['voter_found']:
                     friend_voter = friend_voter_results['voter']
-                    recipient_voter_email = one_friend_invitation.recipient_voter_email \
-                        if hasattr(one_friend_invitation, "recipient_voter_email") \
-                        else ""
+                    positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                     mutual_friends = friend_manager.fetch_mutual_friends_count(
                         voter.we_vote_id, friend_voter.we_vote_id)
-                    positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                     one_friend = {
                         "voter_we_vote_id":                 friend_voter.we_vote_id,
                         "voter_date_last_changed":          friend_voter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
@@ -1984,222 +2230,93 @@ def friend_list_for_api(voter_device_id,  # friendList
                         "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
                         "voter_state_code":                 "",  # To be implemented
                         "invitation_status":                one_friend_invitation.invitation_status,
-                        "invitation_sent_to":               recipient_voter_email,
-                        "mutual_friends":                   mutual_friends,
-                        "positions_taken":                  positions_taken,
-                    }
-                    friend_list.append(one_friend)
-    elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_SENT_TO_ME:
-        status += "KIND_OF_LIST-FRIEND_INVITATIONS_SENT_TO_ME "
-        retrieve_invitations_sent_to_me_results = friend_manager.retrieve_friend_invitations_sent_to_me(
-            voter.we_vote_id, read_only=True)
-        success = retrieve_invitations_sent_to_me_results['success']
-        status += retrieve_invitations_sent_to_me_results['status']
-        if retrieve_invitations_sent_to_me_results['friend_list_found']:
-            raw_friend_list = retrieve_invitations_sent_to_me_results['friend_list']
-            heal_results = heal_friend_invitations_sent_to_me(voter.we_vote_id, raw_friend_list)
-            verified_friend_list = heal_results['friend_list']
-            status += heal_results['status']
-            for one_friend_invitation in verified_friend_list:
-                # Augment the line with voter information
-                friend_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
-                    one_friend_invitation.sender_voter_we_vote_id)  # This is the voter who sent the invitation to me
-                if friend_voter_results['voter_found']:
-                    friend_voter = friend_voter_results['voter']
-                    recipient_voter_email = one_friend_invitation.recipient_voter_email \
-                        if hasattr(one_friend_invitation, "recipient_voter_email") \
-                        else ""
-                    mutual_friends = friend_manager.fetch_mutual_friends_count(
-                        voter.we_vote_id, friend_voter.we_vote_id)
-                    positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
-                    one_friend = {
-                        "voter_we_vote_id":                 friend_voter.we_vote_id,
-                        "voter_date_last_changed":          friend_voter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
-                        "voter_display_name":               friend_voter.get_full_name(),
-                        "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
-                            if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
-                            else friend_voter.voter_photo_url(),
-                        'voter_photo_url_medium':           friend_voter.we_vote_hosted_profile_image_url_medium,
-                        'voter_photo_url_tiny':             friend_voter.we_vote_hosted_profile_image_url_tiny,
-                        "voter_email_address":              friend_voter.email,
-                        "voter_twitter_handle":             friend_voter.twitter_screen_name,
-                        "voter_twitter_description":        "",  # To be implemented
-                        "voter_twitter_followers_count":    0,  # To be implemented
-                        "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
-                        "voter_state_code":                 "",  # To be implemented
-                        "invitation_status":                "",  # Not used for invitations sent to me
-                        "invitation_sent_to":               recipient_voter_email,
                         "invitation_table":                 one_friend_invitation.invitation_table,
+                        "invitation_sent_to":               recipient_voter_email,
                         "mutual_friends":                   mutual_friends,
                         "positions_taken":                  positions_taken,
                     }
                     friend_list.append(one_friend)
-    elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_SENT_BY_ME:
-        status += "KIND_OF_LIST-FRIEND_INVITATIONS_SENT_BY_ME "
-        retrieve_invitations_sent_by_me_results = friend_manager.retrieve_friend_invitations_sent_by_me(
-            voter.we_vote_id)
-        success = retrieve_invitations_sent_by_me_results['success']
-        status += retrieve_invitations_sent_by_me_results['status']
-        if retrieve_invitations_sent_by_me_results['friend_list_found']:
-            raw_friend_list = retrieve_invitations_sent_by_me_results['friend_list']
-            for one_friend_invitation in raw_friend_list:
-                # Two kinds of invitations come in the raw_friend_list, 1) an invitation connected to voter
-                # 2) an invitation to a previously unrecognized email address
-                if hasattr(one_friend_invitation, 'recipient_voter_we_vote_id'):
-                    recipient_voter_we_vote_id = one_friend_invitation.recipient_voter_we_vote_id
-                else:
-                    recipient_voter_we_vote_id = ""
-                recipient_voter_email = one_friend_invitation.recipient_voter_email \
-                    if hasattr(one_friend_invitation, "recipient_voter_email") \
-                    else ""
-
-                if positive_value_exists(recipient_voter_we_vote_id):
-                    friend_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
-                        recipient_voter_we_vote_id)  # This is the voter who received invitation
-                    if friend_voter_results['voter_found']:
-                        friend_voter = friend_voter_results['voter']
-                        positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
-                        mutual_friends = friend_manager.fetch_mutual_friends_count(
-                            voter.we_vote_id, friend_voter.we_vote_id)
+            else:
+                if hasattr(one_friend_invitation, 'recipient_voter_email'):
+                    if positive_value_exists(one_friend_invitation.recipient_voter_email):
                         one_friend = {
-                            "voter_we_vote_id":                 friend_voter.we_vote_id,
-                            "voter_date_last_changed":          friend_voter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
-                            "voter_display_name":               friend_voter.get_full_name(),
-                            "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
-                            if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
-                            else friend_voter.voter_photo_url(),
-                            'voter_photo_url_medium':           friend_voter.we_vote_hosted_profile_image_url_medium,
-                            'voter_photo_url_tiny':             friend_voter.we_vote_hosted_profile_image_url_tiny,
-                            "voter_email_address":              friend_voter.email,
-                            "voter_twitter_handle":             friend_voter.twitter_screen_name,
+                            "voter_we_vote_id":                 "",
+                            "voter_date_last_changed":          "",
+                            "voter_display_name":               "",
+                            "voter_photo_url_large":            "",
+                            'voter_photo_url_medium':           "",
+                            'voter_photo_url_tiny':             "",
+                            "voter_twitter_handle":             "",
                             "voter_twitter_description":        "",  # To be implemented
                             "voter_twitter_followers_count":    0,  # To be implemented
-                            "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
                             "voter_state_code":                 "",  # To be implemented
+                            "voter_email_address":              one_friend_invitation.recipient_voter_email,
                             "invitation_status":                one_friend_invitation.invitation_status,
                             "invitation_table":                 one_friend_invitation.invitation_table,
                             "invitation_sent_to":               recipient_voter_email,
-                            "mutual_friends":                   mutual_friends,
-                            "positions_taken":                  positions_taken,
+                            "mutual_friends":                   0,
+                            "positions_taken":                  0,
                         }
                         friend_list.append(one_friend)
-                else:
-                    if hasattr(one_friend_invitation, 'recipient_voter_email'):
-                        if positive_value_exists(one_friend_invitation.recipient_voter_email):
-                            one_friend = {
-                                "voter_we_vote_id":                 "",
-                                "voter_date_last_changed":          "",
-                                "voter_display_name":               "",
-                                "voter_photo_url_large":            "",
-                                'voter_photo_url_medium':           "",
-                                'voter_photo_url_tiny':             "",
-                                "voter_twitter_handle":             "",
-                                "voter_twitter_description":        "",  # To be implemented
-                                "voter_twitter_followers_count":    0,  # To be implemented
-                                "voter_state_code":                 "",  # To be implemented
-                                "voter_email_address":              one_friend_invitation.recipient_voter_email,
-                                "invitation_status":                one_friend_invitation.invitation_status,
-                                "invitation_table":                 one_friend_invitation.invitation_table,
-                                "invitation_sent_to":               recipient_voter_email,
-                                "mutual_friends":                   0,
-                                "positions_taken":                  0,
-                            }
-                            friend_list.append(one_friend)
-    elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION:
-        status += "KIND_OF_LIST-FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION "
-        send_status = WAITING_FOR_VERIFICATION
-        success = True
-        status = ""
-        email_manager = EmailManager()
-        scheduled_email_results = email_manager.retrieve_scheduled_email_list_from_send_status(
-            voter.we_vote_id, send_status)
-        status += scheduled_email_results['status']
-        if scheduled_email_results['scheduled_email_list_found']:
-            scheduled_email_list = scheduled_email_results['scheduled_email_list']
-            for scheduled_email in scheduled_email_list:
-                one_friend = {
-                    "voter_we_vote_id": "",
-                    "voter_date_last_changed": "",
-                    "voter_display_name": "",
-                    "voter_photo_url_large": "",
-                    'voter_photo_url_medium': "",
-                    'voter_photo_url_tiny': "",
-                    "voter_twitter_handle": "",
-                    "voter_twitter_description": "",
-                    "voter_twitter_followers_count": 0,
-                    "voter_state_code": "",
-                    "voter_email_address": "",
-                    "invitation_status": scheduled_email.send_status,
-                    "invitation_sent_to": scheduled_email.recipient_voter_email,
-                    "mutual_friends": 0,
-                    "positions_taken": 0,
-                }
-                friend_list.append(one_friend)
-    elif kind_of_list_we_are_looking_for == SUGGESTED_FRIEND_LIST:
-        status += "KIND_OF_LIST-SUGGESTED_FRIEND_LIST "
-        retrieve_suggested_friend_list_as_voters_results = friend_manager.retrieve_suggested_friend_list_as_voters(
-            voter.we_vote_id)
-        success = retrieve_suggested_friend_list_as_voters_results['success']
-        status += retrieve_suggested_friend_list_as_voters_results['status']
-        if retrieve_suggested_friend_list_as_voters_results['friend_list_found']:
-            suggested_friend_list = retrieve_suggested_friend_list_as_voters_results['friend_list']
-            for suggested_friend in suggested_friend_list:
-                if not positive_value_exists(suggested_friend.linked_organization_we_vote_id):
-                    # We need to retrieve another voter object that can be saved
-                    organization_manager = OrganizationManager()
-                    voter_results = voter_manager.retrieve_voter_by_we_vote_id(
-                        suggested_friend.we_vote_id, read_only=False)
-                    if voter_results['voter_found']:
-                        suggested_friend = voter_results['voter']
-                        heal_results = \
-                            organization_manager.heal_voter_missing_linked_organization_we_vote_id(suggested_friend)
-                        if heal_results['voter_healed']:
-                            suggested_friend = heal_results['voter']
-                            status += "SUGGESTED_FRIEND_HEALED-MISSING_LINKED_ORGANIZATION_WE_VOTE_ID: " \
-                                      "" + suggested_friend.we_vote_id + " "
-                        else:
-                            status += "SUGGESTED_FRIEND_VOTER_COULD_NOT_BE_HEALED " + heal_results['status']
+    return friend_list, status, success
+
+
+def get_suggested_friends_list(status, voter):
+    friend_manager = FriendManager()
+    voter_manager = VoterManager()
+    position_metrics_manager = PositionMetricsManager()
+    friend_list = []
+    status += "KIND_OF_LIST-SUGGESTED_FRIEND_LIST "
+    retrieve_suggested_friend_list_as_voters_results = friend_manager.retrieve_suggested_friend_list_as_voters(
+        voter.we_vote_id)
+    success = retrieve_suggested_friend_list_as_voters_results['success']
+    status += retrieve_suggested_friend_list_as_voters_results['status']
+    if retrieve_suggested_friend_list_as_voters_results['friend_list_found']:
+        suggested_friend_list = retrieve_suggested_friend_list_as_voters_results['friend_list']
+        for suggested_friend in suggested_friend_list:
+            if not positive_value_exists(suggested_friend.linked_organization_we_vote_id):
+                # We need to retrieve another voter object that can be saved
+                organization_manager = OrganizationManager()
+                voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                    suggested_friend.we_vote_id, read_only=False)
+                if voter_results['voter_found']:
+                    suggested_friend = voter_results['voter']
+                    heal_results = \
+                        organization_manager.heal_voter_missing_linked_organization_we_vote_id(suggested_friend)
+                    if heal_results['voter_healed']:
+                        suggested_friend = heal_results['voter']
+                        status += "SUGGESTED_FRIEND_HEALED-MISSING_LINKED_ORGANIZATION_WE_VOTE_ID: " \
+                                  "" + suggested_friend.we_vote_id + " "
                     else:
-                        status += "SUGGESTED-COULD_NOT_RETRIEVE_VOTER_THAT_CAN_BE_SAVED " + voter_results['status']
-                mutual_friends = \
-                    friend_manager.fetch_mutual_friends_count(voter.we_vote_id, suggested_friend.we_vote_id)
-                positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(suggested_friend)
-                one_friend = {
-                    "voter_we_vote_id":                 suggested_friend.we_vote_id,
-                    "voter_date_last_changed":          suggested_friend.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
-                    "voter_display_name":               suggested_friend.get_full_name(),
-                    "voter_photo_url_large":            suggested_friend.we_vote_hosted_profile_image_url_large
+                        status += "SUGGESTED_FRIEND_VOTER_COULD_NOT_BE_HEALED " + heal_results['status']
+                else:
+                    status += "SUGGESTED-COULD_NOT_RETRIEVE_VOTER_THAT_CAN_BE_SAVED " + voter_results['status']
+            mutual_friends = \
+                friend_manager.fetch_mutual_friends_count(voter.we_vote_id, suggested_friend.we_vote_id)
+            positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(suggested_friend)
+            one_friend = {
+                "voter_we_vote_id":                 suggested_friend.we_vote_id,
+                "voter_date_last_changed":          suggested_friend.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+                "voter_display_name":               suggested_friend.get_full_name(),
+                "voter_photo_url_large":            suggested_friend.we_vote_hosted_profile_image_url_large
                     if positive_value_exists(suggested_friend.we_vote_hosted_profile_image_url_large)
                     else suggested_friend.voter_photo_url(),
-                    'voter_photo_url_medium':           suggested_friend.we_vote_hosted_profile_image_url_medium,
-                    'voter_photo_url_tiny':             suggested_friend.we_vote_hosted_profile_image_url_tiny,
-                    "voter_email_address":              suggested_friend.email,
-                    "voter_twitter_handle":             suggested_friend.twitter_screen_name,
-                    "voter_twitter_description":        "",  # To be implemented
-                    "voter_twitter_followers_count":    0,  # To be implemented
-                    "linked_organization_we_vote_id":   suggested_friend.linked_organization_we_vote_id,
-                    "voter_state_code":                 "",  # To be implemented
-                    "invitation_status":                "",  # Not used with SuggestedFriendList
-                    "invitation_sent_to":               "",  # Not used with SuggestedFriendList
-                    "mutual_friends":                   mutual_friends,
-                    "positions_taken":                  positions_taken,
-                }
-                friend_list.append(one_friend)
-    else:
-        status += kind_of_list_we_are_looking_for + " KIND_OF_LIST_NOT_IMPLEMENTED_YET "
+                'voter_photo_url_medium':           suggested_friend.we_vote_hosted_profile_image_url_medium,
+                'voter_photo_url_tiny':             suggested_friend.we_vote_hosted_profile_image_url_tiny,
+                "voter_email_address":              suggested_friend.email,
+                "voter_twitter_handle":             suggested_friend.twitter_screen_name,
+                "voter_twitter_description":        "",  # To be implemented
+                "voter_twitter_followers_count":    0,  # To be implemented
+                "linked_organization_we_vote_id":   suggested_friend.linked_organization_we_vote_id,
+                "voter_state_code":                 "",  # To be implemented
+                "invitation_status":                "",  # Not used with SuggestedFriendList
+                "invitation_sent_to":               "",  # Not used with SuggestedFriendList
+                "mutual_friends":                   mutual_friends,
+                "positions_taken":                  positions_taken,
+            }
+            friend_list.append(one_friend)
 
-    friend_list_found = True if len(friend_list) else False
-
-    results = {
-        'success':              success,
-        'status':               status,
-        'voter_device_id':      voter_device_id,
-        'state_code':           state_code,
-        'kind_of_list':         kind_of_list_we_are_looking_for,
-        'friend_list_found':    friend_list_found,
-        'friend_list':          friend_list,
-    }
-    return results
+    return friend_list, status, success
 
 
 def heal_current_friend(current_friend, force_update=False):
