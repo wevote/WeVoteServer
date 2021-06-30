@@ -86,4 +86,23 @@
     </table>
 {% endif %}
 
+{% if vote_usa_daily_summary_list %}
+<h4>Vote USA API Calls</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th># of Calls</th>
+            </tr>
+        </thead>
+       {% for vote_usa_daily_summary in vote_usa_daily_summary_list %}
+        <tr>
+            <td>{{ vote_usa_daily_summary.date_string }}</td>
+            <td>{{ vote_usa_daily_summary.count|intcomma }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br />
+{% endif %}
+
 {%  endblock %}

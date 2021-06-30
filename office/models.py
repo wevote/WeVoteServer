@@ -918,7 +918,7 @@ class ContestOfficeManager(models.Manager):
         except ContestOffice.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             exception_multiple_object_returned = True
-            status += "RETRIEVE_OFFICE_MULTIPLE_OBJECTS_RETURNED " + str(e) + " "
+            status += "RETRIEVE_OFFICE_MULTIPLE_OBJECTS_RETURNED: " + str(e) + " "
             success = False
         except ContestOffice.DoesNotExist:
             exception_does_not_exist = True
@@ -1004,7 +1004,6 @@ class ContestOfficeManager(models.Manager):
             self,
             contest_office_name='',
             contest_office_votes_allowed=1,
-            ctcl_uuid='',
             contest_office_number_elected=1,
             google_civic_election_id='',
             state_code='',
@@ -1013,8 +1012,7 @@ class ContestOfficeManager(models.Manager):
         Create ContestOffice table entry with ContestOffice details 
         :param contest_office_name: 
         :param contest_office_votes_allowed:
-        :param ctcl_uuid: 
-        :param contest_office_number_elected: 
+        :param contest_office_number_elected:
         :param google_civic_election_id: 
         :param state_code:
         :param defaults:
@@ -1030,7 +1028,6 @@ class ContestOfficeManager(models.Manager):
             new_contest_office = ContestOffice.objects.create(
                 office_name=contest_office_name,
                 number_voting_for=contest_office_votes_allowed,
-                ctcl_uuid=ctcl_uuid,
                 number_elected=contest_office_number_elected,
                 google_civic_election_id=google_civic_election_id,
                 state_code=state_code)
@@ -1041,8 +1038,10 @@ class ContestOfficeManager(models.Manager):
                 new_contest_office_created = True
                 if 'district_id' in defaults:
                     new_contest_office.district_id = defaults['district_id']
-                new_contest_office.district_name = defaults['district_name']
-                new_contest_office.district_scope = defaults['district_scope']
+                if 'district_name' in defaults:
+                    new_contest_office.district_name = defaults['district_name']
+                if 'district_scope' in defaults:
+                    new_contest_office.district_scope = defaults['district_scope']
                 if 'ballotpedia_district_id' in defaults:
                     new_contest_office.ballotpedia_district_id = convert_to_int(defaults['ballotpedia_district_id'])
                 if 'ballotpedia_election_id' in defaults:
@@ -1060,6 +1059,8 @@ class ContestOfficeManager(models.Manager):
                     new_contest_office.ballotpedia_race_id = convert_to_int(defaults['ballotpedia_race_id'])
                 if 'ballotpedia_race_office_level' in defaults:
                     new_contest_office.ballotpedia_race_office_level = defaults['ballotpedia_race_office_level']
+                if 'ctcl_uuid' in defaults:
+                    new_contest_office.ctcl_uuid = defaults['ctcl_uuid']
                 if 'google_civic_office_name' in defaults:
                     new_contest_office.google_civic_office_name = defaults['google_civic_office_name']
                 if 'is_ballotpedia_general_election' in defaults:

@@ -168,6 +168,7 @@ INSTALLED_APPS = (
     'import_export_maplight',
     'import_export_twitter',  # See also twitter (below)
     'import_export_vote_smart',
+    'import_export_vote_usa',
     'import_export_wikipedia',
     'issue',
     'measure',

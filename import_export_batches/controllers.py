@@ -3717,11 +3717,9 @@ def import_contest_office_data_from_batch_row_actions(
     #     return results
 
     for one_batch_row_action in batch_row_action_list:
-
         # Find the column in the incoming batch_row with the header == contest_office_name
         contest_office_name = one_batch_row_action.contest_office_name
         google_civic_election_id = str(one_batch_row_action.google_civic_election_id)
-        ctcl_uuid = one_batch_row_action.ctcl_uuid
         contest_office_votes_allowed = one_batch_row_action.number_voting_for
         contest_office_number_elected = one_batch_row_action.number_elected
         state_code = one_batch_row_action.state_code
@@ -3742,6 +3740,8 @@ def import_contest_office_data_from_batch_row_actions(
             'is_ballotpedia_primary_election':          one_batch_row_action.is_ballotpedia_primary_election,
             'is_ballotpedia_primary_runoff_election':   one_batch_row_action.is_ballotpedia_primary_runoff_election,
         }
+        if positive_value_exists(one_batch_row_action.ctcl_uuid):
+            defaults['ctcl_uuid'] = one_batch_row_action.ctcl_uuid
         if positive_value_exists(one_batch_row_action.vote_usa_office_id):
             defaults['vote_usa_office_id'] = one_batch_row_action.vote_usa_office_id
 
@@ -3752,13 +3752,12 @@ def import_contest_office_data_from_batch_row_actions(
             if create_entry_flag:
                 defaults['google_civic_office_name'] = one_batch_row_action.contest_office_name
                 results = contest_office_manager.create_contest_office_row_entry(
-                    contest_office_name,
-                    contest_office_votes_allowed,
-                    ctcl_uuid,
-                    contest_office_number_elected,
-                    google_civic_election_id,
-                    state_code,
-                    defaults)
+                    contest_office_name=contest_office_name,
+                    contest_office_votes_allowed=contest_office_votes_allowed,
+                    contest_office_number_elected=contest_office_number_elected,
+                    google_civic_election_id=google_civic_election_id,
+                    state_code=state_code,
+                    defaults=defaults)
                 if results['contest_office_updated']:
                     number_of_contest_offices_created += 1
                     success = True
@@ -3775,14 +3774,13 @@ def import_contest_office_data_from_batch_row_actions(
             elif update_entry_flag:
                 contest_office_we_vote_id = one_batch_row_action.contest_office_we_vote_id
                 results = contest_office_manager.update_contest_office_row_entry(
-                    contest_office_name,
-                    contest_office_votes_allowed,
-                    ctcl_uuid,
-                    contest_office_number_elected,
-                    contest_office_we_vote_id,
-                    google_civic_election_id,
-                    state_code,
-                    defaults)
+                    contest_office_name=contest_office_name,
+                    contest_office_votes_allowed=contest_office_votes_allowed,
+                    contest_office_number_elected=contest_office_number_elected,
+                    contest_office_we_vote_id=contest_office_we_vote_id,
+                    google_civic_election_id=google_civic_election_id,
+                    state_code=state_code,
+                    defaults=defaults)
                 if results['contest_office_updated']:
                     number_of_contest_offices_updated += 1
                     success = True
