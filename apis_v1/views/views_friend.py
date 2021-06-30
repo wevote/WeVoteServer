@@ -5,8 +5,8 @@ from config.base import get_environment_variable
 from django.http import HttpResponse
 from friend.controllers import friend_invitation_by_email_send_for_api, friend_invitation_by_email_verify_for_api, \
     friend_invitation_by_we_vote_id_send_for_api, friend_invite_response_for_api, friend_list_for_api, \
-    friend_invitation_by_facebook_send_for_api, friend_invitation_by_facebook_verify_for_api, \
-    friend_invitation_information_for_api
+    friend_lists_all_for_api, friend_invitation_by_facebook_send_for_api, \
+    friend_invitation_by_facebook_verify_for_api, friend_invitation_information_for_api
 from friend.models import ACCEPT_INVITATION, CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, \
     DELETE_INVITATION_VOTER_SENT_BY_ME, \
     FRIENDS_IN_COMMON, FRIEND_INVITATIONS_PROCESSED, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, \
@@ -223,5 +223,29 @@ def friend_list_view(request):  # friendList
         'kind_of_list':         kind_of_list_we_are_looking_for,
         'friend_list_found':    results['friend_list_found'],
         'friend_list':          results['friend_list'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def friend_lists_all_view(request):  # friendList
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    state_code = request.GET.get('state_code', "")
+    results = friend_lists_all_for_api(voter_device_id=voter_device_id, state_code=state_code)
+
+    json_data = {
+        'status':                               results['status'],
+        'success':                              results['success'],
+        'voter_device_id':                      voter_device_id,
+        'state_code':                           state_code,
+        'current_friends':                      results['current_friends'],
+        'invitations_processed':                results['invitations_processed'],
+        'invitations_sent_to_me':               results['invitations_sent_to_me'],
+        'invitations_sent_by_me':               results['invitations_sent_by_me'],
+        'invitations_waiting_for_verify':       results['invitations_waiting_for_verify'],
+        'suggested_friends':                    results['suggested_friends'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
