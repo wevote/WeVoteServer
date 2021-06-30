@@ -31,11 +31,17 @@ except Exception as e:
     # Can't use logger in the settings file due to loading sequence
 
 
-def get_environment_variable(var_name, json_environment_vars=json_environment_variables):
+def get_environment_variable(var_name, json_environment_vars=json_environment_variables, no_exception=False):
     """
     Get the environment variable or return exception.
     From Two Scoops of Django 1.8, section 5.3.4
     """
+    if no_exception:
+        if var_name in json_environment_vars:
+            return json_environment_vars[var_name]
+        else:
+            return ''
+
     try:
         return json_environment_vars[var_name]  # Loaded from array above
     except KeyError:

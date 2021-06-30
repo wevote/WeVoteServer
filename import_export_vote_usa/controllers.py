@@ -16,7 +16,7 @@ from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-VOTE_USA_API_KEY = get_environment_variable("VOTE_USA_API_KEY")
+VOTE_USA_API_KEY = get_environment_variable("VOTE_USA_API_KEY", no_exception=True)
 VOTE_USA_VOTER_INFO_URL = "https://vote-usa.org/api/v1.asmx/voterInfoQuery"
 VOTE_USA_VOTER_INFO_QUERY_TYPE = "voterinfo"
 
