@@ -40,6 +40,7 @@ from exception.models import handle_exception
 from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_processing, \
     process_ballotpedia_voter_districts, BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL
 from import_export_ctcl.controllers import CTCL_VOTER_INFO_URL
+from import_export_vote_usa.controllers import VOTE_USA_VOTER_INFO_URL
 import json
 from polling_location.models import PollingLocation, PollingLocationManager
 from position.models import POSITION
@@ -2882,7 +2883,7 @@ def refresh_ballots_for_voters_api_v4_internal_view(
     elif positive_value_exists(use_vote_usa):
         batch_set_source = BATCH_SET_SOURCE_IMPORT_VOTE_USA_BALLOT_ITEMS
         kind_of_batch = 'IMPORT_VOTE_USA_BALLOT_ITEMS'
-        source_uri = BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL
+        source_uri = VOTE_USA_VOTER_INFO_URL
 
     if not positive_value_exists(batch_set_id):
         # create batch_set object
@@ -3400,10 +3401,8 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
         batch_set_source = BATCH_SET_SOURCE_IMPORT_CTCL_BALLOT_ITEMS
         source_uri = CTCL_VOTER_INFO_URL
     elif positive_value_exists(use_vote_usa):
-        # from import_export_ballotpedia.
-        # controllers import retrieve_ballotpedia_ballot_items_from_polling_location_api_v4
         batch_set_source = BATCH_SET_SOURCE_IMPORT_VOTE_USA_BALLOT_ITEMS
-        source_uri = BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL
+        source_uri = VOTE_USA_VOTER_INFO_URL
 
     batch_set_id = 0
     if len(polling_location_list) > 0:
@@ -3415,6 +3414,8 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
             batch_set_name += " (state " + str(state_code.upper()) + ")"
         if positive_value_exists(ballotpedia_election_id):
             batch_set_name += " - ballotpedia: " + str(ballotpedia_election_id)
+        elif positive_value_exists(use_vote_usa):
+            batch_set_name += " - vote usa"
         batch_set_name += " - " + str(import_date)
 
         try:
@@ -3468,6 +3469,8 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
                 retrieve_ballotpedia_ballot_items_from_polling_location_api_v4
         elif positive_value_exists(use_ctcl):
             from import_export_ctcl.controllers import retrieve_ctcl_ballot_items_from_polling_location_api
+        elif positive_value_exists(use_vote_usa):
+            from import_export_vote_usa.controllers import retrieve_vote_usa_ballot_items_from_polling_location_api
         for polling_location in polling_location_list:
             one_ballot_results = {}
             if positive_value_exists(use_ballotpedia):
@@ -3490,6 +3493,23 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
                 one_ballot_results = retrieve_ctcl_ballot_items_from_polling_location_api(
                     google_civic_election_id,
                     ctcl_election_uuid=ctcl_election_uuid,
+                    election_day_text=election_day_text,
+                    polling_location_we_vote_id=polling_location.we_vote_id,
+                    polling_location=polling_location,
+                    state_code=state_code,
+                    batch_set_id=batch_set_id,
+                    existing_offices_by_election_dict=existing_offices_by_election_dict,
+                    existing_candidate_objects_dict=existing_candidate_objects_dict,
+                    existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
+                    existing_measure_objects_dict=existing_measure_objects_dict,
+                    new_office_we_vote_ids_list=new_office_we_vote_ids_list,
+                    new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
+                    new_measure_we_vote_ids_list=new_measure_we_vote_ids_list,
+                    update_or_create_rules=update_or_create_rules,
+                )
+            elif positive_value_exists(use_vote_usa):
+                one_ballot_results = retrieve_vote_usa_ballot_items_from_polling_location_api(
+                    google_civic_election_id,
                     election_day_text=election_day_text,
                     polling_location_we_vote_id=polling_location.we_vote_id,
                     polling_location=polling_location,

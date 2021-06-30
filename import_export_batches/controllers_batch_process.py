@@ -2814,7 +2814,7 @@ def schedule_retrieve_ballots_for_polling_locations_api_v4(
         kind_of_process = REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
     else:
         kind_of_process = RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
-    status += "SCHEDULING " + str(kind_of_process) + " "
+    status += "SCHEDULING: " + str(kind_of_process) + " "
 
     batch_process_manager = BatchProcessManager()
     results = batch_process_manager.create_batch_process(

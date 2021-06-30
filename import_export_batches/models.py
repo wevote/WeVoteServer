@@ -162,7 +162,33 @@ BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES = {
     'state_code': 'state_code',
 }
 
+# TODO: Not updated from Ballotpedia yet
 BATCH_HEADER_MAP_CANDIDATES_TO_CTCL_CANDIDATES = {
+    'ballotpedia_candidate_id': 'ballotpedia_candidate_id',
+    'ballotpedia_candidate_name': 'ballotpedia_candidate_name',
+    'ballotpedia_candidate_summary': 'ballotpedia_candidate_summary',
+    'ballotpedia_candidate_url': 'ballotpedia_candidate_url',
+    'ballotpedia_election_id': 'ballotpedia_election_id',
+    'ballotpedia_image_id': 'ballotpedia_image_id',
+    'ballotpedia_office_id': 'ballotpedia_office_id',
+    'ballotpedia_person_id': 'ballotpedia_person_id',
+    'ballotpedia_race_id': 'ballotpedia_race_id',
+    'birth_day_text': 'birth_day_text',
+    'candidate_email': 'candidate_email',
+    'candidate_gender': 'candidate_gender',
+    'candidate_is_incumbent': 'is_incumbent',
+    'candidate_participation_status': 'candidate_participation_status',
+    'candidate_party_name': 'candidate_party_name',
+    'candidate_twitter_handle': 'candidate_twitter_handle',
+    'candidate_url': 'candidate_url',
+    'candidate_contact_form_url': 'candidate_contact_form_url',
+    'crowdpac_candidate_id': 'crowdpac_candidate_id',
+    'facebook_url': 'facebook_url',
+    'state_code': 'state_code',
+}
+
+# TODO: Not updated from Ballotpedia yet
+BATCH_HEADER_MAP_CANDIDATES_TO_VOTE_USA_CANDIDATES = {
     'ballotpedia_candidate_id': 'ballotpedia_candidate_id',
     'ballotpedia_candidate_name': 'ballotpedia_candidate_name',
     'ballotpedia_candidate_summary': 'ballotpedia_candidate_summary',
@@ -254,7 +280,28 @@ BATCH_HEADER_MAP_CONTEST_OFFICES_TO_BALLOTPEDIA_RACES = {
     'state_code': 'office_district_state',
 }
 
+# TODO: Not updated from Ballotpedia yet
 BATCH_HEADER_MAP_CONTEST_OFFICES_TO_CTCL_OFFICES = {
+    'ballotpedia_district_id': 'ballotpedia_district_id',
+    'ballotpedia_election_id': 'ballotpedia_election_id',
+    'ballotpedia_is_marquee': 'ballotpedia_is_marquee',
+    'ballotpedia_office_id': 'ballotpedia_office_id',
+    'ballotpedia_office_name': 'office_name',
+    'ballotpedia_race_id': 'ballotpedia_race_id',
+    'ballotpedia_race_office_level': 'office_level',
+    'ballotpedia_office_url': 'url',
+    'contest_office_number_elected': 'number_of_seats',
+    'contest_office_district_name': 'office_district_name',
+    'election_day': 'election_date',
+    'is_ballotpedia_general_election': 'is_ballotpedia_general_election',
+    'is_ballotpedia_general_runoff_election': 'is_ballotpedia_general_runoff_election',
+    'is_ballotpedia_primary_election': 'is_ballotpedia_primary_election',
+    'is_ballotpedia_primary_runoff_election': 'is_ballotpedia_primary_runoff_election',
+    'state_code': 'office_district_state',
+}
+
+# TODO: Not updated from Ballotpedia yet
+BATCH_HEADER_MAP_CONTEST_OFFICES_TO_VOTE_USA_OFFICES = {
     'ballotpedia_district_id': 'ballotpedia_district_id',
     'ballotpedia_election_id': 'ballotpedia_election_id',
     'ballotpedia_is_marquee': 'ballotpedia_is_marquee',
@@ -323,7 +370,24 @@ BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES = {
     'state_code': 'state_code',
 }
 
+# TODO: Not updated from Ballotpedia yet
 BATCH_HEADER_MAP_MEASURES_TO_CTCL_MEASURES = {
+    'ballotpedia_district_id': 'ballotpedia_district_id',
+    'ballotpedia_election_id': 'ballotpedia_election_id',
+    'ballotpedia_measure_id': 'ballotpedia_measure_id',
+    'ballotpedia_measure_name': 'name',
+    'ballotpedia_measure_status': 'status',
+    'ballotpedia_measure_summary': 'summary',
+    'ballotpedia_measure_text': 'text',
+    'ballotpedia_measure_url': 'ballotpedia_measure_url',
+    'ballotpedia_yes_vote_description': 'ballotpedia_yes_vote_description',
+    'ballotpedia_no_vote_description': 'ballotpedia_no_vote_description',
+    'election_day_text': 'election_day_text',
+    'state_code': 'state_code',
+}
+
+# TODO: Not updated from Ballotpedia yet
+BATCH_HEADER_MAP_MEASURES_TO_VOTE_USA_MEASURES = {
     'ballotpedia_district_id': 'ballotpedia_district_id',
     'ballotpedia_election_id': 'ballotpedia_election_id',
     'ballotpedia_measure_id': 'ballotpedia_measure_id',
@@ -480,7 +544,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS = {
 
 BATCH_HEADER_MAP_BALLOT_ITEMS_TO_BALLOTPEDIA_BALLOT_ITEMS = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
 
-BATCH_HEADER_MAP_BALLOT_ITEMS_TO_CTCL_BALLOT_ITEMS = {
+BATCH_HEADER_MAP_BALLOT_ITEMS_GOOGLE_CIVIC_EMULATION = {
     'contest_office_we_vote_id': 'contest_office_we_vote_id',
     'contest_office_id': 'contest_office_id',
     'contest_office_name': 'contest_office_name',
@@ -497,6 +561,9 @@ BATCH_HEADER_MAP_BALLOT_ITEMS_TO_CTCL_BALLOT_ITEMS = {
     'state_code': 'state_code',
     'voter_id': 'voter_id',
 }
+
+BATCH_HEADER_MAP_BALLOT_ITEMS_TO_CTCL_BALLOT_ITEMS = BATCH_HEADER_MAP_BALLOT_ITEMS_GOOGLE_CIVIC_EMULATION
+BATCH_HEADER_MAP_BALLOT_ITEMS_TO_VOTE_USA_BALLOT_ITEMS = BATCH_HEADER_MAP_BALLOT_ITEMS_GOOGLE_CIVIC_EMULATION
 
 # We Vote contest office key on the left, and Ballotpedia field name on right
 # This gives us the option of putting the same field from a remote source into two We Vote fields
