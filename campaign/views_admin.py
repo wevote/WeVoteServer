@@ -371,10 +371,13 @@ def campaign_edit_process_view(request):
     campaign_description = request.POST.get('campaign_description', None)
     is_blocked_by_we_vote = request.POST.get('is_blocked_by_we_vote', False)
     is_blocked_by_we_vote_reason = request.POST.get('is_blocked_by_we_vote_reason', None)
+    is_not_promoted_by_we_vote = request.POST.get('is_not_promoted_by_we_vote', False)
+    is_not_promoted_by_we_vote_reason = request.POST.get('is_not_promoted_by_we_vote_reason', None)
     is_ok_to_promote_on_we_vote = request.POST.get('is_ok_to_promote_on_we_vote', False)
     politician_starter_list_serialized = request.POST.get('politician_starter_list_serialized', None)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     state_code = request.POST.get('state_code', None)
+    supporters_count_minimum_ignored = request.POST.get('supporters_count_minimum_ignored', False)
 
     # Check to see if this organization is already being used anywhere
     campaignx = None
@@ -401,9 +404,14 @@ def campaign_edit_process_view(request):
             campaignx.is_blocked_by_we_vote = positive_value_exists(is_blocked_by_we_vote)
             if is_blocked_by_we_vote_reason is not None:
                 campaignx.is_blocked_by_we_vote_reason = is_blocked_by_we_vote_reason.strip()
+            campaignx.is_not_promoted_by_we_vote = positive_value_exists(is_not_promoted_by_we_vote)
+            if is_not_promoted_by_we_vote_reason is not None:
+                campaignx.is_not_promoted_by_we_vote_reason = is_not_promoted_by_we_vote_reason.strip()
             campaignx.is_ok_to_promote_on_we_vote = positive_value_exists(is_ok_to_promote_on_we_vote)
             if politician_starter_list_serialized is not None:
                 campaignx.politician_starter_list_serialized = politician_starter_list_serialized.strip()
+            if supporters_count_minimum_ignored is not None:
+                campaignx.supporters_count_minimum_ignored = positive_value_exists(supporters_count_minimum_ignored)
             campaignx.save()
 
             messages.add_message(request, messages.INFO, 'CampaignX updated.')
@@ -414,8 +422,11 @@ def campaign_edit_process_view(request):
         messages.add_message(request, messages.ERROR, 'Could not save CampaignX.'
                                                       ' {error} [type: {error_type}]'.format(error=e,
                                                                                              error_type=type(e)))
+        return HttpResponseRedirect(reverse('campaign:campaignx_edit', args=(campaignx_we_vote_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
 
-    return HttpResponseRedirect(reverse('campaign:campaignx_edit', args=(campaignx_we_vote_id,)) +
+    return HttpResponseRedirect(reverse('campaign:campaignx_summary', args=(campaignx_we_vote_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
                                 "&state_code=" + str(state_code))
 

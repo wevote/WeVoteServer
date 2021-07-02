@@ -713,16 +713,31 @@ def merge_voter_accounts(from_voter, to_voter):
     # is_verified_volunteer
 
     # Is there data we should migrate?
-    if positive_value_exists(from_voter.first_name) or positive_value_exists(from_voter.middle_name) \
-            or positive_value_exists(from_voter.last_name) \
+    if positive_value_exists(from_voter.first_name) \
             or positive_value_exists(from_voter.interface_status_flags) \
-            or positive_value_exists(from_voter.notification_settings_flags) \
             or positive_value_exists(from_voter.is_admin) \
             or positive_value_exists(from_voter.is_analytics_admin) \
             or positive_value_exists(from_voter.is_partner_organization) \
             or positive_value_exists(from_voter.is_political_data_manager) \
             or positive_value_exists(from_voter.is_political_data_viewer) \
-            or positive_value_exists(from_voter.is_verified_volunteer):
+            or positive_value_exists(from_voter.is_verified_volunteer) \
+            or positive_value_exists(from_voter.last_name) \
+            or positive_value_exists(from_voter.middle_name) \
+            or positive_value_exists(from_voter.notification_settings_flags) \
+            or positive_value_exists(from_voter.profile_image_type_currently_active) \
+            or positive_value_exists(from_voter.twitter_profile_image_url_https) \
+            or positive_value_exists(from_voter.we_vote_hosted_profile_facebook_image_url_large) \
+            or positive_value_exists(from_voter.we_vote_hosted_profile_facebook_image_url_medium) \
+            or positive_value_exists(from_voter.we_vote_hosted_profile_facebook_image_url_tiny) \
+            or positive_value_exists(from_voter.we_vote_hosted_profile_image_url_large) \
+            or positive_value_exists(from_voter.we_vote_hosted_profile_image_url_medium) \
+            or positive_value_exists(from_voter.we_vote_hosted_profile_image_url_tiny) \
+            or positive_value_exists(from_voter.we_vote_hosted_profile_twitter_image_url_large) \
+            or positive_value_exists(from_voter.we_vote_hosted_profile_twitter_image_url_medium) \
+            or positive_value_exists(from_voter.we_vote_hosted_profile_twitter_image_url_tiny) \
+            or positive_value_exists(from_voter.we_vote_hosted_profile_uploaded_image_url_large) \
+            or positive_value_exists(from_voter.we_vote_hosted_profile_uploaded_image_url_medium) \
+            or positive_value_exists(from_voter.we_vote_hosted_profile_uploaded_image_url_tiny):
         from_voter_data_to_migrate_exists = True
     else:
         from_voter_data_to_migrate_exists = False
@@ -732,14 +747,8 @@ def merge_voter_accounts(from_voter, to_voter):
             # Now move values to new entry and save if the to_voter doesn't have any data
             if positive_value_exists(from_voter.first_name) and not positive_value_exists(to_voter.first_name):
                 to_voter.first_name = from_voter.first_name
-            if positive_value_exists(from_voter.middle_name) and not positive_value_exists(to_voter.middle_name):
-                to_voter.middle_name = from_voter.middle_name
-            if positive_value_exists(from_voter.last_name) and not positive_value_exists(to_voter.last_name):
-                to_voter.last_name = from_voter.last_name
             # Set all bits that have a value in either from_voter or to_voter
             to_voter.interface_status_flags = to_voter.interface_status_flags | from_voter.interface_status_flags
-            to_voter.notification_settings_flags = \
-                to_voter.notification_settings_flags | from_voter.notification_settings_flags
             if positive_value_exists(from_voter.is_admin) and not positive_value_exists(to_voter.is_admin):
                 to_voter.is_admin = from_voter.is_admin
             if positive_value_exists(from_voter.is_analytics_admin) \
@@ -757,11 +766,69 @@ def merge_voter_accounts(from_voter, to_voter):
             if positive_value_exists(from_voter.is_verified_volunteer) \
                     and not positive_value_exists(to_voter.is_verified_volunteer):
                 to_voter.is_verified_volunteer = from_voter.is_verified_volunteer
+            if positive_value_exists(from_voter.last_name) and not positive_value_exists(to_voter.last_name):
+                to_voter.last_name = from_voter.last_name
+            if positive_value_exists(from_voter.middle_name) and not positive_value_exists(to_voter.middle_name):
+                to_voter.middle_name = from_voter.middle_name
+            # Set all bits that have a value in either from_voter or to_voter
+            to_voter.notification_settings_flags = \
+                to_voter.notification_settings_flags | from_voter.notification_settings_flags
+            if positive_value_exists(from_voter.profile_image_type_currently_active) \
+                    and not positive_value_exists(to_voter.profile_image_type_currently_active):
+                to_voter.profile_image_type_currently_active = from_voter.profile_image_type_currently_active
+            if positive_value_exists(from_voter.twitter_profile_image_url_https) \
+                    and not positive_value_exists(to_voter.twitter_profile_image_url_https):
+                to_voter.twitter_profile_image_url_https = from_voter.twitter_profile_image_url_https
+            if positive_value_exists(from_voter.we_vote_hosted_profile_facebook_image_url_large) \
+                    and not positive_value_exists(to_voter.we_vote_hosted_profile_facebook_image_url_large):
+                to_voter.we_vote_hosted_profile_facebook_image_url_large = \
+                    from_voter.we_vote_hosted_profile_facebook_image_url_large
+            if positive_value_exists(from_voter.we_vote_hosted_profile_facebook_image_url_medium) \
+                    and not positive_value_exists(to_voter.we_vote_hosted_profile_facebook_image_url_medium):
+                to_voter.we_vote_hosted_profile_facebook_image_url_medium = \
+                    from_voter.we_vote_hosted_profile_facebook_image_url_medium
+            if positive_value_exists(from_voter.we_vote_hosted_profile_facebook_image_url_tiny) \
+                    and not positive_value_exists(to_voter.we_vote_hosted_profile_facebook_image_url_tiny):
+                to_voter.we_vote_hosted_profile_facebook_image_url_tiny = \
+                    from_voter.we_vote_hosted_profile_facebook_image_url_tiny
+            if positive_value_exists(from_voter.we_vote_hosted_profile_image_url_large) \
+                    and not positive_value_exists(to_voter.we_vote_hosted_profile_image_url_large):
+                to_voter.we_vote_hosted_profile_image_url_large = from_voter.we_vote_hosted_profile_image_url_large
+            if positive_value_exists(from_voter.we_vote_hosted_profile_image_url_medium) \
+                    and not positive_value_exists(to_voter.we_vote_hosted_profile_image_url_medium):
+                to_voter.we_vote_hosted_profile_image_url_medium = from_voter.we_vote_hosted_profile_image_url_medium
+            if positive_value_exists(from_voter.we_vote_hosted_profile_image_url_tiny) \
+                    and not positive_value_exists(to_voter.we_vote_hosted_profile_image_url_tiny):
+                to_voter.we_vote_hosted_profile_image_url_tiny = from_voter.we_vote_hosted_profile_image_url_tiny
+            if positive_value_exists(from_voter.we_vote_hosted_profile_twitter_image_url_large) \
+                    and not positive_value_exists(to_voter.we_vote_hosted_profile_twitter_image_url_large):
+                to_voter.we_vote_hosted_profile_twitter_image_url_large = \
+                    from_voter.we_vote_hosted_profile_twitter_image_url_large
+            if positive_value_exists(from_voter.we_vote_hosted_profile_twitter_image_url_medium) \
+                    and not positive_value_exists(to_voter.we_vote_hosted_profile_twitter_image_url_medium):
+                to_voter.we_vote_hosted_profile_twitter_image_url_medium = \
+                    from_voter.we_vote_hosted_profile_twitter_image_url_medium
+            if positive_value_exists(from_voter.we_vote_hosted_profile_twitter_image_url_tiny) \
+                    and not positive_value_exists(to_voter.we_vote_hosted_profile_twitter_image_url_tiny):
+                to_voter.we_vote_hosted_profile_twitter_image_url_tiny = \
+                    from_voter.we_vote_hosted_profile_twitter_image_url_tiny
+            if positive_value_exists(from_voter.we_vote_hosted_profile_uploaded_image_url_large) \
+                    and not positive_value_exists(to_voter.we_vote_hosted_profile_uploaded_image_url_large):
+                to_voter.we_vote_hosted_profile_uploaded_image_url_large = \
+                    from_voter.we_vote_hosted_profile_uploaded_image_url_large
+            if positive_value_exists(from_voter.we_vote_hosted_profile_uploaded_image_url_medium) \
+                    and not positive_value_exists(to_voter.we_vote_hosted_profile_uploaded_image_url_medium):
+                to_voter.we_vote_hosted_profile_uploaded_image_url_medium = \
+                    from_voter.we_vote_hosted_profile_uploaded_image_url_medium
+            if positive_value_exists(from_voter.we_vote_hosted_profile_uploaded_image_url_tiny) \
+                    and not positive_value_exists(to_voter.we_vote_hosted_profile_uploaded_image_url_tiny):
+                to_voter.we_vote_hosted_profile_uploaded_image_url_tiny = \
+                    from_voter.we_vote_hosted_profile_uploaded_image_url_tiny
             to_voter.save()
             status += "TO_VOTER_MERGE_SAVED "
         except Exception as e:
             # Fail silently
-            status += "TO_VOTER_MERGE_SAVE_FAILED "
+            status += "TO_VOTER_MERGE_SAVE_FAILED: " + str(e) + " "
 
     else:
         success = True

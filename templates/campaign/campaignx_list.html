@@ -142,7 +142,7 @@
                     {{ campaignx.we_vote_id }}&nbsp;
                 </span><br />
                 (<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}">edit</a>)
-                {% if not campaignx.is_ok_to_promote_on_we_vote %}
+                {% if not campaignx.is_ok_to_promote_on_we_vote or not campaignx.is_not_promoted_by_we_vote %}
                     &nbsp;NO-PROMOTE
                 {% endif %}
                 {% if campaignx.is_blocked_by_we_vote %}
@@ -162,6 +162,11 @@
                 <a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}" target="_blank">
                     {{ campaignx.supporters_count|intcomma }}
                 </a>
+        {% if campaignx.supporters_count_minimum_ignored %}
+                    (Visible)
+        {% elif not campaignx.is_supporters_count_minimum_exceeded %}
+                    (NOT&nbsp;visible)
+        {% endif %}
             {% endif %}</td>
             <td>{{ campaignx.campaign_description|default_if_none:""|truncatechars:250 }}</td>
         </tr>

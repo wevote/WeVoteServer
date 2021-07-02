@@ -46,6 +46,7 @@ def campaign_list_retrieve_doc_template_values(url_root):
                    '     "campaign_title": string,\n' \
                    '     "campaignx_we_vote_id": string,\n' \
                    '     "in_draft_mode": boolean,\n' \
+                   '     "is_supporters_count_minimum_exceeded": boolean,\n' \
                    '     "seo_friendly_path": string,\n' \
                    '     "supporters_count": integer,\n' \
                    '     "supporters_count_next_goal": integer,\n' \

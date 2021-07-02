@@ -15,6 +15,8 @@ from wevote_settings.models import fetch_next_we_vote_id_campaignx_integer, fetc
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+SUPPORTERS_COUNT_MINIMUM_FOR_LISTING = 5  # How many supporters are required before we will show campaign on We Vote
+
 
 class CampaignX(models.Model):
     def __unicode__(self):
@@ -35,14 +37,19 @@ class CampaignX(models.Model):
     in_draft_mode = models.BooleanField(default=True, db_index=True)
     # Campaign owner allows campaignX to be promoted by We Vote on free home page and elsewhere
     is_ok_to_promote_on_we_vote = models.BooleanField(default=True, db_index=True)
+    # Settings controlled by We Vote staff
     is_blocked_by_we_vote = models.BooleanField(default=False, db_index=True)
     is_blocked_by_we_vote_reason = models.TextField(null=True, blank=True)
+    is_not_promoted_by_we_vote = models.BooleanField(default=False, db_index=True)
+    is_not_promoted_by_we_vote_reason = models.TextField(null=True, blank=True)
     is_still_active = models.BooleanField(default=True, db_index=True)
     is_victorious = models.BooleanField(default=False, db_index=True)
     politician_starter_list_serialized = models.TextField(null=True, blank=True)
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=True, db_index=True)
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     supporters_count = models.PositiveIntegerField(default=0)
+    # How many supporters are required before showing in We Vote lists
+    supporters_count_minimum_ignored = models.BooleanField(default=False, db_index=True)
     supporters_count_victory_goal = models.PositiveIntegerField(default=0)
     we_vote_hosted_campaign_photo_original_url = models.TextField(blank=True, null=True)
     # Full sized desktop
@@ -51,6 +58,12 @@ class CampaignX(models.Model):
     we_vote_hosted_campaign_photo_medium_url = models.TextField(blank=True, null=True)
     # Maximum size needed for image grids - Stored as "tiny" image
     we_vote_hosted_campaign_photo_small_url = models.TextField(blank=True, null=True)
+
+    def is_supporters_count_minimum_exceeded(self):
+        if positive_value_exists(self.supporters_count_minimum_ignored) or \
+                self.supporters_count >= SUPPORTERS_COUNT_MINIMUM_FOR_LISTING:
+            return True
+        return False
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -749,10 +762,14 @@ class CampaignXManager(models.Manager):
                 new_filter = Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)
                 filters.append(new_filter)
 
-            new_filter = Q(in_draft_mode=False,
-                           is_blocked_by_we_vote=False,
-                           is_still_active=True,
-                           is_ok_to_promote_on_we_vote=True)
+            new_filter = \
+                Q(in_draft_mode=False,
+                  is_blocked_by_we_vote=False,
+                  is_not_promoted_by_we_vote=False,
+                  is_still_active=True,
+                  is_ok_to_promote_on_we_vote=True) & \
+                (Q(supporters_count__gte=SUPPORTERS_COUNT_MINIMUM_FOR_LISTING) |
+                 Q(supporters_count_minimum_ignored=True))
             filters.append(new_filter)
 
             # Add the first query
@@ -836,6 +853,7 @@ class CampaignXManager(models.Manager):
                 Q(we_vote_id__in=visible_on_this_site_campaignx_we_vote_id_list,
                   in_draft_mode=False,
                   is_blocked_by_we_vote=False,
+                  is_not_promoted_by_we_vote=False,
                   is_still_active=True)
             filters.append(new_filter)
 
@@ -878,6 +896,12 @@ class CampaignXManager(models.Manager):
         return results
 
     def retrieve_campaignx_we_vote_id_list_filler_options(self, campaignx_we_vote_id_list_to_exclude=[], limit=0):
+        """
+        Used for "recommended-campaigns"
+        :param campaignx_we_vote_id_list_to_exclude:
+        :param limit:
+        :return:
+        """
         campaignx_we_vote_id_list_found = False
         campaignx_we_vote_id_list = []
         status = ''
@@ -887,7 +911,10 @@ class CampaignXManager(models.Manager):
             campaignx_query = campaignx_query.filter(
                 in_draft_mode=False,
                 is_blocked_by_we_vote=False,
+                is_not_promoted_by_we_vote=False,
                 is_still_active=True)
+            campaignx_query = campaignx_query.filter(Q(supporters_count__gte=SUPPORTERS_COUNT_MINIMUM_FOR_LISTING) |
+                                                     Q(supporters_count_minimum_ignored=True))
             if len(campaignx_we_vote_id_list_to_exclude) > 0:
                 campaignx_query = campaignx_query.exclude(we_vote_id__in=campaignx_we_vote_id_list_to_exclude)
             campaignx_query = campaignx_query.values_list('we_vote_id', flat=True).distinct()
@@ -1295,7 +1322,8 @@ class CampaignXManager(models.Manager):
             self.retrieve_seo_friendly_path_list(campaignx_we_vote_id=campaignx_we_vote_id)
         simple_list = []
         for one_path in seo_friendly_path_list:
-            simple_list.append(one_path.final_pathname_string)
+            if positive_value_exists(one_path.final_pathname_string):
+                simple_list.append(one_path.final_pathname_string)
         return simple_list
 
     def update_campaignx_owners_with_organization_change(

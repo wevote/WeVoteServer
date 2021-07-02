@@ -50,6 +50,7 @@ def campaign_retrieve_doc_template_values(url_root):
                    '  "campaignx_politician_list_exists": boolean,\n' \
                    '  "campaignx_we_vote_id": string,\n' \
                    '  "in_draft_mode": boolean,\n' \
+                   '  "is_supporters_count_minimum_exceeded": boolean,\n' \
                    '  "organization_we_vote_id": string,\n' \
                    '  "seo_friendly_path": string,\n' \
                    '  "supporters_count": integer,\n' \
