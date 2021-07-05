@@ -2,28 +2,23 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import CampaignX, CampaignXManager, CampaignXOwner, CampaignXPolitician, CampaignXSupporter
+from .models import CampaignX, CampaignXManager, CampaignXOwner, CampaignXPolitician, CampaignXSupporter, \
+    FINAL_ELECTION_DATE_COOL_DOWN, SUPPORTERS_COUNT_MINIMUM_FOR_LISTING
 from admin_tools.views import redirect_to_sign_in_page
-from config.base import get_environment_variable
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
-from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_deleted_exception, handle_record_not_found_exception
-from election.controllers import retrieve_election_id_list_by_year_list, retrieve_upcoming_election_id_list
-from election.models import Election, ElectionManager
-import json
-import operator
+from election.models import ElectionManager
 from organization.models import OrganizationManager
 from politician.models import PoliticianManager
-from voter.models import retrieve_voter_authority, voter_has_authority, VoterManager
+from voter.models import voter_has_authority, VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
-    STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, \
+    generate_date_as_integer, positive_value_exists, STATE_CODE_MAP
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -369,13 +364,15 @@ def campaign_edit_process_view(request):
     campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', None)
     campaign_title = request.POST.get('campaign_title', None)
     campaign_description = request.POST.get('campaign_description', None)
+    final_election_date_as_integer = convert_to_int(request.POST.get('final_election_date_as_integer', 0))
+    final_election_date_as_integer = None if final_election_date_as_integer == 0 else final_election_date_as_integer
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     is_blocked_by_we_vote = request.POST.get('is_blocked_by_we_vote', False)
     is_blocked_by_we_vote_reason = request.POST.get('is_blocked_by_we_vote_reason', None)
     is_not_promoted_by_we_vote = request.POST.get('is_not_promoted_by_we_vote', False)
     is_not_promoted_by_we_vote_reason = request.POST.get('is_not_promoted_by_we_vote_reason', None)
     is_ok_to_promote_on_we_vote = request.POST.get('is_ok_to_promote_on_we_vote', False)
     politician_starter_list_serialized = request.POST.get('politician_starter_list_serialized', None)
-    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     state_code = request.POST.get('state_code', None)
     supporters_count_minimum_ignored = request.POST.get('supporters_count_minimum_ignored', False)
 
@@ -402,6 +399,8 @@ def campaign_edit_process_view(request):
             if campaign_description is not None:
                 campaignx.campaign_description = campaign_description.strip()
             campaignx.is_blocked_by_we_vote = positive_value_exists(is_blocked_by_we_vote)
+            if final_election_date_as_integer is not None:
+                campaignx.final_election_date_as_integer = final_election_date_as_integer
             if is_blocked_by_we_vote_reason is not None:
                 campaignx.is_blocked_by_we_vote_reason = is_blocked_by_we_vote_reason.strip()
             campaignx.is_not_promoted_by_we_vote = positive_value_exists(is_not_promoted_by_we_vote)
@@ -481,19 +480,43 @@ def campaign_list_view(request):
     limit_to_opinions_in_this_year = convert_to_int(request.GET.get('limit_to_opinions_in_this_year', 0))
     campaignx_search = request.GET.get('campaignx_search', '')
     campaignx_type_filter = request.GET.get('campaignx_type_filter', '')
+    hide_campaigns_not_visible_yet = \
+        positive_value_exists(request.GET.get('hide_campaigns_not_visible_yet', False))
+    include_campaigns_from_prior_elections = \
+        positive_value_exists(request.GET.get('include_campaigns_from_prior_elections', False))
     sort_by = request.GET.get('sort_by', '')
     state_code = request.GET.get('state_code', '')
     show_all = request.GET.get('show_all', False)
+    show_blocked_campaigns = \
+        positive_value_exists(request.GET.get('show_blocked_campaigns', False))
+    show_campaigns_in_draft = \
+        positive_value_exists(request.GET.get('show_campaigns_in_draft', False))
     show_more = request.GET.get('show_more', False)  # Show up to 1,000 organizations
     show_issues = request.GET.get('show_issues', '')
     show_organizations_without_email = positive_value_exists(request.GET.get('show_organizations_without_email', False))
-    show_campaigns_in_draft = \
-        positive_value_exists(request.GET.get('show_campaigns_in_draft', False))
 
     election_years_available = [2022, 2021, 2020, 2019, 2018, 2017, 2016]
 
     messages_on_stage = get_messages(request)
     campaignx_list_query = CampaignX.objects.all()
+
+    if positive_value_exists(hide_campaigns_not_visible_yet):
+        campaignx_list_query = campaignx_list_query.filter(
+            Q(supporters_count__gte=SUPPORTERS_COUNT_MINIMUM_FOR_LISTING) |
+            Q(supporters_count_minimum_ignored=True))
+
+    final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
+    if positive_value_exists(include_campaigns_from_prior_elections):
+        pass
+    else:
+        campaignx_list_query = campaignx_list_query.filter(
+            Q(final_election_date_as_integer__isnull=True) |
+            Q(final_election_date_as_integer__gt=final_election_date_plus_cool_down))
+
+    if positive_value_exists(show_blocked_campaigns):
+        campaignx_list_query = campaignx_list_query.filter(is_blocked_by_we_vote=True)
+    else:
+        campaignx_list_query = campaignx_list_query.filter(is_blocked_by_we_vote=False)
 
     if positive_value_exists(show_campaigns_in_draft):
         campaignx_list_query = campaignx_list_query.filter(in_draft_mode=True)
@@ -568,7 +591,10 @@ def campaign_list_view(request):
     template_values = {
         'candidate_we_vote_id':     candidate_we_vote_id,
         'election_years_available': election_years_available,
+        'final_election_date_plus_cool_down':   final_election_date_plus_cool_down,
         'google_civic_election_id': google_civic_election_id,
+        'hide_campaigns_not_visible_yet': hide_campaigns_not_visible_yet,
+        'include_campaigns_from_prior_elections':   include_campaigns_from_prior_elections,
         'limit_to_opinions_in_state_code': limit_to_opinions_in_state_code,
         'limit_to_opinions_in_this_year': limit_to_opinions_in_this_year,
         'messages_on_stage':        messages_on_stage,
@@ -580,7 +606,8 @@ def campaign_list_view(request):
         'show_issues':              show_issues,
         'show_more':                show_more,
         'show_organizations_without_email': show_organizations_without_email,
-        'show_campaigns_in_draft': show_campaigns_in_draft,
+        'show_blocked_campaigns':   show_blocked_campaigns,
+        'show_campaigns_in_draft':  show_campaigns_in_draft,
         'sort_by':                  sort_by,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
