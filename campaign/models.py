@@ -10,11 +10,13 @@ from exception.models import handle_record_found_more_than_one_exception,\
 import json
 import string
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
+from wevote_functions.functions import convert_to_int, generate_date_as_integer, generate_random_string, \
+    positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_campaignx_integer, fetch_site_unique_id_prefix
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+FINAL_ELECTION_DATE_COOL_DOWN = 7
 SUPPORTERS_COUNT_MINIMUM_FOR_LISTING = 5  # How many supporters are required before we will show campaign on We Vote
 
 
@@ -33,6 +35,8 @@ class CampaignX(models.Model):
         blank=True, unique=True, db_index=True)
     campaign_description = models.TextField(null=True, blank=True)
     campaign_title = models.CharField(verbose_name="title of campaign", max_length=255, null=False, blank=False)
+    # We store YYYYMMDD as an integer for very fast lookup (ex/ "20240901" for September, 1, 2024)
+    final_election_date_as_integer = models.PositiveIntegerField(null=True, unique=False, db_index=True)
     # Has not been released for view
     in_draft_mode = models.BooleanField(default=True, db_index=True)
     # Campaign owner allows campaignX to be promoted by We Vote on free home page and elsewhere
@@ -593,12 +597,13 @@ class CampaignXManager(models.Manager):
             'campaignx_we_vote_id':         campaignx_we_vote_id,
             'campaignx_owner_list':         campaignx_owner_list,
             'seo_friendly_path_list':       seo_friendly_path_list,
+            'viewer_is_owner':              viewer_is_owner,
             'DoesNotExist':                 exception_does_not_exist,
             'MultipleObjectsReturned':      exception_multiple_object_returned,
         }
         return results
 
-    def retrieve_campaignx(self, campaignx_we_vote_id='', seo_friendly_path='', read_only=False):
+    def retrieve_campaignx(self, campaignx_we_vote_id='', seo_friendly_path='', voter_we_vote_id='', read_only=False):
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         campaignx = None
@@ -607,6 +612,7 @@ class CampaignXManager(models.Manager):
         campaignx_owner_list = []
         seo_friendly_path_list = []
         status = ''
+        viewer_is_owner = False
 
         try:
             if positive_value_exists(campaignx_we_vote_id):
@@ -640,13 +646,17 @@ class CampaignXManager(models.Manager):
             success = True
 
         if positive_value_exists(campaignx_found):
+            if positive_value_exists(campaignx_we_vote_id) and positive_value_exists(voter_we_vote_id):
+                viewer_is_owner = campaignx_manager.is_voter_campaignx_owner(
+                    campaignx_we_vote_id=campaignx_we_vote_id, voter_we_vote_id=voter_we_vote_id)
+
             campaignx_owner_object_list = campaignx_manager.retrieve_campaignx_owner_list(
                 campaignx_we_vote_id=campaignx_we_vote_id, viewer_is_owner=False)
             for campaignx_owner in campaignx_owner_object_list:
                 campaign_owner_dict = {
                     'organization_name':                        campaignx_owner.organization_name,
                     'organization_we_vote_id':                  campaignx_owner.organization_we_vote_id,
-                    'feature_this_profile_image':                       campaignx_owner.feature_this_profile_image,
+                    'feature_this_profile_image':               campaignx_owner.feature_this_profile_image,
                     'visible_to_public':                        campaignx_owner.visible_to_public,
                     'we_vote_hosted_profile_image_url_tiny':    campaignx_owner.we_vote_hosted_profile_image_url_tiny,
                 }
@@ -664,6 +674,7 @@ class CampaignXManager(models.Manager):
             'campaignx_we_vote_id':     campaignx_we_vote_id,
             'campaignx_owner_list':     campaignx_owner_list,
             'seo_friendly_path_list':   seo_friendly_path_list,
+            'viewer_is_owner':          viewer_is_owner,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
         }
@@ -762,6 +773,7 @@ class CampaignXManager(models.Manager):
                 new_filter = Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)
                 filters.append(new_filter)
 
+            final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
             new_filter = \
                 Q(in_draft_mode=False,
                   is_blocked_by_we_vote=False,
@@ -769,7 +781,9 @@ class CampaignXManager(models.Manager):
                   is_still_active=True,
                   is_ok_to_promote_on_we_vote=True) & \
                 (Q(supporters_count__gte=SUPPORTERS_COUNT_MINIMUM_FOR_LISTING) |
-                 Q(supporters_count_minimum_ignored=True))
+                 Q(supporters_count_minimum_ignored=True)) & \
+                (Q(final_election_date_as_integer__isnull=True) |
+                 Q(final_election_date_as_integer__gt=final_election_date_plus_cool_down))
             filters.append(new_filter)
 
             # Add the first query
@@ -849,12 +863,15 @@ class CampaignXManager(models.Manager):
                 filters.append(new_filter)
 
             # Campaigns approved to be shown on this site
+            final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
             new_filter = \
                 Q(we_vote_id__in=visible_on_this_site_campaignx_we_vote_id_list,
                   in_draft_mode=False,
                   is_blocked_by_we_vote=False,
                   is_not_promoted_by_we_vote=False,
-                  is_still_active=True)
+                  is_still_active=True) & \
+                (Q(final_election_date_as_integer__isnull=True) |
+                 Q(final_election_date_as_integer__gt=final_election_date_plus_cool_down))
             filters.append(new_filter)
 
             # Add the first query
@@ -915,6 +932,10 @@ class CampaignXManager(models.Manager):
                 is_still_active=True)
             campaignx_query = campaignx_query.filter(Q(supporters_count__gte=SUPPORTERS_COUNT_MINIMUM_FOR_LISTING) |
                                                      Q(supporters_count_minimum_ignored=True))
+            final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
+            campaignx_query = campaignx_query.filter(
+                Q(final_election_date_as_integer__isnull=True) |
+                Q(final_election_date_as_integer__gt=final_election_date_plus_cool_down))
             if len(campaignx_we_vote_id_list_to_exclude) > 0:
                 campaignx_query = campaignx_query.exclude(we_vote_id__in=campaignx_we_vote_id_list_to_exclude)
             campaignx_query = campaignx_query.values_list('we_vote_id', flat=True).distinct()
@@ -2104,6 +2125,8 @@ class CampaignXPolitician(models.Model):
         return "CampaignXPolitician"
 
     campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    # We store YYYYMMDD as an integer for very fast lookup (ex/ "20240901" for September, 1, 2024)
+    next_election_date_as_integer = models.PositiveIntegerField(null=True, unique=False, db_index=True)
     politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     politician_name = models.CharField(max_length=255, null=False, blank=False)
     state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)

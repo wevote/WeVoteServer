@@ -49,6 +49,8 @@ def campaign_retrieve_doc_template_values(url_root):
                    '  "campaign_title": string,\n' \
                    '  "campaignx_politician_list_exists": boolean,\n' \
                    '  "campaignx_we_vote_id": string,\n' \
+                   '  "final_election_date_as_integer": integer,\n' \
+                   '  "final_election_date_in_past": boolean,\n' \
                    '  "in_draft_mode": boolean,\n' \
                    '  "is_blocked_by_we_vote": boolean,\n' \
                    '  "is_blocked_by_we_vote_reason": string,\n' \
@@ -59,6 +61,7 @@ def campaign_retrieve_doc_template_values(url_root):
                    '  "supporters_count_next_goal": integer,\n' \
                    '  "supporters_count_victory_goal": integer,\n' \
                    '  "visible_on_this_site": boolean,\n' \
+                   '  "voter_is_campaignx_owner": boolean,\n' \
                    '  "voter_signed_in_with_email": boolean,\n' \
                    '  "voter_we_vote_id": string,\n' \
                    '  "we_vote_hosted_campaign_photo_large_url": string,\n' \

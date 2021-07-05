@@ -9,11 +9,6 @@
 
 <h1>Campaigns</h1>
 
-{#<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"#}
-{#      target="_blank">#}
-{#        Import New Campaigns ></a> (open in new window)#}
-{#</p>#}
-
 <form name="state_code_form" method="get" action="{% url 'campaign:campaignx_list' %}">
     {% csrf_token %}
     <input type="hidden" name="sort_by" value="{{ sort_by }}">
@@ -38,15 +33,30 @@
 {#{% endif %}{# End of if state_list #}
 
     {#  #}
-{#    <label for="show_organizations_without_email_id">#}
-{#      <input type="checkbox" name="show_organizations_without_email" id="show_organizations_without_email_id" value="1"#}
-{#             {% if show_organizations_without_email %}checked{% endif %} /> Show Emails Missing&nbsp;&nbsp;&nbsp;#}
-{#    </label>#}
-
-    {#  #}
     <label for="show_campaigns_in_draft_id">
       <input type="checkbox" name="show_campaigns_in_draft" id="show_campaigns_in_draft_id" value="1"
              {% if show_campaigns_in_draft %}checked{% endif %} /> In Draft Mode
+    </label>
+
+    {#  #}
+    &nbsp;&nbsp;&nbsp;
+    <label for="show_blocked_campaigns_id">
+      <input type="checkbox" name="show_blocked_campaigns" id="show_blocked_campaigns_id" value="1"
+             {% if show_blocked_campaigns %}checked{% endif %} /> Blocked
+    </label>
+
+    {#  #}
+    &nbsp;&nbsp;&nbsp;
+    <label for="hide_campaigns_not_visible_yet_id">
+      <input type="checkbox" name="hide_campaigns_not_visible_yet" id="hide_campaigns_not_visible_yet_id" value="1"
+             {% if hide_campaigns_not_visible_yet %}checked{% endif %} /> Hide "Not Visible Yet"
+    </label>
+
+    {#  #}
+    &nbsp;&nbsp;&nbsp;
+    <label for="include_campaigns_from_prior_elections_id">
+      <input type="checkbox" name="include_campaigns_from_prior_elections" id="include_campaigns_from_prior_elections_id" value="1"
+             {% if include_campaigns_from_prior_elections %}checked{% endif %} /> Include Prior Elections
     </label>
 
     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -140,14 +150,24 @@
                 </span><br />
                 <span>
                     {{ campaignx.we_vote_id }}&nbsp;
-                </span><br />
-                (<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}">edit</a>)
-                {% if not campaignx.is_ok_to_promote_on_we_vote or not campaignx.is_not_promoted_by_we_vote %}
-                    &nbsp;NO-PROMOTE
+                </span>
+                <span style="font-size: .95rem; color: gray">
+                {% if not campaignx.is_ok_to_promote_on_we_vote %}
+                    OWNER-NO-PROMOTE&nbsp;
                 {% endif %}
+                {% if campaignx.is_not_promoted_by_we_vote %}
+                    WE-VOTE-NO-PROMOTE&nbsp;
+                {% endif %}
+                </span>
+
+                <span style="color: red; font-weight: 800;">
                 {% if campaignx.is_blocked_by_we_vote %}
-                    &nbsp;BLOCKED
+                    BLOCKED&nbsp;
                 {% endif %}
+                </span>
+
+                <br />
+                (<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}">edit</a>)
             </td>
             <td>
             {% for campaignx_owner in campaignx.campaignx_owner_list %}
@@ -158,17 +178,30 @@
                 {% endif %}
             {% endfor %}
             </td>
-            <td>{% if campaignx.supporters_count %}
+            <td style="text-align: right">{% if campaignx.supporters_count %}
                 <a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}" target="_blank">
-                    {{ campaignx.supporters_count|intcomma }}
+                    {{ campaignx.supporters_count|intcomma }} <span class="glyphicon glyphicon-new-window" style="font-size: .95rem"></span>
                 </a>
-        {% if campaignx.supporters_count_minimum_ignored %}
+                {% if campaignx.supporters_count_minimum_ignored and campaignx.supporters_count < 5 %}
+                    <br />
+                    <span style="font-size: 1.rem;">
                     (Visible)
-        {% elif not campaignx.is_supporters_count_minimum_exceeded %}
-                    (NOT&nbsp;visible)
-        {% endif %}
+                    </span>
+                {% elif not campaignx.is_supporters_count_minimum_exceeded %}
+                    <br />
+                    <span style="font-size: .95rem; color: gray">
+                    (NOT&nbsp;Visible)
+                    </span>
+                {% endif %}
             {% endif %}</td>
-            <td>{{ campaignx.campaign_description|default_if_none:""|truncatechars:250 }}</td>
+            <td>
+                {{ campaignx.campaign_description|default_if_none:""|truncatechars:250 }}
+                {% if campaignx.final_election_date_as_integer %}
+                    <span style="color: gray">
+                    ({{ campaignx.final_election_date_as_integer|default_if_none:"" }}{% if final_election_date_plus_cool_down > campaignx.final_election_date_as_integer %}-EXPIRED{% endif %})
+                    </span>
+                {% endif %}
+            </td>
         </tr>
     {% endfor %}
     </table>
@@ -202,6 +235,15 @@
                 this.form.submit();
             });
             $('#campaignx_type_filter_id').change(function() {
+                this.form.submit();
+            });
+            $('#hide_campaigns_not_visible_yet_id').change(function() {
+                this.form.submit();
+            });
+            $('#include_campaigns_from_prior_elections_id').change(function() {
+                this.form.submit();
+            });
+            $('#show_blocked_campaigns_id').change(function() {
                 this.form.submit();
             });
             $('#show_campaigns_in_draft_id').change(function() {
