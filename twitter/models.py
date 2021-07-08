@@ -664,7 +664,8 @@ class TwitterUserManager(models.Manager):
         # If here, we want to reach out to Twitter to get info for this twitter_handle
         twitter_results = retrieve_twitter_user_info(twitter_user_id, twitter_handle)
         if twitter_results['twitter_handle_found']:
-            twitter_save_results = self.update_or_create_twitter_user(twitter_results['twitter_json'])
+            twitter_save_results = self.update_or_create_twitter_user(
+                twitter_json=twitter_results['twitter_json'], twitter_id=twitter_user_id)
             if twitter_save_results['twitter_user_found']:
                 twitter_user = twitter_save_results['twitter_user']
                 # If saved, pull the fresh results from the database and return
@@ -1058,12 +1059,16 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def update_or_create_twitter_user(self, twitter_json, twitter_id=None, cached_twitter_profile_image_url_https=None,
-                                      cached_twitter_profile_background_image_url_https=None,
-                                      cached_twitter_profile_banner_url_https=None,
-                                      we_vote_hosted_profile_image_url_large=None,
-                                      we_vote_hosted_profile_image_url_medium=None,
-                                      we_vote_hosted_profile_image_url_tiny=None):
+    def update_or_create_twitter_user(
+            self,
+            twitter_json={},
+            twitter_id=None,
+            cached_twitter_profile_image_url_https=None,
+            cached_twitter_profile_background_image_url_https=None,
+            cached_twitter_profile_banner_url_https=None,
+            we_vote_hosted_profile_image_url_large=None,
+            we_vote_hosted_profile_image_url_medium=None,
+            we_vote_hosted_profile_image_url_tiny=None):
         """
         Update a twitter user entry with details retrieved from the Twitter API or
         create a twitter user entry if not exists.

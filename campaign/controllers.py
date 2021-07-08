@@ -678,6 +678,32 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
         return results
 
     if positive_value_exists(in_draft_mode_changed) and not positive_value_exists(in_draft_mode):
+        # Make sure organization object has necessary images needed for CampaignXOwner and CampaignXSupporter
+        from organization.models import OrganizationManager
+        organization_manager = OrganizationManager()
+        organization_results = \
+            organization_manager.retrieve_organization_from_we_vote_id(linked_organization_we_vote_id)
+        organization_changed = False
+        if organization_results['organization_found']:
+            try:
+                organization = organization_results['organization']
+                if not positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny) and \
+                        positive_value_exists(voter.we_vote_hosted_profile_image_url_tiny):
+                    organization.we_vote_hosted_profile_image_url_tiny = voter.we_vote_hosted_profile_image_url_tiny
+                    organization_changed = True
+                if not positive_value_exists(organization.we_vote_hosted_profile_image_url_medium) and \
+                        positive_value_exists(voter.we_vote_hosted_profile_image_url_medium):
+                    organization.we_vote_hosted_profile_image_url_medium = voter.we_vote_hosted_profile_image_url_medium
+                    organization_changed = True
+                if not positive_value_exists(organization.we_vote_hosted_profile_image_url_large) and \
+                        positive_value_exists(voter.we_vote_hosted_profile_image_url_large):
+                    organization.we_vote_hosted_profile_image_url_large = voter.we_vote_hosted_profile_image_url_large
+                    organization_changed = True
+                if organization_changed:
+                    organization.save()
+            except Exception as e:
+                status += "COULD_NOT_UPDATE_ORGANIZATION_FROM_VOTER: " + str(e) + " "
+
         # To publish a campaign, voter must be signed in with an email address
         if not voter.signed_in_with_email():
             status += "MUST_BE_SIGNED_IN_WITH_EMAIL "
@@ -770,14 +796,14 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                     create_resized_image_results['cached_resized_image_url_tiny']
 
         update_values = {
-            'campaign_description':         campaign_description,
-            'campaign_description_changed': campaign_description_changed,
-            'in_draft_mode':                in_draft_mode,
-            'in_draft_mode_changed':        in_draft_mode_changed,
-            'campaign_photo_changed':       campaign_photo_changed,
-            'campaign_title':               campaign_title,
-            'campaign_title_changed':       campaign_title_changed,
-            'politician_delete_list_serialized':   politician_delete_list_serialized,
+            'campaign_description':                 campaign_description,
+            'campaign_description_changed':         campaign_description_changed,
+            'in_draft_mode':                        in_draft_mode,
+            'in_draft_mode_changed':                in_draft_mode_changed,
+            'campaign_photo_changed':               campaign_photo_changed,
+            'campaign_title':                       campaign_title,
+            'campaign_title_changed':               campaign_title_changed,
+            'politician_delete_list_serialized':    politician_delete_list_serialized,
             'politician_starter_list_changed':      politician_starter_list_changed,
             'politician_starter_list_serialized':   politician_starter_list_serialized,
             'we_vote_hosted_campaign_photo_large_url': we_vote_hosted_campaign_photo_large_url,
@@ -796,13 +822,13 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
         # Save campaign_photo_from_file_reader and get back we_vote_hosted_campaign_photo_large_url
         #  after initial update
         update_values = {
-            'campaign_description':         campaign_description,
-            'campaign_description_changed': campaign_description_changed,
-            'in_draft_mode':                in_draft_mode,
-            'in_draft_mode_changed':        in_draft_mode_changed,
-            'campaign_title':               campaign_title,
-            'campaign_title_changed':       campaign_title_changed,
-            'politician_delete_list_serialized':   politician_delete_list_serialized,
+            'campaign_description':                 campaign_description,
+            'campaign_description_changed':         campaign_description_changed,
+            'in_draft_mode':                        in_draft_mode,
+            'in_draft_mode_changed':                in_draft_mode_changed,
+            'campaign_title':                       campaign_title,
+            'campaign_title_changed':               campaign_title_changed,
+            'politician_delete_list_serialized':    politician_delete_list_serialized,
             'politician_starter_list_changed':      politician_starter_list_changed,
             'politician_starter_list_serialized':   politician_starter_list_serialized,
         }

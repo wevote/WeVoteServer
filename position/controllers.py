@@ -2008,7 +2008,7 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
             try:
                 to_position_entry.save()
             except Exception as e:
-                status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_FRIENDS_ONLY_ORGANIZATION_UPDATE "
+                status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_FRIENDS_ONLY_ORGANIZATION_UPDATE: " + str(e) + " "
         else:
             # Change the position values to the new values
             try:
@@ -2027,7 +2027,7 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
                 from_position_entry.save()
                 position_entries_moved += 1
             except Exception as e:
-                status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_FRIENDS_ONLY_ORGANIZATION_UPDATE2 "
+                status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_FRIENDS_ONLY_ORGANIZATION_UPDATE2: " + str(e) + " "
                 position_entries_not_moved += 1
 
     from_position_private_list_remaining_results = position_list_manager.retrieve_all_positions_for_voter(

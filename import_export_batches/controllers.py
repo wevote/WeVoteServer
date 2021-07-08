@@ -4565,9 +4565,13 @@ def import_organization_data_from_batch_row_actions(
                         one_batch_row_action.organization_twitter_handle)
 
             results = organization_manager.create_organization(
-                one_batch_row_action.organization_name, one_batch_row_action.organization_website,
-                one_batch_row_action.organization_twitter_handle, one_batch_row_action.organization_email,
-                one_batch_row_action.organization_facebook, temp_org_image, twitter_id_for_new_organization)
+                organization_name=one_batch_row_action.organization_name,
+                organization_website=one_batch_row_action.organization_website,
+                organization_twitter_handle=one_batch_row_action.organization_twitter_handle,
+                organization_email=one_batch_row_action.organization_email,
+                organization_facebook=one_batch_row_action.organization_facebook,
+                organization_image=temp_org_image,
+                twitter_id=twitter_id_for_new_organization)
 
             if not results['organization_created']:
                 continue

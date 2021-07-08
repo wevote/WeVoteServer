@@ -62,6 +62,7 @@ class CampaignX(models.Model):
     we_vote_hosted_campaign_photo_medium_url = models.TextField(blank=True, null=True)
     # Maximum size needed for image grids - Stored as "tiny" image
     we_vote_hosted_campaign_photo_small_url = models.TextField(blank=True, null=True)
+    date_campaign_started = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
 
     def is_supporters_count_minimum_exceeded(self):
         if positive_value_exists(self.supporters_count_minimum_ignored) or \
@@ -1710,14 +1711,17 @@ class CampaignXManager(models.Manager):
         success = results['success']
         status += results['status']
 
-        if organization_name is None and positive_value_exists(organization_we_vote_id):
+        if positive_value_exists(organization_we_vote_id):
             from organization.models import OrganizationManager
             organization_manager = OrganizationManager()
             organization_results = \
                 organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
             if organization_results['organization_found']:
                 organization = organization_results['organization']
-                organization_name = organization.organization_name
+                if organization_name is None:
+                    organization_name = organization.organization_name
+                if we_vote_hosted_profile_image_url_tiny is None:
+                    we_vote_hosted_profile_image_url_tiny = organization.we_vote_hosted_profile_image_url_tiny
 
         if campaignx_owner_found:
             if organization_name is not None \
@@ -2023,10 +2027,25 @@ class CampaignXManager(models.Manager):
             }
             return results
 
+        from organization.models import OrganizationManager
+        organization_manager = OrganizationManager()
+        campaignx_supporter_changed = False
         if campaignx_supporter_found:
             # Update existing campaignx_supporter with changes
             try:
-                campaignx_supporter_changed = False
+                # Retrieve the supporter_name and we_vote_hosted_profile_image_url_tiny from the organization entry
+                organization_results = \
+                    organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+                if organization_results['organization_found']:
+                    organization = organization_results['organization']
+                    if positive_value_exists(organization.organization_name):
+                        campaignx_supporter.supporter_name = organization.organization_name
+                        campaignx_supporter_changed = True
+                    if positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny):
+                        campaignx_supporter.we_vote_hosted_profile_image_url_tiny = \
+                            organization.we_vote_hosted_profile_image_url_tiny
+                        campaignx_supporter_changed = True
+
                 if 'campaign_supported_changed' in update_values \
                         and positive_value_exists(update_values['campaign_supported_changed']):
                     campaignx_supporter.campaign_supported = update_values['campaign_supported']
@@ -2048,6 +2067,7 @@ class CampaignXManager(models.Manager):
                 success = True
             except Exception as e:
                 campaignx_supporter = None
+                campaignx_supporter_changed = False
                 success = False
                 status += "CAMPAIGNX_SUPPORTER_NOT_UPDATED: " + str(e) + " "
         else:
@@ -2060,8 +2080,6 @@ class CampaignXManager(models.Manager):
                 )
                 status += "CAMPAIGNX_SUPPORTER_CREATED "
                 # Retrieve the supporter_name and we_vote_hosted_profile_image_url_tiny from the organization entry
-                from organization.models import OrganizationManager
-                organization_manager = OrganizationManager()
                 organization_results = \
                     organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
                 if organization_results['organization_found']:
@@ -2089,6 +2107,7 @@ class CampaignXManager(models.Manager):
                 campaignx_supporter_found = True
                 success = True
             except Exception as e:
+                campaignx_supporter_changed = False
                 campaignx_supporter_created = False
                 campaignx_supporter = None
                 success = False

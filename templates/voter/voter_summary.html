@@ -22,6 +22,12 @@
         </td>
       </tr>
       <tr>
+        <td>Linked Organization IDs:&nbsp;</td>
+        <td>
+          <strong><a href="{% url 'organization:organization_we_vote_id_position_list' voter.linked_organization_we_vote_id %}">{{ voter.linked_organization_we_vote_id }} </a></strong>
+        </td>
+      </tr>
+      <tr>
         <td>Admin?:</td>
         <td><strong>{% if voter.is_admin %}Yes{% else %}No{% endif %}</strong></td>
       </tr>
@@ -70,6 +76,24 @@
     {% endfor %}
     </table>
     {% endif %}
+
+    {% if voter.we_vote_hosted_profile_image_url_tiny %}
+        we_vote_hosted_profile_image_url_tiny: {{ voter.we_vote_hosted_profile_image_url_tiny }}<br />
+        <img src="{{ voter.we_vote_hosted_profile_image_url_tiny }}"><br />
+        <br />
+    {% endif %}
+
+    {% if voter.we_vote_hosted_profile_image_url_medium %}
+        we_vote_hosted_profile_image_url_medium: {{ voter.we_vote_hosted_profile_image_url_medium }}<br />
+        <img src="{{ voter.we_vote_hosted_profile_image_url_medium }}"><br />
+        <br />
+    {% endif %}
+
+    {% if voter.we_vote_hosted_profile_image_url_large %}
+        we_vote_hosted_profile_image_url_large: <a href="{{ voter.we_vote_hosted_profile_image_url_large }}" target="_blank">{{ voter.we_vote_hosted_profile_image_url_large }}</a><br />
+        <br />
+    {% endif %}
+
 
 {% else %}
 

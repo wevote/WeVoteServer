@@ -28,7 +28,7 @@
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
-        <a href="{% url 'campaign:campaignx_list' %}">cancel</a>
+        <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}">cancel</a>
     </label>
     <div class="col-sm-8">
         <button type="submit" class="btn btn-primary">{% if campaignx %}Update Campaign{% else %}CANNOT SAVE{% endif %}</button>
@@ -130,7 +130,7 @@
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
-        <a href="{% url 'campaign:campaignx_list' %}">cancel</a>
+        <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}">cancel</a>
     </label>
     <div class="col-sm-8">
         <button type="submit" class="btn btn-primary">{% if campaignx %}Update Campaign{% else %}CANNOT SAVE{% endif %}</button>

@@ -50,7 +50,7 @@ import json
 from organization.controllers import delete_membership_link_entries_for_voter, \
     delete_organization_complete, \
     move_membership_link_entries_to_another_voter, \
-    move_organization_to_another_complete, transform_web_app_url
+    move_organization_to_another_complete, transfer_voter_images_to_organization, transform_web_app_url
 from organization.models import OrganizationListManager, OrganizationManager, INDIVIDUAL
 from position.controllers import delete_positions_for_voter, duplicate_positions_to_another_voter, \
     move_positions_to_another_voter
@@ -1675,6 +1675,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
     email_manager = EmailManager()
     friend_manager = FriendManager()
+    organization_manager = OrganizationManager()
 
     # ############# EMAIL SIGN IN #####################################
     if positive_value_exists(email_secret_key):
@@ -1917,11 +1918,13 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
         we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
 
-        # Update the Twitter photo
+        # Update the Twitter photo in the voter
         save_twitter_results = voter_manager.save_twitter_user_values_from_twitter_auth_response(
-            twitter_owner_voter, twitter_auth_response, cached_twitter_profile_image_url_https,
-            we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
-            we_vote_hosted_profile_image_url_tiny)
+            twitter_owner_voter, twitter_auth_response,
+            cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
+            we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+            we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
         status += " " + save_twitter_results['status']
         twitter_owner_voter = save_twitter_results['voter']
 
@@ -2031,19 +2034,14 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                     status += "UNABLE_TO_TWITTER_LINK_ORGANIZATION_TO_VOTER " + str(e) + " "
             else:
                 # Create new organization
-                organization_name = twitter_owner_voter.get_full_name()
-                organization_website = ""
-                organization_twitter_handle = ""
-                organization_twitter_id = ""
-                organization_email = ""
-                organization_facebook = ""
-                organization_image = twitter_owner_voter.voter_photo_url()
-                organization_type = INDIVIDUAL
-                organization_manager = OrganizationManager()
                 create_results = organization_manager.create_organization(
-                    organization_name, organization_website, organization_twitter_handle,
-                    organization_email, organization_facebook, organization_image, organization_twitter_id,
-                    organization_type)
+                    organization_name=twitter_owner_voter.get_full_name(),
+                    organization_image=twitter_owner_voter.voter_photo_url(),
+                    organization_type=INDIVIDUAL,
+                    we_vote_hosted_profile_image_url_large=twitter_owner_voter.we_vote_hosted_profile_image_url_large,
+                    we_vote_hosted_profile_image_url_medium=twitter_owner_voter.we_vote_hosted_profile_image_url_medium,
+                    we_vote_hosted_profile_image_url_tiny=twitter_owner_voter.we_vote_hosted_profile_image_url_tiny
+                )
                 if create_results['organization_created']:
                     # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                     organization = create_results['organization']
@@ -2059,7 +2057,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                         else:
                             status += "TwitterLinkToOrganization_NOT_CREATED_AFTER_ORGANIZATION_CREATE "
                     except Exception as e:
-                        status += "UNABLE_TO_LINK_NEW_ORGANIZATION_TO_VOTER "
+                        status += "UNABLE_TO_LINK_NEW_ORGANIZATION_TO_VOTER: " + str(e) + " "
 
         # Make sure we end up with the organization referred to in twitter_link_to_organization ends up as
         # voter.linked_organization_we_vote_id
@@ -2429,7 +2427,12 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
 
     # Bring over the voter-table data
     merge_voter_accounts_results = merge_voter_accounts(from_voter, new_owner_voter)
+    new_owner_voter = merge_voter_accounts_results['to_voter']
     status += " " + merge_voter_accounts_results['status']
+
+    # Make sure the organization has the latest profile image from the voter record
+    transfer_voter_images_results = transfer_voter_images_to_organization(voter=new_owner_voter)
+    status += " " + transfer_voter_images_results['status']
 
     # Delete all existing PositionNetworkScore entries for both the old account and the new account, so they
     # have to be regenerated
@@ -2804,19 +2807,17 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             if not existing_organization_for_this_voter_found:
                 status += "EXISTING_ORGANIZATION_NOT_FOUND "
                 # If we are here, we need to create an organization for this voter
-                organization_name = voter.get_full_name()
-                organization_website = ""
-                organization_email = ""
-                organization_facebook = ""
-                organization_image = voter.we_vote_hosted_profile_image_url_large \
-                    if positive_value_exists(voter.we_vote_hosted_profile_image_url_large) \
-                    else voter.voter_photo_url()
-                organization_type = INDIVIDUAL
                 organization_manager = OrganizationManager()
                 create_results = organization_manager.create_organization(
-                    organization_name, organization_website, organization_twitter_handle,
-                    organization_email, organization_facebook, organization_image, organization_twitter_id,
-                    organization_type)
+                    organization_name=voter.get_full_name(),
+                    organization_twitter_handle=organization_twitter_handle,
+                    organization_image=voter.voter_photo_url(),
+                    organization_type=INDIVIDUAL,
+                    twitter_id=organization_twitter_id,
+                    we_vote_hosted_profile_image_url_large=voter.we_vote_hosted_profile_image_url_large,
+                    we_vote_hosted_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium,
+                    we_vote_hosted_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny
+                )
                 if create_results['organization_created']:
                     # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                     organization = create_results['organization']
@@ -2838,7 +2839,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
                                 status += repair_results['status']
 
                     except Exception as e:
-                        status += "UNABLE_TO_CREATE_NEW_ORGANIZATION_TO_VOTER_FROM_RETRIEVE_VOTER "
+                        status += "UNABLE_TO_CREATE_NEW_ORGANIZATION_TO_VOTER_FROM_RETRIEVE_VOTER: " + str(e) + " "
                 else:
                     status += "ORGANIZATION_NOT_CREATED "
 
@@ -2908,21 +2909,15 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
         if not positive_value_exists(voter.linked_organization_we_vote_id):
             # If we are here, we need to create an organization for this voter
             status += "NEED_TO_CREATE_ORGANIZATION_FOR_THIS_VOTER "
-            organization_name = voter.get_full_name()
-            organization_website = ""
-            organization_email = ""
-            organization_facebook = ""
-            organization_twitter_handle = ""
-            organization_twitter_id = 0
-            organization_image = voter.we_vote_hosted_profile_image_url_large \
-                if positive_value_exists(voter.we_vote_hosted_profile_image_url_large) \
-                else voter.voter_photo_url()
-            organization_type = INDIVIDUAL
             organization_manager = OrganizationManager()
             create_results = organization_manager.create_organization(
-                organization_name, organization_website, organization_twitter_handle,
-                organization_email, organization_facebook, organization_image, organization_twitter_id,
-                organization_type)
+                organization_name=voter.get_full_name(),
+                organization_image=voter.voter_photo_url(),
+                organization_type=INDIVIDUAL,
+                we_vote_hosted_profile_image_url_large=voter.we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny
+            )
             if create_results['organization_created']:
                 # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                 organization = create_results['organization']
@@ -3691,18 +3686,14 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
             status += "NO_LINKED_ORGANIZATION_FOUND "
             # Create new organization
             # Update the twitter_link_to_current_organization with new organization_we_vote_id
-            organization_name = current_voter.get_full_name()
-            organization_website = ""
-            organization_twitter_handle = ""
-            organization_twitter_id = ""
-            organization_email = ""
-            organization_facebook = ""
-            organization_image = current_voter.voter_photo_url()
-            organization_type = INDIVIDUAL
             create_results = organization_manager.create_organization(
-                organization_name, organization_website, organization_twitter_handle,
-                organization_email, organization_facebook, organization_image, organization_twitter_id,
-                organization_type)
+                organization_name=current_voter.get_full_name(),
+                organization_image=current_voter.voter_photo_url(),
+                organization_type=INDIVIDUAL,
+                we_vote_hosted_profile_image_url_large=current_voter.we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=current_voter.we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=current_voter.we_vote_hosted_profile_image_url_tiny
+            )
             if create_results['organization_created']:
                 current_voter_linked_organization = create_results['organization']
                 current_voter_linked_organization_id = current_voter_linked_organization.id
@@ -3720,17 +3711,14 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         # If for some reason there isn't an organization tied to the Twitter account, create a new organization
         # for the split_off_voter
         status += "NO_LINKED_ORGANIZATION_WE_VOTE_ID_FOUND "
-        organization_name = current_voter.get_full_name()
-        organization_website = ""
-        organization_twitter_handle = ""
-        organization_twitter_id = ""
-        organization_email = ""
-        organization_facebook = ""
-        organization_image = current_voter.voter_photo_url()
-        organization_type = INDIVIDUAL
         create_results = organization_manager.create_organization(
-            organization_name, organization_website, organization_twitter_handle,
-            organization_email, organization_facebook, organization_image, organization_twitter_id, organization_type)
+            organization_name=current_voter.get_full_name(),
+            organization_image=current_voter.voter_photo_url(),
+            organization_type=INDIVIDUAL,
+            we_vote_hosted_profile_image_url_large=current_voter.we_vote_hosted_profile_image_url_large,
+            we_vote_hosted_profile_image_url_medium=current_voter.we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny=current_voter.we_vote_hosted_profile_image_url_tiny
+        )
         if create_results['organization_created']:
             current_voter_linked_organization = create_results['organization']
             current_voter_linked_organization_id = current_voter_linked_organization.id

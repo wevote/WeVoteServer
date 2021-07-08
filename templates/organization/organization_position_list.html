@@ -20,7 +20,7 @@
                 <tr>
                     <th>We Vote ID:</th>
                     <td> {{ organization.we_vote_id }}
-                        (<a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">edit</a>) (<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a> in new window)</td>
+                        (<a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">edit</a>) (<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See org images <span class="glyphicon glyphicon-new-window"></span></a>)</td>
                 </tr>
 {#                <tr>#}
 {#                    <th>Vote Smart ID:</th>#}
@@ -64,8 +64,11 @@
                 {% if voter %}
                 <tr>
                     <th>Voter:</th>
-                    <td><a href="{% url 'voter:voter_summary' voter.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                           target="_blank">{% if voter.get_full_name %}{{ voter.get_full_name }}{% else %}{{ voter.we_vote_id }}{% endif %}</a> (open in new window)</td>
+                    <td>
+                        <a href="{% url 'voter:voter_summary' voter.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                           target="_blank">{% if voter.get_full_name %}{{ voter.get_full_name }}{% else %}{{ voter.we_vote_id }}{% endif %} <span class="glyphicon glyphicon-new-window"></span></a>
+                        (<a href="{% url 'image:images_for_one_voter' voter.id %}" target="_blank">See voter images <span class="glyphicon glyphicon-new-window"></span></a>)
+                    </td>
                 </tr>
                 {% endif %}
                 <tr>
@@ -198,15 +201,14 @@
             <br />
             <ul>
                 <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}&organization_we_vote_id={{ organization.we_vote_id }}&state_code={{ organization.state_served_code }}" target="_blank">
-                    Suggest a Voter Guide</a></strong> (in a new window). Quick public tools that feeds into import_export_batch system.</li>
+                    Suggest a Voter Guide <span class="glyphicon glyphicon-new-window"></span></a></strong>. Quick public tools that feeds into import_export_batch system.</li>
                 <li><a href="{% url 'organization:organization_position_new' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}"
-                       target="_blank">Add New Position Form</a> (in new window)</li>
+                       target="_blank">Add New Position Form <span class="glyphicon glyphicon-new-window"></span></a></li>
                 <li><a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}" >
                     Refresh Voter Guides</a></li>
                 <li><a href="{% url 'voter_guide:voter_guide_list' %}?voter_guide_search={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}"
-                       target="_blank">Find Voter Guides for this Endorser</a> (new window)</li>
+                       target="_blank">Find Voter Guides for this Endorser <span class="glyphicon glyphicon-new-window"></span></a></li>
                 <li>Assorted tools:
-                &nbsp;&nbsp;&nbsp; <a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a>,
                     <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
                     <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape endorser website for Twitter Accounts</a>,
                     <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}">Retrieve tweets for endorser</a>,

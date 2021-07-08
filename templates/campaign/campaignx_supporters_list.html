@@ -63,8 +63,11 @@
                     <img src="{{ campaignx_supporter.we_vote_hosted_profile_image_url_tiny }}" width="32px" /></a>{% endif %}</td>
             <td>
                 {{ campaignx_supporter.supporter_name }}<br />
-                &nbsp;&nbsp;&nbsp;(<a href="{% url 'voter:voter_edit_we_vote_id' campaignx_supporter.voter_we_vote_id %}"
-                                      target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>)
+                <div class="u-no-break">
+                <span style="color: darkgray">{{ campaignx_supporter.voter_we_vote_id }}</span>&nbsp;<a
+                    href="{% url 'voter:voter_edit_we_vote_id' campaignx_supporter.voter_we_vote_id %}"
+                    target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                </div>
             </td>
             <td>{{ campaignx_supporter.supporter_endorsement|default_if_none:"" }}</td>
             <td>{% if campaignx_supporter.visible_to_public %}visible{% endif %}</td>

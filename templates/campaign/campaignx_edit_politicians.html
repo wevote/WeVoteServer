@@ -71,10 +71,15 @@ span.nobr { white-space: nowrap; }
             {% endif %}
             {{ campaignx_politician.politician_name }}&nbsp;&nbsp;
         {% if campaignx_politician.politician_we_vote_id %}
+            <span style="color: darkgray">
+            {{ campaignx_politician.politician_we_vote_id }}
+            </span>
             <a href="{% url 'politician:politician_we_vote_id_edit' campaignx_politician.politician_we_vote_id %}"
                target="_blank">
                 view
                 <span class="glyphicon glyphicon-new-window"></span></a>
+        {% else %}
+            <span style="color: darkgray">not&nbsp;linked</span>
         {% endif %}
         </td>
         <td>

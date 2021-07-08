@@ -88,7 +88,13 @@ span.nobr { white-space: nowrap; }
             {% if campaignx_owner.we_vote_hosted_profile_image_url_tiny %}
                 <img src="{{ campaignx_owner.we_vote_hosted_profile_image_url_tiny }}" />
             {% endif %}
+            {% if campaignx_owner.organization_name %}
             {{ campaignx_owner.organization_name }}&nbsp;&nbsp;
+            {% elif campaignx_owner.organization_we_vote_id %}
+            {{ campaignx_owner.organization_we_vote_id }}&nbsp;&nbsp;
+            {% else %}
+            {{ campaignx_owner.voter_we_vote_id }}&nbsp;&nbsp;
+            {% endif %}
             <a href="{% url 'organization:organization_we_vote_id_position_list' campaignx_owner.organization_we_vote_id %}"
                target="_blank">
                 view

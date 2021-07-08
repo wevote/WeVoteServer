@@ -1,14 +1,14 @@
 {# templates/voter/voter_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Edit {% if voter %}{{ voter.get_full_name }}{% else %}Create New Voter Account{% endif %}{% endblock %}
+{% block title %}Voter Edit: {% if voter %}{{ voter.get_full_name }}{% else %}Create New Voter Account{% endif %}{% endblock %}
 
 {%  block content %}
 {% load humanize %}
 
     <a href="{% url 'voter:voter_list' %}">< Back to Voters</a><br />
 
-<h1>{% if voter %}Edit Voter: {{ voter.first_name|default_if_none:"" }} {{ voter.last_name|default_if_none:"" }}{% else %}Create New Voter Account{% endif %}</h1>
+<h1>{% if voter %}Voter Edit: {{ voter.first_name|default_if_none:"" }} {{ voter.last_name|default_if_none:"" }}{% else %}Create New Voter Account{% endif %}</h1>
 <form action="{% url "voter:voter_edit_process" %}" method="post" class="form-horizontal">
 {% csrf_token %}
 
@@ -222,7 +222,11 @@
     <label class="col-sm-3 control-label">
         &nbsp;</label>
     <div class="col-sm-9">
+        {% if voter %}
+        <a href="{% url 'voter:voter_summary' voter.id %}">cancel</a>
+        {% else %}
         <a href="{% url 'voter:voter_list' %}">cancel</a>
+        {% endif %}
         <input type="submit" value="{% if voter %}Update Voter Account{% else %}Create New Voter Account{% endif %}" />
     </div>
 </div>

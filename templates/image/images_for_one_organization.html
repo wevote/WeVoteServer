@@ -2,8 +2,9 @@
 {% extends "template_base.html" %}
 
 {% block title %}
-    {% if organization_we_vote_id %}Org we_vote_id: {{ organization_we_vote_id }}
-    {% else %}No Voter Found {% endif %}
+    Endorser Images:
+    {% if organization_we_vote_id %}{{ organization_we_vote_id }}
+    {% else %}No Endorser Found {% endif %}
 {% endblock %}
 
 {%  block content %}
@@ -12,7 +13,11 @@
 
 <a href="{% url 'image:cache_images_locally_for_all_organizations' %}">< Back to Cache images locally for all organizations</a>
 <br />
-<h1>Images for One Endorser{% if organization_we_vote_id %}: {{ organization.organization_name }}{% endif %}</h1>
+
+<a href="{% url 'organization:organization_we_vote_id_position_list' organization_we_vote_id %}">< Back to Endorser</a>
+<br />
+
+<h1>Endorser Images{% if organization_we_vote_id %}: {{ organization.organization_name }}{% endif %}</h1>
 
 <a href="{% url 'image:create_resized_images_for_organization' organization_we_vote_id %}">Create resized images for this organization</a><br />
 
