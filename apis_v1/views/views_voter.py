@@ -1971,6 +1971,7 @@ def voter_update_view(request):  # voterUpdate
             'notification_settings_flags': 0,
             'notification_flag_integer_to_set': 0,
             'notification_flag_integer_to_unset': 0,
+            'voter_photo_too_big': True,
         }
 
         response = HttpResponse(json.dumps(json_data), content_type='application/json')

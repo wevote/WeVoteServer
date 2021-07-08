@@ -812,21 +812,41 @@ class VoterManager(BaseUserManager):
                         if linked_voter.twitter_profile_image_url_https != twitter_user.twitter_profile_image_url_https:
                             linked_voter.twitter_profile_image_url_https = twitter_user.twitter_profile_image_url_https
                             save_voter = True
-                        if linked_voter.we_vote_hosted_profile_image_url_large != \
+                        if linked_voter.we_vote_hosted_profile_twitter_image_url_large != \
                                 twitter_user.we_vote_hosted_profile_image_url_large:
-                            linked_voter.we_vote_hosted_profile_image_url_large = \
+                            linked_voter.we_vote_hosted_profile_twitter_image_url_large = \
                                 twitter_user.we_vote_hosted_profile_image_url_large
                             save_voter = True
-                        if linked_voter.we_vote_hosted_profile_image_url_medium != \
+                        if linked_voter.we_vote_hosted_profile_twitter_image_url_medium != \
                                 twitter_user.we_vote_hosted_profile_image_url_medium:
-                            linked_voter.we_vote_hosted_profile_image_url_medium = \
+                            linked_voter.we_vote_hosted_profile_twitter_image_url_medium = \
                                 twitter_user.we_vote_hosted_profile_image_url_medium
                             save_voter = True
-                        if linked_voter.we_vote_hosted_profile_image_url_tiny != \
+                        if linked_voter.we_vote_hosted_profile_twitter_image_url_tiny != \
                                 twitter_user.we_vote_hosted_profile_image_url_tiny:
-                            linked_voter.we_vote_hosted_profile_image_url_tiny = \
+                            linked_voter.we_vote_hosted_profile_twitter_image_url_tiny = \
                                 twitter_user.we_vote_hosted_profile_image_url_tiny
                             save_voter = True
+                        if linked_voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                            linked_voter.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
+                            save_voter = True
+                        if linked_voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
+                            if linked_voter.we_vote_hosted_profile_image_url_large != \
+                                    twitter_user.we_vote_hosted_profile_image_url_large:
+                                linked_voter.we_vote_hosted_profile_image_url_large = \
+                                    twitter_user.we_vote_hosted_profile_image_url_large
+                                save_voter = True
+                            if linked_voter.we_vote_hosted_profile_image_url_medium != \
+                                    twitter_user.we_vote_hosted_profile_image_url_medium:
+                                linked_voter.we_vote_hosted_profile_image_url_medium = \
+                                    twitter_user.we_vote_hosted_profile_image_url_medium
+                                save_voter = True
+                            if linked_voter.we_vote_hosted_profile_image_url_tiny != \
+                                    twitter_user.we_vote_hosted_profile_image_url_tiny:
+                                linked_voter.we_vote_hosted_profile_image_url_tiny = \
+                                    twitter_user.we_vote_hosted_profile_image_url_tiny
+                                save_voter = True
+
                         if save_voter:
                             linked_voter.save()
                             status += "REPAIR_TWITTER_CACHING-SAVED_LINKED_VOTER "
@@ -1367,17 +1387,26 @@ class VoterManager(BaseUserManager):
             else:
                 voter.facebook_profile_image_url_https = facebook_auth_response.facebook_profile_image_url_https
             if positive_value_exists(we_vote_hosted_profile_image_url_large):
-                voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                voter.we_vote_hosted_profile_facebook_image_url_large = we_vote_hosted_profile_image_url_large
             if positive_value_exists(we_vote_hosted_profile_image_url_medium):
-                voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                voter.we_vote_hosted_profile_facebook_image_url_medium = we_vote_hosted_profile_image_url_medium
             if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
-                voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                voter.we_vote_hosted_profile_facebook_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+            if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                voter.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_FACEBOOK
+            if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
+                if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                    voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                    voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                    voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
 
             voter.save()
             success = True
             status = "SAVED_FACEBOOK_USER_VALUES "
         except Exception as e:
-            status = "UNABLE_TO_SAVE_FACEBOOK_USER_VALUES " + str(e) + " "
+            status = "UNABLE_TO_SAVE_FACEBOOK_USER_VALUES: " + str(e) + " "
             success = False
 
         results = {
@@ -1401,12 +1430,21 @@ class VoterManager(BaseUserManager):
                 voter.facebook_profile_image_url_https = facebook_user_dict['profile_image_url_https']
             if 'fb_username' in facebook_user_dict:
                 voter.fb_username = facebook_user_dict['fb_username']
-            if we_vote_hosted_profile_image_url_large:
-                voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
-            if we_vote_hosted_profile_image_url_medium:
-                voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
-            if we_vote_hosted_profile_image_url_tiny:
-                voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+            if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                voter.we_vote_hosted_profile_facebook_image_url_large = we_vote_hosted_profile_image_url_large
+            if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                voter.we_vote_hosted_profile_facebook_image_url_medium = we_vote_hosted_profile_image_url_medium
+            if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                voter.we_vote_hosted_profile_facebook_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+            if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                voter.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_FACEBOOK
+            if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
+                if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                    voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                    voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                    voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
 
             voter.save()
             success = True
@@ -1457,15 +1495,30 @@ class VoterManager(BaseUserManager):
                     positive_value_exists(twitter_user_object.profile_image_url_https):
                 voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
                 voter_to_save = True
+            # Always update to latest Twitter image
             if positive_value_exists(we_vote_hosted_profile_image_url_large):
-                voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                voter.we_vote_hosted_profile_twitter_image_url_large = we_vote_hosted_profile_image_url_large
                 voter_to_save = True
             if positive_value_exists(we_vote_hosted_profile_image_url_medium):
-                voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                voter.we_vote_hosted_profile_twitter_image_url_medium = we_vote_hosted_profile_image_url_medium
                 voter_to_save = True
             if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
-                voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                voter.we_vote_hosted_profile_twitter_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 voter_to_save = True
+            # If a profile image preference hasn't been saved, make Twitter the default
+            if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                voter.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
+                voter_to_save = True
+            if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
+                if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                    voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                    voter_to_save = True
+                if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                    voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                    voter_to_save = True
+                if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                    voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                    voter_to_save = True
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
             # 'screen_name': 'jaeeeee',
             if hasattr(twitter_user_object, "screen_name") and positive_value_exists(twitter_user_object.screen_name):
@@ -1482,7 +1535,7 @@ class VoterManager(BaseUserManager):
             success = True
             status += "SAVED_VOTER_TWITTER_VALUES_FROM_TWITTER_USER_VALUES "
         except Exception as e:
-            status += "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES_FROM_TWITTER_USER_VALUES "
+            status += "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES_FROM_TWITTER_USER_VALUES: " + str(e) + " "
             success = False
 
         results = {
@@ -1526,15 +1579,30 @@ class VoterManager(BaseUserManager):
                     positive_value_exists(twitter_auth_response.twitter_profile_image_url_https):
                 voter.twitter_profile_image_url_https = twitter_auth_response.twitter_profile_image_url_https
                 voter_to_save = True
+            # Always update to latest Twitter image
             if positive_value_exists(we_vote_hosted_profile_image_url_large):
-                voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                voter.we_vote_hosted_profile_twitter_image_url_large = we_vote_hosted_profile_image_url_large
                 voter_to_save = True
             if positive_value_exists(we_vote_hosted_profile_image_url_medium):
-                voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                voter.we_vote_hosted_profile_twitter_image_url_medium = we_vote_hosted_profile_image_url_medium
                 voter_to_save = True
             if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
-                voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                voter.we_vote_hosted_profile_twitter_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 voter_to_save = True
+            # If a profile image preference hasn't been saved, make Twitter the default
+            if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                voter.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
+                voter_to_save = True
+            if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
+                if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                    voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                    voter_to_save = True
+                if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                    voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                    voter_to_save = True
+                if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                    voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                    voter_to_save = True
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
             # 'screen_name': 'jaeeeee',
             if hasattr(twitter_auth_response, "twitter_screen_name") and \
@@ -1548,12 +1616,13 @@ class VoterManager(BaseUserManager):
                 voter_to_save = True
             # 'url': 'http://www.carbonize.co.kr',
             # 'time_zone': 'Seoul',
+
             if voter_to_save:
                 voter.save()
             success = True
             status = "SAVED_VOTER_TWITTER_VALUES_FROM_TWITTER_AUTH_RESPONSE "
         except Exception as e:
-            status = "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES_FROM_TWITTER_AUTH_RESPONSE "
+            status = "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES_FROM_TWITTER_AUTH_RESPONSE: " + str(e) + " "
             success = False
 
         results = {
@@ -1587,12 +1656,23 @@ class VoterManager(BaseUserManager):
                 voter.twitter_screen_name = twitter_user_dict['screen_name']
             if 'name' in twitter_user_dict:
                 voter.twitter_name = twitter_user_dict['name']
-            if we_vote_hosted_profile_image_url_large:
-                voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
-            if we_vote_hosted_profile_image_url_medium:
-                voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
-            if we_vote_hosted_profile_image_url_tiny:
-                voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+            # Always update to latest Twitter image
+            if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                voter.we_vote_hosted_profile_twitter_image_url_large = we_vote_hosted_profile_image_url_large
+            if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                voter.we_vote_hosted_profile_twitter_image_url_medium = we_vote_hosted_profile_image_url_medium
+            if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                voter.we_vote_hosted_profile_twitter_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+            # If a profile image preference hasn't been saved, make Twitter the default
+            if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                voter.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
+            if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
+                if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                    voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                    voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                    voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
 
             # 'lang': 'en',
             # 'name': 'Jae Jung Chung',
@@ -1602,7 +1682,7 @@ class VoterManager(BaseUserManager):
             success = True
             status += "SAVED_VOTER_TWITTER_VALUES_FROM_USER_DICT_VALUES "
         except Exception as e:
-            status += "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES_FROM_USER_DICT_VALUES "
+            status += "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES_FROM_USER_DICT_VALUES: " + str(e) + " "
             success = False
             handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
@@ -1707,9 +1787,15 @@ class VoterManager(BaseUserManager):
         if voter_results['voter_found']:
             if positive_value_exists(twitter_profile_image_url_https):
                 voter.twitter_profile_image_url_https = twitter_profile_image_url_https
-                voter.we_vote_hosted_profile_image_url_large = ''
-                voter.we_vote_hosted_profile_image_url_medium = ''
-                voter.we_vote_hosted_profile_image_url_tiny = ''
+                voter.we_vote_hosted_profile_twitter_image_url_large = None
+                voter.we_vote_hosted_profile_twitter_image_url_medium = None
+                voter.we_vote_hosted_profile_twitter_image_url_tiny = None
+                if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                    voter.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
+                if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
+                    voter.we_vote_hosted_profile_image_url_large = None
+                    voter.we_vote_hosted_profile_image_url_medium = None
+                    voter.we_vote_hosted_profile_image_url_tiny = None
                 value_changed = True
             if positive_value_exists(facebook_profile_image_url_https):
                 voter.facebook_profile_image_url_https = facebook_profile_image_url_https
@@ -1733,11 +1819,14 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def update_voter_twitter_details(self, twitter_id, twitter_json,
-                                     cached_twitter_profile_image_url_https,
-                                     we_vote_hosted_profile_image_url_large,
-                                     we_vote_hosted_profile_image_url_medium,
-                                     we_vote_hosted_profile_image_url_tiny):
+    def update_voter_twitter_details(
+            self,
+            twitter_id='',
+            twitter_json={},
+            cached_twitter_profile_image_url_https='',
+            we_vote_hosted_profile_image_url_large='',
+            we_vote_hosted_profile_image_url_medium='',
+            we_vote_hosted_profile_image_url_tiny=''):
         """
         Update existing voter entry with details retrieved from the Twitter API
         :param twitter_id:
@@ -1753,9 +1842,11 @@ class VoterManager(BaseUserManager):
         if voter_results['voter_found']:
             # Twitter user already exists so update twitter user details
             results = self.save_twitter_user_values_from_dict(
-                voter, twitter_json, cached_twitter_profile_image_url_https, we_vote_hosted_profile_image_url_large,
-                we_vote_hosted_profile_image_url_medium,
-                we_vote_hosted_profile_image_url_tiny)
+                voter, twitter_json,
+                cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
+                we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
         else:
             results = {
                 'success':  False,
@@ -2451,9 +2542,15 @@ class Voter(AbstractBaseUser):
         return self.is_admin
 
     def voter_photo_url(self):
-        # If we have facebook id, we might want to use this:
-        # https://graph.facebook.com/504209299/picture?type=square
-        if self.facebook_profile_image_url_https:
+        if self.we_vote_hosted_profile_image_url_large:
+            return self.we_vote_hosted_profile_image_url_large
+        elif self.we_vote_hosted_profile_uploaded_image_url_large:
+            return self.we_vote_hosted_profile_uploaded_image_url_large
+        elif self.we_vote_hosted_profile_facebook_image_url_large:
+            return self.we_vote_hosted_profile_facebook_image_url_large
+        elif self.we_vote_hosted_profile_twitter_image_url_large:
+            return self.we_vote_hosted_profile_twitter_image_url_large
+        elif self.facebook_profile_image_url_https:
             return self.facebook_profile_image_url_https
         elif self.twitter_profile_image_url_https:
             return self.twitter_profile_image_url_https

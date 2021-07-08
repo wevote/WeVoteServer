@@ -162,18 +162,15 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
         # TODO DALE Do we need to do anything if they already have a linked_organization_we_vote_id?
         status += "VOTER_LINKED_ORGANIZATION_WE_VOTE_ID_ALREADY_EXISTS: " + voter.linked_organization_we_vote_id + " "
     else:
-        organization_name = voter.get_full_name()
-        organization_website = ""
-        organization_twitter_handle = ""
-        organization_twitter_id = ""
-        organization_email = ""
-        organization_facebook = ""
-        organization_image = voter.voter_photo_url()
-        organization_type = INDIVIDUAL
         organization_manager = OrganizationManager()
         create_results = organization_manager.create_organization(
-            organization_name, organization_website, organization_twitter_handle,
-            organization_email, organization_facebook, organization_image, organization_twitter_id, organization_type)
+            organization_name=voter.get_full_name(),
+            organization_image=voter.voter_photo_url(),
+            organization_type=INDIVIDUAL,
+            we_vote_hosted_profile_image_url_large=voter.we_vote_hosted_profile_image_url_large,
+            we_vote_hosted_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny
+        )
         if create_results['organization_created']:
             # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
             new_organization = create_results['organization']
@@ -184,7 +181,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
                 status += "VOTER_LINKED_ORGANIZATION_WE_VOTE_ID_UPDATED "
             except Exception as e:
                 success = False
-                status += "VOTER_LINKED_ORGANIZATION_WE_VOTE_ID_NOT_UPDATED "
+                status += "VOTER_LINKED_ORGANIZATION_WE_VOTE_ID_NOT_UPDATED: " + str(e) + " "
         else:
             status += "NEW_ORGANIZATION_COULD_NOT_BE_CREATED "
 

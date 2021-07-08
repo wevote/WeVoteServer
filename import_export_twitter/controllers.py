@@ -451,12 +451,14 @@ def refresh_twitter_candidate_details(candidate):
             twitter_profile_banner_url_https = results['twitter_json']['profile_banner_url'] \
                 if 'profile_banner_url' in results['twitter_json'] else None
             cache_results = cache_master_and_resized_image(
-                candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+                candidate_id=candidate.id,
+                candidate_we_vote_id=candidate.we_vote_id,
                 twitter_id=candidate.twitter_user_id,
                 twitter_screen_name=candidate.candidate_twitter_handle,
                 twitter_profile_image_url_https=twitter_profile_image_url_https,
                 twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
-                twitter_profile_banner_url_https=twitter_profile_banner_url_https, image_source=TWITTER)
+                twitter_profile_banner_url_https=twitter_profile_banner_url_https,
+                image_source=TWITTER)
             cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
             cached_twitter_profile_background_image_url_https = \
                 cache_results['cached_twitter_profile_background_image_url_https']
@@ -466,16 +468,24 @@ def refresh_twitter_candidate_details(candidate):
             we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
 
             save_candidate_results = candidate_manager.update_candidate_twitter_details(
-                candidate, results['twitter_json'], cached_twitter_profile_image_url_https,
-                cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https,
-                we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
-                we_vote_hosted_profile_image_url_tiny)
+                candidate=candidate,
+                twitter_json=results['twitter_json'],
+                cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
+                cached_twitter_profile_background_image_url_https=cached_twitter_profile_background_image_url_https,
+                cached_twitter_profile_banner_url_https=cached_twitter_profile_banner_url_https,
+                we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
             candidate = save_candidate_results['candidate']
             save_twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
-                results['twitter_json'], candidate.twitter_user_id, cached_twitter_profile_image_url_https,
-                cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https,
-                we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
-                we_vote_hosted_profile_image_url_tiny)
+                twitter_json=results['twitter_json'],
+                twitter_id=candidate.twitter_user_id,
+                cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
+                cached_twitter_profile_background_image_url_https=cached_twitter_profile_background_image_url_https,
+                cached_twitter_profile_banner_url_https=cached_twitter_profile_banner_url_https,
+                we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
             # Need to update voter twitter details for the candidate in future
             save_politician_details_results = politician_manager.update_politician_details_from_candidate(
                 candidate)
@@ -609,16 +619,23 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
 
             # Make sure we have a TwitterUser
             save_twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
-                results['twitter_json'], organization.twitter_user_id, cached_twitter_profile_image_url_https,
-                cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https,
-                we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
-                we_vote_hosted_profile_image_url_tiny)
+                twitter_json=results['twitter_json'],
+                twitter_id=organization.twitter_user_id,
+                cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
+                cached_twitter_profile_background_image_url_https=cached_twitter_profile_background_image_url_https,
+                cached_twitter_profile_banner_url_https=cached_twitter_profile_banner_url_https,
+                we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
 
             # If there is a voter with this Twitter id, then update the voter information in other tables
             save_voter_twitter_details_results = voter_manager.update_voter_twitter_details(
-                organization.twitter_user_id, results['twitter_json'], cached_twitter_profile_image_url_https,
-                we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
-                we_vote_hosted_profile_image_url_tiny)
+                twitter_id=organization.twitter_user_id,
+                twitter_json=results['twitter_json'],
+                cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
+                we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
             if save_voter_twitter_details_results['success']:
                 save_position_from_voter_results = update_position_for_friends_details_from_voter(
                     save_voter_twitter_details_results['voter'])
@@ -2033,7 +2050,8 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
         twitter_json = results['twitter_json']
 
     twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
-        twitter_json, twitter_id,
+        twitter_json=twitter_json,
+        twitter_id=twitter_id,
         cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
         cached_twitter_profile_banner_url_https=cached_twitter_profile_banner_url_https,
         we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
@@ -2294,18 +2312,16 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
             new_organization_ready = True
         else:
             # 2) Create organization with twitter_user_id
-            organization_name = voter.get_full_name()
-            organization_website = ""
-            organization_twitter_handle = ""
-            organization_email = ""
-            organization_facebook = ""
-            organization_image = voter.voter_photo_url()
-            organization_type = INDIVIDUAL
             organization_manager = OrganizationManager()
             create_results = organization_manager.create_organization(
-                organization_name, organization_website, organization_twitter_handle,
-                organization_email, organization_facebook, organization_image, twitter_auth_response.twitter_id,
-                organization_type)
+                organization_name=voter.get_full_name(),
+                organization_image=voter.voter_photo_url(),
+                twitter_id=twitter_auth_response.twitter_id,
+                organization_type=INDIVIDUAL,
+                we_vote_hosted_profile_image_url_large=voter.we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny
+            )
             if create_results['organization_created']:
                 # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                 new_organization = create_results['organization']

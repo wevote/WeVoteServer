@@ -3762,7 +3762,9 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
 
         if not positive_value_exists(linked_organization_we_vote_id):
             organization_create_results = organization_manager.create_organization(
-                voter_full_name, organization_website="", organization_twitter_handle="",
+                organization_name=voter_full_name,
+                organization_website="",
+                organization_twitter_handle="",
                 organization_type=INDIVIDUAL)
             if organization_create_results['organization_created']:
                 organization = organization_create_results['organization']

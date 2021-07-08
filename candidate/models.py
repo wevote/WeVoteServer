@@ -3123,7 +3123,10 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def update_candidate_twitter_details(self, candidate, twitter_json, cached_twitter_profile_image_url_https,
+    def update_candidate_twitter_details(self,
+                                         candidate,
+                                         twitter_json,
+                                         cached_twitter_profile_image_url_https,
                                          cached_twitter_profile_background_image_url_https,
                                          cached_twitter_profile_banner_url_https,
                                          we_vote_hosted_profile_image_url_large,

@@ -308,9 +308,20 @@ class OrganizationManager(models.Manager):
             organization = Organization
         return organization
 
-    def create_organization(self, organization_name, organization_website='', organization_twitter_handle='',
-                            organization_email='', organization_facebook='', organization_image='', twitter_id='',
-                            organization_type='', state_served_code=None):
+    def create_organization(
+            self,
+            organization_name='',
+            organization_website='',
+            organization_twitter_handle='',
+            organization_email='',
+            organization_facebook='',
+            organization_image='',
+            twitter_id='',
+            organization_type='',
+            state_served_code=None,
+            we_vote_hosted_profile_image_url_large='',
+            we_vote_hosted_profile_image_url_medium='',
+            we_vote_hosted_profile_image_url_tiny=''):
         try:
             if not positive_value_exists(organization_name):
                 organization_name = ""
@@ -335,9 +346,12 @@ class OrganizationManager(models.Manager):
                 twitter_profile_background_image_url_https = twitter_user.twitter_profile_background_image_url_https
                 twitter_profile_banner_url_https = twitter_user.twitter_profile_banner_url_https
                 twitter_description = twitter_user.twitter_description
-                we_vote_hosted_profile_image_url_large = twitter_user.we_vote_hosted_profile_image_url_large
-                we_vote_hosted_profile_image_url_medium = twitter_user.we_vote_hosted_profile_image_url_medium
-                we_vote_hosted_profile_image_url_tiny = twitter_user.we_vote_hosted_profile_image_url_tiny
+                if twitter_user.we_vote_hosted_profile_image_url_large:
+                    we_vote_hosted_profile_image_url_large = twitter_user.we_vote_hosted_profile_image_url_large
+                if twitter_user.we_vote_hosted_profile_image_url_medium:
+                    we_vote_hosted_profile_image_url_medium = twitter_user.we_vote_hosted_profile_image_url_medium
+                if twitter_user.we_vote_hosted_profile_image_url_tiny:
+                    we_vote_hosted_profile_image_url_tiny = twitter_user.we_vote_hosted_profile_image_url_tiny
                 organization = Organization.create(
                     organization_name=organization_name,
                     organization_website=organization_website,
@@ -367,7 +381,10 @@ class OrganizationManager(models.Manager):
                     organization_facebook=organization_facebook,
                     organization_image=organization_image,
                     organization_type=organization_type,
-                    state_served_code=state_served_code
+                    state_served_code=state_served_code,
+                    we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                    we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                    we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny
                 )
             organization.save()  # We do this so the we_vote_id is created
             status = "CREATE_ORGANIZATION_SUCCESSFUL "
@@ -439,19 +456,15 @@ class OrganizationManager(models.Manager):
         success = True
         status = ''
         voter_healed = False
-        organization_name = voter_on_stage.get_full_name()
-        organization_website = ""
-        organization_twitter_handle = ""
-        organization_twitter_id = ""
-        organization_email = ""
-        organization_facebook = ""
-        organization_image = voter_on_stage.voter_photo_url()
-        organization_type = INDIVIDUAL
         organization_manager = OrganizationManager()
         create_results = organization_manager.create_organization(
-            organization_name, organization_website, organization_twitter_handle,
-            organization_email, organization_facebook, organization_image, organization_twitter_id,
-            organization_type)
+            organization_name=voter_on_stage.get_full_name(),
+            organization_image=voter_on_stage.voter_photo_url(),
+            organization_type=INDIVIDUAL,
+            we_vote_hosted_profile_image_url_large=voter_on_stage.we_vote_hosted_profile_image_url_large,
+            we_vote_hosted_profile_image_url_medium=voter_on_stage.we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny=voter_on_stage.we_vote_hosted_profile_image_url_tiny
+        )
         if create_results['organization_created']:
             organization = create_results['organization']
             try:
@@ -934,19 +947,15 @@ class OrganizationManager(models.Manager):
         if create_new_organization:
             # If here, then we know that there isn't a pre-existing organization related to this voter
             # Create new organization
-            organization_name = voter.get_full_name()
-            organization_website = ""
-            organization_twitter_handle = ""
-            organization_twitter_id = ""
-            organization_email = ""
-            organization_facebook = ""
-            organization_image = voter.voter_photo_url()
-            organization_type = INDIVIDUAL
             organization_manager = OrganizationManager()
             create_results = organization_manager.create_organization(
-                organization_name, organization_website, organization_twitter_handle,
-                organization_email, organization_facebook, organization_image, organization_twitter_id,
-                organization_type)
+                organization_name=voter.get_full_name(),
+                organization_image=voter.voter_photo_url(),
+                organization_type=INDIVIDUAL,
+                we_vote_hosted_profile_image_url_large=voter.we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny
+            )
             if create_results['organization_created']:
                 # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                 organization = create_results['organization']
@@ -1555,10 +1564,15 @@ class OrganizationManager(models.Manager):
                     new_organization_type = UNKNOWN
 
                 # If here, create new organization
-                results = Organization.objects.create_organization(organization_name, organization_website,
-                                                                   organization_twitter_handle, organization_email,
-                                                                   organization_facebook, organization_image,
-                                                                   twitter_user_id, new_organization_type)
+                results = Organization.objects.create_organization(
+                    organization_name=organization_name,
+                    organization_website=organization_website,
+                    organization_twitter_handle=organization_twitter_handle,
+                    organization_email=organization_email,
+                    organization_facebook=organization_facebook,
+                    organization_image=organization_image,
+                    twitter_id=twitter_user_id,
+                    organization_type=new_organization_type)
                 if results['success']:
                     new_organization_created = True
                     success = True

@@ -45,6 +45,14 @@
             <tr>
                 <td colspan="2" style="vertical-align:top">
                     {{ campaignx.campaign_description|default_if_none:"" }}
+                    {% if campaignx.date_campaign_started %}
+                        <span class="u-no-break" style="color: darkgray">(Started: {{ campaignx.date_campaign_started }})</span>
+                    {% endif %}
+                    {% if campaignx.final_election_date_as_integer %}
+                        <span class="u-no-break" style="color: gray">
+                        (Final election: {{ campaignx.final_election_date_as_integer|default_if_none:"" }}{% if final_election_date_plus_cool_down > campaignx.final_election_date_as_integer %}-EXPIRED{% endif %})
+                        </span>
+                    {% endif %}
                 </td>
             </tr>
         {% endif %}
@@ -68,10 +76,16 @@
         {% for campaignx_owner in campaignx_owner_list %}
             <tr>
                 <td>
-                {% if campaignx_owner.we_vote_hosted_profile_image_url_tiny %}
-                    <img src="{{ campaignx_owner.we_vote_hosted_profile_image_url_tiny }}" />
-                {% endif %}
+                    {% if campaignx_owner.we_vote_hosted_profile_image_url_tiny %}
+                        <img src="{{ campaignx_owner.we_vote_hosted_profile_image_url_tiny }}" />
+                    {% endif %}
+                    {% if campaignx_owner.organization_name %}
                     {{ campaignx_owner.organization_name }}&nbsp;&nbsp;
+                    {% elif campaignx_owner.organization_we_vote_id %}
+                    {{ campaignx_owner.organization_we_vote_id }}&nbsp;&nbsp;
+                    {% else %}
+                    {{ campaignx_owner.voter_we_vote_id }}&nbsp;&nbsp;
+                    {% endif %}
                 </td>
                 <td>
                     {% if campaignx_owner.visible_to_public %}
@@ -103,7 +117,7 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Campaign Politician(s)</th>
+                    <th>Campaign Politician(s) or Measure(s)</th>
                     <th>State</th>
                 </tr>
             </thead>
@@ -111,6 +125,11 @@
             <tr>
                 <td>
                     {{ campaignx_politician.politician_name }}&nbsp;&nbsp;
+                    {% if campaignx_politician.politician_we_vote_id %}
+                        <span style="color: darkgray">
+                        {{ campaignx_politician.politician_we_vote_id }}
+                        </span>
+                    {% endif %}
                 </td>
                 <td>
                     {{ campaignx_politician.state_code }}&nbsp;&nbsp;

@@ -148,8 +148,8 @@
                         <strong>{{ campaignx.campaign_title }}</strong>&nbsp;
                     </a>
                 </span><br />
-                <span>
-                    {{ campaignx.we_vote_id }}&nbsp;
+                <span style="color: darkgray">
+                   {{ campaignx.we_vote_id }}&nbsp;
                 </span>
                 <span style="font-size: .95rem; color: gray">
                 {% if not campaignx.is_ok_to_promote_on_we_vote %}
@@ -172,9 +172,9 @@
             <td>
             {% for campaignx_owner in campaignx.campaignx_owner_list %}
                 {% if campaignx_owner.organization_name %}
-                {{ campaignx_owner.organization_name }}
+                    <span class="u-no-break">{{ campaignx_owner.organization_name }}</span><br />
                 {% else %}
-                {{ campaignx_owner.organization_we_vote_id }}
+                    {{ campaignx_owner.organization_we_vote_id }}<br />
                 {% endif %}
             {% endfor %}
             </td>
@@ -196,9 +196,12 @@
             {% endif %}</td>
             <td>
                 {{ campaignx.campaign_description|default_if_none:""|truncatechars:250 }}
+                {% if campaignx.date_campaign_started %}
+                    <span class="u-no-break" style="color: darkgray">(Started: {{ campaignx.date_campaign_started }})</span>
+                {% endif %}
                 {% if campaignx.final_election_date_as_integer %}
-                    <span style="color: gray">
-                    ({{ campaignx.final_election_date_as_integer|default_if_none:"" }}{% if final_election_date_plus_cool_down > campaignx.final_election_date_as_integer %}-EXPIRED{% endif %})
+                    <span class="u-no-break" style="color: gray">
+                    (Final election: {{ campaignx.final_election_date_as_integer|default_if_none:"" }}{% if final_election_date_plus_cool_down > campaignx.final_election_date_as_integer %}-EXPIRED{% endif %})
                     </span>
                 {% endif %}
             </td>

@@ -2,7 +2,8 @@
 {% extends "template_base.html" %}
 
 {% block title %}
-    {% if voter_id %}{{ voter_id }} voter_id
+    Voter Images:
+    {% if voter_id %}{{ voter_id }}
     {% else %}No Voter Found{% endif %}
 {% endblock %}
 
@@ -12,7 +13,10 @@
 
 <a href="{% url 'image:cache_images_locally_for_all_voters' %}">< Back to Cache images locally for all voters</a>
 <br />
-<h1>Images for One Voter</h1>
+
+<a href="{% url 'voter:voter_summary' voter_id %}">< Back to Voter</a>
+<br />
+<h1>Voter Images</h1>
 
 <a href="{% url 'image:create_resized_images_for_voters' voter_id %}" target="_blank">Cache original and resized images for this voter</a> (in new window)<br />
 

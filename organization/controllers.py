@@ -960,6 +960,18 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
 
     # If here we know that we have both from_organization and to_organization
     save_to_organization = False
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'ballotpedia_page_title'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'ballotpedia_photo_url'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'facebook_id'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'facebook_email'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'facebook_profile_image_url_https'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'fb_username'):
+        save_to_organization = True
     if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_website'):
         save_to_organization = True
     if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_email'):
@@ -992,13 +1004,9 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
         save_to_organization = True
     if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_fax'):
         save_to_organization = True
-    if transfer_to_organization_if_missing(from_organization, to_organization, 'facebook_id'):
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_type'):
         save_to_organization = True
-    if transfer_to_organization_if_missing(from_organization, to_organization, 'facebook_email'):
-        save_to_organization = True
-    if transfer_to_organization_if_missing(from_organization, to_organization, 'fb_username'):
-        save_to_organization = True
-    if transfer_to_organization_if_missing(from_organization, to_organization, 'facebook_profile_image_url_https'):
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_endorsements_api_url'):
         save_to_organization = True
     if transfer_to_organization_if_missing(from_organization, to_organization, 'twitter_user_id'):
         save_to_organization = True
@@ -1019,6 +1027,14 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
         save_to_organization = True
     if transfer_to_organization_if_missing(from_organization, to_organization, 'twitter_description'):
         save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization,
+                                           'we_vote_hosted_profile_image_url_large'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization,
+                                           'we_vote_hosted_profile_image_url_medium'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'we_vote_hosted_profile_image_url_tiny'):
+        save_to_organization = True
     if transfer_to_organization_if_missing(from_organization, to_organization, 'wikipedia_page_id'):
         save_to_organization = True
     if transfer_to_organization_if_missing(from_organization, to_organization, 'wikipedia_page_title'):
@@ -1030,14 +1046,6 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
     if transfer_to_organization_if_missing(from_organization, to_organization, 'wikipedia_thumbnail_height'):
         save_to_organization = True
     if transfer_to_organization_if_missing(from_organization, to_organization, 'wikipedia_photo_url'):
-        save_to_organization = True
-    if transfer_to_organization_if_missing(from_organization, to_organization, 'ballotpedia_page_title'):
-        save_to_organization = True
-    if transfer_to_organization_if_missing(from_organization, to_organization, 'ballotpedia_photo_url'):
-        save_to_organization = True
-    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_type'):
-        save_to_organization = True
-    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_endorsements_api_url'):
         save_to_organization = True
 
     if save_to_organization:
@@ -1182,6 +1190,30 @@ def move_organization_membership_link_to_another_organization(from_organization_
         'to_organization_we_vote_id': to_organization_we_vote_id,
         'membership_link_entries_moved': membership_link_entries_moved,
         'membership_link_entries_not_moved': membership_link_entries_not_moved,
+    }
+    return results
+
+
+def transfer_voter_images_to_organization(voter):
+    status = ''
+    success = True
+    try:
+        if voter.linked_organization_we_vote_id:
+            organization_manager = OrganizationManager()
+            results = organization_manager.retrieve_organization_from_we_vote_id(voter.linked_organization_we_vote_id)
+            if results['organization_found']:
+                organization = results['organization']
+                organization.we_vote_hosted_profile_image_url_large = voter.we_vote_hosted_profile_image_url_large
+                organization.we_vote_hosted_profile_image_url_medium = voter.we_vote_hosted_profile_image_url_medium
+                organization.we_vote_hosted_profile_image_url_tiny = voter.we_vote_hosted_profile_image_url_tiny
+                organization.save()
+    except Exception as e:
+        status += "FAILED_TO_TRANSFER_IMAGES: " + str(e) + " "
+        success = False
+
+    results = {
+        'status': status,
+        'success': success,
     }
     return results
 
