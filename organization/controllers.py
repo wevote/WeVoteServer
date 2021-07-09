@@ -11,7 +11,7 @@ from analytics.models import ACTION_BALLOT_VISIT, ACTION_ORGANIZATION_FOLLOW, AC
 import base64
 from config.base import get_environment_variable
 from django.http import HttpResponse
-from donate.controllers import move_donation_info_to_another_organization
+from stripe_donations.controllers import move_donation_info_to_another_organization
 from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
 from follow.controllers import delete_organization_followers_for_organization, \

@@ -70,7 +70,8 @@ public internet.
 Python server's port 8000.
 
     ```
-    (WeVoteServerPy3.7) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % ./ngrok http 8000
+    (WeVoteServerPy3.7) Steves-MacBook-Pro-32GB-Oct-2018:PycharmProjects stevepodell$ ~/PythonProjects/ngrok http 8000 -host-header="localhost:8000"
+
  
    ngrok by @inconshreveable                                                                                                                                                  (Ctrl+C to quit)
                                                                                                                                                                                            
@@ -80,9 +81,8 @@ Python server's port 8000.
     Version                       2.3.35                                                                                                                                                       
     Region                        United States (us)                                                                                                                                           
     Web Interface                 http://127.0.0.1:4040                                                                                                                                        
-    Forwarding                    http://1cf01df55b1d.ngrok.io -> http://localhost:8000                                                                                                        
-    Forwarding                    https://1cf01df55b1d.ngrok.io -> http://localhost:8000                                                                                                       
-                                                                                                                                                                                               
+    Forwarding                    http://81428060fbe4.ngrok.io -> http://localhost:8000                                                                                                        
+    Forwarding                    https://81428060fbe4.ngrok.io -> http://localhost:8000                                                                                                                                                                                                        
     Connections                   ttl     opn     rt1     rt5     p50     p90                                                                                                                  
                                   0       0       0.00    0.00    0.00    0.00                                                                                                                 
  
@@ -96,9 +96,15 @@ Python server's port 8000.
 
     In production the webhook endpoint will be [https://api.wevoteusa.org/apis/v1/donationStripeWebhook/](https://api.wevoteusa.org/apis/v1/donationStripeWebhook/)
 
-    But in our test environment (for this example) it will be [https://1cf01df55b1d.ngrok.io/apis/v1/donationStripeWebhook/](https://1cf01df55b1d.ngrok.io/apis/v1/donationStripeWebhook/)
+    But in our test environment (for this example) it will be [
+https://81428060fbe4.ngrok.io/apis/v1/donationStripeWebhook/](
+https://81428060fbe4.ngrok.io/apis/v1/donationStripeWebhook/)
 
-    ![ScreenShot](images/StripeAddTestEndpoint.png)
+    ![ScreenShot](images/StripeDebuggingConsole.png)
+
+    ![ScreenShot](images/StripeTestApiConfigured.png)
+
+
 
     From the screen above, copy the Signing secret, and paste it into environment_variables.json in the STRIPE_SIGNING_SECRET field.
 

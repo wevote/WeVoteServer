@@ -9,14 +9,14 @@
 <h1>Fast Load Data From We Vote Master Servers</h1>
     <div style="padding: 25px 25px 75px 25px; font-size: 18px">
         If you are loading election data for the first time to your local postgres, press the "FAST LOAD" button below, and within about
-        twelve minutes, it will have loaded and stored all the election data we have for all elections and for all the states.
+        twenty five minutes, it will have loaded and stored all the election data we have for all elections and for all the states.
         <div style="padding-left: 33%; padding-top: 30px; padding-bottom: 30px">
             {% comment %}<form name="retrieve_tables_form" method="get" action="{% url 'retrieve_tables:retrieve_sql_files_from_master_server'  %}">{% endcomment %}
             <button id="fastLoadButton" type="submit" value="1" onClick="fastLoadClick()">FAST LOAD ALL OF THE ELECTION DATA, TO YOUR LOCAL POSTGRES</button>
             {% comment %}</form>{% endcomment %}
         </div>
         If you want to update to current election data, and don't care about overwriting your existing election data,
-        "FAST LOAD" is all you need.
+        "FAST LOAD" is all you need.  The Python console shows progress as the tables are loaded.
         <br><br>
         If you are working with specific election data, and may have made local changes that you want to preserve, then the
         "Sync Data With Master We Vote Servers" tools that follow are for you.  (Syncing data can take many hours for a big

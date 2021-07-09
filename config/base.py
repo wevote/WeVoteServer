@@ -59,6 +59,9 @@ def get_environment_variable(var_name, json_environment_vars=json_environment_va
 
 
 def get_environment_variable_default(var_name, default_value):
+    if var_name in json_environment_variables:
+        return json_environment_variables[var_name]
+
     try:
         return os.environ[var_name]
     except KeyError:
