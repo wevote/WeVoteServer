@@ -21,7 +21,13 @@ def campaign_retrieve_doc_template_values(url_root):
         {
             'name':         'campaignx_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'The unique id of the campaign.',
+            'description':  'The unique id of the campaign. If this value is "", then the API will attempt to do the '
+                            'lookup by seo_friendly_path if one is supplied.',
+        },
+        {
+            'name':         'seo_friendly_path',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The SEO friendly path component.',
         },
     ]
     optional_query_parameter_list = [

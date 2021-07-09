@@ -43,7 +43,7 @@
         <tr style="border-bottom: 1pt solid lightgrey">
           <td style="width: 50px"><input id="edit-plan" type="button" value={{ plan.id }} onclick="activePlan = {{plan}}" /></td>
           <td style="width: 275px">{{ plan.coupon_code }}</td>
-          <td style="width: 200px">{{ plan.plan_type_enum }}</td>
+          <td style="width: 200px">{{ plan.premium_plan_type_enum }}</td>
           <td style="width: 200px">{{ plan.hidden_plan_comment }}</td>
           <td style="width: 200px">{{ plan.coupon_applied_message }}</td>
           <td style="width: 75px; text-align: right">{{ plan.monthly_price_stripe }}</td>
@@ -69,8 +69,8 @@
       <label for="coupon_code">Coupon Code</label><br>
       <input type="text" name="coupon_code" id="coupon_code" value="" class="text ui-widget-content ui-corner-all"><br>
       <div style="height: 7px;"></div>
-      <label for="plan_type_enum">Plan Type (Yearly and "paid without stripe" plans do not work yet)</label><br>
-      <select name="plan_type_enum" id="plan_type_enum" class="text ui-widget-content ui-corner-all"><br>
+      <label for="premium_plan_type_enum">Plan Type (Yearly and "paid without stripe" plans do not work yet)</label><br>
+      <select name="premium_plan_type_enum" id="premium_plan_type_enum" class="text ui-widget-content ui-corner-all"><br>
         <option>FREE</option>
         <option selected="selected">PROFESSIONAL_MONTHLY</option>
         <option>ENTERPRISE_MONTHLY</option>

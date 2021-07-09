@@ -5,7 +5,7 @@ $(function () {
   let isMonthly = true;
   const idfld = $('#id');
   const couponCode = $('#coupon_code');
-  const planTypeEnum = $('#plan_type_enum');
+  const premiumPlanTypeEnum = $('#premium_plan_type_enum');
   const hiddenPlanComment = $('#hidden_plan_comment');
   const couponAppliedMessage = $('#coupon_applied_message');
   const monthlyPriceStripe = $('#monthly_price_stripe');
@@ -169,7 +169,7 @@ $(function () {
     if (valid) {
       const newPlanData = {
         couponCode: couponCode.val(),
-        planTypeEnum: planTypeEnum.val(),
+        premiumPlanTypeEnum: premiumPlanTypeEnum.val(),
         couponAppliedMessage: couponAppliedMessage.val(),
         hiddenPlanComment: hiddenPlanComment.val(),
         monthlyPriceStripe: dollarsToCents(monthlyPriceStripe.val()),
@@ -192,7 +192,7 @@ $(function () {
   function setInitialValues () {
     idfld.val(activePlan.id);
     couponCode.val(activePlan.coupon_code);
-    planTypeEnum.val(activePlan.plan_type_enum).change();
+    premiumPlanTypeEnum.val(activePlan.premium_plan_type_enum).change();
     hiddenPlanComment.val(activePlan.hidden_plan_comment);
     couponAppliedMessage.val(activePlan.coupon_applied_message);
     if (isMonthly) {
@@ -322,7 +322,7 @@ $(function () {
     window.location.href = newUrl;
   });
 
-  $('#plan_type_enum').on('change', function (e) {
+  $('#premium_plan_type_enum').on('change', function (e) {
     event.preventDefault();
     const optionSelected = $("option:selected", this);
     const valueSelected = this.value;

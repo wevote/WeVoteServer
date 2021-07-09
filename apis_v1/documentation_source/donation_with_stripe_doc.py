@@ -34,18 +34,50 @@ def donation_with_stripe_doc_template_values(url_root):
             'description':  'amount to be charged',
         },
         {
-            'name':         'monthly_donation',
+            'name':         'is_chip_in',
             'value':        'boolean',  # boolean, integer, long, string
-            'description':  'recurring donation',
+            'description':  'Is this a "Chip In" for a campaign donation?',
         },
-
+        {
+            'name':         'is_monthly_donation',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Is this recurring donation subscription?',
+        },
+        {
+            'name':         'is_premium_plan',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Is this a premium organization subscription?',
+        },
+        {
+            'name':         'client_ip',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The IP address of the client as reported by Stripe. (The clients IP, as seen from '
+                            'outside of any firewall or NAT)',
+        },
+        {
+            'name':         'payment_method_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The payment method returned by Stripe. It is used to create a subscription from this '
+                            'server, but is not stored in the database',
+        },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         'amount',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'amount to be charged',
-        # },
+        {
+            'name': 'campaignx_we_vote_id',
+            'value': 'string',  # boolean, integer, long, string
+            'description': 'The Campaign We Vote ID, for the Campaigns webapp',
+        },
+        {
+            'name': 'coupon_code',
+            'value': 'string',  # boolean, integer, long, string
+            'description': 'Our coupon codes for pricing and features that are looked up in the '
+                           '(premium) OrganizationSubscriptionPlans',
+        },
+        {
+            'name': 'premium_plan_type_enum',
+            'value': 'string',  # boolean, integer, long, string
+            'description': 'Type of premium organization plan, or undefined for donations, subscriptions, and chipins',
+        },
     ]
 
     potential_status_codes_list = [

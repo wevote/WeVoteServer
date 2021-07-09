@@ -3,18 +3,20 @@
 
 # -*- coding: UTF-8 -*-
 
-from config.base import get_environment_variable, get_environment_variable_default
+import json
+import textwrap
 from datetime import datetime, timezone
+
+import stripe
+
+from campaign.models import CampaignXManager
+from config.base import get_environment_variable, get_environment_variable_default
 from stripe_donations.models import StripeManager
-# from organization.models import OrganizationManager
-from wevote_functions.functions import positive_value_exists
+from voter.models import VoterManager
 from wevote_functions.admin import get_logger
 from wevote_functions.functions import convert_pennies_integer_to_dollars_string, get_voter_device_id
-from voter.models import VoterManager
-import json
-import stripe
-import textwrap
-
+# from organization.models import OrganizationManager
+from wevote_functions.functions import positive_value_exists
 
 logger = get_logger(__name__)
 stripe.api_key = get_environment_variable_default("STRIPE_SECRET_KEY", "")
@@ -30,7 +32,7 @@ def donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_
     donation_plan_definition_list_json = []
     coupon_code = ''
     we_plan_id = ''
-    plan_type_enum = ''
+    premium_plan_type_enum = ''
     stripe_customer_id = ''
     stripe_subscription_id = False
     next_invoice_retrieved = False
@@ -43,7 +45,7 @@ def donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_
     donation_manager = StripeManager()
     if positive_value_exists(linked_organization_we_vote_id):
         plan_results = donation_manager.retrieve_donation_plan_definition_list(
-            organization_we_vote_id=linked_organization_we_vote_id, return_json_version=True)
+            linked_organization_we_vote_id=linked_organization_we_vote_id, return_json_version=True)
         donation_plan_definition_list = plan_results['donation_plan_definition_list']
         donation_plan_definition_list_json = plan_results['donation_plan_definition_list_json']
     elif positive_value_exists(voter_we_vote_id):
@@ -56,11 +58,11 @@ def donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_
     success = True
 
     for donation_plan_definition in donation_plan_definition_list:
-        # if positive_value_exists(donation_plan_definition.is_organization_plan):
+        # if positive_value_exists(donation_plan_definition.is_premium_plan):
         if positive_value_exists(donation_plan_definition.donation_plan_is_active):
             active_paid_plan_found = True
             donation_plan_definition_id = donation_plan_definition.id
-            # plan_type_enum = donation_plan_definition.plan_type_enum
+            # premium_plan_type_enum = donation_plan_definition.premium_plan_type_enum
             # coupon_code = donation_plan_definition.coupon_code
             we_plan_id = donation_plan_definition.we_plan_id
             stripe_customer_id = donation_plan_definition.stripe_customer_id
@@ -155,9 +157,9 @@ def donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_
 
     active_paid_plan = {
         # 'coupon_code':              coupon_code,
-        'we_plan_id':         we_plan_id,
+        'we_plan_id':               we_plan_id,
         'next_invoice':             next_invoice,
-        'plan_type_enum':           plan_type_enum,
+        'premium_plan_type_enum':   premium_plan_type_enum,
         'stripe_subscription_id':   stripe_subscription_id,
         'subscription_active':      active_paid_plan_found,
         # 'subscription_canceled_at': subscription_canceled_at,
@@ -172,24 +174,28 @@ def donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_
     return results
 
 
-def donation_with_stripe_for_api(request, token, payment_method_id, client_ip, email, donation_amount, monthly_donation,
-                                 voter_we_vote_id, is_organization_plan, coupon_code, plan_type_enum,
-                                 organization_we_vote_id):
+def donation_with_stripe_for_api(request, token, email, donation_amount,
+                                 is_chip_in, is_monthly_donation, is_premium_plan,
+                                 client_ip, campaignx_wevote_id, payment_method_id, coupon_code,
+                                 premium_plan_type_enum,
+                                 voter_we_vote_id, linked_organization_we_vote_id):
     """
     Initiate a donation or organization subscription plan using the Stripe Payment API, and record details in our DB
     :param request:
     :param token: The Stripe token.id for the card and transaction
-    :param payment_method_id: payment method selected/created on the client CheckoutForm.jsx
-    :param client_ip:
     :param email:
     :param donation_amount:  the amount of the donation, but not used for organization subscriptions
-    :param monthly_donation: (boolean) is this a monthly donation subscription
-    :param voter_we_vote_id:
-    :param is_organization_plan:  True for a organization plan, False for a donation (one time or donation subscription)
+    :param is_chip_in: (boolean) is this a "Chip in" to a Campaign donation
+    :param is_monthly_donation: (boolean) is this a monthly donation subscription
+    :param is_premium_plan:  True for a premium organization plan, False for a donation (one time or donation subs.)
+    :param client_ip: As reported by Stripe (i.e. outside looking in)
+    :param campaignx_wevote_id: To track Campaign "Chip In"s
+    :param payment_method_id: payment method selected/created on the client CheckoutForm.jsx
     :param coupon_code: Our coupon codes for pricing and features that are looked up
            in the OrganizationSubscriptionPlans
-    :param plan_type_enum: Type of organization plan, or undefined for donations
-    :param organization_we_vote_id: The organization that benefits from this paid plan (subscription)
+    :param premium_plan_type_enum: Type of premium organization plan, or undefined for donations
+    :param voter_we_vote_id:
+    :param linked_organization_we_vote_id: The organization that benefits from this paid plan (subscription)
     :return:
     """
 
@@ -203,11 +209,13 @@ def donation_with_stripe_for_api(request, token, payment_method_id, client_ip, e
         'donation_entry_saved': False,
         'error_message_for_voter': '',
         'stripe_failure_code': '',
-        'monthly_donation': monthly_donation,
+        'is_chip_in': is_chip_in,
+        'is_monthly_donation': is_monthly_donation,
+        'is_premium_plan': is_premium_plan,
         'subscription_already_exists': False,
         'org_subs_already_exists': False,
         'organization_saved': False,
-        'plan_type_enum': plan_type_enum,
+        'premium_plan_type_enum': premium_plan_type_enum,
         'saved_stripe_donation': '',
         'stripe_subscription_created': False,
         'subscription_saved': 'NOT_APPLICABLE',
@@ -218,32 +226,32 @@ def donation_with_stripe_for_api(request, token, payment_method_id, client_ip, e
     raw_donation_status = ''
     is_signed_in = is_voter_logged_in(request)
 
-    if is_organization_plan:
+    if is_premium_plan:
         results['amount_paid'] = 0
 
     if not positive_value_exists(voter_we_vote_id):
         results['status'] += "DONATION_WITH_STRIPE_VOTER_WE_VOTE_ID_MISSING "
         return results
 
-    if not positive_value_exists(email) and not is_organization_plan:
+    if not positive_value_exists(email) and not is_premium_plan:
         results['status'] += "DONATION_WITH_STRIPE_EMAIL_MISSING "
         results['error_message_for_voter'] = 'An email address is required by our payment processor.'
         return results
 
     # Use a default coupon_code if none is specified
-    if is_organization_plan:
+    if is_premium_plan:
         if len(coupon_code) < 2:
-            coupon_code = 'DEFAULT-' + results['plan_type_enum']
+            coupon_code = 'DEFAULT-' + results['premium_plan_type_enum']
     else:
         coupon_code = ''
 
-    # If is_organization_plan, set the price from the coupon, not whatever was passed in.
-    if is_organization_plan:
+    # If is_premium_plan, set the price from the coupon, not whatever was passed in.
+    if is_premium_plan:
         increment_redemption_cnt = False
-        coupon_price, org_subs_id = StripeManager.get_coupon_price(results['plan_type_enum'], coupon_code,
+        coupon_price, org_subs_id = StripeManager.get_coupon_price(results['premium_plan_type_enum'], coupon_code,
                                                                    increment_redemption_cnt)
         if int(donation_amount) > 0:
-            print("Warning for developers, the donation_amount that is passed in for organization plans is ignored,"
+            print("Warning for developers, the donation_amount that is passed in for premium organization plans is ignored,"
                   " the value is read from the coupon")
         donation_amount = coupon_price
 
@@ -264,18 +272,18 @@ def donation_with_stripe_for_api(request, token, payment_method_id, client_ip, e
         if not positive_value_exists(results['stripe_customer_id']):
             results['status'] += "STRIPE_CUSTOMER_ID_MISSING "
         else:
-            # if positive_value_exists(is_organization_plan):
+            # if positive_value_exists(is_premium_plan):
             #     # If here, we are processing organization subscription
             #     results['status'] += 'DONATION_SUBSCRIPTION_SETUP '
-            #     if "MONTHLY" in results['plan_type_enum']:
+            #     if "MONTHLY" in results['premium_plan_type_enum']:
             #         recurring_interval = 'month'
-            #     elif "YEARLY" in results['plan_type_enum']:
+            #     elif "YEARLY" in results['premium_plan_type_enum']:
             #         recurring_interval = 'year'
             #     else:
             #         recurring_interval = 'year'
             #     subscription_results = donation_manager.create_organization_subscription(
             #         results['stripe_customer_id'], voter_we_vote_id, donation_amount, donation_date_time,
-            #         email, coupon_code, results['plan_type_enum'], organization_we_vote_id,
+            #         email, coupon_code, results['premium_plan_type_enum'], linked_organization_we_vote_id,
             #         recurring_interval)
             #
             #     donation_plan_definition_already_exists = \
@@ -299,16 +307,16 @@ def donation_with_stripe_for_api(request, token, payment_method_id, client_ip, e
             #         subscription_canceled_at = None
             #         subscription_ended_at = None
             # else:
-            # If here, we are processing a donation subscription or Membership
-            if positive_value_exists(monthly_donation):
+            # If here, we are processing a donation subscription or Campaign membership
+            if positive_value_exists(is_monthly_donation):
                 results['status'] += 'DONATION_SUBSCRIPTION_SETUP '
                 # The Stripe API calls are made within the following function call
                 recurring_donation_results = donation_manager.create_recurring_donation(
                     results['stripe_customer_id'], voter_we_vote_id,
                     donation_amount, donation_date_time,
-                    email, is_organization_plan,
-                    coupon_code, results['plan_type_enum'],
-                    organization_we_vote_id, client_ip, payment_method_id, is_signed_in)
+                    email, is_premium_plan,
+                    coupon_code, results['premium_plan_type_enum'],
+                    linked_organization_we_vote_id, client_ip, payment_method_id, is_signed_in)
 
                 results['subscription_already_exists'] = recurring_donation_results['subscription_already_exists']
                 results['stripe_subscription_created'] = recurring_donation_results['stripe_subscription_created']
@@ -346,12 +354,16 @@ def donation_with_stripe_for_api(request, token, payment_method_id, client_ip, e
                     source=token,
                     metadata={
                         'email': email,
-                        'one_time_donation': True,
-                        'organization_we_vote_id': organization_we_vote_id,
-                        'plan_type_enum': results['plan_type_enum'],
+                        # 'one_time_donation': True,
+                        'linked_organization_we_vote_id': linked_organization_we_vote_id,
+                        'premium_plan_type_enum': results['premium_plan_type_enum'],
                         'voter_we_vote_id': voter_we_vote_id,
                         'coupon_code': coupon_code,
-                        'stripe_customer_id': dm_results['stripe_customer_id']
+                        'stripe_customer_id': dm_results['stripe_customer_id'],
+                        'is_chip_in': is_chip_in,
+                        'is_monthly_donation': is_monthly_donation,
+                        'is_premium_plan': is_premium_plan,
+                        'campaignx_wevote_id': campaignx_wevote_id,
                     }
                 )
                 results['status'] += textwrap.shorten("STRIPE_CHARGE_SUCCESSFUL " + results['status'], width=255,
@@ -475,14 +487,14 @@ def donation_journal_history_for_a_voter(voter_we_vote_id):
                 'last4': '{:04d}'.format(donation_row.last4),
                 'stripe_status': donation_row.stripe_status,
                 'charge_id': donation_row.charge_id,
-                'plan_type_enum': donation_row.plan_type_enum,
+                'premium_plan_type_enum': donation_row.premium_plan_type_enum,
                 'stripe_subscription_id': donation_row.stripe_subscription_id,
                 'subscription_canceled_at': str(donation_row.subscription_canceled_at),
                 'subscription_ended_at': str(donation_row.subscription_ended_at),
                 'refund_days_limit': refund_days,
                 'last_charged': str(donation_row.last_charged),
-                'is_organization_plan': positive_value_exists(donation_row.is_organization_plan),
-                'organization_we_vote_id': str(donation_row.organization_we_vote_id),
+                'is_premium_plan': positive_value_exists(donation_row.is_premium_plan),
+                'linked_organization_we_vote_id': str(donation_row.linked_organization_we_vote_id),
             }
             simple_donation_list.append(json_data)
 
@@ -517,12 +529,16 @@ def donation_lists_for_a_voter(voter_we_vote_id):
                 'last4': '{:04d}'.format(payment_row.last4),
                 'stripe_status': payment_row.stripe_status,
                 'charge_id': payment_row.stripe_charge_id,
-                # 'plan_type_enum': payment_row.plan_type_enum,
+                # 'premium_plan_type_enum': payment_row.premium_plan_type_enum,
                 'stripe_subscription_id': payment_row.stripe_subscription_id,
                 'refund_days_limit': refund_days,
                 'last_charged': str(payment_row.paid_at),
-                # 'is_organization_plan': positive_value_exists(payment_row.is_organization_plan),
-                # 'organization_we_vote_id': str(payment_row.organization_we_vote_id),
+                'is_chip_in': payment_row.is_chip_in,
+                'campaignx_wevote_id': payment_row.campaignx_wevote_id,
+                'campaign_title': CampaignXManager.retrieve_campaignx_title(payment_row.campaignx_wevote_id),
+
+                # 'is_premium_plan': positive_value_exists(payment_row.is_premium_plan),
+                # 'linked_organization_we_vote_id': str(payment_row.linked_organization_we_vote_id),
             }
             donation_payments_list.append(json_data)
 
@@ -545,14 +561,14 @@ def donation_lists_for_a_voter(voter_we_vote_id):
                 'last4': '{:04d}'.format(payment.last4) if payment else '',
                 'stripe_status': payment.stripe_status if payment else '',
                 'charge_id': subscription_row.stripe_charge_id,
-                # 'plan_type_enum': subscription_row.plan_type_enum,
+                # 'premium_plan_type_enum': subscription_row.premium_plan_type_enum,
                 'stripe_subscription_id': subscription_row.stripe_subscription_id,
                 'subscription_canceled_at': str(subscription_row.subscription_canceled_at),
                 'subscription_ended_at': str(subscription_row.subscription_ended_at),
                 'refund_days_limit': refund_days,
                 'last_charged': str(payment.paid_at) if payment else '',
-                # 'is_organization_plan': positive_value_exists(subscription_row.is_organization_plan),
-                # 'organization_we_vote_id': str(subscription_row.organization_we_vote_id),
+                # 'is_premium_plan': positive_value_exists(subscription_row.is_premium_plan),
+                # 'linked_organization_we_vote_id': str(subscription_row.linked_organization_we_vote_id),
             }
             donation_subscription_list.append(json_data)
 
@@ -607,15 +623,15 @@ def donation_process_charge(event):           # 'charge.succeeded' webhook
         charge = event['data']['object']
         description = charge['description']
         metadata = charge['metadata']
-        is_one_time_donation = True if 'one_time_donation' in metadata else False
-        print('donation_process_charge # charge.succeeded ... is_one_time_donation:', is_one_time_donation)
+        # is_one_time_donation = True if 'one_time_donation' in metadata else False
+        # print('donation_process_charge # charge.succeeded ... is_one_time_donation:', is_one_time_donation)
 
         if description == "Subscription creation":
             print('charge.succeeded webhook is NOT Needed for subscriptions as of 3/16/21: ' + description)
             return
-        elif not is_one_time_donation:
-            print('charge.succeeded webhook received -- not for a subs AND without one_time_donation in metadata')
-            return
+        # elif not is_one_time_donation:
+        #     print('charge.succeeded webhook received -- not for a subs AND without one_time_donation in metadata')
+        #     return
 
         source = charge['source']
         outcome = charge['outcome']
@@ -638,34 +654,26 @@ def donation_process_charge(event):           # 'charge.succeeded' webhook
                 not_loggedin_voter_we_vote_id = metadata['voter_we_vote_id']
 
         payment = {
-            # record_enum
             'voter_we_vote_id': voter_we_vote_id,
             'not_loggedin_voter_we_vote_id': not_loggedin_voter_we_vote_id,
-            'stripe_customer_id': metadata['stripe_customer_id'],
             'stripe_charge_id': charge['id'],
             'stripe_card_id': charge['payment_method'],
             'stripe_request_id': event['request']['id'],
-            # stripe_subscription_id
             'currency': charge['currency'],
             'livemode': charge['livemode'],
-            # action_taken
-            # action_result
             'amount': charge['amount'],
             'created': datetime.fromtimestamp(event['created'], timezone.utc),
             'failure_code': charge['failure_code'],
             'failure_message': charge['failure_message'],
             'network_status': outcome['network_status'],
-            # billing_reason
             'reason': outcome['reason'],
             'seller_message': outcome['seller_message'],
             'stripe_type': stripe_object['object'],
-            # payment_msg
             'is_paid': charge['paid'],
             'is_refunded': charge['refunded'],
             'source_obj': source['object'],
             'funding': source['funding'],
             'amount_refunded': charge['amount_refunded'],
-            'email': metadata['email'] if 'email' in metadata else '',    # Need a change on the other side!
             'address_zip': source['address_zip'],
             'brand': source['brand'],
             'country': source['country'],
@@ -674,11 +682,19 @@ def donation_process_charge(event):           # 'charge.succeeded' webhook
             'last4': source['last4'],
             'stripe_status': charge['status'],
             'status': stripe_object['calculated_statement_descriptor'],
-            # we_plan_id
             'paid_at': datetime.fromtimestamp(charge['created'], timezone.utc),
             'ip_address': '0.0.0.0',                # Need a change on the other side!
-            'is_organization_plan': False,
             'api_version': event['api_version'],
+            'email': metadata['email'] if 'email' in metadata else '',
+            'stripe_customer_id': metadata['stripe_customer_id'] if 'stripe_customer_id' in metadata else '',
+            'is_chip_in': metadata['is_chip_in'] if 'is_chip_in' in metadata else '',
+            'is_monthly_donation': metadata['is_monthly_donation'] if 'is_monthly_donation' in metadata else '',
+            'is_premium_plan': metadata['is_premium_plan'] if 'is_premium_plan' in metadata else '',
+            'campaignx_wevote_id': metadata['campaignx_wevote_id'] if 'campaignx_wevote_id' in metadata else '',
+            # 'one_time_donation': metadata['one_time_donation'] if 'one_time_donation' in metadata else '',
+            # 'linked_organization_we_vote_id': metadata['linked_organization_we_vote_id'] if 'linked_organization_we_vote_id' in metadata else '',
+            # 'premium_plan_type_enum': metadata['premium_plan_type_enum'] if 'premium_plan_type_enum' in metadata else '',
+            # 'coupon_code': metadata['coupon_code'] if 'coupon_code' in metadata else '',
         }
 
         StripeManager.create_payment_entry(payment)
@@ -887,7 +903,7 @@ def donation_process_subscription_payment(event):    # invoice.payment_succeeded
         # reason = str(dataobject['outcome']['reason'])
         # seller_message = dataobject['outcome']['seller_message']
         stripe_type = dataobject['lines']['data'][0]['type']
-        is_organization_plan = 'False'
+        is_premium_plan = 'False'
 
         StripeManager.update_subscription_on_charge_success(we_plan_id, stripe_request_id,
                                                             stripe_subscription_id, stripe_charge_id,
@@ -924,7 +940,7 @@ def donation_process_subscription_payment(event):    # invoice.payment_succeeded
             'stripe_status': stripe_status,
             'we_plan_id': we_plan_id,
             'api_version': api_version,
-            'is_organization_plan': is_organization_plan,
+            'is_premium_plan': is_premium_plan,
             'created': created,
         }
         print('Adding new StripePayment record on_charge_success: ', stripe_payment)
@@ -975,12 +991,12 @@ def donation_refund_for_api(request, charge, voter_we_vote_id):
     return success
 
 
-def donation_subscription_cancellation_for_api(voter_we_vote_id, plan_type_enum='', stripe_subscription_id=''):
+def donation_subscription_cancellation_for_api(voter_we_vote_id, premium_plan_type_enum='', stripe_subscription_id=''):
     """
-    We expect either plan_type_enum or stripe_subscription_id. If plan_type_enum is passed in, then
+    We expect either premium_plan_type_enum or stripe_subscription_id. If premium_plan_type_enum is passed in, then
     stripe_subscription_id might be replaced with another value
     :param voter_we_vote_id:
-    :param plan_type_enum:
+    :param premium_plan_type_enum:
     :param stripe_subscription_id:
     :return:
     """
@@ -1019,10 +1035,10 @@ def donation_subscription_cancellation_for_api(voter_we_vote_id, plan_type_enum=
     # linked_organization_we_vote_id = voter.linked_organization_we_vote_id
 
     donation_manager = StripeManager()
-    # if positive_value_exists(plan_type_enum):
+    # if positive_value_exists(premium_plan_type_enum):
     #     results = donation_manager.retrieve_donation_plan_definition(
-    #         organization_we_vote_id=linked_organization_we_vote_id, is_organization_plan=True,
-    #         plan_type_enum=plan_type_enum, donation_plan_is_active=True)
+    #         linked_organization_we_vote_id=linked_organization_we_vote_id, is_premium_plan=True,
+    #         premium_plan_type_enum=premium_plan_type_enum, donation_plan_is_active=True)
     #     if results['donation_plan_definition_found']:
     #         donation_plan_definition = results['donation_plan_definition']
     #         donation_plan_definition_id = donation_plan_definition.id

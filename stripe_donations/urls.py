@@ -1,4 +1,4 @@
-# donate/urls.py
+# stripe_donations/urls.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 

@@ -1,4 +1,4 @@
-# donate/models.py
+# stripe_donations/models.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
@@ -93,8 +93,9 @@ class StripeSubscription(models.Model):
     # campaignx_we_vote_id = models.CharField(max_length=64, null=True)
     # campaign_title = models.CharField(verbose_name="title of campaign", max_length=255, null=False, blank=False)
     stripe_request_id = models.CharField(verbose_name="stripe initial request id", max_length=32, null=True, blank=True)
-    organization_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id of the organization who benefits from the organization subscription",
+    linked_organization_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id of the organization who benefits from the organization subscription, "
+                     "but does not include the organizations that get credif for Chip Ins",
         max_length=64, default=None, null=True, blank=True, unique=False, db_index=True)
     api_version = models.CharField(verbose_name="Stripe API Version", max_length=32, null=True, blank=True)
     livemode = models.BooleanField(verbose_name="True: Live transaction, False: Test transaction", default=False,
@@ -175,8 +176,15 @@ class StripePayments(models.Model):
                                    auto_now_add=False, null=True)
     ip_address = models.GenericIPAddressField(verbose_name="user ip address", protocol='both', unpack_ipv4=False,
                                               null=True, blank=True, unique=False)
-    is_organization_plan = models.BooleanField(
-        verbose_name="is this a organization plan (and not a personal donation subscription)", default=False)
+    is_chip_in = models.BooleanField(
+        verbose_name="Is this a Campaign 'Chip In' payment?", default=False)
+    is_premium_plan = models.BooleanField(
+        verbose_name="is this a premium organization plan (and not a personal donation subscription)?", default=False)
+    is_monthly_donation = models.BooleanField(
+        verbose_name="is this a repeating monthly subscription donation?", default=False)
+    campaignx_wevote_id = models.CharField(
+        verbose_name="Campaign we vote id, in order to credit chip ins", max_length=32, unique=False, null=True,
+        blank=True)
     record_enum = models.CharField(
         verbose_name="enum of record type {PAYMENT_FROM_UI, PAYMENT_AUTO_SUBSCRIPTION, SUBSCRIPTION_SETUP_AND_INITIAL}",
         max_length=32, unique=False, null=True, blank=True)
@@ -357,8 +365,8 @@ class StripeManager(models.Manager):
 
     @staticmethod
     def retrieve_or_create_recurring_donation_plan(voter_we_vote_id, we_plan_id, donation_amount,
-                                                   is_organization_plan, coupon_code, plan_type_enum,
-                                                   organization_we_vote_id, recurring_interval, client_ip,
+                                                   is_premium_plan, coupon_code, premium_plan_type_enum,
+                                                   linked_organization_we_vote_id, recurring_interval, client_ip,
                                                    stripe_customer_id, is_signed_in):
         """
         June 2017, we create these records, but never read them for donations
@@ -366,10 +374,10 @@ class StripeManager(models.Manager):
         :param voter_we_vote_id:
         :param we_plan_id:
         :param donation_amount:
-        :param is_organization_plan:
+        :param is_premium_plan:
         :param coupon_code:
-        :param plan_type_enum:
-        :param organization_we_vote_id:
+        :param premium_plan_type_enum:
+        :param linked_organization_we_vote_id:
         :param recurring_interval:
         :param client_ip
         :param stripe_customer_id
@@ -406,7 +414,7 @@ class StripeManager(models.Manager):
                 donation_plan_is_active=donation_plan_is_active,
                 voter_we_vote_id=voter_we_vote_id_2,
                 not_loggedin_voter_we_vote_id=not_loggedin_voter_we_vote_id,
-                organization_we_vote_id=organization_we_vote_id,
+                linked_organization_we_vote_id=linked_organization_we_vote_id,
                 # organization_subscription_plan_id=org_subs_id,
                 client_ip=client_ip,
                 stripe_customer_id=stripe_customer_id
@@ -478,22 +486,22 @@ class StripeManager(models.Manager):
     @staticmethod
     def retrieve_or_create_subscription_plan_definition(
             voter_we_vote_id,
-            organization_we_vote_id,
+            linked_organization_we_vote_id,
             stripe_customer_id,
             we_plan_id,
             subscription_cost_pennies,
             coupon_code,
-            plan_type_enum,
+            premium_plan_type_enum,
             recurring_interval):
         """
         August 2019, we read these records for organization paid subscriptions
         :param voter_we_vote_id:
-        :param organization_we_vote_id:
+        :param linked_organization_we_vote_id:
         :param stripe_customer_id:
         :param we_plan_id:
         :param subscription_cost_pennies:
         :param coupon_code:
-        :param plan_type_enum:
+        :param premium_plan_type_enum:
         :param recurring_interval:
         :return:
         """
@@ -508,7 +516,7 @@ class StripeManager(models.Manager):
         currency = "usd"
         exception_multiple_object_returned = False
         is_new = False
-        is_organization_plan = True
+        is_premium_plan = True
         status = ''
         stripe_plan_id = ''
         success = False
@@ -532,9 +540,9 @@ class StripeManager(models.Manager):
                 amount=subscription_cost_pennies,
                 # billing_interval=billing_interval,
                 donation_plan_is_active=True,
-                plan_type_enum=plan_type_enum,
-                is_organization_plan=is_organization_plan,
-                organization_we_vote_id=organization_we_vote_id,
+                premium_plan_type_enum=premium_plan_type_enum,
+                is_premium_plan=is_premium_plan,
+                linked_organization_we_vote_id=linked_organization_we_vote_id,
                 defaults=defaults_for_create,
             )
 
@@ -652,7 +660,7 @@ class StripeManager(models.Manager):
         return saved_results
 
     def create_recurring_donation(self, stripe_customer_id, voter_we_vote_id, donation_amount, start_date_time, email,
-                                  is_organization_plan, coupon_code, plan_type_enum, organization_we_vote_id,
+                                  is_premium_plan, coupon_code, premium_plan_type_enum, linked_organization_we_vote_id,
                                   client_ip, payment_method_id, is_signed_in):
         """
 
@@ -661,10 +669,10 @@ class StripeManager(models.Manager):
         :param donation_amount:
         :param start_date_time:
         :param email:
-        :param is_organization_plan:
+        :param is_premium_plan:
         :param coupon_code:
-        :param plan_type_enum:
-        :param organization_we_vote_id:
+        :param premium_plan_type_enum:
+        :param linked_organization_we_vote_id:
         :param client_ip
         :param payment_method_id
         :param: is_signed_in
@@ -674,15 +682,16 @@ class StripeManager(models.Manager):
         status = ""
         results = {}
         stripe_subscription_created = False
-        org_segment = "organization-" if is_organization_plan else ""
+        org_segment = "organization-" if is_premium_plan else ""
         periodicity = "-monthly-"
-        if "_YEARLY" in plan_type_enum:
+        if "_YEARLY" in premium_plan_type_enum:
             periodicity = "-yearly-"
         we_plan_id = voter_we_vote_id + periodicity + org_segment + str(donation_amount)
 
         donation_plan_results = self.retrieve_or_create_recurring_donation_plan(
-            voter_we_vote_id, we_plan_id, donation_amount, is_organization_plan, coupon_code,
-            plan_type_enum, organization_we_vote_id, 'month', client_ip, stripe_customer_id, is_signed_in)
+            voter_we_vote_id, we_plan_id, donation_amount, is_premium_plan, coupon_code,
+            premium_plan_type_enum, linked_organization_we_vote_id, 'month', client_ip, stripe_customer_id,
+            is_signed_in)
         subscription_already_exists = donation_plan_results['subscription_already_exists']
         success = donation_plan_results['success']
         status += donation_plan_results['status']
@@ -780,7 +789,7 @@ class StripeManager(models.Manager):
 
     # def create_organization_subscription(
     #         self, stripe_customer_id, voter_we_vote_id, donation_amount, start_date_time, email,
-    #         coupon_code, plan_type_enum, organization_we_vote_id, recurring_interval):
+    #         coupon_code, premium_plan_type_enum, linked_organization_we_vote_id, recurring_interval):
     #     """
     #
     #     :param stripe_customer_id:
@@ -789,8 +798,8 @@ class StripeManager(models.Manager):
     #     :param start_date_time:
     #     :param email:
     #     :param coupon_code:
-    #     :param plan_type_enum:
-    #     :param organization_we_vote_id:
+    #     :param premium_plan_type_enum:
+    #     :param linked_organization_we_vote_id:
     #     :param recurring_interval:
     #     :return:
     #     """
@@ -802,19 +811,19 @@ class StripeManager(models.Manager):
     #
     #     org_segment = "organization-"
     #     periodicity ="-monthly-"
-    #     if "_YEARLY" in plan_type_enum:
+    #     if "_YEARLY" in premium_plan_type_enum:
     #         periodicity = "-yearly-"
     #     we_plan_id = voter_we_vote_id + periodicity + org_segment + str(donation_amount)
     #
     #     # We have already previously retrieved the coupon_price, and updated the donation_amount.
     #     # Here, we are incrementing the redemption counter
     #     increment_redemption_count = True
-    #     coupon_price, org_subs_id = DonationManager.get_coupon_price(plan_type_enum, coupon_code,
+    #     coupon_price, org_subs_id = DonationManager.get_coupon_price(premium_plan_type_enum, coupon_code,
     #                                                                  increment_redemption_count)
     #
     #     plan_results = self.retrieve_or_create_subscription_plan_definition(
-    #         voter_we_vote_id, organization_we_vote_id, stripe_customer_id,
-    #         we_plan_id, donation_amount, coupon_code, plan_type_enum,
+    #         voter_we_vote_id, linked_organization_we_vote_id, stripe_customer_id,
+    #         we_plan_id, donation_amount, coupon_code, premium_plan_type_enum,
     #         recurring_interval)
     #     donation_plan_definition_already_exists = plan_results['donation_plan_definition_already_exists']
     #     status = plan_results['status']
@@ -829,7 +838,7 @@ class StripeManager(models.Manager):
     #                 customer=stripe_customer_id,
     #                 plan=we_plan_id,
     #                 metadata={
-    #                     'organization_we_vote_id': organization_we_vote_id,
+    #                     'linked_organization_we_vote_id': linked_organization_we_vote_id,
     #                     'voter_we_vote_id': voter_we_vote_id,
     #                     'email': email
     #                 }
@@ -1076,8 +1085,8 @@ class StripeManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_donation_plan_definition(voter_we_vote_id='', organization_we_vote_id='', is_organization_plan=True,
-                                          plan_type_enum='', donation_plan_is_active=True):
+    def retrieve_donation_plan_definition(voter_we_vote_id='', linked_organization_we_vote_id='', is_premium_plan=True,
+                                          premium_plan_type_enum='', donation_plan_is_active=True):
         donation_plan_definition = None
         donation_plan_definition_found = False
         status = ''
@@ -1086,11 +1095,11 @@ class StripeManager(models.Manager):
             donation_queryset = StripeSubscription.objects.all().order_by('-id')
             if positive_value_exists(voter_we_vote_id):
                 donation_queryset = donation_queryset.filter(voter_we_vote_id__iexact=voter_we_vote_id)
-            elif positive_value_exists(organization_we_vote_id):
-                donation_queryset = donation_queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
-            donation_queryset = donation_queryset.filter(is_organization_plan=is_organization_plan)
-            if positive_value_exists(plan_type_enum):
-                donation_queryset = donation_queryset.filter(plan_type_enum__iexact=plan_type_enum)
+            elif positive_value_exists(linked_organization_we_vote_id):
+                donation_queryset = donation_queryset.filter(linked_organization_we_vote_id__iexact=linked_organization_we_vote_id)
+            donation_queryset = donation_queryset.filter(is_premium_plan=is_premium_plan)
+            if positive_value_exists(premium_plan_type_enum):
+                donation_queryset = donation_queryset.filter(premium_plan_type_enum__iexact=premium_plan_type_enum)
             if positive_value_exists(donation_plan_is_active):
                 donation_queryset = donation_queryset.filter(donation_plan_is_active=donation_plan_is_active)
             donation_plan_definition_list = list(donation_queryset)
@@ -1122,7 +1131,7 @@ class StripeManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_donation_plan_definition_list(voter_we_vote_id='', organization_we_vote_id='',
+    def retrieve_donation_plan_definition_list(voter_we_vote_id='', linked_organization_we_vote_id='',
                                                return_json_version=False):
         donation_plan_definition_list = []
         donation_plan_definition_list_json = []
@@ -1132,8 +1141,8 @@ class StripeManager(models.Manager):
             donation_queryset = StripeSubscription.objects.all().order_by('-id')
             if positive_value_exists(voter_we_vote_id):
                 donation_queryset = donation_queryset.filter(voter_we_vote_id__iexact=voter_we_vote_id)
-            if positive_value_exists(organization_we_vote_id):
-                donation_queryset = donation_queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            if positive_value_exists(linked_organization_we_vote_id):
+                donation_queryset = donation_queryset.filter(linked_organization_we_vote_id__iexact=linked_organization_we_vote_id)
             donation_plan_definition_list = list(donation_queryset)
 
             if len(donation_plan_definition_list):
@@ -1162,15 +1171,15 @@ class StripeManager(models.Manager):
                     'currency': donation_plan_definition.currency,
                     'we_plan_id': donation_plan_definition.we_plan_id,
                     'donation_plan_is_active': donation_plan_definition.donation_plan_is_active,
-                    # 'is_organization_plan': donation_plan_definition.is_organization_plan,
+                    # 'is_premium_plan': donation_plan_definition.is_premium_plan,
                     # 'organization_subscription_plan_id': donation_plan_definition.organization_subscription_plan_id,
-                    'organization_we_vote_id': donation_plan_definition.organization_we_vote_id,
+                    'linked_organization_we_vote_id': donation_plan_definition.linked_organization_we_vote_id,
                     # 'paid_without_stripe': donation_plan_definition.paid_without_stripe,
                     # 'paid_without_stripe_comment': donation_plan_definition.paid_without_stripe_comment,
                     # 'paid_without_stripe_expiration_date':
                     #         donation_plan_definition.paid_without_stripe_expiration_date,
                     # 'plan_id': donation_plan_definition.plan_name,
-                    # 'plan_type_enum': donation_plan_definition.plan_type_enum,
+                    # 'premium_plan_type_enum': donation_plan_definition.premium_plan_type_enum,
                     'voter_we_vote_id': donation_plan_definition.voter_we_vote_id,
                 }
                 donation_plan_definition_list_json.append(json)
@@ -1242,12 +1251,12 @@ class StripeManager(models.Manager):
         return results
 
     @staticmethod
-    def does_paid_subscription_exist(organization_we_vote_id):
+    def does_paid_subscription_exist(linked_organization_we_vote_id):
         found_live_paid_subscription_for_the_org = False
         try:
             donation_queryset = StripePayments.objects.all()
             donation_queryset = donation_queryset.filter(record_enum='SUBSCRIPTION_SETUP_AND_INITIAL',
-                                                         is_organization_plan=True)
+                                                         is_premium_plan=True)
 
             if len(donation_queryset) == 0:
                 found_live_paid_subscription_for_the_org = False
@@ -1390,8 +1399,8 @@ class StripeManager(models.Manager):
             voter_manager = VoterManager()
             org_we_vote_id = voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
 
-            rows = StripeSubscription.objects.get(organization_we_vote_id__iexact=org_we_vote_id,
-                                                  is_organization_plan=True,
+            rows = StripeSubscription.objects.get(linked_organization_we_vote_id__iexact=org_we_vote_id,
+                                                  is_premium_plan=True,
                                                   donation_plan_is_active=True)
             if len(rows):
                 row = rows[0]
@@ -1581,7 +1590,7 @@ class StripeManager(models.Manager):
         try:
             donation_payments_query = StripePayments.objects.all()
             donation_payments_query = donation_payments_query.filter(
-                organization_we_vote_id__iexact=from_organization_we_vote_id)
+                linked_organization_we_vote_id__iexact=from_organization_we_vote_id)
             donation_payments_list = list(donation_payments_query)
             status += "move_donation_payment_entries_from_organization_to_organization LIST_RETRIEVED-" + \
                       from_organization_we_vote_id + "-TO-" + to_organization_we_vote_id +  \
@@ -1597,7 +1606,7 @@ class StripeManager(models.Manager):
         donation_payment_migration_fails = 0
         for donation_payment in donation_payments_list:
             try:
-                donation_payment.organization_we_vote_id = to_organization_we_vote_id
+                donation_payment.linked_organization_we_vote_id = to_organization_we_vote_id
                 donation_payment.save()
                 donation_payment_migration_count += 1
             except Exception as e:
@@ -1631,7 +1640,7 @@ class StripeManager(models.Manager):
         try:
             donation_plan_definition_query = StripeSubscription.objects.all()
             donation_plan_definition_query = donation_plan_definition_query.filter(
-                organization_we_vote_id__iexact=from_organization_we_vote_id)
+                linked_organization_we_vote_id__iexact=from_organization_we_vote_id)
             donation_plan_definition_list = list(donation_plan_definition_query)
             status += "move_donation_plan_definition_entries_from_organization_to_organization LIST_RETRIEVED-" + \
                       from_organization_we_vote_id + "-TO-" + to_organization_we_vote_id + \
@@ -1647,7 +1656,7 @@ class StripeManager(models.Manager):
         donation_plan_definition_migration_fails = 0
         for donation_plan_definition in donation_plan_definition_list:
             try:
-                donation_plan_definition.organization_we_vote_id = to_organization_we_vote_id
+                donation_plan_definition.linked_organization_we_vote_id = to_organization_we_vote_id
                 donation_plan_definition.save()
                 donation_plan_definition_migration_count += 1
             except Exception as e:

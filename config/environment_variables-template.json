@@ -122,6 +122,8 @@
   "SOCIAL_AUTH_APPLE_CLIENT_ID_IOS": "org.wevote.cordova",
   "SOCIAL_AUTH_FACEBOOK_KEY":       "",
   "SOCIAL_AUTH_FACEBOOK_SECRET":    "",
+  "live-SOCIAL_AUTH_TWITTER_KEY":    "",
+  "live-SOCIAL_AUTH_TWITTER_SECRET": "",
   "SOCIAL_AUTH_TWITTER_KEY":        "",
   "SOCIAL_AUTH_TWITTER_SECRET":     "",
   "SOCIAL_AUTH_LOGIN_URL":          "http://localhost:8000/login/",
@@ -142,8 +144,7 @@
 
   "_comment":                       "stripe test 'Secret Key' (The 'Publishable key' is only used on the WebApp!)",
   "STRIPE_SECRET_KEY":              "API Secret key begins with - pk_...",
-  "STRIPE_SIGNING_SECRET":          "ABANDONED 'signing secret key' -- No longer used in Stripe API 2020-08-27",
-  "STRIPE_REFUND_DAYS":             30,
+  "STRIPE_REFUND_DAYS":             10,
 
   "_comment":                       "Image server (Amazon Web Service AWS s3) settings",
   "AWS_ACCESS_KEY_ID":              "",

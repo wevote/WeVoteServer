@@ -15,32 +15,32 @@ waiting for server to start.... done
 server started
 (WeVoteServerPy3.7) Steves-MacBook-Pro-32GB-Oct-2018:WeVoteServer stevepodell$ 
 ```
-####Setting up ngrok to send stripe webhooks to your local python server
+#### Setting up ngrok to send stripe webhooks to your local python server
 ```
 (WeVoteServerPy3.7) Steves-MacBook-Pro-32GB-Oct-2018:PycharmProjects stevepodell$ ~/PythonProjects/ngrok http 8000 -host-header="localhost:8000"
 
 ```
 A very useful http inspector is made available by ngrok at [http://127.0.0.1:4040/inspect/http](http://127.0.0.1:4040/inspect/http)
 
+Then go to the Stripe console, and 
 
-####launching psql and disconnecting all the postgres sessions
+#### launching psql and disconnecting all the postgres sessions
 ```
-Last login: Thu Aug  3 09:13:17 on ttys004
-Steves-MacBook-Pro-2017:StevesForkOfWebApp stevepodell$ "/Applications/Postgres.app/Contents/Versions/9.6/bin/psql" -p5433 -d "postgres"
-psql (9.6.2)
+(PycharmEnvironments) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % psql
+psql (12.3)
 Type "help" for help.
 
-postgres=# SELECT * from pg_database;
-    datname     | datdba | encoding | datcollate  |  datctype   | datistemplate | datallowconn | datconnlimit | datlastsysoid | datfrozenxid | datminmxid | dattablespace |               datacl                
-----------------+--------+----------+-------------+-------------+---------------+--------------+--------------+---------------+--------------+------------+---------------+-------------------------------------
- postgres       |     10 |        6 | en_US.UTF-8 | en_US.UTF-8 | f             | t            |           -1 |         12668 |          858 |          1 |          1663 | 
- stevepodell    |  16384 |        6 | en_US.UTF-8 | en_US.UTF-8 | f             | t            |           -1 |         12668 |          858 |          1 |          1663 | 
- template1      |     10 |        6 | en_US.UTF-8 | en_US.UTF-8 | t             | t            |           -1 |         12668 |          858 |          1 |          1663 | {=c/postgres,postgres=CTc/postgres}
- template0      |     10 |        6 | en_US.UTF-8 | en_US.UTF-8 | t             | f            |           -1 |         12668 |          858 |          1 |          1663 | {=c/postgres,postgres=CTc/postgres}
- WeVoteServerDB |     10 |        6 | en_US.UTF-8 | en_US.UTF-8 | f             | t            |           -1 |         12668 |          858 |          1 |          1663 | 
+stevepodell=# SELECT * from pg_database;
+  oid  |    datname     | datdba | encoding | datcollate |  datctype   | datistemplate | datallowconn | datconnlimit | datlastsysoid | datfrozenxid | datminmxid | dattablespace |                    datacl                    
+-------+----------------+--------+----------+------------+-------------+---------------+--------------+--------------+---------------+--------------+------------+---------------+----------------------------------------------
+ 13690 | postgres       |     10 |        6 | C          | en_US.UTF-8 | f             | t            |           -1 |         13689 |          479 |          1 |          1663 | 
+ 16384 | stevepodell    |     10 |        6 | C          | en_US.UTF-8 | f             | t            |           -1 |         13689 |          479 |          1 |          1663 | 
+     1 | template1      |     10 |        6 | C          | en_US.UTF-8 | t             | t            |           -1 |         13689 |          479 |          1 |          1663 | {=c/stevepodell,stevepodell=CTc/stevepodell}
+ 13689 | template0      |     10 |        6 | C          | en_US.UTF-8 | t             | f            |           -1 |         13689 |          479 |          1 |          1663 | {=c/stevepodell,stevepodell=CTc/stevepodell}
+ 94769 | WeVoteServerDB |  16385 |        6 | C          | en_US.UTF-8 | f             | t            |           -1 |         13689 |          479 |          1 |          1663 | 
 (5 rows)
 
-postgres=# SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'WeVoteServerDB';
+stevepodell=# SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'WeVoteServerDB';
  pg_terminate_backend 
 ----------------------
  t
@@ -49,13 +49,15 @@ postgres=# SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname 
  t
  t
  t
-(6 rows)
+ t
+(7 rows)
 
-postgres=#
+stevepodell=# 
+
 ```
 (You may have to quit out of this session to do the next step, ^D)
 
-####Dropping the database (all data will be destroyed)
+#### Dropping the database (all data will be destroyed)
 You have to terminate all the backend connections before this will work:
 
 Then in pgAdmin 4,
@@ -65,7 +67,7 @@ Then in pgAdmin 4,
 ```
 (WeVoteServer3.6) Steves-MacBook-Pro-2017:WeVoteServer stevepodell$ python manage.py migrate
 ```
-####Nasty upgrade to postgres 12.2 (I did not attempt save the existing db on my local)
+#### Nasty upgrade to postgres 12.2 (I did not attempt save the existing db on my local)
 There has to be a better way to do this, but this is what I went through...
 ```
   165  brew install postgresql

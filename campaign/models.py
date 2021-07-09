@@ -1321,6 +1321,15 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    def retrieve_campaignx_title(campaignx_we_vote_id='', read_only=False):
+        if len(campaignx_we_vote_id) == 0:
+            return ''
+        if positive_value_exists(read_only):
+            campaignx = CampaignX.objects.using('readonly').get(we_vote_id=campaignx_we_vote_id)
+        else:
+            campaignx = CampaignX.objects.get(we_vote_id=campaignx_we_vote_id)
+        return campaignx.campaign_title
+
     def retrieve_seo_friendly_path_list(self, campaignx_we_vote_id=''):
         seo_friendly_path_list_found = False
         seo_friendly_path_list = []

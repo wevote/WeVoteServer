@@ -30,17 +30,19 @@ def donation_with_stripe_view(request):  # donationWithStripe
     :return:
     """
 
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     token = request.GET.get('token', '')
-    client_ip = request.GET.get('client_ip', '')
-    payment_method_id = request.GET.get('payment_method_id', '')
     email = request.GET.get('email', '')
     donation_amount = request.GET.get('donation_amount', 0)
-    monthly_donation = positive_value_exists(request.GET.get('monthly_donation', False))
-    is_organization_plan = positive_value_exists(request.GET.get('is_organization_plan', False))
+    is_chip_in = positive_value_exists(request.GET.get('is_chip_in', False))
+    is_monthly_donation = positive_value_exists(request.GET.get('is_monthly_donation', False))
+    is_premium_plan = positive_value_exists(request.GET.get('is_premium_plan', False))
+    client_ip = request.GET.get('client_ip', '')
+    campaignx_wevote_id = request.GET.get('campaignx_we_vote_id', '')
+    payment_method_id = request.GET.get('payment_method_id', '')
     coupon_code = request.GET.get('coupon_code', '')
-    plan_type_enum = request.GET.get('plan_type_enum', '')
+    premium_plan_type_enum = request.GET.get('premium_plan_type_enum', '')
 
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_we_vote_id = ''
 
     if positive_value_exists(voter_device_id):
@@ -53,9 +55,11 @@ def donation_with_stripe_view(request):  # donationWithStripe
         voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
 
     if positive_value_exists(token):
-        results = donation_with_stripe_for_api(request, token, payment_method_id, client_ip, email, donation_amount,
-                                               monthly_donation, voter_we_vote_id, is_organization_plan, coupon_code,
-                                               plan_type_enum, linked_organization_we_vote_id)
+        results = donation_with_stripe_for_api(request, token, email, donation_amount,
+                                               is_chip_in, is_monthly_donation, is_premium_plan,
+                                               client_ip, campaignx_wevote_id, payment_method_id, coupon_code,
+                                               premium_plan_type_enum,
+                                               voter_we_vote_id, linked_organization_we_vote_id )
 
         org_subs_already_exists = results['org_subs_already_exists'] if \
             'org_subs_already_exists' in results else False
@@ -75,10 +79,10 @@ def donation_with_stripe_view(request):  # donationWithStripe
             'donation_payments_list': donation_payments_list,
             'error_message_for_voter': results['error_message_for_voter'],
             'stripe_failure_code': results['stripe_failure_code'],
-            'monthly_donation': monthly_donation,
+            'is_monthly_donation': is_monthly_donation,
             'organization_saved': results['organization_saved'],
             'org_subs_already_exists': org_subs_already_exists,
-            'plan_type_enum': results['plan_type_enum'],
+            'premium_plan_type_enum': results['premium_plan_type_enum'],
             'saved_donation_in_log': results['donation_entry_saved'],
             'saved_stripe_donation': results['saved_stripe_donation'],
         }
@@ -91,7 +95,7 @@ def donation_with_stripe_view(request):  # donationWithStripe
             'amount_paid': 0,
             'error_message_for_voter': 'Cannot connect to payment processor.',
             'organization_saved': False,
-            'plan_type_enum': '',
+            'premium_plan_type_enum': '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -141,7 +145,7 @@ def donation_cancel_subscription_view(request):  # donationCancelSubscription
     :return:
     """
 
-    plan_type_enum = request.GET.get('plan_type_enum', '')
+    premium_plan_type_enum = request.GET.get('premium_plan_type_enum', '')
     stripe_subscription_id = request.GET.get('stripe_subscription_id', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
 
@@ -149,7 +153,7 @@ def donation_cancel_subscription_view(request):  # donationCancelSubscription
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
         if len(voter_we_vote_id) > 0:
             json_data = donation_subscription_cancellation_for_api(
-                voter_we_vote_id, plan_type_enum=plan_type_enum, stripe_subscription_id=stripe_subscription_id)
+                voter_we_vote_id, premium_plan_type_enum=premium_plan_type_enum, stripe_subscription_id=stripe_subscription_id)
         else:
             logger.error('%s', 'donation_cancel_subscription_view voter_we_vote_id is missing')
             json_data = {
@@ -167,6 +171,8 @@ def donation_cancel_subscription_view(request):  # donationCancelSubscription
 
 
 # Using ngrok to test Stripe Webhook
+# Start ngrok (install it first!)
+# (WeVoteServerPy3.7) Steves-MacBook-Pro-32GB-Oct-2018:PycharmProjects stevepodell$ ~/PythonProjects/ngrok http 8000 -host-header="localhost:8000"
 # https://a9a761d9.ngrok.io/apis/v1/donationStripeWebhook/
 # http://a9a761d9.ngrok.io -> localhost:8000
 # Important!!!!!!!   django urls without a trailing slash do not redirect   !!!!!!
@@ -210,11 +216,11 @@ def donation_history_list_view(request):   # donationHistory
     status = ""
     active_paid_plan = {
         'last_amount_paid':         0,
-        'plan_type_enum':           '',
+        'premium_plan_type_enum':   '',
         'subscription_active':      False,
         'subscription_canceled_at': '',
         'subscription_ended_at':    '',
-        'stripe_subscription_id':          stripe_subscription_id,
+        'stripe_subscription_id':   stripe_subscription_id,
     }
     donation_subscription_list = []
     donation_payments_list = []
@@ -279,14 +285,14 @@ def donation_history_list_view(request):   # donationHistory
 #
 #
 # def validate_coupon_for_api_view(request):  # validateCoupon
-#     plan_type_enum = request.GET.get('plan_type_enum', '')
+#     premium_plan_type_enum = request.GET.get('premium_plan_type_enum', '')
 #     coupon_code = request.GET.get('coupon_code', '')
 #     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-#     print("validate_coupon_for_api_view, plan_type_enum: " + plan_type_enum + ", coupon_code: " + coupon_code)
+#     print("validate_coupon_for_api_view, premium_plan_type_enum: " + premium_plan_type_enum + ", coupon_code: " + coupon_code)
 #
 #     if positive_value_exists(voter_device_id):
 #         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
-#         json_data = DonationManager.validate_coupon(plan_type_enum, coupon_code)
+#         json_data = DonationManager.validate_coupon(premium_plan_type_enum, coupon_code)
 #     else:
 #         json_data = {
 #             'success': False,
@@ -302,7 +308,7 @@ def donation_history_list_view(request):   # donationHistory
 #         return redirect_to_sign_in_page(request, authority_required)
 #
 #     coupon_code = request.GET.get('couponCode')
-#     plan_type_enum = request.GET.get('planTypeEnum')
+#     premium_plan_type_enum = request.GET.get('planTypeEnum')
 #     hidden_plan_comment = request.GET.get('hiddenPlanComment')
 #     coupon_applied_message = request.GET.get('couponAppliedMessage')
 #     monthly_price_stripe = request.GET.get('monthlyPriceStripe')
@@ -314,7 +320,7 @@ def donation_history_list_view(request):   # donationHistory
 #     coupon_expires_date = request.GET.get('couponExpiresDate', None)
 #     if len(coupon_expires_date) == 0:
 #         coupon_expires_date = None
-#     print("create_new_plan_for_api_view, plan_type_enum: " + plan_type_enum + ", coupon_code: " + coupon_code)
+#     print("create_new_plan_for_api_view, premium_plan_type_enum: " + premium_plan_type_enum + ", coupon_code: " + coupon_code)
 #     plan_on_stage = 0
 #
 #     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
@@ -322,7 +328,7 @@ def donation_history_list_view(request):   # donationHistory
 #         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
 #         plan_on_stage = OrganizationSubscriptionPlans.objects.create(
 #             coupon_code=coupon_code,
-#             plan_type_enum=plan_type_enum,
+#             premium_plan_type_enum=premium_plan_type_enum,
 #             hidden_plan_comment=hidden_plan_comment,
 #             coupon_applied_message=coupon_applied_message,
 #             monthly_price_stripe=monthly_price_stripe,
