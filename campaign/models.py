@@ -1277,6 +1277,7 @@ class CampaignXManager(models.Manager):
             voter_we_vote_id=None,
             require_supporter_endorsement=False,
             require_visible_to_public=True,
+            require_not_blocked_by_we_vote=True,
             limit=10,
             read_only=True):
         supporter_list = []
@@ -1295,6 +1296,8 @@ class CampaignXManager(models.Manager):
                 campaignx_queryset = campaignx_queryset.filter(voter_we_vote_id=voter_we_vote_id)
             if positive_value_exists(require_visible_to_public):
                 campaignx_queryset = campaignx_queryset.filter(visible_to_public=True)
+            if positive_value_exists(require_not_blocked_by_we_vote):
+                campaignx_queryset = campaignx_queryset.filter(visibility_blocked_by_we_vote=False)
             if positive_value_exists(require_supporter_endorsement):
                 campaignx_queryset = campaignx_queryset.exclude(
                     Q(supporter_endorsement__isnull=True) |
@@ -2186,6 +2189,7 @@ class CampaignXSupporter(models.Model):
     supporter_name = models.CharField(max_length=255, null=True)
     supporter_endorsement = models.TextField(null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)
+    visibility_blocked_by_we_vote = models.BooleanField(default=False)
     visible_to_public = models.BooleanField(default=False)
     date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
     date_supported = models.DateTimeField(null=True, auto_now_add=True, db_index=True)

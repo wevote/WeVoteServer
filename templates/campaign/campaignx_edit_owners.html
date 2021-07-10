@@ -1,7 +1,7 @@
 {# templates/campaign/campaigns_edit_owners.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if campaignx %}{{ campaignx.campaign_title }}{% endif %}: Campaign Owner(s){% endblock %}
+{% block title %}Campaign Owner(s): {% if campaignx %}{{ campaignx.campaign_title }}{% endif %}{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
@@ -18,7 +18,7 @@ span.nobr { white-space: nowrap; }
 </a>
 
 
-<h1>{{ campaignx.campaign_title }}: Campaign Owner(s)</h1>
+<h1>Campaign Owner(s): {{ campaignx.campaign_title }}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 
@@ -40,7 +40,7 @@ span.nobr { white-space: nowrap; }
         <table id="campaignx_owner_add">
             <thead>
                 <tr>
-                    <th>Owner Voter or Organization We Vote Id</th>
+                    <th>Voter or Organization We Vote Id</th>
                     <th>Visible to Public &nbsp;&nbsp;</th>
                     <th>Feature This Profile Image</th>
                 </tr>

@@ -520,7 +520,8 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
     supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
         campaignx_we_vote_id=campaignx.we_vote_id,
         limit=7,
-        read_only=True)
+        read_only=True,
+        require_visible_to_public=True)
     if supporter_list_results['supporter_list_found']:
         supporter_list = supporter_list_results['supporter_list']
         for campaignx_supporter in supporter_list:

@@ -1,7 +1,7 @@
 {# templates/campaign/campaignx_supporters_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Campaign Supporters{% endblock %}
+{% block title %}Campaign Supporters: {{ campaignx_title }}{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
@@ -41,6 +41,59 @@
 
 </form>
 
+<form action="{% url "campaign:supporters_list_process" %}" method="post" class="form-horizontal">
+{% csrf_token %}
+<input type="hidden" name="campaignx_we_vote_id" value="{{ campaignx_we_vote_id }}">
+<input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+<input type="hidden" name="state_code" value="{{ state_code }}">
+<input type="hidden" name="show_supporters_without_endorsements" value="{{ show_supporters_without_endorsements }}">
+<input type="hidden" name="show_supporters_not_visible_to_public" value="{{ show_supporters_not_visible_to_public }}">
+
+<hr />
+<div class="form-group">
+    <div class="col-sm-12">
+        <strong>Add New Supporter:</strong><br />
+        <table id="campaignx_supporter_add">
+            <thead>
+                <tr>
+                    <th style="color: darkgray">Voter or Organization We Vote Id</th>
+                    <th style="color: darkgray">Endorsement</th>
+                    <th style="color: darkgray">Supporter Wants Visibility &nbsp;&nbsp;</th>
+                    <th style="color: darkgray">Visibility Blocked by We Vote &nbsp;&nbsp;</th>
+                </tr>
+            </thead>
+            <tr>
+                <td style="width: 250px;">
+                    <input type="text"
+                           name="incoming_campaignx_supporter_we_vote_id"
+                           style="width: 230px; border: 1px solid lightgray;"/>
+                </td>
+                <td style="width: 320px;">
+                    <textarea
+                            name="incoming_campaignx_supporter_endorsement"
+                            rows="1"
+                            style="width: 300px; border: 1px solid lightgray;"></textarea>
+                </td>
+                <td>
+                    <input type="checkbox"
+                           name="incoming_campaignx_supporter_wants_visibility"
+                           id="incoming_campaignx_supporter_wants_visibility_id"
+                           value=1
+                           checked
+                    />
+                </td>
+                <td>
+                    <input type="checkbox"
+                           name="incoming_visibility_blocked_by_we_vote"
+                           id="incoming_visibility_blocked_by_we_vote_id"
+                           value=1
+                    />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
 {% if supporters_list %}
     <table class="table">
     {% for campaignx_supporter in supporters_list %}
@@ -52,7 +105,9 @@
             <th></th>
             <th>Supporter</th>
             <th>Endorsement</th>
-            <th>Public?</th>
+            <th>Supporter Wants Visibility</th>
+            <th>Blocked by We Vote?</th>
+            <th>Delete</th>
         </tr>
       </thead>
     {% endif %}
@@ -63,14 +118,43 @@
                     <img src="{{ campaignx_supporter.we_vote_hosted_profile_image_url_tiny }}" width="32px" /></a>{% endif %}</td>
             <td>
                 {{ campaignx_supporter.supporter_name }}<br />
+                <input type="hidden" name="campaignx_supporter_{{ campaignx_supporter.id }}_exists" value="1">
                 <div class="u-no-break">
-                <span style="color: darkgray">{{ campaignx_supporter.voter_we_vote_id }}</span>&nbsp;<a
+                <span style="color: darkgray">{{ campaignx_supporter.voter_we_vote_id }} / {{ campaignx_supporter.organization_we_vote_id }}</span>&nbsp;<a
                     href="{% url 'voter:voter_edit_we_vote_id' campaignx_supporter.voter_we_vote_id %}"
                     target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
                 </div>
             </td>
             <td>{{ campaignx_supporter.supporter_endorsement|default_if_none:"" }}</td>
-            <td>{% if campaignx_supporter.visible_to_public %}visible{% endif %}</td>
+            <td>
+                <input type="checkbox"
+                       name="campaignx_supporter_visible_to_public_{{ campaignx_supporter.id }}"
+                       id="campaignx_supporter_visible_to_public_{{ campaignx_supporter.id }}_id"
+                       value="True"
+                       {% if campaignx_supporter.visible_to_public %}
+                         checked="checked"
+                       {% endif %}
+                />
+                visible
+            </td>
+            <td style="color: darkgray">
+                <input type="checkbox"
+                       name="campaignx_supporter_visibility_blocked_by_we_vote_{{ campaignx_supporter.id }}"
+                       id="campaignx_supporter_visibility_blocked_by_we_vote_{{ campaignx_supporter.id }}_id"
+                       value="True"
+                       {% if campaignx_supporter.visibility_blocked_by_we_vote %}
+                         checked="checked"
+                       {% endif %}
+                />
+                blocked
+            </td>
+            <td>
+                <input type="checkbox"
+                       name="delete_campaignx_supporter_{{ campaignx_supporter.id }}"
+                       id="delete_campaignx_supporter_{{ campaignx_supporter.id }}_id"
+                       value="True"
+                />
+            </td>
         </tr>
     {% endfor %}
     </table>
@@ -89,9 +173,18 @@
     {% endif %}
 
     <p></p>
-{#    <p>#}
-{#        <a href="{% url 'apis_v1:campaignxsSyncOutView' %}?format=json" target="_blank" >Export Campaigns</a>#}
-{#    </p>#}
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+      <a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">cancel</a>
+    </label>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-default">Update Campaign Supporters</button>
+    </div>
+</div>
+
+</form>
+
 {% else %}
     <p>(no supporters found with current filters)</p>
 {% endif %}
