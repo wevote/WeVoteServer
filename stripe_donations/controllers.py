@@ -374,6 +374,8 @@ def donation_with_stripe_for_api(request, token, email, donation_amount,
         if positive_value_exists(charge) and positive_value_exists(charge.id):
             results['saved_stripe_donation'] = True
             results['status'] += ' DONATION_PROCESSED_SUCCESSFULLY '
+            results['stripe_failure_code'] = ''       # Do this to clear the flux store of any prior errors
+            results['error_message_for_voter'] = ''
             amount = charge['amount']
             logger.debug("donation_with_stripe_for_api - charge successful: " + charge.id + ", amount: " + str(amount) + ", voter_we_vote_id:" +
                          voter_we_vote_id)
@@ -387,6 +389,8 @@ def donation_with_stripe_for_api(request, token, email, donation_amount,
                                          error_message=error_from_json['message'])
         results['status'] += textwrap.shorten(raw_donation_status + " " + results['status'], width=255,
                                               placeholder="...")
+        results['stripe_failure_code'] = e.code
+        results['error_message_for_voter'] = error_from_json['message']
         error_message = translate_stripe_error_to_voter_explanation_text(e.http_status, error_from_json['type'])
         logger.error("donation_with_stripe_for_api, CardError: " + error_message)
     except stripe.error.StripeError as e:
@@ -398,6 +402,12 @@ def donation_with_stripe_for_api(request, token, email, donation_amount,
                                          error_message=error_from_json['message'])
         results['status'] += textwrap.shorten(raw_donation_status + " " + results['status'], width=255,
                                               placeholder="...")
+        try:
+            results['stripe_failure_code'] = e.code
+            results['error_message_for_voter'] = error_from_json['message']
+        except Exception as e:
+            # Don't know how to reproduce this, so just in case the error codes don't exist ....
+            pass
         error_message = translate_stripe_error_to_voter_explanation_text(e.http_status, error_from_json['type'])
         logger.error("donation_with_stripe_for_api, StripeError : " + raw_donation_status)
     except Exception as err:
@@ -534,8 +544,11 @@ def donation_lists_for_a_voter(voter_we_vote_id):
                 'refund_days_limit': refund_days,
                 'last_charged': str(payment_row.paid_at),
                 'is_chip_in': payment_row.is_chip_in,
+                'is_monthly_donation': payment_row.is_monthly_donation,
+                'is_premium_plan': payment_row.is_premium_plan,
                 'campaignx_wevote_id': payment_row.campaignx_wevote_id,
                 'campaign_title': CampaignXManager.retrieve_campaignx_title(payment_row.campaignx_wevote_id),
+                'voter_we_vote_id': payment_row.voter_we_vote_id,
 
                 # 'is_premium_plan': positive_value_exists(payment_row.is_premium_plan),
                 # 'linked_organization_we_vote_id': str(payment_row.linked_organization_we_vote_id),
@@ -771,13 +784,13 @@ def move_donation_info_to_another_organization(from_organization_we_vote_id, to_
         }
         return results
 
-    # All we really need to do is find the donations that are associated with the "from" organization, and change their
-    # organization_we_vote_id to the "to" organization.
-    results = StripeManager.move_donation_journal_entries_from_organization_to_organization(
+    # All we really need to do is find the donation payments that are associated with the "from" organization, and
+    # change their organization_we_vote_id to the "to" organization.
+    results = StripeManager.move_stripe_donation_payments_from_organization_to_organization(
         from_organization_we_vote_id, to_organization_we_vote_id)
     status += results['status']
 
-    results = StripeManager.move_donation_plan_definition_entries_from_organization_to_organization(
+    results = StripeManager.move_subscription_entries_from_organization_to_organization(
         from_organization_we_vote_id, to_organization_we_vote_id)
     status += results['status']
 
