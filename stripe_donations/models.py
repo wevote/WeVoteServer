@@ -1626,7 +1626,7 @@ class StripeManager(models.Manager):
         return results
 
     @staticmethod
-    def move_donation_plan_definition_entries_from_organization_to_organization(
+    def move_stripe_donation_payments_from_organization_to_organization(
             from_organization_we_vote_id, to_organization_we_vote_id):
         """
 
@@ -1635,37 +1635,37 @@ class StripeManager(models.Manager):
         :return:
         """
         status = ''
-        donation_plan_definition_list = []
+        payments_list = []
 
         try:
-            donation_plan_definition_query = StripeSubscription.objects.all()
-            donation_plan_definition_query = donation_plan_definition_query.filter(
+            payments_query = StripeSubscription.objects.all()
+            payments_query = payments_query.filter(
                 linked_organization_we_vote_id__iexact=from_organization_we_vote_id)
-            donation_plan_definition_list = list(donation_plan_definition_query)
-            status += "move_donation_plan_definition_entries_from_organization_to_organization LIST_RETRIEVED-" + \
+            payments_list = list(payments_query)
+            status += "move_stripe_donation_payments_from_organization_to_organization LIST_RETRIEVED-" + \
                       from_organization_we_vote_id + "-TO-" + to_organization_we_vote_id + \
-                      " LENGTH: " + str(len(donation_plan_definition_list)) + " "
+                      " LENGTH: " + str(len(payments_list)) + " "
             logger.debug(status)
             success = True
         except Exception as e:
-            status += "RETRIEVE_EXCEPTION_IN-move_donation_plan_definition_entries_from_organization_to_organization "
-            logger.error('%s', "move_donation_plan_definition_entries_from_organization_to_organization 2:" + status)
+            status += "RETRIEVE_EXCEPTION_IN-move_stripe_donation_payments_from_organization_to_organization "
+            logger.error('%s', "move_stripe_donation_payments_from_organization_to_organization 2:" + status)
             success = False
 
-        donation_plan_definition_migration_count = 0
-        donation_plan_definition_migration_fails = 0
-        for donation_plan_definition in donation_plan_definition_list:
+        payments_migration_count = 0
+        payments_migration_fails = 0
+        for donation_plan_definition in payments_list:
             try:
                 donation_plan_definition.linked_organization_we_vote_id = to_organization_we_vote_id
                 donation_plan_definition.save()
-                donation_plan_definition_migration_count += 1
+                payments_migration_count += 1
             except Exception as e:
-                donation_plan_definition_migration_fails += 1
+                payments_migration_fails += 1
 
-        if positive_value_exists(donation_plan_definition_migration_count):
-            status += "DONATION_PLAN_DEFINITION_MOVED: " + str(donation_plan_definition_migration_count) + " "
-        if positive_value_exists(donation_plan_definition_migration_fails):
-            status += "DONATION_PLAN_DEFINITION_FAILS: " + str(donation_plan_definition_migration_fails) + " "
+        if positive_value_exists(payments_migration_count):
+            status += "DONATION_PLAN_DEFINITION_MOVED: " + str(payments_migration_count) + " "
+        if positive_value_exists(payments_migration_fails):
+            status += "DONATION_PLAN_DEFINITION_FAILS: " + str(payments_migration_fails) + " "
 
         results = {
             'status':                       status,
@@ -1805,3 +1805,53 @@ class StripeManager(models.Manager):
         except StripePayments.DoesNotExist:
             logger.error('%s', "update_journal_entry_for_refund_completed row does not exist for charge " + charge)
         return "False"
+
+    @staticmethod
+    def move_subscription_entries_from_organization_to_organization(
+            from_organization_we_vote_id, to_organization_we_vote_id):
+        """
+
+        :param from_organization_we_vote_id:
+        :param to_organization_we_vote_id:
+        :return:
+        """
+        status = ''
+        subscription_definition_list = []
+
+        try:
+            subscription_definition_query = StripeSubscription.objects.all()
+            subscription_definition_query = subscription_definition_query.filter(
+                linked_organization_we_vote_id__iexact=from_organization_we_vote_id)
+            subscription_definition_list = list(subscription_definition_query)
+            status += "move_subscription_entries_from_organization_to_organization LIST_RETRIEVED-" + \
+                      from_organization_we_vote_id + "-TO-" + to_organization_we_vote_id + \
+                      " LENGTH: " + str(len(subscription_definition_list)) + " "
+            logger.debug(status)
+            success = True
+        except Exception as e:
+            status += "RETRIEVE_EXCEPTION_IN-move_subscription_entries_from_organization_to_organization "
+            logger.error('%s', "move_subscription_entries_from_organization_to_organization 2:" + status)
+            success = False
+
+        subscription_definition_migration_count = 0
+        subscription_definition_migration_fails = 0
+        for subscription_definition in subscription_definition_list:
+            try:
+                subscription_definition.linked_organization_we_vote_id = to_organization_we_vote_id
+                subscription_definition.save()
+                subscription_definition_migration_count += 1
+            except Exception as e:
+                subscription_definition_migration_fails += 1
+
+        if positive_value_exists(subscription_definition_migration_count):
+            status += "DONATION_PLAN_DEFINITION_MOVED: " + str(subscription_definition_migration_count) + " "
+        if positive_value_exists(subscription_definition_migration_fails):
+            status += "DONATION_PLAN_DEFINITION_FAILS: " + str(subscription_definition_migration_fails) + " "
+
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'from_organization_we_vote_id': from_organization_we_vote_id,
+            'to_organization_we_vote_id':   to_organization_we_vote_id,
+        }
+        return results
