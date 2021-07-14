@@ -1228,46 +1228,171 @@ class CampaignXManager(models.Manager):
             campaignx_politician_list = []
             return campaignx_politician_list
 
-    def retrieve_campaignx_supporter(self, campaignx_we_vote_id='', voter_we_vote_id='', read_only=False):
-        exception_does_not_exist = False
-        exception_multiple_object_returned = False
+    def repair_campaignx_supporter(self, campaignx_we_vote_id='', voter_we_vote_id=''):
         campaignx_supporter = None
         campaignx_supporter_found = False
+        campaignx_supporter_repaired = False
         status = ''
 
         try:
             if positive_value_exists(campaignx_we_vote_id) and positive_value_exists(voter_we_vote_id):
-                if positive_value_exists(read_only):
-                    campaignx_supporter = CampaignXSupporter.objects.using('readonly').get(
-                        campaignx_we_vote_id=campaignx_we_vote_id,
-                        voter_we_vote_id=voter_we_vote_id)
+                campaignx_supporter_query = CampaignXSupporter.objects.filter(
+                    campaignx_we_vote_id=campaignx_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id)
+                campaignx_supporter_query = campaignx_supporter_query.order_by('id')
+                campaignx_supporter_list = list(campaignx_supporter_query)
+                number_of_campaignx_supporters_found = len(campaignx_supporter_list)
+                if number_of_campaignx_supporters_found == 0:
+                    status += 'REPAIR_CAMPAIGNX_SUPPORTER_FOUND_WITH_WE_VOTE_ID '
+                    campaignx_supporter_found = False
+                elif number_of_campaignx_supporters_found == 1:
+                    status += 'REPAIR_CAMPAIGNX_SUPPORTER_FOUND_ONE_WITH_WE_VOTE_ID '
+                    campaignx_supporter_found = True
                 else:
-                    campaignx_supporter = CampaignXSupporter.objects.get(
-                        campaignx_we_vote_id=campaignx_we_vote_id,
-                        voter_we_vote_id=voter_we_vote_id)
-                campaignx_supporter_found = True
-                status += 'CAMPAIGNX_SUPPORTER_FOUND_WITH_WE_VOTE_ID '
+                    status += 'REPAIR_CAMPAIGNX_SUPPORTER_FOUND_MULTIPLE_WITH_WE_VOTE_ID '
+                    campaignx_supporter_found = True
+                    first_campaignx_supporter = campaignx_supporter_list[0]
+                    # We want to keep the supporter_endorsement with the most characters
+                    supporter_endorsement_to_keep = first_campaignx_supporter.supporter_endorsement
+                    supporter_endorsement_to_keep_length = len(supporter_endorsement_to_keep) \
+                        if positive_value_exists(supporter_endorsement_to_keep) else 0
+                    visible_to_public = first_campaignx_supporter.visible_to_public
+                    visibility_blocked_by_we_vote = first_campaignx_supporter.visibility_blocked_by_we_vote
+
+                    array_index = 1
+                    # We set a "safety valve" of 25
+                    while array_index < number_of_campaignx_supporters_found and array_index < 25:
+                        campaignx_supporter_temp = campaignx_supporter_list[array_index]
+                        # We want to keep the supporter_endorsement with the most characters
+                        if supporter_endorsement_to_keep_length < len(campaignx_supporter_temp.supporter_endorsement):
+                            supporter_endorsement_to_keep = campaignx_supporter_temp.supporter_endorsement
+                            supporter_endorsement_to_keep_length = len(supporter_endorsement_to_keep) \
+                                if positive_value_exists(supporter_endorsement_to_keep) else 0
+                        # If any have visible_to_public true, mark the one to keep as true
+                        if not positive_value_exists(visible_to_public):
+                            visible_to_public = campaignx_supporter_temp.visible_to_public
+                        # If any have visibility_blocked_by_we_vote true, mark the one to keep as true
+                        if not positive_value_exists(visibility_blocked_by_we_vote):
+                            visibility_blocked_by_we_vote = campaignx_supporter_temp.visibility_blocked_by_we_vote
+                        array_index += 1
+
+                    # Now update first_campaignx_supporter with values from while loop
+                    first_campaignx_supporter.supporter_endorsement_to_keep = supporter_endorsement_to_keep
+                    first_campaignx_supporter.visible_to_public = visible_to_public
+                    first_campaignx_supporter.visibility_blocked_by_we_vote = visibility_blocked_by_we_vote
+
+                    # Look up the organization_we_vote_id for the voter
+                    from voter.models import VoterManager
+                    linked_organization_we_vote_id = ''
+                    voter_manager = VoterManager()
+                    results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id, read_only=True)
+                    if results['voter_found']:
+                        voter = results['voter']
+                        first_campaignx_supporter.organization_we_vote_id = voter.linked_organization_we_vote_id
+
+                    # Get the updated organization_name and we_vote_hosted_profile_image_url_tiny
+                    if positive_value_exists(linked_organization_we_vote_id):
+                        from organization.models import OrganizationManager
+                        organization_manager = OrganizationManager()
+                        results = organization_manager.retrieve_organization(
+                            we_vote_id=linked_organization_we_vote_id,
+                            read_only=True)
+                        if results['organization_found']:
+                            organization = results['organization']
+                            first_campaignx_supporter.supporter_name = organization.organization_name
+                            first_campaignx_supporter.we_vote_hosted_profile_image_url_tiny = \
+                                organization.we_vote_hosted_profile_image_url_tiny
+
+                    # Look up supporter_name and we_vote_hosted_profile_image_url for the voter's organization
+                    try:
+                        first_campaignx_supporter.save()
+                        # Delete all other CampaignXSupporters
+                        array_index = 1
+                        while array_index < number_of_campaignx_supporters_found and array_index < 25:
+                            campaignx_supporter_temp = campaignx_supporter_list[array_index]
+                            campaignx_supporter_temp.delete()
+                            array_index += 1
+                    except Exception as e:
+                        status += "CAMPAIGNX_COULD_NOT_SAVE_OR_DELETE: " + str(e) + " "
                 success = True
             else:
-                status += 'CAMPAIGNX_SUPPORTER_NOT_FOUND-MISSING_VARIABLES '
+                status += 'REPAIR_CAMPAIGNX_SUPPORTER_NOT_FOUND-MISSING_VARIABLES '
                 success = False
-        except CampaignXSupporter.MultipleObjectsReturned as e:
-            handle_record_found_more_than_one_exception(e, logger=logger)
-            exception_multiple_object_returned = True
-            status += 'CAMPAIGNX_SUPPORTER_NOT_FOUND_MultipleObjectsReturned '
+        except Exception as e:
+            status += 'REPAIR_CAMPAIGNX_SUPPORTER_EXCEPTION: ' + str(e) + " "
             success = False
-        except CampaignXSupporter.DoesNotExist:
-            exception_does_not_exist = True
-            status += 'CAMPAIGNX_SUPPORTER_NOT_FOUND_DoesNotExist '
-            success = True
 
         results = {
             'status':                       status,
             'success':                      success,
             'campaignx_supporter':          campaignx_supporter,
             'campaignx_supporter_found':    campaignx_supporter_found,
-            'DoesNotExist':                 exception_does_not_exist,
-            'MultipleObjectsReturned':      exception_multiple_object_returned,
+            'campaignx_supporter_repaired': campaignx_supporter_repaired,
+        }
+        return results
+
+    def retrieve_campaignx_supporter(
+            self,
+            campaignx_we_vote_id='',
+            voter_we_vote_id='',
+            read_only=False,
+            recursion_ok=True):
+        campaignx_supporter = None
+        campaignx_supporter_found = False
+        status = ''
+        success = True
+
+        try:
+            if positive_value_exists(campaignx_we_vote_id) and positive_value_exists(voter_we_vote_id):
+                if positive_value_exists(read_only):
+                    campaignx_supporter_query = CampaignXSupporter.objects.using('readonly').filter(
+                        campaignx_we_vote_id=campaignx_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id)
+                else:
+                    campaignx_supporter_query = CampaignXSupporter.objects.filter(
+                        campaignx_we_vote_id=campaignx_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id)
+                campaignx_supporter_list = list(campaignx_supporter_query)
+                if len(campaignx_supporter_list) > 1:
+                    if positive_value_exists(recursion_ok):
+                        repair_results = self.repair_campaignx_supporter(
+                            campaignx_we_vote_id=campaignx_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
+
+                        )
+                        status += repair_results['status']
+                        second_retrieve_results = self.retrieve_campaignx_supporter(
+                            campaignx_we_vote_id=campaignx_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            read_only=read_only,
+                            recursion_ok=False
+                        )
+                        campaignx_supporter_found = second_retrieve_results['campaign_supporter_found']
+                        campaignx_supporter = second_retrieve_results['campaign_supporter']
+                        success = second_retrieve_results['success']
+                        status += second_retrieve_results['status']
+                    else:
+                        campaignx_supporter = campaignx_supporter_list[0]
+                        campaignx_supporter_found = True
+                elif len(campaignx_supporter_list) == 1:
+                    campaignx_supporter = campaignx_supporter_list[0]
+                    campaignx_supporter_found = True
+                    status += 'CAMPAIGNX_SUPPORTER_FOUND_WITH_WE_VOTE_ID '
+                else:
+                    campaignx_supporter_found = False
+                    status += 'CAMPAIGNX_SUPPORTER_NOT_FOUND_WITH_WE_VOTE_ID '
+            else:
+                status += 'CAMPAIGNX_SUPPORTER_NOT_FOUND-MISSING_VARIABLES '
+                success = False
+        except Exception as e:
+            status += 'CAMPAIGNX_SUPPORTER_NOT_FOUND_EXCEPTION: ' + str(e) + ' '
+            success = False
+
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'campaignx_supporter':          campaignx_supporter,
+            'campaignx_supporter_found':    campaignx_supporter_found,
         }
         return results
 
