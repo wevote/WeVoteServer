@@ -960,12 +960,14 @@ def campaign_supporters_list_process_view(request):
 
     # ##################################
     # Deleting or editing a CampaignXSupporter
+    update_campaignx_supporter_count = False
     for campaignx_supporter in supporters_list:
         if positive_value_exists(campaignx_supporter.campaignx_we_vote_id):
             delete_variable_name = "delete_campaignx_supporter_" + str(campaignx_supporter.id)
             delete_campaignx_supporter = positive_value_exists(request.POST.get(delete_variable_name, False))
             if positive_value_exists(delete_campaignx_supporter):
                 campaignx_supporter.delete()
+                update_campaignx_supporter_count = True
                 messages.add_message(request, messages.INFO, 'Deleted CampaignXSupporter.')
             else:
                 supporter_changed = False
@@ -1013,6 +1015,16 @@ def campaign_supporters_list_process_view(request):
                         supporter_changed = True
                 if supporter_changed:
                     campaignx_supporter.save()
+
+    if update_campaignx_supporter_count:
+        campaignx_manager = CampaignXManager()
+        supporter_count = campaignx_manager.fetch_campaignx_supporter_count(campaignx_we_vote_id)
+        if positive_value_exists(supporter_count):
+            results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx_we_vote_id)
+            if results['campaignx_found']:
+                campaignx = results['campaignx']
+                campaignx.supporters_count = supporter_count
+                campaignx.save()
 
     return HttpResponseRedirect(reverse('campaign:supporters_list', args=(campaignx_we_vote_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
