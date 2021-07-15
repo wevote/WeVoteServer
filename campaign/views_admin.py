@@ -5,6 +5,7 @@
 from .models import CampaignX, CampaignXManager, CampaignXOwner, CampaignXPolitician, CampaignXSupporter, \
     FINAL_ELECTION_DATE_COOL_DOWN, SUPPORTERS_COUNT_MINIMUM_FOR_LISTING
 from admin_tools.views import redirect_to_sign_in_page
+from config.base import get_environment_variable
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -21,6 +22,7 @@ from wevote_functions.functions import convert_to_int, \
     generate_date_as_integer, positive_value_exists, STATE_CODE_MAP
 
 logger = wevote_functions.admin.get_logger(__name__)
+WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 
 @login_required
@@ -659,8 +661,12 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
     campaignx_supporter_list = list(supporters_query[:4])
 
     campaignx_supporters_count = campaignx_manager.fetch_campaignx_supporter_count(campaignx_we_vote_id)
-
+    if 'localhost' in WEB_APP_ROOT_URL:
+        campaigns_site_root_url = 'https://localhost:3000'
+    else:
+        campaigns_site_root_url = 'https://campaigns.WeVote.US'
     template_values = {
+        'campaigns_site_root_url':  campaigns_site_root_url,
         'campaignx':                campaignx,
         'campaignx_owner_list':     campaignx_owner_list_modified,
         'campaignx_politician_list': campaignx_politician_list_modified,

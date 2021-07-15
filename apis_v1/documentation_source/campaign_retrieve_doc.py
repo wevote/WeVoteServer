@@ -98,6 +98,8 @@ def campaign_retrieve_doc_template_values(url_root):
                    '  "latest_campaignx_supporter_endorsement_list": list\n' \
                    '   [\n' \
                    '     "id": integer,\n' \
+                   '     "campaign_supported": boolean,\n' \
+                   '     "campaignx_we_vote_id": string,\n' \
                    '     "date_supported": string,\n' \
                    '     "organization_we_vote_id": string,\n' \
                    '     "supporter_endorsement": string,\n' \
@@ -108,6 +110,8 @@ def campaign_retrieve_doc_template_values(url_root):
                    '  "latest_campaignx_supporter_list": list\n' \
                    '   [\n' \
                    '     "id": integer,\n' \
+                   '     "campaign_supported": boolean,\n' \
+                   '     "campaignx_we_vote_id": string,\n' \
                    '     "date_supported": string,\n' \
                    '     "organization_we_vote_id": string,\n' \
                    '     "supporter_endorsement": string,\n' \

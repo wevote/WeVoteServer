@@ -45,12 +45,13 @@ def campaign_supporter_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "supporter_endorsement": string,\n' \
-                   '  "supporter_name": string,\n' \
+                   '  "campaign_supported": boolean,\n' \
                    '  "campaignx_we_vote_id": string,\n' \
                    '  "date_last_changed": string,\n' \
                    '  "date_supported": string,\n' \
                    '  "organization_we_vote_id": string,\n' \
+                   '  "supporter_endorsement": string,\n' \
+                   '  "supporter_name": string,\n' \
                    '  "visible_to_public": boolean,\n' \
                    '  "voter_we_vote_id": string,\n' \
                    '  "we_vote_hosted_profile_image_url_tiny": string,\n' \

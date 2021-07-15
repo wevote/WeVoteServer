@@ -85,6 +85,7 @@ def campaign_supporter_save_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
+                   '  "campaign_supported": boolean,\n' \
                    '  "campaignx_we_vote_id": string,\n' \
                    '  "date_last_changed": string,\n' \
                    '  "date_supported": string,\n' \
