@@ -532,6 +532,8 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
                 status += "DATE_CONVERSION_ERROR: " + str(e) + " "
             one_supporter_dict = {
                 'id': campaignx_supporter.id,
+                'campaign_supported': campaignx_supporter.campaign_supported,
+                'campaignx_we_vote_id': campaignx_supporter.campaignx_we_vote_id,
                 'date_supported': date_supported_string,
                 'organization_we_vote_id': campaignx_supporter.organization_we_vote_id,
                 'supporter_endorsement': campaignx_supporter.supporter_endorsement,
@@ -558,6 +560,8 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
                 status += "DATE_CONVERSION_ERROR: " + str(e) + " "
             one_supporter_dict = {
                 'id': campaignx_supporter.id,
+                'campaign_supported': campaignx_supporter.campaign_supported,
+                'campaignx_we_vote_id': campaignx_supporter.campaignx_we_vote_id,
                 'date_supported': date_supported_string,
                 'organization_we_vote_id': campaignx_supporter.organization_we_vote_id,
                 'supporter_endorsement': campaignx_supporter.supporter_endorsement,
@@ -1116,6 +1120,7 @@ def campaignx_supporter_retrieve_for_api(  # campaignSupporterRetrieve
         results = {
             'status':                       status,
             'success':                      False,
+            'campaign_supported':           False,
             'campaignx_we_vote_id':         '',
             'date_last_changed':            '',
             'date_supported':               '',
@@ -1141,6 +1146,7 @@ def campaignx_supporter_retrieve_for_api(  # campaignSupporterRetrieve
         results = {
             'status':                       status,
             'success':                      False,
+            'campaign_supported':           False,
             'campaignx_we_vote_id':         '',
             'date_last_changed':            '',
             'date_supported':               '',
@@ -1159,6 +1165,7 @@ def campaignx_supporter_retrieve_for_api(  # campaignSupporterRetrieve
         results = {
             'status':                       status,
             'success':                      False,
+            'campaign_supported':           False,
             'campaignx_we_vote_id':         '',
             'date_last_changed':            '',
             'date_supported':               '',
@@ -1183,6 +1190,7 @@ def campaignx_supporter_retrieve_for_api(  # campaignSupporterRetrieve
     results = {
         'status':                       status,
         'success':                      True,
+        'campaign_supported':           campaignx_supporter.campaign_supported,
         'campaignx_we_vote_id':         campaignx_supporter.campaignx_we_vote_id,
         'date_last_changed':            date_last_changed_string,
         'date_supported':               date_supported_string,
@@ -1222,7 +1230,7 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
         results = {
             'status':                       status,
             'success':                      False,
-            'campaignx_supported':          False,
+            'campaign_supported':           False,
             'campaignx_we_vote_id':         '',
             'date_last_changed':            '',
             'date_supported':               '',
@@ -1244,7 +1252,7 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
             results = {
                 'status':                       status,
                 'success':                      False,
-                'campaignx_supported':          False,
+                'campaign_supported':           False,
                 'campaignx_we_vote_id':         '',
                 'date_last_changed':            '',
                 'date_supported':               '',
@@ -1264,7 +1272,7 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
         results = {
             'status':                       status,
             'success':                      False,
-            'campaignx_supported':          False,
+            'campaign_supported':           False,
             'campaignx_we_vote_id':         '',
             'date_last_changed':            '',
             'date_supported':               '',

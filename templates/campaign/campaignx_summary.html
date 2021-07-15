@@ -41,6 +41,18 @@
         {% endif %}
                 </td>
             </tr>
+        <tr>
+            <th>Live link:</th>
+            <td>
+                {% if campaignx.seo_friendly_path %}
+                <a href="{{ campaigns_site_root_url }}/c/{{ campaignx.seo_friendly_path }}"
+                   target="_blank">{{ campaigns_site_root_url }}/c/{{ campaignx.seo_friendly_path }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                {% else %}
+                <a href="{{ campaigns_site_root_url }}/id/{{ campaignx.we_vote_id }}"
+                   target="_blank">{{ campaigns_site_root_url }}/id/{{ campaignx.we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
+            </td>
+        </tr>
         {% if campaignx.campaign_description %}
             <tr>
                 <td colspan="2" style="vertical-align:top">
