@@ -25,7 +25,7 @@ CTCL_VOTER_INFO_URL = "http://api.ballotinfo.org/voterinfo"
 CTCL_API_VOTER_INFO_QUERY_TYPE = "voterinfo"
 
 
-MAIL_HEADERS = {
+HEADERS_FOR_CTCL_API_CALL = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Accept-Encoding': 'gzip, deflate, br',
     'Accept-Language': 'en-US,en;q=0.5',
@@ -420,7 +420,7 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
         # Get the ballot info at this address
         response = requests.get(
             CTCL_VOTER_INFO_URL,
-            headers=MAIL_HEADERS,
+            headers=HEADERS_FOR_CTCL_API_CALL,
             params={
                 "key": api_key,
                 "electionId": ctcl_election_uuid,
@@ -624,7 +624,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
             # Get the ballot info at this address
             response = requests.get(
                 CTCL_VOTER_INFO_URL,
-                headers=MAIL_HEADERS,
+                headers=HEADERS_FOR_CTCL_API_CALL,
                 params={
                     "key": api_key,
                     "electionId": ctcl_election_uuid,

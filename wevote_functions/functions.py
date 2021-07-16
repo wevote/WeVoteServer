@@ -1043,17 +1043,6 @@ def extract_vote_usa_office_id(raw_vote_usa_office_id):
         return ''
 
 
-def extract_vote_usa_politician_id(raw_vote_usa_politician_id):
-    if positive_value_exists(raw_vote_usa_politician_id):
-        if '|' in raw_vote_usa_politician_id:
-            parts = raw_vote_usa_politician_id.split("|")
-            vote_usa_office_id = parts[1]
-        else:
-            vote_usa_office_id = raw_vote_usa_politician_id
-    else:
-        pass
-
-
 def extract_website_from_url(url_string):
     """
 
