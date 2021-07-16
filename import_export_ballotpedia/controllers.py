@@ -41,7 +41,7 @@ GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 
 IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'
 
-MAIL_HEADERS = {
+HEADERS_FOR_BALLOTPEDIA_API_CALL = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Accept-Encoding': 'gzip, deflate, br',
     'Accept-Language': 'en-US,en;q=0.5',
@@ -838,7 +838,7 @@ def retrieve_ballotpedia_ballot_items_from_polling_location_api_v4(
             # Get the electoral_districts at this lat/long
             response = requests.get(
                 BALLOTPEDIA_API_SAMPLE_BALLOT_ELECTIONS_URL,
-                headers=MAIL_HEADERS,
+                headers=HEADERS_FOR_BALLOTPEDIA_API_CALL,
                 params={
                     "lat": polling_location.latitude,
                     "long": polling_location.longitude,
@@ -889,10 +889,13 @@ def retrieve_ballotpedia_ballot_items_from_polling_location_api_v4(
             # chunks_of_district_strings.append(office_district_string)
 
             # Get the electoral_districts at this lat/long
-            response = requests.get(BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL, headers=MAIL_HEADERS, params={
-                "districts": office_district_string,
-                "election_date": election_day_text,
-            })
+            response = requests.get(
+                BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL,
+                headers=HEADERS_FOR_BALLOTPEDIA_API_CALL,
+                params={
+                    "districts": office_district_string,
+                    "election_date": election_day_text,
+                })
             structured_json = json.loads(response.text)
 
             # Use Ballotpedia API call counter to track the number of queries we are doing each day
@@ -1100,7 +1103,7 @@ def retrieve_ballotpedia_ballot_items_for_one_voter_api_v4(
         # Get the electoral_districts at this lat/long
         response = requests.get(
             BALLOTPEDIA_API_SAMPLE_BALLOT_ELECTIONS_URL,
-            headers=MAIL_HEADERS,
+            headers=HEADERS_FOR_BALLOTPEDIA_API_CALL,
             params={
                 "lat": ballot_returned.latitude,
                 "long": ballot_returned.longitude,
@@ -1153,10 +1156,13 @@ def retrieve_ballotpedia_ballot_items_for_one_voter_api_v4(
         # chunks_of_district_strings.append(office_district_string)
 
         # Get the electoral_districts at this lat/long
-        response = requests.get(BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL, headers=MAIL_HEADERS, params={
-            "districts": office_district_string,
-            "election_date": election_day_text,
-        })
+        response = requests.get(
+            BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL,
+            headers=HEADERS_FOR_BALLOTPEDIA_API_CALL,
+            params={
+                "districts": office_district_string,
+                "election_date": election_day_text,
+            })
         structured_json = json.loads(response.text)
 
         # Use Ballotpedia API call counter to track the number of queries we are doing each day
@@ -3145,7 +3151,7 @@ def retrieve_one_ballot_from_ballotpedia_api_v4(latitude, longitude, google_civi
         # Get the electoral_districts at this lat/long
         response = requests.get(
             BALLOTPEDIA_API_SAMPLE_BALLOT_ELECTIONS_URL,
-            headers=MAIL_HEADERS,
+            headers=HEADERS_FOR_BALLOTPEDIA_API_CALL,
             params={
                 "lat": latitude,
                 "long": longitude,
@@ -3191,10 +3197,13 @@ def retrieve_one_ballot_from_ballotpedia_api_v4(latitude, longitude, google_civi
         # chunks_of_district_strings.append(office_district_string)
 
         # Get the electoral_districts at this lat/long
-        response = requests.get(BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL, headers=MAIL_HEADERS, params={
-            "districts": office_district_string,
-            "election_date": election_day_text,
-        })
+        response = requests.get(
+            BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL,
+            headers=HEADERS_FOR_BALLOTPEDIA_API_CALL,
+            params={
+                "districts": office_district_string,
+                "election_date": election_day_text,
+            })
         structured_json = json.loads(response.text)
 
         # Use Ballotpedia API call counter to track the number of queries we are doing each day

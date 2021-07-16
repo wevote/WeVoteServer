@@ -957,7 +957,7 @@ class CandidateListManager(models.Manager):
                 success = True
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND-EXACT_MATCH "
             except Exception as e:
-                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED2 " + str(e) + " "
+                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED2: " + str(e) + " "
                 success = False
 
         if keep_looking_for_duplicates and positive_value_exists(candidate_name):
@@ -1006,7 +1006,7 @@ class CandidateListManager(models.Manager):
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND-FIRST_OR_LAST_NAME "
                 success = True
             except Exception as e:
-                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED3 " + str(e) + " "
+                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED3: " + str(e) + " "
                 success = False
 
         results = {
@@ -1574,10 +1574,12 @@ class CandidateCampaign(models.Model):
     party = models.CharField(verbose_name="party", max_length=255, null=True, blank=True)
     # A URL for a photo of the candidate.
     photo_url = models.TextField(verbose_name="photoUrl", null=True, blank=True)
+    photo_url_from_ctcl = models.TextField(null=True, blank=True)
     photo_url_from_maplight = models.TextField(
         verbose_name='candidate portrait url of candidate from maplight', blank=True, null=True)
     photo_url_from_vote_smart = models.TextField(
         verbose_name='candidate portrait url of candidate from vote smart', blank=True, null=True)
+    photo_url_from_vote_usa = models.TextField(null=True, blank=True)
     # The order the candidate appears on the ballot relative to other candidates for this contest.
     order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
@@ -2195,7 +2197,7 @@ class CandidateManager(models.Manager):
                 status += "CANDIDATE_LIST_FROM_VOTE_USA_POLITICIAN_NOT_FOUND "
         except Exception as e:
             candidate_found = False
-            status += "CANDIDATE_LIST_FROM_VOTE_USA_POLITICIAN_EXCEPTION " + str(e) + " "
+            status += "CANDIDATE_LIST_FROM_VOTE_USA_POLITICIAN_EXCEPTION: " + str(e) + " "
             success = False
 
         if candidate_options_found:
@@ -3371,6 +3373,7 @@ class CandidateManager(models.Manager):
         candidate_participation_status = update_values['candidate_participation_status'] \
             if 'candidate_participation_status' in update_values else ''
         candidate_party_name = update_values['party'] if 'party' in update_values else ''
+        candidate_phone = update_values['candidate_phone'] if 'candidate_phone' in update_values else ''
         candidate_twitter_handle = update_values['candidate_twitter_handle'] \
             if 'candidate_twitter_handle' in update_values else ''
         candidate_url = update_values['candidate_url'] \
@@ -3392,8 +3395,10 @@ class CandidateManager(models.Manager):
             if 'google_civic_candidate_name' in update_values else ''
         google_civic_election_id = update_values['google_civic_election_id'] \
             if 'google_civic_election_id' in update_values else ''
-        photo_url = update_values['photo_url'] \
-            if 'photo_url' in update_values else ''
+        photo_url = update_values['photo_url'] if 'photo_url' in update_values else ''
+        photo_url_from_ctcl = update_values['photo_url_from_ctcl'] if 'photo_url_from_ctcl' in update_values else ''
+        photo_url_from_vote_usa = update_values['photo_url_from_vote_usa'] \
+            if 'photo_url_from_vote_usa' in update_values else ''
         state_code = update_values['state_code'] if 'state_code' in update_values else ''
         if positive_value_exists(state_code):
             state_code = state_code.lower()
@@ -3453,6 +3458,7 @@ class CandidateManager(models.Manager):
                 new_candidate.candidate_is_incumbent = candidate_is_incumbent
                 new_candidate.candidate_is_top_ticket = candidate_is_top_ticket
                 new_candidate.candidate_participation_status = candidate_participation_status
+                new_candidate.candidate_phone = candidate_phone
                 new_candidate.candidate_twitter_handle = candidate_twitter_handle
                 new_candidate.candidate_url = candidate_url
                 new_candidate.candidate_contact_form_url = candidate_contact_form_url
@@ -3464,9 +3470,11 @@ class CandidateManager(models.Manager):
                 new_candidate.google_civic_candidate_name = google_civic_candidate_name
                 new_candidate.party = candidate_party_name
                 new_candidate.photo_url = photo_url
+                new_candidate.photo_url_from_ctcl = photo_url_from_ctcl
+                new_candidate.photo_url_from_vote_usa = photo_url_from_vote_usa
                 if new_candidate.photo_url:
-                    candidate_results = self.modify_candidate_with_organization_endorsements_image(new_candidate,
-                                                                                                   photo_url, True)
+                    candidate_results = self.modify_candidate_with_organization_endorsements_image(
+                        new_candidate, photo_url, True)
                     if candidate_results['success']:
                         candidate = candidate_results['candidate']
                         new_candidate.we_vote_hosted_profile_image_url_large = \
@@ -3484,7 +3492,7 @@ class CandidateManager(models.Manager):
             except Exception as e:
                 success = False
                 new_candidate_created = False
-                status += "CANDIDATE_CREATE_THEN_UPDATE_ERROR "
+                status += "CANDIDATE_CREATE_THEN_UPDATE_ERROR: " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
 
         results = {
@@ -3552,6 +3560,15 @@ class CandidateManager(models.Manager):
                 if 'birth_day_text' in update_values:
                     existing_candidate_entry.birth_day_text = update_values['birth_day_text']
                     values_changed = True
+                if 'candidate_contact_form_url' in update_values:
+                    existing_candidate_entry.candidate_contact_form_url = update_values['candidate_contact_form_url']
+                    values_changed = True
+                if 'candidate_email' in update_values:
+                    existing_candidate_entry.candidate_email = update_values['candidate_email']
+                    values_changed = True
+                if 'candidate_gender' in update_values:
+                    existing_candidate_entry.candidate_gender = update_values['candidate_gender']
+                    values_changed = True
                 if 'candidate_is_incumbent' in update_values:
                     existing_candidate_entry.candidate_is_incumbent = \
                         positive_value_exists(update_values['candidate_is_incumbent'])
@@ -3560,12 +3577,6 @@ class CandidateManager(models.Manager):
                     existing_candidate_entry.is_top_ticket = \
                         positive_value_exists(update_values['candidate_is_top_ticket'])
                     values_changed = True
-                if 'candidate_email' in update_values:
-                    existing_candidate_entry.candidate_email = update_values['candidate_email']
-                    values_changed = True
-                if 'candidate_gender' in update_values:
-                    existing_candidate_entry.candidate_gender = update_values['candidate_gender']
-                    values_changed = True
                 if 'candidate_name' in update_values:
                     existing_candidate_entry.candidate_name = update_values['candidate_name']
                     values_changed = True
@@ -3573,14 +3584,14 @@ class CandidateManager(models.Manager):
                     existing_candidate_entry.candidate_participation_status = \
                         update_values['candidate_participation_status']
                     values_changed = True
+                if 'candidate_phone' in update_values:
+                    existing_candidate_entry.candidate_phone = update_values['candidate_phone']
+                    values_changed = True
                 if 'candidate_twitter_handle' in update_values:
                     existing_candidate_entry.candidate_twitter_handle = update_values['candidate_twitter_handle']
                     values_changed = True
                 if 'candidate_url' in update_values:
                     existing_candidate_entry.candidate_url = update_values['candidate_url']
-                    values_changed = True
-                if 'candidate_contact_form_url' in update_values:
-                    existing_candidate_entry.candidate_contact_form_url = update_values['candidate_contact_form_url']
                     values_changed = True
                 if 'contest_office_we_vote_id' in update_values:
                     existing_candidate_entry.contest_office_we_vote_id = update_values['contest_office_we_vote_id']
@@ -3609,12 +3620,6 @@ class CandidateManager(models.Manager):
                 if 'politician_id' in update_values:
                     existing_candidate_entry.politician_id = update_values['politician_id']
                     values_changed = True
-                if 'state_code' in update_values:
-                    state_code = update_values['state_code']
-                    if positive_value_exists(state_code):
-                        state_code = state_code.lower()
-                    existing_candidate_entry.state_code = state_code
-                    values_changed = True
                 if 'photo_url' in update_values:
                     # check if candidate has an existing photo in the CandidateCampaign table
                     if positive_value_exists(existing_candidate_entry.we_vote_hosted_profile_image_url_large) and \
@@ -3635,6 +3640,18 @@ class CandidateManager(models.Manager):
                             candidate.we_vote_hosted_profile_image_url_medium
                         existing_candidate_entry.we_vote_hosted_profile_image_url_tiny = \
                             candidate.we_vote_hosted_profile_image_url_tiny
+                if 'photo_url_from_ctcl' in update_values:
+                    existing_candidate_entry.photo_url_from_ctcl = update_values['photo_url_from_ctcl']
+                    values_changed = True
+                if 'photo_url_from_vote_usa' in update_values:
+                    existing_candidate_entry.photo_url_from_vote_usa = update_values['photo_url_from_vote_usa']
+                    values_changed = True
+                if 'state_code' in update_values:
+                    state_code = update_values['state_code']
+                    if positive_value_exists(state_code):
+                        state_code = state_code.lower()
+                    existing_candidate_entry.state_code = state_code
+                    values_changed = True
                 if 'vote_usa_office_id' in update_values:
                     existing_candidate_entry.vote_usa_office_id = update_values['vote_usa_office_id']
                     values_changed = True
@@ -3658,7 +3675,7 @@ class CandidateManager(models.Manager):
         except Exception as e:
             success = False
             candidate_updated = False
-            status += "CANDIDATE_RETRIEVE_ERROR "
+            status += "UPDATE_CANDIDATE_ROW_ENTRY: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {

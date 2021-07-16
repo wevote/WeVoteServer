@@ -1861,23 +1861,28 @@ def process_one_ballot_item_batch_process(batch_process):
         analyze_row_count = results['batch_rows_analyzed']
         status += results['status']
         if positive_value_exists(results['success']):
-            if not positive_value_exists(analyze_row_count):
-                if batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_VOTERS:
-                    # If no batch rows were found, we know the entire batch_process is finished.
-                    # Update batch_process.date_completed to now
-                    status += "ANALYZE_DATE_STARTED-REFRESH_BALLOT_ITEMS_FROM_VOTERS-ANALYZE_ROW_COUNT_ZERO "
-                    results = mark_batch_process_as_complete(batch_process, batch_process_ballot_item_chunk,
-                                                             batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
-                                                             google_civic_election_id=google_civic_election_id,
-                                                             kind_of_process=kind_of_process,
-                                                             state_code=state_code,
-                                                             status=status)
-                    status += results['status']
-                    results = {
-                        'success': success,
-                        'status': status,
-                    }
-                    return results
+            # 2021-07-16 Given so many regional elections where thousands of map point may not
+            # have a ballot for a particular election, we don't want to stop when one set of
+            # 125 map points does not return any ballot items
+
+            # if not positive_value_exists(analyze_row_count):
+            #     if batch_process.kind_of_process == REFRESH_BALLOT_ITEMS_FROM_VOTERS:
+            #         # If no batch rows were found, we know the entire batch_process is finished.
+            #         # Update batch_process.date_completed to now
+            #         status += "ANALYZE_DATE_STARTED-REFRESH_BALLOT_ITEMS_FROM_VOTERS-ANALYZE_ROW_COUNT_ZERO "
+            #         results = mark_batch_process_as_complete(batch_process, batch_process_ballot_item_chunk,
+            #                                                  batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
+            #                                                  google_civic_election_id=google_civic_election_id,
+            #                                                  kind_of_process=kind_of_process,
+            #                                                  state_code=state_code,
+            #                                                  status=status)
+            #         status += results['status']
+            #         results = {
+            #             'success': success,
+            #             'status': status,
+            #         }
+            #         return results
+            pass
         else:
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,

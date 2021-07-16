@@ -25,7 +25,9 @@ from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressMana
 from wevote_functions.functions import convert_district_scope_to_ballotpedia_race_office_level, \
     convert_state_text_to_state_code, convert_to_int, \
     extract_district_from_ocd_division_id, extract_district_id_from_ocd_division_id, \
-    extract_state_code_from_address_string, extract_state_from_ocd_division_id, extract_vote_usa_office_id, \
+    extract_facebook_username_from_text_string, \
+    extract_state_code_from_address_string, extract_state_from_ocd_division_id, \
+    extract_twitter_handle_from_text_string, extract_vote_usa_office_id, \
     is_voter_device_id_valid, logger, positive_value_exists, STATE_CODE_MAP
 
 GEOCODE_TIMEOUT = 10
@@ -597,27 +599,76 @@ def groom_and_store_google_civic_candidates_json_2021(
         party = party.strip()
         order_on_ballot = one_candidate['orderOnBallot'] if 'orderOnBallot' in one_candidate else 0
         candidate_url = one_candidate['candidateUrl'] if 'candidateUrl' in one_candidate else ''
+        if positive_value_exists(candidate_url):
+            if 'http' not in candidate_url:
+                candidate_url = 'https://' + candidate_url
         candidate_contact_form_url = one_candidate['candidate_contact_form_url'] \
             if 'candidate_contact_form_url' in one_candidate else ''
-        photo_url = one_candidate['photoUrl'] if 'photoUrl' in one_candidate else ''
-        email = one_candidate['email'] if 'email' in one_candidate else ''
-        phone = one_candidate['phone'] if 'phone' in one_candidate else ''
+        if positive_value_exists(candidate_contact_form_url):
+            if 'http' not in candidate_contact_form_url:
+                candidate_contact_form_url = 'https://' + candidate_contact_form_url
+        candidate_email = one_candidate['email'] if 'email' in one_candidate else ''
+        candidate_phone = one_candidate['phone'] if 'phone' in one_candidate else ''
+        photo_url = ''
+        photo_url_from_ctcl = ''
+        photo_url_from_vote_usa = ''
+        if positive_value_exists(use_ctcl):
+            photo_url_from_ctcl = one_candidate['photoUrl'] if 'photoUrl' in one_candidate else ''
+        elif positive_value_exists(use_vote_usa):
+            photo_url_from_vote_usa = one_candidate['photoUrl'] if 'photoUrl' in one_candidate else ''
+        else:
+            photo_url = one_candidate['photoUrl'] if 'photoUrl' in one_candidate else ''
 
         # Make sure we start with empty channel values
+        ballotpedia_candidate_url = ''
+        blogger_url = ''
+        candidate_twitter_handle = ''
         facebook_url = ''
-        twitter_url = ''
+        flickr_url = ''
         google_plus_url = ''
+        instagram_url = ''
+        linkedin_url = ''
+        twitter_url = ''
+        vimeo_url = ''
+        wikipedia_url = ''
         youtube_url = ''
         if 'channels' in one_candidate:
             channels = one_candidate['channels']
             for one_channel in channels:
                 if 'type' in one_channel:
+                    if one_channel['type'] == 'BallotPedia':
+                        ballotpedia_candidate_url = one_channel['id'] if 'id' in one_channel else ''
+                        if positive_value_exists(ballotpedia_candidate_url):
+                            if 'http' not in ballotpedia_candidate_url:
+                                ballotpedia_candidate_url = 'https://' + ballotpedia_candidate_url
+                    if one_channel['type'] == 'Blogger':
+                        blogger_url = one_channel['id'] if 'id' in one_channel else ''
                     if one_channel['type'] == 'Facebook':
                         facebook_url = one_channel['id'] if 'id' in one_channel else ''
-                    if one_channel['type'] == 'Twitter':
-                        twitter_url = one_channel['id'] if 'id' in one_channel else ''
+                        if positive_value_exists(facebook_url):
+                            facebook_handle = extract_facebook_username_from_text_string(facebook_url)
+                            if positive_value_exists(facebook_handle):
+                                facebook_url = "https://facebook.com/" + str(facebook_handle)
+                            else:
+                                facebook_url = ''
+                        else:
+                            facebook_url = ''
+                    if one_channel['type'] == 'Flickr':
+                        flickr_url = one_channel['id'] if 'id' in one_channel else ''
                     if one_channel['type'] == 'GooglePlus':
                         google_plus_url = one_channel['id'] if 'id' in one_channel else ''
+                    if one_channel['type'] == 'Instagram':
+                        instagram_url = one_channel['id'] if 'id' in one_channel else ''
+                    if one_channel['type'] == 'LinkedIn':
+                        linkedin_url = one_channel['id'] if 'id' in one_channel else ''
+                    if one_channel['type'] == 'Twitter':
+                        twitter_url = one_channel['id'] if 'id' in one_channel else ''
+                        if positive_value_exists(twitter_url):
+                            candidate_twitter_handle = extract_twitter_handle_from_text_string(twitter_url)
+                    if one_channel['type'] == 'Vimeo':
+                        vimeo_url = one_channel['id'] if 'id' in one_channel else ''
+                    if one_channel['type'] == 'Wikipedia':
+                        wikipedia_url = one_channel['id'] if 'id' in one_channel else ''
                     if one_channel['type'] == 'YouTube':
                         youtube_url = one_channel['id'] if 'id' in one_channel else ''
 
@@ -664,6 +715,36 @@ def groom_and_store_google_civic_candidates_json_2021(
                 elif not candidate_results['success']:
                     continue_searching_for_candidate = False
                     status += "RETRIEVE_BY_CANDIDATE_CTCL_UUID_FAILED "
+                    status += candidate_results['status']
+                    continue
+                else:
+                    continue_searching_for_candidate = True
+        elif positive_value_exists(use_vote_usa) and positive_value_exists(vote_usa_politician_id):
+            if vote_usa_politician_id in existing_candidate_objects_dict:
+                candidate = existing_candidate_objects_dict[vote_usa_politician_id]
+                candidate_we_vote_id = candidate.we_vote_id
+                continue_searching_for_candidate = False
+            else:
+                # Does candidate already exist?
+                candidate_results = candidate_manager.retrieve_candidate_from_vote_usa_variables(
+                    vote_usa_office_id=vote_usa_office_id,
+                    vote_usa_politician_id=vote_usa_politician_id,
+                    google_civic_election_id=google_civic_election_id,
+                    read_only=False)
+                if candidate_results['candidate_found']:
+                    continue_searching_for_candidate = False
+                    candidate = candidate_results['candidate']
+                    candidate_we_vote_id = candidate.we_vote_id
+                    existing_candidate_objects_dict[vote_usa_politician_id] = candidate
+                    # In the future, we will want to look for updated data to save
+                elif candidate_results['MultipleObjectsReturned']:
+                    continue_searching_for_candidate = False
+                    status += "MORE_THAN_ONE_CANDIDATE_WITH_SAME_VOTE_USA_POLITICIAN_ID " \
+                              "(" + str(vote_usa_politician_id) + ") "
+                    continue
+                elif not candidate_results['success']:
+                    continue_searching_for_candidate = False
+                    status += "RETRIEVE_BY_CANDIDATE_VOTE_USA_FAILED: "
                     status += candidate_results['status']
                     continue
                 else:
@@ -719,6 +800,8 @@ def groom_and_store_google_civic_candidates_json_2021(
                 }
                 if positive_value_exists(office_ocd_division_id):
                     updated_candidate_values['ocd_division_id'] = office_ocd_division_id
+                if positive_value_exists(ballotpedia_candidate_url):
+                    updated_candidate_values['ballotpedia_candidate_url'] = ballotpedia_candidate_url
                 if positive_value_exists(candidate_name):
                     # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
                     #  updating candidate_name via subsequent Google Civic imports
@@ -731,10 +814,12 @@ def groom_and_store_google_civic_candidates_json_2021(
                     updated_candidate_values['party'] = party
                 if positive_value_exists(election_year_integer):
                     updated_candidate_values['candidate_year'] = election_year_integer
-                if positive_value_exists(email):
-                    updated_candidate_values['candidate_email'] = email
-                if positive_value_exists(phone):
-                    updated_candidate_values['candidate_phone'] = phone
+                if positive_value_exists(candidate_email):
+                    updated_candidate_values['candidate_email'] = candidate_email
+                if positive_value_exists(candidate_phone):
+                    updated_candidate_values['candidate_phone'] = candidate_phone
+                if positive_value_exists(candidate_twitter_handle):
+                    updated_candidate_values['candidate_twitter_handle'] = candidate_twitter_handle
                 if positive_value_exists(order_on_ballot):
                     updated_candidate_values['order_on_ballot'] = order_on_ballot
                 if positive_value_exists(candidate_url):
@@ -743,10 +828,12 @@ def groom_and_store_google_civic_candidates_json_2021(
                     updated_candidate_values['candidate_contact_form_url'] = candidate_contact_form_url
                 if positive_value_exists(photo_url):
                     updated_candidate_values['photo_url'] = photo_url
+                if positive_value_exists(photo_url_from_ctcl):
+                    updated_candidate_values['photo_url_from_ctcl'] = photo_url_from_ctcl
+                if positive_value_exists(photo_url_from_vote_usa):
+                    updated_candidate_values['photo_url_from_vote_usa'] = photo_url_from_vote_usa
                 if positive_value_exists(facebook_url):
                     updated_candidate_values['facebook_url'] = facebook_url
-                if positive_value_exists(twitter_url):
-                    updated_candidate_values['twitter_url'] = twitter_url
                 if positive_value_exists(google_plus_url):
                     updated_candidate_values['google_plus_url'] = google_plus_url
                 if positive_value_exists(youtube_url):
@@ -783,7 +870,7 @@ def groom_and_store_google_civic_candidates_json_2021(
                                 if candidate_name not in existing_candidate_objects_dict:
                                     existing_candidate_objects_dict[candidate_name] = candidate  # ctcl_candidate_uuid
                             elif positive_value_exists(use_vote_usa):
-                                pass
+                                existing_candidate_objects_dict[vote_usa_politician_id] = candidate
                 else:
                     candidate_results = candidate_manager.update_or_create_candidate(
                         google_civic_election_id=google_civic_election_id,
@@ -797,8 +884,9 @@ def groom_and_store_google_civic_candidates_json_2021(
                         candidate = candidate_results['candidate']
                         candidate_we_vote_id = candidate.we_vote_id
                     if positive_value_exists(use_ctcl):
-                        if candidate_name not in existing_candidate_objects_dict:
-                            existing_candidate_objects_dict[candidate_name] = candidate  # ctcl_candidate_uuid
+                        existing_candidate_objects_dict[candidate_name] = candidate  # ctcl_candidate_uuid
+                    elif positive_value_exists(use_vote_usa):
+                        existing_candidate_objects_dict[vote_usa_politician_id] = candidate
 
         if positive_value_exists(candidate_we_vote_id):
             # Now make sure we have a CandidateToOfficeLink
@@ -2860,7 +2948,7 @@ def voter_ballot_items_retrieve_from_google_civic_2021(
                                         original_text_state = one_address_component['short_name']
 
         except Exception as e:
-            status += "RETRIEVE_FROM_VOTE_USA-EXCEPTION with get_geocoder_for_service " + str(e) + " "
+            status += "RETRIEVE_FROM_VOTE_USA-EXCEPTION with get_geocoder_for_service: " + str(e) + " "
             success = False
             # FOR TESTING
             # latitude = 37.8467035
