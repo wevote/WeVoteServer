@@ -1588,6 +1588,7 @@ class CandidateCampaign(models.Model):
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
+    candidate_instagram_url = models.TextField(blank=True, null=True)
     # The date of the last election this candidate relates to, converted to integer, ex/ 20201103
     candidate_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this candidate is running for office
@@ -3380,6 +3381,8 @@ class CandidateManager(models.Manager):
             if 'candidate_url' in update_values else ''
         candidate_contact_form_url = update_values['candidate_contact_form_url'] \
             if 'candidate_contact_form_url' in update_values else ''
+        candidate_instagram_url = update_values['candidate_instagram_url'] \
+            if 'candidate_instagram_url' in update_values else ''
         contest_office_we_vote_id = update_values['contest_office_we_vote_id'] \
             if 'contest_office_we_vote_id' in update_values else ''
         contest_office_id = update_values['contest_office_id'] \
@@ -3455,6 +3458,7 @@ class CandidateManager(models.Manager):
                 new_candidate.birth_day_text = birth_day_text
                 new_candidate.candidate_email = candidate_email
                 new_candidate.candidate_gender = candidate_gender
+                new_candidate.candidate_instagram_url = candidate_instagram_url
                 new_candidate.candidate_is_incumbent = candidate_is_incumbent
                 new_candidate.candidate_is_top_ticket = candidate_is_top_ticket
                 new_candidate.candidate_participation_status = candidate_participation_status
@@ -3562,6 +3566,9 @@ class CandidateManager(models.Manager):
                     values_changed = True
                 if 'candidate_contact_form_url' in update_values:
                     existing_candidate_entry.candidate_contact_form_url = update_values['candidate_contact_form_url']
+                    values_changed = True
+                if 'candidate_instagram_url' in update_values:
+                    existing_candidate_entry.candidate_instagram_url = update_values['candidate_instagram_url']
                     values_changed = True
                 if 'candidate_email' in update_values:
                     existing_candidate_entry.candidate_email = update_values['candidate_email']

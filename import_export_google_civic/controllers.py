@@ -622,6 +622,7 @@ def groom_and_store_google_civic_candidates_json_2021(
         # Make sure we start with empty channel values
         ballotpedia_candidate_url = ''
         blogger_url = ''
+        candidate_instagram_url = ''
         candidate_twitter_handle = ''
         facebook_url = ''
         flickr_url = ''
@@ -658,7 +659,10 @@ def groom_and_store_google_civic_candidates_json_2021(
                     if one_channel['type'] == 'GooglePlus':
                         google_plus_url = one_channel['id'] if 'id' in one_channel else ''
                     if one_channel['type'] == 'Instagram':
-                        instagram_url = one_channel['id'] if 'id' in one_channel else ''
+                        candidate_instagram_url = one_channel['id'] if 'id' in one_channel else ''
+                        if positive_value_exists(candidate_instagram_url):
+                            if 'http' not in candidate_instagram_url:
+                                candidate_instagram_url = 'https://' + candidate_instagram_url
                     if one_channel['type'] == 'LinkedIn':
                         linkedin_url = one_channel['id'] if 'id' in one_channel else ''
                     if one_channel['type'] == 'Twitter':
@@ -808,36 +812,20 @@ def groom_and_store_google_civic_candidates_json_2021(
                     updated_candidate_values['candidate_name'] = candidate_name
                     # We store the literal spelling here so we can match in the future, even if we change candidate_name
                     updated_candidate_values['google_civic_candidate_name'] = candidate_name
-                if positive_value_exists(state_code):
-                    updated_candidate_values['state_code'] = state_code.lower()
-                if positive_value_exists(party):
-                    updated_candidate_values['party'] = party
                 if positive_value_exists(election_year_integer):
                     updated_candidate_values['candidate_year'] = election_year_integer
+                if positive_value_exists(candidate_contact_form_url):
+                    updated_candidate_values['candidate_contact_form_url'] = candidate_contact_form_url
+                if positive_value_exists(candidate_instagram_url):
+                    updated_candidate_values['candidate_instagram_url'] = candidate_instagram_url
                 if positive_value_exists(candidate_email):
                     updated_candidate_values['candidate_email'] = candidate_email
                 if positive_value_exists(candidate_phone):
                     updated_candidate_values['candidate_phone'] = candidate_phone
                 if positive_value_exists(candidate_twitter_handle):
                     updated_candidate_values['candidate_twitter_handle'] = candidate_twitter_handle
-                if positive_value_exists(order_on_ballot):
-                    updated_candidate_values['order_on_ballot'] = order_on_ballot
                 if positive_value_exists(candidate_url):
                     updated_candidate_values['candidate_url'] = candidate_url
-                if positive_value_exists(candidate_contact_form_url):
-                    updated_candidate_values['candidate_contact_form_url'] = candidate_contact_form_url
-                if positive_value_exists(photo_url):
-                    updated_candidate_values['photo_url'] = photo_url
-                if positive_value_exists(photo_url_from_ctcl):
-                    updated_candidate_values['photo_url_from_ctcl'] = photo_url_from_ctcl
-                if positive_value_exists(photo_url_from_vote_usa):
-                    updated_candidate_values['photo_url_from_vote_usa'] = photo_url_from_vote_usa
-                if positive_value_exists(facebook_url):
-                    updated_candidate_values['facebook_url'] = facebook_url
-                if positive_value_exists(google_plus_url):
-                    updated_candidate_values['google_plus_url'] = google_plus_url
-                if positive_value_exists(youtube_url):
-                    updated_candidate_values['youtube_url'] = youtube_url
                 # 2016-02-20 Google Civic sometimes changes the name of contests, which can create a new contest
                 #  so we may need to update the candidate to a new contest_office_id
                 if positive_value_exists(contest_office_id):
@@ -846,10 +834,28 @@ def groom_and_store_google_civic_candidates_json_2021(
                     updated_candidate_values['contest_office_we_vote_id'] = contest_office_we_vote_id
                 if positive_value_exists(contest_office_name):
                     updated_candidate_values['contest_office_name'] = contest_office_name
+                if positive_value_exists(facebook_url):
+                    updated_candidate_values['facebook_url'] = facebook_url
+                if positive_value_exists(google_plus_url):
+                    updated_candidate_values['google_plus_url'] = google_plus_url
+                if positive_value_exists(order_on_ballot):
+                    updated_candidate_values['order_on_ballot'] = order_on_ballot
+                if positive_value_exists(party):
+                    updated_candidate_values['party'] = party
+                if positive_value_exists(photo_url):
+                    updated_candidate_values['photo_url'] = photo_url
+                if positive_value_exists(photo_url_from_ctcl):
+                    updated_candidate_values['photo_url_from_ctcl'] = photo_url_from_ctcl
+                if positive_value_exists(photo_url_from_vote_usa):
+                    updated_candidate_values['photo_url_from_vote_usa'] = photo_url_from_vote_usa
+                if positive_value_exists(state_code):
+                    updated_candidate_values['state_code'] = state_code.lower()
                 if positive_value_exists(vote_usa_office_id):
                     updated_candidate_values['vote_usa_office_id'] = vote_usa_office_id
                 if positive_value_exists(vote_usa_politician_id):
                     updated_candidate_values['vote_usa_politician_id'] = vote_usa_politician_id
+                if positive_value_exists(youtube_url):
+                    updated_candidate_values['youtube_url'] = youtube_url
 
                 candidate_manager = CandidateManager()
                 candidate = None
