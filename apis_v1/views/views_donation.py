@@ -178,7 +178,7 @@ def donation_cancel_subscription_view(request):  # donationCancelSubscription
 # Important!!!!!!!   django urls without a trailing slash do not redirect   !!!!!!
 # The webhook in the stripe console HAS TO END WITH A '/' or you are doomed to waste a bunch of time!
 @csrf_exempt
-def donation_stripe_webhook_view(request):
+def donation_stripe_webhook_view(request):    # donationStripeWebhook
     # print('first line in donation_stripe_webhook')
     payload = request.body.decode('utf-8')
 
@@ -239,11 +239,12 @@ def donation_history_list_view(request):   # donationHistory
             linked_organization_we_vote_id = voter.linked_organization_we_vote_id
 
             donation_subscription_list, donation_payments_list = donation_lists_for_a_voter(voter_we_vote_id)
-            active_results = donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_vote_id)
-            active_paid_plan = active_results['active_paid_plan']
+            # July 2021, active_results fails due to 'source' redefintion in api
+            # active_results = donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_vote_id)
+            # active_paid_plan = active_results['active_paid_plan']
 
         json_data = {
-            'active_paid_plan':                 active_paid_plan,
+            # 'active_paid_plan':                 active_paid_plan,
             'donation_subscription_list':       donation_subscription_list,
             'donation_payments_list':           donation_payments_list,
             'status':                           status,
