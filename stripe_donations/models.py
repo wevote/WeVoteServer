@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from datetime import datetime, timezone
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
@@ -60,14 +60,16 @@ class StripeSubscription(models.Model):
     """
     This table tracks subscriptions (recurring donations) and donations
     """
+    objects = None
+    DoesNotExist = None
     we_plan_id = models.CharField(verbose_name="donation plan name", max_length=64, null=False, blank=True)
     stripe_subscription_id = models.CharField(verbose_name="Stripe subscription id", max_length=32, null=True,
                                               blank=True)
     voter_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the person who created this subscription",
-        max_length=64, default=None, null=True, blank=True, unique=False, db_index=True)
-    not_loggedin_voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=32, unique=False,
-                                                     null=True, blank=True)
+        max_length=64, default='', null=True, blank=True, unique=False, db_index=True)
+    not_loggedin_voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=32, default='',
+                                                     unique=False, null=True, blank=True)
     stripe_customer_id = models.CharField(verbose_name="stripe customer id", max_length=32, null=True, blank=True)
     # Stripe uses integer pennies for amount (ex: 2000 = $20.00)
     amount = models.PositiveIntegerField(verbose_name="recurring donation amount", default=0, null=False)
@@ -108,10 +110,12 @@ class StripePayments(models.Model):
     """
      This table tracks donation, subscription plans and refund activity
      """
+    objects = None
+    DoesNotExist = None
     voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=32, unique=False, null=True,
-                                        blank=True)
+                                        default='', blank=True)
     not_loggedin_voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=32, unique=False,
-                                                     null=True, blank=True)
+                                                     null=True, default='', blank=True)
     stripe_customer_id = models.CharField(verbose_name="stripe unique customer id", max_length=32,
                                           null=True, blank=True)
     stripe_charge_id = models.CharField(verbose_name="unique charge id per specific donation", max_length=32,
@@ -406,19 +410,27 @@ class StripeManager(models.Manager):
                 voter_we_vote_id_2 = ''
                 not_loggedin_voter_we_vote_id = voter_we_vote_id
 
-            donation_plan_query, is_new = StripeSubscription.objects.get_or_create(
-                we_plan_id=we_plan_id,
-                amount=donation_amount,
-                billing_interval=billing_interval,
-                currency=currency,
-                donation_plan_is_active=donation_plan_is_active,
-                voter_we_vote_id=voter_we_vote_id_2,
-                not_loggedin_voter_we_vote_id=not_loggedin_voter_we_vote_id,
-                linked_organization_we_vote_id=linked_organization_we_vote_id,
-                # organization_subscription_plan_id=org_subs_id,
-                client_ip=client_ip,
-                stripe_customer_id=stripe_customer_id
-            )
+            subs_data = {
+                'we_plan_id': we_plan_id,
+                'amount': donation_amount,
+                'billing_interval': billing_interval,
+                'currency': currency,
+                'donation_plan_is_active': donation_plan_is_active,
+                'voter_we_vote_id': voter_we_vote_id_2,
+                'not_loggedin_voter_we_vote_id': not_loggedin_voter_we_vote_id,
+                'linked_organization_we_vote_id': linked_organization_we_vote_id,
+                # 'organization_subscription_plan_id=org_subs_id,
+                'client_ip': client_ip,
+                'stripe_customer_id': stripe_customer_id,
+                'stripe_charge_id': 'needs-match',
+                'brand': 'needs-match',
+                'exp_month': '0',
+                'exp_year': '0',
+                'last4': '0',
+                'billing_reason': 'donationWithStripe_Api'
+            }
+            is_new, donation_plan_query = StripeManager.stripe_subscription_create_or_update(subs_data)
+
             if is_new:
                 # if a donation plan is not found, we've added it to our database
                 success = True
@@ -526,25 +538,23 @@ class StripeManager(models.Manager):
 
         donation_plan_definition_id = 0
         try:
-            # the donation plan needs to exist in two places: our stripe account and our database
+            # the subscription (used to be donation plan) needs to exist in two places: our stripe acct and our database
             # plans can be created here or in our stripe account dashboard
-            defaults_for_create = {
+            subs_data = {
+                # billing_interval': billing_interval,
+                'amount': subscription_cost_pennies,
                 'coupon_code': coupon_code,
                 'currency': currency,
-                'we_plan_id': we_plan_id,
+                'donation_plan_is_active': True,
+                'is_premium_plan': is_premium_plan,
+                'linked_organization_we_vote_id': linked_organization_we_vote_id,
                 'organization_subscription_plan_id': org_subs_id,
+                'premium_plan_type_enum': premium_plan_type_enum,
                 'stripe_customer_id': stripe_customer_id,
                 'voter_we_vote_id': voter_we_vote_id,
+                'we_plan_id': we_plan_id,
             }
-            donation_plan_definition, is_new = StripeSubscription.objects.get_or_create(
-                amount=subscription_cost_pennies,
-                # billing_interval=billing_interval,
-                donation_plan_is_active=True,
-                premium_plan_type_enum=premium_plan_type_enum,
-                is_premium_plan=is_premium_plan,
-                linked_organization_we_vote_id=linked_organization_we_vote_id,
-                defaults=defaults_for_create,
-            )
+            is_new, donation_plan_query = StripeManager.stripe_subscription_create_or_update(subs_data)
 
             if is_new:
                 # if a donation plan is not found, we've added it to our database
@@ -618,12 +628,11 @@ class StripeManager(models.Manager):
 
     @staticmethod
     def create_subscription_entry(subscription):
+        print('create_subscription_entry', subscription)
         status = ''
         new_history_entry = 0
         try:
-            # ** is the "unpacking syntax"
-            new_history_entry = StripeSubscription.objects.create(**subscription)
-
+            new_history_entry = StripeManager.stripe_subscription_create_or_update(subscription)
             success = True
             status = 'NEW_DONATION_PAYMENT_ENTRY_SAVED '
         except Exception as e:
@@ -634,28 +643,6 @@ class StripeManager(models.Manager):
             'success': success,
             'status': status,
             'donation_journal_created': new_history_entry
-        }
-        return saved_results
-
-    @staticmethod
-    def create_payment_entry(payment):
-        status = ''
-        new_payment_entry = 0
-        try:
-            # ** is the "unpacking syntax"
-            new_payment_entry = StripePayments.objects.create(**payment)
-
-            success = True
-            status = 'NEW_PAYMENT_ENTRY_SAVED '
-        except Exception as e:
-            success = False
-            status += 'UNABLE_TO_SAVE_PAYMENT_ENTRY, EXCEPTION: ' + str(e) + ' '
-            logger.error('%s', 'UNABLE_TO_SAVE_PAYMENT_ENTRY, EXCEPTION: ' + str(e))
-
-        saved_results = {
-            'success': success,
-            'status': status,
-            'payment_entry_created': new_payment_entry
         }
         return saved_results
 
@@ -1102,10 +1089,10 @@ class StripeManager(models.Manager):
                 donation_queryset = donation_queryset.filter(premium_plan_type_enum__iexact=premium_plan_type_enum)
             if positive_value_exists(donation_plan_is_active):
                 donation_queryset = donation_queryset.filter(donation_plan_is_active=donation_plan_is_active)
-            donation_plan_definition_list = list(donation_queryset)
+            subscription_list = list(donation_queryset)
 
-            if len(donation_plan_definition_list):
-                donation_plan_definition = donation_plan_definition_list[0]
+            if len(subscription_list):
+                donation_plan_definition = subscription_list[0]
                 donation_plan_definition_found = True
                 status += 'DONATION_PLAN_DEFINITION_RETRIEVED '
                 success = True
@@ -1131,10 +1118,10 @@ class StripeManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_donation_plan_definition_list(voter_we_vote_id='', linked_organization_we_vote_id='',
+    def retrieve_subscription_list(voter_we_vote_id='', linked_organization_we_vote_id='',
                                                return_json_version=False):
-        donation_plan_definition_list = []
-        donation_plan_definition_list_json = []
+        subscription_list = []
+        subscription_list_json = []
         status = ''
 
         try:
@@ -1143,52 +1130,61 @@ class StripeManager(models.Manager):
                 donation_queryset = donation_queryset.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             if positive_value_exists(linked_organization_we_vote_id):
                 donation_queryset = donation_queryset.filter(linked_organization_we_vote_id__iexact=linked_organization_we_vote_id)
-            donation_plan_definition_list = list(donation_queryset)
+            subscription_list = list(donation_queryset)
 
-            if len(donation_plan_definition_list):
-                status += 'DONATION_PLAN_DEFINITION_LIST_RETRIEVED '
+            if len(subscription_list):
+                status += 'subscription_LIST_RETRIEVED '
                 success = True
             else:
-                donation_plan_definition_list = []
-                status += 'DONATION_PLAN_DEFINITION_LIST_EMPTY '
+                subscription_list = []
+                status += 'subscription_LIST_EMPTY '
                 success = True
 
         except StripeSubscription.DoesNotExist:
-            status += "DONATION_PLAN_DEFINITION_LIST_EMPTY2 "
+            status += "subscription_LIST_EMPTY2 "
             success = True
 
         except Exception as e:
-            status += "DONATION_PLAN_DEFINITION_LIST-FAILED_TO_RETRIEVE " + str(e) + " "
+            status += "subscription_LIST-FAILED_TO_RETRIEVE " + str(e) + " "
             success = False
             # handle_exception(e, logger=logger, exception_message=status)
 
         if positive_value_exists(return_json_version):
-            for donation_plan_definition in donation_plan_definition_list:
+            for subscription in subscription_list:
                 json = {
-                    'amount':    donation_plan_definition.amount,
-                    'billing_interval': donation_plan_definition.billing_interval,
-                    # 'coupon_code': donation_plan_definition.coupon_code,
-                    'currency': donation_plan_definition.currency,
-                    'we_plan_id': donation_plan_definition.we_plan_id,
-                    'donation_plan_is_active': donation_plan_definition.donation_plan_is_active,
-                    # 'is_premium_plan': donation_plan_definition.is_premium_plan,
-                    # 'organization_subscription_plan_id': donation_plan_definition.organization_subscription_plan_id,
-                    'linked_organization_we_vote_id': donation_plan_definition.linked_organization_we_vote_id,
-                    # 'paid_without_stripe': donation_plan_definition.paid_without_stripe,
-                    # 'paid_without_stripe_comment': donation_plan_definition.paid_without_stripe_comment,
+                    'amount':                   subscription.amount,
+                    'brand':                    subscription.brand,
+                    'billing_interval':         subscription.billing_interval,
+                    'currency':                 subscription.currency,
+                    'donation_plan_is_active':  subscription.donation_plan_is_active,
+                    'exp_month':                subscription.exp_month,
+                    'exp_year':                 subscription.exp_year,
+                    'last4':                    subscription.last4,
+                    'last_charged':             subscription.last_charged,
+                    'linked_organization_we_vote_id': subscription.linked_organization_we_vote_id,
+                    'stripe_subscription_id':   subscription.stripe_subscription_id,
+                    'subscription_canceled_at': subscription.subscription_canceled_at,
+                    'subscription_created_at':  subscription.subscription_created_at,
+                    'subscription_ended_at':    subscription.subscription_ended_at,
+                    'voter_we_vote_id':         subscription.voter_we_vote_id,
+                    'we_plan_id': subscription.we_plan_id,
+                    # 'coupon_code': subscription.coupon_code,
+                    # 'is_premium_plan': subscription.is_premium_plan,
+                    # 'organization_subscription_plan_id': subscription.organization_subscription_plan_id,
+                    # 'paid_without_stripe': subscription.paid_without_stripe,
+                    # 'paid_without_stripe_comment': subscription.paid_without_stripe_comment,
                     # 'paid_without_stripe_expiration_date':
-                    #         donation_plan_definition.paid_without_stripe_expiration_date,
-                    # 'plan_id': donation_plan_definition.plan_name,
-                    # 'premium_plan_type_enum': donation_plan_definition.premium_plan_type_enum,
-                    'voter_we_vote_id': donation_plan_definition.voter_we_vote_id,
+                    #         subscription.paid_without_stripe_expiration_date,
+                    # 'plan_id': subscription.plan_name,
+                    # 'premium_plan_type_enum': subscription.premium_plan_type_enum,
                 }
-                donation_plan_definition_list_json.append(json)
+                subscription_list_json.append(json)
 
         results = {
-            'success':                          success,
-            'status':                           status,
-            'donation_plan_definition_list':    donation_plan_definition_list,
-            'donation_plan_definition_list_json': donation_plan_definition_list_json,
+            'success':                success,
+            'status':                 status,
+            'subscription_list':      subscription_list,
+            'subscription_list_json': subscription_list_json,
         }
 
         return results
@@ -1346,7 +1342,7 @@ class StripeManager(models.Manager):
         }
 
     @staticmethod
-    def mark_donation_plan_definition_canceled(donation_plan_definition_id=0, stripe_subscription_id=''):
+    def mark_subscription_as_canceled(donation_plan_definition_id=0, stripe_subscription_id=''):
         status = ''
         success = False
         donation_plan_definition = None
@@ -1368,7 +1364,7 @@ class StripeManager(models.Manager):
             else:
                 status += "DONATION_PLAN_DEFINITION_NOT_FOUND "
         except Exception as e:
-            handle_exception(e, logger=logger, exception_message="Exception in mark_donation_plan_definition_canceled")
+            handle_exception(e, logger=logger, exception_message="Exception in mark_subscription_as_canceled")
             status += "MARK_DONATION_PLAN_DEFINITION-FAILED: " + str(e) + " "
         return {
             'status':   status,
@@ -1384,7 +1380,7 @@ class StripeManager(models.Manager):
             success = True
             status = 'SUBSCRIPTION_DELETED_ON_INITIAL_CHARGE_FAILURE'
         except Exception as e:
-            handle_exception(e, logger=logger, exception_message="Exception in mark_donation_plan_definition_canceled")
+            handle_exception(e, logger=logger, exception_message="Exception in mark_subscription_as_canceled")
             status = "DELETE_SUBSCRIPTION-FAILED: " + str(e) + " "
         return {
             'status':   status,
@@ -1412,7 +1408,6 @@ class StripeManager(models.Manager):
                 logger.error('%s', 'StripeSubscription for ' + org_we_vote_id +
                              ' not found in mark_latest_donation_plan_definition_canceled')
 
-            # TODO: STEVE STEVE STEVE seperately make sure that we only find the active ones
         except Exception as e:
             logger.error('%s', 'StripeSubscription for ' + org_we_vote_id +
                          ' threw exception: ' + str(e))
@@ -1697,22 +1692,22 @@ class StripeManager(models.Manager):
 
     @staticmethod
     def update_subscription_on_charge_success(we_plan_id, stripe_request_id, stripe_subscription_id,
-                                              stripe_charge_id, subscription_created_at, last_charged, brand, exp_month,
-                                              exp_year, last4, api_version):
-
+                                              stripe_charge_id, subscription_created_at, last_charged,
+                                              amount, billing_reason, api_version):
         try:
-            row = StripeSubscription.objects.get(we_plan_id=we_plan_id)
-            row.stripe_request_id = stripe_request_id
-            row.stripe_subscription_id = stripe_subscription_id
-            row.stripe_charge_id = stripe_charge_id
-            row.subscription_created_at = subscription_created_at
-            row.last_charged = last_charged
-            row.brand = brand
-            row.exp_month = exp_month
-            row.exp_year = exp_year
-            row.last4 = last4
-            row.api_version = api_version
-            row.save()
+            charge_data = {
+                'amount': amount,
+                'we_plan_id': we_plan_id,
+                'stripe_request_id': stripe_request_id,
+                'stripe_subscription_id': stripe_subscription_id,
+                'stripe_charge_id': stripe_charge_id,
+                'subscription_created_at': subscription_created_at,
+                'last_charged': last_charged,
+                'api_version': api_version,
+                'voter_we_vote_id': 'unknown',
+                'billing_reason': billing_reason,
+            }
+            StripeManager.stripe_subscription_create_or_update(charge_data)
             logger.debug("update_subscription_on_charge_success plan_id=" + we_plan_id + ", stripe_subscription_id=" +
                          stripe_subscription_id)
         except Exception as err:
@@ -1721,14 +1716,176 @@ class StripeManager(models.Manager):
         return
 
     @staticmethod
-    def add_payment_on_charge_success(payment):
+    def update_subscription_and_payment_on_charge_success(charge_data):
         try:
-            new_payment = StripePayments.objects.create(**payment)
-            logger.debug("add_payment_on_charge_success amount=" + new_payment.amount)
+            StripeManager.stripe_payment_create_or_update(charge_data)
+            logger.debug("update_subscription_and_payment_on_charge_success PAYMENTS stripe_charge_id=" +
+                         charge_data['stripe_charge_id'])
+
+            StripeManager.stripe_subscription_create_or_update(charge_data)
+            logger.debug("update_subscription_and_payment_on_charge_success SUBSCRIPTION stripe_charge_id=" +
+                         charge_data['stripe_charge_id'])
+
+        except StripeSubscription.DoesNotExist as err:
+            logger.error('%s', "update_subscription_and_payment_on_charge_success StripeSubscription.DoesNotExist: " +
+                         str(err))
+
         except Exception as err:
-            logger.error('%s', "add_payment_on_charge_success: " + str(err))
+            logger.error('%s', "update_subscription_and_payment_on_charge_success: " + str(err))
 
         return
+
+    @staticmethod
+    def add_to_row_if_in_dictionary (key, dict, row):
+        if key in dict.keys() and dict[key] is not None:
+            setattr(row, key, dict[key])
+
+    @staticmethod
+    def stripe_payment_create_or_update(charge_data):
+        print('stripe_payment_create_or_update PAYMENTS >>>>>> ', charge_data)
+        print('stripe_payment_create_or_update PAYMENTS >>>>>> VOTER TEST',  'voter_we_vote_id' in charge_data.keys() and charge_data['voter_we_vote_id'])
+
+        # print('stripe_payment_create_or_update PAYMENTS >>>>>> amount: ', charge_data['amount'], ' stripe_charge_id:',  charge_data['stripe_charge_id'])
+        with transaction.atomic():
+            try:
+                row = None
+                try:
+                    payment_queryset = StripePayments.objects.all().order_by('-created')
+                    exact_match_subset = payment_queryset.filter(Q(amount=charge_data['amount']) & Q(stripe_charge_id=charge_data['stripe_charge_id']))
+                    if len(exact_match_subset):
+                        print('stripe_payment_create_or_update exact_match_subset (line 1806) length', len(exact_match_subset))
+                        row = exact_match_subset[0]
+                        try:
+                            for arrow in exact_match_subset:
+                                print('ARROWS row amount: ', arrow.amount, 'arrow.id', arrow.id, arrow.stripe_charge_id, 'arrow.created', arrow.created, 'arrow.billing_reason', arrow.billing_reason)
+                        except Exception as err:
+                            logger.error("ARROW err" + str(err))
+                    else:
+                        # charge_succeeded can precede payment_succeeded
+                        # ** is the "unpacking syntax"
+                        remove_keys_from_subs = [
+                            'billing_interval', 'donation_plan_is_active', 'subscription_created_at',
+                            'subscription_canceled_at', 'subscription_ended_at', 'last_charged',
+                            'linked_organization_we_vote_id character', 'client_ip']
+                        for key in remove_keys_from_subs:
+                            if key in charge_data:
+                                del charge_data[key]
+                        if 'billing_reason' not in charge_data.keys():
+                            charge_data['billing_reason'] = ''
+                        print('StripePayments.objects.create PAYMENTS >>>>>> Create New Row, amount: ',
+                              charge_data['amount'], 'billing_reason:', charge_data['billing_reason'],
+                              'stripe_charge_id:', charge_data['stripe_charge_id'], 'created:', charge_data['created'])
+                        return StripePayments.objects.create(**charge_data)
+
+                except Exception as err:
+                    logger.error('%s', "stripe_subscription_create_or_update(a) unpacking syntax: " + str(err))
+
+                # Saves the data items that come in from webhooks
+                for key in charge_data:
+                    StripeManager.add_to_row_if_in_dictionary(key, charge_data, row)
+
+                row.save()
+                print('StripePayments.objects.create Adding to existing row amount: ', charge_data['amount'],
+                      'billing_reason:', charge_data['billing_reason'], 'stripe_charge_id:',
+                      charge_data['stripe_charge_id'], 'created:', charge_data['created'])
+
+            except StripePayments.DoesNotExist as err:
+                logger.error('%s', "stripe_payment_create_or_update StripePayments.DoesNotExist: " + str(err))
+
+            except Exception as err:
+                logger.error('%s', "stripe_payment_create_or_update: " + str(err))
+
+            return
+
+    @staticmethod
+    def stripe_subscription_create_or_update(subs_data):
+        if subs_data['billing_reason'] == 'donationWithStripe_Api':
+            print('API received: donationWithStripe_Api')
+        print('stripe_subscription_create_or_update SUBSCRIPTIONS <<<<<<', subs_data)
+        row = None
+        # Webhooks can arrive faster than we can complete this method, so need to lock the row, to guarantee the write
+        with transaction.atomic():
+            try:
+                row = None
+                subscription_queryset = StripeSubscription.objects.all().order_by('-id')
+                exact_match_subset = subscription_queryset.filter(Q(stripe_charge_id=subs_data['stripe_charge_id']))
+                exact_match_subset = exact_match_subset.exclude(Q(stripe_charge_id='needs-match'))
+                if len(exact_match_subset) > 0:
+                    row = exact_match_subset[0]
+                else:
+                    customer_and_amount_subset = subscription_queryset.filter(
+                        Q(brand='needs-match') &
+                        Q(stripe_charge_id=subs_data['stripe_charge_id']) &
+                        Q(amount=subs_data['amount']))
+                    if len(customer_and_amount_subset) > 0:
+                        row = customer_and_amount_subset[0]
+                    else:
+                        needs_match_subset = subscription_queryset.filter(
+                            Q(stripe_charge_id='needs-match') &
+                            Q(amount=subs_data['amount']))
+                            # &                      Q(voter_we_vote_id=subs_data['voter_we_vote_id']))
+                        if len(needs_match_subset) > 0:
+                            row = needs_match_subset[0]
+
+                if row is None:
+                    entry = None
+                    try:
+                        # charge_succeeded can precede payment_succeeded
+                        # ** is the "unpacking syntax"
+                        remove_keys_from_payment = [
+                            'amount_refunded', 'address_zip', 'amount_refunded', 'country', 'created', 'failure_code',
+                            'failure_message',
+                            'is_paid', 'is_refunded', 'network_status', 'reason', 'seller_message', 'stripe_status',
+                            'status', 'stripe_card_id', 'billing_reason']
+                        for key in remove_keys_from_payment:
+                            if key in subs_data:
+                                del subs_data[key]
+                        entry = StripeSubscription.objects.create(**subs_data)
+                    except Exception as err:
+                        logger.error('%s', "stripe_subscription_create_or_update unpacking syntax (b): " + str(err))
+                    is_new = True
+                    return is_new, entry
+                else:
+                    if subs_data['billing_reason'] == 'subscription_create':
+                        row.stripe_subscription_id = subs_data['stripe_subscription_id']
+                        row.stripe_request_id = subs_data['stripe_request_id']
+                        row.subscription_created_at = subs_data['subscription_created_at']
+                        row.stripe_charge_id = subs_data['stripe_charge_id']
+                        row.last_charged = subs_data['last_charged']
+                        row.api_version = subs_data['api_version']
+                        row.save()
+                        is_new = False
+                        entry = row
+                        return is_new, entry
+                    elif subs_data['billing_reason'] == 'charge.succeeded':
+                        row.stripe_charge_id = subs_data['stripe_charge_id']
+                    row.brand = subs_data['brand']
+                    row.exp_month = subs_data['exp_month']
+                    row.exp_year = subs_data['exp_year']
+                    row.last4 = subs_data['last4']
+                    row.save()
+                    logger.debug("stripe_subscription_create_or_update  row updated")
+
+            except StripeSubscription.DoesNotExist as err:
+                logger.error('%s', "stripe_subscription_create_or_update StripeSubscription.DoesNotExist: " + str(err))
+
+            except Exception as err:
+                logger.error('%s', "stripe_subscription_create_or_update: " + str(err))
+
+            is_new = False
+            entry = row
+            return is_new, entry
+
+    # @staticmethod
+    # def add_payment_on_charge_success(payment):
+    #     try:
+    #         new_payment = StripeManager.stripe_payment_create_or_update(payment)
+    #         # new_payment = StripePayments.objects.create(**payment)
+    #         logger.debug("add_payment_on_charge_success amount=" + new_payment.amount)
+    #     except Exception as err:
+    #         logger.error('%s', "add_payment_on_charge_success: " + str(err))
+    #
+    #     return
 
     @staticmethod
     def find_we_vote_voter_id_for_stripe_customer(stripe_customer_id):
